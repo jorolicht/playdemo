@@ -1,0 +1,2 @@
+@(name: String, param: String="")
+@{ Html(s"""data-usecase='${name}' href="#" onclick="Main.exec('${name}','${param}'); false" """) }

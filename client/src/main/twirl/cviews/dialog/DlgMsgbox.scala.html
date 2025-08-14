@@ -1,0 +1,27 @@
+@import base.UseCaseParam
+@import dialog.DlgMsgbox.Ids._
+@import dialog.DlgMsgbox.Btn
+@import cviews.helper.html._
+
+@(title: String, body: String, btns: List[Btn])(implicit uc: UseCaseParam)
+
+<!-- Modal -->
+<div @id(DlgMsgbox_Modal)  class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 @id(DlgMsgbox_Title)  class="modal-title">@title</h5>
+        <button @id(DlgMsgbox_Close) type="button" class="btn-close"></button>
+      </div>
+      <div class="modal-body">
+        <p @id(DlgMsgbox_Body)>@body</p>
+      </div>
+      <div class="modal-footer">
+        @for(btn <- btns) {
+          <button @id(btn.name) type="button" class="btn btn-outline-secondary btn-xs" >@gM(btn.msgCode)</button>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+  

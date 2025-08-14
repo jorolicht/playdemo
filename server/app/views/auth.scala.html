@@ -1,0 +1,56 @@
+@import shared.Ids._
+
+@(googleClientId: String)(implicit msgs: MessagesProvider)
+@getMsg(name: String) = @{ msgs.messages(name) }
+
+<div @id(Auth_Content) class="d-none row justify-content-sm-center h-100">
+    <div class="mt-4 col-xxl-4 col-xl-5 col-lg-6 col-md-7 col-sm-9">
+        <div class="mt-4 card shadow-lg">
+            <div class="card-header d-flex justify-content-between">
+                <div>
+                    <img src="/versionedAssets/images/logo.png" alt="logo" height="40">
+                </div>
+                <div>
+                    <button type="button" class="btn-close" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="card-body p-5">
+                <div class="mb-3">
+                    <label class="mb-2 text-muted" for="email">@getMsg("app.emailAddress")</label>
+                    <input @id(Auth_Email) type="email" class="form-control" name="email" value="" @event("oninput") required autofocus>
+                    <div class="invalid-feedback">@getMsg("app.invalid.email")</div>
+                </div>
+                <div class="mb-3">
+                    <div class="mb-2 w-100">
+                        <label class="text-muted" for="password">@getMsg("app.password")</label>
+                        <a @id(Auth_doForgot) href='#' @event("onclick") class="float-end">@getMsg("app.forgotPassword")</a>
+                    </div>
+                    <input @id(Auth_Password) type="password" class="form-control" name="password" @event("oninput") required>
+                    <div class="invalid-feedback">@getMsg("app.invalid.password")</div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <div class="mr-1">
+                        <button @id(Auth_doLogin) id="Auth:dologin" type="submit" class="btn btn-sm btn-outline-secondary" @event("onclick")>
+                           @getMsg("btn.login")
+                        </button>
+                    </div>
+                    <div>
+                        <div id="g_id_onload"
+                            data-client_id=@googleClientId 
+                            data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
+                            data-auto_prompt="false">
+                        </div>
+                        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
+                            data-text="signin_with" data-size="medium" data-logo_alignment="left">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer py-3 border-0">
+                <div class="text-center">                
+                    @getMsg("app.noAccount") <a @id(Auth_doRegister) @event("onclick")>@getMsg("app.createOne")</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

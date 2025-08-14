@@ -1,0 +1,22 @@
+@(firstname: String, lastname: String, verifyCode: String)(implicit msgs: MessagesProvider)
+@getMsg(name: String, ins1: String="", ins2:String="") = @{ Html(msgs.messages("email."+name,ins1,ins2)) }
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <title>@getMsg("register.title", getMsg("register.app").toString)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  </head>
+  <body style="margin: 5; padding: 5;">
+    <p>@getMsg("register.salutation", firstname, lastname)</p>
+    <p>@getMsg("register.complete", getMsg("register.app").toString)</p>
+    <p>@getMsg("register.click")</p>
+    <p><strong>@getMsg("register.link", verifyCode)</strong></p>
+    <p>@getMsg("register.expire")</p>
+    <p>@getMsg("register.help")</p>
+    <p>@getMsg("register.closing")</p>
+  </body>
+</html> 
+

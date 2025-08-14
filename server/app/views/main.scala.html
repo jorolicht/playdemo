@@ -1,0 +1,90 @@
+@import play.filters.csrf._
+@import shared.Ids._
+@import shared.UCs._
+
+@(page: String, param: String)(implicit request: RequestHeader, msgs: MessagesProvider)
+@getMsg(name: String) = @{ msgs.messages(name) }
+<!DOCTYPE html>
+<html lang='@getMsg("app.lang")'>
+  <head>
+    <title>@getMsg("app.title")</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content='@getMsg("app.description")'>
+    <meta name="keywords" content='@getMsg("app.keywords")'>
+    <meta name="author" content='@getMsg("app.author")'>
+
+    <link rel="stylesheet" href='@routes.Assets.at("bootstrap-5.3.3/css/bootstrap.min.css")'>
+    <link rel="stylesheet" href='@routes.Assets.at("bootstrap-icons-1.11.3/font/bootstrap-icons.css")'>
+    <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("css/main.css")'>
+    <link rel="shortcut icon" type="image/png" href='@routes.Assets.versioned("images/favicon.png")'>
+    @scalajs.html.scripts("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
+  </head>
+
+  <body>
+    <span id='navbar'></span>
+
+    <div class="d-flex">
+        <!-- Sidebar (aside) -->
+        <span id='sidebar'></span>
+
+        <!-- Hauptinhalt -->
+        <div class="content">
+            @auth("782737132657-vs1domdevjcm9fv5sfg32lp30dd7oc7d.apps.googleusercontent.com")
+            <div @id(Main_JavascriptEnableInfo) class="d-none d-flex flex-column p-2 mb-2 mt-2 border border-danger">
+                <h4>@getMsg("app.title") - Version: @getMsg("app.version")</h4>
+                <h6>@getMsg("app.javascript")</h6>
+            </div>
+
+            <div @id(Main_Content) class="row">         
+                <div class="d-flex mt-2 mr-2 justify-content-center border border-secondary">Main Content</div>
+            </div>
+        </div>
+    </div>
+
+    <div id='footer' class="container-fluid px-4 pt-2 pb-2 bg-secondary">
+        <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">
+                @getMsg("app.copyright")
+                <a href='#' @id(Console_click) data-command='' style="text-decoration:none; color:black;" onclick="Addon.console(); false">&copy;</a>
+                @getMsg("app.website")
+            </div>
+            <div>
+                <a href="#" style="color: black;">Privacy Policy</a>
+                &middot;
+                <a href="#" style="color: black;">Terms &amp; Conditions</a>
+            </div>
+        </div>
+    </div>
+
+    <div @id(DlgPrompt_Load)></div>
+    <div @id(DlgMsgbox_Load)></div>
+
+    <!-- Google Sign In -->
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <!-- Bootstrap JS bundle with poppers -->
+    <script src='@routes.Assets.at("bootstrap-5.3.3/js/bootstrap.bundle.min.js")'></script>
+    <script charset="utf-8">
+        // Function to calculate SHA-256 hash
+        function sha256(str) {
+            // Convert the string to a byte array
+            const buffer = new TextEncoder().encode(str);            
+            // Use the built-in crypto API to generate the SHA-256 hash
+            return crypto.subtle.digest('SHA-256', buffer).then(hashBuffer => {
+                // Convert the hash buffer to an array of hexadecimal values
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+                return hashHex;
+            });
+        }
+        // decode base 64 encoded string to utf
+        function atou(b64) { return decodeURIComponent(escape(atob(b64))); }
+        // encode utf to base 64
+        function utob(str) { return btoa(unescape(encodeURIComponent(str))); }
+        function handleCredentialResponse(response) { App.handleGoogleCredential(response.credential); }
+
+        // Main Entry Point
+        Main.start('@page', '@param', '@getMsg("app.version")', '@getMsg("app.lang")', '@CSRF.getToken(request).map(t=>t.value).getOrElse("")');
+    </script>
+  </body>
+</html>

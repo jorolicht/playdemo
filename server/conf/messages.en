@@ -1,0 +1,120 @@
+
+app.version = 1.0.0EN2025-01
+app.date    = 2025-01-30
+app.lang    = EN
+
+
+###
+# Message Entries
+###
+app.greeting                                        = Welcome!
+app.title                                           = Playframework Example Program
+app.lang                                            = en
+app.javascript                                      = Please enable Javascript.  
+app.author                                          = Robert Lichtenegger
+app.copyright                                       = Copyright
+app.website                                         = Your Website 2024
+app.test                                            = Test @$§%&/()öäü€ {0} {1}
+app.noAccount                                       = Don't have an account?
+app.createOne                                       = Create One
+app.forgotPassword                                  = Forgot Password?
+app.password                                        = Password
+app.emailAddress                                    = E-Mail Address
+app.invalid.password                                = Password is required / invalid
+app.invalid.email                                   = Email is invalid
+app.btn.login                                       = LOGIN
+app.btn.logout                                      = LOGOUT
+app.btn.console                                     = CONSOLE
+app.loggedInAs                                      = Logged in as:
+
+###
+# Sidebar
+###
+sidenav.ChatExample                                 = Chat Example
+sidenav.UseCase2                                    = UseCase2
+sidenav.UseCase3                                    = UseCase3
+sidenav.UseCase4                                    = UseCase4
+sidenav.UseCase41                                   = UseCase41
+sidenav.UseCase42                                   = UseCase42
+sidenav.UseCase5                                    = UseCase5
+sidenav.UseCase51                                   = UseCase51
+sidenav.UseCase511                                  = UseCase511
+sidenav.UseCase512                                  = UseCase512
+sidenav.UseCase52                                   = UseCase52
+sidenav.UseCase53                                   = UseCase53
+
+###
+# Usecase Register
+###
+Register.header                                     = Register
+
+###
+# Usecase ChatExample
+###
+ChatExample.title.UserId                            = User Identification: {0}
+ChatExample.title.SendMsg                           = Send Message
+ChatExample.title.RcvMsgs                           = Received Messages
+ChatExample.lbl.Rcv                                 = Receiver
+ChatExample.lbl.Msg                                 = Message
+ChatExample.plh.RcvIdExample                        = i.e. iK78T45b
+ChatExample.plh.sendMsgExample                      = Hello John Doe!
+ChatExample.btn.send                                = SEND
+###
+# Buttons
+###
+btn.register  = REGISTER
+btn.login     = LOGIN
+btn.cancel    = CANCEL
+btn.ok        = &nbsp; &nbsp; &nbsp; OK &nbsp; &nbsp; &nbsp;
+btn.abort     = ABORT
+btn.retry     = RETRY
+btn.ignore    = IGNORE
+btn.yes       = &nbsp; &nbsp; &nbsp; YES &nbsp; &nbsp; &nbsp;
+btn.no        = &nbsp; &nbsp; &nbsp; NO &nbsp; &nbsp; &nbsp;
+
+###
+# Dialog
+###
+dlg.prompt.title            = Console
+dlg.prompt.plh.command      = <command> <parameter>
+
+###
+# Email Entries
+###
+email.register.app              = XXX App 
+email.register.link             = <a href="http://localhost:9000/auth/verifyUser/{0}">VERIFICATION LINK</a>
+email.register.closing          = Thanks </br> Your XXX Team
+email.register.expire           = This link will expire in one hours. If you don't verify your email within that time, you'll need to request a new verification link.
+email.register.help             = If you have any trouble verifying your email, please don't hesitate to contact us at <a href="mailto:XXX@example.com">XXX@example.com</a>.
+email.register.title            = Verification for {0} 
+email.register.salutation       = Hi {0} {1}!
+email.register.subject          = Verification Link
+email.register.from             = XXX@example.com 
+email.register.complete         = To complete your account setup and unlock all the features of {0}, please verify your email address.
+email.register.click            = Click the link below to confirm your email:
+
+###
+# Errors
+###
+err00001.ajax.post                                  = Communication error in routine post: {0} {1}
+err00002.ajax.decode                                = Error decoding return value: {0} {1}
+err00003.ajax.login                                 = Error routine login: {0} {1}
+err00004.ajax.user.login                            = Error routine login, can't decode user data
+err00005.promise.sha256                             = Error routine sha256: {0}
+err00006.parseJson                                  = Error decoding JSON-String: {0} {1}
+err00007.db.user.update                             = Error update user database {0}
+err00008.db.user.insert                             = Error insert data in user database {0}
+err00009.ajax.get                                   = Communication error in routine get: {0} {1}
+err00010.db.user.read                               = User not in database {0}
+err00011.db.user.select                             = Error reading user database {0}
+
+err00013.auth.google                                = Error google authentication different names: {0} {1}
+err00014.auth.token.invalid                         = Error google token invalid
+err00015.login.invalid                              = Email / password invalid
+
+
+###
+# Addon
+###
+addon.version       = Demo Play Application Version 1.0 / Robert Lichtenegger
+addon.footer        =  For all other tricks, consult the source code!"

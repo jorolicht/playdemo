@@ -1,0 +1,10 @@
+@*
+ * Template for bootstrap button
+ *@
+@import base.UseCaseParam
+
+@(key: String, caption: String, bClass: String, enabledParam:Boolean=true)(implicit ucp: UseCaseParam)
+
+<button @id(key) type='button' class='btn @bClass' @event("onclick") @enabled(enabledParam)>
+  @ucp.gM(s"btn.${caption}",Seq())
+</button>

@@ -1,0 +1,51 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET        /                             controllers.Main.home(name: String?="Home", param: String?="start")
+GET        /main/:name                   controllers.Main.home(name: String, param: String?="")
+
+# Authentication endpoints
+POST       /auth/googleLogin             controllers.Auth.googleLogin()
+POST       /auth/regUser                 controllers.Auth.regUser()
+POST       /auth/logout                  controllers.Auth.logout()
+GET        /auth/basicLogin              controllers.Auth.basicLogin()
+GET        /auth/verifyUser/:code        controllers.Auth.verifyUser(code: String)
+POST       /auth/setUserPassword         controllers.Auth.setUserPassword(email: String)
+
+# Helper endpoints
+GET        /helper/getMessages           controllers.Helper.getMessages(lang: String ?="")
+GET        /helper/getMsg                controllers.Helper.getMsg(msgCode: String, in1:String ?="", in2:String ?="", in3:String ?="")
+GET        /helper/sse                   controllers.Helper.sse(id: String ?="")
+GET        /helper/send2sse              controllers.Helper.send2sse(id: String, msg: String)
+
+# Endpoints managing wordpress custom post types
+GET          /wp/post                    controllers.Wordpress.getPost(slug: String ?="", id: Int ?=0, field: String ?="", status: String ?="private")
+PUT          /wp/post                    controllers.Wordpress.putPost(slug: String ?="", id: Int ?=0, field: String ?="", status: String ?="private")
+
+# Endpoints managing JWT
++ nocsrf
+POST         /wp/token                   controllers.Wordpress.postToken()
+
+
+# PUT          /wp/post                      controllers.Wordpress/putPost(slug: String ?="", id: Int ?=0, field: String)
+# POST       /wp/post                      controllers.Wordpress/setPost(slug: String ?="", id: Int ?=0, field: String)
+# PUT        /wp/post                      controllers.Wordpress/updPost(slug: String ?="", id: Int ?=0, field: String)
+# DELETE     /wp/post                      controllers.Wordpress/updPost(slug: String ?="", id: Int ?=0)   
+
+
+# Endpoints for Testing
+GET        /test/auth/getUserVerifyLink  controllers.test.Auth.getUserVerifyLink(email: String ?="", id:Long ?=0L)
+GET        /test/auth/getUserInfo        controllers.test.Auth.getUserInfo(email: String ?="", id:Long ?=0L)
+GET        /test/auth/checkUserAuth      controllers.test.Auth.checkUserAuth()
+POST       /test/auth/setUserVerify      controllers.test.Auth.setUserVerify(id: Long, value: Boolean ?=true)
+
+GET        /test/wp/pm                   controllers.test.Wordpress.getPM(a: String ?= "", b: String ?= "", c: String ?= "")
+# GET        /test/wp/pm                   controllers.test.Wordpress/getPM(a:String ?="", b:String ?="", c:String ?="")
+# GET        /test/wp/endpoints            controllers.test.Wordpress/getEndpoints()
+# GET        /test/wp/postId               controllers.test.Wordpress/getPostId(slug: String)
+
+# Prefix must match `play.assets.urlPrefix`
+GET        /assets/*file                 controllers.Assets.at(path="/public", file)
+GET        /versionedAssets/*file        controllers.Assets.versioned(path="/public", file: Asset)

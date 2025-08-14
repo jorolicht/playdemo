@@ -1,0 +1,100 @@
+# docker compose -f docker_compose.yml --env-file ../env/docker.env up -d
+# docker compose -f docker_compose.yml --env-file ../env/docker.env down
+
+# step into container 
+# docker exec -it playcontainer /bin/bash
+
+name: PlayDemoApp
+services:
+  playsrv: # PlayDemo Server:
+    image: playsrv # Replace this with the actual image name of your Play Framework app
+    build:
+      context: .
+      args:
+        - APP_VERSION=${APP_VERSION}
+        - BUILD_ENV=${BUILD_ENV}
+        - WORKDIR=${WORKDIR}
+        - DEMON_USER=${DEMON_USER}
+        - DEMON_USERID=${DEMON_USERID}
+
+    labels:
+      MAINTAINER: ${APP_MAINTAINER}
+      VENDOR: ${APP_VENDOR}
+      IMAGE_DESCRIPTION: "This Dockerfile creates an image with the PlayDemo App running on it."
+ 
+    environment:
+      APP_VERSION: ${APP_VERSION}
+      APP_DATE: ${APP_DATE}
+      WORKDIR: ${WORKDIR}
+      LOGFILE_PATH: ${WORKDIR}/logs
+      PIDFILE_PATH: ${PIDFILE_PATH}
+
+      # environment read by application.conf
+      DB_DEFAULT_URL: ${DB_DEFAULT_URL}
+      DB_DEFAULT_DRIVER: ${DB_DEFAULT_DRIVER}
+      DB_DEFAULT_USERNAME: ${DB_DEFAULT_USERNAME}
+      DB_DEFAULT_PASSWORD: ${DB_DEFAULT_PASSWORD}
+      
+      WP_DOMAIN: ${WP_DOMAIN}
+      WP_USERNAME: ${WP_USERNAME}
+      WP_PASSWORD: ${WP_PASSWORD}
+      WP_CPT: ${WP_CPT}
+
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      AUTHENTICATOR_SIGNER_KEY: ${AUTHENTICATOR_SIGNER_KEY}
+      AUTHENTICATOR_CRYPTER_KEY: ${AUTHENTICATOR_CRYPTER_KEY}
+
+      PLAY_HTTP_PORT: ${PLAY_HTTP_PORT}
+      PLAY_HTTP_HOST: ${PLAY_HTTP_HOST}
+      PLAY_HTTP_SECRET_KEY: ${PLAY_HTTP_SECRET_KEY}
+      PLAY_MAILER_HOST: ${PLAY_MAILER_HOST}
+      PLAY_MAILER_PORT: ${PLAY_MAILER_PORT}
+      PLAY_MAILER_USER: ${PLAY_MAILER_USER}
+      PLAY_MAILER_PASSWORD: ${PLAY_MAILER_PASSWORD}
+      PLAY_MAILER_DEBUG: ${PLAY_MAILER_DEBUG}
+      PLAY_MAILER_MOCK: ${PLAY_MAILER_MOCK}
+    ports:
+      - "${PLAY_HTTP_PORT}:${PLAY_HTTP_PORT}"      
+    volumes:
+      - "./logs:${WORKDIR}/logs:rw"
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_DEFAULT_ROOT_PASSWORD}
+      MYSQL_DATABASE: trnydb
+      MYSQL_USER: ${DB_DEFAULT_USERNAME}
+      MYSQL_PASSWORD: ${DB_DEFAULT_PASSWORD}
+    volumes:
+      - ./data/db:/var/lib/mysql
+      - ./data/init/init.sql:/docker-entrypoint-initdb.d/1.sql
+    networks:
+      - app-network
+
+  wordpress:
+    image: wordpress
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      WORDPRESS_URL: http://localhost:8080
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${DB_DEFAULT_USERNAME}
+      WORDPRESS_DB_PASSWORD: ${DB_DEFAULT_PASSWORD}
+      WORDPRESS_DB_NAME: trnydb
+    volumes:
+      - ./wpdata:/var/www/html
+    depends_on:
+      - db
+      - playsrv
+    networks:
+      - app-network      
+
+networks:
+  app-network:
+    driver: bridge

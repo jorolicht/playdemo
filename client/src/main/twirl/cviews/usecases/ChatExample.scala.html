@@ -1,0 +1,41 @@
+@*
+ * Template for chat example
+ *@
+
+@import usecases.ChatExample.Ids._
+@import cviews.helper.html._
+@import base.UseCaseParam
+@import shared.model.User
+
+@(user: User)(implicit uc: UseCaseParam)
+
+<div class="card mt-4">
+    <div class="card-body">
+      <h5 class="card-title">@gMP("title.UserId", user.uuid)</h5>
+      <div class="card mt-4">
+        <div class="card-body">
+          <h5 class="card-title">@gMP("title.SendMsg")</h5>
+            <div class="col-5">
+            <div class="input-group mb-2">
+              <span class="input-group-text">@gMP("lbl.Rcv")</span>
+              <input type="text" class="form-control" @plh("RcvIdExample")>
+            </div>
+            </div>
+            <div class="input-group mb-2">
+              <span class="input-group-text">@gMP("lbl.Msg")</span>
+              <input type="text" class="form-control" @plh("sendMsgExample")>
+              <button @id(ChatExample_Send) class="btn btn-outline-secondary" type="button">@gMP("btn.send")</button>  
+            </div>
+        </div>
+      </div>      
+
+      <div class="card mt-4">
+        <div class="card-body">
+          <h5 class="card-title">@gMP("title.RcvMsgs")</h5>
+            <div class="input-group mb-2">
+              <textarea class="form-control" @id(ChatExample_RcvMsgs) rows="6"></textarea>
+            </div>
+        </div>
+      </div> 
+    </div>
+</div>

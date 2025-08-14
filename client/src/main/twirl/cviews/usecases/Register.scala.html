@@ -1,0 +1,55 @@
+@*
+ * Template for user registration
+ *@
+
+@import base.UseCaseParam
+@import cviews.helper.html._
+
+@()(implicit uc: UseCaseParam)
+
+<div class="mt-4 row justify-content-sm-center h-100">
+  <div class="mt-4 col-xxl-4 col-xl-5 col-lg-6 col-md-7 col-sm-9">
+      <div class="card shadow-lg">
+          <div class="card-header d-flex justify-content-between">
+              <h4 class="fs-4 card-title fw-bold">@gMP("header")</h4>
+              <div>
+                  <button type="button" class="btn-close" aria-label="Close"></button>
+              </div>
+          </div>
+          <div class="card-body p-5">
+              <div class="mb-3">
+                  <label class="mb-2 text-muted" for="name">@gMP("name")</label>
+                  <input id="name" type="text" class="form-control" name="name" value="" required autofocus>
+                  <div class="invalid-feedback">
+                      Name is required
+                  </div>
+              </div>
+              <div class="mb-3">
+                  <label class="mb-2 text-muted" for="email">@gMP("email")</label>
+                  <input id="email" type="email" class="form-control" name="email" value="" required>
+                  <div class="invalid-feedback">
+                      Email is invalid
+                  </div>
+              </div>
+              <div class="mb-3">
+                  <label class="mb-2 text-muted" for="password">@gMP("password")</label>
+                  <input id="password" type="password" placeholder='lastname, firstname' class="form-control" name="password" required>
+                  <div class="invalid-feedback">
+                      Password is required
+                  </div>
+              </div>
+              <p class="form-text text-muted mb-3">
+                  By registering you agree with our terms and condition.
+              </p>
+              <div class="d-flex justify-content-start">
+                  @button("REGISTER", "register", "btn-sm btn-outline-secondary")
+              </div>
+          </div>
+          <div class="card-footer py-3 border-0">
+              <div class="text-center">
+                  Already have an account? <a @exec("Auth", "login") class="text-dark">@gM("btn.login")</a>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>

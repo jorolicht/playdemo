@@ -1,0 +1,62 @@
+@import shared.Ids._
+@import shared.UCs._
+
+@import base.UseCaseParam
+@import cviews.helper.html._
+
+@()(implicit uc: UseCaseParam)
+<aside @id(Home_Sidebar) class="d-none d-md-block bg-secondary">
+    <ul class="nav flex-column">
+        <div class='sidenav-menu-heading'>UseCase1_3 Header</div>
+        <li class="nav-item">
+            <a @exec(ChatExample) class="nav-link"><i class="bi bi-chat-dots"></i>@gM("sidenav.ChatExample")</a>
+        </li>
+        <li class="nav-item">
+            <a @exec(UseCase2) class="nav-link"><i class="bi bi-house-door"></i>@gM("sidenav.UseCase2")</a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usecase3">
+                <i class="bi bi-folder"></i>@gM("sidenav.UseCase3")
+            </a>
+            <ul id="usecase3" class="collapse nav submenu1">
+                <li><a @exec("UseCase31") class="nav-link"><i class="bi bi-file-earmark"></i> UseCase31</a></li>
+                <li><a @exec("UseCase32") class="nav-link"><i class="bi bi-file-earmark"></i> UseCase32</a></li>
+            </ul>
+        </li>
+        <div class='sidenav-menu-heading'>UseCase3_5 Header</div>
+
+        <li class="nav-item">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usecase4">
+                <i class="bi bi-folder"></i>@gM("sidenav.UseCase4")
+            </a>
+            <ul id="usecase4" class="collapse nav submenu1">
+                <li><a @exec("UseCase41") class="nav-link"><i class="bi bi-file-earmark"></i>@gM("sidenav.UseCase41")</a></li>
+                <li><a @exec("UseCase42")" class="nav-link"><i class="bi bi-file-earmark"></i>@gM("sidenav.UseCase42")</a></li>
+            </ul>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usecase5">
+                <i class="bi bi-folder"></i>@gM("sidenav.UseCase5")
+            </a>
+            <ul id="usecase5" class="collapse nav submenu1">
+                <li class="nav-item">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usecase51">
+                        <i class="bi bi-folder"></i>@gM("sidenav.UseCase51")
+                    </a>
+                    <ul id="usecase51" class="collapse nav submenu1">
+                        <li><a @exec("UseCase511") class="nav-link"><i class="bi bi-file-earmark"></i>@gM("sidenav.UseCase511")</a></li>
+                        <li><a @exec("UseCase512")" class="nav-link"><i class="bi bi-file-earmark"></i>@gM("sidenav.UseCase512")</a></li>
+                    </ul>
+                </li>
+                <li><a @exec("UseCase52") class="nav-link"><i class="bi bi-file-earmark"></i>@gM("sidenav.UseCase52")</a></li>
+                <li><a @exec("UseCase53")" class="nav-link"><i class="bi bi-file-earmark"></i>@gM("sidenav.UseCase53")</a></li>
+            </ul>
+        </li>
+        <div @id(Auth_LoginInfo) class="sb-sidenav-footer">
+            <div  class="small">@gM("app.loggedInAs")</div>
+            <span @id(Auth_LoggedInAs)></span>
+        </div>
+    </ul>
+</aside>

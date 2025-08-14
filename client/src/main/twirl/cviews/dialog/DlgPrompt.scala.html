@@ -1,0 +1,42 @@
+@import base.UseCaseParam
+@import cviews.helper.html._
+@import shared.Ids._
+@import dialog.DlgPrompt.Ids._ 
+
+@()(implicit uc: UseCaseParam)
+<!-- Modal -->
+<div @id(DlgPrompt_Modal) class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">@gMP("title")</h5>
+        <button @id(DlgPrompt_close) type="button" class="btn-close"></button>
+      </div>
+      <div class="modal-body">
+        <input @id(DlgPrompt_Input) @plh("command") type='text' class='form-control form-control-sm mb-2'> 
+      </div>
+
+
+      <div class="modal-footer">
+        <button @id(DlgPrompt_clear)   @event("onclick") class="btn btn-outline-secondary btn-xs" type="button">CLEAR</button>
+        <button @id(DlgPrompt_cancel)  class="btn btn-outline-secondary btn-xs" type="button" autofocus>CLOSE</button>
+        <button @id(DlgPrompt_execute) class="btn btn-outline-secondary btn-xs" type="button">EXECUTE</button>
+      </div>
+
+      <div class="card border-0">
+        <div class="card-header d-flex justify-content-between pt-0 pb-0">
+          <div>
+            <a @id(DlgPrompt_toggle) @event("onclick")>
+              <h6 class="text-dark pb-0 mt-1 mb-1"><i class="fa fa-fw fa-bars"></i>Result / Output</h6>
+            </a>			
+          </div>
+        </div>
+        
+        <div @id(DlgPrompt_Result) class="card-body small">
+          <pre @id(DlgPrompt_ResultContent) class='form-control w-100' style='font-size:0.6rem; height:120px;'></pre>
+        </div>
+      </div> 
+
+    </div>
+  </div>
+</div>

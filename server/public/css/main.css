@@ -1,0 +1,68 @@
+/* bootstrap extension */
+.btn-xs, .btn-group-xs > .btn {
+  padding: 0.15rem 0.25rem;
+  font-size: 0.6rem;
+  line-height: 1.5;
+  border-radius: 0.2rem;
+}
+
+.btn-xxs, .btn-group-xxs > .btn {
+  padding: 0.1rem 0.1rem;
+  font-size: 0.5rem;
+  line-height: 1.2;
+  border-radius: 0.1rem;
+}
+
+
+/* Sidebar Styling */
+.sidenav-menu-heading {
+  padding: 0.75rem 1rem 0.25rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+aside {
+  width: 250px;
+  background-color: #969696;
+  color: white;
+  transition: 0.3s;
+  padding: 15px;
+}
+aside .nav-link {
+  color: white;
+}
+
+/* Untermenüs */
+.submenu1 {
+  padding-left: 15px;
+}
+
+
+/* Header Styling */
+header {
+  width: 100%;
+  background-color: #6886a6;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Hauptinhalt Styling */
+.content {
+  flex-grow: 1;
+  padding: 20px;
+}
+/* Responsive Anpassung */
+@media (max-width: 768px) {
+  .wrapper {
+      flex-direction: column;
+  }
+  aside {
+      width: 100%;
+      height: auto;
+      position: static;
+  }
+}

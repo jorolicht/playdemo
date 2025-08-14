@@ -1,0 +1,130 @@
+
+app.version = 1.0.0DE2025-01
+app.date    = 2025-01-30
+app.lang    = DE
+
+
+###
+# Message Entries
+###
+app.greeting                                        = Herzlich Willkommen!
+app.title                                           = Playframework Beispiel Programm
+app.lang                                            = de
+app.javascript                                      = Javascript wird benötigt, ist jedoch deaktiviert.  
+app.author                                          = Robert Lichtenegger
+app.copyright                                       = Copyright
+app.website                                         = Your Website 2024
+app.test                                            = Test @$§%&/()öäü€ {0} {1}
+app.noAccount                                       = Bisher keine Kennung?
+app.createOne                                       = Kennung neu anlegen
+app.forgotPassword                                  = Passwort vergessen?
+app.password                                        = Passwort
+app.emailAddress                                    = E-Mail Adresse
+app.invalid.password                                = Passwort ungültig / erforderlich
+app.invalid.email                                   = E-Mail-Format ungültig
+app.btn.login                                       = LOGIN
+app.btn.logout                                      = LOGOUT
+app.btn.console                                     = CONSOLE
+app.loggedInAs                                      = Angemeldet als:
+
+###
+# Sidebar/Sidenav
+###
+sidenav.ChatExample                                 = Chat Beispiel  
+sidenav.UseCase2                                    = UseCase2
+sidenav.UseCase3                                    = UseCase3
+sidenav.UseCase4                                    = UseCase4
+sidenav.UseCase41                                   = UseCase41
+sidenav.UseCase42                                   = UseCase42
+sidenav.UseCase5                                    = UseCase5
+sidenav.UseCase51                                   = UseCase51
+sidenav.UseCase511                                  = UseCase511
+sidenav.UseCase512                                  = UseCase512
+sidenav.UseCase52                                   = UseCase52
+sidenav.UseCase53                                   = UseCase53
+
+###
+# Usecase Register
+###
+Register.header                                     = Registrierung
+
+
+###
+# Usecase ChatExample
+###
+ChatExample.title.UserId                            = Benutzer Identifikation: {0}
+ChatExample.title.SendMsg                           = Nachricht Senden
+ChatExample.title.RcvMsgs                           = Erhaltene Nachrichten
+ChatExample.lbl.Rcv                                 = Empfänger
+ChatExample.lbl.Msg                                 = Nachricht
+ChatExample.plh.RcvIdExample                        = z.B. iK78T45b 
+ChatExample.plh.sendMsgExample                      = Hella Max Mustermann!
+ChatExample.btn.send                                = SENDEN
+###
+# Buttons
+###
+btn.register  = REGISTER
+btn.login     = ANMELDEN
+
+btn.cancel    = ABBRUCH
+btn.ok        = &nbsp; &nbsp; &nbsp;  OK &nbsp; &nbsp; &nbsp;
+btn.abort     = ABBRUCH
+btn.retry     = WIEDERHOLEN
+btn.ignore    = IGNORIEREN
+btn.yes       = &nbsp; &nbsp; &nbsp; JA &nbsp; &nbsp; &nbsp;
+btn.no        = &nbsp; &nbsp; NEIN &nbsp; &nbsp;
+
+###
+# Dialog
+###
+dlg.prompt.title            = Konsole
+dlg.prompt.plh.command      = <command> <parameter>
+
+###
+# Email Entries
+###
+email.register.app              = XXX App 
+email.register.link             = <a href="http://localhost:9000/auth/verifyUser/{0}">VERIFICATION LINK</a>
+
+email.register.closing          = Danke </br> Ihr XXX Team
+email.register.expire           = Dieser Link wird in einer Stunde ablaufen. Wenn Sie Ihre E-Mail nicht innerhalb dieser Zeit verifizieren, müssen Sie einen neuen Verifizierungslink anfordern.
+email.register.help             = Wenn Sie Probleme mit der Verifizierung Ihrer E-Mail haben, zögern Sie bitte nicht, uns unter <a href="mailto:XXX@example.com">XXX@example.com</a> zu kontaktieren.
+email.register.title            = Bestätigungslink für {0} 
+email.register.salutation       = Hallo {0} {1}!
+email.register.subject          = Bestätigungslink zur Registrierung
+email.register.from             = XXX@example.com 
+email.register.complete         = Um die Einrichtung Ihres Kontos abzuschließen und alle Funktionen von {0} freizuschalten, verifizieren Sie bitte Ihre E-Mail-Adresse.
+email.register.click            = Klicken Sie auf den unten stehenden Link, um Ihre E-Mail zu bestätigen:
+
+###
+# Errors
+###
+err00001.ajax.post                                  = Kommunikationsfehler in Routine post: {0} {1}
+err00002.ajax.decode                                = Fehler beim Dekodieren eines Rückgabewertes: {0} {1}
+err00003.ajax.login                                 = Fehler beim Dekodieren eines Rückgabewertes: {0} {1}
+err00004.ajax.user.login                            = Fehler in Routine login, User-Daten nicht dekodierbar
+err00005.promise.sha256                             = Fehler in Routine sha256: {0}
+err00006.parseJson                                  = Fehler beim Dekodieren von JSON-String: {0} {1}
+err00007.db.user.update                             = Fehler beim Aktualisieren der user Datenbank {0}
+err00008.db.user.insert                             = Fehler beim Einfügen von Daten in die user Datenbank {0}
+err00009.ajax.get                                   = Kommunikationsfehler in Routine get: {0} {1}
+err00010.db.user.read                               = User nicht in Datenbank vorhanden {0}
+err00011.db.user.select                             = Fehler beim Lesen der user Datenbank {0}
+err00013.auth.google                                = Fehler bei Google-Authentisierung unterschiedliche Namen: {0} {1}
+err00014.auth.token.invalid                         = Fehler Google-Token ungültig
+err00015.login.invalid                              = E-Mail / Passwort ungültig
+
+err00050.wordpress.notfound.parse                   = No post found for slug {0} or ID could not be parsed
+err00051.wordpress.api.non.ok                       = WordPress API returned status {0} for slug {1}
+err00052.wordpress.network.unexpected               = Network or unexpected error: {0}
+err00053.wordpress.response.invalid                 = WordPress API return invalid, JSON format expected {0} {1}
+err00054.wordpress.data.notfound                    = WordPress API return no post data: {0} {1}
+err00055.wordpress.notallowed                       = WordPress API call not allowed, missing/wrong authentication/autorization
+err00056.wordpress.error                            = WordPress error status: {0} response: {1}
+
+
+###
+# Addon
+###
+addon.version       = Demo Play Application Version 1.0 / Robert Lichtenegger
+addon.footer        = For all other tricks, consult the source code!"

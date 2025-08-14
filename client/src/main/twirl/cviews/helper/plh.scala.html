@@ -1,0 +1,7 @@
+@*
+ * Template for placeholder attribute
+ *@
+@import base.UseCaseParam
+
+@(name: String="")(implicit ucp: UseCaseParam)
+@{ Html(s"placeholder='${gMP("plh."+name)}'") }
