@@ -174,17 +174,28 @@ libraryDependencies += "org.typelevel" %% "cats-core" % "2.12.0"   //server
 libraryDependencies += "org.typelevel" %%% "cats-core" % "2.12.0"  //client
 ```
 
-
 ## Wordpress Integration
 
 ### Polylang
 Polylang is a very popular WordPress plugin that allows you to create multilingual websites. Here's a breakdown of its key features and what you should know:
 
 
-### Ultimate Member
+## Test Environment
+
+Set environment and start application in server directory
+```
+<projectbase>/server> . ../env/docker.env
+<projectbase>/server> docker compose -f docker_compose.yml --env-file ../env/docker.env up -d
+<projectbase>/server> docker ps                                                              
+CONTAINER ID   IMAGE       COMMAND                  CREATED       STATUS         PORTS                    NAMES
+c133fed8b580   wordpress   "docker-entrypoint.s…"   5 weeks ago   Up 6 minutes   0.0.0.0:8080->80/tcp     playdemoapp-wordpress-1
+71b8158f51cc   playsrv     "./bin/server -Dappl…"   5 weeks ago   Up 5 minutes   0.0.0.0:9500->9500/tcp   playdemoapp-playsrv-1
+d0c2c92c8b65   mysql       "docker-entrypoint.s…"   5 weeks ago   Up 6 minutes   3306/tcp, 33060/tcp      playdemoapp-db-1
+```
 
 
-### Simple JWT Login
+
+
 
 
 

@@ -54,49 +54,11 @@ object Main extends ComWrapper with JsWrapper with Mgmt:
           
           // add sidebar
           setHtml(gE("sidebar"), cviews.html.sidebar()) 
-          
-          // test WP api call
-          // val payload = js.Dynamic.literal(
-          //   title = "Test Tilte",
-          //   content = "Test Content",
-          //   status = "publish"
-          // )
-
-          // val data = JSON.stringify(payload)
-          // debug(s"data: ${data}")
-          // ajaxPost[String]("wp-json/wp/v2/pages", List(), 
-          //                  data, scala.collection.immutable.Map("Content-Type" -> "application/json", "X-WP-Nonce" -> nonce),
-          //                  "").map { 
-          //   case Left(err)  => error(s"Fehler: ${err}")
-          //   case Right(res) => debug(s"Result: ${res}")  
-          // }
-          
-
-          // test WP api call
-          // val payload = js.Dynamic.literal(
-          //   title = "TestPost",
-          //   //content = "Post Content",
-          //   content = """{"id":123,"name":"BName"}""",
-          //   status = "private",
-          //   date   = "2025-07-14T20:10:10"
-          //   // date_gmt   = "2025-07-14T21:22:53Z"
-          // )
-
-          // val data = JSON.stringify(payload)
-          // debug(s"data: ${data}")
-          // ajaxPost[String]("wp-json/wp/v2/posts", List(), 
-          //                  data, scala.collection.immutable.Map("Content-Type" -> "application/json", "X-WP-Nonce" -> nonce),
-          //                  "").map { 
-          //   case Left(err)  => error(s"Fehler: ${err}")
-          //   case Right(res) => debug(s"Result: ${res}")  
-          // }
-
 
           ajaxGet[String]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->nonce), "http://localhost:8080").map { 
             case Left(err)  => error(s"Fehler: ${err}")
             case Right(res) => debug(s"Result: ${res}")  
           }
-
 
           debug(s"Main program initialized")
           

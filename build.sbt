@@ -5,6 +5,7 @@ import scala.sys.process._
 ThisBuild / organization := "org.jorolicht"
 ThisBuild / scalaVersion := "3.3.3"
 
+val includeAddonSrc: Boolean = sys.env.get("INCLUDE_ADDON_SRC").contains("true")
 val appVersion = sys.env.getOrElse("APP_VERSION", "001")
 val appDate    = sys.env.getOrElse("APP_DATE", "1970-01-01")
 ThisBuild / version  := appVersion
@@ -70,7 +71,20 @@ lazy val server = project
 
 lazy val client = project
   .settings(
-    Compile / managedSources / excludeFilter := "addon",
+    (Compile / unmanagedSources / excludeFilter) := {         
+      val baseFilter = HiddenFileFilter || "*~" || "*.tmp"
+    
+      if (includeAddonSrc) {
+        // Nichts zusätzlich ausschließen
+        baseFilter
+      } else {
+        // Bestimmtes src-Verzeichnis ausschließen, z.B. src/main/extra
+        baseFilter || new SimpleFileFilter(file =>
+          file.getAbsolutePath.contains("src/main/scala/addon")
+        )
+      }
+    },
+
     scalaJSUseMainModuleInitializer := false,
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.0",
     libraryDependencies += "com.lihaoyi" %%% "upickle" % "3.3.1",
