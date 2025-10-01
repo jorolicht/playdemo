@@ -56,6 +56,7 @@ object Addon extends JsWrapper:
               | 
               |  Commands:
               |    log  - set log level
+              |    msg  - load new message files
               |    test - start tests
               |
               |""".stripMargin)
@@ -67,11 +68,44 @@ object Addon extends JsWrapper:
     val args1 = args.patch(0, Nil, 1) // scala patch: replace position 0 with the value Nil and the length 1
     args(0).toLowerCase match
       case "log"   => cmdLog(args1)
+      case "msg"   => cmdMsg(args1)
       case "test"  => cmdTest(args1)
       case _       => 
         val conf = new ConfMain(Seq())
         addOutput(conf.getFullHelpString())
         Future(Left(AppError("Invalid command"))) 
+
+
+
+  /** log command
+   * 
+   */ 
+  def cmdMsg(args: Array[String]): Future[Either[AppError, String]] = {
+    class ConfLog(arguments: Seq[String]) extends ScallopConf(arguments) {
+      override def onError(e: Throwable): Unit = e match { case _ => addOutput(getFullHelpString()) }
+
+      //version(getMsg("addon.version"))
+      banner("""Usage: log --lang <countrycode>
+               |setting the local message file
+               |
+               |""".stripMargin)
+      footer(s"\n${getMsg("addon.footer")}") 
+      val lang  = opt[String](name="lang") 
+      verify()
+    }   
+
+    try
+      val conf = new ConfLog(args)
+      val lang = conf.lang.getOrElse("xx") 
+      println(s"lang: ${lang}")
+      fetchMsg(lang).map {
+        case true  => println("done"); Right("done") 
+        case false => println("error"); Left(AppError("invalid language"))
+      }
+    catch { case _:Exception => Future(Left(AppError("command.invalid"))) } 
+    Future(Right(s"FINISHED: cmdLog")) 
+  }
+
 
 
   /** log command
@@ -117,22 +151,26 @@ object Addon extends JsWrapper:
                |
                |""".stripMargin)
 
-      val group  = choice(name="group", choices=Seq("basic", "dialog", "auth", "html"))
+      val group  = choice(name="group", choices=Seq("basic", "dialog", "auth", "html", "tournbase"))
       val number = opt[Int](name="number")
       val param  = opt[String](name="param")  
       verify()
     }
 
     try
+
       val conf   = new ConfTest(args)
       val group  = conf.group.getOrElse("basic")
       val number = conf.number.getOrElse(0)
       val param  = conf.param.getOrElse("")
+
+      println(s"test arguments: ${args.mkString(",")} ${group} ${number} ${param}")
 
       group match
         case "basic"     => TestBasic.exec(group, number, param)
         case "dialog"    => TestDialog.exec(group, number, param)
         case "auth"      => TestAuth.exec(group, number, param)
         case "html"      => TestHtml.exec(group, number, param)
+        case "tournbase" => println("start tournbase"); TestTournBase.exec(group, number, param)
         case _           => Future(Left(AppError("command.invalid"))) 
     catch { case _:Exception => Future(Left(AppError("command.invalid"))) }

@@ -1,0 +1,83 @@
+@()
+
+<div class="container">
+    <h1>Create Tourney</h1>
+    <form id="tourney-form">
+        <div class="mb-3">
+            <label for="tourney-name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="tourney-name">
+        </div>
+        <div class="mb-3">
+            <label for="tourney-organizer" class="form-label">Organizer</label>
+            <input type="text" class="form-control" id="tourney-organizer">
+        </div>
+        <div class="mb-3">
+            <label for="tourney-orgDir" class="form-label">Organizer Directory</label>
+            <input type="text" class="form-control" id="tourney-orgDir">
+        </div>
+        <div class="mb-3">
+            <label for="tourney-startDate" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="tourney-startDate">
+        </div>
+        <div class="mb-3">
+            <label for="tourney-endDate" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="tourney-endDate">
+        </div>
+        <div class="mb-3">
+            <label for="tourney-ident" class="form-label">Ident</label>
+            <input type="text" class="form-control" id="tourney-ident">
+        </div>
+        <div class="mb-3">
+            <label for="tourney-typ" class="form-label">Type</label>
+            <select class="form-select" id="tourney-typ">
+                <option value="0">Unknown</option>
+                <option value="1">Table Tennis</option>
+            </select>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="tourney-privat">
+            <label class="form-check-label" for="tourney-privat">Private</label>
+        </div>
+        <hr>
+        <h2>Contact</h2>
+        <div class="mb-3">
+            <label for="contact-lastname" class="form-label">Lastname</label>
+            <input type="text" class="form-control" id="contact-lastname">
+        </div>
+        <div class="mb-3">
+            <label for="contact-firstname" class="form-label">Firstname</label>
+            <input type="text" class="form-control" id="contact-firstname">
+        </div>
+        <div class="mb-3">
+            <label for="contact-phone" class="form-label">Phone</label>
+            <input type="text" class="form-control" id="contact-phone">
+        </div>
+        <div class="mb-3">
+            <label for="contact-email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="contact-email">
+        </div>
+        <hr>
+        <h2>Address</h2>
+        <div class="mb-3">
+            <label for="address-description" class="form-label">Description</label>
+            <input type="text" class="form-control" id="address-description">
+        </div>
+        <div class="mb-3">
+            <label for="address-country" class="form-label">Country</label>
+            <input type="text" class="form-control" id="address-country">
+        </div>
+        <div class="mb-3">
+            <label for="address-zip" class="form-label">ZIP</label>
+            <input type="text" class="form-control" id="address-zip">
+        </div>
+        <div class="mb-3">
+            <label for="address-city" class="form-label">City</label>
+            <input type="text" class="form-control" id="address-city">
+        </div>
+        <div class="mb-3">
+            <label for="address-street" class="form-label">Street</label>
+            <input type="text" class="form-control" id="address-street">
+        </div>
+        <button type="button" class="btn btn-primary" id="tourney-submit" onclick="Main.event(this, event)">Submit</button>
+    </form>
+</div>

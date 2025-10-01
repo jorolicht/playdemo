@@ -32,7 +32,7 @@ object TestBasic extends Authentication:
       case 5 => testBasic_varName(group, number, param)
       case 6 => testBasic_getMsg(group, number, param)
       case _ => 
-        addOutput(s"FAILED: ${group}-Test:${number} param:${param} unknown test number")
+        addOutput(s"FAILED: ${group}-Test: number:${number} param:${param} unknown test number")
         Future(Left(AppError("unknonw test number")))
         
 

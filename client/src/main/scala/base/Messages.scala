@@ -25,13 +25,18 @@ object Messages extends JsWrapper with ComWrapper:
       debug("Take messages from local storage")
       Future(true)
     else
-      ajaxGet[Map[String, String]]("/helper/getMessages", List(("lang", lang))).map {
-        case Left(err)   => println(s"${err}"); false
-        case Right(msgs) => 
-          debug("Load new messages from server")
-          setLocalStorage("messages", write[Map[String, String]](msgs)) 
-          messages = msgs 
-          true
+      fetchMsg(lang)
+
+  /** fetchMsg - update local messages files from server
+   */
+  def fetchMsg(lang: String): Future[Boolean] = 
+    ajaxGet[Map[String, String]]("/helper/getMessages", List(("lang", lang))).map {
+      case Left(err)   => println(s"${err}"); false
+      case Right(msgs) => 
+        debug("Load new messages from server")
+        setLocalStorage("messages", write[Map[String, String]](msgs)) 
+        messages = msgs 
+        true
       }
 
   /** getMsg

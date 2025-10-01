@@ -1,4 +1,4 @@
-import scala.sys.process._ 
+import scala.sys.process._
 
 // Global / scalaJSStage := FullOptStage
 
@@ -86,14 +86,33 @@ lazy val client = project
     },
 
     scalaJSUseMainModuleInitializer := false,
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.6.0",
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.0",
     libraryDependencies += "com.lihaoyi" %%% "upickle" % "3.3.1",
     libraryDependencies += "org.rogach"  %%% "scallop" % "5.1.0",
-    libraryDependencies += "org.typelevel" %%% "cats-core" % "2.12.0"
+    libraryDependencies += "org.typelevel" %%% "cats-core" % "2.12.0",
+    libraryDependencies += "com.lihaoyi" %%% "utest" % "0.9.0" % "test",
+    // Playwright JVM binding for browser testing
+    libraryDependencies += "com.microsoft.playwright" %%% "playwright" % "1.49.0" % "test",    
+    testFrameworks += new TestFramework("utest.runner.Framework")
   )
-  .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
+  .enablePlugins(ScalaJSPlugin, ScalaJSWeb, SbtTwirl)
   .dependsOn(shared.js)
-  .enablePlugins(SbtTwirl)
+  .settings(
+    (Compile / unmanagedSources / excludeFilter) := {         
+      val baseFilter = HiddenFileFilter || "*~" || "*.tmp"
+    
+      if (includeAddonSrc) {
+        // Nichts zusätzlich ausschließen
+        baseFilter
+      } else {
+        // Bestimmtes src-Verzeichnis ausschließen, z.B. src/main/extra
+        baseFilter || new SimpleFileFilter(file =>
+          file.getAbsolutePath.contains("src/main/scala/addon")
+        )
+      }
+    }
+  )
 
 
 lazy val shared = crossProject(JSPlatform, JVMPlatform)
@@ -102,7 +121,6 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
      name := "shared",
      libraryDependencies ++= Seq(
        "com.lihaoyi" %%% "upickle" % "3.3.1",
-       "com.lihaoyi" %% "upickle" % "3.3.1",
        "org.typelevel" %%% "shapeless3-deriving" % "3.4.0"
      )
    )

@@ -1,6 +1,6 @@
 
-app.version = 1.0.0EN2025-01
-app.date    = 2025-01-30
+app.version = 1.0.0EN2025-04
+app.date    = 2025-04-06
 app.lang    = EN
 
 
@@ -75,8 +75,8 @@ btn.no        = &nbsp; &nbsp; &nbsp; NO &nbsp; &nbsp; &nbsp;
 ###
 # Dialog
 ###
-dlg.prompt.title            = Console
-dlg.prompt.plh.command      = <command> <parameter>
+DlgPrompt.title            = Console
+DlgPrompt.plh.command      = <command> <parameter>
 
 ###
 # Email Entries
