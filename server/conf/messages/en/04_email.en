@@ -1,0 +1,15 @@
+
+###
+# Email Entries
+###
+email.register.app              = XXX App 
+email.register.link             = <a href="http://localhost:9000/auth/verifyUser/{0}">VERIFICATION LINK</a>
+email.register.closing          = Thanks </br> Your XXX Team
+email.register.expire           = This link will expire in one hours. If you don't verify your email within that time, you'll need to request a new verification link.
+email.register.help             = If you have any trouble verifying your email, please don't hesitate to contact us at <a href="mailto:XXX@example.com">XXX@example.com</a>.
+email.register.title            = Verification for {0} 
+email.register.salutation       = Hi {0} {1}!
+email.register.subject          = Verification Link
+email.register.from             = XXX@example.com 
+email.register.complete         = To complete your account setup and unlock all the features of {0}, please verify your email address.
+email.register.click            = Click the link below to confirm your email:

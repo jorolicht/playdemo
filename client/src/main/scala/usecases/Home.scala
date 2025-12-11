@@ -6,7 +6,7 @@ import org.scalajs.dom.raw.HTMLElement
 import scala.scalajs.js
 import cviews.usecases._
 import base._
-import shared.Ids._
+import shared.IdsGlobal.*
 
 object Home extends UseCase with JsWrapper:
   def render(param: String = ""): Boolean =
@@ -19,7 +19,7 @@ object Home extends UseCase with JsWrapper:
 
 
   override def event(elem: HTMLElement, event: dom.Event) =   
-    elem.id match
-      case Home_toggleSidebar => toggleClass(gE(Home_Sidebar), "d-none")
+    shared.IdsGlobal.fromId(elem.id) match
+      case Some(ToggleSidebarId) => toggleClass(gE2(SidebarId), "d-none")
 
       case _ => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}")

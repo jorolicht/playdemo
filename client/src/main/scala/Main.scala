@@ -1,115 +1,97 @@
-import upickle.default._
+import upickle.default.*
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement
+import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
 import scala.scalajs.js.JSON
-import scala.scalajs.js.annotation._
-// import scala.collection.mutable.Map
+import scala.scalajs.js.annotation.*
 
+
+// import scala.collection.mutable.Map
 import services.ComWrapper
 import base.{ Global, JsWrapper, Messages, Logging, _ }
 import shared._
-import shared.Ids._
-
-// Define an external object that represents the global JavaScript object created by wp_localize_script.
-@js.native
-@JSGlobal("PlaydemoAppData")
-object PlaydemoAppData extends js.Object {
-  val user: String = js.native
-  val user_id: Int = js.native
-  val email: String = js.native
-  val club: String = js.native
-  val nonce: String = js.native
-}
+import shared.IdsGlobal.*
 
 
-@JSExportTopLevel("Main")
 object Main extends ComWrapper with JsWrapper with Mgmt:
 
   def gMP(key: String, inserts: String*) = Messages.getMsg(s"Main.${key}", inserts*)
   def gM(key: String, inserts: String*)  = Messages.getMsg(key, inserts*)
   given ucp:UseCaseParam = UseCaseParam("Main", gMP, gM)
 
-  @JSExport
-  def wpStart(server: String, wpUrl: String, nonce: String): Unit = 
-    import cats.data.EitherT
-    import cats.implicits._ 
 
-    Logging.setLogLevel("debug")
-    debug(s"wpStart -> server:${server} wordpress_url: ${wpUrl} nonce: ${nonce} ")
+  @JSExportTopLevel("startApp")
+  def startApp(version: String, startEnv: String, logLevel: String): Unit = 
+    Global.lang = dom.window.navigator.language.take(2)
 
-    setServer(server)
-    setHtml(gE("appcontent"), cviews.html.wpMain())
+    Logging.setLogLevel(logLevel)
+    println(s"startApp -> version:${version} lang:${Global.lang} env:${startEnv} logLevel:${logLevel}")
 
-    (for {
-      version  <- EitherT( ajaxGet[String]("/helper/getMsg", List(("msgCode", "app.version"))) ) 
-      lang     <- EitherT( ajaxGet[String]("/helper/getMsg", List(("msgCode", "app.lang"))) ) 
-    } yield { (version, lang) }).value.map {
-      case Left(err)    => error(s"Main program failed to initialize: ${err}")
-      case Right(res)   => Messages.initMsg(res._1, res._2).map {
-        case true  =>
-          setVersion(res._1) 
-          setLang(res._2)
-          
-          // add sidebar
-          setHtml(gE("sidebar"), cviews.html.sidebar()) 
-
-          ajaxGet[String]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->nonce), "http://localhost:8080").map { 
-            case Left(err)  => error(s"Fehler: ${err}")
-            case Right(res) => debug(s"Result: ${res}")  
-          }
-
-          debug(s"Main program initialized")
-          
-
-        case false  =>  
-          error("Main program failed to initialize")
-      }    
+    Messages.initMsg(version, Global.lang).map { 
+      case true  => startEnv.toLowerCase() match 
+        case "play"  => startPlay()
+        case "wp"    => startWp()
+        case "vite"  => startVite()
+      case false => println("Main program failed to initialize")  
     }
 
 
-  /** main - entry point of application
-   */  
-  @JSExport
-  def start(usecase: String, param: String, version: String, language: String, csrfToken: String): Unit = 
+  def startPlay() : Unit = 
+    val usecase = gE2(AppParamId).getAttribute("data-usecase")
+    val param   = gE2(AppParamId).getAttribute("data-param")
+    Global.csrf  = gE2(AppParamId).getAttribute("data-csrf")
 
-    // init app global variables
-    setVersion(version) 
-    setLang(language) 
-    setCsrf(csrfToken)
-
+    debug(s"startPlay -> usecase:${usecase} param:${param} csrf:${Global.csrf}")
+    
     // set visibility of basic html elements
-    addClass(gE(Main_JavascriptEnableInfo), "d-none")
+    addClass(gE2(JavascriptEnabledInfoId), "d-none")
 
     val evtSource = new dom.raw.EventSource(s"/helper/sse?id=${randomString(6)}")  
     evtSource.onmessage = { (e: dom.MessageEvent) => debug(s"Message from Server: ${e.data}") }
 
-    Logging.setLogLevel("debug")
-    
-    println(s"Main program start usecase:${usecase} param:${param} version:${version} lang:${language}")
-    Messages.initMsg(version, language).map {
-      case true  =>
-        // add nav-bar header
-        setHtml(gE("navbar"), cviews.html.navbar())
-        // add sidebar
-        setHtml(gE("sidebar"), cviews.html.sidebar())   
-       
-        initUser
+    // add nav-bar header
+    setHtml(gE2(NavbarId), cviews.html.navbar())
+    // add sidebar
+    setHtml(gE2(SidebarId), cviews.html.sidebar())   
+    initUser
+    ucExec(usecase, param)  
 
-        debug(s"Main program initialized usecase/param:${usecase}/${param} version:${version} lang:${Global.lang}")
-        ucExec(usecase, param)
-      case false => error("Main program failed to initialize")
+
+  def startWp(): Unit = 
+    import cats.data.EitherT
+    import cats.implicits._ 
+
+    Global.srvUrl = gE2(AppParamId).getAttribute("data-serverUrl")
+    Global.wpUrl  = gE2(AppParamId).getAttribute("data-wpUrl")
+    Global.nonce  = gE2(AppParamId).getAttribute("data-nonce")
+
+    debug(s"wpStart -> serverUrl:${Global.srvUrl} wpUrl: ${Global.wpUrl} nonce: ${Global.nonce}")
+
+    setHtml(gE2(AppContentId), cviews.html.wpMain())
+
+    // add sidebar
+    setHtml(gE2(SidebarId), cviews.html.sidebar()) 
+
+    ajaxGet[String]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.nonce), "http://localhost:8080").map { 
+      case Left(err)  => error(s"Fehler: ${err}")
+      case Right(res) => debug(s"Result: ${res}")  
     }
-  
 
-  @JSExport
+
+  def startVite(): Unit =
+    setHtml(gE2(AppContentId), "Start successful")
+
+
+
+  @JSExportTopLevel("execUsecase")
   def exec(usecase: String, param: String): Unit = ucExec(usecase, param)
 
   @JSExport
   def handleGoogleCredential(credentials: String): Unit = usecases.Auth.googleLogin(credentials)
 
-  @JSExport
+  @JSExportTopLevel("eventApp")
   def event(elem: HTMLElement, event: dom.Event): Unit =
     try
       val (usecase, key) = elem.id.toTuple("_")
@@ -118,8 +100,8 @@ object Main extends ComWrapper with JsWrapper with Mgmt:
     catch
       case e: Exception => error(s"event -> elem:${elem.id} failed") 
 
-  @JSExport
+  @JSExportTopLevel("getLogLevel")
   def getLogLevel():Option[String] =  Logging.getLogLevel()
  
-  @JSExport
+  @JSExportTopLevel("setLogLevel")
   def setLogLevel(value: String="") = Logging.setLogLevel(value)

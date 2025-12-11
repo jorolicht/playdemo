@@ -3,8 +3,8 @@ package base
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
 import shared.model.{ AppError, User }
-import shared.Ids._
-
+import shared.IdsGlobal.*
+import shared.IdsAuth
 
 def debug(msg: => String) = Logging.logger.debug(msg)
 def info(msg: => String)  = Logging.logger.info(msg)
@@ -30,28 +30,23 @@ trait Mgmt extends JsWrapper:
   def initUser = setUser(User.nil(UUIDGen.generate))             
   def setUser(usr: User) = 
     Global.user = usr
-    changeClass(gE(Auth_showLogin), validUser, "disabled")
-    changeClass(gE(Auth_doLogout), !validUser, "disabled")
-    changeClass(gE(Auth_LoginInfo), !validUser, "d-none")
-    setHtml(gE(Auth_LoggedInAs), s"${Global.user.firstname} ${Global.user.lastname}")
+    changeClass(gE2(IdsAuth.ShowLoginId), validUser, "disabled")
+    changeClass(gE2(IdsAuth.DoLogoutId), !validUser, "disabled")
+    changeClass(gE2(IdsAuth.LoginInfoId), !validUser, "d-none")
+    setHtml(gE2(IdsAuth.LoggedInAsId), s"${Global.user.firstname} ${Global.user.lastname}")
 
   def resetUser = 
     Global.user = User.nil(UUIDGen.generate)
-    changeClass(gE(Auth_showLogin), validUser, "disabled")
-    changeClass(gE(Auth_doLogout), !validUser, "disabled")
-    changeClass(gE(Auth_LoginInfo), !validUser, "d-none")
-    setHtml(gE(Auth_LoggedInAs), s"${Global.user.firstname} ${Global.user.lastname}")
+    changeClass(gE2(IdsAuth.ShowLoginId), validUser, "disabled")
+    changeClass(gE2(IdsAuth.DoLogoutId), !validUser, "disabled")
+    changeClass(gE2(IdsAuth.LoginInfoId), !validUser, "d-none")
+    setHtml(gE2(IdsAuth.LoggedInAsId), s"${Global.user.firstname} ${Global.user.lastname}")
 
-  def getUser = Global.user  
-
-  def setServer(srv: String)   = Global.server = srv 
-  def setLang(lang: String) = Global.lang = lang  
-  def setCsrf(csrf: String) = Global.csrf = csrf
-  def setVersion(version: String) = Global.version = version
+  def getUser = Global.user
 
   def ucError(err: AppError): Unit =
-    addClass(gE(Auth_Content), "d-none")
-    removeClass(gE(Main_Content), "d-none")
+    addClass(gE2(IdsAuth.ContentId), "d-none")
+    removeClass(gE2(AppContentId), "d-none")
     if usecases.UCError.render(err) then
       setNavLink("Error")
     else   
@@ -60,8 +55,8 @@ trait Mgmt extends JsWrapper:
 
   def ucExec(usecase: String, param: String): Unit = 
     try
-      addClass(gE(Auth_Content), "d-none")
-      removeClass(gE(Main_Content), "d-none")
+      addClass(gE2(IdsAuth.ContentId), "d-none")
+      removeClass(gE2(AppContentId), "d-none")
       if Global.ucMap(usecase).render(param) then
         setNavLink(usecase)
       else   
@@ -75,11 +70,14 @@ object Global extends JsWrapper:
   import usecases._
   import dialog._
   val localStoragePrefix = "App."
-  var server  = ""
-  var csrf    = ""
   var lang    = ""
   var version = ""
   var user = User.nil("")
+  var csrf   = ""
+  var srvUrl = ""
+  var wpUrl  = ""
+  var nonce  = ""
+
 
   // usecase map usecase name to usecase object   
   val ucMap = List(Home, Auth, Console, UCError, 

@@ -1,36 +1,74 @@
 package shared
 
-// definition of global HTML id attributes
-object Ids extends NameOf: 
-  val Main_Content:String              = nameOf(Main_Content)
-  val Main_Messages:String             = nameOf(Main_Messages)
-  val Main_JavascriptEnableInfo:String = nameOf(Main_JavascriptEnableInfo)
 
-  val Home_toggleSidebar:String        = nameOf(Home_toggleSidebar)
-  val Home_Sidebar:String              = nameOf(Home_Sidebar)
+trait NamedId {
+  // Diese Methode liefert den String-Namen des Enum-Falls (z.B. "AppParam").
+  // Sie wird von jedem Enum-Fall überschrieben, der dieses Trait verwendet.
+  def name: String
+}
 
-  val Auth_doLogin:String              = nameOf(Auth_doLogin)
-  val Auth_doLogout:String             = nameOf(Auth_doLogout)
-  val Auth_doForgot:String             = nameOf(Auth_doForgot)
-  val Auth_showLogin:String            = nameOf(Auth_showLogin)
-  val Auth_doRegister:String           = nameOf(Auth_doRegister)
+
+enum UCsGlobal extends NamedId:
+  case Home, Auth, ChatExample, UseCase1Sub2, UseCase2, UseCase31, UseCase32, 
+       UseCase41, UseCase42, UseCase511, UseCase512, UseCase52, UseCase53
+
+  override def name: String = this.toString 
   
-  val Auth_Password:String             = nameOf(Auth_Password)
-  val Auth_Email:String                = nameOf(Auth_Email)
-  val Auth_LoggedInAs:String           = nameOf(Auth_LoggedInAs)
-  val Auth_LoginInfo:String            = nameOf(Auth_LoginInfo)  
-  val Auth_Content:String              = nameOf(Auth_Content)
 
-  val DlgPrompt_Load:String            = nameOf(DlgPrompt_Load)
-  val DlgMsgbox_Load:String            = nameOf(DlgMsgbox_Load)
+enum IdsGlobal extends NamedId:
+  case AppParamId, AppContentId, MessagesId, JavascriptEnabledInfoId, ToggleSidebarId, SidebarId, NavbarId 
+  override def name: String = IdsGlobal.Prefix + this.toString  
 
-  val Console_show:String              = nameOf(Console_show)
-  val Console_click:String             = nameOf(Console_click)
+object IdsGlobal:
+  import scala.util.Try
+  final val Prefix: String = "IdsGlobal"
+  def fromId(id: String): Option[IdsGlobal] = 
+    if (id.startsWith(Prefix)) then Try(IdsGlobal.valueOf(id.stripPrefix(Prefix))).toOption else None
 
 
-object UCs extends NameOf: 
+enum IdsMsgbox extends NamedId:
+  case LoadId, ModalId, TitleId, BodyId, CloseId 
+  override def name: String = "IdsMsgbox" + this.toString  
 
-  val ChatExample:String               = nameOf(ChatExample)
-  val UseCase1Sub2:String              = nameOf(UseCase1Sub2)
-  val UseCase2:String                  = nameOf(UseCase2)
+enum BtnMsgbox extends NamedId:
+  case Cancel, Ok, Abort, Retry, Ignore, Yes, No, Close
+  def msgCode = "btn.msgbox." + this.toString.toLowerCase
+  def name    = "BtnMsgbox" + this.toString
+
+
+enum IdsConsole extends NamedId:
+  case ConsoleId, ShowId, ClickId
+  override def name: String = IdsConsole.Prefix + this.toString  
+
+object IdsConsole:
+  import scala.util.Try
+  final val Prefix: String = "IdsConsole"
+  def fromId(id: String): Option[IdsConsole] = 
+    if (id.startsWith(Prefix)) then  Try(IdsConsole.valueOf(id.stripPrefix(Prefix))).toOption else None  
+
+
+enum IdsAuth extends NamedId:
+  case  DoLoginId, DoLogoutId, DoForgotId, ShowLoginId, DoRegisterId,
+        PasswordId, EmailId, LoggedInAsId, LoginInfoId, ContentId 
+  override def name: String = "IdsAuth" + this.toString  
+
+object IdsAuth:
+  import scala.util.Try
+  final val Prefix: String = "IdsAuth"
+  def fromId(id: String): Option[IdsAuth] = 
+    if (id.startsWith(Prefix)) then Try(IdsAuth.valueOf(id.stripPrefix(Prefix))).toOption else None    
+
+
+
+enum IdsPrompt extends NamedId:
+  case LoadId, ModalId, ResultId, ResultContentId, InputId,         
+       CloseId, ClearId, ExecuteId, CancelId, ToggleId  
+  override def name: String = IdsPrompt.Prefix + this.toString  
+
+object IdsPrompt:
+  import scala.util.Try
+  final val Prefix: String = "IdsPrompt"
+  def fromId(id: String): Option[IdsPrompt] = 
+    if (id.startsWith(Prefix)) then  Try(IdsPrompt.valueOf(id.stripPrefix(Prefix))).toOption else None    
+
 

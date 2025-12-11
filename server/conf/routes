@@ -29,19 +29,19 @@ PUT          /wp/post                    controllers.Wordpress.putPost(slug: Str
 POST         /wp/token                   controllers.Wordpress.postToken()
 
 
-# PUT          /wp/post                      controllers.Wordpress/putPost(slug: String ?="", id: Int ?=0, field: String)
+# PUT        /wp/post                      controllers.Wordpress/putPost(slug: String ?="", id: Int ?=0, field: String)
 # POST       /wp/post                      controllers.Wordpress/setPost(slug: String ?="", id: Int ?=0, field: String)
 # PUT        /wp/post                      controllers.Wordpress/updPost(slug: String ?="", id: Int ?=0, field: String)
 # DELETE     /wp/post                      controllers.Wordpress/updPost(slug: String ?="", id: Int ?=0)   
 
 
 # Endpoints for Testing
-GET        /test/auth/getUserVerifyLink  controllers.test.Auth.getUserVerifyLink(email: String ?="", id:Long ?=0L)
-GET        /test/auth/getUserInfo        controllers.test.Auth.getUserInfo(email: String ?="", id:Long ?=0L)
-GET        /test/auth/checkUserAuth      controllers.test.Auth.checkUserAuth()
-POST       /test/auth/setUserVerify      controllers.test.Auth.setUserVerify(id: Long, value: Boolean ?=true)
+# GET        /test/auth/getUserVerifyLink  controllers.test.Auth.getUserVerifyLink(email: String ?="", id:Long ?=0L)
+# GET        /test/auth/getUserInfo        controllers.test.Auth.getUserInfo(email: String ?="", id:Long ?=0L)
+# GET        /test/auth/checkUserAuth      controllers.test.Auth.checkUserAuth()
+# POST       /test/auth/setUserVerify      controllers.test.Auth.setUserVerify(id: Long, value: Boolean ?=true)
 
-GET        /test/wp/pm                   controllers.test.Wordpress.getPM(a: String ?= "", b: String ?= "", c: String ?= "")
+# GET        /test/wp/pm                   controllers.test.Wordpress.getPM(a: String ?= "", b: String ?= "", c: String ?= "")
 # GET        /test/wp/pm                   controllers.test.Wordpress/getPM(a:String ?="", b:String ?="", c:String ?="")
 # GET        /test/wp/endpoints            controllers.test.Wordpress/getEndpoints()
 # GET        /test/wp/postId               controllers.test.Wordpress/getPostId(slug: String)

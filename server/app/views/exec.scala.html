@@ -1,2 +1,4 @@
-@(name: String, param: String="")
-@{ Html(s"""data-usecase='${name}' href="#" onclick="Main.exec('${name}','${param}'); false" """) }
+@import shared.UCsGlobal
+
+@(id: UCsGlobal, param: String="")
+@{ Html(s"""data-usecase='${id.name}' href="#" onclick="execUsecase('${id.name}','${param}'); false" """) }

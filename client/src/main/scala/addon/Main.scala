@@ -6,32 +6,28 @@ import base._
 import base.Messages._
 import dialog.DlgPrompt
 
-
 import org.scalajs.dom
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation._
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-
 import upickle.default._
-
 import shared.model.AppError
-import shared.Ids._
+import shared.IdsConsole.*
 
 def addOutput(text: String) = DlgPrompt.add(text)
 
-@JSExportTopLevel("Addon")
 object Addon extends JsWrapper: 
  
+  @JSExportTopLevel("startConsole")
   def startConsole() = dom.window.setTimeout(() => { console() }, 200)
 
   /** console - entry point of addon
    */  
-  @JSExport
   def console(): Future[Boolean] = 
-    val command = getData(gE(Console_click), "command", "")
-    if (command != "") setData(gE(Console_click), "command", "")
+    val command = getData(gE2(ClickId), "command", "")
+    if (command != "") setData(gE2(ClickId), "command", "")
 
     //Future[Either[AppError, String]] =
     val dlgResult = DlgPrompt.show(command).map {

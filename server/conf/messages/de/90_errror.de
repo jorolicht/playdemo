@@ -1,0 +1,27 @@
+
+###
+# Errors
+###
+err00001.ajax.post                                  = Kommunikationsfehler in Routine post: {0} {1}
+err00002.ajax.decode                                = Fehler beim Dekodieren eines Rückgabewertes: {0} {1}
+err00003.ajax.login                                 = Fehler beim Dekodieren eines Rückgabewertes: {0} {1}
+err00004.ajax.user.login                            = Fehler in Routine login, User-Daten nicht dekodierbar
+err00005.promise.sha256                             = Fehler in Routine sha256: {0}
+err00006.parseJson                                  = Fehler beim Dekodieren von JSON-String: {0} {1}
+err00007.db.user.update                             = Fehler beim Aktualisieren der user Datenbank {0}
+err00008.db.user.insert                             = Fehler beim Einfügen von Daten in die user Datenbank {0}
+err00009.ajax.get                                   = Kommunikationsfehler in Routine get: {0} {1}
+err00010.db.user.read                               = User nicht in Datenbank vorhanden {0}
+err00011.db.user.select                             = Fehler beim Lesen der user Datenbank {0}
+err00013.auth.google                                = Fehler bei Google-Authentisierung unterschiedliche Namen: {0} {1}
+err00014.auth.token.invalid                         = Fehler Google-Token ungültig
+err00015.login.invalid                              = E-Mail / Passwort ungültig
+
+err00050.wordpress.notfound.parse                   = No post found for slug {0} or ID could not be parsed
+err00051.wordpress.api.non.ok                       = WordPress API returned status {0} for slug {1}
+err00052.wordpress.network.unexpected               = Network or unexpected error: {0}
+err00053.wordpress.response.invalid                 = WordPress API return invalid, JSON format expected {0} {1}
+err00054.wordpress.data.notfound                    = WordPress API return no post data: {0} {1}
+err00055.wordpress.notallowed                       = WordPress API call not allowed, missing/wrong authentication/autorization
+err00056.wordpress.error                            = WordPress error status: {0} response: {1}
+

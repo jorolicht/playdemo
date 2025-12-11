@@ -2,7 +2,7 @@
  * Template for chat example
  *@
 
-@import usecases.ChatExample.Ids._
+@import usecases.IdsChatExample.*
 @import cviews.helper.html._
 @import base.UseCaseParam
 @import shared.model.User
@@ -24,7 +24,7 @@
             <div class="input-group mb-2">
               <span class="input-group-text">@gMP("lbl.Msg")</span>
               <input type="text" class="form-control" @plh("sendMsgExample")>
-              <button @id(ChatExample_Send) class="btn btn-outline-secondary" type="button">@gMP("btn.send")</button>  
+              <button @id2(SendId) class="btn btn-outline-secondary" type="button">@gMP("btn.send")</button>  
             </div>
         </div>
       </div>      
@@ -33,7 +33,7 @@
         <div class="card-body">
           <h5 class="card-title">@gMP("title.RcvMsgs")</h5>
             <div class="input-group mb-2">
-              <textarea class="form-control" @id(ChatExample_RcvMsgs) rows="6"></textarea>
+              <textarea class="form-control" @id2(RcvMsgsId) rows="6"></textarea>
             </div>
         </div>
       </div> 

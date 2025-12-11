@@ -1,0 +1,56 @@
+
+###
+# Message Entries
+###
+app.greeting                                        = Welcome!
+app.title                                           = Playframework Example Program
+app.lang                                            = en
+app.javascript                                      = Please enable Javascript.  
+app.author                                          = Robert Lichtenegger
+app.copyright                                       = Copyright
+app.website                                         = Your Website 2024
+app.test                                            = Test @$§%&/()öäü€ {0} {1}
+app.noAccount                                       = Don't have an account?
+app.createOne                                       = Create One
+app.forgotPassword                                  = Forgot Password?
+app.password                                        = Password
+app.emailAddress                                    = E-Mail Address
+app.invalid.password                                = Password is required / invalid
+app.invalid.email                                   = Email is invalid
+app.btn.login                                       = LOGIN
+app.btn.logout                                      = LOGOUT
+app.btn.console                                     = CONSOLE
+app.loggedInAs                                      = Logged in as:
+
+###
+# Sidebar
+###
+sidenav.ChatExample                                 = Chat Example
+sidenav.UseCase2                                    = UseCase2
+sidenav.UseCase3                                    = UseCase3
+sidenav.UseCase4                                    = UseCase4
+sidenav.UseCase41                                   = UseCase41
+sidenav.UseCase42                                   = UseCase42
+sidenav.UseCase5                                    = UseCase5
+sidenav.UseCase51                                   = UseCase51
+sidenav.UseCase511                                  = UseCase511
+sidenav.UseCase512                                  = UseCase512
+sidenav.UseCase52                                   = UseCase52
+sidenav.UseCase53                                   = UseCase53
+
+###
+# Usecase Register
+###
+Register.header                                     = Register
+
+###
+# Usecase ChatExample
+###
+ChatExample.title.UserId                            = User Identification: {0}
+ChatExample.title.SendMsg                           = Send Message
+ChatExample.title.RcvMsgs                           = Received Messages
+ChatExample.lbl.Rcv                                 = Receiver
+ChatExample.lbl.Msg                                 = Message
+ChatExample.plh.RcvIdExample                        = i.e. iK78T45b
+ChatExample.plh.sendMsgExample                      = Hello John Doe!
+ChatExample.btn.send                                = SEND

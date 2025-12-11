@@ -3,7 +3,7 @@ import scala.sys.process._
 // Global / scalaJSStage := FullOptStage
 
 ThisBuild / organization := "org.jorolicht"
-ThisBuild / scalaVersion := "3.3.3"
+ThisBuild / scalaVersion := "3.3.7"
 
 val includeAddonSrc: Boolean = sys.env.get("INCLUDE_ADDON_SRC").contains("true")
 val appVersion = sys.env.getOrElse("APP_VERSION", "001")
@@ -17,6 +17,8 @@ lazy val root = (project in file("."))
   .aggregate(server, client, shared.jvm, shared.js)
 
 val genMsgFiles = taskKey[Unit]("Generate Message Files")  
+val convertMessagesToJson = taskKey[Seq[File]]("Converts message files to JSON")
+
 lazy val server = project
   .settings(
     commands ++= Seq(hello),
@@ -43,12 +45,38 @@ lazy val server = project
       IO.write(msgFileEn, filesEn.map(IO.read(_)).reduceLeft(_ ++ _))
       println(s"Message files generated")
     },
+    convertMessagesToJson := {
+      genMsgFiles.value // run genMsgFiles task first
+      val log = streams.value.log
+      val confDir = baseDirectory.value / "conf"
+      val targetDir = (Compile / resourceManaged).value / "messages"
+      IO.createDirectory(targetDir)
+      
+      val msgFiles = Seq(confDir / "messages.de", confDir / "messages.en")
+      
+      msgFiles.map { msgFile =>
+        log.info(s"Converting ${msgFile.getAbsolutePath} to JSON...")
+        if (s"msgConverter ${msgFile.getAbsolutePath}".! != 0) {
+          sys.error(s"msgConverter failed for $msgFile")
+        }
+        
+        val generatedFile = new File(msgFile.getAbsolutePath + "_json")
+        val lang = msgFile.name.split('.').last
+        val targetFileVite = baseDirectory.value / ".." / "client" / "vite" / "data" / ("msgs_" + lang + ".json")
+        val targetFileSrv = baseDirectory.value / ".." / "server" / "public" / "data" / ("msgs_" + lang + ".json")
+        
+        IO.copyFile(generatedFile, targetFileSrv)
+        IO.move(generatedFile, targetFileVite)
+        log.info(s"Generated ${targetFileVite.getAbsolutePath} und ${targetFileSrv.getAbsolutePath}")
+        targetFileSrv
+      }
+    },
+    Compile / resourceGenerators += convertMessagesToJson.taskValue,
     scalaJSProjects := Seq(client),
     Assets / pipelineStages  := Seq(scalaJSPipeline),
     pipelineStages := Seq(digest, gzip),
-    // triggers scalaJSPipeline when using compile or continuous compilation
-    Compile / compile := ((Compile / compile) dependsOn scalaJSPipeline).value,
-    Compile / compile := ((Compile / compile) dependsOn genMsgFiles).value,
+    // triggers scalaJSPipeline and copyClientViteFiles when using compile or continuous compilation
+    Compile / compile := ((Compile / compile) dependsOn (scalaJSPipeline, copyClientViteFiles)).value,
     
     libraryDependencies += guice,
     libraryDependencies += jdbc,
@@ -62,12 +90,30 @@ lazy val server = project
     libraryDependencies += "org.playframework" %% "play-mailer" % "10.0.0",
     libraryDependencies += "org.playframework" %% "play-mailer-guice" % "10.0.0",
     libraryDependencies += "org.typelevel" %% "cats-core" % "2.12.0",
-    libraryDependencies += "org.apache.pekko" %% "pekko-stream-typed" % "1.0.2"
+    libraryDependencies += "org.apache.pekko" %% "pekko-stream-typed" % "1.0.2",
+    copyClientViteFiles := {
+      // Copy main.js and main.js.map to client/vite
+      // Also copy to wordpress plugin directory
+      val log = streams.value.log
+      val clientTargetDir = (client / Compile / fastLinkJS / scalaJSLinkerOutputDirectory).value
+      val clientCssSource = file("server/public/css") 
+
+      val wpJsDestination = file("server/wpdata/wp-content/plugins/playdemo/js")
+      val wpCssDestination = file("server/wpdata/wp-content/plugins/playdemo/css")
+      val viteDestinationDir = baseDirectory.value / ".." / "client" / "vite"
+
+      IO.copyDirectory(clientTargetDir, viteDestinationDir)
+      IO.copyDirectory(clientTargetDir, wpJsDestination)
+      IO.copyDirectory(clientCssSource, wpCssDestination)
+
+      log.info(s"Copied files to vite and wordpress")
+    }
   )
   .enablePlugins(PlayScala)
   .enablePlugins(SbtWeb)
   .dependsOn(shared.jvm)
 
+lazy val copyClientViteFiles = taskKey[Unit]("Copies main.js and main.js.map to client/vite")
 
 lazy val client = project
   .settings(
@@ -86,6 +132,7 @@ lazy val client = project
     },
 
     scalaJSUseMainModuleInitializer := false,
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }, 
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.0",
     libraryDependencies += "com.lihaoyi" %%% "upickle" % "3.3.1",
     libraryDependencies += "org.rogach"  %%% "scallop" % "5.1.0",
@@ -117,32 +164,6 @@ Global / onLoad := (Global / onLoad).value.andThen(state => "project server" :: 
 // clean will only delete the server's generated files (in the server/target directory). 
 // Call root/clean to delete the generated files for all the projects.
 // sbt 'set Global / scalaJSStage := FullOptStage' Universal/packageBin
-
-//detailed error description
-//set ThisBuild/scalacOptions ++=Seq("-explain")
-
-//To run the task: sbt root/copyFileTask
-lazy val copyFileTask = taskKey[Int]("Copies javascript files to wordpress directory.")
-copyFileTask := {
-  val log = streams.value.log
-  //val source = sourceFilePath.value
-  val source = file("client/target/scala-3.3.3/client-fastopt") 
-  val destination = file("server/wpdata/wp-content/plugins/playdemo/js")
-
-  val sourceCss = file("server/public/css") 
-  val destinationCss = file("server/wpdata/wp-content/plugins/playdemo/css")  
-
-  try {
-    IO.copyDirectory(source, destination)
-    IO.copyDirectory(sourceCss, destinationCss)
-    log.info(s"Copied javascript files from ${source.getAbsolutePath} to ${destination.getAbsolutePath}")
-    log.info(s"Copied css files from ${sourceCss.getAbsolutePath} to ${destinationCss.getAbsolutePath}")
-  } catch {
-    case e: Exception =>
-      log.error(s"Error copying files: ${e.getMessage}")
-  }
-  42
-}
 
 
 // A simple, no-argument command that prints "Hello",

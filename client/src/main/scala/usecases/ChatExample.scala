@@ -8,16 +8,19 @@ import org.scalajs.dom.raw.{ HTMLElement, HTMLTextAreaElement }
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
+enum IdsChatExample extends NamedId:
+  case SendId, RcvMsgsId, ReceiverId, MessageId 
+  override def name: String = IdsChatExample.Prefix + this.toString
+
+object IdsChatExample:
+  import scala.util.Try
+  final val Prefix: String = "IdsChatExample"
+  def fromId(id: String): Option[IdsChatExample] = 
+    if (id.startsWith(Prefix)) then Try(IdsChatExample.valueOf(id.stripPrefix(Prefix))).toOption else None
+
 
 object ChatExample extends UseCase with JsWrapper with NameOf with ComWrapper:
-  import Ids._
-
-  object Ids:  
-    // used id attributes in template
-    val ChatExample_Send:String         = nameOf(ChatExample_Send)
-    val ChatExample_RcvMsgs:String      = nameOf(ChatExample_RcvMsgs)
-    val ChatExample_Receiver:String     = nameOf(ChatExample_Receiver)
-    val ChatExample_Message:String      = nameOf(ChatExample_Message)
+  import IdsChatExample._
   
   def render(param: String = ""): Boolean = 
     import cviews.usecases._
@@ -25,10 +28,10 @@ object ChatExample extends UseCase with JsWrapper with NameOf with ComWrapper:
 
 
   override def event(elem: HTMLElement, event: Event) =
-    elem.id match
-      //case ChatExample_Send => sendChatMsg( getInput(gE(ChatExample_Receiver),""), getInput(gE(ChatExample_Message),"") )
-      case ChatExample_Send => 
-        sendChatMsg(Global.user.uuid, getInput(gE(ChatExample_Receiver),""), getInput(gE(ChatExample_Message),"") ).map {
+    IdsChatExample.fromId(elem.id) match
+      //case ChatExample_Send => sendChatMsg( getInput(gE2(ChatExample_Receiver),""), getInput(gE2(ChatExample_Message),"") )
+      case Some(SendId) => 
+        sendChatMsg(Global.user.uuid, getInput(gE2(ReceiverId),""), getInput(gE2(MessageId),"") ).map {
           case Left(err)  => error(s"sendChatMsg -> ${err}") 
           case Right(res) => info(s"sendChatMsg -> ${res}")   
         }
@@ -38,5 +41,5 @@ object ChatExample extends UseCase with JsWrapper with NameOf with ComWrapper:
     ajaxGet[String]("/helper/send2sse", List(("from",from), ("to",to), ("msg",msg)))  
 
   def receiveMsg(msg: String) =
-    val textarea = gE(ChatExample_RcvMsgs).asInstanceOf[HTMLTextAreaElement]
+    val textarea = gE2(RcvMsgsId).asInstanceOf[HTMLTextAreaElement]
     textarea.value = if textarea.value != "" then textarea.value + "\n" + msg else msg

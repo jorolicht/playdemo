@@ -1,8 +1,11 @@
 @import play.filters.csrf._
-@import shared.Ids._
-@import shared.UCs._
+@import shared.IdsGlobal.*
+@import shared.IdsConsole
+@import shared.IdsPrompt
+@import shared.IdsMsgbox
 
-@(page: String, param: String)(implicit request: RequestHeader, msgs: MessagesProvider)
+
+@(usecase: String, param: String)(implicit request: RequestHeader, msgs: MessagesProvider)
 @getMsg(name: String) = @{ msgs.messages(name) }
 <!DOCTYPE html>
 <html lang='@getMsg("app.lang")'>
@@ -22,21 +25,21 @@
   </head>
 
   <body>
-    <span id='navbar'></span>
+    <span @id2(NavbarId)></span>
 
     <div class="d-flex">
         <!-- Sidebar (aside) -->
-        <span id='sidebar'></span>
+        <span @id2(SidebarId)></span>
 
         <!-- Hauptinhalt -->
         <div class="content">
             @auth("782737132657-vs1domdevjcm9fv5sfg32lp30dd7oc7d.apps.googleusercontent.com")
-            <div @id(Main_JavascriptEnableInfo) class="d-none d-flex flex-column p-2 mb-2 mt-2 border border-danger">
+            <div @id2(JavascriptEnabledInfoId) class="d-none d-flex flex-column p-2 mb-2 mt-2 border border-danger">
                 <h4>@getMsg("app.title") - Version: @getMsg("app.version")</h4>
                 <h6>@getMsg("app.javascript")</h6>
             </div>
 
-            <div @id(Main_Content) class="row">         
+            <div @id2(AppContentId) class="row">         
                 <div class="d-flex mt-2 mr-2 justify-content-center border border-secondary">Main Content</div>
             </div>
         </div>
@@ -46,7 +49,7 @@
         <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">
                 @getMsg("app.copyright")
-                <a href='#' @id(Console_click) data-command='' style="text-decoration:none; color:black;" onclick="Addon.console(); false">&copy;</a>
+                <a href='#' @id2(IdsConsole.ClickId) data-command='' style="text-decoration:none; color:black;" onclick="Addon.console(); false">&copy;</a>
                 @getMsg("app.website")
             </div>
             <div>
@@ -57,34 +60,18 @@
         </div>
     </div>
 
-    <div @id(DlgPrompt_Load)></div>
-    <div @id(DlgMsgbox_Load)></div>
+    <div @id2(IdsPrompt.LoadId)></div>
+    <div @id2(IdsMsgbox.LoadId)></div>
+    <span @id2(AppParamId) data-usecase='@usecase' data-param='@param' data-csrf='@CSRF.getToken(request).map(t=>t.value).getOrElse("")'></span>  
 
     <!-- Google Sign In -->
     <script src="https://accounts.google.com/gsi/client"></script>
     <!-- Bootstrap JS bundle with poppers -->
     <script src='@routes.Assets.at("bootstrap-5.3.3/js/bootstrap.bundle.min.js")'></script>
-    <script charset="utf-8">
-        // Function to calculate SHA-256 hash
-        function sha256(str) {
-            // Convert the string to a byte array
-            const buffer = new TextEncoder().encode(str);            
-            // Use the built-in crypto API to generate the SHA-256 hash
-            return crypto.subtle.digest('SHA-256', buffer).then(hashBuffer => {
-                // Convert the hash buffer to an array of hexadecimal values
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
-                return hashHex;
-            });
-        }
-        // decode base 64 encoded string to utf
-        function atou(b64) { return decodeURIComponent(escape(atob(b64))); }
-        // encode utf to base 64
-        function utob(str) { return btoa(unescape(encodeURIComponent(str))); }
-        function handleCredentialResponse(response) { App.handleGoogleCredential(response.credential); }
-
-        // Main Entry Point
-        Main.start('@page', '@param', '@getMsg("app.version")', '@getMsg("app.lang")', '@CSRF.getToken(request).map(t=>t.value).getOrElse("")');
+    <script type="module">
+      import { startApp } from "./main.js";
+      startApp('001DE1970-01', 'play', 'debug');
     </script>
+    
   </body>
 </html>

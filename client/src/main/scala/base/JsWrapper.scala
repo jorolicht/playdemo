@@ -5,8 +5,8 @@ import scala.scalajs.js.annotation.JSGlobal
 import org.scalajs.dom
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.HTMLElement
-
-import shared.Ids._
+import shared.IdsGlobal.*
+import shared.*
 
 trait JsWrapper:
 
@@ -31,12 +31,12 @@ trait JsWrapper:
     
   def displayProperty(visible: Boolean): String = if (visible) "block" else "none"
 
-  def gE(id: String, withWarning: Boolean=true):HTMLElement = 
+  def gE2[T <: NamedId](id: T, withWarning: Boolean=true):HTMLElement = 
     try 
-      val elem = dom.document.getElementById(id).asInstanceOf[HTMLElement]
-      if (elem == null && withWarning) warn(s"gE -> id:${id} null")
+      val elem = dom.document.getElementById(id.name).asInstanceOf[HTMLElement]
+      if (elem == null && withWarning) warn(s"gE -> id:${id.name} null")
       elem
-    catch { case _: Throwable => error(s"gE -> id:${id}"); null } 
+    catch { case _: Throwable => error(s"gE -> id:${id.name}"); null } 
 
 
   def setVisible(elem: HTMLElement, visible: Boolean) = 
@@ -67,7 +67,7 @@ trait JsWrapper:
     * @param content - html content or string content
     */
   def setMain[C](content: => C = ""): Boolean = 
-    val elem = gE(Main_Content)
+    val elem = gE2(AppContentId)
     val value = try content match 
       case _:String => content.asInstanceOf[String]
       case _        => content.toString
@@ -148,7 +148,7 @@ trait JsWrapper:
 
 
   def setNavLink(uc: String) =
-    val navLinkNodes = gE("sidebar").querySelectorAll("[data-usecase]")
+    val navLinkNodes = gE2(SidebarId).querySelectorAll("[data-usecase]")
     for( i <- 0 to navLinkNodes.length-1)
       val elem = navLinkNodes.item(i).asInstanceOf[HTMLElement]
       changeClass(elem, uc==getData(elem, "usecase", "") , "bg-primary")
