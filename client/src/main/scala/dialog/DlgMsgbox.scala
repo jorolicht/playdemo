@@ -14,13 +14,20 @@ import base.Bootstrap._
 import shared.model.AppError
 import shared._
 
-
 import cviews.dialog.html._
 
+enum IdMsgbox extends NamedId:
+  case LoadId, ModalId, TitleId, BodyId, CloseId 
+  override def name: String = "IdMsgbox_" + this.toString  
+
+enum BtnMsgbox extends NamedId:
+  case Cancel, Ok, Abort, Retry, Ignore, Yes, No, Close
+  def msgCode = "btn.msgbox." + this.toString.toLowerCase
+  def name    = "BtnMsgbox" + this.toString
 
 
 object DlgMsgbox extends UseCase with JsWrapper:
-  import IdsMsgbox.* 
+  import IdMsgbox.* 
   import BtnMsgbox.*
 
   var modal: Modal = null
@@ -29,8 +36,9 @@ object DlgMsgbox extends UseCase with JsWrapper:
   def show(body: String, title: String, btns: List[BtnMsgbox]): Future[BtnMsgbox] =
     val p = Promise[BtnMsgbox]()
     val f = p.future
+
     // init modal dialog, always copy
-    setHtml(gE2(LoadId), cviews.dialog.html.DlgMsgbox(title, body, btns))
+    setHtml(getOrCreateDiv(LoadId), cviews.dialog.html.DlgMsgbox(title, body, btns))
     modal = Modal(gE2(ModalId)) 
     modal.show()
 

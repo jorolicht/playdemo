@@ -1,8 +1,5 @@
 @import play.filters.csrf._
-@import shared.IdsGlobal.*
-@import shared.IdsConsole
-@import shared.IdsPrompt
-@import shared.IdsMsgbox
+@import shared.IdGlobal.*
 
 
 @(usecase: String, param: String)(implicit request: RequestHeader, msgs: MessagesProvider)
@@ -21,35 +18,35 @@
     <link rel="stylesheet" href='@routes.Assets.at("bootstrap-icons-1.11.3/font/bootstrap-icons.css")'>
     <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("css/main.css")'>
     <link rel="shortcut icon" type="image/png" href='@routes.Assets.versioned("images/favicon.png")'>
-    @scalajs.html.scripts("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
+  
   </head>
 
   <body>
-    <span @id2(NavbarId)></span>
+    <span @id(NavbarId)></span>
 
     <div class="d-flex">
         <!-- Sidebar (aside) -->
-        <span @id2(SidebarId)></span>
+        <span @id(SidebarId)></span>
 
         <!-- Hauptinhalt -->
         <div class="content">
             @auth("782737132657-vs1domdevjcm9fv5sfg32lp30dd7oc7d.apps.googleusercontent.com")
-            <div @id2(JavascriptEnabledInfoId) class="d-none d-flex flex-column p-2 mb-2 mt-2 border border-danger">
+            <div @id(JavascriptEnabledInfoId) class="d-none d-flex flex-column p-2 mb-2 mt-2 border border-danger">
                 <h4>@getMsg("app.title") - Version: @getMsg("app.version")</h4>
                 <h6>@getMsg("app.javascript")</h6>
             </div>
 
-            <div @id2(AppContentId) class="row">         
+            <div @id(AppContentId) class="row">         
                 <div class="d-flex mt-2 mr-2 justify-content-center border border-secondary">Main Content</div>
             </div>
         </div>
     </div>
 
-    <div id='footer' class="container-fluid px-4 pt-2 pb-2 bg-secondary">
+    <div @id(FooterId) class="container-fluid px-4 pt-2 pb-2 bg-secondary">
         <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">
                 @getMsg("app.copyright")
-                <a href='#' @id2(IdsConsole.ClickId) data-command='' style="text-decoration:none; color:black;" onclick="Addon.console(); false">&copy;</a>
+                <a href='#' @id(ClickConsoleId) data-command='' style="text-decoration:none; color:black;" onclick="Addon.console(); false">&copy;</a>
                 @getMsg("app.website")
             </div>
             <div>
@@ -60,16 +57,14 @@
         </div>
     </div>
 
-    <div @id2(IdsPrompt.LoadId)></div>
-    <div @id2(IdsMsgbox.LoadId)></div>
-    <span @id2(AppParamId) data-usecase='@usecase' data-param='@param' data-csrf='@CSRF.getToken(request).map(t=>t.value).getOrElse("")'></span>  
+    <span @id(AppParamId) data-usecase='@usecase' data-param='@param' data-csrf='@CSRF.getToken(request).map(t=>t.value).getOrElse("")'></span>  
 
     <!-- Google Sign In -->
     <script src="https://accounts.google.com/gsi/client"></script>
     <!-- Bootstrap JS bundle with poppers -->
     <script src='@routes.Assets.at("bootstrap-5.3.3/js/bootstrap.bundle.min.js")'></script>
     <script type="module">
-      import { startApp } from "./main.js";
+      import { startApp } from '@routes.Assets.versioned("client-fastopt/main.js")';
       startApp('001DE1970-01', 'play', 'debug');
     </script>
     

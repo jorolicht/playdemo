@@ -14,6 +14,9 @@ GET        /auth/basicLogin              controllers.Auth.basicLogin()
 GET        /auth/verifyUser/:code        controllers.Auth.verifyUser(code: String)
 POST       /auth/setUserPassword         controllers.Auth.setUserPassword(email: String)
 
+GET        /auth/register/:userId        controllers.AuthController.startRegistration(userId)
+
+
 # Helper endpoints
 GET        /helper/getMessages           controllers.Helper.getMessages(lang: String ?="")
 GET        /helper/getMsg                controllers.Helper.getMsg(msgCode: String, in1:String ?="", in2:String ?="", in3:String ?="")

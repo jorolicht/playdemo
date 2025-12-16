@@ -12,7 +12,7 @@ import scala.scalajs.js.annotation.*
 import services.ComWrapper
 import base.{ Global, JsWrapper, Messages, Logging, _ }
 import shared._
-import shared.IdsGlobal.*
+import shared.IdGlobal.*
 
 
 object Main extends ComWrapper with JsWrapper with Mgmt:
@@ -39,22 +39,22 @@ object Main extends ComWrapper with JsWrapper with Mgmt:
 
 
   def startPlay() : Unit = 
-    val usecase = gE2(AppParamId).getAttribute("data-usecase")
-    val param   = gE2(AppParamId).getAttribute("data-param")
-    Global.csrf  = gE2(AppParamId).getAttribute("data-csrf")
+    val usecase = gE(AppParamId).getAttribute("data-usecase")
+    val param   = gE(AppParamId).getAttribute("data-param")
+    Global.csrf  = gE(AppParamId).getAttribute("data-csrf")
 
     debug(s"startPlay -> usecase:${usecase} param:${param} csrf:${Global.csrf}")
     
     // set visibility of basic html elements
-    addClass(gE2(JavascriptEnabledInfoId), "d-none")
+    addClass(gE(JavascriptEnabledInfoId), "d-none")
 
     val evtSource = new dom.raw.EventSource(s"/helper/sse?id=${randomString(6)}")  
     evtSource.onmessage = { (e: dom.MessageEvent) => debug(s"Message from Server: ${e.data}") }
 
     // add nav-bar header
-    setHtml(gE2(NavbarId), cviews.html.navbar())
+    setHtml(gE(NavbarId), cviews.html.navbar())
     // add sidebar
-    setHtml(gE2(SidebarId), cviews.html.sidebar())   
+    setHtml(gE(SidebarId), cviews.html.sidebar())   
     initUser
     ucExec(usecase, param)  
 
@@ -63,16 +63,16 @@ object Main extends ComWrapper with JsWrapper with Mgmt:
     import cats.data.EitherT
     import cats.implicits._ 
 
-    Global.srvUrl = gE2(AppParamId).getAttribute("data-serverUrl")
-    Global.wpUrl  = gE2(AppParamId).getAttribute("data-wpUrl")
-    Global.nonce  = gE2(AppParamId).getAttribute("data-nonce")
+    Global.srvUrl = gE(AppParamId).getAttribute("data-serverUrl")
+    Global.wpUrl  = gE(AppParamId).getAttribute("data-wpUrl")
+    Global.nonce  = gE(AppParamId).getAttribute("data-nonce")
 
     debug(s"wpStart -> serverUrl:${Global.srvUrl} wpUrl: ${Global.wpUrl} nonce: ${Global.nonce}")
 
-    setHtml(gE2(AppContentId), cviews.html.wpMain())
+    setHtml(gE(AppContentId), cviews.html.wpMain())
 
     // add sidebar
-    setHtml(gE2(SidebarId), cviews.html.sidebar()) 
+    setHtml(gE(SidebarId), cviews.html.sidebar()) 
 
     ajaxGet[String]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.nonce), "http://localhost:8080").map { 
       case Left(err)  => error(s"Fehler: ${err}")
@@ -81,8 +81,7 @@ object Main extends ComWrapper with JsWrapper with Mgmt:
 
 
   def startVite(): Unit =
-    setHtml(gE2(AppContentId), "Start successful")
-
+    setHtml(gE(AppContentId), "Start successful")
 
 
   @JSExportTopLevel("execUsecase")

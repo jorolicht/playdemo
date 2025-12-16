@@ -9,12 +9,12 @@ import dialog.DlgPrompt
 import org.scalajs.dom
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation._
+import scala.scalajs.js.annotation.*
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import upickle.default._
 import shared.model.AppError
-import shared.IdsConsole.*
+import usecases.IdConsole.*
 
 def addOutput(text: String) = DlgPrompt.add(text)
 

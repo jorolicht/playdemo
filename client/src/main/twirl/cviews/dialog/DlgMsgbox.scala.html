@@ -1,25 +1,25 @@
 @import base.UseCaseParam
 
 @import cviews.helper.html._
-@import shared.IdsMsgbox.*
-@import shared.BtnMsgbox.*
+@import dialog.IdMsgbox.*
+@import dialog.BtnMsgbox.*
 
-@(title: String, body: String, btns: List[shared.BtnMsgbox])(implicit uc: UseCaseParam)
+@(title: String, body: String, btns: List[dialog.BtnMsgbox])(implicit uc: UseCaseParam)
 
 <!-- Modal -->
-<div @id2(ModalId)  class="modal fade" tabindex="-1">
+<div @id(ModalId)  class="modal fade" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 @id2(TitleId) class="modal-title">@title</h5>
-        <button @id2(CloseId) type="button" class="btn-close"></button>
+        <h5 @id(TitleId) class="modal-title">@title</h5>
+        <button @id(CloseId) type="button" class="btn-close"></button>
       </div>
       <div class="modal-body">
-        <p @id2(BodyId)>@body</p>
+        <p @id(BodyId)>@body</p>
       </div>
       <div class="modal-footer">
         @for(btn <- btns) {
-          <button @id2(btn) type="button" class="btn btn-outline-secondary btn-xs" >@gM(btn.msgCode)</button>
+          <button @id(btn) type="button" class="btn btn-outline-secondary btn-xs" >@gM(btn.msgCode)</button>
         }
       </div>
     </div>

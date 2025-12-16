@@ -6,21 +6,36 @@ import org.scalajs.dom.raw.HTMLElement
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
+import scala.scalajs.js.annotation.*
 
 import cviews.usecases._
 import shared.model._
-import shared.IdsGlobal.*
-import shared.IdsGlobal
+import shared.IdGlobal.*
 import services._
 import base._
 import shared._
-
-
-
-
+ 
 
 object Auth extends UseCase with JsWrapper with Mgmt with Authentication:
-  import IdsAuth.* 
+
+  def setUser(usr: User) = 
+    Global.user = usr
+    changeClass(gE(ShowLoginId), validUser, "disabled")
+    changeClass(gE(DoLogoutId), !validUser, "disabled")
+    changeClass(gE(LoginInfoId), !validUser, "d-none")
+    setHtml(gE(LoggedInAsId), s"${Global.user.firstname} ${Global.user.lastname}")
+
+
+  def resetUser = 
+    Global.user = User.nil(UUIDGen.generate)
+    changeClass(gE(ShowLoginId), validUser, "disabled")
+    changeClass(gE(DoLogoutId), !validUser, "disabled")
+    changeClass(gE(LoginInfoId), !validUser, "d-none")
+    setHtml(gE(LoggedInAsId), s"${Global.user.firstname} ${Global.user.lastname}")
+
+
+  def hide() = addClass(gE(AuthContentId), "d-none")
+  def show() = removeClass(gE(AuthContentId), "d-none")
 
   def render(param: String = ""): Boolean = 
     param.toLowerCase match       
@@ -29,39 +44,39 @@ object Auth extends UseCase with JsWrapper with Mgmt with Authentication:
         debug(s"Auth.render -> ${param}")
       case "register"  =>  
         // register user
-        addClass(gE2(ContentId), "d-none")
-        removeClass(gE2(AppContentId), "d-none")
+        addClass(gE(AuthContentId), "d-none")
+        removeClass(gE(AppContentId), "d-none")
         setMain(html.Register())
         debug(s"Auth.render -> ${param}")
     true
 
   override def event(elem: HTMLElement, event: dom.Event) =   
-    IdsAuth.fromId(elem.id) match
+    IdGlobal.fromId(elem.id) match
       case Some(ShowLoginId) => 
         // switch to login content as dynamic creation of
         // login content doesn't work with google sign in
-        addClass(gE2(AppContentId), "d-none")
-        removeClass(gE2(ContentId), "d-none")
+        addClass(gE(AppContentId), "d-none")
+        removeClass(gE(AuthContentId), "d-none")
       case Some(DoLogoutId)   => doLogout()
       case Some(DoLoginId)    => doLogin()
       case Some(DoForgotId)   => doForgot()
       case Some(DoRegisterId) => 
         // register user
-        addClass(gE2(ContentId), "d-none")
-        removeClass(gE2(AppContentId), "d-none")
+        addClass(gE(AuthContentId), "d-none")
+        removeClass(gE(AppContentId), "d-none")
         setMain(html.Register())     
-      case Some(EmailId)      => removeClass(gE2(EmailId), "is-invalid")
-      case Some(PasswordId)   => removeClass(gE2(PasswordId), "is-invalid")
+      case Some(EmailId)      => removeClass(gE(EmailId), "is-invalid")
+      case Some(PasswordId)   => removeClass(gE(PasswordId), "is-invalid")
       case _                  => error(s"event -> invalid id/key: ${elem.id}")     
 
 
   def doLogin() =
-    val eMail    = getInput(gE2(EmailId))
-    val password = getInput(gE2(PasswordId))
+    val eMail    = getInput(gE(EmailId))
+    val password = getInput(gE(PasswordId))
     val validEmail    = isEmailValid(eMail) 
     val validPwFormat = isPasswordFormatValid(password) 
-    changeClass(gE2(EmailId), !validEmail, "is-invalid")
-    changeClass(gE2(PasswordId), !validPwFormat, "is-invalid")
+    changeClass(gE(EmailId), !validEmail, "is-invalid")
+    changeClass(gE(PasswordId), !validPwFormat, "is-invalid")
     if (validEmail && validPwFormat) then
       basicLogin(eMail, password).map {
         case Left(err)  => resetUser; ucError(err)
@@ -76,6 +91,7 @@ object Auth extends UseCase with JsWrapper with Mgmt with Authentication:
     }
 
 
+  @JSExportTopLevel("handleGoogleCredential")
   def googleLogin(credentials: String): Unit = 
     ajaxPost[User]("/auth/googleLogin", List(), credentials).map { 
       case Left(err)  => println(s"Error: ${err}") 
@@ -83,10 +99,6 @@ object Auth extends UseCase with JsWrapper with Mgmt with Authentication:
     }      
 
   def doForgot() =
-    val eMail      = getInput(gE2(EmailId))
+    val eMail      = getInput(gE(EmailId))
     val validEmail = isEmailValid(eMail)
-    changeClass(gE2(EmailId), !validEmail, "is-invalid")
-
-
-
-  
+    changeClass(gE(EmailId), !validEmail, "is-invalid")

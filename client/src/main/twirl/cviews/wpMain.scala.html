@@ -1,6 +1,5 @@
-@import shared.IdsGlobal.*
+@import shared.IdGlobal.*
 @import shared.UCsGlobal.*
-@import shared.IdsAuth
 
 @import base.UseCaseParam
 @import cviews.helper.html._
@@ -10,7 +9,7 @@
     <!-- Navbar Brand-->
     <a class="navbar-brand ps-3" @exec(Home, "" )>Demo Playframework</a>
     <!-- Sidebar Toggle-->
-    <button @id2(ToggleSidebarId) class="btn btn-sm d-md-none order-1 order-lg-0 me-4 me-lg-0" @event("onclick")>
+    <button @id(ToggleSidebarId) class="btn btn-sm d-md-none order-1 order-lg-0 me-4 me-lg-0" @event("onclick")>
         <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <rect x="4" y="7.5" width="16" height="1.5"/>
             <rect x="4" y="15" width="16" height="1.5"/>
@@ -26,14 +25,14 @@
 </nav>
 <div class="d-flex mr-2">
     <!-- authentication content for google login -->
-    <span @id2(IdsAuth.ContentId) class="d-none"></span>
+    <span @id(AuthContentId) class="d-none"></span>
 
     <!-- Sidebar (aside) -->
-    <span id='sidebar'></span>
+    <span @id(SidebarId)></span>
 
     <!-- Hauptinhalt -->
     <div class="content">
-        <div @id2(AppContentId) class="row">         
+        <div @id(AppContentId) class="row">         
             <div class="d-flex mt-2 mr-2 justify-content-center border border-secondary">Main Content</div>
         </div>
     </div>

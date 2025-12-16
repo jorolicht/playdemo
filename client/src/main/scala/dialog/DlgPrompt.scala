@@ -16,13 +16,20 @@ import shared._
 import shared.model.AppError
 import cviews.dialog.html._
 
+enum IdPrompt extends NamedId:
+  case LoadId, ModalId, ResultId, ResultContentId, InputId,         
+       CloseId, ClearId, ExecuteId, CancelId, ToggleId  
+  override def name: String = IdPrompt.Prefix + "_" +this.toString  
 
-
-
+object IdPrompt:
+  import scala.util.Try
+  final val Prefix: String = "IdPrompt"
+  def fromId(id: String): Option[IdPrompt] = 
+    if (id.startsWith(Prefix)) then  Try(IdPrompt.valueOf(id.stripPrefix(Prefix))).toOption else None    
 
 
 object DlgPrompt extends UseCase with JsWrapper:
-  import IdsPrompt.*
+  import IdPrompt.*
 
   var modal:        Modal = null
   var collapse:  Collapse = null
@@ -52,7 +59,7 @@ object DlgPrompt extends UseCase with JsWrapper:
 
   @JSExportTopLevel("eventDlgPrompt")  
   override def event(elem: HTMLElement, event: Event) =   
-    IdsPrompt.fromId(elem.id) match
+    IdPrompt.fromId(elem.id) match
       case Some(ToggleId) => collapse.toggle()
       case Some(ClearId)  => set("")
       case _              => error(s"event -> invalid elem/key: ${elem.id}")       
@@ -60,9 +67,10 @@ object DlgPrompt extends UseCase with JsWrapper:
   def show(command: String): Future[Either[AppError, String]] =
     val p = Promise[Either[AppError, String]]()
     val f = p.future
+
     // init modal dialog
-    if gE2(LoadId).innerHTML == "" then 
-      setHtml(gE2(LoadId), cviews.dialog.html.DlgPrompt())
+    if !idExists(LoadId) then
+      setHtml(getOrCreateDiv(LoadId), cviews.dialog.html.DlgPrompt())
       initHistory()
       modal    = Modal(gE2(ModalId))
       collapse = Collapse(gE2(ResultId))

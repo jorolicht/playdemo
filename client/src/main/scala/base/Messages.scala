@@ -28,7 +28,7 @@ object Messages extends JsWrapper with ComWrapper:
       debug("Took messages from local storage")
       Future(true)
     else
-      loadConfigMsg(s"./data/msgs_${lang}.json").map {
+      loadConfigMsg(s"assets/data/msgs_${lang}.json").map {
         case Left(err)   => error(s"Loading messages from server: ${err}") ; false
         case Right(msgs) => 
           debug("Load new messages from server")

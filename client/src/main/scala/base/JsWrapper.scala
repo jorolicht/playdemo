@@ -3,12 +3,26 @@ package base
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
 import org.scalajs.dom
+import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.HTMLElement
-import shared.IdsGlobal.*
+import shared.IdGlobal.*
 import shared.*
 
 trait JsWrapper:
+
+  def idExists[T <: NamedId](id: T): Boolean = dom.document.getElementById(id.name) != null
+
+  def getOrCreateDiv[T <: NamedId](id: T, parent: dom.Element = dom.document.body): HTMLElement =
+    dom.document.getElementById(id.name) match
+      case elem: HTMLElement =>
+        elem
+
+      case _ =>
+        val div = dom.document.createElement("div").asInstanceOf[HTMLElement]
+        div.id = id.name
+        parent.appendChild(div)
+        div
 
   /** getLocalStorage
     *
@@ -31,12 +45,20 @@ trait JsWrapper:
     
   def displayProperty(visible: Boolean): String = if (visible) "block" else "none"
 
-  def gE2[T <: NamedId](id: T, withWarning: Boolean=true):HTMLElement = 
+  def gE[T <: NamedId](id: T, withWarning: Boolean=true):HTMLElement = 
     try 
       val elem = dom.document.getElementById(id.name).asInstanceOf[HTMLElement]
       if (elem == null && withWarning) warn(s"gE -> id:${id.name} null")
       elem
     catch { case _: Throwable => error(s"gE -> id:${id.name}"); null } 
+
+
+  def gE2[T <: NamedId](id: T, withWarning: Boolean=true):HTMLElement = 
+    try 
+      val elem = dom.document.getElementById(id.name).asInstanceOf[HTMLElement]
+      if (elem == null && withWarning) warn(s"gE2 -> id:${id.name} null")
+      elem
+    catch { case _: Throwable => error(s"gE2 -> id:${id.name}"); null } 
 
 
   def setVisible(elem: HTMLElement, visible: Boolean) = 

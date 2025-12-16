@@ -17,5 +17,5 @@ object TestDialog:
 
   def testBasic_Msgbox(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     import dialog.DlgMsgbox
-    import shared.BtnMsgbox.*                
+    import dialog.BtnMsgbox.*                
     DlgMsgbox.show("body text", "title text", List(Cancel, Ok)).map { x => addOutput(x.name); Right(x.name) }

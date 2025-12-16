@@ -1,10 +1,9 @@
-@import shared.IdsAuth.*
-@import shared.IdsGlobal.*
+@import shared.IdGlobal.*
 
 @(googleClientId: String)(implicit msgs: MessagesProvider)
 @getMsg(name: String) = @{ msgs.messages(name) }
 
-<div @id2(AppContentId) class="d-none row justify-content-sm-center h-100">
+<div @id(AppContentId) class="d-none row justify-content-sm-center h-100">
     <div class="mt-4 col-xxl-4 col-xl-5 col-lg-6 col-md-7 col-sm-9">
         <div class="mt-4 card shadow-lg">
             <div class="card-header d-flex justify-content-between">
@@ -18,20 +17,20 @@
             <div class="card-body p-5">
                 <div class="mb-3">
                     <label class="mb-2 text-muted" for="email">@getMsg("app.emailAddress")</label>
-                    <input @id2(EmailId) type="email" class="form-control" name="email" value="" @event("oninput") required autofocus>
+                    <input @id(EmailId) type="email" class="form-control" name="email" value="" @event("oninput") required autofocus>
                     <div class="invalid-feedback">@getMsg("app.invalid.email")</div>
                 </div>
                 <div class="mb-3">
                     <div class="mb-2 w-100">
                         <label class="text-muted" for="password">@getMsg("app.password")</label>
-                        <a @id2(DoForgotId) href='#' @event("onclick") class="float-end">@getMsg("app.forgotPassword")</a>
+                        <a @id(DoForgotId) href='#' @event("onclick") class="float-end">@getMsg("app.forgotPassword")</a>
                     </div>
-                    <input @id2(PasswordId) type="password" class="form-control" name="password" @event("oninput") required>
+                    <input @id(PasswordId) type="password" class="form-control" name="password" @event("oninput") required>
                     <div class="invalid-feedback">@getMsg("app.invalid.password")</div>
                 </div>
                 <div class="d-flex justify-content-between">
                     <div class="mr-1">
-                        <button @id2(DoLoginId) type="submit" class="btn btn-sm btn-outline-secondary" @event("onclick")>
+                        <button @id(DoLoginId) type="submit" class="btn btn-sm btn-outline-secondary" @event("onclick")>
                            @getMsg("btn.login")
                         </button>
                     </div>
@@ -49,7 +48,7 @@
             </div>
             <div class="card-footer py-3 border-0">
                 <div class="text-center">                
-                    @getMsg("app.noAccount") <a @id2(DoRegisterId) @event("onclick")>@getMsg("app.createOne")</a>
+                    @getMsg("app.noAccount") <a @id(DoRegisterId) @event("onclick")>@getMsg("app.createOne")</a>
                 </div>
             </div>
         </div>

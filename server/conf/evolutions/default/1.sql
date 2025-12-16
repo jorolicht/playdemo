@@ -1,5 +1,7 @@
 # --- First database schema
 
+# CREATE DATABASE playdemo; should be run manually before applying evolutions
+
 # --- !Ups
 
 CREATE TABLE user (
@@ -20,3 +22,18 @@ CREATE TABLE user (
 # --- !Downs
 
 drop table if exists user;
+
+
+
+-- CREATE TABLE users (
+--   id UUID PRIMARY KEY,
+--   email VARCHAR(255) UNIQUE NOT NULL
+-- );
+
+-- CREATE TABLE passkeys (
+--   user_id UUID,
+--   credential_id BLOB,
+--   public_key BLOB,
+--   sign_count BIGINT,
+--   PRIMARY KEY (credential_id)
+-- );

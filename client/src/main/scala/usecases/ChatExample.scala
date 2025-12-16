@@ -8,19 +8,19 @@ import org.scalajs.dom.raw.{ HTMLElement, HTMLTextAreaElement }
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-enum IdsChatExample extends NamedId:
+enum IdChatExample extends NamedId:
   case SendId, RcvMsgsId, ReceiverId, MessageId 
-  override def name: String = IdsChatExample.Prefix + this.toString
+  override def name: String = IdChatExample.Prefix + "_" + this.toString
 
-object IdsChatExample:
+object IdChatExample:
   import scala.util.Try
-  final val Prefix: String = "IdsChatExample"
-  def fromId(id: String): Option[IdsChatExample] = 
-    if (id.startsWith(Prefix)) then Try(IdsChatExample.valueOf(id.stripPrefix(Prefix))).toOption else None
+  final val Prefix: String = "IdChatExample"
+  def fromId(id: String): Option[IdChatExample] = 
+    if (id.startsWith(Prefix)) then Try(IdChatExample.valueOf(id.stripPrefix(Prefix))).toOption else None
 
 
 object ChatExample extends UseCase with JsWrapper with NameOf with ComWrapper:
-  import IdsChatExample._
+  import IdChatExample._
   
   def render(param: String = ""): Boolean = 
     import cviews.usecases._
@@ -28,7 +28,7 @@ object ChatExample extends UseCase with JsWrapper with NameOf with ComWrapper:
 
 
   override def event(elem: HTMLElement, event: Event) =
-    IdsChatExample.fromId(elem.id) match
+    IdChatExample.fromId(elem.id) match
       //case ChatExample_Send => sendChatMsg( getInput(gE2(ChatExample_Receiver),""), getInput(gE2(ChatExample_Message),"") )
       case Some(SendId) => 
         sendChatMsg(Global.user.uuid, getInput(gE2(ReceiverId),""), getInput(gE2(MessageId),"") ).map {

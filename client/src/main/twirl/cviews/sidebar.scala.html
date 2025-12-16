@@ -1,12 +1,11 @@
-@import shared.IdsGlobal.*
+@import shared.IdGlobal.*
 @import shared.UCsGlobal.*
-@import shared.IdsAuth
 
 @import base.UseCaseParam
 @import cviews.helper.html._
 
 @()(implicit uc: UseCaseParam)
-<aside @id2(SidebarId) class="d-none d-md-block bg-secondary">
+<aside @id(SidebarId) class="d-none d-md-block bg-secondary">
     <ul class="nav flex-column">
         <div class='sidenav-menu-heading'>UseCase1_3 Header</div>
         <li class="nav-item">
@@ -55,9 +54,9 @@
                 <li><a @exec(UseCase53)" class="nav-link"><i class="bi bi-file-earmark"></i>@gM("sidenav.UseCase53")</a></li>
             </ul>
         </li>
-        <div @id2(IdsAuth.LoginInfoId) class="sb-sidenav-footer">
+        <div @id(LoginInfoId) class="sb-sidenav-footer">
             <div  class="small">@gM("app.loggedInAs")</div>
-            <span @id2(IdsAuth.LoggedInAsId)></span>
+            <span @id(LoggedInAsId)></span>
         </div>
     </ul>
 </aside>
