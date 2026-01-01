@@ -1,0 +1,4 @@
+@import pages.PageIds
+
+@(page: PageIds, param: String="")
+@{ Html(s""" href="#" onclick="window.appLoadPage('${page.toString}','${param}'); false" """) }

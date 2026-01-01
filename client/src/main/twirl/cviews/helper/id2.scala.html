@@ -1,0 +1,7 @@
+@*
+ * Template for id
+ *@
+@import shared.DomTypes.HtmlId
+
+@(id: HtmlId)
+@{ Html(s"id='${id.asString}'")  }

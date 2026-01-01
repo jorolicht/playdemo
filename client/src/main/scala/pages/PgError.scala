@@ -1,0 +1,20 @@
+package pages
+
+import org.scalajs.dom
+import org.scalajs.dom.raw.HTMLElement
+import scala.scalajs.js
+
+import shared.model._
+import shared.DomTypes.HtmlId
+import base._
+
+
+object PgError extends BasePage with JsWrapper:
+  def render(param: String = ""): Boolean = 
+    val err = parseError(atou(param), name)
+    setMain(s"""<div class='d-flex mt-5 justify-content-center'><h5>Error: ${err.toString}</h5></div>""")
+
+  def render(err: AppError): Boolean = 
+    setMain(s"""<div class='d-flex mt-5 justify-content-center'><h5>Error: ${err.toString}</h5></div>""")
+
+

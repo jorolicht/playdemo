@@ -1,0 +1,22 @@
+package dialogs
+
+import org.scalajs.dom.Event
+import org.scalajs.dom.raw.HTMLElement
+
+import shared.DialogTypes.DialogId
+
+import shared.model.AppError
+
+// dlgMap maps dialog names to dialog objects   
+val dlgMap = List(DlgMsgbox, DlgPrompt)
+                    .map(dlg => dlg.name -> dlg).toMap
+
+object Ids:
+  import shared.DialogTypes.DialogId
+  val DlgMsgboxId: DialogId = DialogId.myName
+  val DlgPromptId: DialogId = DialogId.myName
+
+
+abstract class BaseDialog extends comps.CompBase:
+  
+  def event(elem: HTMLElement, event: Event): Unit = {}
