@@ -1,9 +1,0 @@
-@*
- * Template for use case specific getMsg
- *@
-@import base.UseCaseParam
-
-@(key:String,args:String*)(implicit uc: UseCaseParam) 
-@{ Html(uc.gM(key, (for (x <- args) yield (x)).toSeq)) }
-
-

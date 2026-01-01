@@ -1,9 +1,6 @@
 package addon
 
-
-
-
-
+import java.util.UUID
 import cats.data.EitherT
 import cats.syntax.all._  
 
@@ -15,7 +12,7 @@ import shared._
 import base._
 import services._
 
-object TestAuth extends Authentication with ComWrapper:
+object TestAuth extends Authentication with ComWrapper with JsWrapper:
 
   def exec(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     number match 
@@ -58,7 +55,7 @@ object TestAuth extends Authentication with ComWrapper:
 
     (for
       pw   <- EitherT[Future,AppError,String](sha256(password))
-      usr  <- EitherT[Future,AppError,User](regUser(User("Robert", "Lichtenegger", email), pw))
+      usr  <- EitherT[Future,AppError,User](regUser(User(newUuidString, email, "Robert", "Lichtenegger"), pw))
     yield usr).value.map {
       case Left(err)   => addOutput(s"ERROR: ${err}");         Left(err)
       case Right(user) => addOutput(s"RESULT: user->${user}"); Right(s"FINISHED: ${group}-Test:${number} param:${param}")

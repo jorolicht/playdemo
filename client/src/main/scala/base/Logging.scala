@@ -3,6 +3,11 @@ package base
 import org.scalajs.logging._
 
 object Logging extends JsWrapper:
+  def debug(msg: => String) = logger.debug(msg)
+  def info(msg: => String)  = logger.info(msg)
+  def warn(msg: => String)  = logger.warn(msg)
+  def error(msg: => String) = logger.error(msg)
+
   var logger:Logger = org.scalajs.logging.NullLogger
 
   def setLogLevel(value: String) =

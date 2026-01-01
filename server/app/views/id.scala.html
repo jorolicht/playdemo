@@ -1,7 +1,7 @@
 @*
  * Template for id
  *@
-@import shared.HtmlUtils.attrId
+@import shared.DomTypes.HtmlId
 
-@(id: shared.NamedId)
-@{ Html(attrId(id))  }
+@(id: HtmlId)
+@{ Html(s""" id='${id.asString}' """ )  }

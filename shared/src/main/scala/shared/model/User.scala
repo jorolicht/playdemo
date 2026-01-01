@@ -3,19 +3,20 @@ package shared.model
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
 
-case class User(firstname: String, lastname: String, var email: String, var password: String="",
+case class User(id: String,
+                var email: String, 
+                var firstname: String="", 
+                var lastname: String="",
+                var password: String="",
                 var picUrl: String = "", 
                 var locale: String = "", 
                 var verified: Boolean = false,
-                var request: Long = 0L,
-                var id: Long =0L,
-                var wpAppUser: String = "",
-                var wpAppPW  : String = "",
-                var uuid: String = ""):
-  def verifyInfo = write[(Long,String,Long)]((id,email,request))
+                var entryTime: Long = 0L):
+
+  def verifyInfo = write[(String,String,Long)]((id,email,entryTime))
 
 
 object User:
   implicit val rw: RW[User] = macroRW
-  def nil(rand: String) = User("", "", "", "", "", "", false, 0L, 0L, "", "", rand)
-  def isNil(user: User) = (user.id == 0L)
+  def apply(id: String, email: String, entryTime:Long) = 
+    new User(id, email, "", "", "", "", "", false, entryTime)

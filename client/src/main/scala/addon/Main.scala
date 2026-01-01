@@ -14,7 +14,7 @@ import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import upickle.default._
 import shared.model.AppError
-import usecases.IdConsole.*
+import shared.DomTypes.HtmlId
 
 def addOutput(text: String) = DlgPrompt.add(text)
 

@@ -19,7 +19,7 @@ import play.api.libs.EventSource
 import play.api.libs.json.{JsValue, Json }
 
 import actors.SSEMgmtActor
-import models._
+import repositories.UserRepository
 import shared._
 import shared.model._
 

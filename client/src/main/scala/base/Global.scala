@@ -1,15 +1,13 @@
 package base
 
+import org.scalajs.dom
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
 import shared.model.{ AppError, User }
-import shared.IdGlobal.*
-import usecases.Auth
+import shared.GlobalIds.*
+import base.Logging.*
+import comps.Sidebar
 
-def debug(msg: => String) = Logging.logger.debug(msg)
-def info(msg: => String)  = Logging.logger.info(msg)
-def warn(msg: => String)  = Logging.logger.warn(msg)
-def error(msg: => String) = Logging.logger.error(msg)
 
 @js.native
 @JSGlobal("Math")
@@ -26,52 +24,29 @@ object UUIDGen {
 
 
 trait Mgmt extends JsWrapper:
-  def validUser = !User.isNil(Global.user)   
-  def initUser = Auth.setUser(User.nil(UUIDGen.generate))             
-
+  def validUser = Global.user != None  
   def getUser = Global.user
 
   def ucError(err: AppError): Unit =
-    Auth.hide()
+    pages.Auth.hide()
 
-    removeClass(gE(AppContentId), "d-none")
-    if usecases.UCError.render(err) then
-      setNavLink("Error")
+    removeClass(gE3(AppContentId), "d-none")
+    if pages.PgError.render(err) then
+      Sidebar.setNavLink("Error")
     else   
       error(s"exec -> usecase:Error ${err}")
 
 
-  def ucExec(usecase: String, param: String): Unit = 
-    try
-      Auth.hide()
-
-      removeClass(gE(AppContentId), "d-none")
-      if Global.ucMap(usecase).render(param) then
-        setNavLink(usecase)
-      else   
-        error(s"exec -> usecase:${usecase} param:${param}")
-    catch
-      case e: Exception => error(s"exec -> usecase:${usecase} param:${param} not found")
-
-
-object Global extends JsWrapper:
+object Global:
   import shared.model.User
-  import usecases._
-  import dialog._
   val localStoragePrefix = "App."
+  var user : Option[User] = None
   var lang    = ""
   var version = ""
-  var user = User.nil("")
-  var csrf   = ""
-  var srvUrl = ""
-  var wpUrl  = ""
-  var nonce  = ""
+  var csrf    = ""
+  var homeUrl = ""
+  var dataUrl = ""
+  var playUrl = ""
+  var nonce   = ""
 
-
-  // usecase map usecase name to usecase object   
-  val ucMap = List(Home, Auth, Console, UCError, 
-                   DlgPrompt, 
-                   ChatExample,
-                   UseCase2, UseCase31, UseCase32, UseCase41, UseCase42,
-                   UseCase511, UseCase512, UseCase52, UseCase53)
-                   .map(uc => uc.name -> uc).toMap  
+                            

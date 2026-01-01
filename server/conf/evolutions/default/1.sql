@@ -5,19 +5,18 @@
 # --- !Ups
 
 CREATE TABLE user (
-  id          int NOT NULL AUTO_INCREMENT,
-  email       varchar(50) NOT NULL,
-  firstname   varchar(50) NOT NULL,
-  lastname    varchar(50) NOT NULL,
-  picUrl      varchar(100) DEFAULT NULL,
-  locale      varchar(8) DEFAULT NULL,
-  verified    tinyint DEFAULT NULL,
-  password    varchar(64) DEFAULT NULL,
-  request     bigint DEFAULT NULL,
+  id          VARCHAR(36) NOT NULL,
+  email       VARCHAR(50) NOT NULL,
+  firstname   VARCHAR(50),
+  lastname    VARCHAR(50),
+  picUrl      VARCHAR(100) DEFAULT NULL,
+  locale      VARCHAR(8) DEFAULT NULL,
+  verified    TINYINT DEFAULT NULL,
+  password    VARCHAR(64) DEFAULT NULL,
+  entryTime   BIGINT DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY email (email)
 );
-
 
 # --- !Downs
 

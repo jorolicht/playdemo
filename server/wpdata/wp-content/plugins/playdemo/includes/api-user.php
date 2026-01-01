@@ -1,6 +1,7 @@
 <?php
 
 // Registrierung des API-Endpunkts
+// Permalink Einstellungen auf Beiträge setzen, damit die REST API funktioniert
 add_action('rest_api_init', function () {
     register_rest_route('playdemo/v1', '/user/', [
         'methods'  => 'GET',
@@ -27,8 +28,6 @@ function playdemo_api_callback_user($request) {
     $username       = '';
     $email          = '';
     $club           = '';
-    $user_api_pw    = '';  
-    $api_password   = ''; 
 
     if ( is_user_logged_in() )  {
         $user_id        = get_current_user_id();
@@ -36,8 +35,6 @@ function playdemo_api_callback_user($request) {
         $username       = $current_user->user_login;
         $email          = $current_user->user_email;     
         $club           = get_user_meta($user_id, 'club_name' , true );
-        $user_api_pw    = get_option('playdemo_user_api_pw');  
-        $api_password   = get_option('playdemo_api_password');        
     } 
 
     return [
@@ -45,8 +42,6 @@ function playdemo_api_callback_user($request) {
         'user_id'       => $user_id,
         'email'         => $email,
         'club'          => $club,
-        'user_api_pw'   => $user_api_pw,
-        'api_passsword' => $api_password,
         'time'          => current_time('mysql'),
     ];
 }

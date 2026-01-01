@@ -9,7 +9,7 @@ import play.api.mvc._
 import play.api.Logging
 import play.api.i18n.{ I18nSupport, Messages, Langs, Lang }
 
-import models._
+import repositories.UserRepository
 import shared._
 import shared.model._
 

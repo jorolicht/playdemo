@@ -135,17 +135,6 @@ function playdemo_field_url_callback() {
     <?php
 }
 
-/**
- * Rendert das Eingabefeld für die Playdemo Server URL.
- */
-function playdemo_field_url_callback() {
-    $pdemo_url = get_option('playdemo_url', ''); // Wert auslesen, Standard ist leer.
-    ?>
-    <input type="text" id="playdemo_url" name="playdemo_url" value="<?php echo esc_attr($pdemo_url); ?>" class="regular-text">
-    <p class="description">Geben Sie die URL für den Playdemo-Server ein.</p>
-    <?php
-}
-
 
 /**
  * Rendert das Eingabefeld für das API-Passwort.

@@ -14,7 +14,6 @@ GET        /auth/basicLogin              controllers.Auth.basicLogin()
 GET        /auth/verifyUser/:code        controllers.Auth.verifyUser(code: String)
 POST       /auth/setUserPassword         controllers.Auth.setUserPassword(email: String)
 
-GET        /auth/register/:userId        controllers.AuthController.startRegistration(userId)
 
 
 # Helper endpoints

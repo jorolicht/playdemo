@@ -1,26 +1,31 @@
 package base
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSGlobal
+import scala.scalajs.js.annotation.*
 import org.scalajs.dom
 import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.HTMLElement
-import shared.IdGlobal.*
+import shared.DomTypes.HtmlId
+import shared.GlobalIds.*
 import shared.*
+import Logging.*
 
 trait JsWrapper:
 
-  def idExists[T <: NamedId](id: T): Boolean = dom.document.getElementById(id.name) != null
+  def newUuidString: String = js.Dynamic.global.crypto.randomUUID().asInstanceOf[String]
+// Ergebnis: "4a080829-d602-4660-848e-7164b4c73229"
 
-  def getOrCreateDiv[T <: NamedId](id: T, parent: dom.Element = dom.document.body): HTMLElement =
-    dom.document.getElementById(id.name) match
+  def idExists(id: HtmlId): Boolean = dom.document.getElementById(id.asString) != null
+
+  def getOrCreateDiv(id: HtmlId, parent: dom.Element = dom.document.body): HTMLElement =
+    dom.document.getElementById(id.asString) match
       case elem: HTMLElement =>
         elem
 
       case _ =>
         val div = dom.document.createElement("div").asInstanceOf[HTMLElement]
-        div.id = id.name
+        div.id = id.asString
         parent.appendChild(div)
         div
 
@@ -45,20 +50,13 @@ trait JsWrapper:
     
   def displayProperty(visible: Boolean): String = if (visible) "block" else "none"
 
-  def gE[T <: NamedId](id: T, withWarning: Boolean=true):HTMLElement = 
+  def gE3(id: HtmlId, withWarning: Boolean=true):HTMLElement = 
     try 
-      val elem = dom.document.getElementById(id.name).asInstanceOf[HTMLElement]
-      if (elem == null && withWarning) warn(s"gE -> id:${id.name} null")
+      val elem = dom.document.getElementById(id.asString).asInstanceOf[HTMLElement]
+      if (elem == null && withWarning) warn(s"gE3 -> id:${id.asString} null")
       elem
-    catch { case _: Throwable => error(s"gE -> id:${id.name}"); null } 
+    catch { case _: Throwable => error(s"gE3 -> id:${id.asString}"); null } 
 
-
-  def gE2[T <: NamedId](id: T, withWarning: Boolean=true):HTMLElement = 
-    try 
-      val elem = dom.document.getElementById(id.name).asInstanceOf[HTMLElement]
-      if (elem == null && withWarning) warn(s"gE2 -> id:${id.name} null")
-      elem
-    catch { case _: Throwable => error(s"gE2 -> id:${id.name}"); null } 
 
 
   def setVisible(elem: HTMLElement, visible: Boolean) = 
@@ -89,7 +87,7 @@ trait JsWrapper:
     * @param content - html content or string content
     */
   def setMain[C](content: => C = ""): Boolean = 
-    val elem = gE2(AppContentId)
+    val elem = gE3(AppContentId)
     val value = try content match 
       case _:String => content.asInstanceOf[String]
       case _        => content.toString
@@ -169,12 +167,7 @@ trait JsWrapper:
     catch { case _: Throwable => error(s"setInput -> elem:${elem.id}") }
 
 
-  def setNavLink(uc: String) =
-    val navLinkNodes = gE2(SidebarId).querySelectorAll("[data-usecase]")
-    for( i <- 0 to navLinkNodes.length-1)
-      val elem = navLinkNodes.item(i).asInstanceOf[HTMLElement]
-      changeClass(elem, uc==getData(elem, "usecase", "") , "bg-primary")
-    println(s"set navlink: ${uc} ")
+
 
 
   /**

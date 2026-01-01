@@ -63,8 +63,10 @@ lazy val server = project
         val generatedFile = new File(msgFile.getAbsolutePath + "_json")
         val lang = msgFile.name.split('.').last
         val targetFileVite = baseDirectory.value / ".." / "client" / "vite" / "assets" / "data" / ("msgs_" + lang + ".json")
-        val targetFileSrv = baseDirectory.value / ".." / "server" / "public" / "data" / ("msgs_" + lang + ".json")
-        
+        val targetFileSrv  = baseDirectory.value / ".." / "server" / "public" / "data" / ("msgs_" + lang + ".json")
+        val targetFileWp   = baseDirectory.value / ".." / "server" / "wpdata" / "wp-content" / "plugins" / "playdemo" / "data" / ("msgs_" + lang + ".json")
+
+        IO.copyFile(generatedFile, targetFileWp)
         IO.copyFile(generatedFile, targetFileSrv)
         IO.move(generatedFile, targetFileVite)
         log.info(s"Generated ${targetFileVite.getAbsolutePath} und ${targetFileSrv.getAbsolutePath}")
@@ -91,7 +93,7 @@ lazy val server = project
     libraryDependencies += "org.playframework" %% "play-mailer-guice" % "10.0.0",
     libraryDependencies += "org.typelevel" %% "cats-core" % "2.12.0",
     libraryDependencies += "org.apache.pekko" %% "pekko-stream-typed" % "1.0.2",
-    libraryDependencies += "com.yubico" % "webauthn-server-core" % "2.6.0",
+    libraryDependencies += "com.lihaoyi" %% "sourcecode" % "0.4.2",
     copyClientViteFiles := {
       // Copy main.js and main.js.map to client/vite
       // Also copy to wordpress plugin directory
@@ -134,18 +136,11 @@ lazy val client = project
 
     scalaJSUseMainModuleInitializer := false,
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }, 
-
-
-
-
-
-
-
-
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.0",
     libraryDependencies += "com.lihaoyi" %%% "upickle" % "3.3.1",
     libraryDependencies += "org.rogach"  %%% "scallop" % "5.1.0",
-    libraryDependencies += "org.typelevel" %%% "cats-core" % "2.12.0"
+    libraryDependencies += "org.typelevel" %%% "cats-core" % "2.12.0",
+    libraryDependencies += "com.lihaoyi" %%% "sourcecode" % "0.4.2"
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
   .dependsOn(shared.js)

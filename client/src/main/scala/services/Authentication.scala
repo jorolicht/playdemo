@@ -74,7 +74,7 @@ trait Authentication extends ComWrapper:
     * @param user 
     * @return usr with auto generated user id
     */ 
-  def logout(user: User): FuEiErr[Boolean] = 
+  def logout(user: Option[User]): FuEiErr[Boolean] = 
     ajaxPost[Boolean]("/auth/logout", List(), toJson(user))
 
 

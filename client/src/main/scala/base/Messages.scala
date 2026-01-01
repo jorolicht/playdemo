@@ -11,6 +11,7 @@ import scala.scalajs.js
 import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.*
 
+import Logging.*
 import shared.model.AppError
 import services.ComWrapper
 
@@ -22,13 +23,13 @@ def utob(b64: String) = js.Dynamic.global.utob(b64.asInstanceOf[js.Any]).asInsta
 object Messages extends JsWrapper with ComWrapper:
   private var messages: Map[String, String] = Map (""->"")
 
-  def initMsg(version: String, lang: String): Future[Boolean] =
+  def initMsg(version: String, dataUrl: String, lang: String): Future[Boolean] =
     messages = read[Map[String, String]](getLocalStorage("messages", "{}"))
     if (messages.isDefinedAt("app.version") && messages("app.version") == version) then
       debug("Took messages from local storage")
       Future(true)
     else
-      loadConfigMsg(s"assets/data/msgs_${lang}.json").map {
+      loadConfigMsg(s"${dataUrl}msgs_${lang}.json").map {
         case Left(err)   => error(s"Loading messages from server: ${err}") ; false
         case Right(msgs) => 
           debug("Load new messages from server")

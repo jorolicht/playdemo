@@ -8,6 +8,7 @@ import scala.reflect.ClassTag
 import upickle.default._
 
 import base.Global
+import base.Logging.*
 import base.*
 import shared._
 import shared.model._
@@ -17,7 +18,7 @@ trait ComWrapper:
   // ajaxPost - basic wrapper routine for a Ajax post request 
   def ajaxPost[T](route: String, params: List[(String,String)], data: String, 
                   hdrs: Map[String,String]=Map("Content-Type"->"text/plain; charset=utf-8", "Csrf-Token" -> Global.csrf),
-                  host: String=Global.srvUrl)
+                  host: String=Global.playUrl)
                  (using r: Reader[T], ct: ClassTag[T]): Future[Either[AppError,T]] = 
     val name = route.split("/").lastOption.getOrElse("ajaxPost")
     debug(s"ajaxPost -> route:${route} params:${params.mkString("=")} data:${data.take(20)} hdrs: ${hdrs.mkString("=")}")
@@ -33,7 +34,7 @@ trait ComWrapper:
   /** ajaxGet - basic wrapper for get requests   
    * @return either an error or a result type T 
    */
-  def ajaxGet[T](route: String, params: List[(String,String)]=List(), hdrs: Map[String,String]=Map(), host: String = Global.srvUrl)
+  def ajaxGet[T](route: String, params: List[(String,String)]=List(), hdrs: Map[String,String]=Map(), host: String = Global.playUrl)
                 (using r: Reader[T], ct: ClassTag[T]): Future[Either[AppError,T]] =
     val name = route.split("/").lastOption.getOrElse("ajaxGet")
     debug(s"ajaxGet -> route:${route} params:${params.mkString("=")} hdrs: ${hdrs.mkString("=")}")

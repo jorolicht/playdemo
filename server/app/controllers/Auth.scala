@@ -15,7 +15,7 @@ import play.api.i18n.{ I18nSupport, Messages, Langs, Lang }
 
 import org.apache.commons.mail.EmailAttachment
 
-import models._
+import repositories.UserRepository
 import shared._
 import services._
 import shared.model.{ AppError, User }
@@ -70,7 +70,7 @@ class Auth @Inject()(cc: ControllerComponents, mailer: MailerClient, cfg: Config
 
       userRepo.getUser(email).flatMap( _ match {
         case Left(err)  => 
-          val user = User(firstname, lastname, email, "Google", picUrl, locale, true)
+          val user = User( userId, email, firstname, lastname, "Google", picUrl, locale, true)
           userRepo.insert(user).map { 
             case Left(err)  => BadRequest(toJson(err)).discardingCookies(genDiscardAuthCookie) 
             case Right(usr) => Ok(toJson(usr)).withCookies(genUserAuthCookie(usr)) 
@@ -139,7 +139,7 @@ class Auth @Inject()(cc: ControllerComponents, mailer: MailerClient, cfg: Config
     
     parseJson[User](request.body.asText.getOrElse("")) match 
       case Left(err)  => Future(BadRequest(toJson(err)))
-      case Right(usr) => userRepo.insert(usr.copy(request=curUnixTime,verified=false)).map { 
+      case Right(usr) => userRepo.insert(usr.copy(entryTime=curUnixTime,verified=false)).map { 
         case Right(regUsr)  => 
           val code  = encode64(regUsr.verifyInfo)
           val email = Email(

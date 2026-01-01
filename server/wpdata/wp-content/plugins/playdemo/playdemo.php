@@ -87,13 +87,17 @@ add_action( 'rest_api_init', 'register_pdemo_custom_meta_fields' );
  * @return string The complete HTML output for the shortcode.
  */
 function playdemo_render() {
-    $playURL = get_option('playdemo_url', '');
-    $wpURL   = home_url();
+    $jsUrl   = plugins_url('js/main.js', __FILE__);
+    $dataUrl = plugins_url('data/', __FILE__);
+    $playUrl = get_option('playdemo_url', '');
+    $homeUrl = home_url();
     $nonce   = wp_create_nonce('wp_rest');
 
-    $output = '<div id="appcontent"></div>';
-    $output .= '<script type="text/javascript">';
-    $output .= 'Main.wpStart("'. $playURL .'", "'. $wpURL .'", "'. $nonce .'");';
+    $output = '<span id="IdGlobal_AppParamId" data-dataurl="' . esc_url($dataUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" ></span>';
+    $output .= '<div id="IdGlobal_AppContentId"></div>';
+    $output .= '<script type="module">';
+    $output .= 'import { startApp } from "' . esc_url($jsUrl) . '";';
+    $output .= 'startApp("001DE1970-01", "wp", "debug");';
     $output .= '</script>';
 
     return $output;
@@ -125,7 +129,7 @@ function js_enqueue_scripts_styles() {
     wp_enqueue_style( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css', array(), '1.11.3' );
     wp_enqueue_script( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js', array(), '5.3.3', false );
 
-    wp_enqueue_script('tourney_js', plugin_dir_url(__FILE__) . 'js/main.js', [], '1.0', false);
+    //wp_enqueue_script('tourney_js', plugin_dir_url(__FILE__) . 'js/main.js', [], '1.0', false);
     wp_enqueue_style( 'tourney_style', plugin_dir_url(__FILE__) . 'css/main.css', [], '1.0');
 }
 add_action('wp_enqueue_scripts', 'js_enqueue_scripts_styles');

@@ -1,5 +1,5 @@
 @import play.filters.csrf._
-@import shared.IdGlobal.*
+@import shared.GlobalIds.*
 
 
 @(usecase: String, param: String)(implicit request: RequestHeader, msgs: MessagesProvider)
@@ -22,11 +22,9 @@
   </head>
 
   <body>
-    <span @id(NavbarId)></span>
 
     <div class="d-flex">
         <!-- Sidebar (aside) -->
-        <span @id(SidebarId)></span>
 
         <!-- Hauptinhalt -->
         <div class="content">
@@ -46,7 +44,7 @@
         <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">
                 @getMsg("app.copyright")
-                <a href='#' @id(ClickConsoleId) data-command='' style="text-decoration:none; color:black;" onclick="Addon.console(); false">&copy;</a>
+                <a href='#' data-command='' style="text-decoration:none; color:black;" onclick="Addon.console(); false">&copy;</a>
                 @getMsg("app.website")
             </div>
             <div>
