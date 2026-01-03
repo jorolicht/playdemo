@@ -7,7 +7,7 @@ import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.HTMLElement
 import shared.DomTypes.HtmlId
-import shared.GlobalIds.*
+import shared.MainIds.*
 import shared.*
 import Logging.*
 
@@ -50,7 +50,7 @@ trait JsWrapper:
     
   def displayProperty(visible: Boolean): String = if (visible) "block" else "none"
 
-  def gE3(id: HtmlId, withWarning: Boolean=true):HTMLElement = 
+  def gE(id: HtmlId, withWarning: Boolean=true):HTMLElement = 
     try 
       val elem = dom.document.getElementById(id.asString).asInstanceOf[HTMLElement]
       if (elem == null && withWarning) warn(s"gE3 -> id:${id.asString} null")
@@ -87,7 +87,7 @@ trait JsWrapper:
     * @param content - html content or string content
     */
   def setMain[C](content: => C = ""): Boolean = 
-    val elem = gE3(AppContentId)
+    val elem = gE(ContentId)
     val value = try content match 
       case _:String => content.asInstanceOf[String]
       case _        => content.toString

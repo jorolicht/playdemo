@@ -30,11 +30,11 @@ object ChatExample extends BasePage with JsWrapper with ComWrapper:
 
   override def event(elem: HTMLElement, event: Event) =
     HtmlId(elem.id) match
-      //case ChatExample_Send => sendChatMsg( getInput(gE3(ChatExample_Receiver),""), getInput(gE3(ChatExample_Message),"") )
+      //case ChatExample_Send => sendChatMsg( getInput(gE(ChatExample_Receiver),""), getInput(gE(ChatExample_Message),"") )
       case `sendId` => 
         Global.user match
           case None      => error(s"sendChatMsg -> no user logged in") 
-          case Some(usr) => sendChatMsg(usr.id.toString, getInput(gE3(receiverId),""), getInput(gE3(messageId),"") ).map {
+          case Some(usr) => sendChatMsg(usr.id.toString, getInput(gE(receiverId),""), getInput(gE(messageId),"") ).map {
             case Left(err)  => error(s"sendChatMsg -> ${err}") 
             case Right(res) => info(s"sendChatMsg -> ${res}")   
           }
@@ -44,5 +44,5 @@ object ChatExample extends BasePage with JsWrapper with ComWrapper:
     ajaxGet[String]("/helper/send2sse", List(("from",from), ("to",to), ("msg",msg)))  
 
   def receiveMsg(msg: String) =
-    val textarea = gE3(rcvMsgsId).asInstanceOf[HTMLTextAreaElement]
+    val textarea = gE(rcvMsgsId).asInstanceOf[HTMLTextAreaElement]
     textarea.value = if textarea.value != "" then textarea.value + "\n" + msg else msg

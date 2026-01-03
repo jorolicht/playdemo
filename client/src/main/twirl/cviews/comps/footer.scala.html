@@ -1,0 +1,20 @@
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html._
+@import shared.MainIds.* 
+@import comps.Footer.*
+
+@()
+<div @id(FooterId) class="container-fluid px-4 pt-2 pb-2 bg-secondary">
+    <div class="d-flex align-items-center justify-content-between small">
+        <div class="text-muted">
+            @gM("+copyright")
+            <a href='#' data-command='' style="text-decoration:none; color:black;" onclick="Addon.console(); false">&copy;</a>
+            @gM("+website")
+        </div>
+        <div>
+            <a href="#" style="color: black;">Privacy Policy</a>
+            &middot;
+            <a href="#" style="color: black;">Terms &amp; Conditions</a>
+        </div>
+    </div>
+</div>

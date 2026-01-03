@@ -13,8 +13,8 @@ import services.ComWrapper
 import base.{ Global, JsWrapper, _ }
 import comps.{ CompBase, Navbar, Sidebar }
 
-import shared.GlobalIds.*
 import shared.*
+import shared.MainIds.*
 
 
 object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
@@ -22,7 +22,7 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
   @JSExportTopLevel("startApp")
   def startApp(version: String, startEnv: String, logLevel: String): Unit = 
     Global.lang = dom.window.navigator.language.take(2)
-    Global.dataUrl  = getData(gE3(AppParamId), "dataurl", "./data/")
+    Global.dataUrl  = getData(gE(ParamId), "dataurl", "./data/")
 
     Logging.setLogLevel(logLevel)
     println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} env:${startEnv} logLevel:${logLevel}")
@@ -41,14 +41,14 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
 
 
   def startPlay() : Unit = 
-    val usecase = gE3(AppParamId).getAttribute("data-usecase")
-    val param   = gE3(AppParamId).getAttribute("data-param")
-    Global.csrf  = gE3(AppParamId).getAttribute("data-csrf")
+    val usecase = gE(ParamId).getAttribute("data-usecase")
+    val param   = gE(ParamId).getAttribute("data-param")
+    Global.csrf  = gE(ParamId).getAttribute("data-csrf")
 
     debug(s"startPlay -> usecase:${usecase} param:${param} csrf:${Global.csrf}")
     
     // set visibility of basic html elements
-    addClass(gE3(JavascriptEnabledInfoId), "d-none")
+    addClass(gE(JScriptId), "d-none")
 
     val evtSource = new dom.raw.EventSource(s"/helper/sse?id=${randomString(6)}")  
     evtSource.onmessage = { (e: dom.MessageEvent) => debug(s"Message from Server: ${e.data}") }
@@ -64,13 +64,13 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
     import cats.data.EitherT
     import cats.implicits._ 
 
-    Global.playUrl = gE3(AppParamId).getAttribute("data-playurl")
-    Global.homeUrl = gE3(AppParamId).getAttribute("data-homeurl")
-    Global.nonce  = gE3(AppParamId).getAttribute("data-nonce")
+    Global.playUrl = gE(ParamId).getAttribute("data-playurl")
+    Global.homeUrl = gE(ParamId).getAttribute("data-homeurl")
+    Global.nonce  = gE(ParamId).getAttribute("data-nonce")
 
     debug(s"wpStart -> playUrl:${Global.playUrl} homeUrl: ${Global.homeUrl} lang:  ${Global.lang} nonce: ${Global.nonce}")
 
-    setHtml(gE3(AppContentId), cviews.comps.html.wordpress())
+    setHtml(gE(ContentId), cviews.comps.html.wordpress())
 
     // add sidebar
     Sidebar.render("") 
@@ -82,7 +82,7 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
 
 
   def startVite(): Unit =
-    setHtml(gE3(AppContentId), "Start successful")
+    setHtml(gE(ContentId), "Start successful")
 
 
   def sayHello(name: String): Unit = {

@@ -35,16 +35,16 @@ object DlgMsgbox extends BaseDialog with JsWrapper:
 
     // init modal dialog, always copy
     setHtml(getOrCreateDiv(LoadId), cviews.dialogs.html.DlgMsgbox(title, body, btns))
-    modal = Modal(gE3(ModalId)) 
+    modal = Modal(gE(ModalId)) 
     modal.show()
 
-    gE3(CloseId).addEventListener("click", (e: MouseEvent) => {
+    gE(CloseId).addEventListener("click", (e: MouseEvent) => {
       if (!p.isCompleted) then p success Cancel
       modal.hide()      
     })
 
     for btn <- btns do
-      gE3(btn.getId).addEventListener("click", (e: MouseEvent) => {
+      gE(btn.getId).addEventListener("click", (e: MouseEvent) => {
         if (!p.isCompleted) then p success btn
         modal.hide()      
       })

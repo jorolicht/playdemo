@@ -1,10 +1,11 @@
 @import cviews.helper.html._
 @import pages.PageIds.*
 @import comps.Sidebar.*
-@import pages.Auth
+@import shared.AuthIds.*
+
 
 @()
-<aside @id2(SidebarId) class="d-none d-md-block bg-secondary">
+<aside @id(AsideId) class="d-none d-md-block bg-secondary">
     <ul class="nav flex-column">
         <div class='sidenav-menu-heading'>UseCase1_3 Header</div>
         <li class="nav-item">
@@ -18,7 +19,7 @@
             <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usecase3">
                 <i class="bi bi-folder"></i>@gM("sidenav.UseCase3")
             </a>
-            <ul @id2(UseCase3Id)" class="collapse nav submenu1">
+            <ul @id(UseCase3Id)" class="collapse nav submenu1">
                 <li><a @exec2(UseCase31Pid) class="nav-link"><i class="bi bi-file-earmark"></i>@gM("+UseCase31")</a></li>
                 <li><a @exec2(UseCase32Pid) class="nav-link"><i class="bi bi-file-earmark"></i>@gM("+UseCase32")</a></li>
             </ul>
@@ -29,7 +30,7 @@
             <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usecase4">
                 <i class="bi bi-folder"></i>@gM("+UseCase4")
             </a>
-            <ul @id2(UseCase4Id) class="collapse nav submenu1">
+            <ul @id(UseCase4Id) class="collapse nav submenu1">
                 <li><a @exec2(UseCase41Pid) class="nav-link"><i class="bi bi-file-earmark"></i>@gM("+UseCase41")</a></li>
                 <li><a @exec2(UseCase42Pid)" class="nav-link"><i class="bi bi-file-earmark"></i>@gM("+UseCase42")</a></li>
             </ul>
@@ -39,12 +40,12 @@
             <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usecase5">
                 <i class="bi bi-folder"></i>@gM("+UseCase5")
             </a>
-            <ul @id2(UseCase5Id)" class="collapse nav submenu1">
+            <ul @id(UseCase5Id)" class="collapse nav submenu1">
                 <li class="nav-item">
                     <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usecase51">
                         <i class="bi bi-folder"></i>@gM("+UseCase51")
                     </a>
-                    <ul @id2(UseCase51Id)" class="collapse nav submenu1">
+                    <ul @id(UseCase51Id)" class="collapse nav submenu1">
                         <li><a @exec2(UseCase511Pid) class="nav-link"><i class="bi bi-file-earmark"></i>@gM("+UseCase511")</a></li>
                         <li><a @exec2(UseCase512Pid)" class="nav-link"><i class="bi bi-file-earmark"></i>@gM("+UseCase512")</a></li>
                     </ul>
@@ -53,9 +54,9 @@
                 <li><a @exec2(UseCase53Pid)" class="nav-link"><i class="bi bi-file-earmark"></i>@gM("+UseCase53")</a></li>
             </ul>
         </li>
-        <div @id2(Auth.LoginInfoId) class="sb-sidenav-footer">
+        <div @id(LoginInfoId) class="sb-sidenav-footer">
             <div  class="small">@gM("+loggedInAs")</div>
-            <span @id2(Auth.LoggedInAsId)></span>
+            <span @id(LoggedInAsId)></span>
         </div>
     </ul>
 </aside>

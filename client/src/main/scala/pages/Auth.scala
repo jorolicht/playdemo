@@ -10,40 +10,40 @@ import scala.scalajs.js.annotation.*
 
 import cviews.pages.*
 import shared.model.*
-import shared.GlobalIds.*
+
 import shared.DomTypes.HtmlId
 import services._
 import base._
-import shared._
- 
+import shared.AuthIds.*
+import shared.MainIds.*
+
+import comps.Sidebar.LoginInfoId
+import comps.Sidebar.LoggedInAsId
+import comps.Navbar.DoLogoutId
+import comps.Navbar.ShowLoginId
+
+
 
 object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
 
-  val LoginInfoId: HtmlId = HtmlId.fromName(name)
-  val LoggedInAsId: HtmlId = HtmlId.fromName(name)
-  val ShowLoginId: HtmlId = HtmlId.fromName(name)
-  val DoLogoutId: HtmlId = HtmlId.fromName(name)
-  val AuthContentId: HtmlId = HtmlId.fromName(name)
-
-
   def setUser(usr: User) = 
     Global.user = Some(usr)
-    changeClass(gE3(ShowLoginId), validUser, "disabled")
-    changeClass(gE3(DoLogoutId), !validUser, "disabled")
-    changeClass(gE3(LoginInfoId), !validUser, "d-none")
-    setHtml(gE3(LoggedInAsId), s"${usr.firstname} ${usr.lastname}")
+    changeClass(gE(ShowLoginId), validUser, "disabled")
+    changeClass(gE(DoLogoutId), !validUser, "disabled")
+    changeClass(gE(LoginInfoId), !validUser, "d-none")
+    setHtml(gE(LoggedInAsId), s"${usr.firstname} ${usr.lastname}")
 
 
   def resetUser = 
     Global.user = None
-    changeClass(gE3(ShowLoginId), validUser, "disabled")
-    changeClass(gE3(DoLogoutId), !validUser, "disabled")
-    changeClass(gE3(LoginInfoId), !validUser, "d-none")
-    setHtml(gE3(LoggedInAsId), "")
+    changeClass(gE(ShowLoginId), validUser, "disabled")
+    changeClass(gE(DoLogoutId), !validUser, "disabled")
+    changeClass(gE(LoginInfoId), !validUser, "d-none")
+    setHtml(gE(LoggedInAsId), "")
 
 
-  def hide() = addClass(gE3(AuthContentId), "d-none")
-  def show() = removeClass(gE3(AuthContentId), "d-none")
+  def hide() = addClass(gE(AuthContentId), "d-none")
+  def show() = removeClass(gE(AuthContentId), "d-none")
 
   def render(param: String = ""): Boolean = 
     param.toLowerCase match       
@@ -52,8 +52,8 @@ object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
         debug(s"Auth.render -> ${param}")
       case "register"  =>  
         // register user
-        addClass(gE3(AuthContentId), "d-none")
-        removeClass(gE3(AppContentId), "d-none")
+        addClass(gE(ContentId), "d-none")
+        removeClass(gE(ContentId), "d-none")
         setMain(html.Register())
         debug(s"Auth.render -> ${param}")
     true
@@ -63,28 +63,28 @@ object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
       case `ShowLoginId` => 
         // switch to login content as dynamic creation of
         // login content doesn't work with google sign in
-        addClass(gE3(AppContentId), "d-none")
-        removeClass(gE3(AuthContentId), "d-none")
+        addClass(gE(ContentId), "d-none")
+        removeClass(gE(AuthContentId), "d-none")
       case `DoLogoutId`   => doLogout()
       case `DoLoginId`    => doLogin()
       case `DoForgotId`   => doForgot()
       case `DoRegisterId` => 
         // register user
-        addClass(gE3(AuthContentId), "d-none")
-        removeClass(gE3(AppContentId), "d-none")
+        addClass(gE(ContentId), "d-none")
+        removeClass(gE(ContentId), "d-none")
         setMain(html.Register())     
-      case `EmailId`      => removeClass(gE3(EmailId), "is-invalid")
-      case `PasswordId`   => removeClass(gE3(PasswordId), "is-invalid")
+      case `EmailId`      => removeClass(gE(EmailId), "is-invalid")
+      case `PasswordId`   => removeClass(gE(PasswordId), "is-invalid")
       case _              => error(s"event -> invalid id/key: ${elem.id}")     
 
 
   def doLogin() =
-    val eMail    = getInput(gE3(EmailId))
-    val password = getInput(gE3(PasswordId))
+    val eMail    = getInput(gE(EmailId))
+    val password = getInput(gE(PasswordId))
     val validEmail    = isEmailValid(eMail) 
     val validPwFormat = isPasswordFormatValid(password) 
-    changeClass(gE3(EmailId), !validEmail, "is-invalid")
-    changeClass(gE3(PasswordId), !validPwFormat, "is-invalid")
+    changeClass(gE(EmailId), !validEmail, "is-invalid")
+    changeClass(gE(PasswordId), !validPwFormat, "is-invalid")
     if (validEmail && validPwFormat) then
       basicLogin(eMail, password).map {
         case Left(err)  => resetUser; loadPage("PgError", err.toString) 
@@ -107,6 +107,6 @@ object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
     }      
 
   def doForgot() =
-    val eMail      = getInput(gE3(EmailId))
+    val eMail      = getInput(gE(EmailId))
     val validEmail = isEmailValid(eMail)
-    changeClass(gE3(EmailId), !validEmail, "is-invalid")
+    changeClass(gE(EmailId), !validEmail, "is-invalid")

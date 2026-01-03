@@ -16,13 +16,13 @@ object Console extends BasePage with JsWrapper:
 
   def render(param: String = ""): Boolean = 
     setMain(s"""<div class='d-flex mt-5 justify-content-center'><h5>${name}</h5></div>""")
-    setData(gE3(ClickId), "command", param.replaceAll("_", " "))
-    gE3(ClickId).click()
+    setData(gE(ClickId), "command", param.replaceAll("_", " "))
+    gE(ClickId).click()
     true
 
   override def event(elem: HTMLElement, event: dom.Event) =   
     HtmlId(elem.id) match
-      case `ConsoleId` => gE3(ConsoleId).click()
+      case `ConsoleId` => gE(ConsoleId).click()
       case _           => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}") 
 
    

@@ -25,6 +25,6 @@ object Home extends BasePage with JsWrapper:
 
   override def event(elem: HTMLElement, event: dom.Event) =   
     HtmlId(elem.id) match
-      case `ToggleSidebarId` => toggleClass(gE3(SidebarId), "d-none")
+      case `ToggleSidebarId` => toggleClass(gE(SidebarId), "d-none")
 
       case _ => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}")

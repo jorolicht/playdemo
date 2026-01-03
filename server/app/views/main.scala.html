@@ -1,18 +1,20 @@
 @import play.filters.csrf._
-@import shared.GlobalIds.*
+@import shared.DomTypes.HtmlId
+@import shared.MainIds.*
 
+@(page: String, param: String)(implicit request: RequestHeader, msgs: MessagesProvider)
+@gM(name: String) = @{ msgs.messages("main."+name) }
+@id(name: HtmlId) = @{ Html(s""" id='${name.asString}' """ ) }
 
-@(usecase: String, param: String)(implicit request: RequestHeader, msgs: MessagesProvider)
-@getMsg(name: String) = @{ msgs.messages(name) }
 <!DOCTYPE html>
-<html lang='@getMsg("app.lang")'>
+<html lang='@gM("lang")'>
   <head>
-    <title>@getMsg("app.title")</title>
+    <title>@gM("title")</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content='@getMsg("app.description")'>
-    <meta name="keywords" content='@getMsg("app.keywords")'>
-    <meta name="author" content='@getMsg("app.author")'>
+    <meta name="description" content='@gM("description")'>
+    <meta name="keywords" content='@gM("keywords")'>
+    <meta name="author" content='@gM("author")'>
 
     <link rel="stylesheet" href='@routes.Assets.at("bootstrap-5.3.3/css/bootstrap.min.css")'>
     <link rel="stylesheet" href='@routes.Assets.at("bootstrap-icons-1.11.3/font/bootstrap-icons.css")'>
@@ -22,40 +24,29 @@
   </head>
 
   <body>
+    <span @id(NavbarId)></span>
 
     <div class="d-flex">
         <!-- Sidebar (aside) -->
+        <span @id(SidebarId)></span>
 
         <!-- Hauptinhalt -->
         <div class="content">
             @auth("782737132657-vs1domdevjcm9fv5sfg32lp30dd7oc7d.apps.googleusercontent.com")
-            <div @id(JavascriptEnabledInfoId) class="d-none d-flex flex-column p-2 mb-2 mt-2 border border-danger">
-                <h4>@getMsg("app.title") - Version: @getMsg("app.version")</h4>
-                <h6>@getMsg("app.javascript")</h6>
+            <div @id(JScriptId) class="d-none d-flex flex-column p-2 mb-2 mt-2 border border-danger">
+                <h4>@gM("title") - Version: @gM("version")</h4>
+                <h6>@gM("javascript")</h6>
             </div>
 
-            <div @id(AppContentId) class="row">         
+            <div @id(ContentId) class="row">         
                 <div class="d-flex mt-2 mr-2 justify-content-center border border-secondary">Main Content</div>
             </div>
         </div>
     </div>
 
-    <div @id(FooterId) class="container-fluid px-4 pt-2 pb-2 bg-secondary">
-        <div class="d-flex align-items-center justify-content-between small">
-            <div class="text-muted">
-                @getMsg("app.copyright")
-                <a href='#' data-command='' style="text-decoration:none; color:black;" onclick="Addon.console(); false">&copy;</a>
-                @getMsg("app.website")
-            </div>
-            <div>
-                <a href="#" style="color: black;">Privacy Policy</a>
-                &middot;
-                <a href="#" style="color: black;">Terms &amp; Conditions</a>
-            </div>
-        </div>
-    </div>
+    <span @id(FooterId)></span>
 
-    <span @id(AppParamId) data-usecase='@usecase' data-param='@param' data-csrf='@CSRF.getToken(request).map(t=>t.value).getOrElse("")'></span>  
+    <span @id(ParamId) data-page='@page' data-param='@param' data-csrf='@CSRF.getToken(request).map(t=>t.value).getOrElse("")'></span>  
 
     <!-- Google Sign In -->
     <script src="https://accounts.google.com/gsi/client"></script>

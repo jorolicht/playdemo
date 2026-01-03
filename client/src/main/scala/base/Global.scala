@@ -4,7 +4,7 @@ import org.scalajs.dom
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
 import shared.model.{ AppError, User }
-import shared.GlobalIds.*
+import shared.MainIds.* 
 import base.Logging.*
 import comps.Sidebar
 
@@ -30,7 +30,7 @@ trait Mgmt extends JsWrapper:
   def ucError(err: AppError): Unit =
     pages.Auth.hide()
 
-    removeClass(gE3(AppContentId), "d-none")
+    removeClass(gE(ContentId), "d-none")
     if pages.PgError.render(err) then
       Sidebar.setNavLink("Error")
     else   

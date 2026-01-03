@@ -1,9 +1,14 @@
-@import shared.GlobalIds.*
+@import shared.DomTypes.HtmlId
+@import shared.AuthIds.*
 
 @(googleClientId: String)(implicit msgs: MessagesProvider)
-@getMsg(name: String) = @{ msgs.messages(name) }
+@gM(name: String) = @{ msgs.messages(name) }
+@gMP(name: String) = @{ msgs.messages("auth."+name) }
+@oninput() = @{ Html(s""" oninput="window.appEvent(this, event); false" """) }
+@onclick() = @{ Html(s""" onclick="window.appEvent(this, event); false" """) }
+@id(name: HtmlId) = @{ Html(s""" id='${name.asString}' """ ) }
 
-<div @id(AppContentId) class="d-none row justify-content-sm-center h-100">
+<div @id(LoginContentId) class="d-none row justify-content-sm-center h-100">
     <div class="mt-4 col-xxl-4 col-xl-5 col-lg-6 col-md-7 col-sm-9">
         <div class="mt-4 card shadow-lg">
             <div class="card-header d-flex justify-content-between">
@@ -16,22 +21,22 @@
             </div>
             <div class="card-body p-5">
                 <div class="mb-3">
-                    <label class="mb-2 text-muted" for="email">@getMsg("app.emailAddress")</label>
-                    <input @id(EmailId) type="email" class="form-control" name="email" value="" @event("oninput") required autofocus>
-                    <div class="invalid-feedback">@getMsg("app.invalid.email")</div>
+                    <label class="mb-2 text-muted" for="email">@gMP("emailAddress")</label>
+                    <input @id(EmailId) type="email" class="form-control" name="email" value="" @oninput() required autofocus>
+                    <div class="invalid-feedback">@gMP("invalid.email")</div>
                 </div>
                 <div class="mb-3">
                     <div class="mb-2 w-100">
-                        <label class="text-muted" for="password">@getMsg("app.password")</label>
-                        <a @id(DoForgotId) href='#' @event("onclick") class="float-end">@getMsg("app.forgotPassword")</a>
+                        <label class="text-muted" for="password">@gMP("password")</label>
+                        <a @id(DoForgotId) href='#' @onclick() class="float-end">@gMP("forgotPassword")</a>
                     </div>
-                    <input @id(PasswordId) type="password" class="form-control" name="password" @event("oninput") required>
-                    <div class="invalid-feedback">@getMsg("app.invalid.password")</div>
+                    <input @id(PasswordId) type="password" class="form-control" name="password" @oninput() required>
+                    <div class="invalid-feedback">@gMP("invalid.password")</div>
                 </div>
                 <div class="d-flex justify-content-between">
                     <div class="mr-1">
-                        <button @id(DoLoginId) type="submit" class="btn btn-sm btn-outline-secondary" @event("onclick")>
-                           @getMsg("btn.login")
+                        <button @id(DoLoginId) type="submit" class="btn btn-sm btn-outline-secondary" @onclick()>
+                           @gM("btn.login")
                         </button>
                     </div>
                     <div>
@@ -48,7 +53,7 @@
             </div>
             <div class="card-footer py-3 border-0">
                 <div class="text-center">                
-                    @getMsg("app.noAccount") <a @id(DoRegisterId) @event("onclick")>@getMsg("app.createOne")</a>
+                    @gMP("noAccount") <a @id(DoRegisterId) @onclick() >@gMP("createOne")</a>
                 </div>
             </div>
         </div>

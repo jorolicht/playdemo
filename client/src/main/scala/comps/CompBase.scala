@@ -5,7 +5,7 @@ import base.Logging
 import sourcecode.FullName
 
 import shared.model.AppError
-
+import shared.DomTypes.HtmlId
 
 abstract class CompBase(using fn: FullName):
   def name: String = fn.value.split('.').last
@@ -16,6 +16,7 @@ abstract class CompBase(using fn: FullName):
 
   def render(param: String = ""): Boolean
 
+  def id(name: HtmlId) = s"id='${name.asString}'"
   def gM(key: String, inserts: String*)  = 
     if key.startsWith("+") then 
       Messages.getMsg(s"${name}.${key.drop(1)}", inserts*)

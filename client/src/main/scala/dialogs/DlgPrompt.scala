@@ -69,35 +69,35 @@ object DlgPrompt extends BaseDialog with JsWrapper:
     if !idExists(LoadId) then
       setHtml(getOrCreateDiv(LoadId), cviews.dialogs.html.DlgPrompt())
       initHistory()
-      modal    = Modal(gE3(ModalId))
-      collapse = Collapse(gE3(ResultId))
-      output   = gE3(ResultContentId)
-      input    = gE3(InputId)
+      modal    = Modal(gE(ModalId))
+      collapse = Collapse(gE(ResultId))
+      output   = gE(ResultContentId)
+      input    = gE(InputId)
     
     modal.show()
     if (command == "") setInput(input, getHistory()) else setInput(input, command)
 
     // Add an event listener to the execute button
-    gE3(ExecuteId).addEventListener("click", (e: MouseEvent) => {
+    gE(ExecuteId).addEventListener("click", (e: MouseEvent) => {
       if (!p.isCompleted) then p success Right(getInput(input))
       add2History(getInput(input))
       modal.hide()
     })
 
     // Add an event listener to the cancel button
-    gE3(CancelId).addEventListener("click", (e: MouseEvent) => {
+    gE(CancelId).addEventListener("click", (e: MouseEvent) => {
       if (!p.isCompleted) then p success Left(AppError("dlg.cancel"))
       modal.hide()      
     })    
 
     // Add an event listener to the close button
-    gE3(CloseId).addEventListener("click", (e: MouseEvent) => {
+    gE(CloseId).addEventListener("click", (e: MouseEvent) => {
       if (!p.isCompleted) then p success Left(AppError("dlg.cancel"))
       modal.hide()      
     })   
 
     // Check Input for up/down and enter keykey 
-    gE3(InputId).onkeydown = {(e: KeyboardEvent) =>
+    gE(InputId).onkeydown = {(e: KeyboardEvent) =>
       // ENTER key pressed
       if (Seq(13).contains(e.keyCode.toInt)) 
         e.preventDefault()
