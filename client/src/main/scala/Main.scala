@@ -15,19 +15,30 @@ import comps.{ CompBase, Navbar, Sidebar }
 
 import shared.*
 import shared.MainIds.*
+import shared.DomTypes.HtmlId
+import shared.DomTypes.genId
+import comps.Wordpress
 
 
 object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
 
+  val HomePage = genId("HUGO")
+  val LoginPage = genId()
+  
   @JSExportTopLevel("startApp")
   def startApp(version: String, startEnv: String, logLevel: String): Unit = 
     Global.lang = dom.window.navigator.language.take(2)
+    println(s"ParamId: ${ParamId.id}")
+
+    println(s"HomePage: ${HomePage.id}")
+    println(s"LoginPage: ${LoginPage.id}")
+
     Global.dataUrl  = getData(gE(ParamId), "dataurl", "./data/")
 
     Logging.setLogLevel(logLevel)
     println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} env:${startEnv} logLevel:${logLevel}")
 
-    dom.window.asInstanceOf[js.Dynamic].sayHello = (name: String) => s"Hello $name"
+    dom.window.asInstanceOf[js.Dynamic].sayHello    = (name: String) => s"Hello $name"
     dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
     dom.window.asInstanceOf[js.Dynamic].appEvent    = (elem: HTMLElement, event: dom.Event) => appEvent(elem, event)
 
@@ -70,10 +81,8 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
 
     debug(s"wpStart -> playUrl:${Global.playUrl} homeUrl: ${Global.homeUrl} lang:  ${Global.lang} nonce: ${Global.nonce}")
 
-    setHtml(gE(ContentId), cviews.comps.html.wordpress())
-
-    // add sidebar
-    Sidebar.render("") 
+    // init wordpress main page
+    Wordpress.render("")
 
     ajaxGet[String]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.nonce), Global.homeUrl).map { 
       case Left(err)  => error(s"Fehler: ${err}")
@@ -88,7 +97,6 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
   def sayHello(name: String): Unit = {
     println(s"Hallo $name")
   }
-
 
 
   def handleGoogleCredential(credentials: String): Unit = pages.Auth.googleLogin(credentials)

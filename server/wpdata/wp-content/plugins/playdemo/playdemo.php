@@ -93,8 +93,8 @@ function playdemo_render() {
     $homeUrl = home_url();
     $nonce   = wp_create_nonce('wp_rest');
 
-    $output = '<span id="IdGlobal_AppParamId" data-dataurl="' . esc_url($dataUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" ></span>';
-    $output .= '<div id="IdGlobal_AppContentId"></div>';
+    $output = '<span id="Main_ParamId" data-dataurl="' . esc_url($dataUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" ></span>';
+    $output .= '<div id="Main_WordpressId"></div>';
     $output .= '<script type="module">';
     $output .= 'import { startApp } from "' . esc_url($jsUrl) . '";';
     $output .= 'startApp("001DE1970-01", "wp", "debug");';

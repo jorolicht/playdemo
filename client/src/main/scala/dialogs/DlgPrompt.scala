@@ -13,20 +13,21 @@ import upickle.default._
 import base.*
 import base.Bootstrap.*
 import shared.DomTypes.HtmlId
+import shared.DomTypes.genId
 import shared.model.AppError
 
 object DlgPrompt extends BaseDialog with JsWrapper:
 
-  val LoadId:           HtmlId = HtmlId.fromName(name)
-  val ModalId:          HtmlId = HtmlId.fromName(name)
-  val ResultId:         HtmlId = HtmlId.fromName(name)
-  val ResultContentId:  HtmlId = HtmlId.fromName(name)
-  val InputId:          HtmlId = HtmlId.fromName(name)
-  val CloseId:          HtmlId = HtmlId.fromName(name)
-  val ClearId:          HtmlId = HtmlId.fromName(name)
-  val ExecuteId:        HtmlId = HtmlId.fromName(name)
-  val CancelId:         HtmlId = HtmlId.fromName(name) 
-  val ToggleId:         HtmlId = HtmlId.fromName(name)
+  val LoadId:           HtmlId = genId(name)
+  val ModalId:          HtmlId = genId(name)
+  val ResultId:         HtmlId = genId(name)
+  val ResultContentId:  HtmlId = genId(name)
+  val InputId:          HtmlId = genId(name)
+  val CloseId:          HtmlId = genId(name)
+  val ClearId:          HtmlId = genId(name)
+  val ExecuteId:        HtmlId = genId(name)
+  val CancelId:         HtmlId = genId(name) 
+  val ToggleId:         HtmlId = genId(name)
 
 
   var modal:        Modal = null

@@ -1,6 +1,8 @@
 @import cviews.helper.html._
 @import comps.Wordpress.*  
 @import pages.PageIds.*
+@import shared.MainIds.*
+@import comps.Navbar.ToggleSidebarId
 
 @()
 <nav class="navbar navbar-expand navbar-dark bg-secondary">
@@ -22,13 +24,11 @@
     </form>
 </nav>
 <div class="d-flex mr-2">
-    <!-- authentication content for google login -->
-    <span @id(AuthContentId) class="d-none"></span>
     <!-- Sidebar (aside) -->
-    <span @id(SidebarContentId)></span>
+    <span @id(SidebarId)>@sidebar()</span>
     <!-- Hauptinhalt -->
     <div class="content">
-        <div @id(AppContentId) class="row">         
+        <div @id(ContentId) class="row">         
             <div class="d-flex mt-2 mr-2 justify-content-center border border-secondary">Main Content</div>
         </div>
     </div>

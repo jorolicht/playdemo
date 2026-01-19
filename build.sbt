@@ -1,3 +1,4 @@
+
 import scala.sys.process._ 
 
 // Global / scalaJSStage := FullOptStage
@@ -21,7 +22,7 @@ val convertMessagesToJson = taskKey[Seq[File]]("Converts message files to JSON")
 
 lazy val server = project
   .settings(
-    commands ++= Seq(hello),
+    commands ++= Seq(hello, buildMsg),
     genMsgFiles := {
       val msgFileDe = baseDirectory.value  / "conf" / "messages.de"
       val msgFileEn = baseDirectory.value  / "conf" / "messages.en"
@@ -154,7 +155,9 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
      libraryDependencies ++= Seq(
        "com.lihaoyi" %%% "upickle" % "3.3.1",
        "com.lihaoyi" %% "upickle" % "3.3.1",
-       "org.typelevel" %%% "shapeless3-deriving" % "3.4.0"
+       "org.typelevel" %%% "shapeless3-deriving" % "3.4.0",
+       "com.lihaoyi" %%% "sourcecode" % "0.4.2",
+       "com.lihaoyi" %% "sourcecode" % "0.4.2"
      )
    )
   .jsConfigure(_.enablePlugins(ScalaJSWeb))
@@ -178,5 +181,17 @@ def hello = Command.command("hello") { state =>
 
   println(s"Hello")
   state
+}
+
+
+def buildMsg = Command.command("buildMsg") { state =>
+  println("--- Starte Nachrichten-Generierung ---")
+  
+  // Führt die Tasks nacheinander aus
+  val state1 = Command.process("genMsgFiles", state)
+  val state2 = Command.process("convertMessagesToJson", state1)
+  
+  println("--- Nachrichten-Generierung abgeschlossen ---")
+  state2
 }
 

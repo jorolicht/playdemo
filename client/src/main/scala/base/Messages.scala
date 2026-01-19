@@ -62,8 +62,16 @@ object Messages extends JsWrapper with ComWrapper:
 
 
   def loadConfigMsg(jsFile: String): Future[Either[AppError, Map[String, String]]] = {
+
+    val fetchOptions = new dom.RequestInit {
+      method = dom.HttpMethod.GET
+      // 'reload' zwingt den Browser, die Datei vom Server zu holen,
+      // ohne den Cache zu beachten.
+      cache = dom.RequestCache.reload 
+    }
+
     // Die Hauptlogik muss im Future bleiben, um asynchrone Fehler zu fangen
-    dom.fetch(jsFile)
+    dom.fetch(jsFile, fetchOptions)
       .toFuture
       .flatMap { response =>
         // --- 1. HTTP-Status prüfen ---

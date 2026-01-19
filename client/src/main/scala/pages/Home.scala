@@ -8,11 +8,11 @@ import cviews.pages.*
 import base._
 import shared.DomTypes.HtmlId
 
+import shared.MainIds.SidebarId
+import comps
+.Navbar.ToggleSidebarId
 
 object Home extends BasePage with JsWrapper:
-
-  val ToggleSidebarId: HtmlId = HtmlId.fromName(name)
-  val SidebarId: HtmlId = HtmlId.fromName(name)
 
   def render(param: String = ""): Boolean =
     param.toLowerCase match 

@@ -3,17 +3,18 @@ package addon
 import upickle.default._
 
 import shared.model._
-import shared._
-import base._
+import shared.*
+import base.*
+import pages.*
 import services.Authentication
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import upickle.default.{ReadWriter => RW, macroRW}
 
-import cviews.usecases.html.Welcome
+import cviews.pages.html.Welcome
 
-object TestHtml extends UseCase with Authentication with JsWrapper:
+object TestHtml extends BasePage with Authentication with JsWrapper:
 
   def render(param: String = ""): Boolean = true
 

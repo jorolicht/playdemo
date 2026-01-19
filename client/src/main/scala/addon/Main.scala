@@ -4,7 +4,7 @@ import org.rogach.scallop._
 
 import base._
 import base.Messages._
-import dialog.DlgPrompt
+import dialogs.DlgPrompt
 
 import org.scalajs.dom
 
@@ -15,6 +15,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import upickle.default._
 import shared.model.AppError
 import shared.DomTypes.HtmlId
+import comps.Footer.ConsoleClickId
 
 def addOutput(text: String) = DlgPrompt.add(text)
 
@@ -26,8 +27,9 @@ object Addon extends JsWrapper:
   /** console - entry point of addon
    */  
   def console(): Future[Boolean] = 
-    val command = getData(gE2(ClickId), "command", "")
-    if (command != "") setData(gE2(ClickId), "command", "")
+    val command = getData(gE(ConsoleClickId), "command", "")
+    if (command != "") setData(gE(ConsoleClickId), "command", "")
+
 
     //Future[Either[AppError, String]] =
     val dlgResult = DlgPrompt.show(command).map {

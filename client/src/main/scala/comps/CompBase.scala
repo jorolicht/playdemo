@@ -16,7 +16,7 @@ abstract class CompBase(using fn: FullName):
 
   def render(param: String = ""): Boolean
 
-  def id(name: HtmlId) = s"id='${name.asString}'"
+  def id(name: HtmlId) = s"id='${name.id}'"
   def gM(key: String, inserts: String*)  = 
     if key.startsWith("+") then 
       Messages.getMsg(s"${name}.${key.drop(1)}", inserts*)

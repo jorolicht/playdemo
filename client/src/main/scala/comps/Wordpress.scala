@@ -1,14 +1,12 @@
 package comps
 
-import shared.DomTypes.HtmlId
+import base.JsWrapper
+import shared.MainIds.*
 
 
-object Wordpress extends CompBase:
+object Wordpress extends CompBase with JsWrapper:
 
-  val ToggleSidebarId: HtmlId = HtmlId.fromName(name)
-  val AuthContentId: HtmlId = HtmlId.fromName(name)
-  val SidebarContentId: HtmlId = HtmlId.fromName(name)
-  val AppContentId: HtmlId = HtmlId.fromName(name)
-
-  def render(param: String = ""): Boolean = true
+  def render(param: String = ""): Boolean = 
+    setHtml(gE(WordpressId), cviews.comps.html.wordpress())
+    true
 

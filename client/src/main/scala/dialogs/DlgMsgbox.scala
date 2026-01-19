@@ -14,17 +14,18 @@ import base.Bootstrap.*
 import base.Logging.*
 import shared.model.AppError
 import shared.DomTypes.HtmlId
+import shared.DomTypes.genId
 import shared.BoxValueTypes.BoxValue
 import shared.BoxValues.*
 
 
 object DlgMsgbox extends BaseDialog with JsWrapper:
 
-  val LoadId:  HtmlId = HtmlId.fromName(name)
-  val ModalId: HtmlId = HtmlId.fromName(name)
-  val TitleId: HtmlId = HtmlId.fromName(name)
-  val BodyId:  HtmlId = HtmlId.fromName(name)
-  val CloseId: HtmlId = HtmlId.fromName(name)
+  val LoadId:  HtmlId = genId(name)
+  val ModalId: HtmlId = genId(name)
+  val TitleId: HtmlId = genId(name)
+  val BodyId:  HtmlId = genId(name)
+  val CloseId: HtmlId = genId(name)
 
   var modal: Modal = null
   def render(param: String = ""): Boolean = true     

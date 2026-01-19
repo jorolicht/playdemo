@@ -2,20 +2,20 @@ package comps
 
 import org.scalajs.dom.raw.HTMLElement
 import shared.DomTypes.HtmlId
+import shared.DomTypes.genId
 import shared.MainIds.SidebarId
 import base.JsWrapper
 
 
 object Sidebar extends CompBase with JsWrapper:
 
-  val AsideId:         HtmlId = HtmlId.fromName(name)
-  val LoginInfoId:     HtmlId = HtmlId.fromName(name)
-  val LoggedInAsId:    HtmlId = HtmlId.fromName(name)
-  val UseCase3Id:      HtmlId = HtmlId.fromName(name)  
-  val UseCase4Id:      HtmlId = HtmlId.fromName(name)
-  val UseCase5Id:      HtmlId = HtmlId.fromName(name)
-  val UseCase51Id:     HtmlId = HtmlId.fromName(name)
-
+  val AsideId:         HtmlId = genId(name)
+  val LoginInfoId:     HtmlId = genId(name)
+  val LoggedInAsId:    HtmlId = genId(name)
+  val UseCase3Id:      HtmlId = genId(name)  
+  val UseCase4Id:      HtmlId = genId(name)
+  val UseCase5Id:      HtmlId = genId(name)
+  val UseCase51Id:     HtmlId = genId(name)
 
   def render(param: String = "") = 
     setHtml(gE(SidebarId), cviews.comps.html.sidebar())

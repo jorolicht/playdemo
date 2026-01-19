@@ -4,7 +4,7 @@
 
 @(page: String, param: String)(implicit request: RequestHeader, msgs: MessagesProvider)
 @gM(name: String) = @{ msgs.messages("main."+name) }
-@id(name: HtmlId) = @{ Html(s""" id='${name.asString}' """ ) }
+@id(name: HtmlId) = @{ Html(s""" id='${name.id}' """ ) }
 
 <!DOCTYPE html>
 <html lang='@gM("lang")'>

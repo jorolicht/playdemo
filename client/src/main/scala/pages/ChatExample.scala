@@ -9,6 +9,7 @@ import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import shared.model.User
 import shared.DomTypes.HtmlId
+import shared.DomTypes.genId
 
 
 object ChatExample extends BasePage with JsWrapper with ComWrapper:
@@ -16,10 +17,10 @@ object ChatExample extends BasePage with JsWrapper with ComWrapper:
   private inline val P = "ChatExample"
   private inline val MP = "chatexample"
 
-  val sendId: HtmlId = HtmlId.fromName(name)
-  val rcvMsgsId: HtmlId = HtmlId.fromName(name)
-  val receiverId: HtmlId = HtmlId.fromName(name)
-  val messageId: HtmlId = HtmlId.fromName(name)
+  val sendId: HtmlId = genId(name)
+  val rcvMsgsId: HtmlId = genId(name)
+  val receiverId: HtmlId = genId(name)
+  val messageId: HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
     import cviews.pages.*

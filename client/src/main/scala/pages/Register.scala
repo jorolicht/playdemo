@@ -8,12 +8,13 @@ import cviews.pages.*
 import base.*
 import shared.*
 import shared.DomTypes.HtmlId
+import shared.DomTypes.genId
 
 object Register extends BasePage with JsWrapper:
 
-  val NameId: HtmlId = HtmlId.fromName(name)
-  val EmailId: HtmlId = HtmlId.fromName(name)
-  val PasswordId: HtmlId = HtmlId.fromName(name)
+  val NameId: HtmlId = genId(name)
+  val EmailId: HtmlId = genId(name)
+  val PasswordId: HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
     setMain(s"""<div class='d-flex mt-5 justify-content-center'><h5>${name}</h5></div>""")

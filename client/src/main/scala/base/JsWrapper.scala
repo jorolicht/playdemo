@@ -16,16 +16,16 @@ trait JsWrapper:
   def newUuidString: String = js.Dynamic.global.crypto.randomUUID().asInstanceOf[String]
 // Ergebnis: "4a080829-d602-4660-848e-7164b4c73229"
 
-  def idExists(id: HtmlId): Boolean = dom.document.getElementById(id.asString) != null
+  def idExists(name: HtmlId): Boolean = dom.document.getElementById(name.id) != null
 
   def getOrCreateDiv(id: HtmlId, parent: dom.Element = dom.document.body): HTMLElement =
-    dom.document.getElementById(id.asString) match
+    dom.document.getElementById(id.id) match
       case elem: HTMLElement =>
         elem
 
       case _ =>
         val div = dom.document.createElement("div").asInstanceOf[HTMLElement]
-        div.id = id.asString
+        div.id = id.id
         parent.appendChild(div)
         div
 
@@ -52,10 +52,10 @@ trait JsWrapper:
 
   def gE(id: HtmlId, withWarning: Boolean=true):HTMLElement = 
     try 
-      val elem = dom.document.getElementById(id.asString).asInstanceOf[HTMLElement]
-      if (elem == null && withWarning) warn(s"gE3 -> id:${id.asString} null")
+      val elem = dom.document.getElementById(id.id).asInstanceOf[HTMLElement]
+      if (elem == null && withWarning) warn(s"gE -> id:${id.id} null")
       elem
-    catch { case _: Throwable => error(s"gE3 -> id:${id.asString}"); null } 
+    catch { case _: Throwable => error(s"gE -> id:${id.id}"); null } 
 
 
 

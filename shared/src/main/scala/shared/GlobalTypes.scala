@@ -1,10 +1,11 @@
 package shared
 
 import scala.quoted.*
-import shared.DomTypes.HtmlId
+import sourcecode.Name
 
 
 object BoxValueTypes:
+  import DomTypes.HtmlId
   opaque type BoxValue = String
 
   object BoxValue:
@@ -23,38 +24,6 @@ object BoxValueTypes:
       // Greift den Namen des Symbols der umschließenden Definition
       val name = Symbol.spliceOwner.name
       Expr(name).asInstanceOf[Expr[BoxValue]]
-
-
-// object PageTypes:
-//   opaque type PageId = String
-  
-//   object PageId:
-//     def apply(s: String): PageId = s
-
-//     extension (id: PageId)
-//       def asString: String = id
-
-//     // Dieses Makro liest den Namen der Definition aus, der es zugewiesen wird
-//     inline def myName: PageId = ${ useMyNameImpl }
-
-//     private def useMyNameImpl(using Quotes): Expr[PageId] =
-//       import quotes.reflect.*
-//       // Greift den Namen des Symbols der umschließenden Definition
-//       val name = Symbol.spliceOwner.name
-//       Expr(name).asInstanceOf[Expr[PageId]]
-
-//     // Die Methode nimmt jetzt einen Präfix-String entgegen
-//     inline def fromName(inline suffix: String): PageId = 
-//       ${ fromNameImpl('suffix) }
-
-//     private def fromNameImpl(suffixExpr: Expr[String])(using Quotes): Expr[PageId] =
-//       import quotes.reflect.*
-//       // 1. Hole den Variablennamen zur Kompilierzeit
-//       val varName = Symbol.spliceOwner.name.trim
-      
-//       // 2. Kombiniere Suffix und Name in einer neuen Expression
-//       '{ ${Expr(varName)} + $suffixExpr   }.asInstanceOf[Expr[PageId]]
-
 
 
 object DialogTypes:
@@ -90,33 +59,57 @@ object DialogTypes:
 
 
 object DomTypes:
-  opaque type HtmlId = String
+
+  case class HtmlId(id: String)
+
+  // Die Extension-Methode
+  extension (htmlId: HtmlId)
+    def addPrefix(suffix: String): HtmlId = HtmlId(suffix + "_" + htmlId.id)
+    def pref = htmlId.id.takeWhile(_ != '_')
+
+  def genId(prefix: String="")(using name: Name): HtmlId = 
+    if (prefix == "") then HtmlId(name.value) else HtmlId(name.value).addPrefix(prefix) 
+
+
+  // opaque type HtmlId = String
   
-  object HtmlId:
-    def apply(s: String): HtmlId = s
+  // object HtmlId:
+  //   def apply(s: String): HtmlId = s
 
-    extension (id: HtmlId)
-      def asString: String = id
+  //   extension (id: HtmlId)
+  //     def asString: String = id
     
-    // Dieses Makro liest den Namen der Definition aus, der es zugewiesen wird
-    inline def myName: HtmlId = ${ useMyNameImpl }
+  //   // Dieses Makro liest den Namen der Definition aus, der es zugewiesen wird
+  //   inline def myName: HtmlId = ${ useMyNameImpl }
 
-    private def useMyNameImpl(using Quotes): Expr[HtmlId] =
-      import quotes.reflect.*
-      // Greift den Namen des Symbols der umschließenden Definition
-      val name = Symbol.spliceOwner.name
-      Expr(name).asInstanceOf[Expr[HtmlId]]
+  //   private def useMyNameImpl(using Quotes): Expr[HtmlId] =
+  //     import quotes.reflect.*
+  //     // Greift den Namen des Symbols der umschließenden Definition
+  //     val name = Symbol.spliceOwner.name
+  //     Expr(name).asInstanceOf[Expr[HtmlId]]
 
 
-    // Die Methode nimmt jetzt einen Präfix-String entgegen
-    inline def fromName(inline prefix: String): HtmlId = 
-      ${ fromNameImpl('prefix) }
+  //   // Die Methode nimmt jetzt einen Präfix-String entgegen
+  //   inline def fromName(inline prefix: String): HtmlId = 
+  //     ${ fromNameImpl('prefix) }
 
-    private def fromNameImpl(prefixExpr: Expr[String])(using Quotes): Expr[HtmlId] =
-      import quotes.reflect.*
-      // 1. Hole den Variablennamen zur Kompilierzeit
-      val varName = Symbol.spliceOwner.name.trim
+  //   // private def fromNameImpl(prefixExpr: Expr[String])(using Quotes): Expr[HtmlId] =
+  //   //   import quotes.reflect.*
+  //   //   // 1. Hole den Variablennamen zur Kompilierzeit
+  //   //   val varName = Symbol.spliceOwner.name.trim
       
-      // 2. Kombiniere Präfix und Name in einer neuen Expression
-      '{ $prefixExpr + "_" + ${Expr(varName)} }.asInstanceOf[Expr[HtmlId]]
+  //   //   // 2. Kombiniere Präfix und Name in einer neuen Expression
+  //   //   '{ $prefixExpr + "_" + ${Expr(varName)} }.asInstanceOf[Expr[HtmlId]]
+
+
+  //   private def fromNameImpl(prefixExpr: Expr[String])(using Quotes): Expr[HtmlId] =
+  //     import quotes.reflect.*
+
+  //     // Wir wandern den Baum hoch, bis wir eine Definition (Variable/Methode) finden
+  //     def findName(sym: Symbol): String =
+  //       if (sym.isNoSymbol) "unknown"
+  //       else if (sym.isValDef || sym.isDefDef) sym.name
+  //       else findName(sym.owner)
+  //     val varName = findName(Symbol.spliceOwner).trim
+  //     '{ $prefixExpr + "_" + ${Expr(varName)} }.asInstanceOf[Expr[HtmlId]]
    

@@ -2,6 +2,7 @@ package shared
 
 // import shared.PageTypes.PageId
 import shared.DomTypes.HtmlId
+import shared.DomTypes.genId
 import shared.BoxValueTypes.BoxValue
 
 
@@ -18,22 +19,21 @@ object BoxValues:
 
 object MainIds:
   final val name = "Main"
-  val NavbarId    : HtmlId = HtmlId.fromName(name)
-  val ParamId     : HtmlId = HtmlId.fromName(name)
-  val ContentId   : HtmlId = HtmlId.fromName(name)
-  val SidebarId   : HtmlId = HtmlId.fromName(name)
-  val FooterId    : HtmlId = HtmlId.fromName(name)
-  val JScriptId   : HtmlId = HtmlId.fromName(name)
+  val WordpressId : HtmlId = genId(name)
+  val NavbarId    : HtmlId = genId(name)
+  val ParamId     : HtmlId = genId(name)
+  val ContentId   : HtmlId = genId(name)
+  val SidebarId   : HtmlId = genId(name)
+  val FooterId    : HtmlId = genId(name)
+  val JScriptId   : HtmlId = genId(name)
 
 
 object AuthIds:
   final val name = "Auth"  
-  val LoginContentId            : HtmlId = HtmlId.fromName(name)
-  val DoForgotId                : HtmlId = HtmlId.fromName(name)
-  val DoLoginId                 : HtmlId = HtmlId.fromName(name)
-  val DoRegisterId              : HtmlId = HtmlId.fromName(name)
-  val PasswordId                : HtmlId = HtmlId.fromName(name)
-  val EmailId                   : HtmlId = HtmlId.fromName(name)
-  val AuthContentId             : HtmlId = HtmlId.fromName(name)
-
-
+  val LoginContentId            : HtmlId = genId(name)
+  val DoForgotId                : HtmlId = genId(name)
+  val DoLoginId                 : HtmlId = genId(name)
+  val DoRegisterId              : HtmlId = genId(name)
+  val PasswordId                : HtmlId = genId(name)
+  val EmailId                   : HtmlId = genId(name)
+  val AuthContentId             : HtmlId = genId(name)
