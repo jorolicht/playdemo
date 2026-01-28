@@ -27,8 +27,8 @@ GET          /wp/post                    controllers.Wordpress.getPost(slug: Str
 PUT          /wp/post                    controllers.Wordpress.putPost(slug: String ?="", id: Int ?=0, field: String ?="", status: String ?="private")
 
 # Endpoints managing JWT
-+ nocsrf
-POST         /wp/token                   controllers.Wordpress.postToken()
+# + nocsrf
+# POST         /wp/token                   controllers.Wordpress.postToken()
 
 
 # PUT        /wp/post                      controllers.Wordpress/putPost(slug: String ?="", id: Int ?=0, field: String)

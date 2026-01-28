@@ -16,6 +16,38 @@ if (!defined('ABSPATH')) {
 // Define Plugin-Path
 define('PLAYPLUGIN_PATH', plugin_dir_path(__FILE__));
 
+
+// Update-sichere mehrsprachige Dialoge für WP-Members.
+add_filter( 'wpmem_default_msgs', 'my_multilingual_registration_msgs' );
+
+function my_multilingual_registration_msgs( $msgs ) {
+    // Sprache ermitteln (Polylang / WPML / WordPress Default)
+    if ( function_exists('pll_current_language') ) {
+        $lang = pll_current_language();
+    } elseif ( defined('ICL_LANGUAGE_CODE') ) {
+        $lang = ICL_LANGUAGE_CODE;
+    } else {
+        $lang = substr(get_locale(), 0, 2); // Nimmt z.B. "de" aus "de_DE"
+    }
+
+    // Sprachweichen
+    switch ( $lang ) {
+        case 'en':
+            $msgs['register_success'] = 'Congratulations! Your registration was successful.<br /><br />You can now log in using your Passkey or the credentials sent to you.';
+            $msgs['msg_username_exists'] = 'Sorry, that username is already taken.';
+            break;
+
+        case 'de':
+        default:
+            $msgs['register_success'] = 'Herzlichen Glückwunsch! Deine Registrierung war erfolgreich.<br /><br />Du kannst dich jetzt mit deinem Passkey oder deinen Zugangsdaten anmelden.';
+            $msgs['msg_username_exists'] = 'Dieser Benutzername ist leider schon vergeben.';
+            break;
+    }
+
+    return $msgs;
+}
+
+
 // Load required files
 #require_once PLAYPLUGIN_PATH . 'includes/admin.php';
 require_once PLAYPLUGIN_PATH . 'includes/user.php';

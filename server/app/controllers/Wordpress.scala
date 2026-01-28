@@ -37,10 +37,8 @@ class Wordpress @Inject()
   extends AbstractController(cc) with I18nSupport with Logging  {
 
   // Lesen der Konfigurationsdaten aus application.conf
-  val wpDomain: String   = cfg.get[String]("wordpress.api.domain")
-  val wpUsername: String = cfg.get[String]("wordpress.api.username")
-  val wpPassword: String = cfg.get[String]("wordpress.api.password")
-  val wpCPT:      String = cfg.get[String]("wordpress.api.cpt")
+  val wpUrl: String = cfg.get[String]("wordpress.api.url")
+  val wpCpt: String = cfg.get[String]("wordpress.api.cpt")
 
 
   def getPost(slug: String, id: Int, field: String, status: String): Action[AnyContent] = Action.async { implicit request =>
@@ -71,38 +69,38 @@ class Wordpress @Inject()
   } 
 
 
-  def postToken(): Action[JsValue] = Action(parse.json) { implicit request =>
-    val url = s"${wpDomain}/wp-json/jwt-auth/v1/token"
-    logger.debug(s"Attempting to get jwt token for user: ${request.body}")
+  // def postToken(): Action[JsValue] = Action(parse.json) { implicit request =>
+  //   val url = s"${wpUrl}/wp-json/jwt-auth/v1/token"
+  //   logger.debug(s"Attempting to get jwt token for user: ${request.body}")
 
-    // Attempt to bind the JSON to our UserData case class
-    request.body.validate[WpUserLogin] match {
-      case JsSuccess(userData, path) =>
-        println(s"Received UserData: $userData") // Log the entire object
+  //   // Attempt to bind the JSON to our UserData case class
+  //   request.body.validate[WpUserLogin] match {
+  //     case JsSuccess(userData, path) =>
+  //       println(s"Received UserData: $userData") // Log the entire object
 
-        // Access individual elements
-        val user       = userData.user
-        val club       = userData.club
-        val apName     = userData.apName
-        val apPassword = userData.apPassword
-        println(s"Name: $user")
-        println(s"Club: $club")
+  //       // Access individual elements
+  //       val user       = userData.user
+  //       val club       = userData.club
+  //       val apName     = userData.apName
+  //       val apPassword = userData.apPassword
+  //       println(s"Name: $user")
+  //       println(s"Club: $club")
 
 
-        // You would typically save this data to a database here
-        // userStorage.save(userData)
+  //       // You would typically save this data to a database here
+  //       // userStorage.save(userData)
 
-        // Return a successful response, maybe with the created resource's ID
-        Ok(Json.obj("message" -> "User created successfully", "userId" -> 123))
+  //       // Return a successful response, maybe with the created resource's ID
+  //       Ok(Json.obj("message" -> "User created successfully", "userId" -> 123))
 
-      case JsError(errors) =>
-        // If JSON parsing or validation fails
-        val errorMessages = errors.map { case (path, validationErrors) =>
-          s"Error at $path: ${validationErrors.map(_.message).mkString(", ")}"
-        }.mkString("\n")
-        BadRequest(Json.obj("message" -> "Invalid JSON data", "errors" -> errorMessages))
-    }
-  }
+  //     case JsError(errors) =>
+  //       // If JSON parsing or validation fails
+  //       val errorMessages = errors.map { case (path, validationErrors) =>
+  //         s"Error at $path: ${validationErrors.map(_.message).mkString(", ")}"
+  //       }.mkString("\n")
+  //       BadRequest(Json.obj("message" -> "Invalid JSON data", "errors" -> errorMessages))
+  //   }
+  // }
 
 
 
@@ -138,8 +136,11 @@ class Wordpress @Inject()
   def getPostIdFromSlug(slug: String, status: String): Future[Either[AppError, Int]] = {
     // Construct the URL for the WordPress REST API endpoint to query posts by slug.
     // Example URL: "http://your-wordpress-domain.com/wp-json/wp/v2/posts?slug=your-post-slug"
-    val url = s"${wpDomain}/wp-json/wp/v2/${wpCPT}?slug=${slug}&status=${status}"
+    val url = s"${wpUrl}/wp-json/wp/v2/${wpCpt}?slug=${slug}&status=${status}"
     logger.debug(s"Attempting to get post ID for slug '$slug' with status '${status}' from URL: $url")
+
+    val wpUsername ="SSS"
+    val wpPassword ="TTT"
 
     ws.url(url)
       // Apply Basic HTTP Authentication using configured WordPress username and password.
@@ -190,7 +191,10 @@ class Wordpress @Inject()
 
 
   def getPostFromId(id: Int): Future[Either[AppError, JsObject]] = {
-    val url = s"$wpDomain/wp-json/wp/v2/${wpCPT}/$id"
+    val url = s"$wpUrl/wp-json/wp/v2/${wpCpt}/$id"
+        val wpUsername ="SSS"
+    val wpPassword ="TTT"
+
     ws.url(url)
       .withAuth(wpUsername, wpPassword, WSAuthScheme.BASIC) // Fügt Basic Authentication hinzu
       .addHttpHeaders("Accept" -> "application/json")       // Fordert JSON-Antwort an
@@ -203,9 +207,9 @@ class Wordpress @Inject()
             // .asOpt[JsObject] versucht, es sicher in ein JsObject zu casten.
             response.json.asOpt[JsObject] match {
               case Some(postJson) => Right(postJson)
-              case None           => Left(AppError("err00053.wordpress.response.invalid", wpCPT, id))
+              case None           => Left(AppError("err00053.wordpress.response.invalid", wpCpt, id))
             }
-          case NOT_FOUND                => Left(AppError("err00054.wordpress.data.notfound", wpCPT, id))
+          case NOT_FOUND                => Left(AppError("err00054.wordpress.data.notfound", wpCpt, id))
           case UNAUTHORIZED | FORBIDDEN => Left(AppError("err00055.wordpress.notallowed"))
           case otherStatus              => Left(AppError("err00056.wordpress.error", otherStatus, response.body))
         }
@@ -216,7 +220,11 @@ class Wordpress @Inject()
 
 
   def putPostById(id: Int, field: String, value: String): Future[Either[AppError,Int]] = 
-    val url = s"$wpDomain/wp-json/wp/v2/${wpCPT}/$id"
+    val url = s"$wpUrl/wp-json/wp/v2/${wpCpt}/$id"
+
+    val wpUsername ="SSS"
+    val wpPassword ="TTT"
+
     ws.url(url)
       .withAuth(wpUsername, wpPassword, WSAuthScheme.BASIC) // Fügt Basic Authentication hinzu
       .withHttpHeaders("Content-Type" -> "application/json")

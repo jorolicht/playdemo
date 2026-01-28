@@ -3,14 +3,16 @@ import scala.sys.process._
 
 // Global / scalaJSStage := FullOptStage
 
-ThisBuild / organization := "org.jorolicht"
-ThisBuild / scalaVersion := "3.3.7"
+val appIncludeAddon: Boolean  = sys.env.get("APP_INCLUDE_ADDON").contains("true")
+val appOrganization           = sys.env.getOrElse("APP_ORGANIZATION","org.jorolicht")
+val appVersion                = sys.env.getOrElse("APP_VERSION", "001")
+val appDate                   = sys.env.getOrElse("APP_DATE", "1970-01-01")
+val appMaintainer             = sys.env.getOrElse("APP_MAINTAINER", "Joe Doe <joe.doe@example.com>")
 
-val includeAddonSrc: Boolean = sys.env.get("INCLUDE_ADDON_SRC").contains("true")
-val appVersion = sys.env.getOrElse("APP_VERSION", "001")
-val appDate    = sys.env.getOrElse("APP_DATE", "1970-01-01")
-ThisBuild / version  := appVersion
-server / maintainer  := sys.env.getOrElse("APP_MAINTAINER", "Joe Doe <joe.doe@example.com>")
+ThisBuild / scalaVersion := "3.3.7"
+ThisBuild / organization := appOrganization
+ThisBuild / version      := appVersion
+server / maintainer      := appMaintainer
 
 //ThisBuild / scalacOptions ++=Seq("-explain")
 
@@ -111,7 +113,22 @@ lazy val server = project
       IO.copyDirectory(clientCssSource, wpCssDestination)
 
       log.info(s"Copied files to vite and wordpress")
+    },
+    Universal / dist := {
+      // Build ZIP explicitly
+      val zipFile = (Universal / packageBin).value
+
+      val log = streams.value.log
+      val targetDir = baseDirectory.value / "docker" / "playdemo" 
+      IO.createDirectory(targetDir)
+
+      val targetFile = targetDir / zipFile.getName
+      IO.copyFile(zipFile, targetFile)
+
+      log.info(s"Copied ${zipFile.getName} to ${targetDir}")
+      zipFile
     }
+
   )
   .enablePlugins(PlayScala)
   .enablePlugins(SbtWeb)
@@ -124,7 +141,7 @@ lazy val client = project
     (Compile / unmanagedSources / excludeFilter) := {         
       val baseFilter = HiddenFileFilter || "*~" || "*.tmp"
     
-      if (includeAddonSrc) {
+      if (appIncludeAddon) {
         // Nichts zusätzlich ausschließen
         baseFilter
       } else {
