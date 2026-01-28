@@ -24,6 +24,22 @@ val convertMessagesToJson = taskKey[Seq[File]]("Converts message files to JSON")
 
 lazy val server = project
   .settings(
+    Universal / stage := {
+      val stageDir = (Universal / stage).value   // erzeugt target/universal/stage
+
+      val log = streams.value.log
+      val targetDir = baseDirectory.value / "docker" / "playdemo" / "stage"
+      // Zielverzeichnis sauber neu anlegen
+      IO.delete(targetDir)
+      IO.createDirectory(targetDir)
+
+      // komplettes stage-Verzeichnis kopieren
+      IO.copyDirectory(stageDir, targetDir, overwrite = true, preserveLastModified = true)
+
+      log.info(s"Copied staged distribution to ${targetDir.getAbsolutePath}")
+
+      stageDir
+    },
     commands ++= Seq(hello, buildMsg),
     genMsgFiles := {
       val msgFileDe = baseDirectory.value  / "conf" / "messages.de"
@@ -67,7 +83,7 @@ lazy val server = project
         val lang = msgFile.name.split('.').last
         val targetFileVite = baseDirectory.value / ".." / "client" / "vite" / "assets" / "data" / ("msgs_" + lang + ".json")
         val targetFileSrv  = baseDirectory.value / ".." / "server" / "public" / "data" / ("msgs_" + lang + ".json")
-        val targetFileWp   = baseDirectory.value / ".." / "server" / "wpdata" / "wp-content" / "plugins" / "playdemo" / "data" / ("msgs_" + lang + ".json")
+        val targetFileWp   = baseDirectory.value / ".." / "wp-plugin" / "data" / ("msgs_" + lang + ".json")
 
         IO.copyFile(generatedFile, targetFileWp)
         IO.copyFile(generatedFile, targetFileSrv)
@@ -104,8 +120,8 @@ lazy val server = project
       val clientTargetDir = (client / Compile / fastLinkJS / scalaJSLinkerOutputDirectory).value
       val clientCssSource = file("server/public/css") 
 
-      val wpJsDestination = file("server/wpdata/wp-content/plugins/playdemo/js")
-      val wpCssDestination = file("server/wpdata/wp-content/plugins/playdemo/css")
+      val wpJsDestination = file("wp-plugin/js")
+      val wpCssDestination = file("wp-plugin/css")
       val viteDestinationDir = baseDirectory.value / ".." / "client" / "vite"
 
       IO.copyDirectory(clientTargetDir, viteDestinationDir)
@@ -178,6 +194,8 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
      )
    )
   .jsConfigure(_.enablePlugins(ScalaJSWeb))
+
+
 
 
 // Add the following line to build.sbt if you wish to load the server project at sbt startup

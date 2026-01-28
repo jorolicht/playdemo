@@ -1,10 +1,13 @@
 # Start with a base image for Java
-FROM eclipse-temurin:21-jdk AS mainstage
+FROM localhost:5555/eclipse-temurin:21-jdk AS mainstage
 
 ARG DEMON_USER
 ARG DEMON_USERID
 ARG APP_ENVIRONMENT
 ARG APP_VERSION
+ARG APP_HOME=/app
+ARG PLAY_WP_URL
+ARG PLAY_WP_CPT
 
 ENV APP_ENVIRONMENT=${APP_ENVIRONMENT}
 ENV APP_VERSION=${APP_VERSION}
@@ -16,7 +19,7 @@ ENV PLAY_WP_CPT=${PLAY_WP_CPT}
 USER root
 
 # Set working directory, with default value
-ARG APP_HOME=/app
+
 WORKDIR ${APP_HOME}
 
 
@@ -24,20 +27,13 @@ WORKDIR ${APP_HOME}
 COPY ./playdemo/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# 👉 ungezippte Play stage kopieren
+COPY ./playdemo/stage/bin ./bin
+COPY ./playdemo/stage/conf ./conf
+COPY ./playdemo/stage/lib ./lib
+COPY ./playdemo/stage/share ./share
 
-# Unzip the distribution and remove the zip file afterward
-RUN apt-get update && apt-get install -y unzip 
-
-# Copy the distribution zip file to the container
-# Assuming that the dist .zip file is named like server-x.x.x.zip
-COPY ./playdemo/server-${APP_VERSION}.zip .
-
-RUN unzip server-${APP_VERSION}.zip && \
-    mv server-${APP_VERSION}/* .    && \
-    rmdir server-${APP_VERSION}     && \
-    rm server-${APP_VERSION}.zip    && \
-    rm -rf conf/messages        && \
-    apt-get remove -y unzip && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN rm -rf conf/messages || true
 
 
 # create daemon user 
