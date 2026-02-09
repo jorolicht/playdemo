@@ -176,8 +176,19 @@ libraryDependencies += "org.typelevel" %%% "cats-core" % "2.12.0"  //client
 
 ## Wordpress Integration
 
-### Polylang
-Polylang is a very popular WordPress plugin that allows you to create multilingual websites. Here's a breakdown of its key features and what you should know:
+### Plugins
+- hcaptcha-for-forms-and-more
+- loco-translage
+- wp-mail-smtp
+- wp-members
+- wp-webauthn
+
+### SLUG Structure
+<club>/jjjj-mm-dd/<id>-tourney
+<club>/jjjj-mm-dd/<id>-<number>-competition
+<club>/jjjj-mm-dd/<id>-<number>-round
+<club>/jjjj-mm-dd/<id>-clubs
+<club>/jjjj-mm-dd/<id>-players
 
 
 ## Test Environment

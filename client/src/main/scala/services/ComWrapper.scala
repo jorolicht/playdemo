@@ -30,6 +30,33 @@ trait ComWrapper:
         case _: Throwable               => Left(AppError("err00001.ajax.post", s"${route}/${params.mkString(":")}", "request status unknown", name))    
       })
 
+  def ajaxPost2[T, P](
+    route: String,
+    params: List[(String,String)],
+    data: P,
+    hdrs: Map[String,String] =
+      Map("Content-Type" -> "application/json", "Csrf-Token" -> Global.csrf),
+    host: String = Global.playUrl
+  )(
+    using
+      r: Reader[T],
+      ct: ClassTag[T],
+      w: Writer[P]
+  ): Future[Either[AppError, T]] =
+      val name = route.split("/").lastOption.getOrElse("ajaxPost2")
+      debug(
+        s"ajaxPost -> route:$route " +
+        s"params:${params.mkString(", ")} " +
+        s"data:${write(data).take(20)} " +
+        s"hdrs:${hdrs.mkString(", ")}"
+      )
+      Ajax.post(genPath(host, route, params), write(data), headers = hdrs)
+        .map(_.responseText).map(content => parseJson[T](content) )
+        .recover({
+          // Recover from a failed error code into a successful future
+          case dom.ext.AjaxException(req) => Left(parseError(req.responseText, name))   
+          case _: Throwable               => Left(AppError("err00001.ajax.post", s"${route}/${params.mkString(":")}", "request status unknown", name))    
+        })
 
   /** ajaxGet - basic wrapper for get requests   
    * @return either an error or a result type T 

@@ -68,7 +68,8 @@ object DomTypes:
     def pref = htmlId.id.takeWhile(_ != '_')
 
   def genId(prefix: String="")(using name: Name): HtmlId = 
-    if (prefix == "") then HtmlId(name.value) else HtmlId(name.value).addPrefix(prefix) 
+    val x = name.value
+    if (prefix == "") then HtmlId(name.value) else HtmlId(x).addPrefix(prefix) 
 
 
   // opaque type HtmlId = String

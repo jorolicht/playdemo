@@ -117,10 +117,11 @@ trait JsWrapper:
     */
   def getData[A](elem: HTMLElement, name: String, default: A): A = 
     try default match 
-      case _:Int    => elem.getAttribute(s"data-${name}").toIntOption.getOrElse(default.asInstanceOf[Int]).asInstanceOf[A]
-      case _:Long   => elem.getAttribute(s"data-${name}").toLongOption.getOrElse(default.asInstanceOf[Long]).asInstanceOf[A]
-      case _:String => elem.getAttribute(s"data-${name}").asInstanceOf[A]
-      case _        => { info(s"getData -> elem:${elem.id} name:${name} default: ${default}"); default }
+      case _:Int     => elem.getAttribute(s"data-${name}").toIntOption.getOrElse(default.asInstanceOf[Int]).asInstanceOf[A]
+      case _:Long    => elem.getAttribute(s"data-${name}").toLongOption.getOrElse(default.asInstanceOf[Long]).asInstanceOf[A]
+      case _:String  => elem.getAttribute(s"data-${name}").asInstanceOf[A]
+      case _:Boolean => (elem.getAttribute(s"data-${name}").asInstanceOf[String].toBooleanOption.getOrElse(false)).asInstanceOf[A]
+      case _         => { info(s"getData -> elem:${elem.id} name:${name} default: ${default}"); default }
     catch { case _: Throwable => error(s"getData -> elem:${elem.id} name:${name} default:${default}"); default }
 
   def setData[A](elem: HTMLElement, attr: String, value: A) = 

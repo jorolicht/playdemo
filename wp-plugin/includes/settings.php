@@ -18,19 +18,6 @@ function playdemo_register_settings() {
     // Die zweite ist der 'option_name'.
     // Der dritte ist der 'sanitize_callback' (optional, aber empfohlen).
 
-    // App-Name: Einfacher Text, wird sanft bereinigt.
-    register_setting(
-        'mac_settings_group',             // Optionsgruppe
-        'playdemo_url',                   // Optionsname
-        array(                            // Array für zusätzliche Argumente (für Sanitisierung/REST API)
-            'type'         => 'string',   // Datentyp der Option
-            'default'      => '',         // Standardwert
-            'sanitize_callback' => 'sanitize_text_field', // Grundlegende Textbereinigung
-            'show_in_rest' => true,       // Optional: Macht die Option in der REST API sichtbar
-            'description'  => 'Adresse des Playdemoserver'
-        )
-    );
-
 
     // App-Name: Einfacher Text, wird sanft bereinigt.
     register_setting(
@@ -68,22 +55,13 @@ function playdemo_register_settings() {
         'playdemo_configurator'         // Slug der Seite, zu der der Abschnitt gehört
     );
 
-    // Fügt das Eingabefeld für den Playdemo URL hinzu.
-    add_settings_field(
-        'playdemo_field_url',         // ID des Feldes
-        'Playdemo URL',                   // Beschriftung des Feldes
-        'playdemo_field_url_callback',// Funktion zum Rendern des HTML-Feldes
-        'playdemo_configurator',        // Slug der Seite
-        'playdemo_main_section'            // ID des Abschnitts, zu dem das Feld gehört
-    );
-
     // Fügt das Eingabefeld für den App-Namen hinzu.
     add_settings_field(
-        'mac_field_app_name',                       // ID des Feldes
-        'Username',                                 // Beschriftung des Feldes
-        'mac_field_app_name_callback',              // Funktion zum Rendern des HTML-Feldes
-        'playdemo_configurator',                    // Slug der Seite
-        'playdemo_main_section'                     // ID des Abschnitts, zu dem das Feld gehört
+        'mac_field_app_name',             // ID des Feldes
+        'Username',                       // Beschriftung des Feldes
+        'mac_field_app_name_callback',    // Funktion zum Rendern des HTML-Feldes
+        'playdemo_configurator',          // Slug der Seite
+        'playdemo_main_section'           // ID des Abschnitts, zu dem das Feld gehört
     );
 
     // Fügt das Eingabefeld für das API-Passwort hinzu.
@@ -122,17 +100,6 @@ function playdemo_settings_page_callback() {
  */
 function mac_section_callback() {
     echo '<p>Konfigurieren Sie die grundlegenden Informationen für Ihre Anwendung.</p>';
-}
-
-/**
- * Rendert das Eingabefeld für die Playdemo Server URL.
- */
-function playdemo_field_url_callback() {
-    $pdemo_url = get_option('playdemo_url', ''); // Wert auslesen, Standard ist leer.
-    ?>
-    <input type="text" id="playdemo_url" name="playdemo_url" value="<?php echo esc_attr($pdemo_url); ?>" class="regular-text">
-    <p class="description">Geben Sie die URL für den Playdemo-Server ein.</p>
-    <?php
 }
 
 

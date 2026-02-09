@@ -1,11 +1,7 @@
-# Important Docker Compose commands:
-#   docker compose -f docker_compose.yml --env-file ./env/docker.env up -d
-#   docker compose -f docker_compose.yml --env-file ./env/docker.env up build -d
-#   docker compose -f docker_compose.yml --env-file ./env/docker.env down
-# build image playsrv
-#   docker compose --env-file ../env/docker.env up -d --build playsrv
-# step into container 
-#   docker exec -it playcontainer /bin/bash
+
+
+
+
 
 
 name: ${APP_NAME}
@@ -57,6 +53,8 @@ services:
       WORDPRESS_DB_USER: ${DB_USER}
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
       WORDPRESS_DB_NAME: ${DB_NAME}
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'PLAY_SERVER_URL', "${PLAY_SERVER_URL}" );
     ports:
       - 8080:80
     volumes:

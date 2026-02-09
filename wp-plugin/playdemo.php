@@ -51,35 +51,42 @@ function my_multilingual_registration_msgs( $msgs ) {
 // Load required files
 #require_once PLAYPLUGIN_PATH . 'includes/admin.php';
 require_once PLAYPLUGIN_PATH . 'includes/user.php';
+require_once PLAYPLUGIN_PATH . 'includes/cpt.php';
 require_once PLAYPLUGIN_PATH . 'includes/settings.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-user.php';
+require_once PLAYPLUGIN_PATH . 'includes/api-json.php';
+require_once PLAYPLUGIN_PATH . 'includes/api-set-meta.php';
 #require_once PLAYPLUGIN_PATH . 'includes/helpers.php';
 
 
 function pdemo_custom_post_type() {
-	register_post_type('playdemo',
-		array(
-			'labels'      => array(
+    register_post_type('playdemo',
+        array(
+            'labels'      => array(
                 'name'          => 'Playdemos',
-				'singular_name' => 'Playdemo',
-			),
-				'public'          => false,
-				'has_archive'     => false,
-                'show_ui'         => true,
-                'show_in_menu'    => true,
-                'menu_icon'       => 'dashicons-media-spreadsheet', // A WordPress icon for the menu
-                'rewrite'         => array( 'slug' => 'playdemo' ), // Sets the URL slug (e.g., /playdemos/date/)
-                'show_in_rest'    => true, // <--- Crucial for REST API access!
-                'supports'        => array( 'title', 'custom-fields' ), // What standard features it uses
-                'capability_type' => 'post',
-		)
-	);
+                'singular_name' => 'Playdemo',
+            ),
+            'public'              => true,  // Macht ihn grundsätzlich öffentlich
+            'publicly_queryable'  => true,  // Erlaubt den Aufruf der URL
+            'exclude_from_search' => false, // Erscheint dann auch in der Suche     
+            'show_ui'             => true,  // Zeigt das Menü im Backend
+            'show_in_menu'        => true,
+            'show_in_rest'        => true,  // Wichtig für die API
+            'has_archive'         => false,
+            'hierarchical'        => true,
+            'menu_icon'           => 'dashicons-media-spreadsheet',
+            'supports'            => array('title', 'editor', 'custom-fields', 'page-attributes'),
+            'capability_type'     => 'post',
+            'query_var'           => true,
+            'can_export'          => true,
+        )
+    );
 }
 add_action('init', 'pdemo_custom_post_type');
 
 
 function register_pdemo_custom_meta_fields() {
-    register_post_meta( 'playdemo', 'data_1', array(
+    register_post_meta( 'playdemo', 'object_typ', array(
         'show_in_rest' => true, // <-- Dies ist der entscheidende Punkt
         'single'       => true,
         'type'         => 'string',
@@ -89,20 +96,23 @@ function register_pdemo_custom_meta_fields() {
         'sanitize_callback' => 'sanitize_text_field', // Wichtig: Desinfektion
         'description'  => 'Data 1'
     ) );
-    register_post_meta( 'playdemo', 'data_2', array(
-        'show_in_rest' => true, // <-- Dies ist der entscheidende Punkt
-        'single'       => true,
-        'type'         => 'string',
-        'auth_callback' => function() {
-            return current_user_can( 'edit_posts' ); // Oder eine spezifischere Capability
-        },
-        'sanitize_callback' => 'sanitize_text_field', // Wichtig: Desinfektion
-        'description'  => 'Data 2'
-    ) );
 }
 add_action( 'rest_api_init', 'register_pdemo_custom_meta_fields' );
 
 
+// Spalte registrieren
+add_filter('manage_playdemo_posts_columns', function($columns) {
+    $columns['pdemo_type'] = 'Objekt-Typ';
+    return $columns;
+});
+
+// Spalte befüllen
+add_action('manage_playdemo_posts_custom_column', function($column, $post_id) {
+    if ($column === 'pdemo_type') {
+        $type = get_post_meta($post_id, 'object_typ', true);
+        echo '<mark style="background:#e5e5e5; padding:3px 8px; border-radius:3px;">' . esc_html($type) . '</mark>';
+    }
+}, 10, 2);
 
 
 /**
@@ -119,13 +129,16 @@ add_action( 'rest_api_init', 'register_pdemo_custom_meta_fields' );
  * @return string The complete HTML output for the shortcode.
  */
 function playdemo_render() {
-    $jsUrl   = plugins_url('js/main.js', __FILE__);
+    $jsPath = plugin_dir_path(__FILE__) . 'js/main.js';
+    $jsUrl  = plugins_url('js/main.js', __FILE__) . '?v=' . filemtime($jsPath);
     $dataUrl = plugins_url('data/', __FILE__);
     $playUrl = get_option('playdemo_url', '');
     $homeUrl = home_url();
     $nonce   = wp_create_nonce('wp_rest');
 
     $output = '<span id="Main_ParamId" data-dataurl="' . esc_url($dataUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" ></span>';
+    $output .= '<span id="Footer_ConsoleClickId" data-command=""></span>';
+    $output .= '<span id="DlgPrompt_LoadId" data-loaded="false"></span>';
     $output .= '<div id="Main_WordpressId"></div>';
     $output .= '<script type="module">';
     $output .= 'import { startApp } from "' . esc_url($jsUrl) . '";';

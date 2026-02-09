@@ -18,6 +18,7 @@ import shared.model.AppError
 
 object DlgPrompt extends BaseDialog with JsWrapper:
 
+  final override val name = "DlgPrompt"
   val LoadId:           HtmlId = genId(name)
   val ModalId:          HtmlId = genId(name)
   val ResultId:         HtmlId = genId(name)
@@ -66,9 +67,12 @@ object DlgPrompt extends BaseDialog with JsWrapper:
     val p = Promise[Either[AppError, String]]()
     val f = p.future
 
+    println(s"ModalId: ${ModalId.id} ResultId: ${ResultId.id} InputId: ${InputId.id} ExecuteId: ${ExecuteId.id} CancelId: ${CancelId.id} CloseId: ${CloseId.id} ")
+
     // init modal dialog
-    if !idExists(LoadId) then
-      setHtml(getOrCreateDiv(LoadId), cviews.dialogs.html.DlgPrompt())
+    if getData(gE(LoadId), "loaded", false) == false then
+      setData(gE(LoadId), "loaded", true)
+      setHtml(gE(LoadId), cviews.dialogs.html.DlgPrompt())
       initHistory()
       modal    = Modal(gE(ModalId))
       collapse = Collapse(gE(ResultId))

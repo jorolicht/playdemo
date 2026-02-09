@@ -19,10 +19,10 @@ import comps.Footer.ConsoleClickId
 
 def addOutput(text: String) = DlgPrompt.add(text)
 
-object Addon extends JsWrapper: 
- 
-  @JSExportTopLevel("startConsole")
-  def startConsole() = dom.window.setTimeout(() => { console() }, 200)
+object DebugConsole extends JsWrapper: 
+  /** debugConsole - start the console after a short delay
+   */
+  def start() = dom.window.setTimeout(() => { console() }, 200)
 
   /** console - entry point of addon
    */  
@@ -42,7 +42,7 @@ object Addon extends JsWrapper:
     }
     restart.map {
       case false => false
-      case true  => startConsole(); true
+      case true  => start(); true
     }
 
 
@@ -110,12 +110,12 @@ object Addon extends JsWrapper:
 
     class ConfTest(arguments: Seq[String]) extends ScallopConf(arguments) {  
       override def onError(e: Throwable): Unit = e match { case _ => addOutput(getFullHelpString()) }
-      banner("""Usage: test --group [basic | dialog | auth | html] --number <number> --param <value> 
+      banner("""Usage: test --group [basic | dialog | auth | html | wp] --number <number> --param <value> 
                |select a test group and specify the test number and the param for the test
                |
                |""".stripMargin)
 
-      val group  = choice(name="group", choices=Seq("basic", "dialog", "auth", "html"))
+      val group  = choice(name="group", choices=Seq("basic", "dialog", "auth", "html", "wp"))
       val number = opt[Int](name="number")
       val param  = opt[String](name="param")  
       verify()
@@ -132,5 +132,6 @@ object Addon extends JsWrapper:
         case "dialog"    => TestDialog.exec(group, number, param)
         case "auth"      => TestAuth.exec(group, number, param)
         case "html"      => TestHtml.exec(group, number, param)
+        case "wp"        => TestWp.exec(group, number, param)
         case _           => Future(Left(AppError("command.invalid"))) 
     catch { case _:Exception => Future(Left(AppError("command.invalid"))) }

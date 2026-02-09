@@ -18,21 +18,14 @@ import shared.MainIds.*
 import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
 import comps.Wordpress
+import addon.Console
 
 
 object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
 
-  val HomePage = genId("HUGO")
-  val LoginPage = genId()
-  
   @JSExportTopLevel("startApp")
   def startApp(version: String, startEnv: String, logLevel: String): Unit = 
     Global.lang = dom.window.navigator.language.take(2)
-    println(s"ParamId: ${ParamId.id}")
-
-    println(s"HomePage: ${HomePage.id}")
-    println(s"LoginPage: ${LoginPage.id}")
-
     Global.dataUrl  = getData(gE(ParamId), "dataurl", "./data/")
 
     Logging.setLogLevel(logLevel)
@@ -41,6 +34,9 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
     dom.window.asInstanceOf[js.Dynamic].sayHello    = (name: String) => s"Hello $name"
     dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
     dom.window.asInstanceOf[js.Dynamic].appEvent    = (elem: HTMLElement, event: dom.Event) => appEvent(elem, event)
+
+    // expose addon Console.start function, only if addon is included, otherwise dummy function
+    dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
 
     Messages.initMsg(version, Global.dataUrl, Global.lang).map { 
       case true  => startEnv.toLowerCase() match 
@@ -79,7 +75,7 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
     Global.homeUrl = gE(ParamId).getAttribute("data-homeurl")
     Global.nonce  = gE(ParamId).getAttribute("data-nonce")
 
-    debug(s"wpStart -> playUrl:${Global.playUrl} homeUrl: ${Global.homeUrl} lang:  ${Global.lang} nonce: ${Global.nonce}")
+    debug(s"wpStart -> playUrl:${Global.playUrl} homeUrl: ${Global.homeUrl} lang: ${Global.lang} nonce: ${Global.nonce}")
 
     // init wordpress main page
     Wordpress.render("")

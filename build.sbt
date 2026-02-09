@@ -3,11 +3,11 @@ import scala.sys.process._
 
 // Global / scalaJSStage := FullOptStage
 
-val appIncludeAddon: Boolean  = sys.env.get("APP_INCLUDE_ADDON").contains("true")
-val appOrganization           = sys.env.getOrElse("APP_ORGANIZATION","org.jorolicht")
-val appVersion                = sys.env.getOrElse("APP_VERSION", "001")
-val appDate                   = sys.env.getOrElse("APP_DATE", "1970-01-01")
-val appMaintainer             = sys.env.getOrElse("APP_MAINTAINER", "Joe Doe <joe.doe@example.com>")
+val includeAddon: Boolean  = sys.env.get("APP_INCLUDE_ADDON").contains("true")
+val appOrganization        = sys.env.getOrElse("APP_ORGANIZATION","org.jorolicht")
+val appVersion             = sys.env.getOrElse("APP_VERSION", "001")
+val appDate                = sys.env.getOrElse("APP_DATE", "1970-01-01")
+val appMaintainer          = sys.env.getOrElse("APP_MAINTAINER", "Joe Doe <joe.doe@example.com>")
 
 ThisBuild / scalaVersion := "3.3.7"
 ThisBuild / organization := appOrganization
@@ -157,7 +157,7 @@ lazy val client = project
     (Compile / unmanagedSources / excludeFilter) := {         
       val baseFilter = HiddenFileFilter || "*~" || "*.tmp"
     
-      if (appIncludeAddon) {
+      if (includeAddon) {
         // Nichts zusätzlich ausschließen
         baseFilter
       } else {
@@ -166,6 +166,29 @@ lazy val client = project
           file.getAbsolutePath.contains("src/main/scala/addon")
         )
       }
+    },
+
+    Compile / sourceGenerators += Def.task {
+      val out = (Compile / sourceManaged).value / "AddonConfig.scala"
+      val code =
+        if (includeAddon)
+          """package addon
+            |object Console { 
+            |  val enabled = true
+            |  def start() = DebugConsole.start()
+            |}
+            |""".stripMargin          
+
+        else
+          """package addon
+            |object Console { 
+            |  val enabled = false
+            |  def start() = println("debug console not available")
+            |}
+            |""".stripMargin          
+
+      IO.write(out, code)
+      Seq(out)
     },
 
     scalaJSUseMainModuleInitializer := false,
