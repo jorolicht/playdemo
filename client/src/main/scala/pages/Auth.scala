@@ -101,7 +101,7 @@ object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
 
   @JSExportTopLevel("handleGoogleCredential")
   def googleLogin(credentials: String): Unit = 
-    ajaxPost[User]("/auth/googleLogin", List(), credentials).map { 
+    ajaxPost[String, User]("/auth/googleLogin", List(), credentials).map { 
       case Left(err)  => println(s"Error: ${err}") 
       case Right(usr) => setUser(usr); loadPage("Home", "welcome")
     }      

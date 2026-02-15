@@ -1,4 +1,4 @@
-package shared.model
+package shared.basic
 
 import scala.concurrent.Future
 

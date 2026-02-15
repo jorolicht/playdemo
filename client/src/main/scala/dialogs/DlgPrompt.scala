@@ -14,7 +14,7 @@ import base.*
 import base.Bootstrap.*
 import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
-import shared.model.AppError
+import shared.basic.AppError
 
 object DlgPrompt extends BaseDialog with JsWrapper:
 

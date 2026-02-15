@@ -7,10 +7,10 @@ import cats.syntax.all._
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-import shared.model.{ AppError, User }
-import shared._
-import base._
-import services._
+import shared.model.User
+import shared.basic.*
+import base.*
+import services.*
 
 object TestAuth extends Authentication with ComWrapper with JsWrapper:
 
@@ -80,7 +80,7 @@ object TestAuth extends Authentication with ComWrapper with JsWrapper:
     val id    = (param.split(";")(0)).toLong
     val value = (param.split(";")(1)).toBoolean
 
-    ajaxPost[Int]("/test/auth/setUserVerify", List(("id", id.toString),("value", value.toString)), "").map {
+    ajaxPost[String, Int]("/test/auth/setUserVerify", List(("id", id.toString),("value", value.toString)), "").map {
       case Left(err)  => addOutput(s"ERROR: ${err}");     Left(err)
       case Right(res) => addOutput(s"RESULT: res->${res}"); Right(s"FINISHED: ${NAME} ${group}-Test:${number} param:${param}")   
     }

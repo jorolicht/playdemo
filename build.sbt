@@ -213,7 +213,8 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
        "com.lihaoyi" %% "upickle" % "3.3.1",
        "org.typelevel" %%% "shapeless3-deriving" % "3.4.0",
        "com.lihaoyi" %%% "sourcecode" % "0.4.2",
-       "com.lihaoyi" %% "sourcecode" % "0.4.2"
+       "com.lihaoyi" %% "sourcecode" % "0.4.2",
+       "org.typelevel" %%% "cats-core" % "2.13.0"
      )
    )
   .jsConfigure(_.enablePlugins(ScalaJSWeb))

@@ -12,9 +12,9 @@ import org.scalajs.dom.ext.Ajax
 import cats.data.EitherT
 import cats.syntax.all._ 
 
-import base._
-import shared._
-import shared.model._
+import base.*
+import shared.basic.*
+import shared.model.*
 
 trait Authentication extends ComWrapper: 
 
@@ -66,7 +66,7 @@ trait Authentication extends ComWrapper:
   def regUser(user: User, password: String): FuEiErr[User] = 
     (for 
       pwEnc <- EitherT[Future,AppError,String](sha256(password))
-      usr   <- EitherT[Future,AppError,User]( ajaxPost[User]("/auth/regUser", List(), toJson(user.copy(password=pwEnc))) )   
+      usr   <- EitherT[Future,AppError,User]( ajaxPost[String, User]("/auth/regUser", List(), toJson(user.copy(password=pwEnc))) )   
     yield usr).value  
     
   /** logout a user
@@ -75,7 +75,7 @@ trait Authentication extends ComWrapper:
     * @return usr with auto generated user id
     */ 
   def logout(user: Option[User]): FuEiErr[Boolean] = 
-    ajaxPost[Boolean]("/auth/logout", List(), toJson(user))
+    ajaxPost[String, Boolean]("/auth/logout", List(), toJson(user))
 
 
   /** setUserPassword - set users password
@@ -87,7 +87,7 @@ trait Authentication extends ComWrapper:
   def setUserPassword(email: String, password: String): FuEiErr[Int] = 
     (for 
       pwEnc <- EitherT[Future,AppError,String](sha256(password))
-      res   <- EitherT[Future,AppError,Int]( ajaxPost[Int]("/auth/setUserPassword", List(("email", email)), pwEnc) )
+      res   <- EitherT[Future,AppError,Int]( ajaxPost[String, Int]("/auth/setUserPassword", List(("email", email)), pwEnc) )
     yield res).value
 
   /** setUserVerify set users verify flag
@@ -96,4 +96,4 @@ trait Authentication extends ComWrapper:
     * @return result of sql statment
     */ 
   def setUserVerify(email: String, value: Boolean=true): FuEiErr[Int] = 
-    ajaxPost[Int]("/auth/setUserVerify", List(("value", value.toString)), email)
+    ajaxPost[String, Int]("/auth/setUserVerify", List(("value", value.toString)), email)

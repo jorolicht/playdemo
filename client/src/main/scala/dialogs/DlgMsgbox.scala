@@ -12,7 +12,7 @@ import org.scalajs.dom.raw.HTMLElement
 import base._
 import base.Bootstrap.*
 import base.Logging.*
-import shared.model.AppError
+import shared.basic.AppError
 import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
 import shared.BoxValueTypes.BoxValue

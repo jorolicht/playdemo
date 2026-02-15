@@ -4,7 +4,7 @@ import base.Messages
 import base.Logging
 import sourcecode.FullName
 
-import shared.model.AppError
+import shared.basic.AppError
 import shared.DomTypes.HtmlId
 
 abstract class CompBase(using fn: FullName):

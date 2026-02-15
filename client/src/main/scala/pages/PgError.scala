@@ -4,9 +4,9 @@ import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement
 import scala.scalajs.js
 
-import shared.model._
+import shared.basic.*
 import shared.DomTypes.HtmlId
-import base._
+import base.*
 
 
 object PgError extends BasePage with JsWrapper:

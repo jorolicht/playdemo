@@ -2,8 +2,7 @@ package addon
 
 import upickle.default._
 
-import shared.model._
-import shared.*
+import shared.basic.*
 import base.*
 import pages.*
 import services.Authentication

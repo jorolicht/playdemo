@@ -4,9 +4,7 @@ import org.scalajs.dom.Event
 import org.scalajs.dom.raw.HTMLElement
 import base.Logging.* 
 import comps.Sidebar
-
-
-import shared.model.AppError
+import shared.basic.AppError
 
 // pagesMap maps page names to page objects   
 val pagesMap = List(pages.Home, Auth, Console, PgError,

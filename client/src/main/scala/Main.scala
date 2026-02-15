@@ -13,7 +13,7 @@ import services.ComWrapper
 import base.{ Global, JsWrapper, _ }
 import comps.{ CompBase, Navbar, Sidebar }
 
-import shared.*
+import shared.basic.*
 import shared.MainIds.*
 import shared.DomTypes.HtmlId
 import shared.DomTypes.genId

@@ -16,9 +16,9 @@ import play.api.i18n.{ I18nSupport, Messages, Langs, Lang }
 import org.apache.commons.mail.EmailAttachment
 
 import repositories.UserRepository
-import shared._
+import shared.basic.*
 import services._
-import shared.model.{ AppError, User }
+import shared.model.User
 
 @Singleton
 class Auth @Inject()(cc: ControllerComponents, mailer: MailerClient, cfg: Configuration, userRepo: UserRepository)

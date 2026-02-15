@@ -8,7 +8,7 @@ import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.HTMLElement
 import shared.DomTypes.HtmlId
 import shared.MainIds.*
-import shared.*
+import shared.basic.AppError
 import Logging.*
 
 trait JsWrapper:

@@ -10,40 +10,24 @@ import upickle.default._
 import base.Global
 import base.Logging.*
 import base.*
-import shared._
-import shared.model._
+import shared.basic.*
 
 trait ComWrapper: 
 
-  // ajaxPost - basic wrapper routine for a Ajax post request 
-  def ajaxPost[T](route: String, params: List[(String,String)], data: String, 
-                  hdrs: Map[String,String]=Map("Content-Type"->"text/plain; charset=utf-8", "Csrf-Token" -> Global.csrf),
-                  host: String=Global.playUrl)
-                 (using r: Reader[T], ct: ClassTag[T]): Future[Either[AppError,T]] = 
-    val name = route.split("/").lastOption.getOrElse("ajaxPost")
-    debug(s"ajaxPost -> route:${route} params:${params.mkString("=")} data:${data.take(20)} hdrs: ${hdrs.mkString("=")}")
-    Ajax.post(genPath(host, route, params), data, headers = hdrs)
-      .map(_.responseText).map(content => parseJson[T](content) )
-      .recover({
-        // Recover from a failed error code into a successful future
-        case dom.ext.AjaxException(req) => Left(parseError(req.responseText, name))   
-        case _: Throwable               => Left(AppError("err00001.ajax.post", s"${route}/${params.mkString(":")}", "request status unknown", name))    
-      })
-
-  def ajaxPost2[T, P](
+  def ajaxPost[IN, OUT](
     route: String,
     params: List[(String,String)],
-    data: P,
+    data: IN,
     hdrs: Map[String,String] =
       Map("Content-Type" -> "application/json", "Csrf-Token" -> Global.csrf),
     host: String = Global.playUrl
   )(
     using
-      r: Reader[T],
-      ct: ClassTag[T],
-      w: Writer[P]
-  ): Future[Either[AppError, T]] =
-      val name = route.split("/").lastOption.getOrElse("ajaxPost2")
+      r: Reader[OUT],
+      ct: ClassTag[OUT],
+      w: Writer[IN]
+  ): Future[Either[AppError, OUT]] =
+      val name = route.split("/").lastOption.getOrElse("ajaxPost")
       debug(
         s"ajaxPost -> route:$route " +
         s"params:${params.mkString(", ")} " +
@@ -51,7 +35,7 @@ trait ComWrapper:
         s"hdrs:${hdrs.mkString(", ")}"
       )
       Ajax.post(genPath(host, route, params), write(data), headers = hdrs)
-        .map(_.responseText).map(content => parseJson[T](content) )
+        .map(_.responseText).map(content => Return.decode[OUT](content) )
         .recover({
           // Recover from a failed error code into a successful future
           case dom.ext.AjaxException(req) => Left(parseError(req.responseText, name))   
