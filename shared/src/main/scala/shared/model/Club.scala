@@ -18,7 +18,15 @@ import scala.util.control.NonFatal
  *   1 -> federation nickname
  */
 
+case class WpInfo(
+  cptMetaName: String,
+  postId:      Long,
+  timestamp:   Int
+) derives ReadWriter
+  
+
 case class Club(
+  wp:      WpInfo,
   id:      Long,
   name:    String,
   ctt:     Option[ClubCTT] = None

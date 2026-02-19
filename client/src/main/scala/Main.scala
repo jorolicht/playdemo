@@ -71,11 +71,12 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
     import cats.data.EitherT
     import cats.implicits._ 
 
-    Global.playUrl = gE(ParamId).getAttribute("data-playurl")
-    Global.homeUrl = gE(ParamId).getAttribute("data-homeurl")
-    Global.nonce  = gE(ParamId).getAttribute("data-nonce")
+    Global.playUrl = getData(gE(ParamId),"playurl","")
+    Global.homeUrl = getData(gE(ParamId), "homeurl", "")
+    Global.nonce   = getData(gE(ParamId), "nonce", "")
+    Global.pageId  = getData(gE(ParamId), "pageid", 0)
 
-    debug(s"wpStart -> playUrl:${Global.playUrl} homeUrl: ${Global.homeUrl} lang: ${Global.lang} nonce: ${Global.nonce}")
+    debug(s"wpStart -> playUrl:${Global.playUrl} homeUrl: ${Global.homeUrl} lang: ${Global.lang} nonce: ${Global.nonce} pageId: ${Global.pageId}")
 
     // init wordpress main page
     Wordpress.render("")

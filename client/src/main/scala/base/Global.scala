@@ -48,6 +48,7 @@ object Global:
   var homeUrl = ""
   var dataUrl = ""
   var playUrl = ""
+  var pageId  = 0
   var nonce   = ""
 
                             
