@@ -15,10 +15,10 @@ import base.Bootstrap.*
 import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
 import shared.model.AppError
+import shared.PageNameTyp
 
 object DlgPrompt extends BaseDialog with JsWrapper:
-
-  final override val name = "DlgPrompt"
+  def name = PageNameTyp("DlgPrompt")
   val LoadId:           HtmlId = genId(name)
   val ModalId:          HtmlId = genId(name)
   val ResultId:         HtmlId = genId(name)

@@ -1,0 +1,4 @@
+@import pages.BasePage
+
+@(page: BasePage, param: String="")
+@{ Html(s""" href="#" onclick="window.appLoadPage('${page.name.value}','${param}'); false" """) }

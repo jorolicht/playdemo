@@ -10,12 +10,13 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import shared.model.User
 import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
+import shared.PageNameTyp
 
 
 object ChatExample extends BasePage with JsWrapper with ComWrapper:
-  
-  private inline val P = "ChatExample"
-  private inline val MP = "chatexample"
+  def name = PageNameTyp("ChatExample")
+  // private inline val P = "ChatExample"
+  // private inline val MP = "chatexample"
 
   val sendId: HtmlId = genId(name)
   val rcvMsgsId: HtmlId = genId(name)

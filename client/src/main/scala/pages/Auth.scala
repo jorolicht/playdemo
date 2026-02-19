@@ -12,10 +12,11 @@ import cviews.pages.*
 import shared.model.*
 
 import shared.DomTypes.HtmlId
-import services._
-import base._
+import services.*
+import base.*
 import shared.AuthIds.*
 import shared.MainIds.*
+import shared.PageNameTyp
 
 import comps.Sidebar.LoginInfoId
 import comps.Sidebar.LoggedInAsId
@@ -25,7 +26,7 @@ import comps.Navbar.ShowLoginId
 
 
 object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
-
+  def name = PageNameTyp("Auth")
   def setUser(usr: User) = 
     Global.user = Some(usr)
     changeClass(gE(ShowLoginId), validUser, "disabled")
@@ -87,15 +88,15 @@ object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
     changeClass(gE(PasswordId), !validPwFormat, "is-invalid")
     if (validEmail && validPwFormat) then
       basicLogin(eMail, password).map {
-        case Left(err)  => resetUser; loadPage("PgError", err.toString) 
-        case Right(usr) => setUser(usr); loadPage("Home", "welcome") 
+        case Left(err)  => resetUser; loadPage(PageNameTyp("PgError"), err.toString) 
+        case Right(usr) => setUser(usr); loadPage(PageNameTyp("Home"), "welcome") 
       } 
 
       
   def doLogout() =
     logout(getUser).map {
-      case Left(err)  => resetUser; loadPage("PgError", err.toString)
-      case Right(res) => resetUser; loadPage("Home", "goodbye") 
+      case Left(err)  => resetUser; loadPage(PageNameTyp("PgError"), err.toString)
+      case Right(res) => resetUser; loadPage(PageNameTyp("Home"), "goodbye") 
     }
 
 
@@ -103,7 +104,7 @@ object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
   def googleLogin(credentials: String): Unit = 
     ajaxPost[User]("/auth/googleLogin", List(), credentials).map { 
       case Left(err)  => println(s"Error: ${err}") 
-      case Right(usr) => setUser(usr); loadPage("Home", "welcome")
+      case Right(usr) => setUser(usr); loadPage(PageNameTyp("Home"), "welcome")
     }      
 
   def doForgot() =

@@ -1,13 +1,13 @@
 @import shared.DomTypes.HtmlId
-@import cviews.helper.html._
-@import pages.PageIds.*
+@import cviews.helper.html.*
 @import comps.Navbar.*
+@import pages.Home
 
 
 @()
 <nav class="navbar navbar-expand navbar-dark bg-secondary">
     <!-- Navbar Brand-->
-    <a class="navbar-brand ps-3" @exec2(HomePid, "")>Demo Playframework</a>
+    <a class="navbar-brand ps-3" @exec(Home, "")>Demo Playframework</a>
     <!-- Sidebar Toggle-->
     <button @id(ToggleSidebarId) class="btn btn-sm btn-light d-md-none order-1 order-lg-0 me-4 me-lg-0" @event("onclick")><i class="bi bi-list"></i></button>
     <!-- Navbar Search-->

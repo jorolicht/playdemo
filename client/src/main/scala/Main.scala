@@ -17,12 +17,14 @@ import shared.*
 import shared.MainIds.*
 import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
+import shared.PageNameTyp.PageName
 import comps.Wordpress
 import addon.Console
 
 
 object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
-
+  def name = PageNameTyp("Main")
+  
   @JSExportTopLevel("startApp")
   def startApp(version: String, startEnv: String, logLevel: String): Unit = 
     Global.lang = dom.window.navigator.language.take(2)
@@ -97,14 +99,16 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
 
   def handleGoogleCredential(credentials: String): Unit = pages.Auth.googleLogin(credentials)
 
-  def appLoadPage(pageName: String, param: String): Unit = pages.loadPage(pageName, param)
+  def appLoadPage(pageName: String, param: String): Unit = pages.loadPage(PageNameTyp(pageName), param)
 
   def render(param: String = ""): Boolean = true
 
   def appEvent(elem: HTMLElement, event: dom.Event): Unit =
     try
-      val (pgDlgName, key) = elem.id.toTuple("_")
-      debug(s"event -> pgDlgName:${pgDlgName} key:${key} elem:${elem.id}")
+      val (name, key) = elem.id.toTuple("_")
+      val pgDlgName = PageNameTyp(name)
+
+      debug(s"event -> pgDlgName:${name} key:${key} elem:${elem.id}")
 
       if pages.pagesMap.contains(pgDlgName) then
         pages.pagesMap(pgDlgName).event(elem, event)

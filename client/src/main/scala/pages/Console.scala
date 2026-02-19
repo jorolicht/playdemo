@@ -9,9 +9,10 @@ import base.*
 import shared.*
 import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
+import shared.PageNameTyp
 
 object Console extends BasePage with JsWrapper:
-
+  def name = PageNameTyp("Console")
   val ConsoleId: HtmlId = genId(name)
   val ClickId: HtmlId = genId(name)
 

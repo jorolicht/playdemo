@@ -4,11 +4,13 @@ import org.scalajs.dom.raw.HTMLElement
 import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
 import shared.MainIds.SidebarId
+import shared.PageNameTyp
+
 import base.JsWrapper
 
 
 object Sidebar extends CompBase with JsWrapper:
-
+  def name = PageNameTyp("Sidebar")
   val AsideId:         HtmlId = genId(name)
   val LoginInfoId:     HtmlId = genId(name)
   val LoggedInAsId:    HtmlId = genId(name)

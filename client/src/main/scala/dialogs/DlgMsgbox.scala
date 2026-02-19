@@ -16,11 +16,12 @@ import shared.model.AppError
 import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
 import shared.BoxValueTypes.BoxValue
+import shared.PageNameTyp
 import shared.BoxValues.*
 
 
 object DlgMsgbox extends BaseDialog with JsWrapper:
-
+  def name = PageNameTyp("DlgMsgbox")
   val LoadId:  HtmlId = genId(name)
   val ModalId: HtmlId = genId(name)
   val TitleId: HtmlId = genId(name)

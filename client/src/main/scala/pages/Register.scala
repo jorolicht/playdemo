@@ -9,9 +9,11 @@ import base.*
 import shared.*
 import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
+import shared.PageNameTyp
 
 object Register extends BasePage with JsWrapper:
-
+  def name = PageNameTyp("Register")
+  
   val NameId: HtmlId = genId(name)
   val EmailId: HtmlId = genId(name)
   val PasswordId: HtmlId = genId(name)

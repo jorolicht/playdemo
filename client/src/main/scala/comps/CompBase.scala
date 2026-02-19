@@ -5,15 +5,16 @@ import base.Logging
 import sourcecode.FullName
 
 import shared.model.AppError
+import shared.PageNameTyp.PageName
 import shared.DomTypes.HtmlId
 
 abstract class CompBase(using fn: FullName):
-  def name: String = fn.value.split('.').last
   export Logging.debug
   export Logging.error
   export Logging.warn
   export Logging.info
 
+  def name: PageName
   def render(param: String = ""): Boolean
   
   def id(name: HtmlId) = s"id=${name.id}"
