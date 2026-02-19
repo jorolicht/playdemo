@@ -11,18 +11,15 @@ import scala.scalajs.js.annotation.*
 import cviews.pages.*
 import shared.model.*
 
-import shared.DomTypes.HtmlId
 import services.*
 import base.*
 import shared.AuthIds.*
 import shared.MainIds.*
-import shared.PageNameTyp
 
 import comps.Sidebar.LoginInfoId
 import comps.Sidebar.LoggedInAsId
 import comps.Navbar.DoLogoutId
 import comps.Navbar.ShowLoginId
-
 
 
 object Auth extends BasePage with JsWrapper with Mgmt with Authentication:

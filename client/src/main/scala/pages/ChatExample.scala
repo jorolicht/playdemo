@@ -2,22 +2,16 @@ package pages
 
 import base.* 
 import services._
-import shared._
+import shared.*
 import org.scalajs.dom.{ Event }
 import org.scalajs.dom.raw.{ HTMLElement, HTMLTextAreaElement }
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import shared.model.User
-import shared.DomTypes.HtmlId
-import shared.DomTypes.genId
-import shared.PageNameTyp
 
 
 object ChatExample extends BasePage with JsWrapper with ComWrapper:
   def name = PageNameTyp("ChatExample")
-  // private inline val P = "ChatExample"
-  // private inline val MP = "chatexample"
-
   val sendId: HtmlId = genId(name)
   val rcvMsgsId: HtmlId = genId(name)
   val receiverId: HtmlId = genId(name)

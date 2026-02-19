@@ -12,10 +12,7 @@ import upickle.default._
 
 import base.*
 import base.Bootstrap.*
-import shared.DomTypes.HtmlId
-import shared.DomTypes.genId
-import shared.model.AppError
-import shared.PageNameTyp
+
 
 object DlgPrompt extends BaseDialog with JsWrapper:
   def name = PageNameTyp("DlgPrompt")

@@ -1,13 +1,8 @@
 package comps
 
-import base.JsWrapper
-import shared.DomTypes.HtmlId
-import shared.DomTypes.genId
 import shared.MainIds.NavbarId
-import shared.PageNameTyp
 
-
-object Navbar extends CompBase with JsWrapper:
+object Navbar extends CompBase with base.JsWrapper:
   def name = PageNameTyp("Navbar")
   val ToggleSidebarId: HtmlId = genId(name)
   val ConsoleClickId: HtmlId = genId(name)

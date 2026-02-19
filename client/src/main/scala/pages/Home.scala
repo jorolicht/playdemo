@@ -6,9 +6,7 @@ import org.scalajs.dom.raw.HTMLElement
 import scala.scalajs.js
 import cviews.pages.*
 import base.*
-import shared.DomTypes.HtmlId
 import shared.MainIds.SidebarId
-import shared.PageNameTyp
 import comps.Navbar.ToggleSidebarId
 
 object Home extends BasePage with JsWrapper:

@@ -1,7 +1,6 @@
 package pages
 
 import base.JsWrapper
-import shared.PageNameTyp
 
 object UseCase42 extends BasePage with JsWrapper:
   def name = PageNameTyp("UseCase42")

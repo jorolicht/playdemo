@@ -7,9 +7,6 @@ import scala.scalajs.js
 import cviews.pages.*
 import base.*
 import shared.*
-import shared.DomTypes.HtmlId
-import shared.DomTypes.genId
-import shared.PageNameTyp
 
 object Register extends BasePage with JsWrapper:
   def name = PageNameTyp("Register")

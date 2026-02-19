@@ -9,14 +9,9 @@ import org.scalajs.dom.Event
 import org.scalajs.dom.KeyboardEvent
 import org.scalajs.dom.raw.HTMLElement
 
-import base._
+import base.*
 import base.Bootstrap.*
-import base.Logging.*
-import shared.model.AppError
-import shared.DomTypes.HtmlId
-import shared.DomTypes.genId
 import shared.BoxValueTypes.BoxValue
-import shared.PageNameTyp
 import shared.BoxValues.*
 
 

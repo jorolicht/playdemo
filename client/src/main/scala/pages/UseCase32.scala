@@ -1,6 +1,5 @@
 package pages
 
-import shared.PageNameTyp
 import base.JsWrapper
 
 object UseCase32 extends BasePage with JsWrapper:

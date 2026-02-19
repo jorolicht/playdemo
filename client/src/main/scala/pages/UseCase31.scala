@@ -1,7 +1,5 @@
 package pages
 
-import shared.DomTypes.HtmlId
-import shared.PageNameTyp
 import base.JsWrapper
 
 

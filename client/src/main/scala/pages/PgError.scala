@@ -5,8 +5,6 @@ import org.scalajs.dom.raw.HTMLElement
 import scala.scalajs.js
 
 import shared.model._
-import shared.DomTypes.HtmlId
-import shared.PageNameTyp
 import base.* 
 
 
