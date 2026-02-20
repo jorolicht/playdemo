@@ -7,10 +7,10 @@ import cats.syntax.all._
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-import shared.model.{ AppError, User }
-import shared._
-import base._
-import services._
+import shared.model.User
+import shared.basic.*
+import base.*
+import services.*
 
 object TestAuth extends Authentication with ComWrapper with JsWrapper:
 

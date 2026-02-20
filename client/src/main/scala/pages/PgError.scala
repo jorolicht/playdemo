@@ -4,7 +4,7 @@ import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement
 import scala.scalajs.js
 
-import shared.model._
+import shared.basic.*
 import base.* 
 
 

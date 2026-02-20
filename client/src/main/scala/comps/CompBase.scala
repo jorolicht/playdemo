@@ -4,7 +4,7 @@ import base.Messages
 import base.Logging
 import sourcecode.FullName
 
-import shared.model.AppError
+import shared.basic.AppError
 import shared.PageNameTyp.PageName
 import shared.PageNameTyp
 import shared.DomTypes.HtmlId
@@ -21,7 +21,7 @@ abstract class CompBase(using fn: FullName):
   export shared.PageNameTyp
   export shared.DomTypes.HtmlId
   export shared.DomTypes.genId
-  export shared.model.AppError
+  export shared.basic.AppError
 
   def name: PageName
   def render(param: String = ""): Boolean

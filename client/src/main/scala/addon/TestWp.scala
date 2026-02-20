@@ -3,7 +3,7 @@ package addon
 import upickle.default._
 
 import shared.model._
-import shared._
+import shared.basic.AppError
 import base._
 import services.Authentication
 

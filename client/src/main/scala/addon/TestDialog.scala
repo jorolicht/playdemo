@@ -3,7 +3,7 @@ package addon
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-import shared.model.AppError
+import shared.basic.AppError
 
 object TestDialog:
 

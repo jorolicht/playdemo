@@ -10,8 +10,8 @@ import upickle.default._
 import base.Global
 import base.Logging.*
 import base.*
-import shared._
-import shared.model._
+import shared.basic.*
+import shared.model.*
 
 trait ComWrapper: 
 

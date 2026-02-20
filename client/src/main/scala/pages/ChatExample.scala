@@ -1,8 +1,7 @@
 package pages
 
 import base.* 
-import services._
-import shared.*
+import services.*
 import org.scalajs.dom.{ Event }
 import org.scalajs.dom.raw.{ HTMLElement, HTMLTextAreaElement }
 import scala.concurrent.Future

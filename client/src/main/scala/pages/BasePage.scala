@@ -6,7 +6,7 @@ import base.Logging.*
 import comps.Sidebar
 
 
-import shared.model.AppError
+import shared.basic.AppError
 import shared.PageNameTyp.PageName
 
 // pagesMap maps page names to page objecpts   

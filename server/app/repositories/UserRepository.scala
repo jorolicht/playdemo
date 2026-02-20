@@ -10,8 +10,9 @@ import anorm.SqlParser.scalar
 import play.api.db.DBApi
 
 import models.DatabaseExecutionContext
-import shared.model._
-import shared._
+import shared.basic.*
+import shared.model.User
+import shared.basic.AppError
 
 
 implicit def bool2int(b:Boolean):Int = if (b) 1 else 0

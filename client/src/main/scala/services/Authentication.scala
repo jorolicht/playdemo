@@ -12,9 +12,9 @@ import org.scalajs.dom.ext.Ajax
 import cats.data.EitherT
 import cats.syntax.all._ 
 
-import base._
-import shared._
-import shared.model._
+import base.*
+import shared.basic.*
+import shared.model.*
 
 trait Authentication extends ComWrapper: 
 

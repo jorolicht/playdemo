@@ -12,7 +12,7 @@ import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.*
 
 import Logging.*
-import shared.model.AppError
+import shared.basic.AppError
 import services.ComWrapper
 
 // atou - decode base64 encoded string to utf

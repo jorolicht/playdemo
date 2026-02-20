@@ -1,4 +1,4 @@
-package shared.model
+package shared.basic
 
 import scala.concurrent.Future
 
@@ -22,5 +22,7 @@ object AppError:
 def parseError(in: String, func: String): AppError =
   try read[AppError](in)
   catch { case e: Throwable => AppError("err00006.parseJson", e.getMessage, in.take(100)).add(func) }
+
+
 
 

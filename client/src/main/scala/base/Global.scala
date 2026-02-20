@@ -3,7 +3,8 @@ package base
 import org.scalajs.dom
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
-import shared.model.{ AppError, User }
+import shared.model.User
+import shared.basic.AppError
 import shared.MainIds.* 
 import base.Logging.*
 import comps.Sidebar

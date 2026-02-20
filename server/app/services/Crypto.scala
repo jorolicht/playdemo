@@ -10,7 +10,8 @@ import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 import play.api.mvc._
 
-import shared.model.{AppError, User }
+import shared.model.User
+import shared.basic.AppError
 
 trait Encryption:
   private val SALT: String   = "uwkjlkavaölkilsdkjflxku_tTTFDWJ4562klHiUjjer%$jj#rt"

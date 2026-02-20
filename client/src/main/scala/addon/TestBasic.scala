@@ -2,9 +2,10 @@ package addon
 
 import upickle.default._
 
-import shared.model._
-import shared._
-import base._
+import shared.model.*
+import shared.basic.*
+import shared.basic.AppError
+import base.*
 import services.Authentication
 
 import scala.concurrent.Future

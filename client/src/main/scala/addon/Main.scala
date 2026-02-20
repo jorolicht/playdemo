@@ -13,7 +13,7 @@ import scala.scalajs.js.annotation.*
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import upickle.default._
-import shared.model.AppError
+import shared.basic.AppError
 import shared.DomTypes.HtmlId
 import comps.Footer.ConsoleClickId
 
