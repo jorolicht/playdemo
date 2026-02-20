@@ -1,10 +1,10 @@
 @*
  * Template for user registration
  *@
-
 @import pages.Register.*
 @import cviews.helper.html.*
-@import pages.PageIds
+@import pages.Auth
+
 
 @()
 
@@ -48,7 +48,7 @@
           </div>
           <div class="card-footer py-3 border-0">
               <div class="text-center">
-                  Already have an account? <a @exec2(PageIds.AuthPid, "login") class="text-dark">@gM("btn.login")</a>
+                  Already have an account? <a @exec(Auth, "login") class="text-dark">@gM("btn.login")</a>
               </div>
           </div>
       </div>

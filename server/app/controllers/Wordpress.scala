@@ -11,8 +11,9 @@ import play.api.{ Configuration, Logging }
 import play.api.i18n.{ I18nSupport, Messages, Langs, Lang }
 
 import models._
-import shared.basic.*
-import shared.model.*
+import shared.model.User
+import shared.basic.AppError
+
 
 case class WpUserLogin(
     user: String,

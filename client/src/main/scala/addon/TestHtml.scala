@@ -2,9 +2,12 @@ package addon
 
 import upickle.default._
 
-import shared.basic.*
 import base.*
 import pages.*
+import shared.basic.*
+import shared.model.*
+import shared.*
+
 import services.Authentication
 
 import scala.concurrent.Future
@@ -14,7 +17,7 @@ import upickle.default.{ReadWriter => RW, macroRW}
 import cviews.pages.html.Welcome
 
 object TestHtml extends BasePage with Authentication with JsWrapper:
-
+  def name = PageNameTyp("TestHtml")
   def render(param: String = ""): Boolean = true
 
   def exec(group: String, number: Int, param: String): Future[Either[AppError, String]] =

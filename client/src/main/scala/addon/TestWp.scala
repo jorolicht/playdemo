@@ -11,8 +11,6 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import upickle.default.{ReadWriter => RW, macroRW}
 
 
-
-
 object TestWp extends Authentication:
   case class People(name: String, age: Int)
 

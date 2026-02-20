@@ -253,4 +253,3 @@ def buildMsg = Command.command("buildMsg") { state =>
   println("--- Nachrichten-Generierung abgeschlossen ---")
   state2
 }
-

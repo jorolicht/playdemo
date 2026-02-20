@@ -5,15 +5,13 @@ import org.scalajs.dom.raw.HTMLElement
 
 import scala.scalajs.js
 import cviews.pages.*
-import base._
-import shared.DomTypes.HtmlId
-
+import base.*
 import shared.MainIds.SidebarId
-import comps
-.Navbar.ToggleSidebarId
+import comps.Navbar.ToggleSidebarId
 
 object Home extends BasePage with JsWrapper:
-
+  def name = PageNameTyp("Home")
+  
   def render(param: String = ""): Boolean =
     param.toLowerCase match 
       case "goodbye"  => setMain(s"""<div class='d-flex mt-5 justify-content-center'><h5>GOODBYE</h5></div>""")

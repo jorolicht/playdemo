@@ -16,8 +16,9 @@ import play.api.i18n.{ I18nSupport, Messages, Langs, Lang }
 import org.apache.commons.mail.EmailAttachment
 
 import repositories.UserRepository
-import shared.basic.*
-import services._
+import services.*
+import shared.basic.{ toJson, parseJson }
+import shared.basic.* 
 import shared.model.User
 
 @Singleton

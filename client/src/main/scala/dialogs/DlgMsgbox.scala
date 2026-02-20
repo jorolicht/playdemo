@@ -9,18 +9,14 @@ import org.scalajs.dom.Event
 import org.scalajs.dom.KeyboardEvent
 import org.scalajs.dom.raw.HTMLElement
 
-import base._
+import base.*
 import base.Bootstrap.*
-import base.Logging.*
-import shared.basic.AppError
-import shared.DomTypes.HtmlId
-import shared.DomTypes.genId
 import shared.BoxValueTypes.BoxValue
 import shared.BoxValues.*
 
 
 object DlgMsgbox extends BaseDialog with JsWrapper:
-
+  def name = PageNameTyp("DlgMsgbox")
   val LoadId:  HtmlId = genId(name)
   val ModalId: HtmlId = genId(name)
   val TitleId: HtmlId = genId(name)

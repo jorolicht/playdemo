@@ -2,10 +2,8 @@ package dialogs
 
 import org.scalajs.dom.Event
 import org.scalajs.dom.raw.HTMLElement
-
 import shared.DialogTypes.DialogId
 
-import shared.basic.AppError
 
 // dlgMap maps dialog names to dialog objects   
 val dlgMap = List(DlgMsgbox, DlgPrompt)

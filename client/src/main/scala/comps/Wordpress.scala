@@ -1,11 +1,9 @@
 package comps
 
-import base.JsWrapper
 import shared.MainIds.*
 
-
-object Wordpress extends CompBase with JsWrapper:
-
+object Wordpress extends CompBase with base.JsWrapper:
+  def name = PageNameTyp("Wordpress")
   def render(param: String = ""): Boolean = 
     setHtml(gE(WordpressId), cviews.comps.html.wordpress())
     true

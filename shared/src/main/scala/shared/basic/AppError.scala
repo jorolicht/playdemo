@@ -24,3 +24,5 @@ def parseError(in: String, func: String): AppError =
   catch { case e: Throwable => AppError("err00006.parseJson", e.getMessage, in.take(100)).add(func) }
 
 
+
+

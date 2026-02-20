@@ -5,28 +5,22 @@ import org.scalajs.dom.raw.HTMLElement
 import base.Logging.* 
 import comps.Sidebar
 import shared.basic.AppError
+import shared.PageNameTyp.PageName
 
-// pagesMap maps page names to page objects   
+// pagesMap maps page names to page objecpts   
 val pagesMap = List(pages.Home, Auth, Console, PgError,
                     ChatExample, 
                     UseCase2, UseCase31, UseCase32, UseCase41, UseCase42,
                     UseCase511, UseCase512, UseCase52, UseCase53)
-                    .map(pg => pg.name -> pg).toMap
-
-enum PageIds:
-  case HomePid, AuthPid, ConsolePid, PgErrorPid, ChatExamplePid,
-       UseCase2Pid, UseCase31Pid, UseCase32Pid,
-       UseCase41Pid, UseCase42Pid,
-       UseCase511Pid, UseCase512Pid, UseCase52Pid, UseCase53Pid                 
+                    .map(pg => pg.name -> pg).toMap              
 
 
-
-def loadPage(pageName: String, param: String): Unit =
+def loadPage(pageName: PageName, param: String): Unit =
   error(s"loadPage -> ${pagesMap.mkString(":")}")
   try
     debug(s"loadPage -> pageName:${pageName} param:${param}")
     if pagesMap(pageName).render(param) then
-      Sidebar.setNavLink(pageName)
+      Sidebar.setNavLink(pageName.value)
     else   
       error(s"loadPage -> page:${pageName} param:${param}")
   catch
