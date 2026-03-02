@@ -129,14 +129,15 @@ add_action('manage_playdemo_posts_custom_column', function($column, $post_id) {
  * @return string The complete HTML output for the shortcode.
  */
 function playdemo_render() {
-    $jsPath = plugin_dir_path(__FILE__) . 'js/main.js';
-    $jsUrl  = plugins_url('js/main.js', __FILE__) . '?v=' . filemtime($jsPath);
+    $jsPath  = plugin_dir_path(__FILE__) . 'js/main.js';
+    $jsUrl   = plugins_url('js/main.js', __FILE__) . '?v=' . filemtime($jsPath);
     $dataUrl = plugins_url('data/', __FILE__);
     $playUrl = get_option('playdemo_url', '');
+    $pageId  = get_the_ID();
     $homeUrl = home_url();
     $nonce   = wp_create_nonce('wp_rest');
 
-    $output = '<span id="Main_ParamId" data-dataurl="' . esc_url($dataUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" ></span>';
+    $output = '<span id="Main_ParamId" data-dataurl="' . esc_url($dataUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" data-pageid="' . esc_attr($pageId) . '" ></span>';
     $output .= '<span id="Footer_ConsoleClickId" data-command=""></span>';
     $output .= '<span id="DlgPrompt_LoadId" data-loaded="false"></span>';
     $output .= '<div id="Main_WordpressId"></div>';

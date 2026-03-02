@@ -1,6 +1,7 @@
 package shared.model
 
 import upickle.default.*
+import scala.util.hashing.MurmurHash3
 import shared.basic.AppError
 
 /**
@@ -38,6 +39,25 @@ case class PlayerMeta(
 ) derives ReadWriter
 
 
+opaque type PlayerId = Long
+
+object PlayerId:
+
+  def apply(value: Long): PlayerId =
+    value
+
+  def fromLong(value: Long): PlayerId =
+    value
+
+  extension (id: PlayerId)
+    def value: Long = id
+
+  given ReadWriter[PlayerId] =
+    readwriter[Long].bimap[PlayerId](
+      _.value,
+      PlayerId(_)
+    )
+
 /**
  * Immutable Player domain model.
  *
@@ -48,30 +68,34 @@ case class PlayerMeta(
  * - easy to validate
  */
 case class Player(
-  id: Long = 0,
+  id: PlayerId = PlayerId(0),
   clubId: Long = 0,
   clubName: String = "",
-  firstname: String,
-  lastname: String,
-  birthyear: Option[Int] = None,
+  firstName: String,
+  lastName: String,
+  birthYear: Option[Int] = None,
   email: Option[String] = None,
   sex: Sex = Sex.Unknown,
   meta: PlayerMeta = PlayerMeta()
 ) derives ReadWriter:
 
+
   /** JSON encoding */
   def encode: String = write(this)
 
+  def fullName: String =
+    s"$firstName $lastName"
+
   /** Display name: "Lastname, Firstname" */
   def displayName: String =
-    (lastname.trim, firstname.trim) match
+    (lastName.trim, firstName.trim) match
       case ("", f) => f
       case (l, "") => l
       case (l, f)  => s"$l, $f"
 
   /** Display name with optional ID */
   def formattedName(showId: Boolean = false): String =
-    if showId && id != 0 then s"$displayName [$id%03d]"
+    if showId && id.value != 0 then s"$displayName [$id%03d]"
     else displayName
 
   /** Average rating for doubles */
@@ -82,7 +106,7 @@ case class Player(
 
   /** Birthyear string for display */
   def birthyearString: String =
-    birthyear.map(_.toString).getOrElse("")
+    birthYear.map(_.toString).getOrElse("")
 
   /** Club display */
   def formattedClub(showId: Boolean = false): String =
@@ -91,6 +115,31 @@ case class Player(
 
 
 object Player:
+
+  private def normalize(s: String): String =
+    s.trim.toLowerCase
+
+  def generateId(
+      firstName: String,
+      lastName: String,
+      clubName: String,
+      birthYear: Int
+  ): PlayerId =
+
+    val input =
+      s"${normalize(firstName)}|${normalize(lastName)}|${normalize(clubName)}|$birthYear"
+
+    val hash =
+      MurmurHash3.stringHash(input)
+
+    val hash2 =
+      MurmurHash3.stringHash(input, hash)
+
+    val longId =
+      (hash.toLong << 32) | (hash2.toLong & 0xffffffffL)
+
+    PlayerId(longId)
+
 
   /**
    * Safe JSON decoding
@@ -127,9 +176,9 @@ object Player:
           Right(
             Player(
               clubName = club,
-              firstname = firstname,
-              lastname = lastname,
-              birthyear = birthyear,
+              firstName = firstname,
+              lastName = lastname,
+              birthYear = birthyear,
               email = email,
               sex = sex,
               meta = PlayerMeta(ttr = ttr)

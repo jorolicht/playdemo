@@ -192,6 +192,75 @@ function handle_hierarchical_json_by_path($request) {
 }
 
 
+
+// 2. API-Route: Meta-Daten aktualisieren mit Timestamp-Check
+add_action('rest_api_init', function () {
+
+    register_rest_route('tourney/v1', '/update-meta', [
+        'methods'  => 'POST',
+        'callback' => 'update_tourney_meta',
+        'permission_callback' => function () {
+            return current_user_can('edit_posts');
+        }
+    ]);
+
+});
+
+function update_tourney_meta(WP_REST_Request $request)
+{
+    $data = $request->get_json_params();
+
+    if (!$data || !isset($data['wp'])) {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'Invalid payload'
+        ], 400);
+    }
+
+    $metaName  = sanitize_key($data['wp']['cptMetaName']);
+    $timestamp = intval($data['wp']['timestamp']);
+    $postId    = intval($data['id']);
+
+    if (!$metaName || !$postId) {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'Missing required fields'
+        ], 400);
+    }
+
+    // Check CPT type
+    if (get_post_type($postId) !== 'tourney') {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'Invalid CPT'
+        ], 400);
+    }
+
+    $shadowMeta = $metaName . '_ts';
+    $storedTimestamp = intval(get_post_meta($postId, $shadowMeta, true));
+
+    // 🔒 Timestamp check
+    if ($storedTimestamp !== $timestamp) {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'Timestamp mismatch',
+            'stored_timestamp' => $storedTimestamp
+        ], 409);
+    }
+
+    // Update meta with full JSON payload
+    update_post_meta($postId, $metaName, wp_json_encode($data));
+
+    // Update shadow timestamp to current time
+    $newTimestamp = time();
+    update_post_meta($postId, $shadowMeta, $newTimestamp);
+
+    return new WP_REST_Response([
+        'success' => true,
+        'new_timestamp' => $newTimestamp
+    ], 200);
+}
+
 // Wie du die Seite aufrufbar machst
 // Falls du die Daten doch im Browser (z. B. zu Debugging-Zwecken) sehen möchtest, müsstest du zwei Dinge ändern:
 // A) Die CPT-Registrierung anpassen: Du musst den Post-Type "abfragbar" machen.

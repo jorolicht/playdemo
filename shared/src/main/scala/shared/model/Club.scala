@@ -4,6 +4,7 @@ import upickle.default.*
 import shared.basic.AppError
 import shared.basic.*
 import scala.util.control.NonFatal
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Represents a club of a player.
@@ -18,6 +19,61 @@ import scala.util.control.NonFatal
  *   1 -> federation nickname
  */
 
+
+val abbreviationMap = Map(
+  "hsv" -> "hamburger sv",
+  "fcb" -> "bayern munchen",
+  "bvb" -> "borussia dortmund"
+)
+
+def jaroWinkler(s1: String, s2: String): Double = {
+  if (s1 == s2) return 1.0
+  if (s1.isEmpty || s2.isEmpty) return 0.0
+
+  val matchDistance = (Math.max(s1.length, s2.length) / 2) - 1
+  val s1Matches = Array.fill[Boolean](s1.length)(false)
+  val s2Matches = Array.fill[Boolean](s2.length)(false)
+
+  var matches = 0
+  var transpositions = 0
+
+  for (i <- s1.indices) {
+    val start = Math.max(0, i - matchDistance)
+    val end = Math.min(i + matchDistance + 1, s2.length)
+
+    var j = start
+    var found = false
+    while (j < end && !found) {
+      if (!s2Matches(j) && s1(i) == s2(j)) {
+        s1Matches(i) = true
+        s2Matches(j) = true
+        matches += 1
+        found = true
+      }
+      j += 1
+    }
+  }
+
+  if (matches == 0) return 0.0
+
+  var k = 0
+  for (i <- s1.indices if s1Matches(i)) {
+    while (!s2Matches(k)) k += 1
+    if (s1(i) != s2(k)) transpositions += 1
+    k += 1
+  }
+
+  val m = matches.toDouble
+  val jaro =
+    (m / s1.length +
+      m / s2.length +
+      (m - transpositions / 2.0) / m) / 3.0
+
+  val prefixLength = s1.zip(s2).takeWhile { case (a, b) => a == b }.length min 4
+  jaro + (prefixLength * 0.1 * (1 - jaro))
+}
+
+
 case class WpInfo(
   cptMetaName: String,
   postId:      Long,
@@ -26,10 +82,12 @@ case class WpInfo(
   
 
 case class Club(
-  wp:      WpInfo,
-  id:      Long,
-  name:    String,
-  ctt:     Option[ClubCTT] = None
+  wp:             WpInfo,
+  id:             Int,
+  name:           String,
+  normalizedName: String,
+  ctt:            Option[ClubCTT] = None,
+  active:         Boolean = true 
 ) derives ReadWriter:
 
   /** Hash based only on club name */
@@ -96,4 +154,42 @@ object Club:
     catch
       case NonFatal(_) =>
         Left(AppError("err0056.decode.Clubs", json.take(20), "", "Club.decodeSeq"))
+
+
+  def normalize(name: String): String =
+
+    val lower = name.toLowerCase
+      .replace("ü", "ue")
+      .replace("ö", "oe")
+      .replace("ä", "ae")
+      .replace("ß", "ss")
+
+    val expanded =
+      abbreviationMap.foldLeft(lower) {
+        case (acc, (abbr, full)) =>
+          acc.replaceAll(s"\\b$abbr\\b", full)
+      }
+
+    val cleaned = expanded
+      .replaceAll("[^a-z0-9 ]", " ")
+      .replaceAll("\\b(fc|ev|e v|verein|club)\\b", "")
+      .replaceAll("\\b19\\d{2}\\b", "")
+      .replaceAll("\\b1\\b", "")
+      .replaceAll("\\s+", " ")
+      .trim
+
+    // Tokens sortieren → Wortreihenfolge egal
+    cleaned.split(" ").filter(_.nonEmpty).sorted.mkString(" ")
+
+
+  def findSimilar(newClub: String, clubs: ArrayBuffer[Club], threshold: Double = 0.90): Option[(Int, Double)] = 
+    clubs
+      .map { existing =>
+        val score = jaroWinkler(normalize(newClub), existing.normalizedName)
+        (existing.id, score)
+      }
+      .maxByOption(_._2)
+      .filter(_._2 >= threshold)
+  
+       
 

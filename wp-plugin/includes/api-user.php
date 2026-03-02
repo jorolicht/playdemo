@@ -45,3 +45,36 @@ function playdemo_api_callback_user($request) {
         'time'          => current_time('mysql'),
     ];
 }
+
+
+add_action('rest_api_init', function () {
+
+    register_rest_route('tourney/v1', '/issue-jwt', [
+        'methods' => 'POST',
+        'permission_callback' => function (WP_REST_Request $request) {
+
+            $nonce = $request->get_header('X-WP-Nonce');
+
+            if (!wp_verify_nonce($nonce, 'wp_rest')) {
+                return new WP_Error('invalid_nonce', 'Invalid nonce', ['status' => 403]);
+            }
+
+            return is_user_logged_in();
+        },
+        'callback' => function () {
+
+            $user = wp_get_current_user();
+
+            $payload = [
+                'iss' => get_bloginfo('url'),
+                'iat' => time(),
+                'exp' => time() + 3600,
+                'user_id' => $user->ID
+            ];
+
+            $jwt = JWT::encode($payload, JWT_AUTH_SECRET_KEY, 'HS256');
+
+            return ['token' => $jwt];
+        }
+    ]);
+});
