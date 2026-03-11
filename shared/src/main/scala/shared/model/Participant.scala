@@ -48,14 +48,14 @@ object SNO:
     def singleId: PlayerId =
       val p = parts
       if p.length == 1 then
-        PlayerId(p(0).toLong)
+        PlayerId(p(0).toInt)
       else 
         PlayerId(0)
 
     def doubleId: (PlayerId, PlayerId) =
       val p = parts
       if p.length == 2 then
-        (PlayerId(p(0).toLong), PlayerId(p(1).toLong))
+        (PlayerId(p(0).toInt), PlayerId(p(1).toInt))
       else 
         (PlayerId(0), PlayerId(0))        
 
@@ -63,7 +63,7 @@ object SNO:
     def singleIdOpt: Option[PlayerId] =
       val p = parts
       if p.length == 1 then
-        val v = p(0).toLong
+        val v = p(0).toInt
         if v > 0 then Some(PlayerId(v))
         else None
       else None
@@ -72,8 +72,8 @@ object SNO:
       val p = parts
       if p.length == 2 then
         Some(
-          PlayerId(p(0).toLong),
-          PlayerId(p(1).toLong)
+          PlayerId(p(0).toInt),
+          PlayerId(p(1).toInt)
         )
       else None
 
@@ -143,22 +143,6 @@ object PantStatus:
     )
 
 
-
-/**
- *  Single/Double/Team to Competition mapping entry
- */
-case class Pant2Comp (
-  val sno:       SNO,            // mapping of player identifier to start numbers = sno1 <MD> sno2 <MD> ...
-                                 // player/double or team gets a participant of the competition
-                                 // participants are identified by start numbers (sno) 
-  val coId:      Long, 
-  var ident:     String,
-  var placement: String,           // format <position> or <fromPosition>.<toPosition>
-  var status:    PantStatus                           
-
-) derives ReadWriter
-
-
 /**
  * Pant = Participant Entry inside a competition.
  *
@@ -169,10 +153,11 @@ case class Pant2Comp (
  */
 case class Pant(
   id:      SNO,
-  name:    String,
-  club:    String,
-  rating:  Int,
+  name:    String = "",
+  club:    String = "",
+  rating:  Int = 0,
   qInfo:   String = "",
-  place:   (Int, Int) = (0, 0)
+  place:   (Int, Int) = (0, 0),
+  status:  PantStatus = PantStatus.UNKN,
+  var ident: String = ""
 ) derives ReadWriter
-

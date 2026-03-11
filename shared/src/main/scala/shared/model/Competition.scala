@@ -2,6 +2,8 @@ package shared.model
 
 import upickle.default.*
 import shared.basic.AppError
+import scala.collection.mutable. { ArrayBuffer, Map, Stack }
+
 
 enum CompTyp(val id: Int):
   case UNKN   extends CompTyp(0)
@@ -131,7 +133,7 @@ object CompId:
   // rather than letting the compiler search for one.
   given Ordering[CompId] = Ordering.Int
 
-// We use ReadWriter.join(IntReader, IntWriter) to avoid 
+  // We use ReadWriter.join(IntReader, IntWriter) to avoid 
   // the 'readwriter[Int]' macro search entirely.
   given rw: ReadWriter[CompId] = 
     ReadWriter.join(IntReader, IntWriter).bimap(
@@ -146,28 +148,23 @@ case class Competition(
   typ:                  CompTyp,
   startDate:            String,
   var status:           CompStatus,
-  var compRoundStart:   CompRoundId = CompRoundId(0),                 // id of first/start CompRound
-  var compRoundList:    Seq[CompRoundId] = Seq.empty,    // list of round ids in this competition
+  var startRound:       Option[RoundId] = None,    // id of first/start Round
   var activ:            Boolean = true,
   var webRegister:      Boolean = false,
   var lowLevel:         Option[Int] = None,
   var upperLevel:       Option[Int] = None,
-  var cttInfo:          Option[CompCTT] = None
+  var cttInfo:          Option[CompCTT] = None,
+  val pants:            ArrayBuffer[Pant] = ArrayBuffer(),
+  var timestamp:        Long = 0L
 ):
+  var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
 
-  def hash: Int =
-    s"$name${typ.id}$startDate${getFromTTR}${getToTTR}".hashCode
-
-  def setTyp(value: String): Competition =
-    copy(typ = CompTyp.fromString(value))
-
-  def getAgeGroup: String =
-    cttInfo.map(_.ageGroup).getOrElse("")
-
+  def hash: Int = s"$name${typ.id}$startDate${getFromTTR}${getToTTR}".hashCode
+  def equal(co: Competition): Boolean = hash == co.hash
+  def setTyp(value: String): Competition = copy(typ = CompTyp.fromString(value))
+  def getAgeGroup: String = cttInfo.map(_.ageGroup).getOrElse("")
   def getRatingLowLevel: Int = lowLevel.getOrElse(0)
-  
   def getRatingUpperLevel: Int = upperLevel.getOrElse(0)
-
   def getFromTTR: String =
     if getRatingLowLevel > 0 then f"${getRatingLowLevel}%04d"
     else "0000"
@@ -176,9 +173,15 @@ case class Competition(
     if getRatingUpperLevel > 0 then f"${getRatingUpperLevel}%04d"
     else "XXXX"
 
-  def equal(co: Competition): Boolean =
-    hash == co.hash
-
 
 object Competition:
   given ReadWriter[Competition] = macroRW
+
+
+object CompDB:
+  val MaxRound = 32
+  val comps: Array[Competition] = Array.fill(MaxRound)(null)
+  var compIdx: Map[CompId, Int] = Map.empty
+
+  private val free = Stack.from(0 until MaxRound)
+  

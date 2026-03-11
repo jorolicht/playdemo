@@ -1,8 +1,10 @@
 package shared.model
 
 import upickle.default.*
-import scala.util.hashing.MurmurHash3
+import scala.collection.mutable.{ ArrayBuffer, Map }
 import shared.basic.AppError
+import shared.model.PlayerId.*
+
 
 /**
  * Sex ADT (replaces Scala 2 Enumeration)
@@ -39,24 +41,28 @@ case class PlayerMeta(
 ) derives ReadWriter
 
 
-opaque type PlayerId = Long
+opaque type PlayerId = Int
 
 object PlayerId:
+  def apply(value: Int): PlayerId = value
 
-  def apply(value: Long): PlayerId =
-    value
-
-  def fromLong(value: Long): PlayerId =
-    value
-
-  extension (id: PlayerId)
-    def value: Long = id
-
-  given ReadWriter[PlayerId] =
-    readwriter[Long].bimap[PlayerId](
-      _.value,
-      PlayerId(_)
+  // We use 'IntReader' and 'IntWriter' specifically to avoid 
+  // the 'readwriter[Int]' macro search.
+  given rw: ReadWriter[PlayerId] = 
+    ReadWriter.join(IntReader, IntWriter).bimap(
+      (id: PlayerId) => id.value,
+      (value: Int) => PlayerId(value)
     )
+  
+  extension (id: PlayerId)
+    def value: Int = id
+
+    def idx: Int = id - 1
+
+    def isValid(max: Int): Boolean =
+      id >= 1 && id <= max    
+
+
 
 /**
  * Immutable Player domain model.
@@ -69,19 +75,16 @@ object PlayerId:
  */
 case class Player(
   id: PlayerId = PlayerId(0),
-  clubId: Long = 0,
-  clubName: String = "",
   firstName: String,
   lastName: String,
+  clubId: Int = 0,
   birthYear: Option[Int] = None,
   email: Option[String] = None,
   sex: Sex = Sex.Unknown,
-  meta: PlayerMeta = PlayerMeta()
+  var active: Boolean = true,
+  var merge: Option[PlayerId] = None,
+  var meta: PlayerMeta = PlayerMeta()
 ) derives ReadWriter:
-
-
-  /** JSON encoding */
-  def encode: String = write(this)
 
   def fullName: String =
     s"$firstName $lastName"
@@ -108,82 +111,95 @@ case class Player(
   def birthyearString: String =
     birthYear.map(_.toString).getOrElse("")
 
-  /** Club display */
-  def formattedClub(showId: Boolean = false): String =
-    if showId && clubId != 0 then s"$clubName [$clubId%03d]"
-    else clubName
 
 
 object Player:
+  given ReadWriter[Player] = macroRW
 
-  private def normalize(s: String): String =
-    s.trim.toLowerCase
-
-  def generateId(
-      firstName: String,
-      lastName: String,
-      clubName: String,
-      birthYear: Int
-  ): PlayerId =
-
-    val input =
-      s"${normalize(firstName)}|${normalize(lastName)}|${normalize(clubName)}|$birthYear"
-
-    val hash =
-      MurmurHash3.stringHash(input)
-
-    val hash2 =
-      MurmurHash3.stringHash(input, hash)
-
-    val longId =
-      (hash.toLong << 32) | (hash2.toLong & 0xffffffffL)
-
-    PlayerId(longId)
+object PlayerDB:
+  val players: ArrayBuffer[Player] = ArrayBuffer()
+  var playerIdxName    : Map[(String,String,Int), ArrayBuffer[PlayerId]] = Map.empty
+  var playerIdxLicence : Map[String, PlayerId] = Map.empty
+  var playerIdxEmail   : Map[String, PlayerId] = Map.empty
+  var timestamp: Int = 0
+  
+  private def keyOf(p: Player): (String, String, Int) =
+    (
+      p.lastName.trim.toLowerCase,
+      p.firstName.trim.toLowerCase,
+      p.clubId
+    )
 
 
   /**
-   * Safe JSON decoding
+   * Add player if no identical player exists.
+   * Unique key: firstName + lastName + clubId + birthYear
    */
-  def decode(json: String): Either[AppError, Player] =
-    try Right(read[Player](json))
-    catch
-      case e: Throwable =>
-        Left(AppError("err.decode.player", json.take(30), e.getMessage))
+  def add(player: Player): Either[AppError, PlayerId] =
+    val key = keyOf(player)
 
-  /**
-   * Parse from simple CSV format:
-   * lastname,firstname,club,ttr,birthyear,sex,email
-   */
-  def fromCSV(csv: String): Either[AppError, Player] =
-    val parts = csv.split(',').map(_.trim)
+    playerIdxName.get(key) match
+      case Some(ids) =>
+        val duplicate =
+          ids.exists { id =>
+            val p = players(id.idx)
+            p.birthYear == player.birthYear && p.active
+          }
 
-    def toIntSafe(s: String): Option[Int] =
-      s.toIntOption
-
-    parts.length match
-      case 7 | 6 | 5 | 4 | 3 =>
-        val lastname  = parts.lift(0).getOrElse("")
-        val firstname = parts.lift(1).getOrElse("")
-        val club      = parts.lift(2).getOrElse("")
-        val ttr       = parts.lift(3).flatMap(toIntSafe)
-        val birthyear = parts.lift(4).flatMap(toIntSafe)
-        val sex       = parts.lift(5).flatMap(toIntSafe).map(Sex.fromInt).getOrElse(Sex.Unknown)
-        val email     = parts.lift(6).filter(_.nonEmpty)
-
-        if lastname.isEmpty then
-          Left(AppError("err.csv.player.empty.lastname"))
+        if duplicate then
+          Left(AppError("Player already exists"))
         else
-          Right(
-            Player(
-              clubName = club,
-              firstName = firstname,
-              lastName = lastname,
-              birthYear = birthyear,
-              email = email,
-              sex = sex,
-              meta = PlayerMeta(ttr = ttr)
-            )
-          )
+          insert(player)
 
-      case _ =>
-        Left(AppError("err.csv.player.invalid.format"))
+      case None =>
+        insert(player)
+
+
+  private def insert(player: Player): Either[AppError, PlayerId] =
+    val newId = PlayerId(players.length + 1)
+
+    val newPlayer = player.copy(id = newId)
+
+    players += newPlayer
+
+    val key = keyOf(newPlayer)
+    val list = playerIdxName.getOrElseUpdate(key, ArrayBuffer[PlayerId]())
+    list += newId
+
+    Right(newId)
+
+
+  /**
+   * Logical delete
+   */
+  def delete(id: PlayerId): Either[AppError, Unit] =
+    
+    if id.value >= players.length then
+      Left(AppError("Player not found"))
+    else
+      val p = players(id.idx)
+      p.active = false
+      Right(())
+
+
+  /**
+   * Merge two players
+   * mergedId -> mainId
+   */
+  def merge(mainId: PlayerId, mergedId: PlayerId): Either[AppError, Unit] =
+    if !mainId.isValid(players.length) then
+      Left(AppError("Main player not found"))
+
+    if !mergedId.isValid(players.length) then
+      return Left(AppError("Merged player not found"))
+
+    if mainId == mergedId then
+      return Left(AppError("Cannot merge identical players"))
+
+    val mainPlayer = players(mainId.idx)
+    val mergedPlayer = players(mergedId.idx)
+
+    mergedPlayer.merge = Some(mainId)
+    mergedPlayer.active = false
+
+    Right(())

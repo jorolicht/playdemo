@@ -8,8 +8,8 @@ import shared.basic.*
 trait MEntry {
   def coId: CompId 
   def coTyp: CompTyp 
-  def rndId: CompRoundId
-  def rndTyp: CompRoundTyp
+  def rndId: RoundId
+  def rndTyp: RoundTyp
   def stNoA: SNO
   def stNoB: SNO
   def koRnd: Int
@@ -123,8 +123,8 @@ trait MEntry {
 
 case class MEntryBase(coId: CompId, 
                       coTyp: CompTyp, 
-                      rndId: CompRoundId, 
-                      rndTyp: CompRoundTyp, 
+                      rndId: RoundId, 
+                      rndTyp: RoundTyp, 
                       var gameNo: Int=0,
                       koRnd: Int=0, 
                       var playfield:String="", 
@@ -157,8 +157,8 @@ case class MEntryBase(coId: CompId,
 case class MEntryKo(
   val coId:   CompId,                     // competition identifier
   val coTyp:  CompTyp,                    // competition typ, e.g. CT_SINGLE, CT_DOUBLE
-  val rndId:  CompRoundId,                // competition phase identifier
-  val rndTyp: CompRoundTyp,               // competition phase type
+  val rndId:  RoundId,                // competition phase identifier
+  val rndTyp: RoundTyp,               // competition phase type
   var gameNo: Int,                        //(0) game number within phase
   
   var stNoA:  SNO,                        //(1) participant A start number
@@ -251,7 +251,7 @@ object MEntryKo {
     }
   } 
 
-  def init(coId: CompId, coTyp: CompTyp, rndId: CompRoundId, rndTyp: CompRoundTyp, stNoA: SNO, stNoB: SNO, gameNo: Int, koRnd: Int, maNo: Int,
+  def init(coId: CompId, coTyp: CompTyp, rndId: RoundId, rndTyp: RoundTyp, stNoA: SNO, stNoB: SNO, gameNo: Int, koRnd: Int, maNo: Int,
             winPos: String, looPos: String, status: Int, sets: (Int,Int), winSets: Int,
             playfield: String="", info: String="", startTime: String="", endTime: String="", result: String = "") = {
               val wl = getWinLooSingleKo(koRnd, gameNo, maNo)
@@ -263,8 +263,8 @@ object MEntryKo {
 case class MEntryGr(
   val coId:      CompId,                 // competition identifier
   val coTyp:     CompTyp,                // competition typ, e.g. CT_SINGLE, CT_DOUBLE
-  val rndId:     CompRoundId,            // competition phase identifier
-  val rndTyp:    CompRoundTyp,           // competition phase system, eg. CPT_GR, CPT_KO
+  val rndId:     RoundId,            // competition phase identifier
+  val rndTyp:    RoundTyp,           // competition phase system, eg. CPT_GR, CPT_KO
   var gameNo:    Int,                    //(0) game number within phase
   
   var stNoA:     SNO,                    //(1) participant A start number
@@ -316,15 +316,15 @@ case class MEntryGr(
 
 
 object MEntryGr {
-   def init(coId: CompId, coTyp: CompTyp, rndId: CompRoundId, rndTyp: CompRoundTyp, gameNo: Int, stNoA: SNO, stNoB: SNO, koRnd: Int, grId: Int, wgw: (Int,Int), winSets: Int) = {
+   def init(coId: CompId, coTyp: CompTyp, rndId: RoundId, rndTyp: RoundTyp, gameNo: Int, stNoA: SNO, stNoB: SNO, koRnd: Int, grId: Int, wgw: (Int,Int), winSets: Int) = {
      MEntryGr(coId, coTyp, rndId, rndTyp, gameNo, stNoA, stNoB, koRnd, grId, wgw, "_default_", "", "", "", "", "", 0, (0,0), winSets, "")
    }
 }
 
-case class MEntryTx(coId: CompId, coTyp: CompTyp, rndId: CompRoundId, rndTyp: CompRoundTyp, content: String) {
+case class MEntryTx(coId: CompId, coTyp: CompTyp, rndId: RoundId, rndTyp: RoundTyp, content: String) {
   def decode: MEntry = {
     rndTyp match {
-      case CompRoundTyp.GR | CompRoundTyp.RR => {
+      case RoundTyp.GR | RoundTyp.RR => {
       try { 
           val m = content.split("\\^")
           val (gameNo,     stNoA, stNoB,                 koRnd,      grId,       wgw1,       wgw2,       depend, trigger, playfield, info, startTime, endTime, status,      sets1,       sets2,       winSets,     result) =
@@ -332,7 +332,7 @@ case class MEntryTx(coId: CompId, coTyp: CompTyp, rndId: CompRoundId, rndTyp: Co
           MEntryGr(coId, coTyp, rndId, rndTyp, gameNo, SNO.fromString(m(1)), SNO.fromString(m(2)), koRnd, grId, (wgw1,wgw2), depend, trigger, playfield, info, startTime, endTime, status, (sets1,sets2), winSets, result)
         } catch { case _: Throwable => MEntryGr(coId, coTyp, rndId, rndTyp, 0, SNO.nn, SNO.nn, 0, 0, (0,0), "", "", "", "", "", "", 0, (0,0), 0, "") }
       }
-      case CompRoundTyp.KO => {
+      case RoundTyp.KO => {
         try { 
           val m = content.split("\\^")
           val (gameNo,     stNoA,                 stNoB,                 koRnd,      maNo,       winPos, looPos, playfield, info, startTime, endTime, status,      sets1,       sets2,       winSets,    result) =
@@ -366,7 +366,7 @@ object MEntry {
   val MS_UNKN  = 99   // finished with no winner or error
 
   // list of player currently playing in (coId, coIdPh, gameNo)
-  val playing: Map[PlayerId, HashSet[(CompId, CompRoundId, Int)]] = Map()
+  val playing: Map[PlayerId, HashSet[(CompId, RoundId, Int)]] = Map()
 
   def statusInfo(value: Int) = value match {
     case MS_RESET  => "RESET"
@@ -384,11 +384,11 @@ object MEntry {
   /** addRunning(plId: Long, gaId: (Long,Int,Int))
    *  game identifier = tripple (competition identifier, competition phase identifier, game number)
    */
-  def addPlayerRunning(plId: PlayerId, gaId: (CompId, CompRoundId, Int)) = {
+  def addPlayerRunning(plId: PlayerId, gaId: (CompId, RoundId, Int)) = {
     // println(s"addPlayerRunning: ${plId} game: ${gaId._3}")
     if (plId.value > 0) { if (playing.contains(plId)) { playing(plId) += gaId } else { playing(plId) = HashSet(gaId) } }  
   }  
-  def removePlayerRunning(plId: PlayerId, gaId: (CompId, CompRoundId, Int)) = {
+  def removePlayerRunning(plId: PlayerId, gaId: (CompId, RoundId, Int)) = {
     if (plId.value > 0 && playing.contains(plId)) { playing(plId) -= (gaId) }
   }  
 

@@ -40,7 +40,7 @@ object GroupEntry {
  * val tup2     = """\((\d+),(\d+)\)""".r 
  */
 class Group(val grId: Int, val size: Int, val quali: Int, val name: String, noWinSets: Int) {
-  var pants      = Array.fill[Pant](size) (Pant(SNO.nn, "", "", 0, "", (0,0)))                      
+  var pants      = Array.fill[Pant](size) (Pant(SNO.nn))                     
   val results    = Array.fill[GroupEntry](size, size) (GroupEntry(false, (0,0), (0,0), (0,0), Array("")))
   var points     = Array.fill[(Int, Int)](size) ((0,0))
   var sets       = Array.fill[(Int, Int)](size) ((0,0))
