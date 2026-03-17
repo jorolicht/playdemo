@@ -12,6 +12,75 @@ import base.Logging.*
 import base.*
 import shared.basic.*
 
+
+// PlayerApi - example of an authenticated API call using JWT token
+// object PlayerApi:
+//   def list()(using cw: ComWrapper): Future[Either[AppError,List[Player]]] =
+//     AuthComWrapper.ajaxGetAuth[List[Player]](
+//       "/wp-json/tourney/v1/players"
+//     )
+
+// Example usage of PlayerApi.list() - this would typically be called from a component or service that needs the player list
+// PlayerApi.list().map {
+//   case Right(players) =>
+//     println(players)
+//   case Left(err) =>
+//     println(err)
+// }
+
+// Example of how to use the ComWrapper for an authenticated POST request
+// case class CreatePlayer(name: String)
+// case class Player(id: Int, name: String)
+
+// AuthComWrapper.ajaxPostAuth[CreatePlayer, Player](
+//   "/wp-json/tourney/v1/player",
+//   data = CreatePlayer("Roger")
+// )
+
+object AuthComWrapper:
+
+  def ajaxGetAuth[T](
+      route: String,
+      params: List[(String,String)] = Nil
+  )(using cw: ComWrapper, r: Reader[T], ct: ClassTag[T]): Future[Either[AppError,T]] =
+
+    JwtService.getToken.flatMap {
+      case Right(token) =>
+        cw.ajaxGet[T](
+          route,
+          params,
+          hdrs = Map("Authorization" -> s"Bearer $token"),
+          host = Global.homeUrl
+        )
+      case Left(err) =>
+        Future.successful(Left(err))
+    }
+
+  def ajaxPostAuth[IN, OUT](
+      route: String,
+      params: List[(String,String)] = Nil,
+      data: IN,
+      hdrs: Map[String,String] = Map("Content-Type" -> "application/json")
+  )(using cw: ComWrapper, r: Reader[OUT], ct: ClassTag[OUT], w: Writer[IN]): Future[Either[AppError, OUT]] =
+
+    JwtService.getToken.flatMap {
+      case Right(token) =>
+        val headers = hdrs ++ Map("Authorization" -> s"Bearer $token")
+
+        cw.ajaxPost[IN, OUT](
+          route = route,
+          params = params,
+          data = data,
+          hdrs = headers,
+          host = Global.homeUrl
+        )
+
+      case Left(err) =>
+        Future.successful(Left(err))
+    }
+
+
+
 trait ComWrapper: 
 
   def ajaxPost[IN, OUT](

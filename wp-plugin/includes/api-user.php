@@ -1,5 +1,9 @@
 <?php
 
+require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
+
+use Firebase\JWT\JWT;
+
 // Registrierung des API-Endpunkts
 // Permalink Einstellungen auf Beiträge setzen, damit die REST API funktioniert
 add_action('rest_api_init', function () {
@@ -61,6 +65,33 @@ add_action('rest_api_init', function () {
 
             return is_user_logged_in();
         },
+        'callback' => function () {
+
+            $user = wp_get_current_user();
+
+            $payload = [
+                'iss' => get_bloginfo('url'),
+                'iat' => time(),
+                'exp' => time() + 3600,
+                'user_id' => $user->ID
+            ];
+
+            $jwt = JWT::encode($payload, JWT_AUTH_SECRET_KEY, 'HS256');
+
+            return ['token' => $jwt];
+        }
+    ]);
+});
+
+add_action('rest_api_init', function () {
+
+    register_rest_route('tourney/v1', '/get-jwt-token', [
+        'methods' => 'POST',
+
+        'permission_callback' => function () {
+            return current_user_can('read');
+        },
+
         'callback' => function () {
 
             $user = wp_get_current_user();

@@ -37,6 +37,9 @@ trait Mgmt extends JsWrapper:
     else   
       error(s"exec -> usecase:Error ${err}")
 
+enum AuthMode:
+  case Nonce
+  case AppPassword
 
 object Global:
   import shared.model.User
@@ -49,6 +52,10 @@ object Global:
   var dataUrl = ""
   var playUrl = ""
   var pageId  = 0
-  var nonce   = ""
+  var wpNonce   = ""
+
+  var authMode: AuthMode = AuthMode.Nonce
+  var wpUserName: String = ""
+  var wpAppPassword: String = ""
 
                             

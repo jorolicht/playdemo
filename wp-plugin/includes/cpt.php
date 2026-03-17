@@ -28,23 +28,42 @@ add_action('init', 'trny_custom_post_type');
 
 function register_trny_custom_meta_fields() {
     $meta_fields = [
-        'basic'      => 'Turniergrunddaten',
-        'clubs'        => 'Vereine',
-        'competitions' => 'Wettbewerbe',
-        'player'       => 'Spieler',
-        'pants'        => 'Teilnehmer'
+        'basic'         => 'Turniergrunddaten',
+        'clubs'         => 'Vereine',
+        'competitions'  => 'Wettbewerbe',
+        'players'       => 'Spieler'
     ];
 
+    // Runden 001–128 hinzufügen
+    for ($i = 1; $i <= 128; $i++) {
+        $key = sprintf('round%03d', $i);
+        $meta_fields[$key] = 'Runde ' . $i;
+    }
+
     foreach ( $meta_fields as $key => $description ) {
+
+        // Hauptfeld
         register_post_meta( 'tourney', $key, array(
             'show_in_rest'      => true,
             'single'            => true,
-            'type'              => 'string', // Auch für JSON-Strings 'string' nutzen
+            'type'              => 'string',
             'auth_callback'     => function() {
                 return current_user_can( 'edit_posts' );
             },
-            'sanitize_callback' => 'sanitize_text_field',
+            'sanitize_callback' => null,
             'description'       => $description,
+        ) );
+
+        // Shadow Timestamp Feld
+        register_post_meta( 'tourney', "_{$key}_ts", array(
+            'show_in_rest'      => true,
+            'single'            => true,
+            'type'              => 'integer',
+            'auth_callback'     => function() {
+                return current_user_can( 'edit_posts' );
+            },
+            'sanitize_callback' => 'absint',
+            'description'       => $description . ' Timestamp',
         ) );
     }
 }

@@ -3,7 +3,7 @@ package addon
 import java.util.UUID
 import cats.data.EitherT
 import cats.syntax.all._  
-
+import scala.util.control.NonFatal
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
@@ -12,19 +12,65 @@ import shared.basic.*
 import base.*
 import services.*
 
+val authMode: AuthMode = AuthMode.AppPassword
+val wpUserName: String = "robert"
+val wpAppPassword: String = "mx5dkwkidnTmNavhDnSeVmqK"
+
+def getTokenInfo(using cw: ComWrapper): Future[Either[AppError, String]] =
+  JwtService.getToken.map {
+    case Right(token) =>
+      printTokenInfo(token)
+      Right("Token info printed to console")
+    case Left(err) =>
+      Left(err)
+  } 
+  
+def printTokenInfo(token: String): Unit =
+  try
+      val parts = token.split("\\.")
+
+      if parts.length < 2 then
+        println("JWT Debug: invalid token format")
+        return
+
+      val headerJson = new String(java.util.Base64.getUrlDecoder.decode(parts(0)), "UTF-8")
+      val payloadJson = new String(java.util.Base64.getUrlDecoder.decode(parts(1)), "UTF-8")
+
+      println("---- JWT DEBUG ----")
+      println(s"header : $headerJson")
+      println(s"payload: $payloadJson")
+
+      JwtService.decodePayload(token).foreach { p =>
+        val now = System.currentTimeMillis() / 1000
+        val ttl = p.exp - now
+
+        println(s"user_id : ${p.user_id}")
+        println(s"issued  : ${p.iat}")
+        println(s"expires : ${p.exp}")
+        println(s"ttl(sec): $ttl")
+      }
+
+      println("-------------------")
+
+  catch
+      case NonFatal(e) =>  println(s"JWT Debug failed: ${e.getMessage}")    
+
+
+
 object TestAuth extends Authentication with ComWrapper with JsWrapper:
 
   def exec(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     number match 
-      case 1 => testBasic_sha256(group, number, param)
-      case 2 => testBasic_checkPasswordFormat(group, number, param)
-      case 3 => testBasic_regUser(group, number, param)
-      case 4 => testBasic_login(group, number, param)
-      case 5 => testBasic_verifyUser(group, number, param)
-      case 6 => testBasic_getVerifyLink(group, number, param)
-      case 7 => testBasic_getUserInfo(group, number, param)
-      case 8 => testBasic_setUserPassword(group, number, param)
-      case 9 => testBasic_checkUserAuth(group, number, param)
+      case 1  => testBasic_sha256(group, number, param)
+      case 2  => testBasic_checkPasswordFormat(group, number, param)
+      case 3  => testBasic_regUser(group, number, param)
+      case 4  => testBasic_login(group, number, param)
+      case 5  => testBasic_verifyUser(group, number, param)
+      case 6  => testBasic_getVerifyLink(group, number, param)
+      case 7  => testBasic_getUserInfo(group, number, param)
+      case 8  => testBasic_setUserPassword(group, number, param)
+      case 9  => testBasic_checkUserAuth(group, number, param)
+      case 10 => testBasic_getJwt(group, number, param)
       case _ => 
         addOutput(s"FAILED: ${group}-Test:${number} param:${param} unknown test number")
         Future(Left(AppError("unknonw test number")))
@@ -137,4 +183,22 @@ object TestAuth extends Authentication with ComWrapper with JsWrapper:
       case Left(err)   => addOutput(s"ERROR: ${err}");       Left(err)
       case Right(res)  => addOutput(s"RESULT: res->${res}"); Right(s"FINISHED ${NAME}: ${group}-Test:${number} param:${param}")
     }
+
+  // http://localhost:9000/usecase/Console?param=test_--group_auth_--number_10_--param_xx  
+  def testBasic_getJwt(group: String, number: Int, param: String): Future[Either[AppError, String]] =
+    val NAME = "testBasic_getJwt"
+
+    Global.authMode = AuthMode.AppPassword
+    Global.wpUserName = wpUserName
+    Global.wpAppPassword = wpAppPassword
+
+    object DefaultComWrapper extends ComWrapper
+    given ComWrapper = DefaultComWrapper
+
+    getTokenInfo.map {
+      case Left(err)   => addOutput(s"ERROR: ${err}");       Left(err)
+      case Right(res)  => addOutput(s"RESULT: res->${res}"); Right(s"FINISHED ${NAME}: ${group}-Test:${number} param:${param}")
+    } 
+
+   
 

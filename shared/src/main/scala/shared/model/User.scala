@@ -20,3 +20,14 @@ object User:
   implicit val rw: RW[User] = macroRW
   def apply(id: String, email: String, entryTime:Long) = 
     new User(id, email, "", "", "", "", "", false, entryTime)
+
+case class UserInfo(
+  username: String,
+  user_id: Int,
+  email: String,
+  club: String,
+  time: String
+)
+
+object UserInfo:
+  given Reader[UserInfo] = macroR

@@ -7,8 +7,6 @@ import scala.scalajs.js
 import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.*
 
-
-// import scala.collection.mutable.Map
 import services.ComWrapper
 import base.{ Global, JsWrapper, _ }
 import comps.{ CompBase, Navbar, Sidebar }
@@ -66,20 +64,21 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
 
 
   def startWp(): Unit = 
+    import shared.model.UserInfo
     import cats.data.EitherT
     import cats.implicits._ 
 
     Global.playUrl = getData(gE(ParamId),"playurl","")
     Global.homeUrl = getData(gE(ParamId), "homeurl", "")
-    Global.nonce   = getData(gE(ParamId), "nonce", "")
+    Global.wpNonce   = getData(gE(ParamId), "nonce", "")
     Global.pageId  = getData(gE(ParamId), "pageid", 0)
 
-    debug(s"wpStart -> playUrl:${Global.playUrl} homeUrl: ${Global.homeUrl} lang: ${Global.lang} nonce: ${Global.nonce} pageId: ${Global.pageId}")
+    debug(s"wpStart -> playUrl:${Global.playUrl} homeUrl: ${Global.homeUrl} lang: ${Global.lang} nonce: ${Global.wpNonce} pageId: ${Global.pageId}")
 
     // init wordpress main page
     Wordpress.render("")
 
-    ajaxGet[String]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.nonce), Global.homeUrl).map { 
+    ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl).map { 
       case Left(err)  => error(s"Fehler: ${err}")
       case Right(res) => debug(s"Result: ${res}")  
     }

@@ -10,6 +10,7 @@ case class AppError(msgCode:String, var in1:String="", var in2:String="", var ca
   def is(code: String): Boolean = { this.msgCode == code }
   def add(func: String): AppError = { callStack = s"${func}:${callStack}"; this} 
   def isDummy  = (msgCode == "")
+  def msg = s"AppError: ${msgCode} in1:${in1} in2:${in2} callStack:${callStack}"
 
 object AppError: 
   implicit val rw: RW[AppError] = macroRW

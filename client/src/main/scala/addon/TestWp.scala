@@ -29,7 +29,7 @@ object TestWp extends Authentication:
   def testWp_saveJson(group: String, number: Int, param: String): Future[Either[AppError, String]] = 
     val people = People("Robert", 63)
     ajaxPost[People, String]("/wp-json/tourney/v1/set-meta/ftp", List(("key","basic")), people,
-                    Map("Content-Type"->"application/json", "X-WP-NONCE"->Global.nonce),
+                    Map("Content-Type"->"application/json", "X-WP-NONCE"->Global.wpNonce),
                     Global.homeUrl).map {
       case Left(err) => addOutput(s"ERROR: ${err}");        Left(err)
       case Right(res) => addOutput(s"RESULT: res->${res}"); Right(s"FINISHED: ${group}-Test:${number} param:${param}")
@@ -38,7 +38,7 @@ object TestWp extends Authentication:
   def testWp_readJson(group: String, number: Int, param: String): Future[Either[AppError, String]] = 
 
     ajaxGet[People]("/wp-json/tourney/v1/get-meta/ftp", List(("key","basic")), 
-                    Map("Content-Type"->"application/json", "X-WP-NONCE"->Global.nonce),
+                    Map("Content-Type"->"application/json", "X-WP-NONCE"->Global.wpNonce),
                     Global.homeUrl).map {
       case Left(err) => addOutput(s"ERROR: ${err}");        Left(err)
       case Right(res) => addOutput(s"RESULT: res->${res}"); Right(s"FINISHED: ${group}-Test:${number} param:${param}")

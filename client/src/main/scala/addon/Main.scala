@@ -110,12 +110,12 @@ object DebugConsole extends JsWrapper:
 
     class ConfTest(arguments: Seq[String]) extends ScallopConf(arguments) {  
       override def onError(e: Throwable): Unit = e match { case _ => addOutput(getFullHelpString()) }
-      banner("""Usage: test --group [basic | dialog | auth | html | wp] --number <number> --param <value> 
+      banner("""Usage: test --group [basic | dialog | auth | html | wp | club] --number <number> --param <value> 
                |select a test group and specify the test number and the param for the test
                |
                |""".stripMargin)
 
-      val group  = choice(name="group", choices=Seq("basic", "dialog", "auth", "html", "wp"))
+      val group  = choice(name="group", choices=Seq("basic", "dialog", "auth", "html", "wp", "club"))
       val number = opt[Int](name="number")
       val param  = opt[String](name="param")  
       verify()
@@ -133,5 +133,6 @@ object DebugConsole extends JsWrapper:
         case "auth"      => TestAuth.exec(group, number, param)
         case "html"      => TestHtml.exec(group, number, param)
         case "wp"        => TestWp.exec(group, number, param)
+        case "club"      => TestClub.exec(group, number, param)
         case _           => Future(Left(AppError("command.invalid"))) 
     catch { case _:Exception => Future(Left(AppError("command.invalid"))) }
