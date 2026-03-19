@@ -122,11 +122,17 @@ lazy val server = project
 
       val wpJsDestination = file("wp-plugin/js")
       val wpCssDestination = file("wp-plugin/css")
+      // 2. Zielverzeichnisse definieren
+      val wpJsDestination2 = file("server/docker/wp_data/wp-content/plugins/playdemo/js")
+      val wpCssDestination2 = file("server/docker/wp_data/wp-content/plugins/playdemo/css")
+
       val viteDestinationDir = baseDirectory.value / ".." / "client" / "vite"
 
       IO.copyDirectory(clientTargetDir, viteDestinationDir)
       IO.copyDirectory(clientTargetDir, wpJsDestination)
       IO.copyDirectory(clientCssSource, wpCssDestination)
+      IO.copyDirectory(clientTargetDir, wpJsDestination2)
+      IO.copyDirectory(clientCssSource, wpCssDestination2)
 
       log.info(s"Copied files to vite and wordpress")
     },

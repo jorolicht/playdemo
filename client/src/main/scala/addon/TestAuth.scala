@@ -17,13 +17,37 @@ val wpUserName: String = "robert"
 val wpAppPassword: String = "mx5dkwkidnTmNavhDnSeVmqK"
 
 def getTokenInfo(using cw: ComWrapper): Future[Either[AppError, String]] =
-  JwtService.getToken.map {
-    case Right(token) =>
-      printTokenInfo(token)
-      Right("Token info printed to console")
-    case Left(err) =>
-      Left(err)
-  } 
+
+    // 1. Credentials zusammenbauen
+    val credentials = s"${Global.wpUserName}:${Global.wpAppPassword}"
+
+    // 2. Base64 Kodierung (Sicherstellen, dass keine Newlines entstehen)
+    // In Scala.js / Browser-Umfeld kann man auch 'btoa' nutzen, 
+    // aber java.util.Base64 ist in Scala 3 meist stabiler.
+    val basicAuth = java.util.Base64.getEncoder.encodeToString(credentials.getBytes("UTF-8"))
+
+    println(s"1. Credentials: $credentials")
+    println(s"2. Sending Auth Header: Basic $basicAuth")
+
+    cw.ajaxPost[Map[String, String], JwtResponse](
+        route = "/wp-json/tourney/v1/get-jwt-token",
+        params = Nil,
+        data = Map.empty, // Leer lassen, da curl auch keinen Body sendet
+        hdrs = Map(
+            "Authorization" -> s"Basic $basicAuth"
+        ),
+        host = Global.homeUrl,
+        cred = false
+    ).map {
+        case Right(resp) =>
+            val token = resp.token
+            printTokenInfo(token)
+            Right("Token info printed to console")
+        case Left(err) =>
+            Left(err)
+    }
+
+
   
 def printTokenInfo(token: String): Unit =
   try
@@ -188,7 +212,8 @@ object TestAuth extends Authentication with ComWrapper with JsWrapper:
   def testBasic_getJwt(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     val NAME = "testBasic_getJwt"
 
-    Global.authMode = AuthMode.AppPassword
+    //Global.authMode = AuthMode.AppPassword
+    Global.authMode = AuthMode.Nonce
     Global.wpUserName = wpUserName
     Global.wpAppPassword = wpAppPassword
 

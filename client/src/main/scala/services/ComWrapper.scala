@@ -89,7 +89,8 @@ trait ComWrapper:
     data: IN,
     hdrs: Map[String,String] =
       Map("Content-Type" -> "application/json", "Csrf-Token" -> Global.csrf),
-    host: String = Global.playUrl
+    host: String = Global.playUrl,
+    cred: Boolean = true
   )(
     using
       r: Reader[OUT],
@@ -103,7 +104,7 @@ trait ComWrapper:
         s"data:${write(data).take(20)} " +
         s"hdrs:${hdrs.mkString(", ")}"
       )
-      Ajax.post(genPath(host, route, params), write(data), headers = hdrs)
+      Ajax.post(genPath(host, route, params), write(data), headers = hdrs, withCredentials = cred)
         .map(_.responseText).map(content => Return.decode[OUT](content) )
         .recover({
           // Recover from a failed error code into a successful future

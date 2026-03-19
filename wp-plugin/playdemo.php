@@ -56,63 +56,7 @@ require_once PLAYPLUGIN_PATH . 'includes/settings.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-user.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-json.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-set-meta.php';
-#require_once PLAYPLUGIN_PATH . 'includes/helpers.php';
-
-
-function pdemo_custom_post_type() {
-    register_post_type('playdemo',
-        array(
-            'labels'      => array(
-                'name'          => 'Playdemos',
-                'singular_name' => 'Playdemo',
-            ),
-            'public'              => true,  // Macht ihn grundsätzlich öffentlich
-            'publicly_queryable'  => true,  // Erlaubt den Aufruf der URL
-            'exclude_from_search' => false, // Erscheint dann auch in der Suche     
-            'show_ui'             => true,  // Zeigt das Menü im Backend
-            'show_in_menu'        => true,
-            'show_in_rest'        => true,  // Wichtig für die API
-            'has_archive'         => false,
-            'hierarchical'        => true,
-            'menu_icon'           => 'dashicons-media-spreadsheet',
-            'supports'            => array('title', 'editor', 'custom-fields', 'page-attributes'),
-            'capability_type'     => 'post',
-            'query_var'           => true,
-            'can_export'          => true,
-        )
-    );
-}
-add_action('init', 'pdemo_custom_post_type');
-
-
-function register_pdemo_custom_meta_fields() {
-    register_post_meta( 'playdemo', 'object_typ', array(
-        'show_in_rest' => true, // <-- Dies ist der entscheidende Punkt
-        'single'       => true,
-        'type'         => 'string',
-        'auth_callback' => function() {
-            return current_user_can( 'edit_posts' ); // Oder eine spezifischere Capability
-        },
-        'sanitize_callback' => 'sanitize_text_field', // Wichtig: Desinfektion
-        'description'  => 'Data 1'
-    ) );
-}
-add_action( 'rest_api_init', 'register_pdemo_custom_meta_fields' );
-
-
-// Spalte registrieren
-add_filter('manage_playdemo_posts_columns', function($columns) {
-    $columns['pdemo_type'] = 'Objekt-Typ';
-    return $columns;
-});
-
-// Spalte befüllen
-add_action('manage_playdemo_posts_custom_column', function($column, $post_id) {
-    if ($column === 'pdemo_type') {
-        $type = get_post_meta($post_id, 'object_typ', true);
-        echo '<mark style="background:#e5e5e5; padding:3px 8px; border-radius:3px;">' . esc_html($type) . '</mark>';
-    }
-}, 10, 2);
+require_once PLAYPLUGIN_PATH . 'includes/helpers.php';
 
 
 /**

@@ -59,30 +59,37 @@ object JwtService:
 
   def refreshTokenAppPassword(using cw: ComWrapper): Future[Either[AppError, String]] =
 
+    // 1. Credentials zusammenbauen
     val credentials = s"${Global.wpUserName}:${Global.wpAppPassword}"
+
+    // 2. Base64 Kodierung (Sicherstellen, dass keine Newlines entstehen)
+    // In Scala.js / Browser-Umfeld kann man auch 'btoa' nutzen, 
+    // aber java.util.Base64 ist in Scala 3 meist stabiler.
     val basicAuth = java.util.Base64.getEncoder.encodeToString(credentials.getBytes("UTF-8"))
 
-    cw.ajaxPost[Map[String,String], JwtResponse](
+    println(s"1. Credentials: $credentials")
+    println(s"2. Sending Auth Header: Basic $basicAuth")
+
+    cw.ajaxPost[Map[String, String], JwtResponse](
         route = "/wp-json/tourney/v1/get-jwt-token",
         params = Nil,
-        data = Map.empty,
+        data = Map.empty, // Leer lassen, da curl auch keinen Body sendet
         hdrs = Map(
-        "Content-Type" -> "application/json",
-        "Authorization" -> s"Basic $basicAuth"
+            "Authorization" -> s"Basic $basicAuth",
+            "Accept" -> "application/json" // Manche Plugins brauchen diesen Hinweis
         ),
-        host = Global.homeUrl
+        host = Global.homeUrl,
+        cred = false
     ).map {
-
         case Right(resp) =>
-
-        val token = resp.token
-        decodePayload(token).foreach { payload =>
-            expiresAt = payload.exp
-        }
-        cachedToken = Some(token)
-        Right(token)
+            val token = resp.token
+            decodePayload(token).foreach { payload =>
+                expiresAt = payload.exp
+            }
+            cachedToken = Some(token)
+            Right(token)
         case Left(err) =>
-        Left(err)
+            Left(err)
     }
 
 

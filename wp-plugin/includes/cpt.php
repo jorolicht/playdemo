@@ -68,3 +68,43 @@ function register_trny_custom_meta_fields() {
     }
 }
 add_action( 'rest_api_init', 'register_trny_custom_meta_fields' );
+
+
+add_action('rest_api_init', function () {
+    register_rest_route('tourney/v1', '/convert-to-cpt', [
+        'methods' => 'POST',
+        'permission_callback' => function () {
+            return current_user_can('edit_posts'); // oder strenger!
+        },
+        'callback' => function ($request) {
+
+            $post_id = $request->get_param('post_id');
+            $target_type = $request->get_param('target_type');
+
+            if (!$post_id || !$target_type) {
+                return ApiHelper::error("auth.forbidden", "post_id oder target_type fehlt", "", "", HttpStatus::BAD_REQUEST);
+
+                //return new WP_Error('missing_params', 'post_id oder target_type fehlt', ['status' => 400]);
+            }
+
+            $post = get_post($post_id);
+
+            if (!$post) {
+                return ApiHelper::error("not_found", "Post nicht gefunden", "", "", HttpStatus::NOT_FOUND);
+                //return new WP_Error('not_found', 'Post nicht gefunden', ['status' => 404]);
+            }
+
+            // Update
+            wp_update_post([
+                'ID' => $post_id,
+                'post_type' => $target_type
+            ]);
+
+            return [
+                'success' => true,
+                'post_id' => $post_id,
+                'new_type' => $target_type
+            ];
+        }
+    ]);
+});

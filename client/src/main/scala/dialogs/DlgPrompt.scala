@@ -63,7 +63,7 @@ object DlgPrompt extends BaseDialog with JsWrapper:
     val p = Promise[Either[AppError, String]]()
     val f = p.future
 
-    println(s"ModalId: ${ModalId.id} ResultId: ${ResultId.id} InputId: ${InputId.id} ExecuteId: ${ExecuteId.id} CancelId: ${CancelId.id} CloseId: ${CloseId.id} ")
+    // println(s"ModalId: ${ModalId.id} ResultId: ${ResultId.id} InputId: ${InputId.id} ExecuteId: ${ExecuteId.id} CancelId: ${CancelId.id} CloseId: ${CloseId.id} ")
 
     // init modal dialog
     if getData(gE(LoadId), "loaded", false) == false then

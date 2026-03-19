@@ -43,3 +43,19 @@ object TestWp extends Authentication:
       case Left(err) => addOutput(s"ERROR: ${err}");        Left(err)
       case Right(res) => addOutput(s"RESULT: res->${res}"); Right(s"FINISHED: ${group}-Test:${number} param:${param}")
     }    
+
+
+
+// cw.ajaxPost[Map[String,String], Map[String,String]](
+//   route = "/wp-json/tourney/v1/convert-to-cpt",
+//   params = Nil,
+//   data = Map(
+//     "post_id" -> "123",
+//     "target_type" -> "tournament"
+//   ),
+//   hdrs = Map(
+//     "Content-Type" -> "application/json",
+//     "Authorization" -> s"Basic $basicAuth"
+//   ),
+//   host = Global.homeUrl
+// )
