@@ -7,7 +7,7 @@ import scala.scalajs.js
 import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.*
 
-import services.ComWrapper
+import services.{ ComWrapper, ClubDB }
 import base.{ Global, JsWrapper, _ }
 import comps.{ CompBase, Navbar, Sidebar }
 
@@ -34,7 +34,16 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
     // expose addon Console.start function, only if addon is included, otherwise dummy function
     dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
 
-    Messages.initMsg(version, Global.dataUrl, Global.lang).map { 
+    Messages.initMsg(version, Global.dataUrl, Global.lang).flatMap { 
+      case true  => 
+        ClubDB.load().map {
+          case Left(err) => error(s"Failed to load clubs: ${err.msg}"); true
+          case Right(_)  => debug("Clubs loaded successfully"); true
+        }
+      case false => 
+        println("Main program failed to initialize messages")
+        Future.successful(false)
+    }.map {
       case true  => startEnv.toLowerCase() match 
         case "play"  => startPlay()
         case "wp"    => startWp()

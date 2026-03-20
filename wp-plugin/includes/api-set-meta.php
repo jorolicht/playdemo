@@ -149,9 +149,9 @@ add_action('rest_api_init', function () {
 function tourney_get_clubs(WP_REST_Request $request)
 {
     $post_id = intval($request->get_param('postId'));
-    $meta = $request->get_param('metafield-name');
+    $meta = $request->get_param('metafield-name') ?: 'clubs';
 
-    if(!$post_id || !$meta){
+    if(!$post_id){
         return new WP_Error('missing_param','Missing parameters',['status'=>400]);
     }
 
@@ -172,9 +172,9 @@ function tourney_get_clubs(WP_REST_Request $request)
 function tourney_sync_clubs(WP_REST_Request $request)
 {
     $post_id = intval($request->get_param('postId'));
-    $meta = $request->get_param('metafield-name');
+    $meta = $request->get_param('metafield-name') ?: 'clubs';
 
-    if(!$post_id || !$meta){
+    if(!$post_id){
         return new WP_Error('missing_param','Missing parameters',['status'=>400]);
     }
 

@@ -19,12 +19,16 @@ object TestClub:
         Future(Left(AppError("unknown test number")))
 
   def testClub_add(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    ClubDB.add(param) match
+    val parts = param.split(",")
+    val name = parts(0).trim
+    val checkSimilarity = if parts.length > 1 then parts(1).trim.toBoolean else true
+
+    ClubDB.add(name, checkSimilarity) match
       case Left(err) =>
-        addOutput(s"Error adding club '$param': ${err.msg}")
+        addOutput(s"Error adding club '$name' (checkSimilarity=$checkSimilarity): ${err.msg}")
         Future(Left(err))
       case Right(club) =>
-        addOutput(s"Added club: ${club.name} (ID: ${ClubId.value(club.id)}, Active: ${club.active})")
+        addOutput(s"Added club: ${club.name} (ID: ${ClubId.value(club.id)}, Active: ${club.active}, checkSimilarity=$checkSimilarity)")
         Future(Right(s"FINISHED: ${group}-Test:${number}"))
 
   def testClub_delete(group: String, number: Int, param: String): Future[Either[AppError, String]] =

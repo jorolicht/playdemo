@@ -20,7 +20,6 @@ object ClubDB extends ComWrapper:
 
   var timestamp: Long = 0
   var postId: Int = 0
-  var metaField: String = "Clubs"
 
   private val route = "/wp-json/tourney/v1/clubs-sync"
 
@@ -34,8 +33,7 @@ object ClubDB extends ComWrapper:
     else
       val req = ClubSyncRequest(timestamp, pendingEvents.toSeq)
       val params = List(
-        "postId" -> postId.toString,
-        "metafield-name" -> metaField
+        "postId" -> postId.toString
       )
 
       ajaxPost[ClubSyncRequest, ClubSyncResponse](
@@ -53,9 +51,15 @@ object ClubDB extends ComWrapper:
   }
 
   def load(): Future[Either[AppError, Unit]] = {
+    if (postId == 0 && base.Global.pageId != 0) postId = base.Global.pageId
+
+    if (postId == 0) {
+      // debug("ClubDB.load: postId is 0, skipping load")
+      return Future.successful(Right(()))
+    }
+
     val params = List(
-      "postId" -> postId.toString,
-      "metafield-name" -> metaField
+      "postId" -> postId.toString
     )
     ajaxGet[ClubsResponse](s"/wp-json/tourney/v1/clubs", params).map {
       case Right(res) =>
@@ -69,10 +73,11 @@ object ClubDB extends ComWrapper:
   }
 
 
-  def add(name: String): Either[AppError, Club] =
+  def add(name: String, checkSimilarity: Boolean = true): Either[AppError, Club] =
     try
       val normalized = Club.normalize(name)
-      Club.findSimilar(name, clubs) match
+      val threshold = if checkSimilarity then 0.90 else 1.0
+      Club.findSimilar(name, clubs, threshold) match
 
         case Some((existingId, _)) =>
           val i = idx(existingId)

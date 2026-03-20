@@ -22,6 +22,8 @@ lazy val root = (project in file("."))
 val genMsgFiles = taskKey[Unit]("Generate Message Files")  
 val convertMessagesToJson = taskKey[Seq[File]]("Converts message files to JSON")
 
+lazy val copyClientViteFiles = taskKey[Unit]("Copies main.js and main.js.map to client/vite")
+
 lazy val server = project
   .settings(
     Universal / stage := {
@@ -114,8 +116,10 @@ lazy val server = project
     libraryDependencies += "org.apache.pekko" %% "pekko-stream-typed" % "1.0.2",
     libraryDependencies += "com.lihaoyi" %% "sourcecode" % "0.4.2",
     copyClientViteFiles := {
-      // Copy main.js and main.js.map to client/vite
-      // Also copy to wordpress plugin directory
+      // make sure that main.js and main.js.map are created before copying
+      (client / Compile / fastLinkJS).value
+      (client / Compile / fullLinkJS).value
+
       val log = streams.value.log
       val clientTargetDir = (client / Compile / fastLinkJS / scalaJSLinkerOutputDirectory).value
       val clientCssSource = file("server/public/css") 
@@ -155,8 +159,6 @@ lazy val server = project
   .enablePlugins(PlayScala)
   .enablePlugins(SbtWeb)
   .dependsOn(shared.jvm)
-
-lazy val copyClientViteFiles = taskKey[Unit]("Copies main.js and main.js.map to client/vite")
 
 lazy val client = project
   .settings(
