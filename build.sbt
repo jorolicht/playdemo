@@ -131,6 +131,9 @@ lazy val server = project
       val wpCssDestination2 = file("server/docker/wp_data/wp-content/plugins/playdemo/css")
 
       val viteDestinationDir = baseDirectory.value / ".." / "client" / "vite"
+      
+      val wpPluginDir = baseDirectory.value / ".." / "wp-plugin"
+      val dockerWpPluginDir = baseDirectory.value / "docker" / "wp_data" / "wp-content" / "plugins" / "playdemo"
 
       IO.copyDirectory(clientTargetDir, viteDestinationDir)
       IO.copyDirectory(clientTargetDir, wpJsDestination)
@@ -138,7 +141,11 @@ lazy val server = project
       IO.copyDirectory(clientTargetDir, wpJsDestination2)
       IO.copyDirectory(clientCssSource, wpCssDestination2)
 
-      log.info(s"Copied files to vite and wordpress")
+      // Copy playdemo.php and includes to docker
+      IO.copyFile(wpPluginDir / "playdemo.php", dockerWpPluginDir / "playdemo.php")
+      IO.copyDirectory(wpPluginDir / "includes", dockerWpPluginDir / "includes")
+
+      log.info(s"Copied files to vite and wordpress (including php and includes)")
     },
     Universal / dist := {
       // Build ZIP explicitly
