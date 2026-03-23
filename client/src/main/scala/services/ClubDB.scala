@@ -2,6 +2,7 @@ package services
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.scalajs.js.timers.*
 
 import upickle.default.*
 import shared.basic.AppError
@@ -9,8 +10,23 @@ import scala.util.control.NonFatal
 import scala.collection.mutable.{ ArrayBuffer, Map }
 import shared.model.ClubId
 import shared.model.Club
+import base.{ Global, Logging }
+
+
 
 object ClubDB extends ComWrapper:
+
+  var syncHandle: Option[SetTimeoutHandle] = None
+
+  def triggerSync(): Unit =
+    syncHandle.foreach(clearTimeout)
+
+    syncHandle = Some(setTimeout(500) {
+      sync()
+      syncHandle = None
+    })
+
+
   val clubs: ArrayBuffer[Club] = ArrayBuffer()
   val pendingEvents: ArrayBuffer[Club] = ArrayBuffer() // nur Add/Update Events
 
@@ -19,7 +35,6 @@ object ClubDB extends ComWrapper:
   def nextId(): ClubId = ClubId(clubs.length + 1)
 
   var timestamp: Long = 0
-  var postId: Int = 0
 
   private val route = "/wp-json/tourney/v1/clubs-sync"
 
@@ -32,9 +47,7 @@ object ClubDB extends ComWrapper:
       Future.successful(Right(()))
     else
       val req = ClubSyncRequest(timestamp, pendingEvents.toSeq)
-      val params = List(
-        "postId" -> postId.toString
-      )
+      val params = List("postId" -> Global.pageId.toString)
 
       ajaxPost[ClubSyncRequest, ClubSyncResponse](
         route,
@@ -50,24 +63,22 @@ object ClubDB extends ComWrapper:
       }
   }
 
-  def load(): Future[Either[AppError, Unit]] = {
-    if (postId == 0 && base.Global.pageId != 0) postId = base.Global.pageId
+  def load(): Future[Either[AppError, Long]] = {
 
-    if (postId == 0) {
-      // debug("ClubDB.load: postId is 0, skipping load")
-      return Future.successful(Right(()))
+    if (Global.pageId== 0) {
+      Logging.debug("ClubDB.load: postId is 0, skipping load")
+      return Future.successful(Right((0L)))
     }
 
-    val params = List(
-      "postId" -> postId.toString
-    )
+    val params = List("postId" -> Global.pageId.toString)
     ajaxGet[ClubsResponse](s"/wp-json/tourney/v1/clubs", params).map {
       case Right(res) =>
         clubs.clear()
         clubs ++= res.clubs
         timestamp = res.timestamp
-        pendingEvents.clear()
-        Right(())
+        pendingEvents.clear
+        Logging.debug(s"ClubDB.load: loaded ${clubs.length} clubs, timestamp: $timestamp ")
+        Right(res.timestamp)
       case Left(err) => Left(err)
     }
   }
@@ -91,7 +102,7 @@ object ClubDB extends ComWrapper:
               val updated = existing.copy(active = true)
               clubs.update(i, updated)
               pendingEvents += updated
-
+              triggerSync()
             Right(clubs(i))
 
         case None =>
@@ -107,6 +118,7 @@ object ClubDB extends ComWrapper:
 
           clubs += club
           pendingEvents += club
+          triggerSync()
           Right(club)
 
     catch
@@ -137,6 +149,7 @@ object ClubDB extends ComWrapper:
         val updated = club.copy(active = false)
         clubs.update(i, updated)
         pendingEvents += updated
+        triggerSync()
         Right(updated)
 
 
@@ -170,9 +183,14 @@ object ClubDB extends ComWrapper:
     val mergedCtt = target.ctt.orElse(source.ctt)
     val updatedTarget = target.copy(ctt = mergedCtt)
 
+    // Target aktualisieren
     clubs.update(targetIdx, updatedTarget)
+    pendingEvents += updatedTarget   // 👉 Event für Sync
 
     // Source deaktivieren
-    clubs.update(sourceIdx, source.copy(active = false))
-
+    val deactivatedSource = source.copy(active = false)
+    clubs.update(sourceIdx, deactivatedSource)
+    pendingEvents += deactivatedSource   // 👉 Event für Sync
+    triggerSync()
     Right(updatedTarget)
+

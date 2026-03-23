@@ -17,7 +17,7 @@ function trny_get_meta_handler($request) {
     $page = get_page_by_path($path, OBJECT, ['tourney', 'page']);
 
     if (!$page) {
-        return new WP_Error('not_found', 'Seite nicht gefunden', ['status' => 404]);
+        return ApiHelper::error("not_found", "Seite nicht gefunden", "", "", HttpStatus::NOT_FOUND);
     }
 
     // Meta-Wert auslesen
@@ -152,7 +152,7 @@ function tourney_get_clubs(WP_REST_Request $request)
     $meta = $request->get_param('metafield-name') ?: 'clubs';
 
     if(!$post_id){
-        return new WP_Error('missing_param','Missing parameters',['status'=>400]);
+        return ApiHelper::error("missing_param", "Missing parameters", "", "", HttpStatus::BAD_REQUEST);
     }
 
     $meta_ts = $meta."_ts";
@@ -169,74 +169,67 @@ function tourney_get_clubs(WP_REST_Request $request)
 }
 
 
+
 function tourney_sync_clubs(WP_REST_Request $request)
 {
     $post_id = intval($request->get_param('postId'));
     $meta = $request->get_param('metafield-name') ?: 'clubs';
 
     if(!$post_id){
-        return new WP_Error('missing_param','Missing parameters',['status'=>400]);
+        return ApiHelper::error("missing_param", "Missing parameters", "", "", HttpStatus::BAD_REQUEST);
     }
 
-    $body = json_decode($request->get_body(),true);
+    $body = json_decode($request->get_body(), true);
+
     if(!$body){
-        return new WP_Error('invalid_body','Invalid JSON',['status'=>400]);
+        return ApiHelper::error("invalid_body", "Invalid JSON", "", "", HttpStatus::BAD_REQUEST);
     }
 
-    $timestamp = intval($body["timestamp"]);
+    $timestamp = intval($body["timestamp"] ?? 0);
     $meta_ts = $meta."_ts";
     $stored_ts = intval(get_post_meta($post_id,$meta_ts,true));
 
-    // Optimistic locking
+    // 🔒 Optimistic locking
     if($stored_ts !== 0 && $stored_ts !== $timestamp){
-        return new WP_Error(
-            'timestamp_mismatch',
-            'Timestamp mismatch',
-            ['status'=>409]
-        );
+        $errorMessage = "Timestamp mismatch. Received: $timestamp, Stored: $stored_ts";
+        return ApiHelper::error("timestamp_mismatch", $errorMessage, "", "", HttpStatus::CONFLICT);
     }
 
+    // 📦 Bestehende Clubs laden
     $clubs_json = get_post_meta($post_id,$meta,true);
     $clubs = $clubs_json ? json_decode($clubs_json,true) : [];
 
-    // Map nach ID für O(1) Updates
+    // 🗺️ Map nach ID (robust für Objektstruktur!)
     $map = [];
     foreach($clubs as $c){
-        $map[$c[0]] = $c; // 0 = ClubId
-    }
-
-    if(isset($body["events"])){
-        foreach($body["events"] as $e){
-
-            $type = $e["type"];
-
-            if($type === "Add" && isset($e["club"])){
-                $club = $e["club"];
-                $map[$club[0]] = $club;
-            }
-
-            if($type === "Update" && isset($e["club"])){
-                $club = $e["club"];
-                $map[$club[0]] = $club;
-            }
-
-            if($type === "Delete" && isset($e["id"])){
-                $id = $e["id"];
-                if(isset($map[$id])){
-                    // Soft Delete: active auf false
-                    $map[$id][4] = false; // Index 4 = active
-                }
-            }
-
+        if(isset($c["id"])){
+            $map[intval($c["id"])] = $c;
         }
     }
 
-    // wieder Array für Speicherung
-    $clubs = array_values($map);
-    update_post_meta($post_id,$meta,wp_json_encode($clubs));
+    // 🔄 Events anwenden (Upsert-Logik)
+    if(isset($body["events"]) && is_array($body["events"])){
 
+        foreach($body["events"] as $club){
+
+            if(!isset($club["id"])) continue;
+
+            $id = intval($club["id"]);
+
+            // 👉 Add + Update + Delete (active=false) = alles gleich behandeln
+            $map[$id] = $club;
+        }
+    }
+
+    // 🔁 Zurück in Array konvertieren
+    $clubs = array_values($map);
+
+    // 💾 Speichern
+    update_post_meta($post_id, $meta, wp_json_encode($clubs));
+
+    // ⏱️ Neuer Timestamp
     $new_ts = time();
-    update_post_meta($post_id,$meta_ts,$new_ts);
+    update_post_meta($post_id, $meta_ts, $new_ts);
 
     return [
         "timestamp"=>$new_ts

@@ -82,16 +82,13 @@ add_action('rest_api_init', function () {
             $target_type = $request->get_param('target_type');
 
             if (!$post_id || !$target_type) {
-                return ApiHelper::error("auth.forbidden", "post_id oder target_type fehlt", "", "", HttpStatus::BAD_REQUEST);
-
-                //return new WP_Error('missing_params', 'post_id oder target_type fehlt', ['status' => 400]);
+                return ApiHelper::error("missing_params", "post_id oder target_type fehlt", "", "", HttpStatus::BAD_REQUEST);
             }
 
             $post = get_post($post_id);
 
             if (!$post) {
                 return ApiHelper::error("not_found", "Post nicht gefunden", "", "", HttpStatus::NOT_FOUND);
-                //return new WP_Error('not_found', 'Post nicht gefunden', ['status' => 404]);
             }
 
             // Update

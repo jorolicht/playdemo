@@ -20,7 +20,7 @@ function playdemo_api_create_get_permissions_check( WP_REST_Request $request ) {
     // Für Administratoren: current_user_can( 'manage_options' )
     // Für Redakteure: current_user_can( 'edit_others_posts' )
     // if ( ! is_user_logged_in() ) {
-    //     return new WP_Error( 'rest_forbidden_access', __( 'Sie sind nicht berechtigt, Posts zu erstellen.', 'my-custom-api' ), array( 'status' => 403 ) );
+    //     return ApiHelper::error("rest_forbidden_access", "Sie sind nicht berechtigt, Posts zu erstellen.", "", "", HttpStatus::FORBIDDEN);
     // }
     return true;
 }
@@ -60,7 +60,7 @@ add_action('rest_api_init', function () {
             $nonce = $request->get_header('X-WP-Nonce');
 
             if (!wp_verify_nonce($nonce, 'wp_rest')) {
-                return new WP_Error('invalid_nonce', 'Invalid nonce', ['status' => 403]);
+                return ApiHelper::error("invalid_nonce", "Invalid nonce", "", "", HttpStatus::FORBIDDEN);
             }
 
             return is_user_logged_in();

@@ -34,16 +34,7 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
     // expose addon Console.start function, only if addon is included, otherwise dummy function
     dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
 
-    Messages.initMsg(version, Global.dataUrl, Global.lang).flatMap { 
-      case true  => 
-        ClubDB.load().map {
-          case Left(err) => error(s"Failed to load clubs: ${err.msg}"); true
-          case Right(_)  => debug("Clubs loaded successfully"); true
-        }
-      case false => 
-        println("Main program failed to initialize messages")
-        Future.successful(false)
-    }.map {
+    Messages.initMsg(version, Global.dataUrl, Global.lang).map {
       case true  => startEnv.toLowerCase() match 
         case "play"  => startPlay()
         case "wp"    => startWp()
@@ -77,9 +68,9 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
     import cats.data.EitherT
     import cats.implicits._ 
 
-    Global.playUrl = getData(gE(ParamId),"playurl","")
+    Global.playUrl = getData(gE(ParamId), "playurl","")
     Global.homeUrl = getData(gE(ParamId), "homeurl", "")
-    Global.wpNonce   = getData(gE(ParamId), "nonce", "")
+    Global.wpNonce = getData(gE(ParamId), "nonce", "")
     Global.pageId  = getData(gE(ParamId), "pageid", 0)
 
     debug(s"wpStart -> playUrl:${Global.playUrl} homeUrl: ${Global.homeUrl} lang: ${Global.lang} nonce: ${Global.wpNonce} pageId: ${Global.pageId}")
@@ -87,9 +78,12 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
     // init wordpress main page
     Wordpress.render("")
 
-    ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl).map { 
-      case Left(err)  => error(s"Fehler: ${err}")
-      case Right(res) => debug(s"Result: ${res}")  
+    (for {
+      user       <- EitherT(ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl))
+      timestamp  <- EitherT(ClubDB.load())
+    } yield  (user, timestamp) ).value.map {
+      case Right(res)  => debug(s"User loaded: ${res._1}, Clubs timestamp: ${res._2}")
+      case Left(err)   => debug(s"Error loading user or clubs: ${err}")
     }
 
 

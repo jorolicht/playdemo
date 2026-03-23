@@ -63,7 +63,7 @@ function handle_get_json_by_slug($request) {
     ));
 
     if (empty($posts)) {
-        return new WP_Error('not_found', 'Eintrag mit diesem Slug existiert nicht.', array('status' => 404));
+        return ApiHelper::error("not_found", "Eintrag mit diesem Slug existiert nicht.", "", "", HttpStatus::NOT_FOUND);
     }
 
     $post = $posts[0];
@@ -94,7 +94,7 @@ function handle_generic_json_post($request) {
     $data = $params['inhalt'][$object_type] ?? null;
 
     if (!$data) {
-        return new WP_Error('missing_object', "Objekt '{$object_type}' fehlt im Inhalt.", array('status' => 400));
+        return ApiHelper::error("missing_object", "Objekt '{$object_type}' fehlt im Inhalt.", "", "", HttpStatus::BAD_REQUEST);
     }
 
     $post_data = array(
@@ -137,7 +137,7 @@ function handle_hierarchical_json_by_path($request) {
     // 2. Object Type aus dem letzten Segment extrahieren (alles nach dem letzten Bindestrich)
     // "kunde-person" -> "person"
     if (strpos($last_segment, '_') === false) {
-        return new WP_Error('invalid_format', 'Slug muss Format "prefix-objecttype" haben.', array('status' => 400));
+        return ApiHelper::error("invalid_format", "Slug muss Format 'prefix-objecttype' haben.", "", "", HttpStatus::BAD_REQUEST);
     }
     
     $object_type = substr($last_segment, strrpos($last_segment, '_') + 1);
@@ -146,7 +146,7 @@ function handle_hierarchical_json_by_path($request) {
     $data = $params['content'][$object_type] ?? null;
 
     if (!$data) {
-        return new WP_Error('no_data', "Objekt '{$object_type}' nicht im JSON gefunden.", array('status' => 400));
+        return ApiHelper::error("no_data", "Objekt '{$object_type}' nicht im JSON gefunden.", "", "", HttpStatus::BAD_REQUEST);
     }
 
     // 3. Hierarchie durchlaufen / erstellen
