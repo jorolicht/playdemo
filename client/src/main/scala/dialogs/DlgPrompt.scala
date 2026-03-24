@@ -51,13 +51,7 @@ object DlgPrompt extends BaseDialog with JsWrapper:
 
   def getHistory()  = if (history.isDefinedAt(hPos)) then history(hPos) else ""
   def upHistory()   = { if (hPos < history.length-1) hPos = hPos + 1;  getHistory() }
-  def downHistory() = { if (hPos > 1) hPos = hPos - 1; getHistory() }
-
-  // override def event(elem: HTMLElement, event: Event) =   
-  //   HtmlId(elem.id) match
-  //     case `ToggleId` => collapse.toggle()
-  //     case `ClearId`  => set("")
-  //     case _          => error(s"event -> invalid elem/key: ${elem.id}")       
+  def downHistory() = { if (hPos > 1) hPos = hPos - 1; getHistory() }     
   
   def show(command: String): Future[Either[AppError, String]] =
     val p = Promise[Either[AppError, String]]()
@@ -78,7 +72,7 @@ object DlgPrompt extends BaseDialog with JsWrapper:
     modal.show()
     if (command == "") setInput(input, getHistory()) else setInput(input, command)
 
-    // Add an event listener to the execute button
+    // Add an event listener to the clear button
     gE(ClearId).addEventListener("click", (e: MouseEvent) => {
       set("")
     })
