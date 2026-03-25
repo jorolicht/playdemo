@@ -112,7 +112,3 @@ case class Player(
     birthYear.map(_.toString).getOrElse("")
 
 
-
-object Player:
-  given ReadWriter[Player] = macroRW
-

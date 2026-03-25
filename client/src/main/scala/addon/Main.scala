@@ -115,7 +115,7 @@ object DebugConsole extends JsWrapper:
                |
                |""".stripMargin)
 
-      val group  = choice(name="group", choices=Seq("basic", "dialog", "auth", "html", "wp", "club"))
+      val group  = choice(name="group", choices=Seq("basic", "dialog", "auth", "html", "wp", "club", "player"))
       val number = opt[Int](name="number")
       val param  = opt[String](name="param")  
       verify()
@@ -134,5 +134,6 @@ object DebugConsole extends JsWrapper:
         case "html"      => TestHtml.exec(group, number, param)
         case "wp"        => TestWp.exec(group, number, param)
         case "club"      => TestClub.exec(group, number, param)
+        case "player"    => TestPlayer.exec(group, number, param)
         case _           => Future(Left(AppError("command.invalid"))) 
     catch { case _:Exception => Future(Left(AppError("command.invalid"))) }

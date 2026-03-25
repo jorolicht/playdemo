@@ -14,17 +14,13 @@ import base.{ Global, Logging }
 
 
 
-object ClubDB extends ComWrapper:
-
-  var syncHandle: Option[SetTimeoutHandle] = None
+object ClubDB extends ComWrapper with Debouncer:
 
   def triggerSync(): Unit =
-    syncHandle.foreach(clearTimeout)
-
-    syncHandle = Some(setTimeout(500) {
+    debounce(delay = 800) {
+      Logging.debug("Synchronisiere Vereine mit dem Server...")
       sync()
-      syncHandle = None
-    })
+    }
 
 
   val clubs: ArrayBuffer[Club] = ArrayBuffer()
@@ -36,7 +32,7 @@ object ClubDB extends ComWrapper:
 
   var timestamp: Long = 0
 
-  private val route = "/wp-json/tourney/v1/clubs-sync"
+  
 
   case class ClubSyncRequest(timestamp: Long, events: Seq[Club]) derives ReadWriter
   case class ClubSyncResponse(timestamp: Long) derives ReadWriter
@@ -46,6 +42,7 @@ object ClubDB extends ComWrapper:
     if pendingEvents.isEmpty then
       Future.successful(Right(()))
     else
+      val route = "/wp-json/tourney/v1/clubs-sync"
       val req = ClubSyncRequest(timestamp, pendingEvents.toSeq)
       val params = List("postId" -> Global.pageId.toString)
 
