@@ -1,6 +1,6 @@
 package shared.model
 
-import upickle.default.*
+import shared.basic.Pickle.*
 import shared.basic.AppError
 import shared.basic.*
 import scala.util.control.NonFatal

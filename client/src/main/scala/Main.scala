@@ -1,4 +1,4 @@
-import upickle.default.*
+import shared.basic.Pickle.*
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement
 import scala.concurrent.Future
@@ -7,7 +7,7 @@ import scala.scalajs.js
 import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.*
 
-import services.{ ComWrapper, ClubDB }
+import services.{ ComWrapper, ClubDB, PlayerDB, CompetitionDB }
 import base.{ Global, JsWrapper, _ }
 import comps.{ CompBase, Navbar, Sidebar }
 
@@ -79,9 +79,10 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
     Wordpress.render("")
 
     (for {
-      user       <- EitherT(ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl))
-      timestamp  <- EitherT(ClubDB.load())
-    } yield  (user, timestamp) ).value.map {
+      user        <- EitherT(ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl))
+      timestamp1  <- EitherT(ClubDB.load())
+      timestamp3  <- EitherT(PlayerDB.load())
+    } yield  (user, timestamp1, timestamp3) ).value.map {
       case Right(res)  => debug(s"User loaded: ${res._1}, Clubs timestamp: ${res._2}")
       case Left(err)   => debug(s"Error loading user or clubs: ${err}")
     }

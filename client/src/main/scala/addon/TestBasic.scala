@@ -1,6 +1,6 @@
 package addon
 
-import upickle.default._
+import shared.basic.Pickle._
 
 import shared.model.*
 import shared.basic.*
@@ -10,7 +10,7 @@ import services.Authentication
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import upickle.default.{ReadWriter => RW, macroRW}
+import shared.basic.Pickle.{ReadWriter => RW, macroRW}
 
 
 import scala.quoted.*
@@ -56,7 +56,7 @@ object TestBasic extends Authentication:
 
   // http://localhost:9555/main/Console?param=test_--group_basic_--number_3
   def testBasic_parseJson(group: String, number: Int, param: String): Future[Either[AppError, String]] = 
-    import upickle.default._
+    import shared.basic.Pickle._
 
     parseJson[People]("""{"name":"Robert","age":50}""") match
       case Left(err)  => addOutput(s"ERROR: ${err}"); Future(Right("ERROR")) 

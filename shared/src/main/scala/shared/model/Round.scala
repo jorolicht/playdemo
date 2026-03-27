@@ -1,6 +1,6 @@
 package shared.model
 
-import upickle.default.*
+import shared.basic.Pickle.*
 import scala.collection.mutable.{ ArrayBuffer, Map, Set, Stack }
 
 opaque type RoundId = Int
@@ -140,19 +140,20 @@ object RoundStatus:
 
 
 case class Round(
-  id:             RoundId,
-  name:           String,
-  coId:           CompId,
-  rndCfg:         RoundCfg,
-  status:         RoundStatus,
-  demo:           Boolean,
-  size:           Int,
-  noPlayers:      Int,
-  noWinSets:      Int = 0,
-  prefId:         Option[RoundId] = None,
-  nextIds:        List[RoundId] = List(),
-  quali:          QualifyTyp = QualifyTyp.ALL,
-  var timestamp:  Int
+  id:                   RoundId,
+  coId:                 CompId,
+  name:                 String,
+  rndCfg:               RoundCfg,
+  var status:           RoundStatus,
+  var demo:             Boolean,
+  var size:             Int,
+  var noPlayers:        Int,
+  val noWinSets:        Int = 0,
+  var prefId:           Option[RoundId] = None,
+  var nextIds:          List[RoundId] = List(),
+  var quali:            QualifyTyp = QualifyTyp.ALL,
+  var deleted:          Boolean = false,
+  var timestamp:        Long = 0L
 ):
 
   // -----------------------------

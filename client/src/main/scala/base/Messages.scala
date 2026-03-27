@@ -1,7 +1,7 @@
 package base
 
 import org.scalajs.dom
-import upickle.default._
+import shared.basic.Pickle._
 import scala.scalajs.js
 import scala.concurrent.Future
 import scala.collection.mutable.Map

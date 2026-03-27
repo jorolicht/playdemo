@@ -2,8 +2,7 @@ package shared.model
 
 import scala.collection.mutable.{ ArrayBuffer, HashMap, Map }
 
-import upickle.default._
-import upickle.default.{ReadWriter => RW, macroRW}
+import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
 
 import shared.model.MEntryGr
 import shared.model.Pant

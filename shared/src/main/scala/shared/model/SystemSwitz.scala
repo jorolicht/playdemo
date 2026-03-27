@@ -1,7 +1,7 @@
 // package shared.model.tabletennis
 
-// import upickle.default._
-// import upickle.default.{ReadWriter => RW, macroRW}
+// import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
+// import shared.basic.Pickle.*
 
 // import shared.utils.Constants._
 // import shared.model.ParticipantEntry

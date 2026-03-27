@@ -4,7 +4,7 @@ import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js.timers.*
 
-import upickle.default.*
+import shared.basic.Pickle.*
 import shared.basic.AppError
 import scala.util.control.NonFatal
 import scala.collection.mutable.ArrayBuffer

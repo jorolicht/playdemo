@@ -4,7 +4,7 @@ import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js.timers.*
 
-import upickle.default.*
+import shared.basic.Pickle.*
 import shared.basic.AppError
 import scala.util.control.NonFatal
 import scala.collection.mutable.{ ArrayBuffer, Map }
@@ -122,15 +122,6 @@ object ClubDB extends ComWrapper with Debouncer:
       case NonFatal(e) =>
         Left(AppError(s"club.add.failed: ${e.getMessage}"))  
 
-
-// def deleteClub(id: ClubId): Unit = {
-//   val index = id.value - 1
-//   if index >= 0 && index < clubs.length then
-//     val c = clubs(index)
-//     val deleted = c.copy(active = false)    // soft delete
-//     clubs(index) = deleted
-//     pendingEvents += deleted                // Event für sync
-// }
 
   def deleteClub(id: ClubId): Either[AppError, Club] =
     val i = idx(id)

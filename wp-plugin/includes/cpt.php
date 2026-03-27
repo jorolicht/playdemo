@@ -30,7 +30,6 @@ function register_trny_custom_meta_fields() {
     $meta_fields = [
         'basic'         => 'Turniergrunddaten',
         'clubs'         => 'Vereine',
-        'competitions'  => 'Wettbewerbe',
         'players'       => 'Spieler'
     ];
 
@@ -39,6 +38,12 @@ function register_trny_custom_meta_fields() {
         $key = sprintf('round%03d', $i);
         $meta_fields[$key] = 'Runde ' . $i;
     }
+
+    // Wettbewerbe 01–64 hinzufügen
+    for ($i = 1; $i <= 64; $i++) {
+        $key = sprintf('competition%02d', $i);
+        $meta_fields[$key] = 'Wettbewerbe ' . $i;
+    }    
 
     foreach ( $meta_fields as $key => $description ) {
 

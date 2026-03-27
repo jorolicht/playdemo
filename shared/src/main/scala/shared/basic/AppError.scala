@@ -2,8 +2,7 @@ package shared.basic
 
 import scala.concurrent.Future
 
-import upickle.default.{ReadWriter => RW, macroRW}
-import upickle.default._
+import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
 
 case class AppError(msgCode:String, var in1:String="", var in2:String="", var callStack: String=""):
   def equal2Code(code: String): Boolean = { this.msgCode == code }
@@ -21,7 +20,7 @@ object AppError:
 
 
 def parseError(in: String, func: String): AppError =
-  try read[AppError](in)
+  try Pickle.read[AppError](in)
   catch { case e: Throwable => AppError("err00006.parseJson", e.getMessage, in.take(100)).add(func) }
 
 

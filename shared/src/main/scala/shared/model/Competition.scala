@@ -1,6 +1,6 @@
 package shared.model
 
-import upickle.default.*
+import shared.basic.Pickle.*
 import shared.basic.AppError
 import scala.collection.mutable. { ArrayBuffer, Map, Stack }
 
@@ -13,8 +13,7 @@ enum CompTyp(val id: Int):
   case TEAM   extends CompTyp(4)
   case Typ    extends CompTyp(99)
 
-  def msgCode: String =
-    s"CompTyp.${this.toString}"
+  def msgCode: String = s"CompTyp.${this.toString}"
 
   def equalsTo(compareWith: CompTyp*): Boolean =
     compareWith.contains(this)
@@ -26,7 +25,7 @@ enum CompTyp(val id: Int):
     mfun(msgCode, Seq(insert))
 
 object CompTyp:
-  import upickle.default.*
+  import shared.basic.Pickle.*
 
   given ReadWriter[CompTyp] =
     readwriter[Int].bimap[CompTyp](_.id, id =>
@@ -116,7 +115,7 @@ case class CompCTT(
 )
 
 object CompCTT:
-  import upickle.default.*
+  import shared.basic.Pickle.*
   given ReadWriter[CompCTT] = macroRW
 
 
@@ -155,6 +154,7 @@ case class Competition(
   var upperLevel:       Option[Int] = None,
   var cttInfo:          Option[CompCTT] = None,
   val pants:            ArrayBuffer[Pant] = ArrayBuffer(),
+  val deleted:          Boolean = false,
   var timestamp:        Long = 0L
 ):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array

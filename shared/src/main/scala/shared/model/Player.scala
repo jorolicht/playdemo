@@ -1,21 +1,26 @@
 package shared.model
 
-import upickle.default.*
+import shared.basic.Pickle.*
 import scala.collection.mutable.{ ArrayBuffer, Map }
 import shared.basic.AppError
 import shared.model.PlayerId.*
 
+import shared.basic.given
 
 /**
- * Sex ADT (replaces Scala 2 Enumeration)
- * Gives exhaustiveness checking and type safety.
+ * Sex ADT
  */
-enum Sex derives ReadWriter:
-  case Unknown
-  case Female
-  case Male
+enum Sex(val id: Int):
+  case Unknown extends Sex(0)
+  case Female  extends Sex(1)
+  case Male    extends Sex(2)
 
 object Sex:
+  given rw: ReadWriter[Sex] = readwriter[Int].bimap(
+    _.id,
+    id => Sex.values.find(_.id == id).getOrElse(Sex.Unknown)
+  )
+
   def fromInt(i: Int): Sex =
     i match
       case 1 => Female
@@ -38,7 +43,10 @@ case class PlayerMeta(
   foreignerEqState: Option[String] = None,
   region: Option[String] = None,
   subRegion: Option[String] = None
-) derives ReadWriter
+)
+
+object PlayerMeta:
+  given ReadWriter[PlayerMeta] = macroRW
 
 
 opaque type PlayerId = Int
@@ -84,7 +92,7 @@ case class Player(
   var active: Boolean = true,
   var merge: Option[PlayerId] = None,
   var meta: PlayerMeta = PlayerMeta()
-) derives ReadWriter:
+):
 
   def fullName: String =
     s"$firstName $lastName"
@@ -98,7 +106,7 @@ case class Player(
 
   /** Display name with optional ID */
   def formattedName(showId: Boolean = false): String =
-    if showId && id.value != 0 then s"$displayName [$id%03d]"
+    if showId && id.value != 0 then s"$displayName [${id.value}%03d]"
     else displayName
 
   /** Average rating for doubles */
@@ -112,3 +120,5 @@ case class Player(
     birthYear.map(_.toString).getOrElse("")
 
 
+object Player:
+  given ReadWriter[Player] = macroRW

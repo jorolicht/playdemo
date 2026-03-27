@@ -2,7 +2,7 @@ package services
 
 
 
-import upickle.default._
+import shared.basic.Pickle._
 import scala.scalajs.js
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue

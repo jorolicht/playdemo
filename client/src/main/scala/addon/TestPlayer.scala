@@ -17,6 +17,7 @@ object TestPlayer:
       case 2 => testPlayer_delete(group, number, param)
       case 3 => testPlayer_merge(group, number, param)
       case 4 => testPlayer_list(group, number, param)
+      case 5 => testPlayer_sync(group, number, param)
       case _ =>
         addOutput(s"FAILED: ${group}-Test:${number} param:${param} unknown test number")
         Future(Left(AppError("unknown test number")))
@@ -96,3 +97,17 @@ object TestPlayer:
       addOutput(s"- [${p.id.value}] ${p.fullName} (Club: ${p.clubId}, Active: ${p.active}, MergedInto: ${p.merge.map(_.value).getOrElse("-")})")
     }
     Future(Right(s"FINISHED: ${group}-Test:${number}"))
+
+  /**
+   * Test 5: Sync players with server.
+   */
+  def testPlayer_sync(group: String, number: Int, param: String): Future[Either[AppError, String]] =
+    addOutput(s"Syncing players (${PlayerDB.pendingEvents.length} pending events)...")
+    PlayerDB.sync().map {
+      case Left(err) =>
+        addOutput(s"Error syncing players: ${err.msg}")
+        Left(err)
+      case Right(_) =>
+        addOutput(s"Players synced successfully. New timestamp: ${PlayerDB.timestamp}")
+        Right(s"FINISHED: ${group}-Test:${number}")
+    }

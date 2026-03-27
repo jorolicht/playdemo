@@ -5,7 +5,7 @@ import base.Global
 import base.AuthMode
 import scala.concurrent.*
 import scala.concurrent.ExecutionContext.Implicits.global
-import upickle.default.*
+import shared.basic.Pickle.*
 
 
 case class JwtPayload(iss: String, iat: Long, exp: Long, user_id: Int)

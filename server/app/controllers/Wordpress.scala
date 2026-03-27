@@ -1,7 +1,7 @@
 package controllers
 
 import javax.inject._
-import upickle.default._
+import shared.basic.Pickle.*
 import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.mvc._

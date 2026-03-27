@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets
 import scala.jdk.CollectionConverters._
 
 import scala.concurrent.{ExecutionContext, Future}
-import upickle.default._
+import shared.basic.Pickle.*
 import play.api.mvc._
 import play.api.libs.mailer._
 import play.api.{ Environment, Configuration, Logging }

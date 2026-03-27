@@ -5,7 +5,7 @@ import org.scalajs.dom.ext.Ajax
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.reflect.ClassTag
-import upickle.default._
+import shared.basic.Pickle._
 
 import base.Global
 import base.Logging.*

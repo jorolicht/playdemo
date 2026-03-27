@@ -14,6 +14,7 @@ object TestClub:
       case 2 => testClub_delete(group, number, param)
       case 3 => testClub_merge(group, number, param)
       case 4 => testClub_list(group, number, param)
+      case 5 => testClub_sync(group, number, param)
       case _ =>
         addOutput(s"FAILED: ${group}-Test:${number} param:${param} unknown test number")
         Future(Left(AppError("unknown test number")))
@@ -74,3 +75,14 @@ object TestClub:
       addOutput(s"- [${ClubId.value(club.id)}] ${club.name} (Active: ${club.active})")
     }
     Future(Right(s"FINISHED: ${group}-Test:${number}"))
+
+  def testClub_sync(group: String, number: Int, param: String): Future[Either[AppError, String]] =
+    addOutput(s"Syncing clubs (${ClubDB.pendingEvents.length} pending events)...")
+    ClubDB.sync().map {
+      case Left(err) =>
+        addOutput(s"Error syncing clubs: ${err.msg}")
+        Left(err)
+      case Right(_) =>
+        addOutput(s"Clubs synced successfully. New timestamp: ${ClubDB.timestamp}")
+        Right(s"FINISHED: ${group}-Test:${number}")
+    }

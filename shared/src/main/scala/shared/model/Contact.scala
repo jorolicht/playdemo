@@ -1,6 +1,6 @@
 package shared.model
 
-import upickle.default.*
+import shared.basic.Pickle.*
 import shared.basic.AppError
 import scala.util.control.NonFatal
 import scala.deriving.Mirror
@@ -18,7 +18,7 @@ case class Contact(
   firstname: String,
   phone:     String,
   email:     String
-) derives ReadWriter:
+):
 
   def encode(): String = write(Tuple.fromProductTyped(this))
 
@@ -42,6 +42,8 @@ case class Contact(
 
 
 object Contact:
+  given ReadWriter[Contact] = macroRW
+
   /**
    * Name formatting styles.
    */

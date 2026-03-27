@@ -7,8 +7,23 @@ import scala.util.matching.Regex
 import scala.concurrent.Future
 import scala.reflect.ClassTag
 import java.util.Random
-import upickle.default.*
 import cats.syntax.either.*
+
+// ---------------------------------------------------------------------------
+// Custom upickle bundle for nullable Option support
+// ---------------------------------------------------------------------------
+object Pickle extends upickle.AttributeTagged:
+  override implicit def OptionWriter[T: Writer]: Writer[Option[T]] =
+    writer[ujson.Value].comap[Option[T]] {
+      case Some(v) => writeJs(v)
+      case None    => ujson.Null
+    }
+
+  override implicit def OptionReader[T: Reader]: Reader[Option[T]] =
+    reader[ujson.Value].map[Option[T]] {
+      case ujson.Null => None
+      case x => Some(read[T](x))
+    }
 
 type EiErr[T] = Either[Error, T]
 type FuEiErr[T] = Future[Either[AppError, T]]
@@ -19,26 +34,26 @@ extension (str: String)
     if x.length != 2 then ("","") else (x(0),x(1))
 
   def toError(func: String): AppError = 
-    try read[AppError](str)
+    try Pickle.read[AppError](str)
     catch { case e: Throwable => AppError("err00006.parseJson", e.getMessage, str.take(10)).add(func) }
 
-  def to[T]()(using r: Reader[T]): Either[AppError, T] = {
-    try if str == "" then Left(AppError("err00006.parseJson", "empty string")) else Right(read[T](str))
+  def to[T]()(using r: Pickle.Reader[T]): Either[AppError, T] = {
+    try if str == "" then Left(AppError("err00006.parseJson", "empty string")) else Right(Pickle.read[T](str))
     catch { case e: Throwable => Left(AppError("err00006.parseJson", e.getMessage, str.take(10))) }
   }    
 
 
-def parseJson[T: Reader](x: String): Either[AppError, T] =
+def parseJson[T: Pickle.Reader](x: String): Either[AppError, T] =
   if x.isEmpty then
     Left(AppError("err00006.parseJson", "empty string"))
   else
     Either
-      .catchNonFatal(read[T](x))
+      .catchNonFatal(Pickle.read[T](x))
       .leftMap(e =>
         AppError("err00006.parseJson", e.getMessage, x.take(10))
       )
 
-// inline def parseJson[T](x: String)(using r: Reader[T], ct: ClassTag[T]): Either[AppError, T] = {
+// inline def parseJson[T](x: String)(using r: Pickle.Reader[T], ct: ClassTag[T]): Either[AppError, T] = {
 //   import scala.util.Try
 //   if      (x == "")                            Left(AppError("err00006.parseJson", "empty string"))
 //   if      (ct.runtimeClass == classOf[String]) Right(x.asInstanceOf[T])
@@ -49,12 +64,12 @@ def parseJson[T: Reader](x: String): Either[AppError, T] =
 //     }
 //   }  
 //   else { 
-//     try Right(read[T](x))
+//     try Right(Pickle.read[T](x))
 //     catch { case e: Throwable => Left(AppError("err00006.parseJson", e.getMessage, x.take(10))) }
 //   }  
 // }
 
-inline def toJson[T](x: T)(using w: Writer[T]): String = write[T](x)  
+inline def toJson[T](x: T)(using w: Pickle.Writer[T]): String = Pickle.write[T](x)  
 
 // ---------------------------------------------------------------------------
 // Constants

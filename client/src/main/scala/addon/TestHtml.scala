@@ -1,6 +1,6 @@
 package addon
 
-import upickle.default._
+import shared.basic.Pickle._
 
 import base.*
 import pages.*
@@ -12,7 +12,7 @@ import services.Authentication
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import upickle.default.{ReadWriter => RW, macroRW}
+import shared.basic.Pickle.{ReadWriter => RW, macroRW}
 
 import cviews.pages.html.Welcome
 

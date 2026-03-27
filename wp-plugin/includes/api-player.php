@@ -42,7 +42,7 @@ function tourney_get_players(WP_REST_Request $request)
     
     // Nur aktive Spieler zurückgeben (wie im Prompt gefordert)
     $active_players = array_values(array_filter($players, function($p) {
-        return isset($p['active']) && $p['active'] === true;
+        return !isset($p['active']) || $p['active'] === true;
     }));
 
     return [

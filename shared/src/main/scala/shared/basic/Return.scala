@@ -1,8 +1,7 @@
 package shared.basic
 
 import scala.concurrent.Future
-import upickle.default.{ReadWriter => RW, macroRW}
-import upickle.default.*
+import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
 
 
 case class Return[A](value: A):

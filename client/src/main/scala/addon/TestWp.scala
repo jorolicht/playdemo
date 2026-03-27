@@ -1,6 +1,6 @@
 package addon
 
-import upickle.default._
+import shared.basic.Pickle._
 
 import shared.basic.*
 import base.*
@@ -8,7 +8,7 @@ import services.Authentication
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import upickle.default.{ReadWriter => RW, macroRW}
+import shared.basic.Pickle.{ReadWriter => RW, macroRW}
 
 
 object TestWp extends Authentication:

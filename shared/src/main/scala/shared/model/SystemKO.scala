@@ -2,8 +2,7 @@ package shared.model
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
-import upickle.default._
-import upickle.default.{ReadWriter => RW, macroRW}
+import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
 
 case class KoRound(
   id: Int,

@@ -1,6 +1,6 @@
 package shared.model
 
-import upickle.default.*
+import shared.basic.Pickle.*
 import shared.basic.*
 import scala.util.control.NonFatal
 
@@ -34,7 +34,7 @@ case class Tourney(
   contact:   Option[Contact] = None,
   address:   Option[Address] = None,
   id:        Long = 0L        // Autoincrement database id
-) derives ReadWriter:
+):
 
   /**
    * Validates tournament data.
@@ -76,6 +76,7 @@ case class Tourney(
 
 
 object Tourney:
+  given ReadWriter[Tourney] = macroRW
 
   /**
    * Decodes a single Tourney from JSON.

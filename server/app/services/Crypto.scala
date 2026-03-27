@@ -1,6 +1,6 @@
 package services
 
-import upickle.default._
+import shared.basic.Pickle.*
 import java.security.MessageDigest
 import java.util.Arrays
 import java.util.Base64

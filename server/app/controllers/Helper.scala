@@ -7,7 +7,7 @@ import pekko.stream._
 import pekko.stream.typed.scaladsl.ActorSource
 
 import javax.inject._
-import upickle.default._
+import shared.basic.Pickle.*
 import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 import scala.quoted.*

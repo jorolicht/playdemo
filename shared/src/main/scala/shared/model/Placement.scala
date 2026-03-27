@@ -2,7 +2,7 @@ package shared.model
 
 import cats.syntax.either.*
 import scala.util.control.NonFatal
-import upickle.default.*
+import shared.basic.Pickle.*
 import shared.basic.*
 
 /**

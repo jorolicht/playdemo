@@ -1,6 +1,6 @@
 package shared.model
 
-import upickle.default.*
+import shared.basic.Pickle.*
 import shared.basic.AppError
 import shared.basic.*
 import scala.util.control.NonFatal
@@ -36,7 +36,6 @@ object ClubId:
     )  
 
        
-
 def jaroWinkler(s1: String, s2: String): Double = {
   if (s1 == s2) return 1.0
   if (s1.isEmpty || s2.isEmpty) return 0.0
@@ -100,8 +99,7 @@ case class Club(
   normalizedName: String,
   ctt: Option[ClubCTT] = None,
   active: Boolean = true
-) derives ReadWriter:
-
+):
 
   /**
    * Returns formatted name.
@@ -117,10 +115,15 @@ case class Club(
 case class ClubCTT(
   clubNr: Option[String] = None,
   clubFedNick: Option[String] = None
-) derives ReadWriter
+)
 
+object ClubCTT:
+  given ReadWriter[ClubCTT] = macroRW
 
 object Club:
+
+  given ReadWriter[Club] = macroRW
+
   /**
    * Name formatting styles.
    */

@@ -1,7 +1,7 @@
 package shared.model
 
-import upickle.default._
-import upickle.default.{ReadWriter => RW, macroRW}
+import shared.basic.Pickle.*
+import shared.basic.Pickle.{ReadWriter => RW, macroRW}
 
 import scala.collection.mutable.{ ArrayBuffer, HashMap, Map }
 import shared.basic.*

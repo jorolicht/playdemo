@@ -8,7 +8,7 @@ import scala.scalajs.js.annotation.*
 import org.scalajs.dom.{ MouseEvent, Event, KeyboardEvent }
 import org.scalajs.dom.raw.HTMLElement
 
-import upickle.default._
+import shared.basic.Pickle._
 
 import base.*
 import base.Bootstrap.*
