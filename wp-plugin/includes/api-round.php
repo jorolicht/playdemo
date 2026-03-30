@@ -52,7 +52,7 @@ function tourney_get_rounds(WP_REST_Request $request)
 }
 
 /**
- * Synchronisiert die Runden-Daten.
+ * Synchronisiert die Runden-Daten mit optimistic locking via Version-Counter.
  */
 function tourney_sync_rounds(WP_REST_Request $request)
 {
@@ -69,8 +69,8 @@ function tourney_sync_rounds(WP_REST_Request $request)
     }
 
     $events = $body["events"] ?? [];
-    $new_ts = time();
 
+    // 🔒 Optimistic locking Check vorab für alle Events
     foreach ($events as $round) {
         if (!isset($round["id"])) continue;
         
@@ -78,15 +78,56 @@ function tourney_sync_rounds(WP_REST_Request $request)
         if ($id < 1 || $id > 128) continue;
         
         $key = sprintf('round%03d', $id);
-        $meta_ts = "_{$key}_ts";
+        $meta_ver = "_{$key}_ts"; // Wir nutzen das Feld für die Version
+        
+        $stored_ver = intval(get_post_meta($post_id, $meta_ver, true));
+        $client_ver = intval($round["version"] ?? 0);
+
+        // Optimistic Locking:
+        // Da der Client die Version bereits lokal inkrementiert hat (z.B. von 1 auf 2),
+        // muss sie um genau 1 höher sein als auf dem Server (bzw. 1 für neue Runden).
+        
+        if ($stored_ver === 0) {
+            if ($client_ver !== 1) {
+                return ApiHelper::error(
+                    "version_mismatch", 
+                    "Round $id is new but version is not 1.", 
+                    "Sent: $client_ver", 
+                    "tourney_sync_rounds", 
+                    HttpStatus::CONFLICT
+                );
+            }
+        } else {
+            if ($client_ver !== ($stored_ver + 1)) {
+                return ApiHelper::error(
+                    "version_mismatch", 
+                    "Round $id has been modified by another user.", 
+                    "Stored Version: $stored_ver, Sent Version: $client_ver", 
+                    "tourney_sync_rounds", 
+                    HttpStatus::CONFLICT
+                );
+            }
+        }
+    }
+
+    // Wenn alle Checks bestanden, dann speichern
+    foreach ($events as $round) {
+        if (!isset($round["id"])) continue;
+        
+        $id = intval($round["id"]);
+        if ($id < 1 || $id > 128) continue;
+        
+        $key = sprintf('round%03d', $id);
+        $meta_ver = "_{$key}_ts";
+        
+        $client_ver = intval($round["version"]);
         
         // Speichern der Runde als JSON
         update_post_meta($post_id, $key, wp_json_encode($round));
-        update_post_meta($post_id, $meta_ts, $new_ts);
+        update_post_meta($post_id, $meta_ver, $client_ver);
     }
 
     return [
-        "success" => true,
-        "timestamp" => $new_ts
+        "success" => true
     ];
 }

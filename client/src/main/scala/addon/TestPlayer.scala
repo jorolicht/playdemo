@@ -108,6 +108,6 @@ object TestPlayer:
         addOutput(s"Error syncing players: ${err.msg}")
         Left(err)
       case Right(_) =>
-        addOutput(s"Players synced successfully. New timestamp: ${PlayerDB.timestamp}")
+        addOutput(s"Players synced successfully. New version: ${PlayerDB.version}")
         Right(s"FINISHED: ${group}-Test:${number}")
     }

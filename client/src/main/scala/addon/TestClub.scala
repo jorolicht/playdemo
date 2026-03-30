@@ -83,6 +83,6 @@ object TestClub:
         addOutput(s"Error syncing clubs: ${err.msg}")
         Left(err)
       case Right(_) =>
-        addOutput(s"Clubs synced successfully. New timestamp: ${ClubDB.timestamp}")
+        addOutput(s"Clubs synced successfully. New version: ${ClubDB.version}")
         Right(s"FINISHED: ${group}-Test:${number}")
     }

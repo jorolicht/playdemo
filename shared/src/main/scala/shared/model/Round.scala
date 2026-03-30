@@ -22,7 +22,7 @@ object RoundId:
 // -----------------------------
 // RoundCfg
 // -----------------------------
-enum RoundCfg(val id: Int, val typ: RoundTyp) derives CanEqual:
+enum RoundCfg(val id: Int, val typ: RoundTyp) derives CanEqual, ReadWriter:
 
   // --- Basic Phases ---
   case UNKN   extends RoundCfg(-1, RoundTyp.UNKN)
@@ -59,18 +59,6 @@ enum RoundCfg(val id: Int, val typ: RoundTyp) derives CanEqual:
   def isOneOf(values: RoundCfg*): Boolean = values.contains(this)
 
 object RoundCfg:
-  // implicit val rw: ReadWriter[RoundCfg] = readwriter[String].bimap[RoundCfg](
-  //     x => x.toString,           // Serialize: Enum -> String
-  //     s => RoundCfg.valueOf(s)   // Deserialize: String -> Enum
-  //   )
-
-  implicit val rw: ReadWriter[RoundCfg] =
-    readwriter[String].bimap[RoundCfg](
-      _.toString,
-      s => RoundCfg.values.find(_.toString == s).getOrElse(RoundCfg.UNKN)
-    )
-
-  
   def fromId(id: Int): RoundCfg =
     values.find(_.id == id).getOrElse(UNKN)
       
@@ -79,7 +67,7 @@ object RoundCfg:
 // -----------------------------
 // QualifyTyp
 // -----------------------------
-enum QualifyTyp(val id: Int) derives CanEqual:
+enum QualifyTyp(val id: Int) derives CanEqual, ReadWriter:
   case ALL extends QualifyTyp(0)
   case WIN extends QualifyTyp(1)
   case LOO extends QualifyTyp(2)
@@ -90,18 +78,12 @@ enum QualifyTyp(val id: Int) derives CanEqual:
 object QualifyTyp:
   def fromId(id: Int): QualifyTyp =
     values.find(_.id == id).getOrElse(ALL)
-  
-  // Add this implicit ReadWriter
-  implicit val rw: ReadWriter[QualifyTyp] = readwriter[String].bimap[QualifyTyp](
-    _.toString,             // To JSON: Enum -> "ALL"
-    valueOf(_)              // From JSON: "ALL" -> Enum.ALL
-  )    
 
 
 // -----------------------------
 // RoundTyp
 // -----------------------------
-enum RoundTyp(val id: Int) derives CanEqual:
+enum RoundTyp(val id: Int) derives CanEqual, ReadWriter:
 
   case UNKN extends RoundTyp(-1)
   case GR   extends RoundTyp(1)
@@ -120,7 +102,7 @@ object RoundTyp:
 // -----------------------------
 // RoundStatus
 // -----------------------------
-enum RoundStatus(val id: Int) derives CanEqual:
+enum RoundStatus(val id: Int) derives CanEqual, ReadWriter:
   case CFG  extends RoundStatus(0)
   case AUS  extends RoundStatus(1)
   case EIN  extends RoundStatus(2)
@@ -130,11 +112,6 @@ enum RoundStatus(val id: Int) derives CanEqual:
   def msgCode: String = s"RoundStatus.$productPrefix"
 
 object RoundStatus:
-  // This tells uPickle: "Convert the Enum to its name string and back"
-  implicit val rw: ReadWriter[RoundStatus] = readwriter[String].bimap[RoundStatus](
-    s => s.toString,
-    str => RoundStatus.valueOf(str)
-  )  
   def fromId(id: Int): RoundStatus = values.find(_.id == id).getOrElse(UNKN)
   def fromName(name: String): RoundStatus = values.find(_.productPrefix == name).getOrElse(UNKN)
 
@@ -153,7 +130,7 @@ case class Round(
   var nextIds:          List[RoundId] = List(),
   var quali:            QualifyTyp = QualifyTyp.ALL,
   var deleted:          Boolean = false,
-  var timestamp:        Long = 0L
+  var version:          Int = 0
 ):
 
   // -----------------------------
@@ -180,109 +157,6 @@ case class Round(
 
 
 object Round:
-  implicit val rw: ReadWriter[Round] = macroRW  
+  given ReadWriter[Round] = macroRW
 
 
-object RoundDB:
-  val MaxRound = 256
-  val rounds: Array[Round] = Array.fill(MaxRound)(null)
-
-  private val free = Stack.from(0 until MaxRound)
-
-  private def get(id: RoundId): Option[Round] =
-    Option(rounds(id.value))
-
-  def init = {
-    // todo load Round json encoded from wordpress custom post type round_001 to round_256
-    // set nextRoundId to max RoundId value
-  }
-
-
-  // =========================================================
-  // WORDPRESS SYNC
-  // =========================================================
-  private def sync(id: RoundId): Unit =
-    val postName = f"round_${id.value + 1}%03d"
-
-    val json =
-      if rounds(id.value) == null then ""
-      else write[Round](rounds(id.value))
-
-    // Wordpress.updateRoundPost(
-    //   Global.postId,
-    //   postName,
-    //   json
-    // )
-
-
-  // =========================================================
-  // ADD ROUND
-  // =========================================================
-  def addRound(prefId: Option[RoundId], base: Round): Round =
-    if free.isEmpty then
-      throw RuntimeException("Max rounds reached")
-
-    val id = free.pop()
-    val now = (System.currentTimeMillis() / 1000).toInt
-
-    val r =
-      base.copy(
-        id = RoundId(id),
-        prefId = prefId,
-        nextIds = List(),
-        timestamp = now
-      )
-    rounds(id) = r
-
-    // Vorgänger aktualisieren
-    prefId.foreach { pid =>
-      val pref = rounds(pid.value)
-
-      if pref != null then
-        rounds(pid.value) =
-          pref.copy(
-            nextIds = pref.nextIds :+ RoundId(id),
-            timestamp = now
-          )
-
-        sync(pid)
-    }
-  
-    sync(RoundId(id))
-    r
-
-
-
-  // =========================================================
-  // DELETE ROUND (inkl. aller Nachfolger)
-  // =========================================================
-  def deleteRound(id: RoundId): Unit =
-    val r = rounds(id.value)
-
-    if r == null then return
-
-    // zuerst Nachfolger löschen
-    r.nextIds.foreach(deleteRound)
-
-    val now = (System.currentTimeMillis() / 1000).toInt
-
-    // aus Vorgänger austragen
-    r.prefId.foreach { pid =>
-      val pref = rounds(pid.value)
-
-      if pref != null then
-        rounds(pid.value) =
-          pref.copy(
-            nextIds = pref.nextIds.filterNot(_ == id),
-            timestamp = now
-          )
-
-        sync(pid)
-    }
-
-    rounds(id.value) = null
-    free.push(id.value)
-
-    sync(id)
-
- 

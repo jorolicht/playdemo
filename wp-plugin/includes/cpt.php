@@ -28,7 +28,7 @@ add_action('init', 'trny_custom_post_type');
 
 function register_trny_custom_meta_fields() {
     $meta_fields = [
-        'basic'         => 'Turniergrunddaten',
+        'tourney'       => 'Turniergrunddaten',
         'clubs'         => 'Vereine',
         'players'       => 'Spieler'
     ];

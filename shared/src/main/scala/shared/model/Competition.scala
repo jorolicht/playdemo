@@ -155,7 +155,7 @@ case class Competition(
   var cttInfo:          Option[CompCTT] = None,
   val pants:            ArrayBuffer[Pant] = ArrayBuffer(),
   val deleted:          Boolean = false,
-  var timestamp:        Long = 0L
+  var version:          Int = 0
 ):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
 

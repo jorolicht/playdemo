@@ -94,6 +94,6 @@ object TestRound:
         addOutput(s"Error syncing rounds: ${err.msg}")
         Left(err)
       case Right(_) =>
-        addOutput(s"Rounds synced successfully. New timestamp: ${RoundDB.timestamp}")
+        addOutput(s"Rounds synced successfully.")
         Right(s"FINISHED: ${group}-Test:${number}")
     }

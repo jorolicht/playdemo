@@ -15,6 +15,7 @@ import base.{Global, Logging}
  * RoundDB provides methods to manage rounds and synchronize them with the WordPress server.
  * It supports up to 128 rounds.
  * Rounds are stored in custom post type meta fields round001 to round128.
+ * Optimistic locking is implemented using a version counter.
  */
 object RoundDB extends ComWrapper with Debouncer:
 
@@ -22,12 +23,10 @@ object RoundDB extends ComWrapper with Debouncer:
   val rounds: ArrayBuffer[Round] = ArrayBuffer.fill(MaxRounds)(null)
   val pendingEvents: ArrayBuffer[Round] = ArrayBuffer() 
 
-  var timestamp: Long = 0
-
   private val route = "/wp-json/tourney/v1/rounds-sync"
 
-  case class RoundSyncRequest(timestamp: Long, events: Seq[Round]) derives ReadWriter
-  case class RoundSyncResponse(timestamp: Long) derives ReadWriter
+  case class RoundSyncRequest(events: Seq[Round]) derives ReadWriter
+  case class RoundSyncResponse(success: Boolean) derives ReadWriter
   case class RoundsResponse(rounds: Seq[Round]) derives ReadWriter
 
   def triggerSync(): Unit =
@@ -38,25 +37,31 @@ object RoundDB extends ComWrapper with Debouncer:
 
   /**
    * Synchronizes pending round events with the WordPress server.
+   * If a version mismatch occurs (conflict), it clears pending events and reloads rounds from the server.
    */
   def sync(): Future[Either[AppError, Unit]] = {
     if pendingEvents.isEmpty then
       Future.successful(Right(()))
     else
-      val req = RoundSyncRequest(timestamp, pendingEvents.toSeq)
+      val req = RoundSyncRequest(pendingEvents.toSeq)
       val params = List("postId" -> Global.pageId.toString)
 
       ajaxPost[RoundSyncRequest, RoundSyncResponse](
         route,
         params,
         req
-      ).map {
+      ).flatMap {
         case Right(res) =>
-          timestamp = res.timestamp
           pendingEvents.clear()
-          Right(())
+          Future.successful(Right(()))
+        case Left(err) if err.is("version_mismatch") =>
+          Logging.error(s"Sync fehlgeschlagen: Version-Mismatch. Lade Runden neu... ${err.msg}")
+          pendingEvents.clear()
+          // Reload resetet den lokalen Zustand auf den Server-Stand (Undo)
+          load().map(_ => Left(err))
         case Left(err) =>
-          Left(err)
+          // Bei anderen Fehlern (z.B. Netzwerk) behalten wir pendingEvents für einen Retry
+          Future.successful(Left(err))
       }
   }
 
@@ -90,6 +95,7 @@ object RoundDB extends ComWrapper with Debouncer:
    * Finds the first empty slot or reuses the first deleted slot if all slots are full.
    * If prefId is None, sets this round as startRound in the competition.
    * If prefId is provided, adds this round to the nextIds of the predecessor.
+   * The version counter is initialized to 1.
    */
   def addRound(coId: CompId, prefId: Option[RoundId], name: String, rndCfg: RoundCfg, size: Int, noPlayers: Int): Either[AppError, Round] =
     val firstNull = rounds.indexOf(null)
@@ -101,7 +107,6 @@ object RoundDB extends ComWrapper with Debouncer:
 
     if (index != -1) {
       val id = RoundId(index + 1)
-      val now = (System.currentTimeMillis() / 1000).toLong
       val r = Round(
         id = id,
         coId = coId,
@@ -113,7 +118,7 @@ object RoundDB extends ComWrapper with Debouncer:
         noPlayers = noPlayers,
         prefId = prefId,
         nextIds = List(),
-        timestamp = now
+        version = 1
       )
       rounds(index) = r
       pendingEvents += r
@@ -123,7 +128,10 @@ object RoundDB extends ComWrapper with Debouncer:
         val pIdx = pid.value - 1
         if (pIdx >= 0 && pIdx < MaxRounds && rounds(pIdx) != null) {
           val pref = rounds(pIdx)
-          val updatedPref = pref.copy(nextIds = pref.nextIds :+ id, timestamp = now)
+          val updatedPref = pref.copy(
+            nextIds = pref.nextIds :+ id, 
+            version = pref.version + 1
+          )
           rounds(pIdx) = updatedPref
           pendingEvents += updatedPref
         }
@@ -135,7 +143,7 @@ object RoundDB extends ComWrapper with Debouncer:
         if (cIdx >= 0 && cIdx < CompetitionDB.MaxComps && CompetitionDB.competitions(cIdx) != null) {
           val comp = CompetitionDB.competitions(cIdx)
           if (comp.startRound.isEmpty) {
-            val updatedComp = comp.copy(startRound = Some(id), timestamp = now)
+            val updatedComp = comp.copy(startRound = Some(id))
             CompetitionDB.competitions(cIdx) = updatedComp
             CompetitionDB.pendingEvents += updatedComp
             CompetitionDB.triggerSync()
@@ -152,6 +160,7 @@ object RoundDB extends ComWrapper with Debouncer:
   /**
    * Deletes a round and its successors (soft delete).
    * If the round was the startRound of its competition, sets startRound to None.
+   * The version counter is incremented.
    */
   def deleteRound(id: RoundId): Either[AppError, Unit] =
     val i = id.value - 1
@@ -159,13 +168,16 @@ object RoundDB extends ComWrapper with Debouncer:
       Left(AppError("round.notFound"))
     } else {
       val r = rounds(i)
-      val now = (System.currentTimeMillis() / 1000).toLong
       
       // Delete successors recursively
       r.nextIds.foreach(deleteRound)
 
       // Soft delete current round
-      val updatedR = rounds(i).copy(deleted = true, timestamp = now)
+      val currentRound = rounds(i)
+      val updatedR = currentRound.copy(
+        deleted = true, 
+        version = currentRound.version + 1
+      )
       rounds(i) = updatedR
       pendingEvents += updatedR
 
@@ -174,7 +186,10 @@ object RoundDB extends ComWrapper with Debouncer:
         val pIdx = pid.value - 1
         if (pIdx >= 0 && pIdx < MaxRounds && rounds(pIdx) != null) {
           val pref = rounds(pIdx)
-          val updatedPref = pref.copy(nextIds = pref.nextIds.filterNot(_ == id), timestamp = now)
+          val updatedPref = pref.copy(
+            nextIds = pref.nextIds.filterNot(_ == id), 
+            version = pref.version + 1
+          )
           rounds(pIdx) = updatedPref
           pendingEvents += updatedPref
         }
@@ -185,7 +200,7 @@ object RoundDB extends ComWrapper with Debouncer:
       if (cIdx >= 0 && cIdx < CompetitionDB.MaxComps && CompetitionDB.competitions(cIdx) != null) {
         val comp = CompetitionDB.competitions(cIdx)
         if (comp.startRound.contains(id)) {
-          val updatedComp = comp.copy(startRound = None, timestamp = now)
+          val updatedComp = comp.copy(startRound = None)
           CompetitionDB.competitions(cIdx) = updatedComp
           CompetitionDB.pendingEvents += updatedComp
           CompetitionDB.triggerSync()

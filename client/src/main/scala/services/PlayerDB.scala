@@ -13,22 +13,17 @@ import base.{Global, Logging}
 
 /**
  * PlayerDB provides methods to manage players and synchronize them with the server.
- * It follows the structure of ClubDB.
+ * It follows the structure of ClubDB with global version-based locking.
  */
-object PlayerDB extends ComWrapper:
-
-  var syncHandle: Option[SetTimeoutHandle] = None
+object PlayerDB extends ComWrapper with Debouncer:
 
   /**
    * Triggers a delayed synchronization with the server.
    */
   def triggerSync(): Unit =
-    syncHandle.foreach(clearTimeout)
-
-    syncHandle = Some(setTimeout(500) {
+    debounce(delay = 800) {
       sync()
-      syncHandle = None
-    })
+    }
 
   val players: ArrayBuffer[Player] = ArrayBuffer()
   val pendingEvents: ArrayBuffer[Player] = ArrayBuffer() // Only Add/Update events
@@ -37,11 +32,11 @@ object PlayerDB extends ComWrapper:
   def validIdx(i: Int): Boolean = i >= 0 && i < players.length
   def nextId(): PlayerId = PlayerId(players.length + 1)
 
-  var timestamp: Long = 0
+  var version: Int = 0
 
-  case class PlayerSyncRequest(timestamp: Long, events: Seq[Player]) derives ReadWriter
-  case class PlayerSyncResponse(timestamp: Long) derives ReadWriter
-  case class PlayersResponse(timestamp: Long, players: Seq[Player]) derives ReadWriter
+  case class PlayerSyncRequest(version: Int, players: Seq[Player]) derives ReadWriter
+  case class PlayerSyncResponse(version: Int) derives ReadWriter
+  case class PlayersResponse(version: Int, players: Seq[Player]) derives ReadWriter
 
   /**
    * Synchronizes pending player events with the WordPress server.
@@ -51,20 +46,25 @@ object PlayerDB extends ComWrapper:
       Future.successful(Right(()))
     else
       val route = "/wp-json/tourney/v1/players-sync"
-      val req = PlayerSyncRequest(timestamp, pendingEvents.toSeq)
+      // Da alle Spieler in einem Meta-Feld liegen, senden wir den gesamten Stand.
+      val req = PlayerSyncRequest(version, players.toSeq)
       val params = List("postId" -> Global.pageId.toString)
 
       ajaxPost[PlayerSyncRequest, PlayerSyncResponse](
         route,
         params,
         req
-      ).map {
+      ).flatMap {
         case Right(res) =>
-          timestamp = res.timestamp
+          version = res.version
           pendingEvents.clear()
-          Right(())
+          Future.successful(Right(()))
+        case Left(err) if err.is("version_mismatch") =>
+          Logging.error(s"Sync fehlgeschlagen: Version-Mismatch bei Spielern. Lade neu... ${err.msg}")
+          pendingEvents.clear()
+          load().map(_ => Left(err))
         case Left(err) =>
-          Left(err)
+          Future.successful(Left(err))
       }
   }
 
@@ -82,10 +82,10 @@ object PlayerDB extends ComWrapper:
       case Right(res) =>
         players.clear()
         players ++= res.players
-        timestamp = res.timestamp
+        version = res.version
         pendingEvents.clear()
-        Logging.debug(s"PlayerDB.load: loaded ${players.length} players, timestamp: $timestamp")
-        Right(res.timestamp)
+        Logging.debug(s"PlayerDB.load: loaded ${players.length} players, version: $version")
+        Right(version.toLong)
       case Left(err) => Left(err)
     }
   }
@@ -124,6 +124,20 @@ object PlayerDB extends ComWrapper:
     }
 
   /**
+   * Updates an existing player.
+   */
+  def update(p: Player): Either[AppError, Player] =
+    val i = idx(p.id)
+    if (!validIdx(i)) {
+      Left(AppError("player.notFound"))
+    } else {
+      players.update(i, p)
+      pendingEvents += p
+      triggerSync()
+      Right(p)
+    }
+
+  /**
    * Deactivates a player (soft delete).
    */
   def delete(id: PlayerId): Either[AppError, Player] =
@@ -154,13 +168,10 @@ object PlayerDB extends ComWrapper:
     } else if (mainId == mergedId) {
       Left(AppError("player.merge.sameId", "Cannot merge a player with themselves"))
     } else {
-      val mainPlayer = players(mainIdx)
       val mergedPlayer = players(mergedIdx)
-
-      mergedPlayer.active = false
-      mergedPlayer.merge = Some(mainId)
-
-      pendingEvents += mergedPlayer
+      val updatedMerged = mergedPlayer.copy(active = false, merge = Some(mainId))
+      players.update(mergedIdx, updatedMerged)
+      pendingEvents += updatedMerged
       triggerSync()
       Right(())
     }

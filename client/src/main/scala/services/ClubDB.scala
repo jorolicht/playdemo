@@ -30,33 +30,36 @@ object ClubDB extends ComWrapper with Debouncer:
   def validIdx(i: Int): Boolean = i >= 0 && i < clubs.length
   def nextId(): ClubId = ClubId(clubs.length + 1)
 
-  var timestamp: Long = 0
+  var version: Int = 0
 
-  
-
-  case class ClubSyncRequest(timestamp: Long, events: Seq[Club]) derives ReadWriter
-  case class ClubSyncResponse(timestamp: Long) derives ReadWriter
-  case class ClubsResponse(timestamp: Long, clubs: Seq[Club]) derives ReadWriter
+  case class ClubSyncRequest(version: Int, clubs: Seq[Club]) derives ReadWriter
+  case class ClubSyncResponse(version: Int) derives ReadWriter
+  case class ClubsResponse(version: Int, clubs: Seq[Club]) derives ReadWriter
 
   def sync(): Future[Either[AppError, Unit]] = {
     if pendingEvents.isEmpty then
       Future.successful(Right(()))
     else
       val route = "/wp-json/tourney/v1/clubs-sync"
-      val req = ClubSyncRequest(timestamp, pendingEvents.toSeq)
+      // Wir senden den gesamten Stand der Vereine, da sie in einem Meta-Feld liegen.
+      val req = ClubSyncRequest(version, clubs.toSeq)
       val params = List("postId" -> Global.pageId.toString)
 
       ajaxPost[ClubSyncRequest, ClubSyncResponse](
         route,
         params,
         req
-      ).map {
+      ).flatMap {
         case Right(res) =>
-          timestamp = res.timestamp
+          version = res.version
           pendingEvents.clear()
-          Right(())
+          Future.successful(Right(()))
+        case Left(err) if err.is("version_mismatch") =>
+          Logging.error(s"Sync fehlgeschlagen: Version-Mismatch bei Vereinen. Lade neu... ${err.msg}")
+          pendingEvents.clear()
+          load().map(_ => Left(err))
         case Left(err) =>
-          Left(err)
+          Future.successful(Left(err))
       }
   }
 
@@ -72,10 +75,10 @@ object ClubDB extends ComWrapper with Debouncer:
       case Right(res) =>
         clubs.clear()
         clubs ++= res.clubs
-        timestamp = res.timestamp
+        version = res.version
         pendingEvents.clear
-        Logging.debug(s"ClubDB.load: loaded ${clubs.length} clubs, timestamp: $timestamp ")
-        Right(res.timestamp)
+        Logging.debug(s"ClubDB.load: loaded ${clubs.length} clubs, version: $version")
+        Right(version.toLong)
       case Left(err) => Left(err)
     }
   }
@@ -100,7 +103,9 @@ object ClubDB extends ComWrapper with Debouncer:
               clubs.update(i, updated)
               pendingEvents += updated
               triggerSync()
-            Right(clubs(i))
+              Right(updated)
+            else
+              Right(existing)
 
         case None =>
           val id = nextId()
@@ -164,8 +169,11 @@ object ClubDB extends ComWrapper with Debouncer:
     // Spieler umhängen
     PlayerDB.players.indices.foreach { i =>
       if PlayerDB.players(i).clubId == sourceId.toInt then
-        PlayerDB.players.update(i, PlayerDB.players(i).copy(clubId = targetId.toInt))
+        val p = PlayerDB.players(i)
+        PlayerDB.players.update(i, p.copy(clubId = targetId.toInt))
+        PlayerDB.pendingEvents += PlayerDB.players(i)
     }
+    PlayerDB.triggerSync()
 
     // CTT zusammenführen
     val mergedCtt = target.ctt.orElse(source.ctt)
