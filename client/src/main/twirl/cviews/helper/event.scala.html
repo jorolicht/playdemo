@@ -3,4 +3,4 @@
  *@
 
 @(inEvent:String)
-@{ Html(s""" ${inEvent}="Main.event(this, event); false" """) }
+@{ Html(s""" ${inEvent}="window.appEvent(this, event); false" """) }

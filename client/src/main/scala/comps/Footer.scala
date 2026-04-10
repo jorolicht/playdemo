@@ -2,7 +2,7 @@ package comps
 
 import shared.MainIds.NavbarId
 
-object Footer extends CompBase with base.JsWrapper:
+object Footer extends BaseComp with base.JsWrapper:
   def name = PageNameTyp("Footer")
   val ConsoleClickId: HtmlId = genId(name)
 

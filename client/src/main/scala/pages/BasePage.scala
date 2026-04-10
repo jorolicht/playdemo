@@ -27,5 +27,5 @@ def loadPage(pageName: PageName, param: String): Unit =
     case e: Exception => error(s"loadPage -> page:${pageName} param:${param} not found")
 
 
-abstract class BasePage extends comps.CompBase:
-  def event(elem: HTMLElement, event: Event): Unit = {}
+abstract class BasePage extends comps.BaseComp:
+  override def handleEvent(elem: HTMLElement, event: Event): Unit = {}

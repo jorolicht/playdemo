@@ -56,7 +56,7 @@ object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
         debug(s"Auth.render -> ${param}")
     true
 
-  override def event(elem: HTMLElement, event: dom.Event) =   
+  override def handleEvent(elem: HTMLElement, event: dom.Event) =   
     HtmlId(elem.id) match
       case `ShowLoginId` => 
         // switch to login content as dynamic creation of

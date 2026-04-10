@@ -6,8 +6,6 @@ import org.scalajs.dom.raw.HTMLElement
 import scala.scalajs.js
 import cviews.pages.*
 import base.*
-import shared.MainIds.SidebarId
-import comps.Navbar.ToggleSidebarId
 
 object Home extends BasePage with JsWrapper:
   def name = PageNameTyp("Home")
@@ -21,8 +19,6 @@ object Home extends BasePage with JsWrapper:
       case _          => setMain(s"""<div class='d-flex mt-5 justify-content-center'><h5>${param}</h5></div>""")
 
 
-  override def event(elem: HTMLElement, event: dom.Event) =   
+  override def handleEvent(elem: HTMLElement, event: dom.Event) =   
     HtmlId(elem.id) match
-      case `ToggleSidebarId` => toggleClass(gE(SidebarId), "d-none")
-
       case _ => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}")

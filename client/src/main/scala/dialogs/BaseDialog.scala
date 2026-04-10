@@ -15,6 +15,6 @@ object Ids:
   val DlgPromptId: DialogId = DialogId.myName
 
 
-abstract class BaseDialog extends comps.CompBase:
+abstract class BaseDialog extends comps.BaseComp:
   
-  def event(elem: HTMLElement, event: Event): Unit = {}
+  override def handleEvent(elem: HTMLElement, event: Event): Unit = {}

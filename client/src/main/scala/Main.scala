@@ -9,14 +9,14 @@ import scala.scalajs.js.annotation.*
 
 import services.{ ComWrapper, ClubDB, PlayerDB, CompetitionDB }
 import base.{ Global, JsWrapper, _ }
-import comps.{ CompBase, Navbar, Sidebar }
+import comps.{ BaseComp, Navbar, Sidebar }
 
 import shared.basic.*
 import shared.MainIds.*
 import comps.Wordpress
 import addon.Console
 
-object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
+object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
   def name = PageNameTyp("Main")
   
   @JSExportTopLevel("startApp")
@@ -111,9 +111,11 @@ object Main extends CompBase with ComWrapper with JsWrapper with Mgmt:
       debug(s"event -> pgDlgName:${name} key:${key} elem:${elem.id}")
 
       if pages.pagesMap.contains(pgDlgName) then
-        pages.pagesMap(pgDlgName).event(elem, event)
+        pages.pagesMap(pgDlgName).handleEvent(elem, event)
+      else if comps.compsMap.contains(pgDlgName) then
+        comps.compsMap(pgDlgName).handleEvent(elem, event)
       else
-        dialogs.dlgMap(pgDlgName).event(elem, event)
+        dialogs.dlgMap(pgDlgName).handleEvent(elem, event)
     catch
       case e: Exception => error(s"event -> elem:${elem.id} failed") 
 

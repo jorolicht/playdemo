@@ -19,7 +19,7 @@ object Register extends BasePage with JsWrapper:
     setMain(s"""<div class='d-flex mt-5 justify-content-center'><h5>${name}</h5></div>""")
     true
 
-  override def event(elem: HTMLElement, event: dom.Event) =   
+  override def handleEvent(elem: HTMLElement, event: dom.Event) =   
     HtmlId(elem.id) match
       case _           => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}") 
 

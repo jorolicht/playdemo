@@ -20,7 +20,7 @@ object Console extends BasePage with JsWrapper:
     gE(ClickId).click()
     true
 
-  override def event(elem: HTMLElement, event: dom.Event) =   
+  override def handleEvent(elem: HTMLElement, event: dom.Event) =   
     HtmlId(elem.id) match
       case `ConsoleId` => gE(ConsoleId).click()
       case _           => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}") 

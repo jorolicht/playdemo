@@ -158,5 +158,3 @@ case class Round(
 
 object Round:
   given ReadWriter[Round] = macroRW
-
-

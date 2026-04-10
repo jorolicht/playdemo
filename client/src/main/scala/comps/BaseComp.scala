@@ -9,7 +9,9 @@ import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
 import base.JsWrapper
 
-abstract class CompBase(using fn: FullName):
+val compsMap = List(Navbar, Sidebar).map(c => c.name -> c).toMap
+
+abstract class BaseComp(using fn: FullName):
   export Logging.debug
   export Logging.error
   export Logging.warn
@@ -22,6 +24,7 @@ abstract class CompBase(using fn: FullName):
 
   def name: PageName
   def render(param: String = ""): Boolean
+  def handleEvent(elem: org.scalajs.dom.raw.HTMLElement, event: org.scalajs.dom.Event): Unit = {}
   
   def id(name: HtmlId) = s"id=${name.id}"
   def gM(key: String, inserts: String*)  = 

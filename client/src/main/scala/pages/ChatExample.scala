@@ -23,8 +23,9 @@ object ChatExample extends BasePage with JsWrapper with ComWrapper:
       case Some(usr) => setMain(html.ChatExample(usr))
       
 
-  override def event(elem: HTMLElement, event: Event) =
+  override def handleEvent(elem: HTMLElement, event: Event) =   
     HtmlId(elem.id) match
+
       //case ChatExample_Send => sendChatMsg( getInput(gE(ChatExample_Receiver),""), getInput(gE(ChatExample_Message),"") )
       case `sendId` => 
         Global.user match
