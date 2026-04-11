@@ -1,6 +1,7 @@
 package comps
 
-import shared.MainIds.*
+import shared.MainIds.NavbarId
+import comps.Sidebar.AsideId
 
 object Navbar extends BaseComp with base.JsWrapper:
   def name = PageNameTyp("Navbar")
@@ -15,5 +16,5 @@ object Navbar extends BaseComp with base.JsWrapper:
 
   override def handleEvent(elem: org.scalajs.dom.raw.HTMLElement, event: org.scalajs.dom.Event) =   
     HtmlId(elem.id) match
-      case `ToggleSidebarId` => toggleClass(gE(shared.MainIds.SidebarId), "d-none")
+      case `ToggleSidebarId` => toggleClass(gE(AsideId), "d-none")
       case _                 => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}")

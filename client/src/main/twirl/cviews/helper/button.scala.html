@@ -3,9 +3,7 @@
  *@
 @import base.Messages.*
 
-
 @(key: String, caption: String, bClass: String, enabledParam:Boolean=true)
-
 <button id='@key' type='button' class='btn @bClass' @onclick @enabled(enabledParam)>
   @caption
 </button>
