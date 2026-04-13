@@ -57,6 +57,7 @@ require_once PLAYPLUGIN_PATH . 'includes/api-user.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-player.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-club.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-tourney.php';
+require_once PLAYPLUGIN_PATH . 'includes/api-create-tourney.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-competition.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-round.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-json.php';
@@ -86,13 +87,16 @@ function playdemo_render() {
     $homeUrl = home_url();
     $nonce   = wp_create_nonce('wp_rest');
 
+    $logLevel  = isset($_GET['logLevel']) ? $_GET['logLevel'] : 'debug';
+    $tourney = isset($_GET['tourney']) ? $_GET['tourney'] : '';
+
     $output = '<span id="Main_ParamId" data-dataurl="' . esc_url($dataUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" data-pageid="' . esc_attr($pageId) . '" ></span>';
     $output .= '<span id="Footer_ConsoleClickId" data-command=""></span>';
     $output .= '<span id="DlgPrompt_LoadId" data-loaded="false"></span>';
     $output .= '<div id="Main_WordpressId"></div>';
     $output .= '<script type="module">';
     $output .= 'import { startApp } from "' . esc_url($jsUrl) . '";';
-    $output .= 'startApp("001DE1970-01", "wp", "debug");';
+    $output .= 'startApp("001DE1970-01", "wp", "' . esc_attr($logLevel) . '", "' . esc_attr($tourney) . '");';
     $output .= '</script>';
 
     return $output;

@@ -125,7 +125,7 @@ object TestAuth extends Authentication with ComWrapper with JsWrapper:
 
     (for
       pw   <- EitherT[Future,AppError,String](sha256(password))
-      usr  <- EitherT[Future,AppError,User](regUser(User(newUuidString, email, "Robert", "Lichtenegger"), pw))
+      usr  <- EitherT[Future,AppError,User](regUser(User((newUuidString, 0), email, email, "Robert", "Lichtenegger"), pw))
     yield usr).value.map {
       case Left(err)   => addOutput(s"ERROR: ${err}");         Left(err)
       case Right(user) => addOutput(s"RESULT: user->${user}"); Right(s"FINISHED: ${group}-Test:${number} param:${param}")

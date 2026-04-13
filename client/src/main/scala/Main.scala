@@ -20,12 +20,14 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
   def name = PageNameTyp("Main")
   
   @JSExportTopLevel("startApp")
-  def startApp(version: String, startEnv: String, logLevel: String): Unit = 
+  def startApp(version: String, startEnv: String, logLevel: String, tourney: String = ""): Unit = 
     Global.lang = dom.window.navigator.language.take(2)
     Global.dataUrl  = getData(gE(ParamId), "dataurl", "./data/")
+    Logging.setLogLevel(logLevel.toLowerCase())
+    //Global.tourney  = tourney
 
     Logging.setLogLevel(logLevel)
-    println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} env:${startEnv} logLevel:${logLevel}")
+    println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} env:${startEnv} logLevel:${logLevel} tourney:${tourney}")
 
     dom.window.asInstanceOf[js.Dynamic].sayHello    = (name: String) => s"Hello $name"
     dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
@@ -65,6 +67,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
   def startWp(): Unit = 
     import shared.model.UserInfo
+    import shared.model.User
     import cats.data.EitherT
     import cats.implicits._ 
 
@@ -83,7 +86,22 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       timestamp1  <- EitherT(ClubDB.load())
       timestamp3  <- EitherT(PlayerDB.load())
     } yield  (user, timestamp1, timestamp3) ).value.map {
-      case Right(res)  => debug(s"User loaded: ${res._1}, Clubs timestamp: ${res._2}")
+      case Right(res)  => 
+        val ui = res._1
+        debug(s"User loaded: ${ui}, Clubs timestamp: ${res._2}")
+        if (ui.user_id > 0) {
+           Global.user = Some(User(
+             id = ("", ui.user_id),
+             username = ui.username,
+             email = ui.email,
+             firstname = ui.firstname,
+             lastname = ui.lastname,
+             org = ui.club,
+             picUrl = ui.avatar_url,
+             description = ui.description,
+             roles = ui.roles
+           ))
+        }
       case Left(err)   => debug(s"Error loading user or clubs: ${err}")
     }
 

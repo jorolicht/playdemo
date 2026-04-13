@@ -27,21 +27,30 @@ class UserRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionConte
    */
   private val simple = {
     get[String]("id") ~ 
+    get[String]("username") ~
+    get[Int]("wpId") ~
     get[String]("email") ~ 
     get[Option[String]]("firstname") ~ 
     get[Option[String]]("lastname") ~ 
+    get[Option[String]]("password") ~ 
+    get[Option[String]]("org") ~ 
     get[Option[String]]("picUrl") ~ 
+    get[Option[String]]("description") ~ 
+    get[Option[String]]("roles") ~ 
     get[Option[String]]("locale") ~ 
     get[Option[Int]]("verified") ~ 
-    get[Option[String]]("password") ~ 
     get[Long]("entryTime") map {
-      case idStr ~ email ~ firstname ~ lastname  ~ picUrl ~ locale ~ verified ~ password ~ entryTime 
-        => User(idStr,
+      case idStr ~ username ~ wpId ~ email ~ firstname ~ lastname ~ password ~ org ~ picUrl ~ description ~ roles ~ locale ~ verified ~ entryTime 
+        => User((idStr, wpId),
+                username,
                 email,
                 firstname.getOrElse(""), 
                 lastname.getOrElse(""), 
-                password.getOrElse(""), 
+                password.getOrElse(""),
+                org.getOrElse(""),
                 picUrl.getOrElse(""), 
+                description.getOrElse(""),
+                roles.flatMap( r => parseJson[List[String]](r).toOption ).getOrElse(Nil),
                 locale.getOrElse(""), 
                 verified == Some(1), entryTime)
     }
@@ -66,10 +75,11 @@ class UserRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionConte
    */
   def insert(user: User): FuEiErr[User] = Future {
     val verified = if user.verified then 1 else 0
+    val rolesJson = toJson(user.roles)
     try
       db.withConnection { implicit connection =>
-        SQL"""insert user (id, email, firstname, lastname, picUrl, locale, verified, password, entryTime)
-              values(${user.id},${user.email},${user.firstname},${user.lastname},${user.picUrl},${user.locale},${verified},${user.password},${user.entryTime})"""
+        SQL"""insert user (id, username, wpId, email, firstname, lastname, password, org, picUrl, description, roles, locale, verified, entryTime)
+              values(${user.id._1}, ${user.username}, ${user.id._2}, ${user.email}, ${user.firstname}, ${user.lastname}, ${user.password}, ${user.org}, ${user.picUrl}, ${user.description}, ${rolesJson}, ${user.locale}, ${verified}, ${user.entryTime})"""
         .executeUpdate()
       }
       Right(user) 
@@ -81,7 +91,7 @@ class UserRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionConte
    *
    * @param user id
    */
-  def setEmailVerified(id: Long): FuEiErr[Boolean] = Future {
+  def setEmailVerified(id: String): FuEiErr[Boolean] = Future {
     try
       val result = db.withConnection { implicit connection =>
         SQL"""UPDATE user SET verified=1 WHERE user.id=$id""".executeUpdate()
@@ -109,10 +119,10 @@ class UserRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionConte
    *
    * @param users id
    */
-  def setVerified(id: Long, value: Boolean): FuEiErr[Int] = Future {
+  def setVerified(id: String, value: Boolean): FuEiErr[Int] = Future {
     try
       val result = db.withConnection { implicit connection =>
-        SQL"""UPDATE user SET verified=${value:Int} WHERE user.id=$id"""".executeUpdate()
+        SQL"""UPDATE user SET verified=${value:Int} WHERE user.id=$id""".executeUpdate()
       } 
       Right(result)
     catch { case e: Exception => Left(AppError("err00007.db.user.update", e.getMessage)) }

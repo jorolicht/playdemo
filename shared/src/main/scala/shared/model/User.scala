@@ -2,31 +2,41 @@ package shared.model
 
 import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
 
-case class User(id: String,
-                var email: String, 
-                var firstname: String="", 
-                var lastname: String="",
-                var password: String="",
-                var picUrl: String = "", 
-                var locale: String = "", 
-                var verified: Boolean = false,
-                var entryTime: Long = 0L):
+case class User(id:               (String, Int),  // (UUID (e.g. from google), wordpress user id)
+                var username:     String = "",
+                var email:        String, 
+                var firstname:    String="", 
+                var lastname:     String="",
+                var password:     String="",
+                var org:          String = "",
+                var picUrl:       String = "", 
+                var description:  String = "",
+                var roles:        List[String] = Nil,
+                var locale:       String = "", 
+                var verified:     Boolean = false,
+                var entryTime:    Long = 0L):
 
-  def verifyInfo = write[(String,String,Long)]((id,email,entryTime))
+  def verifyInfo = write[((String, Int), String, Long)]((id, email, entryTime))
+  def name = if firstname != "" || lastname != "" then s"$firstname $lastname" else if username != "" then username else email
 
 
 object User:
   implicit val rw: RW[User] = macroRW
-  def apply(id: String, email: String, entryTime:Long) = 
-    new User(id, email, "", "", "", "", "", false, entryTime)
+  def apply(id: (String, Int), email: String, entryTime:Long) = 
+    new User(id, "", email, "", "", "", "", "", "", Nil, "", false, entryTime)
 
 case class UserInfo(
   username: String,
   user_id: Int,
   email: String,
   club: String,
+  firstname: String = "",
+  lastname: String = "",
+  description: String = "",
+  avatar_url: String = "",
+  roles: List[String] = Nil,
   time: String
 )
 
 object UserInfo:
-  given Reader[UserInfo] = macroR
+  implicit val rw: RW[UserInfo] = macroRW

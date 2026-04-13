@@ -30,7 +30,8 @@ function register_trny_custom_meta_fields() {
     $meta_fields = [
         'tourney'       => 'Turniergrunddaten',
         'clubs'         => 'Vereine',
-        'players'       => 'Spieler'
+        'players'       => 'Spieler',
+        'date'          => 'Datum'
     ];
 
     // Runden 001–128 hinzufügen

@@ -58,4 +58,8 @@ object Global:
   var wpUserName: String = ""
   var wpAppPassword: String = ""
 
+  def setUser(usr: User) = user = Some(usr)
+  def resetUser = user = None
+
+
                             

@@ -28,10 +28,15 @@ function playdemo_api_create_get_permissions_check( WP_REST_Request $request ) {
 
 // Die Callback-Funktion für den Endpunkt
 function playdemo_api_callback_user($request) {
-    $user_id        = 'null';
+    $user_id        = 0;
     $username       = '';
     $email          = '';
     $club           = '';
+    $firstname      = '';
+    $lastname       = '';
+    $description    = '';
+    $avatar_url     = '';
+    $roles          = [];
 
     if ( is_user_logged_in() )  {
         $user_id        = get_current_user_id();
@@ -39,13 +44,23 @@ function playdemo_api_callback_user($request) {
         $username       = $current_user->user_login;
         $email          = $current_user->user_email;     
         $club           = get_user_meta($user_id, 'club_name' , true );
+        $firstname      = $current_user->first_name;
+        $lastname       = $current_user->last_name;
+        $description    = $current_user->description;
+        $avatar_url     = get_avatar_url($user_id);
+        $roles          = $current_user->roles;
     } 
 
     return [
         'username'      => $username,
-        'user_id'       => $user_id,
+        'user_id'       => (int)$user_id,
         'email'         => $email,
         'club'          => $club,
+        'firstname'     => $firstname,
+        'lastname'      => $lastname,
+        'description'   => $description,
+        'avatar_url'    => $avatar_url,
+        'roles'         => array_values($roles), // Ensure numeric array for JSON
         'time'          => current_time('mysql'),
     ];
 }

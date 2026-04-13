@@ -69,9 +69,10 @@ class Auth @Inject()(cc: ControllerComponents, mailer: MailerClient, cfg: Config
       //   This confirms that the user has access to the existing account.
       //   A returning federated user: You can silently sign the user in.
 
+
       userRepo.getUser(email).flatMap( _ match {
         case Left(err)  => 
-          val user = User( userId, email, firstname, lastname, "Google", picUrl, locale, true)
+          val user = User( (userId, 0), email, email, firstname, lastname, "Google", "", picUrl, "", List(), locale, true)
           userRepo.insert(user).map { 
             case Left(err)  => BadRequest(toJson(err)).discardingCookies(genDiscardAuthCookie) 
             case Right(usr) => Ok(toJson(usr)).withCookies(genUserAuthCookie(usr)) 
@@ -118,9 +119,9 @@ class Auth @Inject()(cc: ControllerComponents, mailer: MailerClient, cfg: Config
   def verifyUser(code: String): Action[AnyContent] = Action.async { implicit request =>
     logger.trace(s"verifyUser -> code=${code}")
 
-    parseJson[(Long,String,Long)](decode64(code)) match 
+    parseJson[((String, Int), String, Long)](decode64(code)) match 
       case Left(err)    => Future(Ok("Error"))
-      case Right(vCode) => userRepo.setEmailVerified(vCode._1).map {
+      case Right(vCode) => userRepo.setEmailVerified(vCode._1._1).map {
         case Left(err)  => Ok(views.html.main("Error", encode64(toJson(AppError("verifyUserNotPossible"))) ))
         case Right(res) => if (res) 
           then Ok(views.html.main("Home", "verified")) 

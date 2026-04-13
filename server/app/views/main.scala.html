@@ -2,7 +2,7 @@
 @import shared.DomTypes.HtmlId
 @import shared.MainIds.*
 
-@(page: String, param: String)(implicit request: RequestHeader, msgs: MessagesProvider)
+@(page: String, param: String, debug: String = "", tourney: String = "")(implicit request: RequestHeader, msgs: MessagesProvider)
 @gM(name: String) = @{ msgs.messages("main."+name) }
 @id(name: HtmlId) = @{ Html(s""" id='${name.id}' """ ) }
 
@@ -54,7 +54,7 @@
     <script src='@routes.Assets.at("bootstrap-5.3.3/js/bootstrap.bundle.min.js")'></script>
     <script type="module">
       import { startApp } from '@routes.Assets.versioned("client-fastopt/main.js")';
-      startApp('001DE1970-01', 'play', 'debug');
+      startApp('001DE1970-01', 'play', 'debug', '@debug', '@tourney');
     </script>
     
   </body>

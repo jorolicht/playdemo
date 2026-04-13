@@ -18,8 +18,10 @@ class Main @Inject()(cc: ControllerComponents, userRepo: UserRepository)(implici
   extends AbstractController(cc) with I18nSupport with Logging  {
 
   def home(name: String, param: String=""): Action[AnyContent] = Action { implicit request =>
-    logger.trace(s"home -> name=${name} param=${param}")
-    Ok(views.html.main(name, param) )
+    val debug   = request.getQueryString("debug").getOrElse("")
+    val tourney = request.getQueryString("tourney").getOrElse("")
+    logger.trace(s"home -> name=${name} param=${param} debug=${debug} tourney=${tourney}")
+    Ok(views.html.main(name, param, debug, tourney) )
   }
 
 }
