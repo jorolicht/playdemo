@@ -123,7 +123,7 @@ function tourney_sync_rounds(WP_REST_Request $request)
         $client_ver = intval($round["version"]);
         
         // Speichern der Runde als JSON
-        update_post_meta($post_id, $key, wp_json_encode($round));
+        update_post_meta($post_id, $key, wp_json_encode($round, JSON_UNESCAPED_UNICODE));
         update_post_meta($post_id, $meta_ver, $client_ver);
     }
 

@@ -74,7 +74,9 @@ object CompetitionDB extends ComWrapper with Debouncer:
     val params = List("postId" -> Global.pageId.toString)
     ajaxGet[CompetitionsResponse]("/wp-json/tourney/v1/competitions", params).map {
       case Right(res) =>
-        for (i <- 0 until MaxComps) competitions(i) = null
+        println(s"CompetitionDB.load: received ${res.competitions.length} competitions from server")
+        competitions.clear()
+        for (i <- 0 until MaxComps) competitions += null
         res.competitions.foreach { c =>
            val i = c.id.value - 1
            if (i >= 0 && i < MaxComps) then
@@ -83,7 +85,9 @@ object CompetitionDB extends ComWrapper with Debouncer:
         pendingEvents.clear()
         Logging.debug(s"CompetitionDB.load: loaded ${res.competitions.length} competitions")
         Right(0L)
-      case Left(err) => Left(err)
+      case Left(err) => 
+        Logging.error(s"CompetitionDB.load: failed to load competitions: ${err.msgCode}")
+        Left(err)
     }
   }
 

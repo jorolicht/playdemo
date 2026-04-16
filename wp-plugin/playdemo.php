@@ -61,7 +61,6 @@ require_once PLAYPLUGIN_PATH . 'includes/api-create-tourney.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-competition.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-round.php';
 require_once PLAYPLUGIN_PATH . 'includes/api-json.php';
-require_once PLAYPLUGIN_PATH . 'includes/api-set-meta.php';
 require_once PLAYPLUGIN_PATH . 'includes/helpers.php';
 
 
@@ -73,12 +72,17 @@ require_once PLAYPLUGIN_PATH . 'includes/helpers.php';
  * a container for the application and a script tag that initializes the main
  * JavaScript application with the required data.
  *
- * The shortcode `[playdemo]` can be used to embed the application anywhere
+ * The shortcode `[playdemo mode="wp"]` can be used to embed the application anywhere
  * on the WordPress site.
  *
+ * @param array $atts Shortcode attributes.
  * @return string The complete HTML output for the shortcode.
  */
-function playdemo_render() {
+function playdemo_render($atts) {
+    $atts = shortcode_atts( array(
+        'mode' => 'wp',
+    ), $atts );
+
     $jsPath  = plugin_dir_path(__FILE__) . 'js/main.js';
     $jsUrl   = plugins_url('js/main.js', __FILE__) . '?v=' . filemtime($jsPath);
     $dataUrl = plugins_url('data/', __FILE__);
@@ -96,12 +100,42 @@ function playdemo_render() {
     $output .= '<div id="Main_WordpressId"></div>';
     $output .= '<script type="module">';
     $output .= 'import { startApp } from "' . esc_url($jsUrl) . '";';
-    $output .= 'startApp("001DE1970-01", "wp", "' . esc_attr($logLevel) . '", "' . esc_attr($tourney) . '");';
+    $output .= 'startApp("001DE1970-01", "' . esc_attr($atts['mode']) . '", "' . esc_attr($logLevel) . '", "' . esc_attr($tourney) . '");';
     $output .= '</script>';
 
     return $output;
 }
 add_shortcode('playdemo', 'playdemo_render');
+
+
+/**
+ * Filters the template for "tourney" single posts to ensure the shortcode is rendered
+ * even if the theme doesn't support the custom post type content out of the box.
+ *
+ * @param string $template The path to the template.
+ * @return string The path to the template.
+ */
+add_filter('template_include', function ($template) {
+    if (is_singular('tourney')) {
+        // If the theme has a specific template, use it.
+        // Otherwise, we can force a basic output that includes our shortcode.
+        // For simplicity and to ensure it works, we can hook into the_content
+        // or ensure the loop is handled.
+    }
+    return $template;
+});
+
+
+/**
+ * Ensures that the shortcode is added to the content of 'tourney' posts
+ * if it's missing, or just makes sure it's processed correctly.
+ */
+add_filter('the_content', function ($content) {
+    if (is_singular('tourney') && !has_shortcode($content, 'playdemo')) {
+        $content .= '[playdemo mode="view"]';
+    }
+    return $content;
+});
 
 
 /**

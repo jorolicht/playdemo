@@ -30,24 +30,28 @@ object TourneyDB extends ComWrapper with Debouncer:
   /**
    * Initializes the application state by loading all data from the server.
    */
-  def init(): Future[Either[AppError, Unit]] = {
+  def init(): Future[Either[AppError, Long]] = {
     Logging.info("Initialisiere TourneyDB: Lade alle Daten vom Server...")
+    
+    // Explicitly define each load to keep track of this.load()
+    val loadTourney = this.load()
     val loads = Seq(
-      this.load(),
+      loadTourney,
       CompetitionDB.load(),
       ClubDB.load(),
       PlayerDB.load(),
       RoundDB.load()
     )
 
-    Future.sequence(loads).map { results =>
+    Future.sequence(loads).flatMap { results =>
       val errors = results.collect { case Left(err) => err }
       if (errors.nonEmpty) {
         val combinedMsg = errors.map(_.msgCode).mkString(", ")
-        Left(AppError("init.failed", combinedMsg))
+        Future.successful(Left(AppError("init.failed", combinedMsg)))
       } else {
         Logging.info("TourneyDB erfolgreich initialisiert.")
-        Right(())
+        // Return the result of loadTourney
+        loadTourney
       }
     }
   }

@@ -84,7 +84,7 @@ function tourney_sync_clubs(WP_REST_Request $request)
     $next_ver = $stored_ver + 1;
 
     // 💾 Gesamtes Array speichern
-    update_post_meta($post_id, $meta, wp_json_encode(array_values($new_clubs)));
+    update_post_meta($post_id, $meta, wp_json_encode(array_values($new_clubs), JSON_UNESCAPED_UNICODE));
     update_post_meta($post_id, $meta_ver, $next_ver);
 
     return [

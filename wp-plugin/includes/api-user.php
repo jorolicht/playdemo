@@ -31,7 +31,7 @@ function playdemo_api_callback_user($request) {
     $user_id        = 0;
     $username       = '';
     $email          = '';
-    $club           = '';
+    $organizer    = '';
     $firstname      = '';
     $lastname       = '';
     $description    = '';
@@ -43,7 +43,7 @@ function playdemo_api_callback_user($request) {
         $current_user   = wp_get_current_user();
         $username       = $current_user->user_login;
         $email          = $current_user->user_email;     
-        $club           = get_user_meta($user_id, 'club_name' , true );
+        $organizer    = get_user_meta($user_id, 'organizer' , true );
         $firstname      = $current_user->first_name;
         $lastname       = $current_user->last_name;
         $description    = $current_user->description;
@@ -55,7 +55,7 @@ function playdemo_api_callback_user($request) {
         'username'      => $username,
         'user_id'       => (int)$user_id,
         'email'         => $email,
-        'club'          => $club,
+        'club'          => $organizer,
         'firstname'     => $firstname,
         'lastname'      => $lastname,
         'description'   => $description,

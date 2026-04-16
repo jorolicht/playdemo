@@ -77,7 +77,8 @@ object RoundDB extends ComWrapper with Debouncer:
     val params = List("postId" -> Global.pageId.toString)
     ajaxGet[RoundsResponse]("/wp-json/tourney/v1/rounds", params).map {
       case Right(res) =>
-        for (i <- 0 until MaxRounds) rounds(i) = null
+        rounds.clear()
+        for (i <- 0 until MaxRounds) rounds += null
         res.rounds.foreach { r =>
            val i = r.id.value - 1
            if (i >= 0 && i < MaxRounds) then

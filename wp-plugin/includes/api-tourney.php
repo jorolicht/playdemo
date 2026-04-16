@@ -85,7 +85,7 @@ function tourney_sync_tourney(WP_REST_Request $request)
 
     // 💾 Speichern
     if ($new_tourney) {
-        update_post_meta($post_id, $meta, wp_json_encode($new_tourney));
+        update_post_meta($post_id, $meta, wp_json_encode($new_tourney, JSON_UNESCAPED_UNICODE));
     } else {
         delete_post_meta($post_id, $meta);
     }

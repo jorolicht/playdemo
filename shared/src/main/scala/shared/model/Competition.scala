@@ -28,8 +28,9 @@ object CompTyp:
   import shared.basic.Pickle.*
 
   given ReadWriter[CompTyp] =
-    readwriter[Int].bimap[CompTyp](_.id, id =>
-      CompTyp.values.find(_.id == id).getOrElse(CompTyp.UNKN)
+    readwriter[String].bimap[CompTyp](
+      _.toString,
+      s => try CompTyp.valueOf(s) catch { case _: Exception => CompTyp.UNKN }
     )
 
   def fromString(value: String): CompTyp =
@@ -74,8 +75,9 @@ enum CompStatus(val id: Int):
 object CompStatus:
 
   given ReadWriter[CompStatus] =
-    readwriter[Int].bimap[CompStatus](_.id, id =>
-      CompStatus.values.find(_.id == id).getOrElse(CompStatus.UNKN)
+    readwriter[String].bimap[CompStatus](
+      _.toString,
+      s => try CompStatus.valueOf(s) catch { case _: Exception => CompStatus.UNKN }
     )
 
 

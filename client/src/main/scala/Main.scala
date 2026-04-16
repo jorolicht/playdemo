@@ -7,7 +7,7 @@ import scala.scalajs.js
 import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.*
 
-import services.{ ComWrapper, ClubDB, PlayerDB, CompetitionDB }
+import services.{ ComWrapper, ClubDB, PlayerDB, CompetitionDB, TourneyDB }
 import base.{ Global, JsWrapper, _ }
 import comps.{ BaseComp, Navbar, Sidebar }
 
@@ -20,14 +20,14 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
   def name = PageNameTyp("Main")
   
   @JSExportTopLevel("startApp")
-  def startApp(version: String, startEnv: String, logLevel: String, tourney: String = ""): Unit = 
+  def startApp(version: String, mode: String, logLevel: String, tourney: String = ""): Unit = 
     Global.lang = dom.window.navigator.language.take(2)
     Global.dataUrl  = getData(gE(ParamId), "dataurl", "./data/")
     Logging.setLogLevel(logLevel.toLowerCase())
     //Global.tourney  = tourney
 
     Logging.setLogLevel(logLevel)
-    println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} env:${startEnv} logLevel:${logLevel} tourney:${tourney}")
+    println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} mode:${mode} logLevel:${logLevel} tourney:${tourney}")
 
     dom.window.asInstanceOf[js.Dynamic].sayHello    = (name: String) => s"Hello $name"
     dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
@@ -37,11 +37,40 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
 
     Messages.initMsg(version, Global.dataUrl, Global.lang).map {
-      case true  => startEnv.toLowerCase() match 
+      case true  => mode.toLowerCase() match 
         case "play"  => startPlay()
         case "wp"    => startWp()
         case "vite"  => startVite()
+        case "view"  => startView()
       case false => println("Main program failed to initialize")  
+    }
+
+
+  def startView(): Unit =
+    import services.*
+    import shared.model.*
+
+    Global.playUrl = getData(gE(ParamId), "playurl","")
+    Global.homeUrl = getData(gE(ParamId), "homeurl", "")
+    Global.wpNonce = getData(gE(ParamId), "nonce", "")
+    Global.pageId  = getData(gE(ParamId), "pageid", 0)
+
+    debug(s"startView -> pageId: ${Global.pageId}")
+
+    TourneyDB.init().map {
+      case Right(_) =>
+        val html = cviews.pages.html.ViewTourney(
+          TourneyDB.tourney,
+          CompetitionDB.competitions.toSeq.filter(_ != null),
+          RoundDB.rounds.toSeq.filter(_ != null),
+          ClubDB.clubs.toSeq,
+          PlayerDB.players.toSeq
+        )
+        setHtml(gE(WordpressId), html)
+        //setHtml(gE(WordpressId), "<div class='container'>Tourney Content</div>")
+      case Left(err) =>
+        error(s"Initialization failed in startView: ${err.msgCode}")
+        setHtml(gE(WordpressId), s"<div class='alert alert-danger'>Fehler beim Laden der Daten: ${err.msgCode}</div>")
     }
 
 
@@ -76,7 +105,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     Global.wpNonce = getData(gE(ParamId), "nonce", "")
     Global.pageId  = getData(gE(ParamId), "pageid", 0)
 
-    debug(s"wpStart -> playUrl:${Global.playUrl} homeUrl: ${Global.homeUrl} lang: ${Global.lang} nonce: ${Global.wpNonce} pageId: ${Global.pageId}")
+    debug(s"startWp -> playUrl:${Global.playUrl} homeUrl: ${Global.homeUrl} lang: ${Global.lang} nonce: ${Global.wpNonce} pageId: ${Global.pageId}")
 
     // init wordpress main page
     Wordpress.render("")

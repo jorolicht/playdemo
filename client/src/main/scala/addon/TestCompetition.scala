@@ -6,6 +6,7 @@ import services.CompetitionDB
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.collection.mutable.ArrayBuffer
+import scala.util.control.NonFatal
 
 /**
  * TestCompetition provides addon console commands to test CompetitionDB functionality.
@@ -19,6 +20,7 @@ object TestCompetition:
       case 3 => testCompetition_list(group, number, param)
       case 4 => testCompetition_sync(group, number, param)
       case 5 => testCompetition_addPants(group, number, param)
+      case 6 => testCompetition_jsonDecode(group, number, param)
       case _ =>
         addOutput(s"FAILED: ${group}-Test:${number} param:${param} unknown test number")
         Future(Left(AppError("unknown test number")))
@@ -143,3 +145,29 @@ object TestCompetition:
       case _: Exception =>
         addOutput(s"Invalid parameters: $param")
         Future(Left(AppError("invalid.param")))
+
+  /**
+   * Test 6: Test JSON decoding of a Competition object.
+   */
+  def testCompetition_jsonDecode(group: String, number: Int, param: String): Future[Either[AppError, String]] =
+    import shared.basic.Pickle.*
+    
+    val json = """{"id":1,"version":4,"name":"Wettbewerb 1","typ":"SINGLE","startDate":"2026-04-14","status":"RUN","startRound":null,"activ":true,"webRegister":true,"lowLevel":0,"upperLevel":2500,"cttInfo":{"ageGroup":"Herren","ratingRemark":"A-Klasse","ratingLowLevel":0,"ratingUpperLevel":2500,"sex":1,"maxPersons":64,"entryFee":"15,00 \u20ac","ageFrom":"","ageTo":"","preliminaryRoundMode":"Gruppen","finalRoundMode":"KO-System","manualFinalRankings":false},"pants":[],"deleted":false}"""
+    
+    addOutput(s"Starting JSON decode test...")
+    try
+      val comp = read[Competition](json)
+      addOutput(s"Successfully decoded competition: ${comp.name} (ID: ${comp.id.value})")
+      addOutput(s"- Typ: ${comp.typ}")
+      addOutput(s"- Status: ${comp.status}")
+      addOutput(s"- StartDate: ${comp.startDate}")
+      addOutput(s"- AgeGroup: ${comp.cttInfo.map(_.ageGroup).getOrElse("N/A")}")
+      addOutput(s"- EntryFee: ${comp.cttInfo.map(_.entryFee).getOrElse("N/A")}")
+      Future(Right(s"FINISHED: ${group}-Test:${number}"))
+    catch
+      case ex: Throwable =>
+        val msg = s"Failed to decode competition: ${ex.getClass.getName}: ${ex.getMessage}"
+        addOutput(msg)
+        println(msg)
+        ex.printStackTrace()
+        Future(Left(AppError("decode.failed", msg)))

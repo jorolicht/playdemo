@@ -44,6 +44,7 @@ extension (str: String)
 
 
 def parseJson[T: Pickle.Reader](x: String): Either[AppError, T] =
+  println(s"parseJson: parsing string: ${x}") 
   if x.isEmpty then
     Left(AppError("err00006.parseJson", "empty string"))
   else
