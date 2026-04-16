@@ -42,7 +42,30 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
         case "wp"    => startWp()
         case "vite"  => startVite()
         case "view"  => startView()
+        case "overview" => startOverview()
       case false => println("Main program failed to initialize")  
+    }
+
+
+  def startOverview(): Unit =
+    import shared.model.*
+    
+    case class Organizer(id: Int, title: String, slug: String, count: Int) derives ReadWriter
+
+    Global.playUrl = getData(gE(ParamId), "playurl","")
+    Global.homeUrl = getData(gE(ParamId), "homeurl", "")
+    Global.wpNonce = getData(gE(ParamId), "nonce", "")
+
+    debug(s"startOverview -> Fetching organizers")
+
+    ajaxGet[Seq[Organizer]]("/wp-json/tourney/v1/organizers", List()).map {
+      case Right(orgs) =>
+        val organizers = orgs.map(o => (o.id, o.title, o.slug, o.count))
+        val html = cviews.pages.html.ViewOverview(organizers)
+        setHtml(gE(WordpressId), html)
+      case Left(err) =>
+        error(s"Failed to load organizers: ${err.msgCode}")
+        setHtml(gE(WordpressId), s"<div class='alert alert-danger'>Fehler beim Laden der Organisatoren: ${err.msgCode}</div>")
     }
 
 
@@ -146,7 +169,50 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
   def handleGoogleCredential(credentials: String): Unit = pages.Auth.googleLogin(credentials)
 
-  def appLoadPage(pageName: String, param: String): Unit = pages.loadPage(PageNameTyp(pageName), param)
+  def appLoadPage(pageName: String, param: String): Unit = 
+    if (pageName == "Overview") then
+      loadTourneysForOrganizer(param)
+    else
+      pages.loadPage(PageNameTyp(pageName), param)
+
+
+  def loadTourneysForOrganizer(slug: String): Unit =
+    import shared.model.*
+    
+    // Response models for standard WP API
+    case class WpTitle(rendered: String) derives ReadWriter
+    case class WpPost(id: Int, title: WpTitle, link: String) derives ReadWriter
+
+    val containerId = s"tourneys-$slug"
+    val container = dom.document.getElementById(containerId).asInstanceOf[HTMLElement]
+    
+    if (container.classList.contains("d-none")) {
+      container.classList.remove("d-none")
+      setHtml(container, "<em>Lade Turniere...</em>")
+      
+      // Wir brauchen die Parent ID für diesen Slug. 
+      ajaxGet[Seq[WpPost]](s"/wp-json/wp/v2/tourney?slug=$slug", List()).map {
+        case Right(parents) if parents.nonEmpty =>
+          val parentId = parents.head.id
+          ajaxGet[Seq[WpPost]](s"/wp-json/wp/v2/tourney?parent=$parentId", List()).map {
+            case Right(children) =>
+              if (children.isEmpty) {
+                setHtml(container, "<div class='alert alert-info py-1'>Keine Turniere gefunden.</div>")
+              } else {
+                val listItems = children.map { c =>
+                  val title = c.title.rendered
+                  val link = c.link
+                  s"<a href='$link' class='list-group-item list-group-item-action py-1'>$title</a>"
+                }.mkString("")
+                setHtml(container, s"<div class='list-group mt-1 shadow-sm'>$listItems</div>")
+              }
+            case Left(_) => setHtml(container, "<div class='alert alert-danger py-1'>Fehler beim Laden.</div>")
+          }
+        case _ => setHtml(container, "<div class='alert alert-danger py-1'>Organisator nicht gefunden.</div>")
+      }
+    } else {
+      container.classList.add("d-none")
+    }
 
   def render(param: String = ""): Boolean = true
 

@@ -19,7 +19,49 @@ add_action('rest_api_init', function () {
         'permission_callback' => '__return_true'
     ]);
 
+    // GET /tourney/v1/organizers - Gibt alle Parent-Posts (Organisatoren) zurück
+    register_rest_route('tourney/v1', '/organizers', [
+        'methods' => 'GET',
+        'callback' => 'tourney_get_organizers',
+        'permission_callback' => '__return_true'
+    ]);
+
 });
+
+/**
+ * Gibt eine Liste aller Organisatoren (Parent-Posts) zurück.
+ */
+function tourney_get_organizers(WP_REST_Request $request) {
+    $parents = get_posts([
+        'post_type'      => 'tourney',
+        'post_parent'    => 0,
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'title',
+        'order'          => 'ASC'
+    ]);
+
+    $result = [];
+    foreach ($parents as $parent) {
+        // Zähle Kinder
+        $children = get_posts([
+            'post_type'   => 'tourney',
+            'post_parent' => $parent->ID,
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'fields'      => 'ids'
+        ]);
+
+        $result[] = [
+            'id'    => $parent->ID,
+            'title' => $parent->post_title,
+            'slug'  => $parent->post_name,
+            'count' => count($children)
+        ];
+    }
+
+    return $result;
+}
 
 /**
  * Gibt die Turnierdaten für eine bestimmte Post-ID zurück.

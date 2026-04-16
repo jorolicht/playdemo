@@ -80,7 +80,7 @@ require_once PLAYPLUGIN_PATH . 'includes/helpers.php';
  */
 function playdemo_render($atts) {
     $atts = shortcode_atts( array(
-        'mode' => 'wp',
+        'mode' => 'overview',
     ), $atts );
 
     $jsPath  = plugin_dir_path(__FILE__) . 'js/main.js';
