@@ -53,14 +53,13 @@ function my_multilingual_registration_msgs( $msgs ) {
 require_once PLAYPLUGIN_PATH . 'includes/user.php';
 require_once PLAYPLUGIN_PATH . 'includes/cpt.php';
 require_once PLAYPLUGIN_PATH . 'includes/settings.php';
-require_once PLAYPLUGIN_PATH . 'includes/api-user.php';
-require_once PLAYPLUGIN_PATH . 'includes/api-player.php';
-require_once PLAYPLUGIN_PATH . 'includes/api-club.php';
-require_once PLAYPLUGIN_PATH . 'includes/api-tourney.php';
-require_once PLAYPLUGIN_PATH . 'includes/api-create-tourney.php';
-require_once PLAYPLUGIN_PATH . 'includes/api-competition.php';
-require_once PLAYPLUGIN_PATH . 'includes/api-round.php';
-require_once PLAYPLUGIN_PATH . 'includes/api-json.php';
+require_once PLAYPLUGIN_PATH . 'includes/api/user.php';
+require_once PLAYPLUGIN_PATH . 'includes/api/player.php';
+require_once PLAYPLUGIN_PATH . 'includes/api/club.php';
+require_once PLAYPLUGIN_PATH . 'includes/api/tourney.php';
+require_once PLAYPLUGIN_PATH . 'includes/api/competition.php';
+require_once PLAYPLUGIN_PATH . 'includes/api/round.php';
+require_once PLAYPLUGIN_PATH . 'includes/api/json.php';
 require_once PLAYPLUGIN_PATH . 'includes/helpers.php';
 
 

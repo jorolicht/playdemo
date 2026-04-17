@@ -61,7 +61,7 @@ object TourneyDB extends ComWrapper with Debouncer:
   case class TourneyResponse(version: Int, tourney: Option[Tourney]) derives ReadWriter
 
   private val routeSync = "/wp-json/tourney/v1/tourney-sync"
-  private val routeGet  = "/wp-json/tourney/v1/tourney"
+  private val routeGet  = "/wp-json/tourney/v1/read"
 
   /**
    * Synchronizes pending tourney changes with the WordPress server.
