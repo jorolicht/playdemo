@@ -79,7 +79,8 @@ require_once PLAYPLUGIN_PATH . 'includes/helpers.php';
  */
 function playdemo_render($atts) {
     $atts = shortcode_atts( array(
-        'mode' => 'overview',
+        'mode' => 'multi', // default mode
+        'page' => '',      // optional page parameter for more specific views    
     ), $atts );
 
     $jsPath  = plugin_dir_path(__FILE__) . 'js/main.js';
@@ -93,7 +94,7 @@ function playdemo_render($atts) {
     $logLevel  = isset($_GET['logLevel']) ? $_GET['logLevel'] : 'debug';
     $tourney = isset($_GET['tourney']) ? $_GET['tourney'] : '';
 
-    $output = '<span id="Main_ParamId" data-dataurl="' . esc_url($dataUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" data-pageid="' . esc_attr($pageId) . '" ></span>';
+    $output = '<span id="Main_ParamId" data-page="' . esc_attr($atts['page']) . '" data-dataurl="' . esc_url($dataUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" data-pageid="' . esc_attr($pageId) . '" ></span>';
     $output .= '<span id="Footer_ConsoleClickId" data-command=""></span>';
     $output .= '<span id="DlgPrompt_LoadId" data-loaded="false"></span>';
     $output .= '<div id="Main_WordpressId"></div>';
@@ -131,7 +132,7 @@ add_filter('template_include', function ($template) {
  */
 add_filter('the_content', function ($content) {
     if (is_singular('tourney') && !has_shortcode($content, 'playdemo')) {
-        $content .= '[playdemo mode="view"]';
+        $content .= '[playdemo mode="single"]';
     }
     return $content;
 });

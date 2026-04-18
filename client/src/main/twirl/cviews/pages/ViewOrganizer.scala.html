@@ -1,8 +1,9 @@
+@import shared.DomTypes.HtmlId
 @import shared.model.*
+@import cviews.helper.html.*
+@import pages.ViewOrganizer.*
 
-@(
-  organizers: Seq[(Int, String, String, Int)]
-)
+@(organizers: Seq[(Int, String, String, Int)])
 
 <div class="container mt-4">
     <div class="card shadow-sm">
@@ -11,15 +12,14 @@
         </div>
         <div class="card-body">
             <div class="list-group">
-                @for((id, title, slug, count) <- organizers.filter(_._4 > 0)) {
+                @for((orgId, title, slug, count) <- organizers.filter(_._4 > 0)) {
                     <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         <div class="flex-grow-1">
                             <h5 class="mb-1">@title</h5>
                             <small class="text-muted">Pfad: tourney/@slug</small>
                         </div>
                         <span class="badge bg-primary rounded-pill">@count Turniere</span>
-                        <button class="btn btn-outline-primary btn-sm ms-3" 
-                                onclick="appLoadPage('Overview', '@slug')">
+                        <button @id(Details) data-slug="@slug" class="btn btn-outline-primary btn-sm ms-3"  @event("onclick")>
                             Details anzeigen
                         </button>
                     </div>

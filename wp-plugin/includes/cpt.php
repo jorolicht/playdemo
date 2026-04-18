@@ -31,7 +31,10 @@ function register_trny_custom_meta_fields() {
         'tourney'       => 'Turniergrunddaten',
         'clubs'         => 'Vereine',
         'players'       => 'Spieler',
-        'date'          => 'Datum'
+        'startdate'     => 'StartDatum',
+        'enddate'       => 'EndDatum',
+        'ident'         => 'Identifikationsnummer',
+        'organizer'     => 'Organisator'
     ];
 
     // Runden 001–128 hinzufügen

@@ -23,14 +23,12 @@ enum TourneyTyp derives ReadWriter:
 
 
 case class Tourney(
-  name:      String,
+  name:          String,
   var organizer: String,          // Organizer name (club or registered program user)
-  var orgDir:    String,          // Normalized organizer name (used as directory)
   var startDate: Int,             // Format: yyyymmdd
   var endDate:   Int,
   var ident:     String,          // clickTT id
-  typ:       TourneyTyp,
-  var privat:    Boolean,         // Private tournaments visible only to registered users
+  typ:           TourneyTyp,
   var contact:   Option[Contact] = None,
   var address:   Option[Address] = None,
   var version:   Int = 0

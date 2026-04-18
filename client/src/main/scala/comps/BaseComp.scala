@@ -1,5 +1,8 @@
 package comps
 
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+
 import base.Messages
 import base.Logging
 import sourcecode.FullName
@@ -24,6 +27,7 @@ abstract class BaseComp(using fn: FullName):
 
   def name: PageName
   def render(param: String = ""): Boolean
+  def renderAsync(param: String = ""): Future[Boolean] = Future(true)
   def handleEvent(elem: org.scalajs.dom.raw.HTMLElement, event: org.scalajs.dom.Event): Unit = {}
   
   def id(name: HtmlId) = s"id=${name.id}"

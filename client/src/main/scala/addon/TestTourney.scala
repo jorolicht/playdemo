@@ -30,12 +30,11 @@ object TestTourney:
       Tourney(
         name = name,
         organizer = "Test Org",
-        orgDir = "test-org",
         startDate = 20260101,
         endDate = 20260101,
         ident = "123",
-        typ = TourneyTyp.TableTennis,
-        privat = false
+        version = 0,
+        typ = TourneyTyp.TableTennis
       )
     )
     val updated = current.copy(name = name)
