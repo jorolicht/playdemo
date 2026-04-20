@@ -86,6 +86,7 @@ function playdemo_render($atts) {
     $jsPath  = plugin_dir_path(__FILE__) . 'js/main.js';
     $jsUrl   = plugins_url('js/main.js', __FILE__) . '?v=' . filemtime($jsPath);
     $dataUrl = plugins_url('data/', __FILE__);
+    $imgUrl  = plugins_url('img/', __FILE__);
     $playUrl = get_option('playdemo_url', '');
     $pageId  = get_the_ID();
     $homeUrl = home_url();
@@ -94,7 +95,8 @@ function playdemo_render($atts) {
     $logLevel  = isset($_GET['logLevel']) ? $_GET['logLevel'] : 'debug';
     $tourney = isset($_GET['tourney']) ? $_GET['tourney'] : '';
 
-    $output = '<span id="Main_ParamId" data-page="' . esc_attr($atts['page']) . '" data-dataurl="' . esc_url($dataUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" data-pageid="' . esc_attr($pageId) . '" ></span>';
+    $output = '<span id="Main_ParamId" data-page="' . esc_attr($atts['page']) . '" data-dataurl="' . esc_url($dataUrl) . '" data-imgurl="' . esc_url($imgUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" data-pageid="' . esc_attr($pageId) . '" ></span>';
+    $output .= '<span id="Main_NavbarId"></span>';
     $output .= '<span id="Footer_ConsoleClickId" data-command=""></span>';
     $output .= '<span id="DlgPrompt_LoadId" data-loaded="false"></span>';
     $output .= '<div id="Main_WordpressId"></div>';
@@ -159,8 +161,8 @@ add_filter('the_content', function ($content) {
 function js_enqueue_scripts_styles() {
     // add script in head (false)
     wp_enqueue_style( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css', array(), '5.3.3' );
-    wp_enqueue_style( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css', array(), '1.11.3' );
-    wp_enqueue_script( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js', array(), '5.3.3', false );
+    wp_enqueue_style( 'bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css', array(), '1.11.3' );
+    wp_enqueue_script( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', array(), '5.3.3', false );
 
     //wp_enqueue_script('tourney_js', plugin_dir_url(__FILE__) . 'js/main.js', [], '1.0', false);
     wp_enqueue_style( 'tourney_style', plugin_dir_url(__FILE__) . 'css/main.css', [], '1.0');

@@ -50,6 +50,7 @@ object Global:
   var csrf    = ""
   var homeUrl = ""
   var dataUrl = ""
+  var imgUrl  = ""
   var playUrl = ""
   var pageId  = 0
   var wpNonce   = ""

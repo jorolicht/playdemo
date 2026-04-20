@@ -26,21 +26,16 @@
   <body>
     <span @id(NavbarId)></span>
 
-    <div class="d-flex">
-        <!-- Sidebar (aside) -->
-        <span @id(SidebarId)></span>
+    <!-- Hauptinhalt -->
+    <div class="container-fluid mt-3">
+        @auth("782737132657-vs1domdevjcm9fv5sfg32lp30dd7oc7d.apps.googleusercontent.com")
+        <div @id(JScriptId) class="d-none d-flex flex-column p-2 mb-2 mt-2 border border-danger">
+            <h4>@gM("title") - Version: @gM("version")</h4>
+            <h6>@gM("javascript")</h6>
+        </div>
 
-        <!-- Hauptinhalt -->
-        <div class="content">
-            @auth("782737132657-vs1domdevjcm9fv5sfg32lp30dd7oc7d.apps.googleusercontent.com")
-            <div @id(JScriptId) class="d-none d-flex flex-column p-2 mb-2 mt-2 border border-danger">
-                <h4>@gM("title") - Version: @gM("version")</h4>
-                <h6>@gM("javascript")</h6>
-            </div>
-
-            <div @id(ContentId) class="row">         
-                <div class="d-flex mt-2 mr-2 justify-content-center border border-secondary">Main Content</div>
-            </div>
+        <div @id(ContentId) class="row">         
+            <div class="d-flex mt-2 mr-2 justify-content-center border border-secondary">Main Content</div>
         </div>
     </div>
 

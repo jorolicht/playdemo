@@ -23,6 +23,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
   def startApp(version: String, mode: String, logLevel: String, tourney: String = ""): Unit = 
     Global.lang = dom.window.navigator.language.take(2)
     Global.dataUrl  = getData(gE(ParamId), "dataurl", "./data/")
+    Global.imgUrl   = getData(gE(ParamId), "imgurl", "./img/")
     Logging.setLogLevel(logLevel.toLowerCase())
     //Global.tourney  = tourney
 
@@ -71,6 +72,10 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     Global.pageId  = getData(gE(ParamId), "pageid", 0)
     debug(s"modeSingle -> playUrl: ${Global.playUrl}, homeUrl: ${Global.homeUrl}, lang: ${Global.lang}, nonce: ${Global.wpNonce}, pageId: ${Global.pageId}")
 
+    // Render components
+    Navbar.render("")
+    Wordpress.render("")
+
     TourneyDB.init().map {
       case Right(_) =>
         val html = cviews.pages.html.ViewTourney(
@@ -80,11 +85,10 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
           ClubDB.clubs.toSeq,
           PlayerDB.players.toSeq
         )
-        Wordpress.render("")
-        setMain(html)
+        setHtml(gE(ContentId), html)
       case Left(err) =>
-        error(s"Initialization failed in startView: ${err.msgCode}")
-        setHtml(gE(WordpressId), s"<div class='alert alert-danger'>Fehler beim Laden der Daten: ${err.msgCode}</div>")
+        error(s"Initialization failed in modeSingle: ${err.msgCode}")
+        setHtml(gE(ContentId), s"<div class='alert alert-danger'>Fehler beim Laden der Daten: ${err.msgCode}</div>")
     }
 
 
@@ -98,7 +102,8 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
     debug(s"modeMulti -> playUrl: ${Global.playUrl}, homeUrl: ${Global.homeUrl}, lang: ${Global.lang}, nonce: ${Global.wpNonce}, pageId: ${Global.pageId}")
 
-    // init wordpress main page
+    // Render components
+    Navbar.render("")
     Wordpress.render("")
 
     (for {
@@ -122,6 +127,8 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
              roles = ui.roles
            ))
         }
+        // Load initial page for multi mode
+        pages.loadPage(pages.Home.name, "")
       case Left(err)   => debug(s"Error loading user or clubs: ${err}")
     }
 
@@ -139,9 +146,9 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     val evtSource = new dom.raw.EventSource(s"/helper/sse?id=${randomString(6)}")  
     evtSource.onmessage = { (e: dom.MessageEvent) => debug(s"Message from Server: ${e.data}") }
 
-    // add nav-bar header and sidebar
+    // add nav-bar header
     Navbar.render("")
-    Sidebar.render("") 
+    // Sidebar.render("") - Removed as requested
 
     appLoadPage(usecase, param)  
 

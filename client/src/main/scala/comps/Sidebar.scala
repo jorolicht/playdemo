@@ -29,8 +29,9 @@ object Sidebar extends BaseComp with base.JsWrapper:
     true
 
   def setNavLink(uc: String) =
-    val navLinkNodes = gE(AsideId).querySelectorAll("[data-usecase]")
-    for( i <- 0 to navLinkNodes.length-1)
-      val elem = navLinkNodes.item(i).asInstanceOf[HTMLElement]
-      changeClass(elem, uc==getData(elem, "usecase", "") , "bg-primary")
-    println(s"set navlink: ${uc} ")
+    if (idExists(AsideId)) then
+      val navLinkNodes = gE(AsideId).querySelectorAll("[data-usecase]")
+      for( i <- 0 to navLinkNodes.length-1)
+        val elem = navLinkNodes.item(i).asInstanceOf[HTMLElement]
+        changeClass(elem, uc==getData(elem, "usecase", "") , "bg-primary")
+      println(s"set navlink: ${uc} ")

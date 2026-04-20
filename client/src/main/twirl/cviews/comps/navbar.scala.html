@@ -1,34 +1,86 @@
 @import shared.DomTypes.HtmlId
 @import cviews.helper.html.*
 @import comps.Navbar.*
-@import pages.Home
-
+@import pages.*
 
 @()
-<nav class="navbar navbar-expand navbar-dark bg-secondary">
-    <!-- Navbar Brand-->
-    <a class="navbar-brand ps-3" @exec(Home, "")>Demo Playframework</a>
-    <!-- Sidebar Toggle-->
-    <button @id(ToggleSidebarId) class="btn btn-sm btn-light d-md-none order-1 order-lg-0 me-4 me-lg-0" @event("onclick")><i class="bi bi-list"></i></button>
-    <!-- Navbar Search-->
-    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-        <div class="input-group">
-            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
-            <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
-        </div>
-    </form>
-    <!-- Navbar-->
-    <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li><a @id(ShowLoginId) class="dropdown-item" @onclick >@gM("app.btn.login")</a></li>
-                <li><a @id(DoLogoutId)  class="dropdown-item" @onclick>@gM("app.btn.logout")</a></li>
-                <li>
-                    <hr class="dropdown-divider" />
+<nav class="navbar navbar-expand-lg navbar-dark bg-secondary shadow-sm pt-0 pb-0">
+    <div class="container-fluid">
+        <!-- Navbar Brand -->
+        <a class="navbar-brand ps-3" @exec(Home, "")>
+            <img src="@{base.Global.imgUrl}logo.png" alt="Logo" width="47" height="32" class="d-inline-block align-top">
+        </a>
+        
+        <!-- Burger Icon for Mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbarContent" aria-controls="mainNavbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menu Content -->
+        <div class="collapse navbar-collapse" id="mainNavbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                
+                <!-- Turnier Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarTourney" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Turnier
+                    </a>
+                    <ul class="dropdown-menu shadow" aria-labelledby="navbarTourney">
+                        <li><a class="dropdown-item" @exec(ViewOrganizer, "")>Suche</a></li>
+                        <li><a class="dropdown-item" @exec(UseCase31, "new")>Neu</a></li>
+                        <li><a class="dropdown-item" @exec(UseCase31, "edit")>Edit</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" @exec(UseCase52, "")>Upload</a></li>
+                    </ul>
                 </li>
-                <li><a @id(ConsoleClickId) class="dropdown-item" @onclick >@gM("app.btn.console")</a></li>
+
+                <!-- Wettbewerbe Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarComps" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Wettbewerbe
+                    </a>
+                    <ul class="dropdown-menu shadow" aria-labelledby="navbarComps">
+                        <li><a class="dropdown-item" @exec(UseCase32, "select")>Auswahl</a></li>
+                        <li><a class="dropdown-item" @exec(UseCase32, "new")>Neu</a></li>
+                        <li><a class="dropdown-item" @exec(UseCase32, "edit")>Edit</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li class="dropdown-submenu dropdown-dropend">
+                            <a class="dropdown-item dropdown-toggle" href="#">Runden</a>
+                            <ul class="dropdown-menu shadow">
+                                <li><a class="dropdown-item" @exec(UseCase41, "draw")>Auslosung</a></li>
+                                <li><a class="dropdown-item" @exec(UseCase41, "input")>Eingabe</a></li>
+                                <li><a class="dropdown-item" @exec(UseCase41, "view")>Anzeige</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Spieler -->
+                <li class="nav-item">
+                    <a class="nav-link" @exec(UseCase511, "")>Spieler</a>
+                </li>
+
+                <!-- Ergebnisse -->
+                <li class="nav-item">
+                    <a class="nav-link" @exec(UseCase53, "")>Ergebnisse</a>
+                </li>
+
             </ul>
-        </li>
-    </ul>
+
+            <!-- Right side: User Profile / Console -->
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 me-3">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user fa-fw"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="navbarDropdown">
+                        <li><a @id(ShowLoginId) class="dropdown-item" @onclick >@gM("app.btn.login")</a></li>
+                        <li><a @id(DoLogoutId)  class="dropdown-item" @onclick>@gM("app.btn.logout")</a></li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li><a @id(ConsoleClickId) class="dropdown-item" @onclick >@gM("app.btn.console")</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
 </nav>

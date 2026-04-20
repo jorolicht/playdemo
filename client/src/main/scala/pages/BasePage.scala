@@ -20,7 +20,7 @@ val pagesMap = List(pages.Home, Auth, Console, PgError,
 
 
 def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, async: Boolean = false): Unit =
-  error(s"loadPage -> ${pagesMap.mkString(":")}")
+  //debug(s"loadPage -> ${pagesMap.mkString(":")}")
   try
     debug(s"loadPage -> pageName:${pageName} param:${param}")
     if async then
