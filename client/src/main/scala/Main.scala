@@ -127,8 +127,8 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
              roles = ui.roles
            ))
         }
-        // Load initial page for multi mode
-        pages.loadPage(pages.Home.name, "")
+        // Load initial page for multi mode (Landing Page)
+        pages.loadPage(pages.MainMulti.name, "")
       case Left(err)   => debug(s"Error loading user or clubs: ${err}")
     }
 

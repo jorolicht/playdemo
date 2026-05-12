@@ -159,6 +159,17 @@ add_filter('the_content', function ($content) {
  * @return void
  */
 function js_enqueue_scripts_styles() {
+    // Den Pfad zur CSS-Datei dynamisch generieren
+    $url = plugin_dir_url( __FILE__ ) . 'css/style.css';
+
+    // Das Stylesheet registrieren und einreihen
+    wp_enqueue_style( 
+        'mein-plugin-basis-style', // Einzigartiger Name (Handle)
+        $url,                      // URL zur Datei
+        array(),                   // Abhängigkeiten (falls nötig)
+        '1.0.0'                    // Version (hilft beim Browser-Caching)
+    );    
+
     // add script in head (false)
     wp_enqueue_style( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css', array(), '5.3.3' );
     wp_enqueue_style( 'bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css', array(), '1.11.3' );
