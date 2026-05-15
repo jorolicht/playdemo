@@ -23,7 +23,7 @@ enum TourneyTyp derives ReadWriter:
 
 
 case class Tourney(
-  name:          String,
+  name:          String,          // Tournament name
   var organizer: String,          // Organizer name (club or registered program user)
   var startDate: Int,             // Format: yyyymmdd
   var endDate:   Int,

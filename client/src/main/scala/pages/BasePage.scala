@@ -15,7 +15,7 @@ import javax.swing.text.View
 val pagesMap = List(pages.Home, Auth, Console, PgError,
                     ChatExample, 
                     UseCase2, UseCase31, UseCase32, UseCase41, UseCase42,
-                    UseCase511, UseCase512, UseCase52, UseCase53, ViewOrganizer, MainMulti)
+                    UseCase511, UseCase512, UseCase52, UseCase53, ViewOrganizer, MainMulti, NewTourney)
                     .map(pg => pg.name -> pg).toMap              
 
 
