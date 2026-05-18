@@ -1,0 +1,30 @@
+@()
+
+<div class="modal fade" id="DlgClickTT-modal" tabindex="-1" aria-labelledby="DlgClickTT-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="DlgClickTT-label">ClickTT XML Import</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" id="DlgClickTT-close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-4">Wählen Sie eine ClickTT XML-Datei aus, um Turnierdaten, Wettbewerbe und Teilnehmer automatisch zu importieren.</p>
+                
+                <div class="mb-3">
+                    <label for="DlgClickTT-fileInput" class="form-label">ClickTT XML-Datei auswählen</label>
+                    <input class="form-control" type="file" id="DlgClickTT-fileInput" accept=".xml">
+                </div>
+                
+                <div id="DlgClickTT-importResult" class="mt-3">
+                    <!-- Results will be displayed here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="DlgClickTT-cancel">Abbrechen</button>
+                <button type="button" class="btn btn-primary d-none" id="DlgClickTT-apply">Daten übernehmen</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="DlgClickTT-load" data-loaded="false"></div>

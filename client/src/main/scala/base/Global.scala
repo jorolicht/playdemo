@@ -3,7 +3,7 @@ package base
 import org.scalajs.dom
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
-import shared.model.User
+import shared.model.{User, Selection}
 import shared.basic.AppError
 import shared.MainIds.* 
 import base.Logging.*
@@ -42,9 +42,10 @@ enum AuthMode:
   case AppPassword
 
 object Global:
-  import shared.model.User
+  import shared.model.{User, Selection}
   val localStoragePrefix = "App."
   var user : Option[User] = None
+  var currentSelection = Selection()
   var lang    = ""
   var version = ""
   var csrf    = ""

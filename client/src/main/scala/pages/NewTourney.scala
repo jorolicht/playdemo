@@ -37,9 +37,34 @@ object NewTourney extends BasePage with JsWrapper:
       case `BtnSave` => 
         saveTourney()
       case `BtnLoadCtt` =>
-        loadPage(PageNameTyp("UseCase52"), "") // Redirect to XML upload
+        dialogs.DlgClickTT.show().map {
+          case Right(t) => 
+            fillFormFromCtt(t)
+          case Left(err) => 
+            debug(s"ClickTT Import cancelled or failed: $err")
+        }
       case _ => 
         debug(s"Unhandled event in NewTourney: ${elem.id}")
+
+  private def fillFormFromCtt(t: CttTournament): Unit =
+    def setVal(id: String, value: String) = 
+      val el = dom.document.getElementById(id).asInstanceOf[dom.html.Input]
+      if (el != null) el.value = value
+
+    setVal("tn-name", t.name)
+    setVal("tn-ident", t.tournamentId)
+    setVal("tn-start", t.startDate)
+    setVal("tn-end", t.endDate)
+    
+    t.locations.headOption.foreach { loc =>
+      setVal("tn-addr-desc", loc.name.getOrElse(""))
+      setVal("tn-addr-street", loc.street.getOrElse(""))
+      setVal("tn-addr-zip", loc.zipCode.getOrElse(""))
+      setVal("tn-addr-city", loc.city.getOrElse(""))
+    }
+
+    val feedback = dom.document.getElementById("validationFeedback")
+    feedback.innerHTML = s"""<div class='alert alert-info mt-3'>Daten aus ClickTT '${t.name}' wurden übernommen (${t.competitions.length} Wettbewerbe).</div>"""
 
   private def saveTourney(): Unit =
     val feedback = dom.document.getElementById("validationFeedback")
@@ -94,13 +119,16 @@ object NewTourney extends BasePage with JsWrapper:
 
       Logging.info(s"Speichere neues Turnier: ${tourney}")
       
-      // Here would be the API call to save. For now, we show success and redirect.
-      feedback.innerHTML = s"""<div class='alert alert-success mt-3'>Turnier '${tourney.name}' wurde validiert. Speichern-API wird aufgerufen...</div>"""
+      // Update DB and Selection
+      services.TourneyDB.update(tourney)
+      Global.currentSelection = Selection(Some(tourney))
+      comps.ContextHeader.render()
+
+      feedback.innerHTML = s"""<div class='alert alert-success mt-3'>Turnier '${tourney.name}' wurde erstellt.</div>"""
       
-      // Simuliere Erfolg
       dom.window.setTimeout(() => {
-        pages.loadPage(pages.MainMulti.name, "")
-      }, 1500)
+        pages.loadPage(pages.InfoTourney.name, "")
+      }, 1000)
     }
 
   private def showError(msg: String): Unit =

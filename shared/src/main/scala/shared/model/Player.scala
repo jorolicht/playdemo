@@ -12,8 +12,9 @@ import shared.basic.given
  */
 enum Sex(val id: Int):
   case Unknown extends Sex(0)
-  case Female  extends Sex(1)
-  case Male    extends Sex(2)
+  case Male    extends Sex(1)
+  case Female  extends Sex(2)
+
 
 object Sex:
   given rw: ReadWriter[Sex] = readwriter[Int].bimap(

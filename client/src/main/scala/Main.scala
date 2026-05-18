@@ -9,7 +9,7 @@ import scala.scalajs.js.annotation.*
 
 import services.{ ComWrapper, ClubDB, PlayerDB, CompetitionDB, TourneyDB }
 import base.{ Global, JsWrapper, _ }
-import comps.{ BaseComp, Navbar, Sidebar }
+import comps.{ BaseComp, Navbar, Sidebar, ContextHeader }
 
 import shared.basic.*
 import shared.MainIds.*
@@ -73,7 +73,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     debug(s"modeSingle -> playUrl: ${Global.playUrl}, homeUrl: ${Global.homeUrl}, lang: ${Global.lang}, nonce: ${Global.wpNonce}, pageId: ${Global.pageId}")
 
     // Render components
-    Navbar.render("")
+    ContextHeader.render("")
     Wordpress.render("")
 
     TourneyDB.init().map {
@@ -103,7 +103,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     debug(s"modeMulti -> playUrl: ${Global.playUrl}, homeUrl: ${Global.homeUrl}, lang: ${Global.lang}, nonce: ${Global.wpNonce}, pageId: ${Global.pageId}")
 
     // Render components
-    Navbar.render("")
+    ContextHeader.render("")
     Wordpress.render("")
 
     (for {
@@ -146,8 +146,8 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     val evtSource = new dom.raw.EventSource(s"/helper/sse?id=${randomString(6)}")  
     evtSource.onmessage = { (e: dom.MessageEvent) => debug(s"Message from Server: ${e.data}") }
 
-    // add nav-bar header
-    Navbar.render("")
+    // add context header
+    ContextHeader.render("")
     // Sidebar.render("") - Removed as requested
 
     appLoadPage(usecase, param)  

@@ -1,0 +1,58 @@
+@import shared.model.*
+
+@(round: Round, matches: Seq[(MEntry, String, String)])
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">Ergebniseingabe: @round.name</h5>
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light small">
+                    <tr>
+                        <th style="width: 50px;">Nr.</th>
+                        <th>Begegnung</th>
+                        <th class="text-center" style="width: 250px;">Ergebnis (Sätze)</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(matches.isEmpty) {
+                        <tr><td colspan="4" class="text-center py-5 text-muted italic">Keine Spiele für diese Runde vorhanden.</td></tr>
+                    }
+                    @matches.map { case (m, nameA, nameB) =>
+                        <tr>
+                            <td class="text-muted small">@m.gameNo</td>
+                            <td>
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-bold">@nameA</span>
+                                    <span class="mx-2 text-muted">-</span>
+                                    <span class="fw-bold">@nameB</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <input type="number" class="form-control form-control-sm text-center" style="width: 45px;" value="@m.sets._1">
+                                    <span class="align-self-center">:</span>
+                                    <input type="number" class="form-control form-control-sm text-center" style="width: 45px;" value="@m.sets._2">
+                                    <button class="btn btn-sm btn-outline-success ms-2"><i class="bi bi-check-lg"></i></button>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge @{if(m.finished) "bg-success" else "bg-light text-dark border"}">
+                                    @{if(m.finished) "Fertig" else "Offen"}
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+            <button class="btn btn-success px-4" onclick="appLoadPage('RoundRES', '')">
+                <i class="bi bi-check-all me-1"></i>ERGEBNISSE FINALISIEREN
+            </button>
+        </div>
+    </div>
+</div>

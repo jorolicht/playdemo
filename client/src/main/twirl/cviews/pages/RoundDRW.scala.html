@@ -1,0 +1,47 @@
+@import shared.model.*
+
+@(round: Round, groups: Seq[Group])
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">Auslosung & Setzung: @round.name</h5>
+        
+        <div class="alert alert-info py-2 small">
+            <i class="bi bi-info-circle me-2"></i>Überprüfen Sie die Gruppenzuordnung.
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @if(groups.isEmpty) {
+                <div class="col-12 text-center py-5 text-muted italic">Keine Gruppen für diese Runde generiert.</div>
+            }
+            @groups.map { g =>
+                <div class="col">
+                    <div class="card h-100 border-info border-opacity-25 bg-light bg-opacity-10">
+                        <div class="card-header bg-info bg-opacity-10 py-1 text-center fw-bold">@g.name</div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush small">
+                                @g.pants.zipWithIndex.map { case (p, i) =>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><span class="text-muted me-2">@{i + 1}.</span> @p.name</span>
+                                        <div class="btn-group btn-group-sm">
+                                            <span class="badge bg-light text-dark border">@p.rating</span>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-danger">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>RESET
+            </button>
+            <button class="btn btn-success px-4" onclick="appLoadPage('RoundINP', '')">
+                <i class="bi bi-play-circle me-1"></i>START SPIELRUNDE
+            </button>
+        </div>
+    </div>
+</div>

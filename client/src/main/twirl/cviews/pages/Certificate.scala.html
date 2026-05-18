@@ -1,0 +1,56 @@
+@import shared.model.*
+
+@(param: String)
+
+@parts = @{ param.split("\\|") }
+@name = @{ if(parts.length > 0) parts(0) else "Unbekannt" }
+@comp = @{ if(parts.length > 1) parts(1) else "Wettbewerb" }
+@place = @{ if(parts.length > 2) parts(2) else "X" }
+
+<div class="container mt-5 mb-5 d-flex justify-content-center">
+    <div class="certificate-container p-5 border border-5 border-warning shadow-lg bg-white text-center" style="max-width: 800px; min-height: 1000px; border-style: double !important;">
+        <div class="mb-5">
+            <i class="bi bi-award-fill text-warning" style="font-size: 5rem;"></i>
+        </div>
+        
+        <h1 class="display-1 fw-bold mb-4" style="font-family: serif;">URKUNDE</h1>
+        
+        <p class="lead mb-5 fs-3">Wir verleihen</p>
+        
+        <h2 class="display-4 fw-bold text-primary mb-5">@name</h2>
+        
+        <p class="lead mb-4 fs-4">den</p>
+        
+        <div class="mb-5">
+            <span class="display-3 fw-bold border-bottom border-warning pb-2">@place. Platz</span>
+        </div>
+        
+        <p class="lead mb-5 fs-4">im Wettbewerb</p>
+        
+        <h3 class="h2 fw-bold mb-5">@comp</h3>
+        
+        <p class="mb-5 text-muted">Ausgestellt am @{new scala.scalajs.js.Date().toLocaleDateString()}</p>
+        
+        <div class="row mt-5 pt-5">
+            <div class="col-6 mx-auto border-top border-dark pt-2">
+                <p class="small text-muted">Unterschrift Turnierleitung</p>
+            </div>
+        </div>
+
+        <div class="mt-5 pt-5 d-print-none">
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="bi bi-printer me-2"></i>Drucken
+            </button>
+            <button class="btn btn-outline-secondary ms-2" onclick="history.back()">
+                <i class="bi bi-arrow-left me-2"></i>Zurück
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .context-header, .navbar, .footer, .d-print-none { display: none !important; }
+        .certificate-container { border: none !important; box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
+    }
+</style>

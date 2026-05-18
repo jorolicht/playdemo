@@ -1,0 +1,148 @@
+@import shared.model.*
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+@import pages.InfoCompetition.*
+
+@(comp: Competition, participants: Seq[Pant], rounds: Seq[Round])
+
+<div class="container mt-4">
+    <!-- Competition Header Card -->
+    <div class="card shadow-sm mb-4 border-success">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h3 class="h5 mb-0"><i class="bi bi-info-circle me-2"></i>Wettbewerb: @comp.name</h3>
+            <div class="btn-group btn-group-sm">
+                <button class="btn btn-light" @id(BtnEditComp) @event("onclick")>Edit</button>
+                <button class="btn btn-danger" @id(BtnDeleteComp) @event("onclick")>Löschen</button>
+            </div>
+        </div>
+        <div class="card-body bg-light">
+            <div class="row text-center small">
+                <div class="col-md-3 border-end">
+                    <span class="text-muted fw-bold">Typ:</span> @comp.typ
+                </div>
+                <div class="col-md-3 border-end">
+                    <span class="text-muted fw-bold">Start:</span> @comp.startDate
+                </div>
+                <div class="col-md-3 border-end">
+                    <span class="text-muted fw-bold">TTR:</span> @{comp.lowLevel.getOrElse(0)} - @{comp.upperLevel.getOrElse("∞")}
+                </div>
+                <div class="col-md-3">
+                    <span class="text-muted fw-bold">Status:</span> 
+                    <span class="badge @{if(comp.status == CompStatus.RUN) "bg-warning" else "bg-secondary"}">@comp.status</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Participants Accordion -->
+    <div class="accordion mb-4 shadow-sm" id="participantsAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingParticipants">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParticipants" aria-expanded="true" aria-controls="collapseParticipants">
+                    <i class="bi bi-people me-2"></i>Teilnehmerliste (@participants.length)
+                </button>
+            </h2>
+            <div id="collapseParticipants" class="accordion-collapse collapse show" aria-labelledby="headingParticipants" data-bs-parent="#participantsAccordion">
+                <div class="accordion-body p-0">
+                    <div class="p-2 bg-light border-bottom d-flex justify-content-end gap-2">
+                        <button class="btn btn-outline-primary btn-sm" @id(BtnAddParticipant) @event("onclick")>
+                            <i class="bi bi-person-plus me-1"></i>Spieler hinzufügen
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" @id(BtnUploadCsv) @event("onclick")>
+                            <i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV Upload
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr class="small text-muted text-uppercase">
+                                    <th class="ps-3">Name, Vorname</th>
+                                    <th>Verein</th>
+                                    <th class="text-center">TTR</th>
+                                    <th class="text-center" style="width: 100px;">Teilnahme</th>
+                                    <th class="text-end pe-3" style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if(participants.isEmpty) {
+                                    <tr><td colspan="5" class="text-center py-3 text-muted">Keine Teilnehmer angemeldet.</td></tr>
+                                }
+                                @participants.map { p =>
+                                    <tr>
+                                        <td class="ps-3 fw-bold">@p.name</td>
+                                        <td>@p.club</td>
+                                        <td class="text-center">@p.rating</td>
+                                        <td class="text-center">
+                                            <div class="form-check d-flex justify-content-center">
+                                                <input class="form-check-input" type="checkbox" @{if(p.status == PantStatus.PLAY) "checked" else ""}>
+                                            </div>
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <button class="btn btn-link btn-sm text-danger p-0" title="Entfernen">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rounds List Section -->
+    <div class="card shadow-sm border-info">
+        <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
+            <h4 class="h5 mb-0 fw-bold"><i class="bi bi-layers me-2"></i>Spielrunden</h4>
+            <button class="btn btn-dark btn-sm" @id(BtnAddRound) @event("onclick")>
+                <i class="bi bi-plus-lg me-1"></i>Neue Runde
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light small text-muted">
+                        <tr>
+                            <th class="ps-3">Runde</th>
+                            <th>Teilnehmer</th>
+                            <th>Status</th>
+                            <th class="text-end pe-3">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(rounds.isEmpty) {
+                            <tr><td colspan="4" class="text-center py-4 text-muted">Keine Runden angelegt.</td></tr>
+                        }
+                        @rounds.map { r =>
+                            <tr>
+                                <td class="ps-3 fw-bold">@r.name</td>
+                                <td>@r.noPlayers</td>
+                                <td>
+                                    <span class="badge @{r.status match {
+                                        case RoundStatus.CFG => "bg-secondary"
+                                        case RoundStatus.AUS => "bg-info text-dark"
+                                        case RoundStatus.EIN => "bg-warning text-dark"
+                                        case RoundStatus.FIN => "bg-success"
+                                        case _ => "bg-light text-dark"
+                                    }}">@r.status</span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-primary" onclick="appLoadPage('RoundCFG', '@r.id.value')">
+                                            <i class="bi bi-eye me-1"></i>Anzeigen
+                                        </button>
+                                        <button class="btn btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

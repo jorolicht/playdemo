@@ -12,7 +12,7 @@ import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
 import base.JsWrapper
 
-val compsMap = List(Navbar, Sidebar).map(c => c.name -> c).toMap
+val compsMap = List(Navbar, Sidebar, ContextHeader).map(c => c.name -> c).toMap
 
 abstract class BaseComp(using fn: FullName):
   export Logging.debug

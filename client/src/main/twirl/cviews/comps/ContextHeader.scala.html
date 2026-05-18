@@ -1,0 +1,110 @@
+@import shared.model.*
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+
+@(selection: Selection, competitions: Seq[Competition], rounds: Seq[Round])
+
+<div class="context-header bg-dark text-white p-2 mb-3 shadow-sm">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+            <!-- Breadcrumb / Selection Info -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 bg-transparent p-0 align-items-center">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:appLoadPage('MainMulti', '')" class="text-white-50 text-decoration-none hover-white">
+                            <i class="bi bi-house-door"></i>
+                        </a>
+                    </li>
+                    
+                    <!-- Tournament Link (Trophy Icon) -->
+                    @selection.tourney.map { t =>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            <a href="javascript:appLoadPage('InfoTourney', '')" class="btn btn-outline-light btn-sm fw-bold border-secondary py-1">
+                                <i class="bi bi-trophy text-warning me-2"></i>@t.name
+                            </a>
+                        </li>
+                    }
+
+                    <!-- Competition Dropdown -->
+                    @if(selection.tourney.isDefined) {
+                        <li class="breadcrumb-item dropdown active" aria-current="page">
+                            <a class="btn btn-outline-light btn-sm dropdown-toggle border-secondary py-1 @if(selection.competition.isEmpty){text-white-50}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="badge bg-success me-1">C</span>
+                                @selection.competition.map(_.name).getOrElse("Selektiere Wettbewerb")
+                            </a>
+                            <ul class="dropdown-menu shadow">
+                                @if(competitions.isEmpty) {
+                                    <li><span class="dropdown-item-text text-muted small">Keine Wettbewerbe vorhanden</span></li>
+                                }
+                                @competitions.map { c =>
+                                    <li><a class="dropdown-item @if(selection.competition.exists(_.id == c.id)){active}" href="javascript:appLoadPage('InfoCompetition', '@c.id.value')">@c.name</a></li>
+                                }
+                                @if(competitions.nonEmpty) {
+                                    <li><hr class="dropdown-divider"></li>
+                                }
+                                <li><a class="dropdown-item small" href="javascript:appLoadPage('InfoTourney', '')"><i class="bi bi-list-ul me-2"></i>Alle anzeigen</a></li>
+                            </ul>
+                        </li>
+                    }
+
+                    <!-- Round Dropdown -->
+                    @if(selection.competition.isDefined && rounds.nonEmpty) {
+                        <li class="breadcrumb-item dropdown active" aria-current="page">
+                            <a class="btn btn-outline-info text-white btn-sm dropdown-toggle border-secondary py-1 @if(selection.round.isEmpty){text-white-50}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="badge bg-info me-1 text-dark">R</span>
+                                @selection.round.map(_.name).getOrElse("Selektiere Runde")
+                            </a>
+                            <ul class="dropdown-menu shadow">
+                                @rounds.map { r =>
+                                    <li><a class="dropdown-item @if(selection.round.exists(_.id == r.id)){active}" href="javascript:appLoadPage('RoundCFG', '@r.id.value')">@r.name</a></li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item small" href="javascript:appLoadPage('InfoCompetition', '')"><i class="bi bi-list-ul me-2"></i>Alle anzeigen</a></li>
+                            </ul>
+                        </li>
+                    }
+                </ol>
+            </nav>
+
+            <!-- Horizontal Menu based on context -->
+            <div class="context-menu d-flex gap-2 align-items-center">
+                @if(selection.tourney.isDefined) {
+                    <div class="vr mx-2 bg-secondary opacity-50" style="height: 24px;"></div>
+                    <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('PlayerList', '')">
+                        <i class="bi bi-people me-1"></i>Teilnehmer
+                    </button>
+                    <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('ResultList', '')">
+                        <i class="bi bi-award me-1"></i>Ergebnisse
+                    </button>
+                }
+            </div>
+            
+            <!-- User Profile / Settings -->
+            <div class="d-flex align-items-center ms-auto">
+                @base.Global.user.map { u =>
+                    <span class="me-2 small text-white-50 d-none d-md-inline">@u.username</span>
+                    <i class="bi bi-person-circle fs-5 text-white-50"></i>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .context-header .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255,255,255,0.3);
+        padding-right: 0.5rem;
+        padding-left: 0.5rem;
+        vertical-align: middle;
+    }
+    .context-header .breadcrumb-item {
+        display: flex;
+        align-items: center;
+    }
+    .context-header .hover-white:hover {
+        color: white !important;
+    }
+    .context-header .btn-sm {
+        font-size: 0.85rem;
+    }
+</style>
