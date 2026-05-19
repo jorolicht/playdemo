@@ -32,6 +32,10 @@ abstract class BaseComp(using fn: FullName):
   
   def id(name: HtmlId) = s"id=${name.id}"
   def dataBsTarget(name: HtmlId) = s"data-bs-target=#${name.id}"
+  def forAttr(name: HtmlId)= s"for='${name.id}'"
+  def ariaLabelledByAttr(name: HtmlId)= s"aria-labelledby='${name.id}'"
+  def ariaDescribedByAttr(name: HtmlId)= s"aria-describedby='${name.id}'"
+
   def gM(key: String, inserts: String*)  = 
     if key.startsWith("+") then 
       Messages.getMsg(s"${name}.${key.drop(1)}", inserts*)

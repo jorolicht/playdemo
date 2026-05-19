@@ -39,32 +39,15 @@ object NewTourney extends BasePage with JsWrapper:
       case `BtnLoadCtt` =>
         dialogs.DlgClickTT.show().map {
           case Right(t) => 
-            fillFormFromCtt(t)
+            // Data is already in DB services (mapped by ClickTTMapper)
+            Global.currentSelection = Selection(Some(t))
+            comps.ContextHeader.render()
+            loadPage(pages.InfoTourney.name, "")
           case Left(err) => 
             debug(s"ClickTT Import cancelled or failed: $err")
         }
       case _ => 
         debug(s"Unhandled event in NewTourney: ${elem.id}")
-
-  private def fillFormFromCtt(t: CttTournament): Unit =
-    def setVal(id: String, value: String) = 
-      val el = dom.document.getElementById(id).asInstanceOf[dom.html.Input]
-      if (el != null) el.value = value
-
-    setVal("tn-name", t.name)
-    setVal("tn-ident", t.tournamentId)
-    setVal("tn-start", t.startDate)
-    setVal("tn-end", t.endDate)
-    
-    t.locations.headOption.foreach { loc =>
-      setVal("tn-addr-desc", loc.name.getOrElse(""))
-      setVal("tn-addr-street", loc.street.getOrElse(""))
-      setVal("tn-addr-zip", loc.zipCode.getOrElse(""))
-      setVal("tn-addr-city", loc.city.getOrElse(""))
-    }
-
-    val feedback = dom.document.getElementById("validationFeedback")
-    feedback.innerHTML = s"""<div class='alert alert-info mt-3'>Daten aus ClickTT '${t.name}' wurden übernommen (${t.competitions.length} Wettbewerbe).</div>"""
 
   private def saveTourney(): Unit =
     val feedback = dom.document.getElementById("validationFeedback")

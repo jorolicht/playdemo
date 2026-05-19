@@ -97,9 +97,9 @@ function playdemo_render($atts) {
 
     $output = '<span id="Main_ParamId" data-page="' . esc_attr($atts['page']) . '" data-dataurl="' . esc_url($dataUrl) . '" data-imgurl="' . esc_url($imgUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" data-pageid="' . esc_attr($pageId) . '" ></span>';
     $output .= '<span id="Main_NavbarId"></span>';
-    $output .= '<span id="Footer_ConsoleClickId" data-command=""></span>';
-    $output .= '<span id="DlgPrompt_LoadId" data-loaded="false"></span>';
+    $output .= '<span id="Main_DynContentId"></span>';
     $output .= '<div id="Main_WordpressId"></div>';
+    $output .= '<span id="Footer_ConsoleClickId" data-command=""></span>';
     $output .= '<script type="module">';
     $output .= 'import { startApp } from "' . esc_url($jsUrl) . '";';
     $output .= 'startApp("001DE1970-01", "' . esc_attr($atts['mode']) . '", "' . esc_attr($logLevel) . '", "' . esc_attr($tourney) . '");';

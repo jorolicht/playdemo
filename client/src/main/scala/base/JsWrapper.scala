@@ -1,15 +1,15 @@
 package base
 
 import scala.scalajs.js
+
 import scala.scalajs.js.annotation.*
 import org.scalajs.dom
 import org.scalajs.dom.HTMLElement
-import org.scalajs.dom.html.Input
-import org.scalajs.dom.raw.HTMLElement
 import shared.DomTypes.HtmlId
 import shared.MainIds.*
 import shared.basic.*
 import Logging.*
+import shared.MainIds
 
 trait JsWrapper:
 
@@ -58,6 +58,27 @@ trait JsWrapper:
     catch { case _: Throwable => error(s"gE -> id:${id.id}"); null } 
 
 
+  /* eE ensures Element (eE) with id exists, otherwise creates it and appends to parent */
+  def eE[T <: dom.Element](
+    id: HtmlId,
+    tag: String,
+  ): T = {
+    val parent = gE(MainIds.DynContentId)
+    val existing = gE(id, withWarning = false)
+
+    if (existing != null) {
+      existing.asInstanceOf[T]
+    } else {
+      println(s"eE -> creating element with id: ${id.id} and tag: ${tag}")
+      val el = dom.document.createElement(tag).asInstanceOf[T]
+      el.id = id.id
+      parent.appendChild(el)
+      el.asInstanceOf[T]
+    }
+  }
+  /* isEmpty checks if element is empty (no child nodes or only whitespace) */
+  def isEmpty(el: dom.html.Element): Boolean =
+    el.childNodes.length == 0 || el.textContent.trim.isEmpty
 
   def setVisible(elem: HTMLElement, visible: Boolean) = 
     try elem.style.setProperty("display", displayProperty(visible))
@@ -155,16 +176,16 @@ trait JsWrapper:
     */
   def getInput[R](elem: HTMLElement, defVal: R = ""): R = 
     try defVal match
-      case _:Boolean => elem.asInstanceOf[Input].checked.asInstanceOf[R]
-      case _:Int     => elem.asInstanceOf[Input].value.toIntOption.getOrElse(defVal).asInstanceOf[R]
-      case _:Long    => elem.asInstanceOf[Input].value.toLongOption.getOrElse(defVal).asInstanceOf[R]
-      case _:String  => { val in = elem.asInstanceOf[Input].value.asInstanceOf[R]; if (in=="") defVal else in }  
+      case _:Boolean => elem.asInstanceOf[dom.html.Input].checked.asInstanceOf[R]
+      case _:Int     => elem.asInstanceOf[dom.html.Input].value.toIntOption.getOrElse(defVal).asInstanceOf[R]
+      case _:Long    => elem.asInstanceOf[dom.html.Input].value.toLongOption.getOrElse(defVal).asInstanceOf[R]
+      case _:String  => { val in = elem.asInstanceOf[dom.html.Input].value.asInstanceOf[R]; if (in=="") defVal else in }  
       case _         => error(s"getInput -> elem: ${elem} defVal: ${defVal}"); defVal
     catch { case _: Throwable => error(s"getInput -> elem:${elem} defVal:${defVal}"); defVal }
 
 
   def setInput(elem: HTMLElement, text: String): Unit =
-    try elem.asInstanceOf[Input].value = text
+    try elem.asInstanceOf[dom.html.Input].value = text
     catch { case _: Throwable => error(s"setInput -> elem:${elem.id}") }
 
 

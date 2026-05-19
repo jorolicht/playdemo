@@ -9,7 +9,7 @@ import org.scalajs.dom.raw.HTMLElement
 import base.*
 import base.Bootstrap.*
 import services.ClickTTParser
-import shared.model.CttTournament
+import shared.model.{CttTournament, Tourney}
 
 /**
  * Dialog for importing ClickTT XML data.
@@ -19,6 +19,7 @@ object DlgClickTT extends BaseDialog with JsWrapper:
   def name = PageNameTyp("DlgClickTT")
   
   val LoadId:         HtmlId = genId(name)
+  val LabelId:        HtmlId = genId(name)
   val ModalId:        HtmlId = genId(name)
   val FileInputId:    HtmlId = genId(name)
   val ResultId:       HtmlId = genId(name)
@@ -33,15 +34,14 @@ object DlgClickTT extends BaseDialog with JsWrapper:
 
   /**
    * Shows the ClickTT import dialog.
-   * @return A Future containing Either an AppError or the parsed CttTournament.
+   * @return A Future containing Either an AppError or the mapped Tourney.
    */
-  def show(): Future[Either[AppError, CttTournament]] =
-    val p = Promise[Either[AppError, CttTournament]]()
+  def show(): Future[Either[AppError, Tourney]] =
+    val p = Promise[Either[AppError, Tourney]]()
     val f = p.future
 
     // Initialize modal dialog if not already loaded
-    if getData(gE(LoadId), "loaded", false) == false then
-      setData(gE(LoadId), "loaded", true)
+    if isEmpty(eE(LoadId,"span")) then
       setHtml(gE(LoadId), cviews.dialogs.html.DlgClickTT())
       modal = Modal(gE(ModalId))
     
@@ -89,9 +89,14 @@ object DlgClickTT extends BaseDialog with JsWrapper:
     // Apply button
     gE(ApplyId).onclick = { (_: MouseEvent) =>
       parsedTournament match
-        case Some(t) => 
-          if (!p.isCompleted) p.success(Right(t))
-          modal.hide()
+        case Some(ctt) => 
+          services.ClickTTMapper.mapAndImport(ctt) match {
+            case Right(t) => 
+              if (!p.isCompleted) p.success(Right(t))
+              modal.hide()
+            case Left(err) => 
+              setHtml(gE(ResultId), s"<div class='alert alert-danger'>Mapping fehlgeschlagen: ${err.msgCode}</div>")
+          }
         case None => 
           debug("Apply clicked but no tournament parsed")
     }

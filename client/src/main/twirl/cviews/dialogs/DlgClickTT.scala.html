@@ -1,30 +1,32 @@
+@import dialogs.DlgClickTT.*
+
 @()
 
-<div class="modal fade" id="DlgClickTT-modal" tabindex="-1" aria-labelledby="DlgClickTT-label" aria-hidden="true">
+<div class="modal fade" @id(ModalId) tabindex="-1" @ariaLabelledByAttr(LabelId) aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="DlgClickTT-label">ClickTT XML Import</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" id="DlgClickTT-close"></button>
+                <h5 class="modal-title" @id(LabelId)>ClickTT XML Import</h5>
+                <button @id(CloseId) type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p class="text-muted mb-4">Wählen Sie eine ClickTT XML-Datei aus, um Turnierdaten, Wettbewerbe und Teilnehmer automatisch zu importieren.</p>
                 
                 <div class="mb-3">
-                    <label for="DlgClickTT-fileInput" class="form-label">ClickTT XML-Datei auswählen</label>
-                    <input class="form-control" type="file" id="DlgClickTT-fileInput" accept=".xml">
+                    <label @forAttr(FileInputId) class="form-label">ClickTT XML-Datei auswählen</label>
+                    <input class="form-control" type="file" @id(FileInputId) accept=".xml">
                 </div>
                 
-                <div id="DlgClickTT-importResult" class="mt-3">
+                <div @id(ResultId) class="mt-3">
                     <!-- Results will be displayed here -->
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="DlgClickTT-cancel">Abbrechen</button>
-                <button type="button" class="btn btn-primary d-none" id="DlgClickTT-apply">Daten übernehmen</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>Abbrechen</button>
+                <button type="button" class="btn btn-primary d-none" @id(ApplyId)>Daten übernehmen</button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="DlgClickTT-load" data-loaded="false"></div>
+<div @id(LoadId) data-loaded="false"></div>
