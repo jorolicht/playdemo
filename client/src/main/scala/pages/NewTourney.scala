@@ -89,6 +89,7 @@ object NewTourney extends BasePage with JsWrapper:
       )
 
       val tourney = Tourney(
+        id = 0,         // New entry, DB will assign ID
         name = tName,
         organizer = tOrganizer,
         startDate = tStart,

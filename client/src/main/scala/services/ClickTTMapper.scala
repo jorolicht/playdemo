@@ -16,6 +16,7 @@ object ClickTTMapper:
     try
       // 1. Map Tourney
       val tourney = Tourney(
+        id = 0,  // New entry, DB will assign ID
         name = ctt.name,
         organizer = base.Global.user.map(_.org).getOrElse("ClickTT Import"),
         startDate = formatDate(ctt.startDate),
@@ -33,6 +34,9 @@ object ClickTTMapper:
         },
         version = 1
       )
+
+      // Hier entweder neue Tourney anlegen oder bestehende aktualisieren, z.B. anhand ident
+      // D.h. 
 
       // 2. Import Players and Clubs first (Multi-pass)
       // Collect all unique persons from all competitions

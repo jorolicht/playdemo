@@ -28,6 +28,7 @@ object TestTourney:
     val name = if (param.isEmpty) "Test Tournament" else param
     val current = TourneyDB.tourney.getOrElse(
       Tourney(
+        0, // id
         name = name,
         organizer = "Test Org",
         startDate = 20260101,

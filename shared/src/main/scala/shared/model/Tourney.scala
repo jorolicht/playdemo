@@ -23,6 +23,7 @@ enum TourneyTyp derives ReadWriter:
 
 
 case class Tourney(
+  id:            Int,             // Wordpress Page Id, 0 for new entries
   name:          String,          // Tournament name
   var organizer: String,          // Organizer name (club or registered program user)
   var startDate: Int,             // Format: yyyymmdd

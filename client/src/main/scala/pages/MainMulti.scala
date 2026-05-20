@@ -29,6 +29,7 @@ object MainMulti extends BasePage with JsWrapper:
           case Right(res) => 
             // 1. Create and save Dummy Tourney
             val dummyTourney = Tourney(
+              id = 0,
               name = s"Quick: ${res.competition.name}",
               organizer = Global.user.map(_.org).getOrElse("System"),
               startDate = res.competition.startDate.replace("-", "").toInt,

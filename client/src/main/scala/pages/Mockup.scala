@@ -9,6 +9,7 @@ object Mockup extends BasePage with JsWrapper:
   def render(param: String = ""): Boolean = 
     // Seed Data
     val tourney = Tourney(
+      id = 0,
       name = "Mock Stadtmeisterschaft 2026",
       organizer = "TTV Musterstadt",
       startDate = 20260515,
