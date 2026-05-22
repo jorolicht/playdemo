@@ -155,22 +155,29 @@ function tourney_sync_tourney(WP_REST_Request $request)
  * @return array|WP_REST_Response
  */
 function tourney_api_create(WP_REST_Request $request) {
-    $title = $request->get_param('title');
-    $slug_param  = $request->get_param('slug');
+    $body = json_decode($request->get_body(), true);
 
-    if (empty($title) || empty($slug_param)) {
-        return ApiHelper::error("missing_params", "Titel und Slug sind erforderlich.", "", "tourney_api_create", HttpStatus::BAD_REQUEST);
+    if (empty($body)) {
+        return ApiHelper::error("missing_payload", "JSON-Payload ist erforderlich.", "", "tourney_api_create", HttpStatus::BAD_REQUEST);
+    }
+
+    $tourney_name = $body['name'] ?? '';
+    $start_date   = $body['startDate'] ?? '';
+    $ident        = $body['ident'] ?? '';
+
+    if (empty($tourney_name) || empty($start_date)) {
+        return ApiHelper::error("missing_params", "Name und Startdatum sind erforderlich.", "", "tourney_api_create", HttpStatus::BAD_REQUEST);
     }
 
     $current_user = wp_get_current_user();
     $username = ($current_user && $current_user->exists()) ? $current_user->user_login : '';
     $organizer = ($current_user && $current_user->exists()) ? get_user_meta($current_user->ID, 'organizer', true) : '';
-    
+
     // Parent slug selection logic: organizer > username > 'admin'
     $parent_base = !empty($organizer) ? $organizer : (!empty($username) ? $username : 'admin');
     $parent_slug = sanitize_title($parent_base);
     $parent_title = !empty($organizer) ? $organizer : (!empty($username) ? $username : 'admin');
-    
+
     $parent_id = 0;
 
     $existing_parents = get_posts([
@@ -192,8 +199,9 @@ function tourney_api_create(WP_REST_Request $request) {
         ]);
     }
 
-    // Bereinige den Turnier-Slug
-    $turnier_slug = sanitize_title($slug_param);
+    // Generiere den Turnier-Slug aus Datum und Name: <jjjjMMdd>-<name>
+    $slug_base = $start_date . '-' . $tourney_name;
+    $turnier_slug = sanitize_title($slug_base);
 
     // Prüfen, ob bereits ein Turnier mit diesem Slug unter diesem Parent existiert
     $existing_posts = get_posts([
@@ -205,7 +213,7 @@ function tourney_api_create(WP_REST_Request $request) {
     ]);
 
     $post_data = [
-        'post_title'   => $title,
+        'post_title'   => $tourney_name,
         'post_name'    => $turnier_slug,
         'post_parent'  => $parent_id,
         'post_content' => '[playdemo mode="view"]',
@@ -228,6 +236,11 @@ function tourney_api_create(WP_REST_Request $request) {
         return ApiHelper::error("db_error", $result_id->get_error_message(), "", "tourney_api_create_tourney", HttpStatus::INTERNAL_SERVER_ERROR);
     }
 
+    // Setze ident Metafield
+    if (!empty($ident)) {
+        update_post_meta($result_id, 'ident', $ident);
+    }
+
     // Full hierarchical slug for the response
     $full_slug = "tourney/" . $parent_slug . "/" . $turnier_slug;
 
@@ -241,3 +254,4 @@ function tourney_api_create(WP_REST_Request $request) {
         'slug'     => $full_slug
     ];
 }
+

@@ -2,7 +2,7 @@
 @import scala.collection.mutable.ArrayBuffer
 
 @(
-  tourney: Option[Tourney],
+  tourney: Tourney,
   competitions: Seq[Competition],
   rounds: Seq[Round],
   clubs: Seq[Club],
@@ -10,29 +10,26 @@
 )
 
 <div class="container mt-4">
-    @tourney match {
-        case Some(t) => {
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0">@t.name</h2>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Veranstalter:</strong> @t.organizer</p>
-                            <p><strong>Datum:</strong> @t.getStartDate("de") - @t.getEndDate("de")</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Typ:</strong> @t.typ.toString</p>
-                            <p><strong>Ident:</strong> @t.ident</p>
-                        </div>
+    @if(tourney.id != 0) {
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">@tourney.name</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Veranstalter:</strong> @tourney.organizer</p>
+                        <p><strong>Datum:</strong> @tourney.getStartDate("de") - @tourney.getEndDate("de")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Typ:</strong> @tourney.typ.toString</p>
+                        <p><strong>Ident:</strong> @tourney.ident</p>
                     </div>
                 </div>
             </div>
-        }
-        case None => {
-            <div class="alert alert-warning">Kein Turnier geladen.</div>
-        }
+        </div>
+    } else {
+        <div class="alert alert-warning">Kein Turnier geladen.</div>
     }
 
     <div class="row">

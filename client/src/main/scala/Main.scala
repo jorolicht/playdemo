@@ -70,6 +70,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     import shared.model.*
 
     Global.pageId  = getData(gE(ParamId), "pageid", 0)
+    TourneyDB.tourney = TourneyDB.tourney.copy(id = Global.pageId)
     debug(s"modeSingle -> playUrl: ${Global.playUrl}, homeUrl: ${Global.homeUrl}, lang: ${Global.lang}, nonce: ${Global.wpNonce}, pageId: ${Global.pageId}")
 
     // Render components
@@ -82,8 +83,8 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
           TourneyDB.tourney,
           CompetitionDB.competitions.toSeq.filter(_ != null),
           RoundDB.rounds.toSeq.filter(_ != null),
-          ClubDB.clubs.toSeq,
-          PlayerDB.players.toSeq
+          TourneyDB.tourney.clubs.toSeq,
+          TourneyDB.tourney.players.toSeq
         )
         setHtml(gE(ContentId), html)
       case Left(err) =>

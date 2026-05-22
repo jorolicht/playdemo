@@ -2,6 +2,7 @@ package services
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.scalajs.js
 import scala.scalajs.js.timers.*
 
 import shared.basic.Pickle.*
@@ -24,8 +25,10 @@ object TourneyDB extends ComWrapper with Debouncer:
       sync()
     }
 
-  var tourney: Option[Tourney] = None
+  var tourney: Tourney = Tourney.default
   var version: Int = 0
+
+
 
   /**
    * Initializes the application state by loading all data from the server.
@@ -56,12 +59,33 @@ object TourneyDB extends ComWrapper with Debouncer:
     }
   }
 
-  case class TourneySyncRequest(version: Int, tourney: Option[Tourney]) derives ReadWriter
+  case class TourneySyncRequest(version: Int, tourney: Tourney) derives ReadWriter
   case class TourneySyncResponse(version: Int) derives ReadWriter
-  case class TourneyResponse(version: Int, tourney: Option[Tourney]) derives ReadWriter
+  case class TourneyResponse(version: Int, tourney: Tourney) derives ReadWriter
+  case class TourneyCreateResponse(
+    success: Boolean,
+    action: String,
+    pageId: Int,
+    parentId: Int,
+    username: String,
+    organizer: String,
+    slug: String
+  ) derives ReadWriter
 
-  private val routeSync = "/wp-json/tourney/v1/tourney-sync"
-  private val routeGet  = "/wp-json/tourney/v1/read"
+  private val routeSync   = "/wp-json/tourney/v1/tourney-sync"
+  private val routeGet    = "/wp-json/tourney/v1/read"
+  private val routeCreate = "/wp-json/tourney/v1/create"
+
+  /**
+   * Creates a new tournament post on the server.
+   */
+  def apiCreate(t: Tourney): Future[Either[AppError, String]] = {
+    ajaxPost[Tourney, TourneyCreateResponse](routeCreate, List(), t).map {
+      case Right(res) =>
+        Right(res.slug)
+      case Left(err) => Left(err)
+    }
+  }
 
   /**
    * Synchronizes pending tourney changes with the WordPress server.
@@ -69,7 +93,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    */
   def sync(): Future[Either[AppError, Unit]] = {
     val req = TourneySyncRequest(version, tourney)
-    val params = List("postId" -> Global.pageId.toString)
+    val params = List("postId" -> tourney.id.toString)
 
     ajaxPost[TourneySyncRequest, TourneySyncResponse](
       routeSync,
@@ -91,16 +115,20 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Loads tournament data from the WordPress server.
    */
   def load(): Future[Either[AppError, Long]] = {
-    if (Global.pageId == 0) {
-      Logging.debug("TourneyDB.load: postId is 0, skipping load")
+    if (tourney.id == 0) {
+      Logging.debug("TourneyDB.load: tourney.id is 0, skipping load")
       return Future.successful(Right(0L))
     }
 
-    val params = List("postId" -> Global.pageId.toString)
+    val params = List("postId" -> tourney.id.toString)
     ajaxGet[TourneyResponse](routeGet, params).map {
       case Right(res) =>
         tourney = res.tourney
         version = res.version
+        ClubDB.initHandler() 
+        PlayerDB.initHandler()
+        CompetitionDB.initHandler()
+        RoundDB.initHandler()
         Logging.debug(s"TourneyDB.load: tournament loaded, version: $version")
         Right(version.toLong)
       case Left(err) => Left(err)
@@ -111,5 +139,9 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Updates the current tournament data and triggers sync.
    */
   def update(t: Tourney): Unit =
-    tourney = Some(t)
+    tourney = t
+    ClubDB.initHandler()
+    PlayerDB.initHandler()
+    CompetitionDB.initHandler()
+    RoundDB.initHandler()
     triggerSync()

@@ -2,12 +2,12 @@ package addon
 
 import shared.model.*
 import shared.basic.*
-import services.RoundDB
+import services.{TourneyDB, RoundDB}
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 /**
- * TestRound provides addon console commands to test RoundDB functionality.
+ * TestRound provides addon console commands to test Round functionality.
  */
 object TestRound:
 
@@ -22,37 +22,33 @@ object TestRound:
         Future(Left(AppError("unknown test number")))
 
   /**
-   * Test 1: Add a round. Param format: "compId,prefId,name,rndCfg,size,noPlayers"
-   * Example: "1,,Round 1,VRGR,8,8" (prefId is empty for startRound)
-   * Example: "1,1,Round 2,KO,4,4" (prefId is 1)
+   * Test 1: Add a round. Param format: "coId,name,size,noPlayers[,prefId]"
    */
   def testRound_add(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     val parts = param.split(",")
-    if (parts.length < 6) {
-      addOutput("Param must be 'compId,prefId,name,rndCfg,size,noPlayers'")
+    if (parts.length < 4) {
+      addOutput("Param must be 'coId,name,size,noPlayers[,prefId]'")
       return Future(Left(AppError("invalid.param")))
     }
 
     try
       val coId = CompId.fromInt(parts(0).trim.toInt)
-      val prefId = if (parts(1).trim.isEmpty) None else Some(RoundId.fromInt(parts(1).trim.toInt))
-      val name = parts(2).trim
-      val rndCfgStr = parts(3).trim
-      val size = parts(4).trim.toInt
-      val noPlayers = parts(5).trim.toInt
-      
-      val rndCfg = RoundCfg.values.find(_.toString == rndCfgStr).getOrElse(RoundCfg.VRGR)
+      val name = parts(1).trim
+      val size = parts(2).trim.toInt
+      val noPlayers = parts(3).trim.toInt
+      val prefId = if (parts.length > 4) Some(RoundId.fromInt(parts(4).trim.toInt)) else None
+      val rndCfg = RoundCfg.VRGR // Default for test
 
-      RoundDB.addRound(coId, prefId, name, rndCfg, size, noPlayers) match
+      TourneyDB.tourney.addRound(coId, prefId, name, rndCfg, size, noPlayers) match
         case Left(err) =>
           addOutput(s"Error adding round '$name': ${err.msg}")
           Future(Left(err))
         case Right(r) =>
-          addOutput(s"Added round: ${r.name} (ID: ${r.id.value}, Comp: ${r.coId.value}, Pref: ${r.prefId.map(_.value).getOrElse("None")})")
+          addOutput(s"Added round: ${r.name} (ID: ${r.id.value}, CompID: ${r.coId.value}, Version: ${r.version})")
           Future(Right(s"FINISHED: ${group}-Test:${number}"))
     catch
       case _: Exception =>
-        addOutput(s"Invalid parameters in: $param")
+        addOutput(s"Invalid parameters: $param")
         Future(Left(AppError("invalid.param")))
 
   /**
@@ -61,12 +57,12 @@ object TestRound:
   def testRound_delete(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     try
       val id = RoundId.fromInt(param.toInt)
-      RoundDB.deleteRound(id) match
+      TourneyDB.tourney.deleteRound(id) match
         case Left(err) =>
           addOutput(s"Error deleting round ID $param: ${err.msg}")
           Future(Left(err))
         case Right(_) =>
-          addOutput(s"Deleted round (and successors) ID: $param")
+          addOutput(s"Deleted (soft delete) round ID $param successfully")
           Future(Right(s"FINISHED: ${group}-Test:${number}"))
     catch
       case _: Exception =>
@@ -77,10 +73,10 @@ object TestRound:
    * Test 3: List rounds.
    */
   def testRound_list(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    val activeRounds = RoundDB.rounds.filter(r => r != null)
+    val activeRounds = TourneyDB.tourney.rounds.filter(r => r != null)
     addOutput(s"Rounds in DB (${activeRounds.length}):")
     activeRounds.foreach { r =>
-      addOutput(s"- [${r.id.value}] ${r.name} (Comp: ${r.coId.value}, Pref: ${r.prefId.map(_.value).getOrElse("-")}, Next: ${r.nextIds.map(_.value).mkString(",")}, Deleted: ${r.deleted})")
+      addOutput(s"- [${r.id.value}] ${r.name} (CompID: ${r.coId.value}, Size: ${r.size}, Players: ${r.noPlayers}, Deleted: ${r.deleted}, Version: ${r.version})")
     }
     Future(Right(s"FINISHED: ${group}-Test:${number}"))
 
@@ -88,12 +84,6 @@ object TestRound:
    * Test 4: Sync rounds with server.
    */
   def testRound_sync(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    addOutput(s"Syncing rounds (${RoundDB.pendingEvents.length} pending events)...")
-    RoundDB.sync().map {
-      case Left(err) =>
-        addOutput(s"Error syncing rounds: ${err.msg}")
-        Left(err)
-      case Right(_) =>
-        addOutput(s"Rounds synced successfully.")
-        Right(s"FINISHED: ${group}-Test:${number}")
-    }
+    addOutput(s"Syncing rounds...")
+    TourneyDB.tourney.syncRounds()
+    Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))

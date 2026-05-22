@@ -41,7 +41,7 @@ object MainMulti extends BasePage with JsWrapper:
             services.TourneyDB.update(dummyTourney)
             
             // 2. Add Competition to DB
-            services.CompetitionDB.add(
+            services.TourneyDB.tourney.addCompetition(
               res.competition.name, 
               res.competition.typ, 
               res.competition.startDate.replace("-", "")

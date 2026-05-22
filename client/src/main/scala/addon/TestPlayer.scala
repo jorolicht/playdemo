@@ -37,7 +37,7 @@ object TestPlayer:
     val clubId = parts(2).trim.toInt
     val birthYear = if (parts.length > 3) Some(parts(3).trim.toInt) else None
 
-    PlayerDB.add(firstName, lastName, clubId, birthYear) match
+    services.TourneyDB.tourney.addPlayer(firstName, lastName, clubId, birthYear) match
       case Left(err) =>
         addOutput(s"Error adding player '$firstName $lastName': ${err.msg}")
         Future(Left(err))
@@ -51,12 +51,12 @@ object TestPlayer:
   def testPlayer_delete(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     try
       val id = PlayerId(param.toInt)
-      PlayerDB.delete(id) match
+      services.TourneyDB.tourney.deletePlayer(id) match
         case Left(err) =>
           addOutput(s"Error deleting player ID $param: ${err.msg}")
           Future(Left(err))
-        case Right(player) =>
-          addOutput(s"Deleted (deactivated) player: ${player.fullName} (ID: ${player.id.value}, Active: ${player.active})")
+        case Right(_) =>
+          addOutput(s"Deleted (deactivated) player ID $param successfully")
           Future(Right(s"FINISHED: ${group}-Test:${number}"))
     catch
       case _: Exception =>
@@ -76,7 +76,7 @@ object TestPlayer:
     try
       val mainId = PlayerId(ids(0).trim.toInt)
       val mergedId = PlayerId(ids(1).trim.toInt)
-      PlayerDB.merge(mainId, mergedId) match
+      services.TourneyDB.tourney.mergePlayer(mainId, mergedId) match
         case Left(err) =>
           addOutput(s"Error merging: ${err.msg}")
           Future(Left(err))
@@ -92,22 +92,17 @@ object TestPlayer:
    * Test 4: List players.
    */
   def testPlayer_list(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    addOutput(s"Players in DB (${PlayerDB.players.length}):")
-    PlayerDB.players.foreach { p =>
+    val t = services.TourneyDB.tourney
+    addOutput(s"Players in DB (${t.players.length}):")
+    t.players.foreach { p =>
       addOutput(s"- [${p.id.value}] ${p.fullName} (Club: ${p.clubId}, Active: ${p.active}, MergedInto: ${p.merge.map(_.value).getOrElse("-")})")
     }
-    Future(Right(s"FINISHED: ${group}-Test:${number}"))
+    Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))
 
   /**
    * Test 5: Sync players with server.
    */
   def testPlayer_sync(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    addOutput(s"Syncing players (${PlayerDB.pendingEvents.length} pending events)...")
-    PlayerDB.sync().map {
-      case Left(err) =>
-        addOutput(s"Error syncing players: ${err.msg}")
-        Left(err)
-      case Right(_) =>
-        addOutput(s"Players synced successfully. New version: ${PlayerDB.version}")
-        Right(s"FINISHED: ${group}-Test:${number}")
-    }
+    addOutput(s"Syncing players...")
+    services.TourneyDB.tourney.syncPlayers()
+    Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))

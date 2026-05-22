@@ -35,16 +35,13 @@ object ClickTTMapper:
         version = 1
       )
 
-      // Hier entweder neue Tourney anlegen oder bestehende aktualisieren, z.B. anhand ident
-      // D.h. 
-
       // 2. Import Players and Clubs first (Multi-pass)
       // Collect all unique persons from all competitions
       val allCttPersons = ctt.competitions.flatMap(_.players).flatMap(_.persons)
       val personMap = importPersons(allCttPersons)
 
       // 3. Map Competitions and Pants
-      ctt.competitions.zipWithIndex.foreach { case (cttComp, idx) =>
+      val mappedComps = ctt.competitions.zipWithIndex.map { case (cttComp, idx) =>
         val compId = CompId(idx + 1)
         
         // Construct Name: ttr-remarks + " " + age-group + " " + type
@@ -83,16 +80,14 @@ object ClickTTMapper:
             comp.pants += p
           }
         }
-
-        // Add to DB
-        CompetitionDB.competitions.append(comp)
-        CompetitionDB.pendingEvents += comp
+        comp
       }
 
-      // Update Tourney in DB
-      TourneyDB.tourney = Some(tourney)
-      TourneyDB.triggerSync()
-      CompetitionDB.triggerSync()
+      // Update Tourney in DB and trigger bulk sync
+      TourneyDB.update(tourney)
+      tourney.syncClubs()
+      tourney.syncPlayers()
+      tourney.syncCompetitions(mappedComps)
 
       Right(tourney)
     catch
@@ -115,49 +110,52 @@ object ClickTTMapper:
       val lic = p.licenceNr
       if (lic.nonEmpty && !licenseMap.contains(lic)) {
         // Check if player already exists in DB
-        PlayerDB.players.find(_.meta.licenceNr.contains(lic)) match
+        TourneyDB.tourney.players.find(_.meta.licenceNr.contains(lic)) match
           case Some(existing) => 
             licenseMap(lic) = existing
           case None =>
             // Ensure Club exists
             val clubName = p.clubName.getOrElse("Unbekannter Verein")
-            val club = ClubDB.clubs.find(_.name == clubName).getOrElse {
-              ClubDB.add(clubName, checkSimilarity = false) match
+            val club = TourneyDB.tourney.clubs.find(_.name == clubName).getOrElse {
+              TourneyDB.tourney.addClub(clubName, checkSimilarity = false, doSync = false) match
                 case Right(c) => c
                 case Left(_) => Club(ClubId(0), clubName, Club.normalize(clubName))
             }
 
             // Create Player
-            val player = Player(
-              id = PlayerId(PlayerDB.players.length + 1),
-              firstName = p.firstname,
-              lastName = p.lastname,
-              clubId = club.id.toInt,
-              birthYear = try Some(p.birthyear.toInt) catch { case _:Exception => None },
-              sex = p.sex match {
-                case 1 => Sex.Male
-                case 2 => Sex.Female
-                case _ => Sex.Unknown
-              },
-              meta = PlayerMeta(
-                internalNr = Some(p.internalNr),
-                licenceNr = Some(lic),
-                clubNr = p.clubNr,
-                clubFedNick = p.clubFederationNickname,
-                ttr = p.ttr,
-                ttrMatchCnt = p.ttrMatchCount,
-                nationality = p.nationality,
-                foreignerEqState = p.foreignerEqState,
-                region = p.region,
-                subRegion = p.subRegion
-              )
+            val playerMeta = PlayerMeta(
+              internalNr = Some(p.internalNr),
+              licenceNr = Some(lic),
+              clubNr = p.clubNr,
+              clubFedNick = p.clubFederationNickname,
+              ttr = p.ttr,
+              ttrMatchCnt = p.ttrMatchCount,
+              nationality = p.nationality,
+              foreignerEqState = p.foreignerEqState,
+              region = p.region,
+              subRegion = p.subRegion
             )
-            PlayerDB.players += player
-            PlayerDB.pendingEvents += player
-            licenseMap(lic) = player
+
+            val sex = p.sex match {
+              case 1 => Sex.Male
+              case 2 => Sex.Female
+              case _ => Sex.Unknown
+            }
+
+            val bYear = try Some(p.birthyear.toInt) catch { case _:Exception => None }
+
+            TourneyDB.tourney.addPlayer(p.firstname, p.lastname, club.id.toInt, bYear, doSync = false) match {
+              case Right(player) => 
+                // Update meta data which addPlayer doesn't set
+                val updatedPlayer = player.copy(sex = sex, meta = playerMeta)
+                TourneyDB.tourney.updatePlayer(updatedPlayer, doSync = false)
+                licenseMap(lic) = updatedPlayer
+              case Left(err) => 
+                base.Logging.error(s"Failed to add player: ${err.msg}")
+            }
       }
     }
-    PlayerDB.triggerSync()
+    TourneyDB.tourney.syncPlayers()
     licenseMap.toMap
 
   private def mapPlayerToPant(cttPlayer: CttPlayer, personMap: Map[String, Player]): Option[Pant] =
@@ -170,7 +168,7 @@ object ClickTTMapper:
         Pant(
           id = SNO.single(player.id),
           name = player.displayName,
-          club = ClubDB.clubs.find(_.id.toInt == player.clubId).map(_.name).getOrElse(""),
+          club = TourneyDB.tourney.clubs.find(_.id.toInt == player.clubId).map(_.name).getOrElse(""),
           rating = player.meta.ttr.getOrElse(0),
           status = PantStatus.REGI
         )
@@ -184,8 +182,8 @@ object ClickTTMapper:
         player1 <- p1Opt
         player2 <- p2Opt
       } yield {
-        val club1 = ClubDB.clubs.find(_.id.toInt == player1.clubId).map(_.name).getOrElse("")
-        val club2 = ClubDB.clubs.find(_.id.toInt == player2.clubId).map(_.name).getOrElse("")
+        val club1 = TourneyDB.tourney.clubs.find(_.id.toInt == player1.clubId).map(_.name).getOrElse("")
+        val club2 = TourneyDB.tourney.clubs.find(_.id.toInt == player2.clubId).map(_.name).getOrElse("")
         
         Pant(
           id = SNO.double(player1.id, player2.id),

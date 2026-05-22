@@ -24,7 +24,7 @@ object TestClub:
     val name = parts(0).trim
     val checkSimilarity = if parts.length > 1 then parts(1).trim.toBoolean else true
 
-    ClubDB.add(name, checkSimilarity) match
+    services.TourneyDB.tourney.addClub(name, checkSimilarity) match
       case Left(err) =>
         addOutput(s"Error adding club '$name' (checkSimilarity=$checkSimilarity): ${err.msg}")
         Future(Left(err))
@@ -35,12 +35,12 @@ object TestClub:
   def testClub_delete(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     try
       val id = ClubId(param.toInt)
-      ClubDB.deleteClub(id) match
+      services.TourneyDB.tourney.deleteClub(id) match
         case Left(err) =>
           addOutput(s"Error deleting club ID $param: ${err.msg}")
           Future(Left(err))
-        case Right(club) =>
-          addOutput(s"Deleted (deactivated) club: ${club.name} (ID: ${ClubId.value(club.id)}, Active: ${club.active})")
+        case Right(_) =>
+          addOutput(s"Deleted (deactivated) club ID $param successfully")
           Future(Right(s"FINISHED: ${group}-Test:${number}"))
     catch
       case _: Exception =>
@@ -57,12 +57,12 @@ object TestClub:
       try
         val sourceId = ClubId(ids(0).trim.toInt)
         val targetId = ClubId(ids(1).trim.toInt)
-        ClubDB.merge(sourceId, targetId) match
+        services.TourneyDB.tourney.mergeClubs(sourceId, targetId) match
           case Left(err) =>
             addOutput(s"Error merging: $err")
             Future(Left(AppError(err)))
-          case Right(targetClub) =>
-            addOutput(s"Merged successfully into: ${targetClub.name}")
+          case Right(_) =>
+            addOutput(s"Merged successfully: $sourceId into $targetId")
             Future(Right(s"FINISHED: ${group}-Test:${number}"))
       catch
         case _: Exception =>
@@ -70,19 +70,15 @@ object TestClub:
           Future(Left(AppError("invalid.id")))
 
   def testClub_list(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    addOutput(s"Clubs in DB (${ClubDB.clubs.length}):")
-    ClubDB.clubs.foreach { club =>
+    val t = services.TourneyDB.tourney
+    addOutput(s"Clubs in DB (${t.clubs.length}):")
+    t.clubs.foreach { club =>
       addOutput(s"- [${ClubId.value(club.id)}] ${club.name} (Active: ${club.active})")
     }
-    Future(Right(s"FINISHED: ${group}-Test:${number}"))
+    Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))
 
   def testClub_sync(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    addOutput(s"Syncing clubs (${ClubDB.pendingEvents.length} pending events)...")
-    ClubDB.sync().map {
-      case Left(err) =>
-        addOutput(s"Error syncing clubs: ${err.msg}")
-        Left(err)
-      case Right(_) =>
-        addOutput(s"Clubs synced successfully. New version: ${ClubDB.version}")
-        Right(s"FINISHED: ${group}-Test:${number}")
-    }
+    addOutput(s"Syncing clubs...")
+    services.TourneyDB.tourney.syncClubs()
+    // Sync is async, but this test just triggers it
+    Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))

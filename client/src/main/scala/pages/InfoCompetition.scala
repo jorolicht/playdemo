@@ -52,7 +52,7 @@ object InfoCompetition extends BasePage with JsWrapper:
         dialogs.DlgPrompt.show("").map {
           case Right(name) if name.trim.nonEmpty => 
             val coId = Global.currentSelection.competition.map(_.id).getOrElse(CompId(0))
-            services.RoundDB.addRound(
+            services.TourneyDB.tourney.addRound(
               coId, 
               None, // No predecessor for new start round
               name, 
@@ -73,7 +73,7 @@ object InfoCompetition extends BasePage with JsWrapper:
         DlgMsgbox.show("Möchten Sie diesen Wettbewerb wirklich löschen?", "Wettbewerb löschen", List(Yes, No)).map {
           case Yes => 
             val cId = Global.currentSelection.competition.map(_.id).getOrElse(CompId(0))
-            services.CompetitionDB.delete(cId) match {
+            services.TourneyDB.tourney.deleteCompetition(cId) match {
               case Right(_) => 
                 Global.currentSelection = Global.currentSelection.copy(competition = None, round = None)
                 comps.ContextHeader.render()

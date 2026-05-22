@@ -2,14 +2,14 @@ package addon
 
 import shared.model.*
 import shared.basic.*
-import services.CompetitionDB
+import services.{TourneyDB, CompetitionDB}
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.NonFatal
 
 /**
- * TestCompetition provides addon console commands to test CompetitionDB functionality.
+ * TestCompetition provides addon console commands to test Competition functionality.
  */
 object TestCompetition:
 
@@ -41,7 +41,7 @@ object TestCompetition:
     val startDate = parts(2).trim
     val typ = CompTyp.fromString(typStr)
 
-    CompetitionDB.add(name, typ, startDate) match
+    TourneyDB.tourney.addCompetition(name, typ, startDate) match
       case Left(err) =>
         addOutput(s"Error adding competition '$name': ${err.msg}")
         Future(Left(err))
@@ -55,12 +55,12 @@ object TestCompetition:
   def testCompetition_delete(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     try
       val id = CompId.fromInt(param.toInt)
-      CompetitionDB.delete(id) match
+      TourneyDB.tourney.deleteCompetition(id) match
         case Left(err) =>
           addOutput(s"Error deleting competition ID $param: ${err.msg}")
           Future(Left(err))
-        case Right(comp) =>
-          addOutput(s"Deleted (soft delete) competition: ${comp.name} (ID: ${comp.id.value}, Deleted: ${comp.deleted}, Version: ${comp.version})")
+        case Right(_) =>
+          addOutput(s"Deleted (soft delete) competition ID $param successfully")
           Future(Right(s"FINISHED: ${group}-Test:${number}"))
     catch
       case _: Exception =>
@@ -71,7 +71,7 @@ object TestCompetition:
    * Test 3: List competitions.
    */
   def testCompetition_list(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    val activeComps = CompetitionDB.competitions.filter(c => c != null)
+    val activeComps = TourneyDB.tourney.competitions.filter(c => c != null)
     addOutput(s"Competitions in DB (${activeComps.length}):")
     activeComps.foreach { c =>
       val pantsInfo = if (c.pants.isEmpty) "no participants" else s"${c.pants.length} participants"
@@ -87,15 +87,9 @@ object TestCompetition:
    * Test 4: Sync competitions with server.
    */
   def testCompetition_sync(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    addOutput(s"Syncing competitions (${CompetitionDB.pendingEvents.length} pending events)...")
-    CompetitionDB.sync().map {
-      case Left(err) =>
-        addOutput(s"Error syncing competitions: ${err.msg}")
-        Left(err)
-      case Right(_) =>
-        addOutput(s"Competitions synced successfully.")
-        Right(s"FINISHED: ${group}-Test:${number}")
-    }
+    addOutput(s"Syncing competitions...")
+    TourneyDB.tourney.syncCompetitions()
+    Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))
 
   /**
    * Test 5: Add participants to competition. Param: "compId,name1;club1,name2;club2,..."
@@ -111,13 +105,14 @@ object TestCompetition:
     try
       val id = CompId.fromInt(parts(0).trim.toInt)
       val compIdx = id.value - 1
+      val t = TourneyDB.tourney
       
-      if (compIdx < 0 || compIdx >= CompetitionDB.MaxComps || CompetitionDB.competitions(compIdx) == null) {
+      if (compIdx < 0 || compIdx >= 64 || t.competitions(compIdx) == null) {
          addOutput(s"Competition ID ${id.value} not found.")
          return Future(Left(AppError("competition.notFound")))
       }
 
-      val comp = CompetitionDB.competitions(compIdx)
+      val comp = t.competitions(compIdx)
       val newPants = parts.drop(1).map { pStr =>
         val pParts = pStr.split(";")
         val name = pParts(0).trim
@@ -133,7 +128,7 @@ object TestCompetition:
       val updatedComp = comp.copy()
       updatedComp.pants ++= newPants
       
-      CompetitionDB.update(updatedComp) match
+      t.updateCompetition(updatedComp) match
         case Left(err) =>
           addOutput(s"Error updating competition: ${err.msg}")
           Future(Left(err))

@@ -25,25 +25,25 @@ object InfoTourney extends BasePage with JsWrapper:
     }
 
     // Get tournament from Selection or TourneyDB
-    val tourneyOpt = Global.currentSelection.tourney.orElse(services.TourneyDB.tourney)
+    val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
 
-    tourneyOpt match
-      case Some(t) => 
+    if (tourney.id != 0) {
         // Update selection if it was empty
         if (Global.currentSelection.tourney.isEmpty) {
-          Global.currentSelection = Global.currentSelection.copy(tourney = Some(t))
+          Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney))
           comps.ContextHeader.render()
         }
 
         // Get real competitions from DB
         val compList = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
 
-        setMain(cviews.pages.html.InfoTourney(t, compList))
+        setMain(cviews.pages.html.InfoTourney(tourney, compList))
         true
-      case None => 
+    } else {
         debug("InfoTourney: No tournament found, redirecting to Home")
         loadPage(MainMulti.name, "")
         false
+    }
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
@@ -51,7 +51,7 @@ object InfoTourney extends BasePage with JsWrapper:
         DlgCompetition.show().map {
           case Right(res) => 
             debug(s"Adding competition: ${res.competition.name}")
-            services.CompetitionDB.add(
+            services.TourneyDB.tourney.addCompetition(
               res.competition.name, 
               res.competition.typ, 
               res.competition.startDate.replace("-", "")
@@ -70,7 +70,7 @@ object InfoTourney extends BasePage with JsWrapper:
           case Yes => 
             // In a real app, we would call an API here. 
             // For now, we clear the local state.
-            services.TourneyDB.tourney = None
+            services.TourneyDB.tourney = Tourney.default
             Global.currentSelection = Selection()
             comps.ContextHeader.render()
             loadPage(MainMulti.name, "")

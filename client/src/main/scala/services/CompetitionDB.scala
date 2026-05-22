@@ -18,9 +18,15 @@ import base.{Global, Logging}
  */
 object CompetitionDB extends ComWrapper with Debouncer:
 
-  val MaxComps = 64
-  val competitions: ArrayBuffer[Competition] = ArrayBuffer.fill(MaxComps)(null)
-  val pendingEvents: ArrayBuffer[Competition] = ArrayBuffer() 
+  def triggerSync(): Unit =
+    debounce(delay = 800) {
+      Logging.debug("Synchronisiere Wettbewerbe mit dem Server...")
+      sync()
+    }
+
+  // Helper to access the current tourney's competitions
+  def competitions: ArrayBuffer[Competition] = TourneyDB.tourney.competitions
+  def pendingEvents: ArrayBuffer[Competition] = TourneyDB.tourney.dirtyCompetition
 
   private val route = "/wp-json/tourney/v1/competitions-sync"
 
@@ -28,22 +34,23 @@ object CompetitionDB extends ComWrapper with Debouncer:
   case class CompetitionSyncResponse(success: Boolean) derives ReadWriter
   case class CompetitionsResponse(competitions: Seq[Competition]) derives ReadWriter
 
-  def triggerSync(): Unit =
-    debounce(delay = 800) {
-      Logging.debug("Synchronisiere Wettbewerbe mit dem Server...")
-      sync()
+  /**
+   * Initializes the sync handler for the current tournament.
+   */
+  def initHandler(): Unit =
+    if (TourneyDB.tourney.id != 0) {
+      TourneyDB.tourney.setCompSyncHandler { _ => triggerSync() }
     }
 
   /**
    * Synchronizes pending competition events with the WordPress server.
-   * If a version mismatch occurs (conflict), it clears pending events and reloads from the server.
    */
   def sync(): Future[Either[AppError, Unit]] = {
-    if pendingEvents.isEmpty then
+    if pendingEvents.isEmpty || TourneyDB.tourney.id == 0 then
       Future.successful(Right(()))
     else
       val req = CompetitionSyncRequest(pendingEvents.toSeq)
-      val params = List("postId" -> Global.pageId.toString)
+      val params = List("postId" -> TourneyDB.tourney.id.toString)
 
       ajaxPost[CompetitionSyncRequest, CompetitionSyncResponse](
         route,
@@ -66,23 +73,26 @@ object CompetitionDB extends ComWrapper with Debouncer:
    * Loads competitions from the WordPress server.
    */
   def load(): Future[Either[AppError, Long]] = {
-    if (Global.pageId == 0) {
-      Logging.debug("CompetitionDB.load: postId is 0, skipping load")
+    if (TourneyDB.tourney.id == 0) {
+      Logging.debug("CompetitionDB.load: tourney.id is 0, skipping load")
       return Future.successful(Right(0L))
     }
 
-    val params = List("postId" -> Global.pageId.toString)
+    val params = List("postId" -> TourneyDB.tourney.id.toString)
     ajaxGet[CompetitionsResponse]("/wp-json/tourney/v1/competitions", params).map {
       case Right(res) =>
-        println(s"CompetitionDB.load: received ${res.competitions.length} competitions from server")
-        competitions.clear()
-        for (i <- 0 until MaxComps) competitions += null
-        res.competitions.foreach { c =>
-           val i = c.id.value - 1
-           if (i >= 0 && i < MaxComps) then
-             competitions(i) = c
+        if (TourneyDB.tourney.id != 0) {
+          val t = TourneyDB.tourney
+          t.competitions.clear()
+          for (i <- 0 until 64) t.competitions += null
+          res.competitions.foreach { c =>
+             val i = c.id.value - 1
+             if (i >= 0 && i < 64) then
+               t.competitions(i) = c
+          }
+          t.dirtyCompetition.clear()
+          initHandler() // Ensure handler is set
         }
-        pendingEvents.clear()
         Logging.debug(s"CompetitionDB.load: loaded ${res.competitions.length} competitions")
         Right(0L)
       case Left(err) => 
@@ -90,62 +100,3 @@ object CompetitionDB extends ComWrapper with Debouncer:
         Left(err)
     }
   }
-
-  /**
-   * Adds a new competition. 
-   * Finds the first empty slot or reuses the first deleted slot if all slots are full.
-   * Version is initialized to 1.
-   */
-  def add(name: String, typ: CompTyp, startDate: String): Either[AppError, Competition] =
-    val firstNull = competitions.indexOf(null)
-    val index = if (firstNull != -1) firstNull else competitions.indexWhere(c => c != null && c.deleted)
-    
-    if (index != -1) {
-      val c = Competition(
-        id = CompId(index + 1), 
-        name = name, 
-        typ = typ, 
-        startDate = startDate, 
-        status = CompStatus.READY,
-        version = 1
-      )
-      competitions(index) = c
-      pendingEvents += c
-      triggerSync()
-      Right(c)
-    } else {
-      Left(AppError("max.competitions.reached", "Maximal 64 Wettbewerbe sind erlaubt."))
-    }
-
-  /**
-   * Deletes a competition (soft delete).
-   * Increments the version counter.
-   */
-  def delete(id: CompId): Either[AppError, Competition] =
-    val i = id.value - 1
-    if (i < 0 || i >= MaxComps || competitions(i) == null) {
-      Left(AppError("competition.notFound"))
-    } else {
-      val oldComp = competitions(i)
-      val c = oldComp.copy(deleted = true, version = oldComp.version + 1)
-      competitions(i) = c
-      pendingEvents += c
-      triggerSync()
-      Right(c)
-    }
-
-  /**
-   * Updates a competition.
-   * Increments the version counter.
-   */
-  def update(comp: Competition): Either[AppError, Competition] =
-    val i = comp.id.value - 1
-    if (i < 0 || i >= MaxComps || competitions(i) == null) {
-      Left(AppError("competition.notFound"))
-    } else {
-      val updatedComp = comp.copy(version = comp.version + 1)
-      competitions(i) = updatedComp
-      pendingEvents += updatedComp
-      triggerSync()
-      Right(updatedComp)
-    }
