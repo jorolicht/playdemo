@@ -95,11 +95,12 @@ object TestTourney:
    * Param: "name,startDate" (e.g., "My Tourney,20260515")
    */
   def testTourney_apiCreate(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    val parts = param.split(",")
+    val cleanParam = param.stripPrefix("\"").stripSuffix("\"")
+    val parts = cleanParam.split(",")
     val name = if (parts.length > 0 && parts(0).nonEmpty) parts(0).trim else "Freisinger Meisterschaften"
     val dateStr = if (parts.length > 1 && parts(1).nonEmpty) parts(1).trim else "20220402"
     val date = try dateStr.toInt catch { case _: Exception => 20220402 }
-
+    
     val t = Tourney(
       id = 0,
       name = name,

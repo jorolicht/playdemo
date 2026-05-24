@@ -59,9 +59,9 @@ object DlgPrompt extends BaseDialog with JsWrapper:
 
     // println(s"ModalId: ${ModalId.id} ResultId: ${ResultId.id} InputId: ${InputId.id} ExecuteId: ${ExecuteId.id} CancelId: ${CancelId.id} CloseId: ${CloseId.id} ")
 
-    // init modal dialog
-    if getData(gE(LoadId), "loaded", false) == false then
-      setData(gE(LoadId), "loaded", true)
+
+    // Initialize modal dialog if not already loaded
+    if isEmpty(eE(LoadId,"span")) then
       setHtml(gE(LoadId), cviews.dialogs.html.DlgPrompt())
       initHistory()
       modal    = Modal(gE(ModalId))

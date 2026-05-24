@@ -82,6 +82,7 @@ object TourneyDB extends ComWrapper with Debouncer:
   def apiCreate(t: Tourney): Future[Either[AppError, String]] = {
     ajaxPost[Tourney, TourneyCreateResponse](routeCreate, List(), t).map {
       case Right(res) =>
+        t.id = res.pageId
         Right(res.slug)
       case Left(err) => Left(err)
     }

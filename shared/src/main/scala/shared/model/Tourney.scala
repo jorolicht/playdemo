@@ -25,7 +25,7 @@ enum TourneyTyp derives ReadWriter:
 import scala.collection.mutable.ArrayBuffer
 
 case class Tourney(
-  id:            Int,             // Wordpress Page Id, 0 for new entries
+  var id:        Int,             // Wordpress Page Id, 0 for new entries
   name:          String,          // Tournament name
   var organizer: String,          // Organizer name (club or registered program user)
   var startDate: Int,             // Format: yyyymmdd

@@ -30,9 +30,7 @@ add_action('rest_api_init', function () {
     register_rest_route('tourney/v1', '/create', [
         'methods'  => 'POST',
         'callback' => 'tourney_api_create',
-        'permission_callback' => function () {
-            return current_user_can('edit_posts');
-        }
+        'permission_callback' => '__return_true'
     ]);
 
 });
@@ -101,6 +99,10 @@ function tourney_get_read(WP_REST_Request $request)
  */
 function tourney_sync_tourney(WP_REST_Request $request)
 {
+    if (!current_user_can('edit_posts')) {
+        return ApiHelper::error("auth_required", "Sie müssen angemeldet sein, um diese Aktion auszuführen.", "", "tourney_sync_tourney", HttpStatus::UNAUTHORIZED);
+    }
+
     $post_id = intval($request->get_param('postId'));
     $meta = $request->get_param('metafield-name') ?: 'basic';
 
@@ -155,6 +157,10 @@ function tourney_sync_tourney(WP_REST_Request $request)
  * @return array|WP_REST_Response
  */
 function tourney_api_create(WP_REST_Request $request) {
+    if (!current_user_can('edit_posts')) {
+        return ApiHelper::error("auth_required", "Sie müssen angemeldet sein, um diese Aktion auszuführen.", "", "tourney_api_create", HttpStatus::UNAUTHORIZED);
+    }
+
     $body = json_decode($request->get_body(), true);
 
     if (empty($body)) {
@@ -234,6 +240,17 @@ function tourney_api_create(WP_REST_Request $request) {
 
     if (is_wp_error($result_id)) {
         return ApiHelper::error("db_error", $result_id->get_error_message(), "", "tourney_api_create_tourney", HttpStatus::INTERNAL_SERVER_ERROR);
+    }
+
+    // Aktualisiere die ID im Body, damit sie mit der WordPress Post-ID übereinstimmt
+    $body['id'] = $result_id;
+
+    // Speichere den gesamten Payload als initialen Stand in 'basic'
+    update_post_meta($result_id, 'basic', wp_json_encode($body, JSON_UNESCAPED_UNICODE));
+    
+    // Initialisiere Version auf 1, falls neu
+    if ($action === 'created') {
+        update_post_meta($result_id, 'basic_ts', 1);
     }
 
     // Setze ident Metafield

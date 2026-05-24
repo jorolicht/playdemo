@@ -1,6 +1,7 @@
 package shared.basic
 
 import scala.concurrent.Future
+import ujson.*
 
 import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
 
@@ -19,9 +20,23 @@ object AppError:
   def dummy = AppError("","","","")
 
 
+
 def parseError(in: String, func: String): AppError =
-  try Pickle.read[AppError](in)
-  catch { case e: Throwable => AppError("err00006.parseJson", e.getMessage, in.take(100)).add(func) }
+  try 
+    val json = ujson.read(in)
+    if (json.obj.contains("msgCode")) {
+      Pickle.read[AppError](in)
+    } else if (json.obj.contains("code") && json.obj.contains("message")) {
+      // Standard WordPress Error Format
+      val code = json.obj("code").str
+      val msg = json.obj("message").str
+      AppError(code, msg).add(func)
+    } else {
+      AppError("err00006.parseJson", "Unexpected error format", in.take(100)).add(func)
+    }
+  catch { 
+    case e: Throwable => AppError("err00006.parseJson", e.getMessage, in.take(100)).add(func) 
+  }
 
 
 
