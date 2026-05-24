@@ -1,0 +1,91 @@
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+@import pages.MainSearch.*
+
+@()
+
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white py-3">
+            <h3 class="h5 mb-0"><i class="bi bi-search me-2"></i>Turniersuche</h3>
+        </div>
+        <div class="card-body bg-light">
+            <form @idAttr(IdMainSearchForm) onsubmit="return false;" class="row g-3">
+                <!-- Live Title Search -->
+                <div class="col-md-5">
+                    <label @forAttr(IdInputTitle) class="form-label fw-bold">Turniername</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-fonts"></i></span>
+                        <input type="text" class="form-control border-start-0" @idAttr(IdInputTitle) @event("oninput") placeholder="Suchen...">
+                    </div>
+                </div>
+
+                <!-- Organizer Search -->
+                <div class="col-md-4">
+                    <label @forAttr(IdInputOrganizer) class="form-label fw-bold">Organisator</label>
+                    <input type="text" class="form-control" @idAttr(IdInputOrganizer) @event("oninput") placeholder="Verein oder Name">
+                </div>
+
+                <!-- Date Search (From) -->
+                <div class="col-md-3">
+                    <label @forAttr(IdInputDate) class="form-label fw-bold">Startdatum (ab)</label>
+                    <input type="date" class="form-control" @idAttr(IdInputDate) @event("onchange")>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Area -->
+    <div class="card shadow-sm mt-4 border-0">
+        <div class="card-body p-0">
+            <div @idAttr(IdResultsContainer) class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            <th class="ps-3 cursor-pointer" style="width: 150px;" @id(IdHeaderDate) @event("onclick") title="Nach Datum sortieren">
+                                Datum <i id="@IdSortIcon" class="bi bi-sort-numeric-up-alt ms-1"></i>
+                            </th>
+                            <th>Turnier / Titel</th>
+                            <th>Organisator</th>
+                            <th class="text-center" style="width: 120px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody @idAttr(IdResultsBody)>
+                        <!-- Entries will be loaded here via AJAX -->
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                Lade Turniere...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white text-muted small py-2">
+            <div @idAttr(IdResultCount)">0 Turniere gefunden</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sticky-top {
+        z-index: 10;
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .table-responsive::-webkit-scrollbar {
+        width: 8px;
+    }
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 4px;
+    }
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: #bbb;
+    }
+</style>

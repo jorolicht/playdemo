@@ -1,0 +1,8 @@
+@*
+ * Template for aria-labelledby attribute 
+ *@
+@import shared.DomTypes.HtmlId 
+
+@(name: HtmlId)
+@{ Html(s""" aria-labelledby='${name.id}' """) }
+

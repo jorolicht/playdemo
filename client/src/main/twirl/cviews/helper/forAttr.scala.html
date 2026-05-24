@@ -1,0 +1,8 @@
+@*
+ * Template for 'for' attribute 
+ *@
+@import shared.DomTypes.HtmlId 
+
+@(name: HtmlId)
+@{ Html(s""" for='${name.id}' """) }
+

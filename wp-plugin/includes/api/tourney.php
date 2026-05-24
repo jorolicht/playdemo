@@ -26,6 +26,13 @@ add_action('rest_api_init', function () {
         'permission_callback' => '__return_true'
     ]);
 
+    // GET /tourney/v1/search - Sucht nach Turnieren
+    register_rest_route('tourney/v1', '/search', [
+        'methods' => 'GET',
+        'callback' => 'tourney_api_search',
+        'permission_callback' => '__return_true'
+    ]);
+
     // POST /tourney/v1/create
     register_rest_route('tourney/v1', '/create', [
         'methods'  => 'POST',
@@ -139,6 +146,16 @@ function tourney_sync_tourney(WP_REST_Request $request)
     // 💾 Speichern
     if ($new_tourney) {
         update_post_meta($post_id, $meta, wp_json_encode($new_tourney, JSON_UNESCAPED_UNICODE));
+        
+        // Index meta fields for searching if this is the basic meta
+        if ($meta === 'basic') {
+            if (isset($new_tourney['startDate'])) {
+                update_post_meta($post_id, 'startDate', intval($new_tourney['startDate']));
+            }
+            if (isset($new_tourney['organizer'])) {
+                update_post_meta($post_id, 'organizer', sanitize_text_field($new_tourney['organizer']));
+            }
+        }
     } else {
         delete_post_meta($post_id, $meta);
     }
@@ -248,6 +265,10 @@ function tourney_api_create(WP_REST_Request $request) {
     // Speichere den gesamten Payload als initialen Stand in 'basic'
     update_post_meta($result_id, 'basic', wp_json_encode($body, JSON_UNESCAPED_UNICODE));
     
+    // Index meta fields for searching
+    update_post_meta($result_id, 'startDate', intval($start_date));
+    update_post_meta($result_id, 'organizer', sanitize_text_field($body['organizer'] ?? $organizer));
+
     // Initialisiere Version auf 1, falls neu
     if ($action === 'created') {
         update_post_meta($result_id, 'basic_ts', 1);
@@ -272,3 +293,100 @@ function tourney_api_create(WP_REST_Request $request) {
     ];
 }
 
+/**
+ * Sucht nach Turnieren basierend auf verschiedenen Kriterien.
+ */
+function tourney_api_search(WP_REST_Request $request) {
+    $q         = $request->get_param('q');
+    $organizer = $request->get_param('organizer');
+    $date_from = $request->get_param('dateFrom');
+    $order     = strtoupper($request->get_param('order') ?? 'DESC');
+
+    $args = [
+        'post_type'      => 'tourney',
+        'post_status'    => ['publish', 'private'],
+        'posts_per_page' => -1, // Wir holen alle und filtern/limitieren in PHP für maximale Kompatibilität
+        'post_parent__not_in' => [0],
+        'orderby'        => 'date',
+        'order'          => 'DESC'
+    ];
+
+    if (!empty($q)) {
+        $args['s'] = $q;
+    }
+
+    $query = new WP_Query($args);
+    $posts = $query->posts;
+
+    $results = [];
+    foreach ($posts as $post) {
+        $start_date = get_post_meta($post->ID, 'startDate', true);
+        $org_meta   = get_post_meta($post->ID, 'organizer', true);
+        
+        $basic_json = get_post_meta($post->ID, 'basic', true);
+        $basic = $basic_json ? json_decode($basic_json, true) : null;
+        
+        // Fallbacks für Altdaten aus dem JSON
+        if (empty($start_date) && $basic && isset($basic['startDate'])) {
+            $start_date = $basic['startDate'];
+        }
+        if (empty($org_meta) && $basic && isset($basic['organizer'])) {
+            $org_meta = $basic['organizer'];
+        }
+
+        $start_date_int = intval($start_date);
+
+        // 1. Filter: Nur Turniere mit gültigem Startdatum (> 0)
+        if ($start_date_int <= 0) {
+            continue;
+        }
+
+        // 2. Filter: Startdatum ab (falls angegeben)
+        if (!empty($date_from) && $start_date_int < intval($date_from)) {
+            continue;
+        }
+
+        // 3. Filter: Organisator (falls angegeben)
+        if (!empty($organizer) && stripos($org_meta, $organizer) === false) {
+            continue;
+        }
+
+        // Organisator Fallback über Autor (wie zuvor)
+        if (empty($org_meta)) {
+            $author_id = $post->post_author;
+            $user_org  = get_user_meta($author_id, 'organizer', true);
+            if (!empty($user_org)) {
+                $org_meta = $user_org;
+            } else {
+                $user_data = get_userdata($author_id);
+                if ($user_data) {
+                    $org_meta = !empty($user_data->display_name) ? $user_data->display_name : $user_data->user_login;
+                }
+            }
+        }
+        
+        $status = $basic['status'] ?? 'Active';
+
+        $results[] = [
+            'id'        => $post->ID,
+            'name'      => $post->post_title,
+            'organizer' => $org_meta ?: 'Unbekannt',
+            'startDate' => $start_date_int,
+            'status'    => $status,
+            'slug'      => $post->post_name
+        ];
+    }
+
+    // 4. Sortierung in PHP
+    usort($results, function($a, $b) use ($order) {
+        if ($a['startDate'] == $b['startDate']) return 0;
+        if ($order === 'ASC') {
+            return ($a['startDate'] < $b['startDate']) ? -1 : 1;
+        } else {
+            return ($a['startDate'] > $b['startDate']) ? -1 : 1;
+        }
+    });
+
+    // 5. Limitierung auf 100 Ergebnisse
+    return array_slice($results, 0, 100);
+}

@@ -1,8 +1,9 @@
+@import cviews.helper.html.*
 @import dialogs.DlgClickTT.*
 
 @()
 
-<div class="modal fade" @id(ModalId) tabindex="-1" @ariaLabelledByAttr(LabelId) aria-hidden="true">
+<div class="modal fade" @id(ModalId) tabindex="-1" @ariaLabelledBy(LabelId) aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">

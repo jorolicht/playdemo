@@ -55,5 +55,5 @@ object MainMulti extends BasePage with JsWrapper:
             }
           case Left(_) => debug("Option 2 cancelled")
         }
-      case `BtnSearch` => loadPage(PageNameTyp("ViewOrganizer"), "")
+      case `BtnSearch` => loadPage(MainSearch.name, "")
       case _ => debug(s"MainMulti handleEvent: ${elem.id}")

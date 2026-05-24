@@ -1,0 +1,8 @@
+@*
+ * Template for data-bs-target attribute and related attributes
+ *@
+@import shared.DomTypes.HtmlId 
+
+@(name: HtmlId)
+@{ Html(s""" data-bs-target='#${name.id}' """) }
+
