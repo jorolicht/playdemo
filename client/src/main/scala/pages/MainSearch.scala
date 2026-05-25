@@ -45,23 +45,22 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
         }
       case `IdHeaderDate` =>
         toggleSort()
-      case id if id.id.startsWith("row-") =>
-        val pageId = id.id.stripPrefix("row-").toInt
-        debug(s"Switching to tournament post: $pageId")
-        
-        // 1. Update IDs
-        Global.pageId = pageId
-        TourneyDB.tourney = Tourney.default.copy(id = pageId)
-        
+      case id if id.id.startsWith("MainSearch_InputResult") =>
+        val tourneyId = getData(elem,"tourney-id", 0)
+        debug(s"Switching to tournament post: $tourneyId")
+
+        // 1. Update Global PageId
+        Global.pageId = tourneyId
+
         // 2. Clear current selection to force reload context
         Global.currentSelection = Selection()
-        
-        // 3. Initialize data from server for the new ID
-        TourneyDB.init().map {
+
+        // 3. Initialize all data from server for the new ID
+        TourneyDB.init(tourneyId).map {
           case Right(_) => 
             loadPage(InfoTourney.name, "")
           case Left(err) => 
-            error(s"Failed to initialize tournament $pageId: ${err.msgCode}")
+            error(s"Failed to initialize tournament $tourneyId: ${err.msgCode}")
             dom.window.alert(s"Fehler beim Laden des Turniers: ${err.msgCode}")
         }
       case _ => 
@@ -113,12 +112,7 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
     } else {
       val html = results.map { r =>
         val dateDisplay = formatDate(r.startDate.toString)
-        s"""<tr id='row-${r.id}' class='cursor-pointer' onclick="appHandleEvent(this, 'click')">
-             <td class='ps-3'><span class='badge bg-light text-dark border'>$dateDisplay</span></td>
-             <td class='fw-bold'>${r.name}</td>
-             <td>${r.organizer}</td>
-             <td class='text-center'><span class='badge bg-secondary opacity-75'>${r.status}</span></td>
-           </tr>"""
+        cviews.comps.html.MainSearchInputResult(r, dateDisplay).toString
       }.mkString("")
       setHtml(gE(IdResultsBody), html)
     }

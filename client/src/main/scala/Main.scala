@@ -52,6 +52,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     Global.playUrl = getData(gE(ParamId), "playurl","")
     Global.homeUrl = getData(gE(ParamId), "homeurl", "")
     Global.wpNonce = getData(gE(ParamId), "nonce", "")
+    Global.pageId  = getData(gE(ParamId), "pageid", 0)
 
     mode match {
       case "multi"     => modeMulti()
@@ -59,7 +60,6 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       case "page"      => modePage(getData(gE(ParamId), "page", ""))
       case _           => debug(s"startWp -> unknown mode: ${mode}") 
     }
-
 
   def modePage(page: String): Unit =
     pages.loadPage(PageNameTyp(page), "", withSidebar = false, async = true)
@@ -69,15 +69,13 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     import services.*
     import shared.model.*
 
-    Global.pageId  = getData(gE(ParamId), "pageid", 0)
-    TourneyDB.tourney = TourneyDB.tourney.copy(id = Global.pageId)
     debug(s"modeSingle -> playUrl: ${Global.playUrl}, homeUrl: ${Global.homeUrl}, lang: ${Global.lang}, nonce: ${Global.wpNonce}, pageId: ${Global.pageId}")
 
     // Render components
     ContextHeader.render("")
     Wordpress.render("")
 
-    TourneyDB.init().map {
+    TourneyDB.init(Global.pageId).map {
       case Right(_) =>
         val html = cviews.pages.html.ViewTourney(
           TourneyDB.tourney,
@@ -94,12 +92,12 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
 
   def modeMulti(): Unit = 
+    import services.*
+    import shared.model.*
     import shared.model.UserInfo
     import shared.model.User
     import cats.data.EitherT
     import cats.implicits._ 
-
-    Global.pageId = 0
 
     debug(s"modeMulti -> playUrl: ${Global.playUrl}, homeUrl: ${Global.homeUrl}, lang: ${Global.lang}, nonce: ${Global.wpNonce}, pageId: ${Global.pageId}")
 
@@ -107,14 +105,13 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     ContextHeader.render("")
     Wordpress.render("")
 
+    // Start loading user and tournament
     (for {
       user        <- EitherT(ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl))
-      timestamp1  <- EitherT(ClubDB.load())
-      timestamp3  <- EitherT(PlayerDB.load())
-    } yield  (user, timestamp1, timestamp3) ).value.map {
-      case Right(res)  => 
-        val ui = res._1
-        debug(s"User loaded: ${ui}, Clubs timestamp: ${res._2}")
+      timestamp   <- EitherT(TourneyDB.init(Global.pageId))
+    } yield (user, timestamp)).value.map {
+      case Right((ui, ts))  => 
+        debug(s"User loaded: ${ui}, Tourney initialized, timestamp: $ts")
         if (ui.user_id > 0) {
            Global.user = Some(User(
              id = ("", ui.user_id),
@@ -128,9 +125,15 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
              roles = ui.roles
            ))
         }
-        // Load initial page for multi mode (Landing Page)
-        pages.loadPage(pages.MainMulti.name, "")
-      case Left(err)   => debug(s"Error loading user or clubs: ${err}")
+        
+        // Navigation logic based on tourney.ident
+        if (TourneyDB.tourney.ident == "IGNORE") {
+          pages.loadPage(pages.MainMulti.name, "")
+        } else {
+          pages.loadPage(pages.InfoTourney.name, "")
+        }
+
+      case Left(err)   => debug(s"Error loading user or tournament: ${err}")
     }
 
 

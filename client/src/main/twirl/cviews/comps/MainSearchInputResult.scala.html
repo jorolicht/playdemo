@@ -1,0 +1,11 @@
+@import pages.MainSearch.SearchResult
+@import cviews.helper.html.* 
+
+@(r: SearchResult, dateDisplay: String)
+
+<tr id='MainSearch_InputResult--@r.id' data-tourney-id='@r.id' class='cursor-pointer' @event("onclick")">
+    <td class='ps-3'><span class='badge bg-light text-dark border'>@dateDisplay</span></td>
+    <td class='fw-bold'>@r.name</td>
+    <td>@r.organizer</td>
+    <td class='text-center'><span class='badge bg-secondary opacity-75'>@r.status</span></td>
+</tr>

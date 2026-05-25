@@ -18,9 +18,10 @@ object TestTourney:
       case 3 => testTourney_sync(group, number, param)
       case 4 => testTourney_init(group, number, param)
       case 5 => testTourney_apiCreate(group, number, param)
+      case 6 => testTourney_createFull(group, number, param)
       case _ =>
         addOutput(s"FAILED: ${group}-Test:${number} param:${param} unknown test number")
-        Future(Left(AppError("unknown test number")))
+        Future.successful(Left(AppError("unknown test number")))
 
   /**
    * Test 1: Update tournament name. Param: "newName"
@@ -41,13 +42,14 @@ object TestTourney:
     val updated = current.copy(name = name)
     TourneyDB.update(updated)
     addOutput(s"Updated tournament name to: ${updated.name}. Sync triggered.")
-    Future(Right(s"FINISHED: ${group}-Test:${number}"))
+    Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))
 
   /**
    * Test 2: Load tournament data.
    */
   def testTourney_load(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    TourneyDB.load().map {
+    val id = try param.toInt catch { case _: Exception => TourneyDB.tourney.id }
+    TourneyDB.load(id).map {
       case Left(err) =>
         addOutput(s"Error loading tournament: ${err.msg}")
         Left(err)
@@ -76,7 +78,7 @@ object TestTourney:
    */
   def testTourney_init(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     addOutput("Initialisiere alle Datenbanken vom Server...")
-    TourneyDB.init().map {
+    TourneyDB.init(param.toInt).map {
       case Left(err) =>
         addOutput(s"Fehler bei der Initialisierung: ${err.msgCode} (${err.in1})")
         Left(err)
@@ -118,5 +120,37 @@ object TestTourney:
         Left(err)
       case Right(slug) =>
         addOutput(s"Tournament created successfully! Slug: $slug")
+        Right(s"FINISHED: ${group}-Test:${number}")
+    }
+
+  /**
+   * Test 6: Create a full tournament post using all fields from ClickTTDemo.xml.
+   * Param: "name,startDate"
+   */
+  def testTourney_createFull(group: String, number: Int, param: String): Future[Either[AppError, String]] =
+    val cleanParam = param.stripPrefix("\"").stripSuffix("\"")
+    val parts = cleanParam.split(",")
+    val name = if (parts.length > 0 && parts(0).nonEmpty) parts(0).trim else "100. Internationale Freisinger Meisterschaften"
+    val dateStr = if (parts.length > 1 && parts(1).nonEmpty) parts(1).trim else "20220402"
+    val date = try dateStr.toInt catch { case _: Exception => 20220402 }
+
+    val t = Tourney(
+      id = 0,
+      name = name,
+      organizer = "TTV Freising",
+      startDate = date,
+      endDate = date,
+      ident = "i36eIvYBUqxYW1OUCKu2pT5v50i4mxM0",
+      typ = TourneyTyp.TableTennis,
+      address = Some(Address("Luitpoldhalle", "Luitpoldanlage 1", "85356", "Freising", "DE"))
+    )
+
+    addOutput(s"Creating FULL tournament via API: ${t.name}...")
+    TourneyDB.apiCreate(t).map {
+      case Left(err) =>
+        addOutput(s"Error creating tournament: ${err.msgCode}")
+        Left(err)
+      case Right(slug) =>
+        addOutput(s"Full Tournament created! Slug: $slug")
         Right(s"FINISHED: ${group}-Test:${number}")
     }

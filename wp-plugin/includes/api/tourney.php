@@ -149,12 +149,39 @@ function tourney_sync_tourney(WP_REST_Request $request)
         
         // Index meta fields for searching if this is the basic meta
         if ($meta === 'basic') {
+            // Update Post Title if name is present
+            if (!empty($new_tourney['name'])) {
+                wp_update_post([
+                    'ID'         => $post_id,
+                    'post_title' => $new_tourney['name']
+                ]);
+            }
+
             if (isset($new_tourney['startDate'])) {
                 update_post_meta($post_id, 'startDate', intval($new_tourney['startDate']));
             }
-            if (isset($new_tourney['organizer'])) {
-                update_post_meta($post_id, 'organizer', sanitize_text_field($new_tourney['organizer']));
+            if (isset($new_tourney['endDate'])) {
+                update_post_meta($post_id, 'endDate', intval($new_tourney['endDate']));
             }
+            if (isset($new_tourney['ident'])) {
+                update_post_meta($post_id, 'ident', sanitize_text_field($new_tourney['ident']));
+            }
+
+            // Organizer logic with hierarchical fallback
+            $organizer = $new_tourney['organizer'] ?? '';
+            if (empty($organizer)) {
+                $author_id = get_post_field('post_author', $post_id);
+                $organizer = get_user_meta($author_id, 'organizer', true);
+                if (empty($organizer)) {
+                    $user_data = get_userdata($author_id);
+                    if ($user_data) {
+                        $organizer = !empty($user_data->display_name) ? $user_data->display_name : $user_data->user_login;
+                    } else {
+                        $organizer = 'user';
+                    }
+                }
+            }
+            update_post_meta($post_id, 'organizer', sanitize_text_field($organizer));
         }
     } else {
         delete_post_meta($post_id, $meta);
@@ -239,7 +266,7 @@ function tourney_api_create(WP_REST_Request $request) {
         'post_title'   => $tourney_name,
         'post_name'    => $turnier_slug,
         'post_parent'  => $parent_id,
-        'post_content' => '[playdemo mode="view"]',
+        'post_content' => '[playdemo mode="multi"]',
         'post_type'    => 'tourney',
         'post_status'  => 'publish',
     ];
@@ -268,6 +295,9 @@ function tourney_api_create(WP_REST_Request $request) {
     // Index meta fields for searching
     update_post_meta($result_id, 'startDate', intval($start_date));
     update_post_meta($result_id, 'organizer', sanitize_text_field($body['organizer'] ?? $organizer));
+    if (isset($body['endDate'])) {
+        update_post_meta($result_id, 'endDate', intval($body['endDate']));
+    }
 
     // Initialisiere Version auf 1, falls neu
     if ($action === 'created') {

@@ -33,11 +33,14 @@ object TourneyDB extends ComWrapper with Debouncer:
   /**
    * Initializes the application state by loading all data from the server.
    */
-  def init(): Future[Either[AppError, Long]] = {
-    Logging.info("Initialisiere TourneyDB: Lade alle Daten vom Server...")
+  def init(tourneyId: Int): Future[Either[AppError, Long]] = {
+    Logging.info(s"Initialisiere TourneyDB für ID $tourneyId: Lade alle Daten vom Server...")
     
+    // Set internal ID immediately to provide context for other loaders
+    this.tourney = Tourney.default.copy(id = tourneyId)
+
     // Explicitly define each load to keep track of this.load()
-    val loadTourney = this.load()
+    val loadTourney = this.load(tourneyId)
     val loads = Seq(
       loadTourney,
       CompetitionDB.load(),
@@ -106,22 +109,22 @@ object TourneyDB extends ComWrapper with Debouncer:
         Future.successful(Right(()))
       case Left(err) if err.is("version_mismatch") =>
         Logging.error(s"Sync fehlgeschlagen: Version-Mismatch bei Turnierdaten. Lade neu... ${err.msg}")
-        load().map(_ => Left(err))
+        load(tourney.id).map(_ => Left(err))
       case Left(err) =>
         Future.successful(Left(err))
     }
   }
 
   /**
-   * Loads tournament data from the WordPress server.
+   * Loads basic tournament data from the WordPress server.
    */
-  def load(): Future[Either[AppError, Long]] = {
-    if (tourney.id == 0) {
-      Logging.debug("TourneyDB.load: tourney.id is 0, skipping load")
+  def load(trnyId: Int): Future[Either[AppError, Long]] = {
+    if (trnyId == 0) {
+      Logging.debug("TourneyDB.load: trnyId is 0, skipping load")
       return Future.successful(Right(0L))
     }
 
-    val params = List("postId" -> tourney.id.toString)
+    val params = List("postId" -> trnyId.toString)
     ajaxGet[TourneyResponse](routeGet, params).map {
       case Right(res) =>
         tourney = res.tourney
