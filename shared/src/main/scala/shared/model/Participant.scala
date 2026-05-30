@@ -42,6 +42,7 @@ object SNO:
     
     def isSingle: Boolean = parts.length == 1 && !content.startsWith("-") && content != "0"
     def isDouble: Boolean = parts.length == 2
+    def startId: String =  String.format("%03d", parts(0).toInt)
     def isBye: Boolean = parts.length == 1 && content.startsWith("-")
     def isNN: Boolean = s == "[0]"  
 
@@ -156,8 +157,9 @@ case class Pant(
   name:    String = "",
   club:    String = "",
   rating:  Int = 0,
-  qInfo:   String = "",
-  place:   (Int, Int) = (0, 0),
-  status:  PantStatus = PantStatus.UNKN,
+  var qInfo:   String = "",
+  var place:   (Int, Int) = (0, 0),
+  var status:  PantStatus = PantStatus.UNKN,
+  var active: Boolean = false,
   var ident: String = ""
 ) derives ReadWriter

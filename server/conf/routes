@@ -19,7 +19,8 @@ POST       /auth/setUserPassword         controllers.Auth.setUserPassword(email:
 # Helper endpoints
 GET        /helper/getMessages           controllers.Helper.getMessages(lang: String ?="")
 GET        /helper/getMsg                controllers.Helper.getMsg(msgCode: String, in1:String ?="", in2:String ?="", in3:String ?="")
-GET        /helper/sse                   controllers.Helper.sse(id: String ?="")
+POST       /helper/clicktt-to-json       controllers.Helper.convertClickTT()
+
 GET        /helper/send2sse              controllers.Helper.send2sse(id: String, msg: String)
 
 # Endpoints managing wordpress custom post types

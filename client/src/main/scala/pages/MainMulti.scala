@@ -28,7 +28,7 @@ object MainMulti extends BasePage with JsWrapper:
         DlgCompetition.show(isOption2 = true).map {
           case Right(res) => 
             // 1. Create and save Dummy Tourney
-            val dummyTourney = Tourney(
+            val dummyTourney = Tourney.default.copy(
               id = 0,
               name = s"Quick: ${res.competition.name}",
               organizer = Global.user.map(_.org).getOrElse("System"),

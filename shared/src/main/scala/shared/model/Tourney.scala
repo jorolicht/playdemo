@@ -3,53 +3,46 @@ package shared.model
 import shared.basic.Pickle.*
 import shared.basic.*
 import scala.util.control.NonFatal
+import scala.collection.mutable.ArrayBuffer
 
 /**
- * Represents a row in the tournament table.
- *
- * Contains:
- *  - unique identifier
- *  - tournament name
- *  - organizer
- *  - start and end date (format: yyyymmdd as Int)
- *  - clickTT id
- *  - tournament type
- *  - visibility flag (private/public)
- *  - optional contact and address
+ * Represents a tournament with all its related data.
  */
-enum TourneyTyp derives ReadWriter:
+enum TourneyTyp:
   case Unknown
   case TableTennis
 
-
-import scala.collection.mutable.ArrayBuffer
+object TourneyTyp:
+  given rw: ReadWriter[TourneyTyp] =
+    readwriter[String].bimap[TourneyTyp](
+      _.toString,
+      s => try TourneyTyp.valueOf(s) catch { case _: Exception => TourneyTyp.Unknown }
+    )
 
 case class Tourney(
-  var id:        Int,             // Wordpress Page Id, 0 for new entries
-  name:          String,          // Tournament name
-  var organizer: String,          // Organizer name (club or registered program user)
-  var startDate: Int,             // Format: yyyymmdd
-  var endDate:   Int,
-  var ident:     String,          // clickTT id
-  typ:           TourneyTyp,
-  var contact:   Option[Contact] = None,
-  var address:   Option[Address] = None,
-  var version:   Int = 0
+  var id:           Int,             // Wordpress Page Id, 0 for new entries
+  var name:         String,          // Tournament name
+  var organizer:    String,          // Organizer name (club or registered program user)
+  var startDate:    Int,             // Format: yyyymmdd
+  var endDate:      Int,
+  var ident:        String,          // clickTT id
+  var typ:          TourneyTyp,
+  var contact:      Option[Contact] = None,
+  var address:      Option[Address] = None,
+  var version:      Int = 0,
+  val clubs:        ArrayBuffer[Club],
+  val players:      ArrayBuffer[Player],
+  val competitions: ArrayBuffer[Competition],
+  val rounds:       ArrayBuffer[Round]
 ):
-  val clubs: ArrayBuffer[Club] = ArrayBuffer()
+
+  // --- Buffers for tracking changes ---
   val dirtyClubs: ArrayBuffer[Club] = ArrayBuffer()
-
-  val players: ArrayBuffer[Player] = ArrayBuffer()
   val dirtyPlayer: ArrayBuffer[Player] = ArrayBuffer()
-
-  val competitions: ArrayBuffer[Competition] = ArrayBuffer.fill(64)(null)
   val dirtyCompetition: ArrayBuffer[Competition] = ArrayBuffer()
-
-  val rounds: ArrayBuffer[Round] = ArrayBuffer.fill(128)(null)
   val dirtyRound: ArrayBuffer[Round] = ArrayBuffer()
 
   // --- Callbacks for client-side synchronization ---
-
   private var onSyncClubs: Option[Seq[Club] => Unit] = None
   def setSyncHandler(handler: Seq[Club] => Unit): Unit = onSyncClubs = Some(handler)
 
@@ -62,6 +55,7 @@ case class Tourney(
   private var onSyncRounds: Option[Seq[Round] => Unit] = None
   def setRoundSyncHandler(handler: Seq[Round] => Unit): Unit = onSyncRounds = Some(handler)
 
+  // --- Helpers ---
   def nextClubId(): ClubId = ClubId(clubs.length + 1)
   def nextPlayerId(): PlayerId = PlayerId(players.length + 1)
 
@@ -81,6 +75,14 @@ case class Tourney(
         typ = typ, 
         startDate = startDate, 
         status = CompStatus.READY,
+        startRound = None,
+        activ = true,
+        webRegister = false,
+        lowLevel = None,
+        upperLevel = None,
+        cttInfo = None,
+        pants = ArrayBuffer(),
+        deleted = false,
         version = 1
       )
       competitions(index) = c
@@ -134,8 +136,9 @@ case class Tourney(
   /** Internal trigger for client-side competition synchronization. */
   private def triggerCompSync(): Unit = 
     if (dirtyCompetition.nonEmpty) {
+      val dirty = dirtyCompetition.toSeq
       dirtyCompetition.clear()
-      onSyncCompetitions.foreach(_(competitions.toSeq.filter(_ != null)))
+      onSyncCompetitions.foreach(_(dirty))
     }
 
   // ===========================================================================
@@ -161,6 +164,8 @@ case class Tourney(
         noWinSets = 0,
         prefId = prefId, 
         nextIds = List(), 
+        quali = QualifyTyp.ALL,
+        deleted = false,
         version = 1
       )
       rounds(index) = r
@@ -268,8 +273,9 @@ case class Tourney(
   /** Internal trigger for client-side round synchronization. */
   private def triggerRoundSync(): Unit = 
     if (dirtyRound.nonEmpty) {
+      val dirty = dirtyRound.toSeq
       dirtyRound.clear()
-      onSyncRounds.foreach(_(rounds.toSeq.filter(_ != null)))
+      onSyncRounds.foreach(_(dirty))
     }
 
   // ===========================================================================
@@ -464,7 +470,6 @@ case class Tourney(
         Right(())
       case _ => Left("Source or target club not found")
 
-  /** Bulk synchronizes clubs from external data. */
   def syncClubs(newClubs: Seq[Club] = Nil): Unit = 
     if (newClubs.nonEmpty) {
       newClubs.foreach(c => if (!dirtyClubs.exists(_.id == c.id)) dirtyClubs += c)
@@ -518,9 +523,24 @@ case class Tourney(
 
 
 object Tourney:
-  given ReadWriter[Tourney] = macroRW
+  given rw: ReadWriter[Tourney] = macroRW
 
-  def default: Tourney = Tourney(0, "", "", 0, 0, "", TourneyTyp.Unknown)
+  def default: Tourney = Tourney(
+    id = 0, 
+    name = "", 
+    organizer = "", 
+    startDate = 0, 
+    endDate = 0, 
+    ident = "", 
+    typ = TourneyTyp.Unknown,
+    contact = None,
+    address = None,
+    version = 0,
+    clubs = ArrayBuffer(),
+    players = ArrayBuffer(),
+    competitions = ArrayBuffer.fill(64)(null),
+    rounds = ArrayBuffer.fill(128)(null)
+  )
 
   /**
    * Decodes a single Tourney from JSON.

@@ -99,6 +99,8 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     import cats.data.EitherT
     import cats.implicits._ 
 
+    Global.pageId  = getData(gE(ParamId), "pageid", 0)
+    
     debug(s"modeMulti -> playUrl: ${Global.playUrl}, homeUrl: ${Global.homeUrl}, lang: ${Global.lang}, nonce: ${Global.wpNonce}, pageId: ${Global.pageId}")
 
     // Render components

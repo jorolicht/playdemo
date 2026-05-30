@@ -19,15 +19,14 @@ import base.{Global, Logging}
  */
 object RoundDB extends ComWrapper with Debouncer:
 
-  def triggerSync(): Unit =
+  def triggerSync(dirty: Seq[Round]): Unit =
     debounce(delay = 800) {
-      Logging.debug("Synchronisiere Runden mit dem Server...")
-      sync()
+      Logging.debug(s"Synchronisiere ${dirty.length} Runden mit dem Server...")
+      sync(dirty)
     }
 
   // Helper to access the current tourney's rounds
   def rounds: ArrayBuffer[Round] = TourneyDB.tourney.rounds
-  def pendingEvents: ArrayBuffer[Round] = TourneyDB.tourney.dirtyRound
 
   private val route = "/wp-json/tourney/v1/rounds-sync"
 
@@ -39,18 +38,16 @@ object RoundDB extends ComWrapper with Debouncer:
    * Initializes the sync handler for the current tournament.
    */
   def initHandler(): Unit =
-    if (TourneyDB.tourney.id != 0) {
-      TourneyDB.tourney.setRoundSyncHandler { _ => triggerSync() }
-    }
+    TourneyDB.tourney.setRoundSyncHandler { dirty => triggerSync(dirty) }
 
   /**
    * Synchronizes pending round events with the WordPress server.
    */
-  def sync(): Future[Either[AppError, Unit]] = {
-    if pendingEvents.isEmpty || TourneyDB.tourney.id == 0 then
+  def sync(dirty: Seq[Round]): Future[Either[AppError, Unit]] = {
+    if (dirty.isEmpty || TourneyDB.tourney.id == 0) {
       Future.successful(Right(()))
-    else
-      val req = RoundSyncRequest(pendingEvents.toSeq)
+    } else {
+      val req = RoundSyncRequest(dirty)
       val params = List("postId" -> TourneyDB.tourney.id.toString)
 
       ajaxPost[RoundSyncRequest, RoundSyncResponse](
@@ -59,15 +56,14 @@ object RoundDB extends ComWrapper with Debouncer:
         req
       ).flatMap {
         case Right(res) =>
-          pendingEvents.clear()
           Future.successful(Right(()))
         case Left(err) if err.is("version_mismatch") =>
           Logging.error(s"Sync fehlgeschlagen: Version-Mismatch bei Runden. Lade neu... ${err.msg}")
-          pendingEvents.clear()
           load().map(_ => Left(err))
         case Left(err) =>
           Future.successful(Left(err))
       }
+    }
   }
 
   /**

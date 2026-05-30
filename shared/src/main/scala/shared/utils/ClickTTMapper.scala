@@ -1,4 +1,4 @@
-package services
+package shared.utils
 
 import shared.model.*
 import shared.basic.*
@@ -6,42 +6,40 @@ import scala.collection.mutable.ArrayBuffer
 
 /**
  * ClickTTMapper handles the translation from ClickTT XML models to internal domain models.
+ * This is a shared utility used by both the Play server and the Scala.js client.
  */
 object ClickTTMapper:
 
   /**
-   * Maps a CttTournament to the internal models and populates the DB services.
+   * Maps a CttTournament to a target Tourney object.
+   * Note: This method populates the provided Tourney object's buffers.
    */
-  def mapAndImport(ctt: CttTournament): Either[AppError, Tourney] =
+  def mapToTourney(ctt: CttTournament, target: Tourney): Either[AppError, Unit] =
     try
-      // 1. Map Tourney
-      val tourney = Tourney(
-        id = 0,  // New entry, DB will assign ID
-        name = ctt.name,
-        organizer = base.Global.user.map(_.org).getOrElse("ClickTT Import"),
-        startDate = formatDate(ctt.startDate),
-        endDate = formatDate(ctt.endDate),
-        ident = ctt.tournamentId,
-        typ = TourneyTyp.TableTennis,
-        address = ctt.locations.headOption.map { loc =>
-          Address(
-            description = loc.name.getOrElse(""),
-            street = loc.street.getOrElse(""),
-            zip = loc.zipCode.getOrElse(""),
-            city = loc.city.getOrElse(""),
-            country = "DE"
-          )
-        },
-        version = 1
-      )
+      // 1. Update Tourney Basic Data
+      target.name = ctt.name
+      target.startDate = formatDate(ctt.startDate)
+      target.endDate = formatDate(ctt.endDate)
+      target.ident = ctt.tournamentId
+      target.typ = TourneyTyp.TableTennis
+      
+      ctt.locations.headOption.foreach { loc =>
+        target.address = Some(Address(
+          description = loc.name.getOrElse(""),
+          street = loc.street.getOrElse(""),
+          zip = loc.zipCode.getOrElse(""),
+          city = loc.city.getOrElse(""),
+          country = "DE"
+        ))
+      }
 
       // 2. Import Players and Clubs first (Multi-pass)
       // Collect all unique persons from all competitions
       val allCttPersons = ctt.competitions.flatMap(_.players).flatMap(_.persons)
-      val personMap = importPersons(allCttPersons)
+      val personMap = importPersons(allCttPersons, target)
 
       // 3. Map Competitions and Pants
-      val mappedComps = ctt.competitions.zipWithIndex.map { case (cttComp, idx) =>
+      ctt.competitions.zipWithIndex.foreach { case (cttComp, idx) =>
         val compId = CompId(idx + 1)
         
         // Construct Name: ttr-remarks + " " + age-group + " " + type
@@ -52,8 +50,11 @@ object ClickTTMapper:
           id = compId,
           name = compName,
           typ = if (cttComp.typ.toLowerCase.contains("doppel")) CompTyp.DOUBLE else CompTyp.SINGLE,
-          startDate = cttComp.startDate, // Format from XML: yyyy-MM-dd HH:mm
+          startDate = cttComp.startDate,
           status = CompStatus.UNKN,
+          startRound = None,
+          activ = true,
+          webRegister = false,
           lowLevel = cttComp.ttrFrom,
           upperLevel = cttComp.ttrTo,
           cttInfo = Some(CompCTT(
@@ -69,55 +70,55 @@ object ClickTTMapper:
             preliminaryRoundMode = cttComp.preliminaryRoundPlaymode.getOrElse(""),
             finalRoundMode = cttComp.finalRoundPlaymode.getOrElse(""),
             manualFinalRankings = cttComp.manualFinalRankings
-          ))
+          )),
+          pants = ArrayBuffer(),
+          deleted = false,
+          version = 1
         )
 
         // Map CttPlayers to Pants
         cttComp.players.foreach { cttPlayer =>
-          val mappedPant = mapPlayerToPant(cttPlayer, personMap)
+          val mappedPant = mapPlayerToPant(cttPlayer, personMap, target)
           mappedPant.foreach { p =>
-            p.ident = cttPlayer.id // aus CttCompetition.player.id
+            p.ident = cttPlayer.id
             comp.pants += p
           }
         }
-        comp
+
+        // Add to local buffer and mark as dirty
+        if (idx < target.competitions.length) {
+          target.competitions(idx) = comp
+          if (!target.dirtyCompetition.exists(_.id == comp.id)) target.dirtyCompetition += comp
+        }
       }
 
-      // Update Tourney in DB and trigger bulk sync
-      TourneyDB.update(tourney)
-      tourney.syncClubs()
-      tourney.syncPlayers()
-      tourney.syncCompetitions(mappedComps)
-
-      Right(tourney)
+      Right(())
     catch
       case e: Exception => 
-        base.Logging.error(s"Mapping failed: ${e.getMessage}")
         Left(AppError("mapping.failed", e.getMessage))
 
   private def formatDate(dateStr: String): Int =
-    // Expects yyyy-MM-dd, returns yyyymmdd
     try dateStr.replace("-", "").take(8).toInt
     catch { case _: Exception => 0 }
 
   /**
-   * Imports persons into PlayerDB and returns a map of LicenseNr -> Player
+   * Imports persons into target Tourney and returns a map of LicenseNr -> Player
    */
-  private def importPersons(persons: Seq[CttPerson]): Map[String, Player] =
+  private def importPersons(persons: Seq[CttPerson], target: Tourney): Map[String, Player] =
     val licenseMap = collection.mutable.Map[String, Player]()
     
     persons.foreach { p =>
       val lic = p.licenceNr
       if (lic.nonEmpty && !licenseMap.contains(lic)) {
-        // Check if player already exists in DB
-        TourneyDB.tourney.players.find(_.meta.licenceNr.contains(lic)) match
+        // Check if player already exists in the target tourney
+        target.players.find(_.meta.licenceNr.contains(lic)) match
           case Some(existing) => 
             licenseMap(lic) = existing
           case None =>
             // Ensure Club exists
             val clubName = p.clubName.getOrElse("Unbekannter Verein")
-            val club = TourneyDB.tourney.clubs.find(_.name == clubName).getOrElse {
-              TourneyDB.tourney.addClub(clubName, checkSimilarity = false, doSync = false) match
+            val club = target.clubs.find(_.name == clubName).getOrElse {
+              target.addClub(clubName, checkSimilarity = false, doSync = false) match
                 case Right(c) => c
                 case Left(_) => Club(ClubId(0), clubName, Club.normalize(clubName))
             }
@@ -144,21 +145,18 @@ object ClickTTMapper:
 
             val bYear = try Some(p.birthyear.toInt) catch { case _:Exception => None }
 
-            TourneyDB.tourney.addPlayer(p.firstname, p.lastname, club.id.toInt, bYear, doSync = false) match {
+            target.addPlayer(p.firstname, p.lastname, club.id.toInt, bYear, doSync = false) match {
               case Right(player) => 
-                // Update meta data which addPlayer doesn't set
                 val updatedPlayer = player.copy(sex = sex, meta = playerMeta)
-                TourneyDB.tourney.updatePlayer(updatedPlayer, doSync = false)
+                target.updatePlayer(updatedPlayer, doSync = false)
                 licenseMap(lic) = updatedPlayer
-              case Left(err) => 
-                base.Logging.error(s"Failed to add player: ${err.msg}")
+              case Left(_) => // Should not happen in bulk
             }
       }
     }
-    TourneyDB.tourney.syncPlayers()
     licenseMap.toMap
 
-  private def mapPlayerToPant(cttPlayer: CttPlayer, personMap: Map[String, Player]): Option[Pant] =
+  private def mapPlayerToPant(cttPlayer: CttPlayer, personMap: Map[String, Player], target: Tourney): Option[Pant] =
     val persons = cttPlayer.persons
     if (persons.isEmpty) return None
 
@@ -168,7 +166,7 @@ object ClickTTMapper:
         Pant(
           id = SNO.single(player.id),
           name = player.displayName,
-          club = TourneyDB.tourney.clubs.find(_.id.toInt == player.clubId).map(_.name).getOrElse(""),
+          club = target.clubs.find(_.id.toInt == player.clubId).map(_.name).getOrElse(""),
           rating = player.meta.ttr.getOrElse(0),
           status = PantStatus.REGI
         )
@@ -182,8 +180,8 @@ object ClickTTMapper:
         player1 <- p1Opt
         player2 <- p2Opt
       } yield {
-        val club1 = TourneyDB.tourney.clubs.find(_.id.toInt == player1.clubId).map(_.name).getOrElse("")
-        val club2 = TourneyDB.tourney.clubs.find(_.id.toInt == player2.clubId).map(_.name).getOrElse("")
+        val club1 = target.clubs.find(_.id.toInt == player1.clubId).map(_.name).getOrElse("")
+        val club2 = target.clubs.find(_.id.toInt == player2.clubId).map(_.name).getOrElse("")
         
         Pant(
           id = SNO.double(player1.id, player2.id),

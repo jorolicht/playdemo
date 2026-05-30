@@ -27,7 +27,7 @@ enum CompTyp(val id: Int):
 object CompTyp:
   import shared.basic.Pickle.*
 
-  given ReadWriter[CompTyp] =
+  given rw: ReadWriter[CompTyp] =
     readwriter[String].bimap[CompTyp](
       _.toString,
       s => try CompTyp.valueOf(s) catch { case _: Exception => CompTyp.UNKN }
@@ -74,33 +74,13 @@ enum CompStatus(val id: Int):
 
 object CompStatus:
 
-  given ReadWriter[CompStatus] =
+  given rw: ReadWriter[CompStatus] =
     readwriter[String].bimap[CompStatus](
       _.toString,
       s => try CompStatus.valueOf(s) catch { case _: Exception => CompStatus.UNKN }
     )
 
 
-/* Competition (based on Click TT Competition definition)                            
- * Tournament/Event can have 1..n competitions
- *             
- *     !ELEMENT competition (players, matches?)>                                    
- *     !ATTLIST competition                                      
- *       age-group CDATA #REQUIRED                            
- *       type (Einzel|Doppel|Mixed|Mannschaft) #REQUIRED                                                     
- *       start-date CDATA #REQUIRED                                                       
- *       ttr-from CDATA #IMPLIED      -> RatingLowerLevel                                 
- *       ttr-to CDATA #IMPLIED        -> RatingUpperLevel                          
- *       ttr-remarks CDATA #IMPLIED   -> RatingRemark      (e.g. C-Klasse)                          
- *       entry-fee CDATA #IMPLIED                                      
- *       age-from CDATA #IMPLIED                                       
- *       age-to CDATA #IMPLIED                                        
- *       sex CDATA #IMPLIED                 
- *       preliminary-round-playmode CDATA #IMPLIED                         
- *       final-round-playmode CDATA #IMPLIED                                   
- *       max-persons CDATA #IMPLIED                       
- *       manual-final-rankings (0|1) #IMPLIED
- */
 case class CompCTT(
   ageGroup:             String = "",
   ratingRemark:         String = "",
@@ -118,7 +98,7 @@ case class CompCTT(
 
 object CompCTT:
   import shared.basic.Pickle.*
-  given ReadWriter[CompCTT] = macroRW
+  given rw: ReadWriter[CompCTT] = macroRW
 
 
 opaque type CompId = Int
@@ -130,35 +110,31 @@ object CompId:
   extension (id: CompId)
     def value: Int = id
 
-  // Break the loop by referencing the specific Int ordering 
-  // rather than letting the compiler search for one.
   given Ordering[CompId] = Ordering.Int
 
-  // We use ReadWriter.join(IntReader, IntWriter) to avoid 
-  // the 'readwriter[Int]' macro search entirely.
   given rw: ReadWriter[CompId] = 
     ReadWriter.join(IntReader, IntWriter).bimap(
-      id => id, // Inside here, CompId is seen as Int
+      id => id, 
       value => CompId(value)
     )
 
 
 case class Competition(
   id:                   CompId,
-  name:                 String,
-  typ:                  CompTyp,
-  startDate:            String,
+  var name:             String,
+  var typ:              CompTyp,
+  var startDate:        String,
   var status:           CompStatus,
-  var startRound:       Option[RoundId] = None,    // id of first/start Round
-  var activ:            Boolean = true,
-  var webRegister:      Boolean = false,
-  var lowLevel:         Option[Int] = None,
-  var upperLevel:       Option[Int] = None,
-  var cttInfo:          Option[CompCTT] = None,
-  val pants:            ArrayBuffer[Pant] = ArrayBuffer(),
-  val deleted:          Boolean = false,
-  var version:          Int = 0
-):
+  var startRound:       Option[RoundId],
+  var activ:            Boolean,
+  var webRegister:      Boolean,
+  var lowLevel:         Option[Int],
+  var upperLevel:       Option[Int],
+  var cttInfo:          Option[CompCTT],
+  val pants:            ArrayBuffer[Pant],
+  var deleted:          Boolean,
+  var version:          Int
+) derives ReadWriter:
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
 
   def hash: Int = s"$name${typ.id}$startDate${getFromTTR}${getToTTR}".hashCode
@@ -177,7 +153,10 @@ case class Competition(
 
 
 object Competition:
-  given ReadWriter[Competition] = macroRW
+  def dummy: Competition = Competition(
+    CompId(0), "", CompTyp.UNKN, "", CompStatus.UNKN, 
+    None, true, false, None, None, None, ArrayBuffer(), false, 0
+  )
 
 
 object CompDB:
@@ -186,4 +165,3 @@ object CompDB:
   var compIdx: Map[CompId, Int] = Map.empty
 
   private val free = Stack.from(0 until MaxRound)
-  

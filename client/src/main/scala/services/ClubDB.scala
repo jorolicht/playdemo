@@ -32,9 +32,8 @@ object ClubDB extends ComWrapper with Debouncer:
    * Initializes the sync handler for the current tournament.
    */
   def initHandler(): Unit =
-    if (TourneyDB.tourney.id != 0) {
-      TourneyDB.tourney.setSyncHandler { all => triggerSync(all) }
-    }
+    TourneyDB.tourney.setSyncHandler { all => triggerSync(all) }
+
 
   def sync(all: Seq[Club]): Future[Either[AppError, Unit]] = {
     if (TourneyDB.tourney.id == 0) {

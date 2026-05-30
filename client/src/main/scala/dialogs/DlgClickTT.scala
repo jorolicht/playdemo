@@ -8,7 +8,7 @@ import org.scalajs.dom.raw.HTMLElement
 
 import base.*
 import base.Bootstrap.*
-import services.ClickTTParser
+import services.{ClickTTParser, TourneyDB}
 import shared.model.{CttTournament, Tourney}
 
 /**
@@ -90,10 +90,31 @@ object DlgClickTT extends BaseDialog with JsWrapper:
     gE(ApplyId).onclick = { (_: MouseEvent) =>
       parsedTournament match
         case Some(ctt) => 
-          services.ClickTTMapper.mapAndImport(ctt) match {
-            case Right(t) => 
-              if (!p.isCompleted) p.success(Right(t))
-              modal.hide()
+          val t = Tourney.default
+          shared.utils.ClickTTMapper.mapToTourney(ctt, t) match {
+            case Right(_) => 
+              // 1. Set as current tournament (without immediate sync)
+              TourneyDB.update(t, doSync = false)
+              
+              setHtml(gE(ResultId), "<div class='alert alert-info'>Turnier wird auf dem Server erstellt...</div>")
+              
+              // 2. Create on server to get PageId
+              TourneyDB.apiCreate(t).map {
+                case Right(slug) =>
+                  // ID is now set in t.id by apiCreate
+                  Global.pageId = t.id
+                  
+                  // 3. Bulk Sync the rest
+                  t.syncClubs()
+                  t.syncPlayers()
+                  t.syncCompetitions() // This will sync the mapped competitions
+                  
+                  if (!p.isCompleted) p.success(Right(t))
+                  modal.hide()
+                case Left(err) =>
+                  setHtml(gE(ResultId), s"<div class='alert alert-danger'>Server-Erstellung fehlgeschlagen: ${err.msgCode}</div>")
+              }
+              
             case Left(err) => 
               setHtml(gE(ResultId), s"<div class='alert alert-danger'>Mapping fehlgeschlagen: ${err.msgCode}</div>")
           }

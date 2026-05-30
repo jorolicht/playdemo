@@ -1,12 +1,13 @@
 # Important Docker Compose commands:
 
 ## Start / Stop
-docker compose -f docker_compose.yml --env-file ./env/docker.env up -d
-docker compose -f docker_compose.yml --env-file ./env/docker.env down
+docker compose -f docker-compose.yml --env-file ../env/docker.env up -d
+docker compose -f docker-compose.yml --env-file ../env/docker.env down
 
 ## Build Image 
-docker compose -f docker_compose.yml --env-file ./env/docker.env up build -d
+docker compose -f docker-compose.yml --env-file ../env/docker.env up build -d
 docker compose --env-file ../env/docker.env up -d --build playsrv
+
 
 
 ## Step into Container 

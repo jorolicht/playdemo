@@ -22,7 +22,7 @@ object RoundId:
 // -----------------------------
 // RoundCfg
 // -----------------------------
-enum RoundCfg(val id: Int, val typ: RoundTyp) derives CanEqual, ReadWriter:
+enum RoundCfg(val id: Int, val typ: RoundTyp) derives CanEqual:
 
   // --- Basic Phases ---
   case UNKN   extends RoundCfg(-1, RoundTyp.UNKN)
@@ -39,18 +39,18 @@ enum RoundCfg(val id: Int, val typ: RoundTyp) derives CanEqual, ReadWriter:
 
   // --- Group Systems ---
   case GR3to9 extends RoundCfg(100, RoundTyp.GR)
-  case GRPS3  extends RoundCfg(101, RoundTyp.GR)
-  case GRPS34 extends RoundCfg(102, RoundTyp.GR)
-  case GRPS4  extends RoundCfg(103, RoundTyp.GR)
-  case GRPS45 extends RoundCfg(104, RoundTyp.GR)
-  case GRPS5  extends RoundCfg(105, RoundTyp.GR)
-  case GRPS56 extends RoundCfg(106, RoundTyp.GR)
-  case GRPS6  extends RoundCfg(107, RoundTyp.GR)
+  case GRPS3  extends RoundCfg(101, RoundTyp.GR)   // only groups with 3 players 
+  case GRPS34 extends RoundCfg(102, RoundTyp.GR)   // only groups with 3 or 4 players
+  case GRPS4  extends RoundCfg(103, RoundTyp.GR)   // only groups with 4 players
+  case GRPS45 extends RoundCfg(104, RoundTyp.GR)   // only groups with 4 or 5 players
+  case GRPS5  extends RoundCfg(105, RoundTyp.GR)   // only groups with 5 players
+  case GRPS56 extends RoundCfg(106, RoundTyp.GR)   // only groups with 5 or 6 players
+  case GRPS6  extends RoundCfg(107, RoundTyp.GR)   // only groups with 6 players
 
   // --- Tournament Systems ---
-  case RR     extends RoundCfg(108, RoundTyp.RR)
-  case KO     extends RoundCfg(109, RoundTyp.KO)
-  case SW     extends RoundCfg(110, RoundTyp.SW)
+  case RR     extends RoundCfg(108, RoundTyp.RR)    // Round Robin - everyone plays everyone
+  case KO     extends RoundCfg(109, RoundTyp.KO)    // Knockout - single elimination   
+  case SW     extends RoundCfg(110, RoundTyp.SW)    // Swiss - players are paired in each round based on their current score, with the goal of matching players with similar performance.
 
   // --------------------------------
 
@@ -59,6 +59,12 @@ enum RoundCfg(val id: Int, val typ: RoundTyp) derives CanEqual, ReadWriter:
   def isOneOf(values: RoundCfg*): Boolean = values.contains(this)
 
 object RoundCfg:
+  given rw: ReadWriter[RoundCfg] =
+    readwriter[String].bimap[RoundCfg](
+      _.toString,
+      s => try RoundCfg.valueOf(s) catch { case _: Exception => RoundCfg.UNKN }
+    )
+
   def fromId(id: Int): RoundCfg =
     values.find(_.id == id).getOrElse(UNKN)
       
@@ -67,7 +73,7 @@ object RoundCfg:
 // -----------------------------
 // QualifyTyp
 // -----------------------------
-enum QualifyTyp(val id: Int) derives CanEqual, ReadWriter:
+enum QualifyTyp(val id: Int) derives CanEqual:
   case ALL extends QualifyTyp(0)
   case WIN extends QualifyTyp(1)
   case LOO extends QualifyTyp(2)
@@ -76,6 +82,12 @@ enum QualifyTyp(val id: Int) derives CanEqual, ReadWriter:
   def msgCode: String = s"QualifyTyp.$productPrefix"
 
 object QualifyTyp:
+  given rw: ReadWriter[QualifyTyp] =
+    readwriter[String].bimap[QualifyTyp](
+      _.toString,
+      s => try QualifyTyp.valueOf(s) catch { case _: Exception => QualifyTyp.ALL }
+    )
+
   def fromId(id: Int): QualifyTyp =
     values.find(_.id == id).getOrElse(ALL)
 
@@ -83,7 +95,7 @@ object QualifyTyp:
 // -----------------------------
 // RoundTyp
 // -----------------------------
-enum RoundTyp(val id: Int) derives CanEqual, ReadWriter:
+enum RoundTyp(val id: Int) derives CanEqual:
 
   case UNKN extends RoundTyp(-1)
   case GR   extends RoundTyp(1)
@@ -94,6 +106,12 @@ enum RoundTyp(val id: Int) derives CanEqual, ReadWriter:
   def msgCode: String = s"RoundTyp.$productPrefix"
 
 object RoundTyp:
+  given rw: ReadWriter[RoundTyp] =
+    readwriter[String].bimap[RoundTyp](
+      _.toString,
+      s => try RoundTyp.valueOf(s) catch { case _: Exception => RoundTyp.UNKN }
+    )
+
   def fromId(id: Int): RoundTyp = values.find(_.id == id).getOrElse(UNKN)
   def fromName(name: String): RoundTyp = values.find(_.productPrefix == name).getOrElse(UNKN)
   def apply(id: Int): RoundTyp = fromId(id)  
@@ -102,7 +120,7 @@ object RoundTyp:
 // -----------------------------
 // RoundStatus
 // -----------------------------
-enum RoundStatus(val id: Int) derives CanEqual, ReadWriter:
+enum RoundStatus(val id: Int) derives CanEqual:
   case CFG  extends RoundStatus(0)
   case AUS  extends RoundStatus(1)
   case EIN  extends RoundStatus(2)
@@ -112,6 +130,12 @@ enum RoundStatus(val id: Int) derives CanEqual, ReadWriter:
   def msgCode: String = s"RoundStatus.$productPrefix"
 
 object RoundStatus:
+  given rw: ReadWriter[RoundStatus] =
+    readwriter[String].bimap[RoundStatus](
+      _.toString,
+      s => try RoundStatus.valueOf(s) catch { case _: Exception => RoundStatus.UNKN }
+    )
+
   def fromId(id: Int): RoundStatus = values.find(_.id == id).getOrElse(UNKN)
   def fromName(name: String): RoundStatus = values.find(_.productPrefix == name).getOrElse(UNKN)
 
@@ -119,19 +143,19 @@ object RoundStatus:
 case class Round(
   id:                   RoundId,
   coId:                 CompId,
-  name:                 String,
-  rndCfg:               RoundCfg,
+  var name:             String,
+  var rndCfg:           RoundCfg,
   var status:           RoundStatus,
   var demo:             Boolean,
   var size:             Int,
   var noPlayers:        Int,
-  val noWinSets:        Int = 0,
-  var prefId:           Option[RoundId] = None,
-  var nextIds:          List[RoundId] = List(),
-  var quali:            QualifyTyp = QualifyTyp.ALL,
-  var deleted:          Boolean = false,
-  var version:          Int = 0
-):
+  var noWinSets:        Int,
+  var prefId:           Option[RoundId],
+  var nextIds:          List[RoundId],
+  var quali:            QualifyTyp,
+  var deleted:          Boolean,
+  var version:          Int
+) derives ReadWriter:
 
   // -----------------------------
   // Mutable state (kept explicit)
@@ -157,4 +181,7 @@ case class Round(
 
 
 object Round:
-  given ReadWriter[Round] = macroRW
+  def dummy: Round = Round(
+    RoundId(0), CompId(0), "", RoundCfg.UNKN, RoundStatus.UNKN, 
+    false, 0, 0, 0, None, List(), QualifyTyp.ALL, false, 0
+  )

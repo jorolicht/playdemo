@@ -36,9 +36,7 @@ object PlayerDB extends ComWrapper with Debouncer:
    * Initializes the sync handler for the current tournament.
    */
   def initHandler(): Unit =
-    if (TourneyDB.tourney.id != 0) {
-      TourneyDB.tourney.setPlayerSyncHandler { all => triggerSync(all) }
-    }
+    TourneyDB.tourney.setPlayerSyncHandler { all => triggerSync(all) }
 
   /**
    * Synchronizes pending player events with the WordPress server.

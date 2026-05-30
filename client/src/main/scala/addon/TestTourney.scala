@@ -29,8 +29,8 @@ object TestTourney:
   def testTourney_update(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     val name = if (param.isEmpty) "Test Tournament" else param
     val current = if (TourneyDB.tourney.id != 0) TourneyDB.tourney else
-      Tourney(
-        0, // id
+      Tourney.default.copy(
+        id = 0,
         name = name,
         organizer = "Test Org",
         startDate = 20260101,
@@ -78,7 +78,8 @@ object TestTourney:
    */
   def testTourney_init(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     addOutput("Initialisiere alle Datenbanken vom Server...")
-    TourneyDB.init(param.toInt).map {
+    val id = try param.toInt catch { case _: Exception => TourneyDB.tourney.id }
+    TourneyDB.init(id).map {
       case Left(err) =>
         addOutput(s"Fehler bei der Initialisierung: ${err.msgCode} (${err.in1})")
         Left(err)
@@ -103,7 +104,7 @@ object TestTourney:
     val dateStr = if (parts.length > 1 && parts(1).nonEmpty) parts(1).trim else "20220402"
     val date = try dateStr.toInt catch { case _: Exception => 20220402 }
     
-    val t = Tourney(
+    val t = Tourney.default.copy(
       id = 0,
       name = name,
       organizer = "TTV Freising",
@@ -134,7 +135,7 @@ object TestTourney:
     val dateStr = if (parts.length > 1 && parts(1).nonEmpty) parts(1).trim else "20220402"
     val date = try dateStr.toInt catch { case _: Exception => 20220402 }
 
-    val t = Tourney(
+    val t = Tourney.default.copy(
       id = 0,
       name = name,
       organizer = "TTV Freising",

@@ -18,15 +18,14 @@ import base.{Global, Logging}
  */
 object CompetitionDB extends ComWrapper with Debouncer:
 
-  def triggerSync(): Unit =
+  def triggerSync(dirty: Seq[Competition]): Unit =
     debounce(delay = 800) {
-      Logging.debug("Synchronisiere Wettbewerbe mit dem Server...")
-      sync()
+      Logging.debug(s"Synchronisiere ${dirty.length} Wettbewerbe mit dem Server...")
+      sync(dirty)
     }
 
   // Helper to access the current tourney's competitions
   def competitions: ArrayBuffer[Competition] = TourneyDB.tourney.competitions
-  def pendingEvents: ArrayBuffer[Competition] = TourneyDB.tourney.dirtyCompetition
 
   private val route = "/wp-json/tourney/v1/competitions-sync"
 
@@ -38,18 +37,16 @@ object CompetitionDB extends ComWrapper with Debouncer:
    * Initializes the sync handler for the current tournament.
    */
   def initHandler(): Unit =
-    if (TourneyDB.tourney.id != 0) {
-      TourneyDB.tourney.setCompSyncHandler { _ => triggerSync() }
-    }
+    TourneyDB.tourney.setCompSyncHandler { dirty => triggerSync(dirty) }
 
   /**
    * Synchronizes pending competition events with the WordPress server.
    */
-  def sync(): Future[Either[AppError, Unit]] = {
-    if pendingEvents.isEmpty || TourneyDB.tourney.id == 0 then
+  def sync(dirty: Seq[Competition]): Future[Either[AppError, Unit]] = {
+    if (dirty.isEmpty || TourneyDB.tourney.id == 0) {
       Future.successful(Right(()))
-    else
-      val req = CompetitionSyncRequest(pendingEvents.toSeq)
+    } else {
+      val req = CompetitionSyncRequest(dirty)
       val params = List("postId" -> TourneyDB.tourney.id.toString)
 
       ajaxPost[CompetitionSyncRequest, CompetitionSyncResponse](
@@ -58,15 +55,14 @@ object CompetitionDB extends ComWrapper with Debouncer:
         req
       ).flatMap {
         case Right(res) =>
-          pendingEvents.clear()
           Future.successful(Right(()))
         case Left(err) if err.is("version_mismatch") =>
           Logging.error(s"Sync fehlgeschlagen: Version-Mismatch bei Wettbewerben. Lade neu... ${err.msg}")
-          pendingEvents.clear()
           load().map(_ => Left(err))
         case Left(err) =>
           Future.successful(Left(err))
       }
+    }
   }
 
   /**

@@ -7,6 +7,7 @@ import pekko.stream._
 import pekko.stream.typed.scaladsl.ActorSource
 
 import javax.inject._
+import shared.basic.Pickle
 import shared.basic.Pickle.*
 import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
@@ -72,6 +73,45 @@ class Helper @Inject()(system: ActorSystem, cc: ControllerComponents, userRepo: 
     sseManager ! SendMessage(id, msg)
     Ok(s"Send message: ${msg} to: ${id}")
   }  
+
+
+  /**
+   * Converts ClickTT XML to a JSON Tourney object.
+   */
+  def convertClickTT(): Action[AnyContent] = Action { implicit request =>
+    val bodyString = request.body.asXml.map(_.toString)
+      .orElse(request.body.asText)
+      .getOrElse {
+        request.body.asRaw.flatMap(_.asBytes()).map(_.decodeString("UTF-8")).getOrElse("")
+      }
+
+    if (bodyString.isEmpty) {
+      BadRequest("Missing XML body")
+    } else {
+      services.ClickTTParser.parse(bodyString) match {
+        case Right(ctt) =>
+          val tourney = Tourney.default
+          shared.utils.ClickTTMapper.mapToTourney(ctt, tourney) match {
+            case Right(_) => 
+              logger.info(s"Mapping successful: ${tourney.name}, Comps: ${tourney.competitions.count(_ != null)}")
+
+              // Create a clean copy for JSON output without null padding
+              val cleanTourney = tourney.copy(
+                competitions = tourney.competitions.filter(_ != null),
+                rounds = tourney.rounds.filter(_ != null)
+              )
+
+              // Using writeJs for consistent serialization and pretty printing
+              Ok(Pickle.writeJs(cleanTourney).render(indent = 2)).as(ContentTypes.JSON)
+            case Left(err) => 
+ 
+              BadRequest(s"Mapping failed: ${err.msgCode}")
+          }
+        case Left(err) => 
+          BadRequest(s"XML Parsing failed: $err")
+      }
+    }
+  }
 
 
   /**

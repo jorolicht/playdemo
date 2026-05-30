@@ -8,7 +8,7 @@ object Mockup extends BasePage with JsWrapper:
 
   def render(param: String = ""): Boolean = 
     // Seed Data
-    val tourney = Tourney(
+    val tourney = Tourney.default.copy(
       id = 0,
       name = "Mock Stadtmeisterschaft 2026",
       organizer = "TTV Musterstadt",
@@ -18,9 +18,9 @@ object Mockup extends BasePage with JsWrapper:
       typ = TourneyTyp.TableTennis
     )
 
-    val comp1 = Competition(CompId(1), "Herren A Einzel", CompTyp.SINGLE, "20260515", CompStatus.RUN)
-    val comp2 = Competition(CompId(2), "Herren B Einzel", CompTyp.SINGLE, "20260515", CompStatus.CFG)
-    val comp3 = Competition(CompId(3), "Damen Einzel", CompTyp.SINGLE, "20260516", CompStatus.FIN)
+    val comp1 = Competition.dummy.copy(id = CompId(1), name = "Herren A Einzel", typ = CompTyp.SINGLE, startDate = "20260515", status = CompStatus.RUN)
+    val comp2 = Competition.dummy.copy(id = CompId(2), name = "Herren B Einzel", typ = CompTyp.SINGLE, startDate = "20260515", status = CompStatus.CFG)
+    val comp3 = Competition.dummy.copy(id = CompId(3), name = "Damen Einzel", typ = CompTyp.SINGLE, startDate = "20260516", status = CompStatus.FIN)
     
     // Add participants to comp3 for ResultList testing
     comp3.pants += Pant(SNO.single(PlayerId(10)), "Siegfried, Siggi", "TTV Winner", 1800, place = (1, 0), status = PantStatus.FINI)
@@ -39,14 +39,14 @@ object Mockup extends BasePage with JsWrapper:
     for (i <- 1 to 128) services.RoundDB.rounds += null
     
     // Rounds for Herren A
-    services.RoundDB.rounds(0) = Round(RoundId(1), comp1.id, "A-Vorrunde", RoundCfg.VRGR, RoundStatus.FIN, false, 8, 8)
-    services.RoundDB.rounds(1) = Round(RoundId(2), comp1.id, "A-Endrunde", RoundCfg.KO, RoundStatus.CFG, false, 4, 4)
+    services.RoundDB.rounds(0) = Round.dummy.copy(id = RoundId(1), coId = comp1.id, name = "A-Vorrunde", rndCfg = RoundCfg.VRGR, status = RoundStatus.FIN, size = 8, noPlayers = 8)
+    services.RoundDB.rounds(1) = Round.dummy.copy(id = RoundId(2), coId = comp1.id, name = "A-Endrunde", rndCfg = RoundCfg.KO, status = RoundStatus.CFG, size = 4, noPlayers = 4)
     
     // Rounds for Herren B
-    services.RoundDB.rounds(2) = Round(RoundId(3), comp2.id, "B-Vorrunde", RoundCfg.VRGR, RoundStatus.CFG, false, 12, 12)
+    services.RoundDB.rounds(2) = Round.dummy.copy(id = RoundId(3), coId = comp2.id, name = "B-Vorrunde", rndCfg = RoundCfg.VRGR, status = RoundStatus.CFG, size = 12, noPlayers = 12)
     
     // Rounds for Damen
-    services.RoundDB.rounds(3) = Round(RoundId(4), comp3.id, "D-Endrunde", RoundCfg.KO, RoundStatus.FIN, false, 4, 4)
+    services.RoundDB.rounds(3) = Round.dummy.copy(id = RoundId(4), coId = comp3.id, name = "D-Endrunde", rndCfg = RoundCfg.KO, status = RoundStatus.FIN, size = 4, noPlayers = 4)
 
     Global.currentSelection = Selection(Some(tourney), Some(comp1))
     comps.ContextHeader.render()

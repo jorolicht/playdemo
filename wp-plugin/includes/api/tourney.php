@@ -319,7 +319,8 @@ function tourney_api_create(WP_REST_Request $request) {
         'parentId' => $parent_id,
         'username' => $username,
         'organizer'=> $organizer,
-        'slug'     => $full_slug
+        'slug'     => $full_slug,
+        'version'  => intval(get_post_meta($result_id, 'basic_ts', true))
     ];
 }
 

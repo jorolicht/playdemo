@@ -1,38 +1,33 @@
 name: ${APP_NAME}
 
 services:
-  # traefik:
-  #   image: localhost:5555/traefik:v2.11
-  #   container_name: traefik-instance
-  #   command:
-  #     # Traefik Dashboard aktiv
-  #     - "--api.dashboard=true"
-  #     - "--providers.docker=true"
-  #     - "--providers.docker.exposedbydefault=false"
-  #     - "--providers.docker.network=wordpress_web"
-
-  #     # EntryPoints
-  #     - "--entrypoints.web.address=:80"
-  #     - "--entrypoints.websecure.address=:443"
-
-  #     # HTTP → HTTPS Umleitung
-  #     - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-  #     - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-
-  #     # Let's Encrypt ACME
-  #     - "--certificatesresolvers.myresolver.acme.email=${MY_EMAIL}"
-  #     - "--certificatesresolvers.myresolver.acme.storage=/acme.json"
-  #     - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
-  #     - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock   # Zugriff auf Docker API
-  #     - ./acme.json:/acme.json
-  #   networks:
-  #     - web
+  # Reverse Proxy (Traefik), der den HTTPS-Traffic (Port 443) verwaltet
+  reverse-proxy:
+    image: traefik:v3.6.2
+    command:
+      - "--log.level=DEBUG"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+    
+      # 1. Entrypoints definieren
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+    
+      # 2. Globale Weiterleitung von Port 80 (web) nach Port 443 (websecure) einrichten
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+    
+      - "--providers.file.filename=/etc/traefik/dynamic_config.toml"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /Users/robert/.docker/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/etc/traefik/certs:ro
+      - ./dynamic_config.toml:/etc/traefik/dynamic_config.toml:ro
+    networks:
+      - proxy
 
   wordpress:
     image: wp-gmp-image
@@ -48,22 +43,26 @@ services:
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
       WORDPRESS_DB_NAME: ${DB_NAME}
       WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_HOME', 'https://localhost' );
+        define( 'WP_SITEURL', 'https://localhost' );
         define( 'PLAY_SERVER_URL', "${PLAY_SERVER_URL}" );
-    ports:
-      - 8080:80
+
+    expose:
+      - "80"
     volumes:
       - ./wp_data:/var/www/html
-    # labels:
-      # - "traefik.enable=true"
-      # - "traefik.docker.network=wordpress_web"
-      # - "traefik.http.routers.wordpress.rule=Host(`${MY_DOMAIN}`)"
-      # - "traefik.http.routers.wordpress.entrypoints=websecure"
-      # - "traefik.http.routers.wordpress.tls.certresolver=myresolver"
-      # - "traefik.http.routers.wordpress.tls=true"
-      # - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.entrypoints=websecure"
+      # Reagiert auf localhost (Standard-Pfad /)
+      - "traefik.http.routers.wordpress.rule=Host(`localhost`)"
+      - "traefik.http.routers.wordpress.tls=true"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+      # KORREKTUR: Netzwerk-Name korrigiert von 'web' zu 'proxy'
+      - "traefik.docker.network=proxy"
     networks:
-      - web
-      - internal
+      - proxy
+      - backend
 
   wp-cli:
     image: wordpress:cli
@@ -79,9 +78,8 @@ services:
     depends_on:
       - db
     networks:
-      - internal
-    command: tail -f /dev/null # Container am Laufen halten
-
+      - backend
+    command: tail -f /dev/null
 
   db:
     image: mariadb:10.11
@@ -94,11 +92,10 @@ services:
     volumes:
       - ./db_data:/var/lib/mysql
     networks:
-      - internal
+      - backend
 
-
-  playsrv: # PlayDemo Server:
-    image: playsrv-image # Replace this with the actual image name of your Play Framework app
+  playsrv:
+    image: playsrv-image
     container_name: playsrv-instance
     build:
       context: .
@@ -110,25 +107,36 @@ services:
         - APP_VERSION=${APP_VERSION}
         - DEMON_USER=${DEMON_USER}
         - DEMON_USERID=${DEMON_USERID}
-
     labels:
-      MAINTAINER: ${APP_MAINTAINER}
-      VENDOR: ${APP_VENDOR}
-      IMAGE_DESCRIPTION: "This Dockerfile creates an image with the PlayDemo App running on it."
- 
+      - "traefik.enable=true"
+      - "traefik.http.routers.playsrv.entrypoints=websecure"
+      # KORREKTUR: Pfadbasiertes Routing auf derselben Domain
+      - "traefik.http.routers.playsrv.rule=Host(`localhost`) && PathPrefix(`/playsrv`)"
+      - "traefik.http.routers.playsrv.tls=true"
+      - "traefik.http.services.playsrv.loadbalancer.server.port=${PLAY_HTTP_PORT}"
+      # KORREKTUR: Netzwerk-Name korrigiert von 'web' zu 'proxy'
+      - "traefik.docker.network=proxy"
+      
+      # OPTIONAL: Falls die Play-App den Präfix "/playsrv" nicht kennt, 
+      # schneidet diese Middleware ihn ab, bevor die Anfrage die App erreicht:
+      - "traefik.http.routers.playsrv.middlewares=playsrv-strip"
+      - "traefik.http.middlewares.playsrv-strip.stripprefix.prefixes=/playsrv"
+
+      # KORREKTUR: YAML-Syntax für die restlichen Labels repariert
+      - "MAINTAINER=${APP_MAINTAINER}"
+      - "VENDOR=${APP_VENDOR}"
+      - "IMAGE_DESCRIPTION=This Dockerfile creates an image with the PlayDemo App running on it."
+
     environment:
       APP_VERSION: ${APP_VERSION}
       APP_ENVIRONMENT: ${APP_ENVIRONMENT}
       APP_DATE: ${APP_DATE}   
       PLAY_LOGFILE_PATH: ${APP_HOME}/logs
       PLAY_PIDFILE_PATH: ${PLAY_PIDFILE_PATH}
-
-      # environment read by application.conf
       DB_DEFAULT_URL: ${DB_DEFAULT_URL}
       DB_DEFAULT_DRIVER: ${DB_DEFAULT_DRIVER}
       DB_DEFAULT_USERNAME: ${DB_DEFAULT_USERNAME}
       DB_DEFAULT_PASSWORD: ${DB_DEFAULT_PASSWORD}
-      
       PLAY_WP_URL: ${PLAY_WP_URL}
       PLAY_WP_CPT: ${PLAY_WP_CPT}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
@@ -141,14 +149,15 @@ services:
       PLAY_MAILER_PASSWORD: ${PLAY_MAILER_PASSWORD}
       PLAY_MAILER_DEBUG: ${PLAY_MAILER_DEBUG}
       PLAY_MAILER_MOCK: ${PLAY_MAILER_MOCK}
-    ports:
-      - "${PLAY_HTTP_PORT}:${PLAY_HTTP_PORT}"      
+    expose:
+     - "${PLAY_HTTP_PORT}"
     volumes:
       - "./logs:${APP_HOME}/logs:rw"
     depends_on:
       - db
     networks:
-      - internal
+      - proxy
+      - backend
 
   composer:
     image: composer:2
@@ -158,10 +167,10 @@ services:
       - ./wp_data:/app
     user: "${UID:-1000}:${GID:-1000}"
     networks:
-      - internal      
+      - backend      
 
 networks:
-  web:
-    external: false
-  internal:
-    external: false
+  proxy:
+    name: proxy
+  backend:
+    name: backend

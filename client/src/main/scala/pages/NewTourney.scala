@@ -88,7 +88,7 @@ object NewTourney extends BasePage with JsWrapper:
         street = getValue("tn-addr-street")
       )
 
-      val tourney = Tourney(
+      val tourney = Tourney.default.copy(
         id = 0,         // New entry, DB will assign ID
         name = tName,
         organizer = tOrganizer,
@@ -103,16 +103,26 @@ object NewTourney extends BasePage with JsWrapper:
 
       Logging.info(s"Speichere neues Turnier: ${tourney}")
       
-      // Update DB and Selection
-      services.TourneyDB.update(tourney)
-      Global.currentSelection = Selection(Some(tourney))
-      comps.ContextHeader.render()
+      feedback.innerHTML = s"""<div class='alert alert-info mt-3'>Turnier wird auf dem Server erstellt...</div>"""
 
-      feedback.innerHTML = s"""<div class='alert alert-success mt-3'>Turnier '${tourney.name}' wurde erstellt.</div>"""
-      
-      dom.window.setTimeout(() => {
-        pages.loadPage(pages.InfoTourney.name, "")
-      }, 1000)
+      // 1. Create on server
+      services.TourneyDB.apiCreate(tourney).map {
+        case Right(slug) =>
+          // 2. Update DB and Selection (ID is set by apiCreate)
+          Global.pageId = tourney.id
+          services.TourneyDB.update(tourney, doSync = false)
+          Global.currentSelection = Selection(Some(tourney))
+          comps.ContextHeader.render()
+
+          feedback.innerHTML = s"""<div class='alert alert-success mt-3'>Turnier '${tourney.name}' wurde erfolgreich erstellt.</div>"""
+          
+          dom.window.setTimeout(() => {
+            pages.loadPage(pages.InfoTourney.name, "")
+          }, 1000)
+          
+        case Left(err) =>
+          showError(s"Fehler beim Erstellen des Turniers: ${err.msgCode}")
+      }
     }
 
   private def showError(msg: String): Unit =
