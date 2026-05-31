@@ -19,7 +19,7 @@
             </div>
         </div>
         <div class="btn-group btn-group-sm">
-            <button class="btn btn-outline-secondary" onclick="appLoadPage('InfoCompetition', '')">
+            <button class="btn btn-outline-secondary" onclick="appLoadPage('CompetitionInfo', '')">
                 <i class="bi bi-arrow-left me-1"></i>Zurück zum Wettbewerb
             </button>
         </div>
@@ -28,22 +28,22 @@
     <!-- Round Sub-Menu (Tabs) -->
     <ul class="nav nav-tabs mb-4">
         <li class="nav-item">
-            <a class="nav-link @{if(activeTab == "CFG") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('RoundCFG', '')">
+            <a class="nav-link @{if(activeTab == "CFG") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('RoundAdmin', '')">
                 <i class="bi bi-gear me-1"></i>Konfiguration
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @{if(activeTab == "DRW") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('RoundDRW', '')">
+            <a class="nav-link @{if(activeTab == "DRW") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('RoundDraw', '')">
                 <i class="bi bi-shuffle me-1"></i>Auslosung
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @{if(activeTab == "INP") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('RoundINP', '')">
+            <a class="nav-link @{if(activeTab == "INP") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('RoundInput', '')">
                 <i class="bi bi-input-cursor-text me-1"></i>Eingabe
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @{if(activeTab == "RES") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('RoundRES', '')">
+            <a class="nav-link @{if(activeTab == "RES") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('RoundResult', '')">
                 <i class="bi bi-bar-chart-line me-1"></i>Ergebnisse
             </a>
         </li>

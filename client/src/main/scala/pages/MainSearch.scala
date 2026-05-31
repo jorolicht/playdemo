@@ -26,6 +26,7 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
   val IdHeaderDate:        HtmlId = genId(name)
   val IdSortIcon:          HtmlId = genId(name)
   val IdMainSearchForm:    HtmlId = genId(name)
+  val InputResultId:       HtmlId = genId(name)
 
   case class SearchResult(id: Int, name: String, organizer: String, startDate: Int, status: String, slug: String) derives ReadWriter
 
@@ -45,7 +46,7 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
         }
       case `IdHeaderDate` =>
         toggleSort()
-      case id if id.id.startsWith("MainSearch_InputResult") =>
+      case id if id.id.startsWith(InputResultId.id) =>
         val tourneyId = getData(elem,"tourney-id", 0)
         debug(s"Switching to tournament post: $tourneyId")
 
@@ -58,7 +59,7 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
         // 3. Initialize all data from server for the new ID
         TourneyDB.init(tourneyId).map {
           case Right(_) => 
-            loadPage(InfoTourney.name, "")
+            loadPage(TourneyInfo.name, "")
           case Left(err) => 
             error(s"Failed to initialize tournament $tourneyId: ${err.msgCode}")
             dom.window.alert(s"Fehler beim Laden des Turniers: ${err.msgCode}")

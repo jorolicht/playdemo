@@ -1,7 +1,7 @@
 @import shared.model.*
 @import shared.DomTypes.HtmlId
 @import cviews.helper.html.*
-@import pages.InfoTourney.*
+@import pages.TourneyInfo.*
 
 @(tourney: Tourney, competitions: Seq[Competition])
 
@@ -9,7 +9,12 @@
     <!-- Compact Tourney Info Card -->
     <div class="card shadow-sm mb-4 border-primary">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h3 class="h5 mb-0"><i class="bi bi-trophy me-2"></i>Turnier-Informationen</h3>
+            <h3 class="h5 mb-0">
+                <i class="bi bi-trophy me-2"></i>Turnier-Informationen
+                @if(tourney.slug.nonEmpty) {
+                    <span class="ms-2 opacity-75 small fw-normal">(@tourney.slug)</span>
+                }
+            </h3>
             <div>
                 <button class="btn btn-light btn-sm me-2" @id(BtnEditTourney) @event("onclick")>
                     <i class="bi bi-pencil me-1"></i>Edit
@@ -71,7 +76,7 @@
                         @competitions.zipWithIndex.map { case (c, i) =>
                             <tr class="cursor-pointer">
                                 <td>@(i + 1)</td>
-                                <td class="fw-bold" onclick="appLoadPage('InfoCompetition', '@c.id.value')">@c.name</td>
+                                <td class="fw-bold" onclick="appLoadPage('CompetitionInfo', '@c.id.value')">@c.name</td>
                                 <td><span class="badge bg-light text-dark border">@c.typ</span></td>
                                 <td>@{c.lowLevel.getOrElse(0)} - @{c.upperLevel.getOrElse("∞")}</td>
                                 <td>
@@ -81,7 +86,7 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-outline-primary" onclick="appLoadPage('InfoCompetition', '@c.id.value')">
+                                        <button class="btn btn-outline-primary" onclick="appLoadPage('CompetitionInfo', '@c.id.value')">
                                             <i class="bi bi-eye"></i>
                                         </button>
                                         <button class="btn btn-outline-secondary">

@@ -10,8 +10,8 @@ import shared.MainIds.*
 import shared.model.*
 import dialogs.*
 
-object InfoTourney extends BasePage with JsWrapper:
-  def name = PageNameTyp("InfoTourney")
+object TourneyInfo extends BasePage with JsWrapper:
+  def name = PageNameTyp("TourneyInfo")
 
   val BtnEditTourney:   HtmlId = genId(name)
   val BtnDeleteTourney: HtmlId = genId(name)
@@ -37,10 +37,10 @@ object InfoTourney extends BasePage with JsWrapper:
         // Get real competitions from DB
         val compList = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
 
-        setMain(cviews.pages.html.InfoTourney(tourney, compList))
+        setMain(cviews.pages.html.TourneyInfo(tourney, compList))
         true
     } else {
-        debug("InfoTourney: No tournament found, redirecting to Home")
+        debug("TourneyInfo: No tournament found, redirecting to Home")
         loadPage(MainMulti.name, "")
         false
     }
@@ -77,4 +77,4 @@ object InfoTourney extends BasePage with JsWrapper:
           case _ => debug("Delete cancelled")
         }
       case _ => 
-        debug(s"InfoTourney handleEvent: ${elem.id}")
+        debug(s"TourneyInfo handleEvent: ${elem.id}")

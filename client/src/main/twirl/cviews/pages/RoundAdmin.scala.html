@@ -1,9 +1,12 @@
 @import shared.model.*
 @import shared.DomTypes.HtmlId
 @import cviews.helper.html.*
-@import pages.RoundCFG.*
+@import pages.RoundAdmin.*
+@import shared.utils.DrawRules.ModeOption
 
-@(round: Round, participants: Seq[Pant])
+@(round: Round, participants: Seq[Pant], modes: Seq[ModeOption])
+
+@disabledIfAus = @{ if(round.status == RoundStatus.AUS) "disabled" else "" }
 
 <div class="round-cfg-container">
     <!-- SECTION 1: CONTROL -->
@@ -14,10 +17,13 @@
         <div class="card-body py-3">
             <div class="row align-items-center">
                 <!-- Left: Start -->
-                <div class="col-md-4 border-end">
-                    <button class="btn btn-success w-100 py-2 fw-bold" @id(BtnStartPlaying) @event("onclick")>
-                        <i class="bi bi-play-fill me-2 fs-5"></i>RUNDE STARTEN
+                <div class="col-md-4 border-end text-center">
+                    <button class="btn btn-success w-100 py-2 fw-bold" @id(BtnStartPlaying) @event("onclick") @disabledIfAus>
+                        <i class="bi bi-shuffle me-2 fs-5"></i>AUSLOSUNG GENERIEREN
                     </button>
+                    <div class="mt-2 text-muted small" @id(LabelDrawCnt)>
+                        @participants.count(_.status == PantStatus.PLAY) Teilnehmer ausgewählt
+                    </div>
                 </div>
                 <!-- Right: Reset Actions -->
                 <div class="col-md-8">
@@ -53,21 +59,24 @@
         </div>
         <div class="card-body">
             <div class="row g-4">
-                <div class="col-md-6">
+                <div class="col-md-8">
                     <label class="form-label fw-bold">Spielmodus</label>
-                    <select class="form-select border-primary" id="rnd-modus">
-                        <option value="GR" @{if(round.rndCfg.typ == RoundTyp.GR) "selected" else ""}>Gruppensystem</option>
-                        <option value="KO" @{if(round.rndCfg.typ == RoundTyp.KO) "selected" else ""}>KO-System</option>
-                        <option value="SW" @{if(round.rndCfg.typ == RoundTyp.SW) "selected" else ""}>Schweizer System</option>
+                    <select class="form-select border-primary" @id(SelectDrawMode) @event("onchange") @disabledIfAus>
+                        <option value="UNKN" @{if(round.rndCfg == RoundCfg.UNKN || round.rndCfg == RoundCfg.CFG) "selected" else ""}>-- Spielmodus auswählen --</option>
+                        @modes.map { m =>
+                            <option value="@m.cfg.productPrefix" @if(!m.isEnabled){disabled class="text-muted"} @{if(round.rndCfg == m.cfg) "selected" else ""}>
+                                @m.label @if(!m.isEnabled){(nicht mgl.)}
+                            </option>
+                        }
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label fw-bold">Gewinnsätze</label>
-                    <input type="number" class="form-control" id="rnd-sets" value="@round.noWinSets">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label fw-bold">Größe</label>
-                    <input type="number" class="form-control" id="rnd-size" value="@round.size">
+                    <select class="form-select" id="rnd-sets" @disabledIfAus>
+                        <option value="2" @{if(round.noWinSets == 2) "selected" else ""}>Best-of-3 (2 Gewinnsätze)</option>
+                        <option value="3" @{if(round.noWinSets == 3 || round.noWinSets < 2 || round.noWinSets > 4) "selected" else ""}>Best-of-5 (3 Gewinnsätze)</option>
+                        <option value="4" @{if(round.noWinSets == 4) "selected" else ""}>Best-of-7 (4 Gewinnsätze)</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -75,17 +84,18 @@
 
     <!-- SECTION 3: PLAYER -->
     <div class="card shadow-sm">
-        <div class="card-header bg-light py-2">
+        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
             <h5 class="mb-0 small text-uppercase fw-bold text-muted"><i class="bi bi-person-check me-2"></i>Player</h5>
+            <button class="btn btn-outline-primary btn-sm fw-bold" @id(ChkBoxAll) @event("onclick") @disabledIfAus>
+                <i class="bi bi-check2-all me-1"></i>ALLE AUSWÄHLEN
+            </button>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive" style="max-height: 400px;">
                 <table class="table table-hover table-sm mb-0 align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-3" style="width: 40px;">
-                                <input class="form-check-input" type="checkbox" id="checkAllPlayers" checked>
-                            </th>
+                            <th class="ps-3" style="width: 40px;"></th>
                             <th>Name, Vorname</th>
                             <th>Verein</th>
                             <th class="text-center" style="width: 80px;">TTR</th>
@@ -96,9 +106,9 @@
                             <tr><td colspan="4" class="text-center py-4 text-muted">Keine Teilnehmer im Wettbewerb gefunden.</td></tr>
                         }
                         @participants.map { p =>
-                            <tr>
-                                <td class="ps-3">
-                                    <input class="form-check-input" type="checkbox" @{if(p.status == PantStatus.PLAY) "checked" else ""}>
+                            <tr class="cursor-pointer @{if(p.status == PantStatus.PLAY) "table-success" else ""}">
+                                <td class="ps-3 text-center">
+                                    <input @idAttr(ChkBoxPlayer, p.id.toString) class="form-check-input player-draw-check" type="checkbox" data-sno="@p.id" @{if(p.status == PantStatus.PLAY) "checked" else ""} @event("onchange") @disabledIfAus>
                                 </td>
                                 <td class="fw-bold">@p.name</td>
                                 <td class="small">@p.club</td>
@@ -110,7 +120,7 @@
             </div>
         </div>
         <div class="card-footer bg-white py-2 small text-muted">
-            <i class="bi bi-info-circle me-1"></i> @participants.length Spieler verfügbar. Die Auswahl bestimmt die Teilnehmer dieser Runde.
+            <i class="bi bi-info-circle me-1"></i> @participants.length Spieler verfügbar. Nur aktivierte Spieler nehmen an der Auslosung teil.
         </div>
     </div>
 </div>

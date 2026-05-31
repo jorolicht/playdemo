@@ -98,7 +98,7 @@ case class CompCTT(
 
 object CompCTT:
   import shared.basic.Pickle.*
-  given rw: ReadWriter[CompCTT] = macroRW
+  given ReadWriter[CompCTT] = macroRW
 
 
 opaque type CompId = Int
@@ -125,16 +125,16 @@ case class Competition(
   var typ:              CompTyp,
   var startDate:        String,
   var status:           CompStatus,
-  var startRound:       Option[RoundId],
-  var activ:            Boolean,
-  var webRegister:      Boolean,
-  var lowLevel:         Option[Int],
-  var upperLevel:       Option[Int],
-  var cttInfo:          Option[CompCTT],
-  val pants:            ArrayBuffer[Pant],
-  var deleted:          Boolean,
-  var version:          Int
-) derives ReadWriter:
+  var startRound:       Option[RoundId] = None,
+  var activ:            Boolean = true,
+  var webRegister:      Boolean = false,
+  var lowLevel:         Option[Int] = None,
+  var upperLevel:       Option[Int] = None,
+  var cttInfo:          Option[CompCTT] = None,
+  val pants:            ArrayBuffer[Pant] = ArrayBuffer(),
+  var deleted:          Boolean = false,
+  var version:          Int = 0
+):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
 
   def hash: Int = s"$name${typ.id}$startDate${getFromTTR}${getToTTR}".hashCode
@@ -153,10 +153,8 @@ case class Competition(
 
 
 object Competition:
-  def dummy: Competition = Competition(
-    CompId(0), "", CompTyp.UNKN, "", CompStatus.UNKN, 
-    None, true, false, None, None, None, ArrayBuffer(), false, 0
-  )
+  given rw: ReadWriter[Competition] = macroRW
+  def dummy: Competition = Competition(CompId(0), "", CompTyp.UNKN, "", CompStatus.UNKN)
 
 
 object CompDB:

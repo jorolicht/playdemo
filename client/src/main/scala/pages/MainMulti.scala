@@ -23,12 +23,12 @@ object MainMulti extends BasePage with JsWrapper:
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
-      case `BtnOption1` => loadPage(NewTourney.name, "")
+      case `BtnOption1` => loadPage(TourneyNew.name, "")
       case `BtnOption2` => 
         DlgCompetition.show(isOption2 = true).map {
           case Right(res) => 
             // 1. Create and save Dummy Tourney
-            val dummyTourney = Tourney.default.copy(
+            val dummyTourney = Tourney(
               id = 0,
               name = s"Quick: ${res.competition.name}",
               organizer = Global.user.map(_.org).getOrElse("System"),
@@ -49,7 +49,7 @@ object MainMulti extends BasePage with JsWrapper:
               case Right(c) => 
                 Global.currentSelection = Selection(Some(dummyTourney), Some(c))
                 comps.ContextHeader.render()
-                loadPage(PageNameTyp("InfoCompetition"), "")
+                loadPage(PageNameTyp("CompetitionInfo"), "")
               case Left(err) => 
                 error(s"Failed to create quick competition: ${err.msgCode}")
             }

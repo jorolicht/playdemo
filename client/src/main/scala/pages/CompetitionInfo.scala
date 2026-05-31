@@ -10,8 +10,8 @@ import shared.MainIds.*
 import shared.model.*
 import dialogs.*
 
-object InfoCompetition extends BasePage with JsWrapper:
-  def name = PageNameTyp("InfoCompetition")
+object CompetitionInfo extends BasePage with JsWrapper:
+  def name = PageNameTyp("CompetitionInfo")
 
   val BtnEditComp:       HtmlId = genId(name)
   val BtnDeleteComp:     HtmlId = genId(name)
@@ -49,11 +49,11 @@ object InfoCompetition extends BasePage with JsWrapper:
         // Real rounds from the tourney object (shared model)
         val rounds = services.TourneyDB.tourney.rounds.toSeq.filter(r => r != null && r.coId == c.id && !r.deleted)
 
-        setMain(cviews.pages.html.InfoCompetition(c, participants, rounds, sortCol, sortAsc))
+        setMain(cviews.pages.html.CompetitionInfo(c, participants, rounds, sortCol, sortAsc))
         true
       case None => 
-        debug("InfoCompetition: No competition selected, redirecting to Tourney Info")
-        loadPage(InfoTourney.name, "")
+        debug("CompetitionInfo: No competition selected, redirecting to Tourney Info")
+        loadPage(TourneyInfo.name, "")
         false
 
   private def sortParticipants(pants: Seq[Pant]): Seq[Pant] =
@@ -95,7 +95,7 @@ object InfoCompetition extends BasePage with JsWrapper:
               case Right(r) => 
                 Global.currentSelection = Global.currentSelection.copy(round = Some(r))
                 comps.ContextHeader.render()
-                loadPage(RoundCFG.name, "")
+                loadPage(RoundAdmin.name, "")
               case Left(err) => 
                 error(s"Failed to start round: ${err.msgCode}")
             }
@@ -111,14 +111,14 @@ object InfoCompetition extends BasePage with JsWrapper:
               case Right(_) => 
                 Global.currentSelection = Global.currentSelection.copy(competition = None, round = None)
                 comps.ContextHeader.render()
-                loadPage(InfoTourney.name, "")
+                loadPage(TourneyInfo.name, "")
               case Left(err) => 
                 error(s"Failed to delete competition: ${err.msgCode}")
             }
           case _ => debug("Delete cancelled")
         }
       case _ => 
-        debug(s"InfoCompetition handleEvent: ${elem.id}")
+        debug(s"CompetitionInfo handleEvent: ${elem.id}")
 
   private def toggleSort(col: String): Unit =
     if (sortCol == col) sortAsc = !sortAsc

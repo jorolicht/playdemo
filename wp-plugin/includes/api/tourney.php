@@ -94,6 +94,15 @@ function tourney_get_read(WP_REST_Request $request)
 
     $tourney_json = get_post_meta($post_id, $meta, true);
     $tourney = $tourney_json ? json_decode($tourney_json, true) : null;
+    
+    // Include the current full slug for the client
+    if ($tourney && $meta === 'basic') {
+        $post = get_post($post_id);
+        if ($post) {
+            $parent_slug = substr($post->post_name, 0, 4);
+            $tourney['slug'] = "tourney/" . $parent_slug . "/" . $post->post_name;
+        }
+    }
 
     return [
         "version" => $version,

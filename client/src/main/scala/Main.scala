@@ -132,7 +132,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
         if (TourneyDB.tourney.ident == "IGNORE") {
           pages.loadPage(pages.MainMulti.name, "")
         } else {
-          pages.loadPage(pages.InfoTourney.name, "")
+          pages.loadPage(pages.TourneyInfo.name, "")
         }
 
       case Left(err)   => debug(s"Error loading user or tournament: ${err}")

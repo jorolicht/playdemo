@@ -19,7 +19,7 @@
                     <!-- Tournament Link (Trophy Icon) -->
                     @selection.tourney.map { t =>
                         <li class="breadcrumb-item active" aria-current="page">
-                            <a href="javascript:appLoadPage('InfoTourney', '')" class="btn btn-outline-light btn-sm fw-bold border-secondary py-1">
+                            <a href="javascript:appLoadPage('TourneyInfo', '')" class="btn btn-outline-light btn-sm fw-bold border-secondary py-1">
                                 <i class="bi bi-trophy text-warning me-2"></i>@t.name
                             </a>
                         </li>
@@ -37,12 +37,12 @@
                                     <li><span class="dropdown-item-text text-muted small">Keine Wettbewerbe vorhanden</span></li>
                                 }
                                 @competitions.map { c =>
-                                    <li><a class="dropdown-item @if(selection.competition.exists(_.id == c.id)){active}" href="javascript:appLoadPage('InfoCompetition', '@c.id.value')">@c.name</a></li>
+                                    <li><a class="dropdown-item @if(selection.competition.exists(_.id == c.id)){active}" href="javascript:appLoadPage('CompetitionInfo', '@c.id.value')">@c.name</a></li>
                                 }
                                 @if(competitions.nonEmpty) {
                                     <li><hr class="dropdown-divider"></li>
                                 }
-                                <li><a class="dropdown-item small" href="javascript:appLoadPage('InfoTourney', '')"><i class="bi bi-list-ul me-2"></i>Alle anzeigen</a></li>
+                                <li><a class="dropdown-item small" href="javascript:appLoadPage('TourneyInfo', '')"><i class="bi bi-list-ul me-2"></i>Alle anzeigen</a></li>
                             </ul>
                         </li>
                     }
@@ -56,10 +56,10 @@
                             </a>
                             <ul class="dropdown-menu shadow">
                                 @rounds.map { r =>
-                                    <li><a class="dropdown-item @if(selection.round.exists(_.id == r.id)){active}" href="javascript:appLoadPage('RoundCFG', '@r.id.value')">@r.name</a></li>
+                                    <li><a class="dropdown-item @if(selection.round.exists(_.id == r.id)){active}" href="javascript:appLoadPage('RoundAdmin', '@r.id.value')">@r.name</a></li>
                                 }
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item small" href="javascript:appLoadPage('InfoCompetition', '')"><i class="bi bi-list-ul me-2"></i>Alle anzeigen</a></li>
+                                <li><a class="dropdown-item small" href="javascript:appLoadPage('CompetitionInfo', '')"><i class="bi bi-list-ul me-2"></i>Alle anzeigen</a></li>
                             </ul>
                         </li>
                     }

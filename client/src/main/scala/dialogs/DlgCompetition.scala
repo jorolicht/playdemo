@@ -72,7 +72,7 @@ object DlgCompetition extends BaseDialog with JsWrapper:
         val ttrFrom = try Some(getInput(gE(TtrFromId)).toInt) catch { case _:Exception => None }
         val ttrTo   = try Some(getInput(gE(TtrToId)).toInt)   catch { case _:Exception => None }
         
-        val comp = Competition.dummy.copy(
+        val comp = Competition(
           id = CompId(0), // Temporary ID
           name = name,
           typ = typ,

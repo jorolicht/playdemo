@@ -11,14 +11,14 @@ import shared.MainIds.*
 import shared.model.*
 import shared.basic.*
 
-object NewTourney extends BasePage with JsWrapper:
-  def name = PageNameTyp("NewTourney")
+object TourneyNew extends BasePage with JsWrapper:
+  def name = PageNameTyp("TourneyNew")
 
   val BtnSave: HtmlId    = genId(name)
   val BtnLoadCtt: HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
-    setMain(cviews.pages.html.NewTourney())
+    setMain(cviews.pages.html.TourneyNew())
     
     // Set default dates (today)
     val today = new js.Date()
@@ -42,12 +42,12 @@ object NewTourney extends BasePage with JsWrapper:
             // Data is already in DB services (mapped by ClickTTMapper)
             Global.currentSelection = Selection(Some(t))
             comps.ContextHeader.render()
-            loadPage(pages.InfoTourney.name, "")
+            loadPage(pages.TourneyInfo.name, "")
           case Left(err) => 
             debug(s"ClickTT Import cancelled or failed: $err")
         }
       case _ => 
-        debug(s"Unhandled event in NewTourney: ${elem.id}")
+        debug(s"Unhandled event in TourneyNew: ${elem.id}")
 
   private def saveTourney(): Unit =
     val feedback = dom.document.getElementById("validationFeedback")
@@ -88,7 +88,7 @@ object NewTourney extends BasePage with JsWrapper:
         street = getValue("tn-addr-street")
       )
 
-      val tourney = Tourney.default.copy(
+      val tourney = Tourney(
         id = 0,         // New entry, DB will assign ID
         name = tName,
         organizer = tOrganizer,
@@ -117,7 +117,7 @@ object NewTourney extends BasePage with JsWrapper:
           feedback.innerHTML = s"""<div class='alert alert-success mt-3'>Turnier '${tourney.name}' wurde erfolgreich erstellt.</div>"""
           
           dom.window.setTimeout(() => {
-            pages.loadPage(pages.InfoTourney.name, "")
+            pages.loadPage(pages.TourneyInfo.name, "")
           }, 1000)
           
         case Left(err) =>

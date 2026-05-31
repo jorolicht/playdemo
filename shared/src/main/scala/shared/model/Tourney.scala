@@ -30,10 +30,11 @@ case class Tourney(
   var contact:      Option[Contact] = None,
   var address:      Option[Address] = None,
   var version:      Int = 0,
-  val clubs:        ArrayBuffer[Club],
-  val players:      ArrayBuffer[Player],
-  val competitions: ArrayBuffer[Competition],
-  val rounds:       ArrayBuffer[Round]
+  var slug:         String = "",
+  val clubs:        ArrayBuffer[Club] = ArrayBuffer(),
+  val players:      ArrayBuffer[Player] = ArrayBuffer(),
+  val competitions: ArrayBuffer[Competition] = ArrayBuffer.fill(64)(null),
+  val rounds:       ArrayBuffer[Round] = ArrayBuffer.fill(128)(null)
 ):
 
   // --- Buffers for tracking changes ---
@@ -536,6 +537,7 @@ object Tourney:
     contact = None,
     address = None,
     version = 0,
+    slug = "",
     clubs = ArrayBuffer(),
     players = ArrayBuffer(),
     competitions = ArrayBuffer.fill(64)(null),

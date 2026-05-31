@@ -4,6 +4,6 @@
 
 @import shared.DomTypes.HtmlId 
 
-@(name: HtmlId)
-@{ Html(s""" id="${name.id}" """) }
+@(name: HtmlId, suffix: String = "")
+@{ Html(if suffix.isEmpty then s""" id="${name.id}" """ else s""" id="${name.id}-${suffix}" """) }
 

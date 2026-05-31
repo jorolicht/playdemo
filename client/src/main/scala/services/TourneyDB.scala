@@ -84,6 +84,7 @@ object TourneyDB extends ComWrapper with Debouncer:
       case Right(res) =>
         t.id = res.pageId
         t.version = res.version
+        t.slug = res.slug
         this.version = res.version
         Right(res.slug)
       case Left(err) => Left(err)

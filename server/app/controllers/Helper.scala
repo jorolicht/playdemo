@@ -77,13 +77,10 @@ class Helper @Inject()(system: ActorSystem, cc: ControllerComponents, userRepo: 
 
   /**
    * Converts ClickTT XML to a JSON Tourney object.
+   * Uses parse.tolerantText to bypass Play's default XML parser which rejects DOCTYPEs.
    */
-  def convertClickTT(): Action[AnyContent] = Action { implicit request =>
-    val bodyString = request.body.asXml.map(_.toString)
-      .orElse(request.body.asText)
-      .getOrElse {
-        request.body.asRaw.flatMap(_.asBytes()).map(_.decodeString("UTF-8")).getOrElse("")
-      }
+  def convertClickTT(): Action[String] = Action(parse.tolerantText(10 * 1024 * 1024)) { implicit request =>
+    val bodyString = request.body
 
     if (bodyString.isEmpty) {
       BadRequest("Missing XML body")

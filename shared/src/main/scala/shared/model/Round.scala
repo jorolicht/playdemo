@@ -46,6 +46,8 @@ enum RoundCfg(val id: Int, val typ: RoundTyp) derives CanEqual:
   case GRPS5  extends RoundCfg(105, RoundTyp.GR)   // only groups with 5 players
   case GRPS56 extends RoundCfg(106, RoundTyp.GR)   // only groups with 5 or 6 players
   case GRPS6  extends RoundCfg(107, RoundTyp.GR)   // only groups with 6 players
+  case GRPS7  extends RoundCfg(111, RoundTyp.GR)   // only groups with 7 players
+  case GRPS8  extends RoundCfg(112, RoundTyp.GR)   // only groups with 8 players
 
   // --- Tournament Systems ---
   case RR     extends RoundCfg(108, RoundTyp.RR)    // Round Robin - everyone plays everyone
@@ -149,13 +151,13 @@ case class Round(
   var demo:             Boolean,
   var size:             Int,
   var noPlayers:        Int,
-  var noWinSets:        Int,
-  var prefId:           Option[RoundId],
-  var nextIds:          List[RoundId],
-  var quali:            QualifyTyp,
-  var deleted:          Boolean,
-  var version:          Int
-) derives ReadWriter:
+  var noWinSets:        Int = 0,
+  var prefId:           Option[RoundId] = None,
+  var nextIds:          List[RoundId] = List(),
+  var quali:            QualifyTyp = QualifyTyp.ALL,
+  var deleted:          Boolean = false,
+  var version:          Int = 0
+):
 
   // -----------------------------
   // Mutable state (kept explicit)
@@ -181,7 +183,5 @@ case class Round(
 
 
 object Round:
-  def dummy: Round = Round(
-    RoundId(0), CompId(0), "", RoundCfg.UNKN, RoundStatus.UNKN, 
-    false, 0, 0, 0, None, List(), QualifyTyp.ALL, false, 0
-  )
+  given rw: ReadWriter[Round] = macroRW
+  def dummy: Round = Round(RoundId(0), CompId(0), "", RoundCfg.UNKN, RoundStatus.UNKN, false, 0, 0)

@@ -29,8 +29,8 @@ object TestTourney:
   def testTourney_update(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     val name = if (param.isEmpty) "Test Tournament" else param
     val current = if (TourneyDB.tourney.id != 0) TourneyDB.tourney else
-      Tourney.default.copy(
-        id = 0,
+      Tourney(
+        0, // id
         name = name,
         organizer = "Test Org",
         startDate = 20260101,
@@ -104,7 +104,7 @@ object TestTourney:
     val dateStr = if (parts.length > 1 && parts(1).nonEmpty) parts(1).trim else "20220402"
     val date = try dateStr.toInt catch { case _: Exception => 20220402 }
     
-    val t = Tourney.default.copy(
+    val t = Tourney(
       id = 0,
       name = name,
       organizer = "TTV Freising",
@@ -135,7 +135,7 @@ object TestTourney:
     val dateStr = if (parts.length > 1 && parts(1).nonEmpty) parts(1).trim else "20220402"
     val date = try dateStr.toInt catch { case _: Exception => 20220402 }
 
-    val t = Tourney.default.copy(
+    val t = Tourney(
       id = 0,
       name = name,
       organizer = "TTV Freising",
