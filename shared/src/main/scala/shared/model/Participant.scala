@@ -157,6 +157,7 @@ case class Pant(
   name:    String = "",
   club:    String = "",
   rating:  Int = 0,
+  var birthYear: String = "",
   var qInfo:   String = "",
   var place:   (Int, Int) = (0, 0),
   var status:  PantStatus = PantStatus.UNKN,

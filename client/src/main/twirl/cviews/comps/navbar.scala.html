@@ -72,10 +72,10 @@
                         <i class="fas fa-user fa-fw"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="navbarDropdown">
-                        <li><a @id(ShowLoginId) class="dropdown-item" @onclick >@gM("app.btn.login")</a></li>
-                        <li><a @id(DoLogoutId)  class="dropdown-item" @onclick>@gM("app.btn.logout")</a></li>
+                        <li><a @id(ShowLoginId, "onclick") class="dropdown-item">@gM("app.btn.login")</a></li>
+                        <li><a @id(DoLogoutId, "onclick")  class="dropdown-item">@gM("app.btn.logout")</a></li>
                         <li><hr class="dropdown-divider" /></li>
-                        <li><a @id(ConsoleClickId) class="dropdown-item" @onclick >@gM("app.btn.console")</a></li>
+                        <li><a @id(ConsoleClickId, "onclick") class="dropdown-item">@gM("app.btn.console")</a></li>
                     </ul>
                 </li>
             </ul>

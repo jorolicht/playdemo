@@ -5,7 +5,7 @@
 
 @(r: SearchResult, dateDisplay: String)
 
-<tr @idAttr(InputResultId, r.id.toString()) data-tourney-id='@r.id' class='cursor-pointer' @event("onclick")">
+<tr @id(InputResultId, "onclick", r.id.toString()) data-tourney-id='@r.id' class='cursor-pointer'>
     <td class='ps-3'><span class='badge bg-light text-dark border'>@dateDisplay</span></td>
     <td class='fw-bold'>@r.name</td>
     <td>@r.organizer</td>

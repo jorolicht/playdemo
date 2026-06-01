@@ -1,0 +1,72 @@
+@import shared.model.*
+
+@(clubs: Seq[Club], currentYear: Int)
+
+<div class="modal fade" id="DlgAddSingle-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Teilnehmer hinzufügen</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" id="DlgAddSingle-close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="DlgAddSingle-form" onsubmit="return false;">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nachname</label>
+                            <input type="text" class="form-control" id="DlgAddSingle-lastname" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Vorname</label>
+                            <input type="text" class="form-control" id="DlgAddSingle-firstname" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Verein</label>
+                        <input type="text" class="form-control" id="DlgAddSingle-club" list="DlgAddSingle-clublist" required>
+                        <datalist id="DlgAddSingle-clublist">
+                            @clubs.map { c =>
+                                <option value="@c.name">
+                            }
+                        </datalist>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">TTR-Wert</label>
+                            <input type="number" class="form-control" id="DlgAddSingle-ttr" placeholder="z.B. 1450">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Jahrgang</label>
+                            <select class="form-select" id="DlgAddSingle-year">
+                                <option value="0">-- Unbekannt --</option>
+                                @for(y <- ((currentYear - 80) to (currentYear - 8)).reverse) {
+                                    <option value="@y">@y</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-3 rounded border mb-3">
+                        <label class="form-label d-block small fw-bold mb-2">Aktion</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="DlgAddSingle-action" id="DlgAddSingle-actReg" value="reg">
+                            <label class="form-check-label small" for="DlgAddSingle-actReg">Nur Registrieren (Inaktiv)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="DlgAddSingle-action" id="DlgAddSingle-actPlay" value="play" checked>
+                            <label class="form-check-label small" for="DlgAddSingle-actPlay">Registrieren und Anmelden (Aktiv)</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="DlgAddSingle-cancel">Abbrechen</button>
+                <button type="button" class="btn btn-primary" id="DlgAddSingle-apply">Speichern</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="DlgAddSingle-load" data-loaded="false"></div>

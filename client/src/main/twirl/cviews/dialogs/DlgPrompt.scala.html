@@ -12,7 +12,7 @@
         <button @id(CloseId) type="button" class="btn-close"></button>
       </div>
       <div class="modal-body">
-        <input @id(InputId) @plh2("command") type='text' class='form-control form-control-sm mb-2'> 
+        <input @id(InputId) @plh("command") type='text' class='form-control form-control-sm mb-2'> 
       </div>
 
 
@@ -25,7 +25,7 @@
       <div class="card border-0">
         <div class="card-header d-flex justify-content-between pt-0 pb-0">
           <div>
-            <a @id(ToggleId) @onclick>
+            <a @id(ToggleId, "onclick")>
               <h6 class="text-dark pb-0 mt-1 mb-1"><i class="fa fa-fw fa-bars"></i>Result / Output</h6>
             </a>			
           </div>

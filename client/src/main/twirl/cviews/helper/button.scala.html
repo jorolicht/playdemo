@@ -2,8 +2,10 @@
  * Template for bootstrap button
  *@
 @import base.Messages.*
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
 
 @(key: String, caption: String, bClass: String, enabledParam:Boolean=true)
-<button id='@key' type='button' class='btn @bClass' @onclick @enabled(enabledParam)>
+<button @id(HtmlId(key), "onclick") type='button' class='btn @bClass' @enabled(enabledParam)>
   @caption
 </button>

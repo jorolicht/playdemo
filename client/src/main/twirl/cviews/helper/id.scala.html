@@ -1,0 +1,14 @@
+@*
+ * Template for id attribute with optional event
+ *@
+@import shared.DomTypes.HtmlId 
+
+@(name: HtmlId, inEvent: String = "", suffix: String = "")
+
+@defining(if (suffix.isEmpty) name.id else s"${name.id}-${suffix}") { idPart =>
+    @if(inEvent.isEmpty) {
+        @Html(s""" id="$idPart" """)
+    } else {
+        @Html(s""" id="$idPart" $inEvent="window.appEvent(this, event); false" """)
+    }
+}

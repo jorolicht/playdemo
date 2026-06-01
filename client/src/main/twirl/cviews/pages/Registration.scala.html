@@ -1,0 +1,134 @@
+@import shared.model.*
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+@import pages.Registration.*
+
+@(selection: Selection, competitions: Seq[Competition], participants: Seq[Pant], sortCol: String, sortAsc: Boolean)
+
+<div class="container mt-4">
+    <div class="card shadow-sm mb-4 border-warning">
+        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+            <h3 class="h5 mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Turnier-Anmeldung</h3>
+            <div class="d-flex gap-2">
+                @if(selection.competition.isDefined) {
+                    <button class="btn btn-dark btn-sm fw-bold" @id(BtnAddParticipant, "onclick")>
+                        <i class="bi bi-plus-lg me-1"></i>
+                        @if(selection.competition.exists(_.typ == CompTyp.DOUBLE)) { Doppel hinzufügen } else { Teilnehmer hinzufügen }
+                    </button>
+                }
+            </div>
+        </div>
+        <div class="card-body bg-light py-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small text-uppercase text-muted mb-1">Wettbewerb auswählen</label>
+                    <select class="form-select border-warning" @id(SelectComp, "onchange")>
+                        <option value="0" @if(selection.competition.isEmpty){selected}>-- Bitte Wettbewerb wählen --</option>
+                        @competitions.map { c =>
+                            <option value="@c.id.value" @if(selection.competition.exists(_.id == c.id)){selected}>
+                                @c.name (@c.typ)
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <div class="stats-box d-inline-block p-2 bg-white border rounded shadow-xs">
+                        <span class="text-muted small me-2">Status:</span>
+                        @selection.competition.map { c =>
+                            <span class="badge @if(c.status == CompStatus.RUN){bg-warning}else{bg-secondary}">@c.status</span>
+                            <span class="ms-3 text-muted small me-2">Teilnehmer:</span>
+                            <span class="fw-bold text-primary">@participants.count(_.active) / @participants.length</span>
+                        }.getOrElse {
+                            <span class="text-muted small italic">Kein Wettbewerb gewählt</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if(selection.competition.isDefined) {
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr class="small text-muted text-uppercase">
+                                <th class="ps-3" style="width: 80px;">
+                                    <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderSno, "onclick")>
+                                        SNr @sortIcon("sno", sortCol, sortAsc)
+                                    </button>
+                                </th>
+                                <th>
+                                    <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
+                                        Name, Vorname @sortIcon("name", sortCol, sortAsc)
+                                    </button>
+                                </th>
+                                <th>
+                                    <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderClub, "onclick")>
+                                        Verein @sortIcon("club", sortCol, sortAsc)
+                                    </button>
+                                </th>
+                                <th class="text-center" style="width: 80px;">
+                                    <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
+                                        TTR @sortIcon("ttr", sortCol, sortAsc)
+                                    </button>
+                                </th>
+                                <th class="text-center" style="width: 80px;">
+                                    <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderYear, "onclick")>
+                                        JG @sortIcon("year", sortCol, sortAsc)
+                                    </button>
+                                </th>
+                                <th class="text-center" style="width: 100px;">
+                                    <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderActive, "onclick")>
+                                        Teilnahme @sortIcon("active", sortCol, sortAsc)
+                                    </button>
+                                </th>
+                                <th class="text-end pe-3" style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(participants.isEmpty) {
+                                <tr><td colspan="7" class="text-center py-4 text-muted italic">Noch keine Teilnehmer für diesen Wettbewerb registriert.</td></tr>
+                            }
+                            @participants.map { p =>
+                                <tr class="@if(!p.active){text-muted opacity-75}">
+                                    <td class="ps-3">@p.id.startId</td>
+                                    <td class="fw-bold">@p.name</td>
+                                    <td>@p.club</td>
+                                    <td class="text-center">@p.rating</td>
+                                    <td class="text-center small">@p.birthYear</td>
+                                    <td class="text-center">
+                                        <div class="form-check d-flex justify-content-center">
+                                            <input @id(IdCheckActive, "onchange", p.id.toString) class="form-check-input" type="checkbox" data-sno="@p.id" @if(p.active){checked}>
+                                        </div>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <button class="btn btn-link btn-sm text-danger p-0" title="Entfernen">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white py-2 small text-muted">
+                <i class="bi bi-info-circle me-1"></i> Klicken Sie auf die Spaltenköpfe zum Sortieren. Startnummern werden automatisch vergeben.
+            </div>
+        </div>
+    } else {
+        <div class="text-center py-5 bg-light border rounded shadow-sm">
+            <i class="bi bi-arrow-up-circle text-muted opacity-25" style="font-size: 4rem;"></i>
+            <h4 class="mt-3 text-muted">Wettbewerb auswählen</h4>
+            <p class="text-muted small">Bitte wählen Sie oben einen Wettbewerb aus, um die Anmeldungen zu verwalten.</p>
+        </div>
+    }
+</div>
+
+@sortIcon(col: String, currentSort: String, asc: Boolean) = {
+    @if(col == currentSort) {
+        <i class="bi bi-sort-@{if(asc) "alpha-down" else "alpha-up-alt"} ms-1"></i>
+    }
+}

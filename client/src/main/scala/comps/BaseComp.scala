@@ -30,8 +30,6 @@ abstract class BaseComp(using fn: FullName):
   def renderAsync(param: String = ""): Future[Boolean] = Future(true)
   def handleEvent(elem: org.scalajs.dom.raw.HTMLElement, event: org.scalajs.dom.Event): Unit = {}
   
-  def id(name: HtmlId, suffix: String="") = if (suffix.isEmpty) s"id=${name.id}" else s"id=${name.id}-${suffix}"
-
   def gM(key: String, inserts: String*)  = 
     if key.startsWith("+") then 
       Messages.getMsg(s"${name}.${key.drop(1)}", inserts*)

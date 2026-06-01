@@ -1,0 +1,55 @@
+@import shared.model.*
+
+@(players: Seq[Player], clubs: Seq[Club])
+
+<div class="modal fade" id="DlgAddDouble-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Doppel hinzufügen</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" id="DlgAddDouble-close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="DlgAddDouble-form" onsubmit="return false;">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">1. Spieler</label>
+                        <input type="text" class="form-control" id="DlgAddDouble-player1" list="DlgAddDouble-plist1" placeholder="Suche Name, Vorname..." required>
+                        <datalist id="DlgAddDouble-plist1">
+                            @players.map { p =>
+                                <option value="@p.lastName, @p.firstName [@{clubs.find(_.id.toInt == p.clubId).map(_.name).getOrElse("?")}]" data-id="@p.id">
+                            }
+                        </datalist>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">2. Spieler</label>
+                        <input type="text" class="form-control" id="DlgAddDouble-player2" list="DlgAddDouble-plist2" placeholder="Suche Name, Vorname..." required>
+                        <datalist id="DlgAddDouble-plist2">
+                            @players.map { p =>
+                                <option value="@p.lastName, @p.firstName [@{clubs.find(_.id.toInt == p.clubId).map(_.name).getOrElse("?")}]" data-id="@p.id">
+                            }
+                        </datalist>
+                    </div>
+
+                    <div class="bg-light p-3 rounded border mb-3">
+                        <label class="form-label d-block small fw-bold mb-2">Aktion</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="DlgAddDouble-action" id="DlgAddDouble-actReg" value="reg">
+                            <label class="form-check-label small" for="DlgAddDouble-actReg">Nur Registrieren (Inaktiv)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="DlgAddDouble-action" id="DlgAddDouble-actPlay" value="play" checked>
+                            <label class="form-check-label small" for="DlgAddDouble-actPlay">Registrieren und Anmelden (Aktiv)</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="DlgAddDouble-cancel">Abbrechen</button>
+                <button type="button" class="btn btn-primary" id="DlgAddDouble-apply">Speichern</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="DlgAddDouble-load" data-loaded="false"></div>

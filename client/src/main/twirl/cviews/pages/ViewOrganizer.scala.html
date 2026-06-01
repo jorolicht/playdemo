@@ -19,7 +19,7 @@
                             <small class="text-muted">Pfad: tourney/@slug</small>
                         </div>
                         <span class="badge bg-primary rounded-pill">@count Turniere</span>
-                        <button @id(Details) data-slug="@slug" class="btn btn-outline-primary btn-sm ms-3"  @event("onclick")>
+                        <button @id(Details, "onclick") data-slug="@slug" class="btn btn-outline-primary btn-sm ms-3">
                             Details anzeigen
                         </button>
                     </div>

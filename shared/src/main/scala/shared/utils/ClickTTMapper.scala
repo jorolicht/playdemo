@@ -168,6 +168,7 @@ object ClickTTMapper:
           name = player.displayName,
           club = target.clubs.find(_.id.toInt == player.clubId).map(_.name).getOrElse(""),
           rating = player.meta.ttr.getOrElse(0),
+          birthYear = player.birthYear.map(_.toString).getOrElse(""),
           status = PantStatus.REGI
         )
       }
@@ -188,6 +189,7 @@ object ClickTTMapper:
           name = s"${player1.lastName} / ${player2.lastName}",
           club = if (club1 == club2) club1 else s"$club1, $club2",
           rating = (player1.meta.ttr.getOrElse(0) + player2.meta.ttr.getOrElse(0)) / 2,
+          birthYear = "", // Or combined if needed
           status = PantStatus.REGI
         )
       }
