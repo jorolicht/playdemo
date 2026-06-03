@@ -39,7 +39,7 @@ object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
         // register user
         addClass(gE(ContentId), "d-none")
         removeClass(gE(ContentId), "d-none")
-        setMain(html.Register())
+        setMain(html.UserRegistration())
         debug(s"Auth.render -> ${param}")
     true
 
@@ -57,7 +57,7 @@ object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
         // register user
         addClass(gE(ContentId), "d-none")
         removeClass(gE(ContentId), "d-none")
-        setMain(html.Register())     
+        setMain(html.UserRegistration())     
       case `EmailId`      => removeClass(gE(EmailId), "is-invalid")
       case `PasswordId`   => removeClass(gE(PasswordId), "is-invalid")
       case _              => error(s"event -> invalid id/key: ${elem.id}")     

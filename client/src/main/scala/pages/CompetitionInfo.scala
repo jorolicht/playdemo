@@ -15,8 +15,6 @@ object CompetitionInfo extends BasePage with JsWrapper:
 
   val BtnEditComp:       HtmlId = genId(name)
   val BtnDeleteComp:     HtmlId = genId(name)
-  val BtnAddParticipant: HtmlId = genId(name)
-  val BtnUploadCsv:      HtmlId = genId(name)
   val BtnStartRound:     HtmlId = genId(name)
 
   // Header IDs for sorting
@@ -24,8 +22,7 @@ object CompetitionInfo extends BasePage with JsWrapper:
   val IdHeaderName:      HtmlId = genId(name)
   val IdHeaderClub:      HtmlId = genId(name)
   val IdHeaderTtr:       HtmlId = genId(name)
-  val IdHeaderActive:    HtmlId = genId(name)
-  val PantActivId:       HtmlId = genId(name)
+  val IdHeaderYear:      HtmlId = genId(name)
 
   private var sortCol = "name"
   private var sortAsc = true
@@ -43,8 +40,8 @@ object CompetitionInfo extends BasePage with JsWrapper:
 
     Global.currentSelection.competition match
       case Some(c) => 
-        // Real participants from the competition object, sorted by state
-        val participants = sortParticipants(c.pants.toSeq)
+        // Real participants from the competition object, filtered by active and sorted
+        val participants = sortParticipants(c.pants.toSeq.filter(_.active))
         
         // Real rounds from the tourney object (shared model)
         val rounds = services.TourneyDB.tourney.rounds.toSeq.filter(r => r != null && r.coId == c.id && !r.deleted)
@@ -61,7 +58,7 @@ object CompetitionInfo extends BasePage with JsWrapper:
       case "sno"    => pants.sortBy(_.id.startId)
       case "club"   => pants.sortBy(_.club.toLowerCase)
       case "ttr"    => pants.sortBy(-_.rating)
-      case "active" => pants.sortBy(_.active)
+      case "year"   => pants.sortBy(_.birthYear)
       case _        => pants.sortBy(_.name.toLowerCase)
     
     if (sortAsc) sorted else sorted.reverse
@@ -72,11 +69,7 @@ object CompetitionInfo extends BasePage with JsWrapper:
       case `IdHeaderName`   => toggleSort("name")
       case `IdHeaderClub`   => toggleSort("club")
       case `IdHeaderTtr`    => toggleSort("ttr")
-      case `IdHeaderActive` => toggleSort("active")
-      case id if id.id.startsWith(PantActivId.id) =>
-        val snoStr = getData(elem, "sno", "")
-        val active = elem.asInstanceOf[dom.html.Input].checked
-        updateParticipation(snoStr, active)
+      case `IdHeaderYear`   => toggleSort("year")
 
       case `BtnStartRound` => 
         val c = Global.currentSelection.competition.get
@@ -127,16 +120,3 @@ object CompetitionInfo extends BasePage with JsWrapper:
       sortAsc = true
     }
     render()
-
-  private def updateParticipation(snoStr: String, active: Boolean): Unit =
-    Global.currentSelection.competition.foreach { c =>
-      val sno = SNO.fromString(snoStr)
-      c.pants.find(_.id == sno).foreach { p =>
-        p.active = active
-        p.status = if (active) PantStatus.PLAY else PantStatus.REGI
-        debug(s"Updated participant ${p.name}: active=$active")
-        
-        // Trigger sync of the entire competition
-        services.TourneyDB.tourney.updateCompetition(c)
-      }
-    }

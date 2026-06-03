@@ -34,88 +34,8 @@
         </div>
     </div>
 
-    <!-- Participants Accordion -->
-    <div class="accordion mb-4 shadow-sm" id="participantsAccordion">
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingParticipants">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParticipants" aria-expanded="true" aria-controls="collapseParticipants">
-                    <i class="bi bi-people me-2"></i>Teilnehmerliste (@participants.length)
-                </button>
-            </h2>
-            <div id="collapseParticipants" class="accordion-collapse collapse show" aria-labelledby="headingParticipants" data-bs-parent="#participantsAccordion">
-                <div class="accordion-body p-0">
-                    <div class="p-2 bg-light border-bottom d-flex justify-content-end gap-2">
-                        <button class="btn btn-outline-primary btn-sm" @id(BtnAddParticipant, "onclick")>
-                            <i class="bi bi-person-plus me-1"></i>Spieler hinzufügen
-                        </button>
-                        <button class="btn btn-outline-secondary btn-sm" @id(BtnUploadCsv, "onclick")>
-                            <i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV Upload
-                        </button>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover mb-0">
-                            <thead class="table-light">
-                                <tr class="small text-muted text-uppercase">
-                                    <th class="ps-3" style="width: 80px;">
-                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderSno, "onclick")>
-                                            SNr @sortIcon("sno", sortCol, sortAsc)
-                                        </button>
-                                    </th>
-                                    <th>
-                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
-                                            Name, Vorname @sortIcon("name", sortCol, sortAsc)
-                                        </button>
-                                    </th>
-                                    <th>
-                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderClub, "onclick")>
-                                            Verein @sortIcon("club", sortCol, sortAsc)
-                                        </button>
-                                    </th>
-                                    <th class="text-center" style="width: 80px;">
-                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
-                                            TTR @sortIcon("ttr", sortCol, sortAsc)
-                                        </button>
-                                    </th>
-                                    <th class="text-center" style="width: 100px;">
-                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderActive, "onclick")>
-                                            Teilnahme @sortIcon("active", sortCol, sortAsc)
-                                        </button>
-                                    </th>
-                                    <th class="text-end pe-3" style="width: 50px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if(participants.isEmpty) {
-                                    <tr><td colspan="6" class="text-center py-3 text-muted">Keine Teilnehmer angemeldet.</td></tr>
-                                }
-                                @participants.map { p =>
-                                    <tr class="@{if(!p.active) "text-muted opacity-75" else ""}">
-                                        <td class="ps-3">@p.id.startId</td>
-                                        <td class="fw-bold">@p.name</td>
-                                        <td>@p.club</td>
-                                        <td class="text-center">@p.rating</td>
-                                        <td class="text-center">
-                                            <div class="form-check d-flex justify-content-center">
-                                                <input @id(PantActivId, "onchange", p.id.toString) class="form-check-input" type="checkbox" data-sno='@p.id'  @{if(p.active) "checked" else ""}>
-                                            </div>
-                                        </td>
-                                        <td class="text-end pe-3">
-                                            <button class="btn btn-link btn-sm text-danger p-0" title="Entfernen">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Rounds List Section -->
-    <div class="card shadow-sm border-info">
+    <!-- Rounds List Section (Moved up) -->
+    <div class="card shadow-sm border-info mb-4">
         <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
             <h4 class="h5 mb-0 fw-bold"><i class="bi bi-layers me-2"></i>Spielrunden</h4>
             <button class="btn btn-dark btn-sm" @id(BtnStartRound, "onclick")>
@@ -164,6 +84,68 @@
                         }
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Participants Accordion (Moved down) -->
+    <div class="accordion mb-4 shadow-sm" id="participantsAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingParticipants">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParticipants" aria-expanded="true" aria-controls="collapseParticipants">
+                    <i class="bi bi-people me-2"></i>Teilnehmerliste (@participants.length)
+                </button>
+            </h2>
+            <div id="collapseParticipants" class="accordion-collapse collapse show" aria-labelledby="headingParticipants" data-bs-parent="#participantsAccordion">
+                <div class="accordion-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr class="small text-muted text-uppercase">
+                                    <th class="ps-3" style="width: 80px;">
+                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderSno, "onclick")>
+                                            SNr @sortIcon("sno", sortCol, sortAsc)
+                                        </button>
+                                    </th>
+                                    <th>
+                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
+                                            Name, Vorname @sortIcon("name", sortCol, sortAsc)
+                                        </button>
+                                    </th>
+                                    <th>
+                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderClub, "onclick")>
+                                            Verein @sortIcon("club", sortCol, sortAsc)
+                                        </button>
+                                    </th>
+                                    <th class="text-center" style="width: 80px;">
+                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
+                                            TTR @sortIcon("ttr", sortCol, sortAsc)
+                                        </button>
+                                    </th>
+                                    <th class="text-center" style="width: 80px;">
+                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderYear, "onclick")>
+                                            JG @sortIcon("year", sortCol, sortAsc)
+                                        </button>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if(participants.isEmpty) {
+                                    <tr><td colspan="5" class="text-center py-3 text-muted">Keine Teilnehmer aktiv.</td></tr>
+                                }
+                                @participants.map { p =>
+                                    <tr>
+                                        <td class="ps-3">@p.id.startId</td>
+                                        <td class="fw-bold">@p.name</td>
+                                        <td>@p.club</td>
+                                        <td class="text-center">@p.rating</td>
+                                        <td class="text-center">@p.birthYear</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

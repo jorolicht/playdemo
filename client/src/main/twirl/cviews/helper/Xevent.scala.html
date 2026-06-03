@@ -1,0 +1,6 @@
+@*
+ * Template for event
+ *@
+
+@(inEvent:String)
+@{ Html(s""" ${inEvent}="window.appEvent(this, event); false" """) }

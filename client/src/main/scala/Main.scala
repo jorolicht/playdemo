@@ -58,6 +58,8 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       case "multi"     => modeMulti()
       case "single"    => modeSingle()
       case "page"      => modePage(getData(gE(ParamId), "page", ""))
+      case "login"     => modeLogin()
+      case "register"  => pages.loadPage(pages.UserRegistration.name, "")
       case _           => debug(s"startWp -> unknown mode: ${mode}") 
     }
 
@@ -73,7 +75,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
     // Render components
     ContextHeader.render("")
-    Wordpress.render("")
+    //Wordpress.render("")
 
     TourneyDB.init(Global.pageId).map {
       case Right(_) =>
@@ -105,7 +107,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
     // Render components
     ContextHeader.render("")
-    Wordpress.render("")
+    //Wordpress.render("")
 
     // Start loading user and tournament
     (for {
@@ -137,6 +139,43 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
       case Left(err)   => debug(s"Error loading user or tournament: ${err}")
     }
+
+
+  def modeLogin(): Unit = 
+    import services.*
+    import shared.model.*
+    import shared.model.UserInfo
+    import shared.model.User
+    
+    debug(s"modeLogin -> playUrl: ${Global.playUrl}, homeUrl: ${Global.homeUrl}, lang: ${Global.lang}, nonce: ${Global.wpNonce}, pageId: ${Global.pageId}")
+
+    ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl).map {
+      case Right(ui) => 
+        debug(s"User loaded: ${ui}")
+        if (ui.user_id > 0) {
+            Global.user = Some(User(
+              id = ("", ui.user_id),
+              username = ui.username,
+              email = ui.email,
+              firstname = ui.firstname,
+              lastname = ui.lastname,
+              org = ui.club,
+              picUrl = ui.avatar_url,
+              description = ui.description,
+              roles = ui.roles
+            ))
+        } 
+        pages.loadPage(pages.UserLogin.name, "")
+
+      case Left(err) => 
+        debug(s"Error loading user: ${err}")
+        pages.loadPage(pages.UserLogin.name, "")
+    }  
+
+
+
+
+
 
 
   def startPlay() : Unit = 

@@ -10,10 +10,11 @@ import shared.MainIds.*
 import shared.model.*
 import dialogs.*
 
-object Registration extends BasePage with JsWrapper:
-  def name = PageNameTyp("Registration")
+object PlayerRegistration extends BasePage with JsWrapper:
+  def name = PageNameTyp("PlayerRegistration")
 
   val BtnAddParticipant: HtmlId = genId(name)
+  val BtnUploadCsv:      HtmlId = genId(name)
   val SelectComp:        HtmlId = genId(name)
 
   // Header IDs for sorting
@@ -45,10 +46,10 @@ object Registration extends BasePage with JsWrapper:
     selection.competition match
       case Some(c) => 
         val participants = sortParticipants(c.pants.toSeq)
-        setMain(cviews.pages.html.Registration(selection, competitions, participants, sortCol, sortAsc))
+        setMain(cviews.pages.html.PlayerRegistration(selection, competitions, participants, sortCol, sortAsc))
         true
       case None => 
-        setMain(cviews.pages.html.Registration(selection, competitions, Seq.empty, sortCol, sortAsc))
+        setMain(cviews.pages.html.PlayerRegistration(selection, competitions, Seq.empty, sortCol, sortAsc))
         true
 
   private def sortParticipants(pants: Seq[Pant]): Seq[Pant] =
@@ -84,13 +85,18 @@ object Registration extends BasePage with JsWrapper:
       case `BtnAddParticipant` =>
         handleAddParticipant()
 
+      case `BtnUploadCsv` =>
+        debug("PlayerRegistration: CSV Upload clicked")
+        // Placeholder for CSV upload logic - as requested only to add the button
+        dom.window.alert("CSV Upload Funktion wird demnächst implementiert.")
+
       case id if id.id.startsWith(IdCheckActive.id) =>
         val snoStr = elem.getAttribute("data-sno")
         val active = elem.asInstanceOf[dom.html.Input].checked
         updateParticipation(snoStr, active)
 
       case _ => 
-        debug(s"Registration handleEvent: ${elem.id}")
+        debug(s"PlayerRegistration handleEvent: ${elem.id}")
 
   private def toggleSort(col: String): Unit =
     if (sortCol == col) sortAsc = !sortAsc

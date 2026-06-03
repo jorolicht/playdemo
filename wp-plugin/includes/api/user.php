@@ -12,7 +12,120 @@ add_action('rest_api_init', function () {
         'callback' => 'playdemo_api_callback_user',
         'permission_callback' => 'playdemo_api_create_get_permissions_check' 
     ]);
+
+    // Endpunkt: LOGIN
+    register_rest_route('playdemo/v1', '/auth/login', array(
+        'methods' => 'POST',
+        'callback' => 'pd_api_login_handler',
+        'permission_callback' => '__return_true',
+    ));
+
+    // Endpunkt: LOGOUT
+    register_rest_route('playdemo/v1', '/auth/logout', array(
+        'methods' => 'POST',
+        'callback' => 'pd_api_logout_handler',
+        'permission_callback' => '__return_true',
+    ));
+
+    // Endpunkt: REGISTER
+    register_rest_route('playdemo/v1', '/auth/register', array(
+        'methods' => 'POST',
+        'callback' => 'pd_api_register_user',
+        'permission_callback' => '__return_true',
+    ));
+    
+    // Endpunkt: VERIFY
+    register_rest_route('playdemo/v1', '/auth/verify', array(
+        'methods' => 'POST',
+        'callback' => 'pd_api_verify_handler',
+        'permission_callback' => '__return_true',
+    ));
 });
+
+function pd_api_login_handler($request) {
+    $params = $request->get_json_params();
+
+    if ( empty($params['email']) || empty($params['password']) ) {
+        return new WP_Error('missing_params', 'Benutzername/Email und Passwort sind erforderlich.', array('status' => 400));
+    }
+
+    $creds = array(
+        'user_login'    => $params['email'],
+        'user_password' => $params['password'],
+        'remember'      => true
+    );
+
+    $user = wp_signon($creds, false);
+
+    if (is_wp_error($user)) {
+        return new WP_Error('login_failed', $user->get_error_message(), array('status' => 403));
+    }
+
+    $status = get_user_meta($user->ID, 'pd_status', true);
+    if ($status === 'email_pending' || $status === 'organizer_pending') {
+        wp_logout();
+        return new WP_Error('pending_approval', 'Dein Account wurde noch nicht vollständig bestätigt.', array('status' => 403));
+    }
+
+    return array('status' => 'success', 'message' => 'Login erfolgreich');
+}
+
+function pd_api_logout_handler() {
+    wp_logout();
+    return array('status' => 'success', 'message' => 'Erfolgreich abgemeldet.');
+}
+
+function pd_api_register_user($request) {
+    $params = $request->get_json_params();
+    
+    $user_id = wp_insert_user(array(
+        'user_login' => $params['email'],
+        'user_email' => $params['email'],
+        'display_name' => $params['name'],
+        'user_pass'  => $params['password'],
+        'role'       => $params['role']
+    ));
+
+    if (is_wp_error($user_id)) {
+        return new WP_Error('reg_failed', $user_id->get_error_message(), array('status' => 400));
+    }
+
+    update_user_meta($user_id, 'pd_status', 'email_pending');
+    update_user_meta($user_id, 'organizer', sanitize_text_field($params['organizer']));
+    
+    $hash = wp_generate_password(32, false);
+    update_user_meta($user_id, 'pd_verify_hash', $hash);
+
+    $verify_page_url = home_url("/verifikation/?uid=$user_id&hash=$hash");
+    
+    $subject = "Willkommen bei Playdemo - Bitte E-Mail bestätigen";
+    $message = "Hallo " . $params['name'] . ",\n\nbitte klicke auf den Link, um deinen Account zu aktivieren:\n$verify_page_url";
+    
+    wp_mail($params['email'], $subject, $message);
+
+    return array('status' => 'success', 'message' => 'Registrierung erfolgreich.');
+}
+
+function pd_api_verify_handler($request) {
+    $params = $request->get_json_params();
+    $uid = $params['uid'];
+    $hash = $params['hash'];
+    $saved_hash = get_user_meta($uid, 'pd_verify_hash', true);
+
+    if ($hash === $saved_hash && !empty($hash)) {
+        delete_user_meta($uid, 'pd_verify_hash');
+        $role = get_userdata($uid)->roles[0];
+
+        if ($role === 'turnier_admin') {
+            update_user_meta($uid, 'pd_status', 'organizer_pending');
+            return array('status' => 'success', 'message' => 'E-Mail bestätigt. Dein Account wird nun vom Administrator geprüft.');
+        } else {
+            update_user_meta($uid, 'pd_status', 'active');
+            return array('status' => 'success', 'message' => 'E-Mail bestätigt. Du kannst dich jetzt einloggen.');
+        }
+    }
+    return new WP_Error('verify_failed', 'Ungültiger oder abgelaufener Link.', array('status' => 403));
+}
 
 
 function playdemo_api_create_get_permissions_check( WP_REST_Request $request ) {
