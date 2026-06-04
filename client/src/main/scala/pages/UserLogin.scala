@@ -19,6 +19,8 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
   val CaptchaId:    HtmlId = genId(name)
   val BtnLogin:     HtmlId = genId(name)
   val BtnLogout:    HtmlId = genId(name)
+  val BtnPasskey:   HtmlId = genId(name)
+  val BtnPasskeyAdd: HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
     setMain(cviews.pages.html.UserLogin(Global.user))
@@ -30,13 +32,31 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
         doLogin()
       case `BtnLogout` =>
         doLogout()
+      case `BtnPasskey` =>
+        doPasskeyLogin()
+      case `BtnPasskeyAdd` =>
+        doPasskeyAdd()
       case _ => debug(s"UserLogin Event: ${elem.id}")
 
+  private def doPasskeyAdd(): Unit =
+    services.WebAuthnService.registerPasskey().map {
+      case Right(msg) => dom.window.alert(msg)
+      case Left(err)  => dom.window.alert(s"Passkey konnte nicht hinzugefügt werden: ${err.msg}")
+    }
+
   private def doLogout(): Unit =
-    debug("Logging out...")
     ajaxPost[String, String]("/wp-json/playdemo/v1/auth/logout", List(), "", host = Global.homeUrl).map { _ =>
       Global.resetUser
       dom.window.location.href = Global.homeUrl
+    }
+
+  private def doPasskeyLogin(): Unit =
+    services.WebAuthnService.loginPasskey().map {
+      case Right(msg) => 
+        debug(s"Passkey Login successful: $msg")
+        dom.window.location.href = Global.homeUrl
+      case Left(err) =>
+        dom.window.alert(s"Passkey Login fehlgeschlagen: ${err.msg}")
     }
 
   private def doLogin(): Unit =
