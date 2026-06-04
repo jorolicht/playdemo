@@ -14,8 +14,7 @@ import javax.swing.text.View
 // pagesMap maps page names to page objecpts   
 val pagesMap = List(pages.Home, Auth, Console, PgError,
                     ChatExample, 
-                    UseCase2, UseCase31, UseCase32, UseCase41, UseCase42,
-                    UseCase511, UseCase512, UseCase53, ViewOrganizer, MainMulti, TourneyNew, TourneyInfo, Mockup, CompetitionInfo, PlayerRegistration, UserRegistration, UserLogin, VerifyAccount, RoundAdmin, RoundDraw, RoundInput, RoundResult, PlayerList, ResultList, Certificate, MainSearch)
+                    ViewOrganizer, MainMulti, TourneyNew, TourneyInfo, Mockup, CompetitionInfo, PlayerRegistration, UserRegistration, UserLogin, VerifyAccount, RoundAdmin, RoundDraw, RoundInput, RoundResult, PlayerList, ResultList, Certificate, MainSearch)
                     .map(pg => pg.name -> pg).toMap              
 
 

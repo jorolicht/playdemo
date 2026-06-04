@@ -28,7 +28,6 @@
                     <ul class="dropdown-menu shadow" aria-labelledby="navbarTourney">
                         <li><a class="dropdown-item" @exec(ViewOrganizer, "")>Suche</a></li>
                         <li><a class="dropdown-item" @exec(TourneyNew, "")>Neu</a></li>
-                        <li><a class="dropdown-item" @exec(UseCase31, "edit")>Edit</a></li>
                     </ul>
                 </li>
 
@@ -38,29 +37,13 @@
                         Wettbewerbe
                     </a>
                     <ul class="dropdown-menu shadow" aria-labelledby="navbarComps">
-                        <li><a class="dropdown-item" @exec(UseCase32, "select")>Auswahl</a></li>
-                        <li><a class="dropdown-item" @exec(UseCase32, "new")>Neu</a></li>
-                        <li><a class="dropdown-item" @exec(UseCase32, "edit")>Edit</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li class="dropdown-submenu dropdown-dropend">
-                            <a class="dropdown-item dropdown-toggle" href="#">Runden</a>
-                            <ul class="dropdown-menu shadow">
-                                <li><a class="dropdown-item" @exec(UseCase41, "draw")>Auslosung</a></li>
-                                <li><a class="dropdown-item" @exec(UseCase41, "input")>Eingabe</a></li>
-                                <li><a class="dropdown-item" @exec(UseCase41, "view")>Anzeige</a></li>
-                            </ul>
-                        </li>
+                        <li><a class="dropdown-item" onclick="appLoadPage('TourneyInfo', '')">Auswahl</a></li>
                     </ul>
-                </li>
-
-                <!-- Spieler -->
-                <li class="nav-item">
-                    <a class="nav-link" @exec(UseCase511, "")>Spieler</a>
                 </li>
 
                 <!-- Ergebnisse -->
                 <li class="nav-item">
-                    <a class="nav-link" @exec(UseCase53, "")>Ergebnisse</a>
+                    <a class="nav-link" onclick="appLoadPage('ResultList', '')">Ergebnisse</a>
                 </li>
 
             </ul>

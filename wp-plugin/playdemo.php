@@ -99,7 +99,7 @@ function playdemo_render($atts) {
     $output .= '<span id="Main_DynContentId"></span>';
     $output .= '<span id="Main_NavbarId"></span>';
     $output .= '<div class="container-fluid mt-3">';
-    $output .= '   <div id="Main_ContentId" class="d-flex mt-2 mr-2 justify-content-center border border-secondary">';
+    $output .= '   <div id="Main_ContentId" class="d-flex mt-2 mr-2 justify-content-center">';
     $output .= '      Main Content';
     $output .= '   </div>';
     $output .= '</div>';

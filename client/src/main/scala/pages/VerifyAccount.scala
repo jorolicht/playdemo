@@ -2,6 +2,8 @@ package pages
 
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import base.*
 import shared.model.*
 import scala.scalajs.js

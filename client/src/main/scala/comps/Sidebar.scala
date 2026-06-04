@@ -12,10 +12,6 @@ object Sidebar extends BaseComp with base.JsWrapper:
   val AsideId:         HtmlId = genId(name)
   val LoginInfoId:     HtmlId = genId(name)
   val LoggedInAsId:    HtmlId = genId(name)
-  val UseCase3Id:      HtmlId = genId(name)  
-  val UseCase4Id:      HtmlId = genId(name)
-  val UseCase5Id:      HtmlId = genId(name)
-  val UseCase51Id:     HtmlId = genId(name)
 
   def updateUserInfo = 
     val validUser = Global.user != None

@@ -49,8 +49,28 @@ function pd_api_login_handler($request) {
         return new WP_Error('missing_params', 'Benutzername/Email und Passwort sind erforderlich.', array('status' => 400));
     }
 
+    // 1. Benutzer suchen (entweder per E-Mail oder per Login)
+    $user_obj = get_user_by('email', $params['email']);
+    if (!$user_obj) {
+        $user_obj = get_user_by('login', $params['email']);
+    }
+
+    if (!$user_obj) {
+        return new WP_Error('login_failed', 'Benutzer oder E-Mail-Adresse unbekannt.', array('status' => 403));
+    }
+
+    // 2. Status prüfen, bevor wir den eigentlichen Login versuchen
+    $status = get_user_meta($user_obj->ID, 'pd_status', true);
+    if ($status === 'email_pending') {
+        return new WP_Error('pending_email', 'Bitte bestätige zuerst deine E-Mail-Adresse (Link in der Willkommens-Mail).', array('status' => 403));
+    }
+    if ($status === 'organizer_pending') {
+        return new WP_Error('pending_approval', 'Dein Account wurde noch nicht vom Administrator freigeschaltet.', array('status' => 403));
+    }
+
+    // 3. Login Versuch
     $creds = array(
-        'user_login'    => $params['email'],
+        'user_login'    => $user_obj->user_login, // Wir nehmen den echten User-Login aus dem gefundenen Objekt
         'user_password' => $params['password'],
         'remember'      => true
     );
@@ -58,14 +78,12 @@ function pd_api_login_handler($request) {
     $user = wp_signon($creds, false);
 
     if (is_wp_error($user)) {
-        return new WP_Error('login_failed', $user->get_error_message(), array('status' => 403));
+        return new WP_Error('login_failed', 'Passwort ungültig.', array('status' => 403));
     }
 
-    $status = get_user_meta($user->ID, 'pd_status', true);
-    if ($status === 'email_pending' || $status === 'organizer_pending') {
-        wp_logout();
-        return new WP_Error('pending_approval', 'Dein Account wurde noch nicht vollständig bestätigt.', array('status' => 403));
-    }
+    // EXPLIZIT: Cookies für die gesamte Domain setzen
+    wp_set_current_user($user->ID);
+    wp_set_auth_cookie($user->ID, true);
 
     return array('status' => 'success', 'message' => 'Login erfolgreich');
 }

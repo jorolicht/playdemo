@@ -60,6 +60,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       case "page"      => modePage(getData(gE(ParamId), "page", ""))
       case "login"     => modeLogin()
       case "register"  => pages.loadPage(pages.UserRegistration.name, "")
+      case "verify"    => pages.loadPage(pages.VerifyAccount.name, "")
       case _           => debug(s"startWp -> unknown mode: ${mode}") 
     }
 
