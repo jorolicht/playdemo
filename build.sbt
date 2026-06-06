@@ -22,7 +22,7 @@ lazy val root = (project in file("."))
 val genMsgFiles = taskKey[Unit]("Generate Message Files")  
 val convertMessagesToJson = taskKey[Seq[File]]("Converts message files to JSON")
 
-lazy val copyClientViteFiles = taskKey[Unit]("Copies main.js and main.js.map to client/vite")
+lazy val syncClientWpFiles = taskKey[Unit]("Copies main.js and main.js.map to wordpress")
 
 lazy val server = project
   .settings(
@@ -89,14 +89,12 @@ lazy val server = project
         
         val generatedFile = new File(msgFile.getAbsolutePath + "_json")
         val lang = msgFile.name.split('.').last
-        val targetFileVite = baseDirectory.value / ".." / "client" / "vite" / "assets" / "data" / ("msgs_" + lang + ".json")
         val targetFileSrv  = baseDirectory.value / ".." / "server" / "public" / "data" / ("msgs_" + lang + ".json")
         val targetFileWp   = baseDirectory.value / ".." / "wp-plugin" / "data" / ("msgs_" + lang + ".json")
 
         IO.copyFile(generatedFile, targetFileWp)
         IO.copyFile(generatedFile, targetFileSrv)
-        IO.move(generatedFile, targetFileVite)
-        log.info(s"Generated ${targetFileVite.getAbsolutePath} und ${targetFileSrv.getAbsolutePath}")
+        log.info(s"Generated ${targetFileWp.getAbsolutePath} und ${targetFileSrv.getAbsolutePath}")
         targetFileSrv
       }
     },
@@ -104,8 +102,8 @@ lazy val server = project
     scalaJSProjects := Seq(client),
     Assets / pipelineStages  := Seq(scalaJSPipeline),
     pipelineStages := Seq(digest, gzip),
-    // triggers scalaJSPipeline and copyClientViteFiles when using compile or continuous compilation
-    Compile / compile := ((Compile / compile) dependsOn (scalaJSPipeline, copyClientViteFiles)).value,
+    // triggers scalaJSPipeline and syncClientWpFiles when using compile or continuous compilation
+    Compile / compile := ((Compile / compile) dependsOn (scalaJSPipeline, syncClientWpFiles)).value,
     
     libraryDependencies += guice,
     libraryDependencies += jdbc,
@@ -121,7 +119,7 @@ lazy val server = project
     libraryDependencies += "org.typelevel" %% "cats-core" % "2.12.0",
     libraryDependencies += "org.apache.pekko" %% "pekko-stream-typed" % "1.0.2",
     libraryDependencies += "com.lihaoyi" %% "sourcecode" % "0.4.2",
-    copyClientViteFiles := {
+    syncClientWpFiles := {
       // make sure that main.js and main.js.map are created before copying
       (client / Compile / fastLinkJS).value
       (client / Compile / fullLinkJS).value
@@ -136,12 +134,9 @@ lazy val server = project
       val wpJsDestination2 = file("server/docker/wp_data/wp-content/plugins/playdemo/js")
       val wpCssDestination2 = file("server/docker/wp_data/wp-content/plugins/playdemo/css")
 
-      val viteDestinationDir = baseDirectory.value / ".." / "client" / "vite"
-      
       val wpPluginDir = baseDirectory.value / ".." / "wp-plugin"
       val dockerWpPluginDir = baseDirectory.value / "docker" / "wp_data" / "wp-content" / "plugins" / "playdemo"
 
-      IO.copyDirectory(clientTargetDir, viteDestinationDir)
       IO.copyDirectory(clientTargetDir, wpJsDestination)
       IO.copyDirectory(clientCssSource, wpCssDestination)
       IO.copyDirectory(clientTargetDir, wpJsDestination2)
@@ -151,7 +146,7 @@ lazy val server = project
       IO.copyFile(wpPluginDir / "playdemo.php", dockerWpPluginDir / "playdemo.php")
       IO.copyDirectory(wpPluginDir / "includes", dockerWpPluginDir / "includes")
 
-      log.info(s"Copied files to vite and wordpress (including php and includes)")
+      log.info(s"Copied files to wordpress (including php and includes)")
     },
     Universal / dist := {
       // Build ZIP explicitly

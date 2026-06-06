@@ -40,7 +40,6 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     Messages.initMsg(version, Global.dataUrl, Global.lang).map {
       case true  => mode.toLowerCase() match 
         case "play" => startPlay()
-        case "vite" => startVite()
         case _      => startWp(mode.toLowerCase())
        case false => println("Main program failed to initialize")  
     }
@@ -169,16 +168,6 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     // Sidebar.render("") - Removed as requested
 
     appLoadPage(usecase, param)  
-
-
-
-  def startVite(): Unit =
-    setHtml(gE(ContentId), "Start successful")
-
-
-  def sayHello(name: String): Unit = {
-    println(s"Hallo $name")
-  }
 
 
   def handleGoogleCredential(credentials: String): Unit = pages.Auth.googleLogin(credentials)
