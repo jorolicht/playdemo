@@ -9,7 +9,7 @@ import scala.scalajs.js.annotation.*
 
 import services.{ ComWrapper, ClubDB, PlayerDB, CompetitionDB, TourneyDB }
 import base.{ Global, JsWrapper, _ }
-import comps.{ BaseComp, Navbar, Sidebar, ContextHeader }
+import comps.{ BaseComp, Navbar, Sidebar, ContextHeader, Footer }
 
 import shared.basic.*
 import shared.MainIds.*
@@ -54,14 +54,52 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     Global.wpNonce = getData(gE(ParamId), "nonce", "")
     Global.pageId  = getData(gE(ParamId), "pageid", 0)
 
-    mode match {
-      case "multi"     => modeMulti()
-      case "single"    => modeSingle()
-      case "page"      => modePage(getData(gE(ParamId), "page", ""))
-      case "login"     => modeLogin()
-      case "register"  => pages.loadPage(pages.UserRegistration.name, "")
-      case "verify"    => pages.loadPage(pages.VerifyAccount.name, "")
-      case _           => debug(s"startWp -> unknown mode: ${mode}") 
+    initApp(mode)
+
+  def initApp(mode: String): Unit =
+    import services.*
+    import shared.model.*
+    import shared.model.UserInfo
+    import shared.model.User
+    
+    debug(s"initApp -> mode: $mode, playUrl: ${Global.playUrl}")
+
+    ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl).map {
+      case Right(ui) => 
+        if (ui.user_id > 0) {
+            Global.user = Some(User(
+              id = ("", ui.user_id),
+              username = ui.username,
+              email = ui.email,
+              firstname = ui.firstname,
+              lastname = ui.lastname,
+              org = ui.club,
+              picUrl = ui.avatar_url,
+              description = ui.description,
+              roles = ui.roles
+            ))
+        } 
+        
+        // Render Framework Structure
+        Navbar.render()
+        Footer.render()
+        
+        // Route based on mode
+        mode match {
+          case "login"     => pages.loadPage(pages.UserLogin.name, "")
+          case "register"  => pages.loadPage(pages.UserRegistration.name, "")
+          case "verify"    => pages.loadPage(pages.VerifyAccount.name, "")
+          case "multi"     => modeMulti()
+          case "single"    => modeSingle()
+          case "page"      => modePage(getData(gE(ParamId), "page", ""))
+          case _           => pages.loadPage(pages.Home.name, "")
+        }
+
+      case Left(err) => 
+        debug(s"initApp -> Error loading user info: ${err}")
+        Navbar.render()
+        Footer.render()
+        pages.loadPage(pages.Home.name, "")
     }
 
   def modePage(page: String): Unit =
@@ -72,11 +110,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     import services.*
     import shared.model.*
 
-    debug(s"modeSingle -> playUrl: ${Global.playUrl}, homeUrl: ${Global.homeUrl}, lang: ${Global.lang}, nonce: ${Global.wpNonce}, pageId: ${Global.pageId}")
-
-    // Render components
-    ContextHeader.render("")
-    //Wordpress.render("")
+    debug(s"modeSingle -> playUrl: ${Global.playUrl}, pageId: ${Global.pageId}")
 
     TourneyDB.init(Global.pageId).map {
       case Right(_) =>
@@ -97,86 +131,24 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
   def modeMulti(): Unit = 
     import services.*
     import shared.model.*
-    import shared.model.UserInfo
-    import shared.model.User
     import cats.data.EitherT
     import cats.implicits._ 
 
-    Global.pageId  = getData(gE(ParamId), "pageid", 0)
-    
-    debug(s"modeMulti -> playUrl: ${Global.playUrl}, homeUrl: ${Global.homeUrl}, lang: ${Global.lang}, nonce: ${Global.wpNonce}, pageId: ${Global.pageId}")
+    debug(s"modeMulti -> pageId: ${Global.pageId}")
 
-    // Render components
-    ContextHeader.render("")
-    //Wordpress.render("")
-
-    // Start loading user and tournament
-    (for {
-      user        <- EitherT(ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl))
-      timestamp   <- EitherT(TourneyDB.init(Global.pageId))
-    } yield (user, timestamp)).value.map {
-      case Right((ui, ts))  => 
-        debug(s"User loaded: ${ui}, Tourney initialized, timestamp: $ts")
-        if (ui.user_id > 0) {
-           Global.user = Some(User(
-             id = ("", ui.user_id),
-             username = ui.username,
-             email = ui.email,
-             firstname = ui.firstname,
-             lastname = ui.lastname,
-             org = ui.club,
-             picUrl = ui.avatar_url,
-             description = ui.description,
-             roles = ui.roles
-           ))
-        }
-        
+    TourneyDB.init(Global.pageId).map {
+      case Right(ts) => 
+        debug(s"Tourney initialized, timestamp: $ts")
         // Navigation logic based on tourney.ident
         if (TourneyDB.tourney.ident == "IGNORE") {
           pages.loadPage(pages.MainMulti.name, "")
         } else {
           pages.loadPage(pages.TourneyInfo.name, "")
         }
-
-      case Left(err)   => debug(s"Error loading user or tournament: ${err}")
-    }
-
-
-  def modeLogin(): Unit = 
-    import services.*
-    import shared.model.*
-    import shared.model.UserInfo
-    import shared.model.User
-    
-    debug(s"modeLogin -> playUrl: ${Global.playUrl}, homeUrl: ${Global.homeUrl}, lang: ${Global.lang}, nonce: ${Global.wpNonce}, pageId: ${Global.pageId}")
-
-    ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl).map {
-      case Right(ui) => 
-        debug(s"User loaded: ${ui}")
-        if (ui.user_id > 0) {
-            Global.user = Some(User(
-              id = ("", ui.user_id),
-              username = ui.username,
-              email = ui.email,
-              firstname = ui.firstname,
-              lastname = ui.lastname,
-              org = ui.club,
-              picUrl = ui.avatar_url,
-              description = ui.description,
-              roles = ui.roles
-            ))
-        } 
-        pages.loadPage(pages.UserLogin.name, "")
-
       case Left(err) => 
-        debug(s"Error loading user: ${err}")
-        pages.loadPage(pages.UserLogin.name, "")
-    }  
-
-
-
-
-
+        debug(s"Error loading tournament: ${err}")
+        pages.loadPage(pages.MainMulti.name, "")
+    }
 
 
   def startPlay() : Unit = 

@@ -2,65 +2,83 @@
 @import cviews.helper.html.*
 @import comps.Navbar.*
 @import pages.*
+@import base.Global
 
 @()
-<nav class="navbar navbar-expand-lg navbar-dark bg-secondary shadow-sm pt-0 pb-0">
+<style>
+    .navbar-custom {
+        background-color: #336699 !important;
+    }
+    .navbar-brand-large {
+        font-size: 1.5rem !important;
+    }
+    .nav-link-bold {
+        font-weight: 700 !important;
+    }
+    .btn-start-custom {
+        padding: 0.25rem 1rem !important;
+        border-width: 1px !important;
+        font-size: inherit !important;
+    }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm sticky-top">
     <div class="container-fluid">
-        <!-- Navbar Brand -->
-        <a class="navbar-brand ps-3" @exec(Home, "") style="display:none">
-            <img src="@{base.Global.imgUrl}logo.png" alt="Logo" width="47" height="32" class="d-inline-block align-top">
+        <!-- Logo und Titel -->
+        <a class="navbar-brand d-flex align-items-center navbar-brand-large" href="javascript:appLoadPage('Home', '')">
+            <img src="@{Global.imgUrl}logo.png" alt="Logo" width="70" height="47" class="d-inline-block align-text-top me-2">
+            <span class="fw-bold">TurnierService</span>
         </a>
-        
-        <!-- Burger Icon for Mobile -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbarContent" aria-controls="mainNavbarContent" aria-expanded="false" aria-label="Toggle navigation">
+
+        <!-- Burger Icon für Mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- Menu Content -->
-        <div class="collapse navbar-collapse" id="mainNavbarContent">
-            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-                
-                <!-- Turnier Dropdown -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarTourney" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Turnier
-                    </a>
-                    <ul class="dropdown-menu shadow" aria-labelledby="navbarTourney">
-                        <li><a class="dropdown-item" @exec(ViewOrganizer, "")>Suche</a></li>
-                        <li><a class="dropdown-item" @exec(TourneyNew, "")>Neu</a></li>
-                    </ul>
-                </li>
-
-                <!-- Wettbewerbe Dropdown -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarComps" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Wettbewerbe
-                    </a>
-                    <ul class="dropdown-menu shadow" aria-labelledby="navbarComps">
-                        <li><a class="dropdown-item" onclick="appLoadPage('TourneyInfo', '')">Auswahl</a></li>
-                    </ul>
-                </li>
-
-                <!-- Ergebnisse -->
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <!-- Linke Seite -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" onclick="appLoadPage('ResultList', '')">Ergebnisse</a>
+                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('Home', 'functions')">Funktionen</a>
                 </li>
-
+                <li class="nav-item">
+                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('Home', 'pricing')">Support/Kosten</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle nav-link-bold" href="#" id="navbarTools" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Tools
+                    </a>
+                    <ul class="dropdown-menu shadow" aria-labelledby="navbarTools">
+                        <li><a class="dropdown-item" href="javascript:appLoadPage('MainMulti', '')">Wordpress-Plugin</a></li>
+                        <li><a class="dropdown-item" href="javascript:appLoadPage('Mockup', '')">Excel-Vorlage</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item ms-lg-3 d-flex align-items-center">
+                    <a class="btn btn-primary fw-bold btn-start-custom" href="javascript:appLoadPage('MainMulti', '')">STARTEN</a>
+                </li>
             </ul>
 
-            <!-- Right side: User Profile / Console -->
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 me-3" style="display:none">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user fa-fw"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="navbarDropdown">
-                        <li><a @id(ShowLoginId, "onclick") class="dropdown-item">@gM("app.btn.login")</a></li>
-                        <li><a @id(DoLogoutId, "onclick")  class="dropdown-item">@gM("app.btn.logout")</a></li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li><a @id(ConsoleClickId, "onclick") class="dropdown-item">@gM("app.btn.console")</a></li>
-                    </ul>
-                </li>
+            <!-- Rechte Seite: User / Login -->
+            <ul class="navbar-nav align-items-center">
+                @if(Global.user.isDefined) {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center nav-link-bold" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle fs-5 me-2"></i>
+                            @Global.user.get.username
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="javascript:appLoadPage('UserLogin', '')">Profil / Passkeys</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" @id(DoLogoutId, "onclick")>Abmelden</a></li>
+                        </ul>
+                    </li>
+                } else {
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light btn-sm fw-bold" href="javascript:appLoadPage('UserLogin', '')">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                        </a>
+                    </li>
+                }
             </ul>
         </div>
     </div>

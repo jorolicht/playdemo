@@ -1,20 +1,22 @@
-@import shared.DomTypes.HtmlId
-@import cviews.helper.html._
-@import shared.MainIds.* 
-@import comps.Footer.*
-
 @()
-<div @id(FooterId) class="container-fluid px-4 pt-2 pb-2 bg-secondary">
-    <div class="d-flex align-items-center justify-content-between small">
-        <div class="text-muted">
-            @gM("+copyright")
-            <a href='#' @id(ConsoleClickId) data-command='' style="text-decoration:none; color:black;" onclick="Addon.console(); false">&copy;</a>
-            @gM("+website")
-        </div>
-        <div>
-            <a href="#" style="color: black;">Privacy Policy</a>
-            &middot;
-            <a href="#" style="color: black;">Terms &amp; Conditions</a>
+<footer class="footer mt-auto py-4 bg-light border-top">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <h6 class="fw-bold">TurnierService</h6>
+                <p class="small text-muted">Die moderne SPA-Lösung für deine Turnierverwaltung. Schnell, sicher und plattformunabhängig.</p>
+            </div>
+            <div class="col-md-8 text-md-end">
+                <ul class="list-inline mb-0">
+                    <li class="list-inline-item me-3"><a href="javascript:appLoadPage('Home', 'impressum')" class="text-decoration-none text-muted small">Impressum</a></li>
+                    <li class="list-inline-item me-3"><a href="javascript:appLoadPage('Home', 'privacy')" class="text-decoration-none text-muted small">Datenschutz</a></li>
+                    <li class="list-inline-item me-3"><a href="javascript:appLoadPage('Home', 'contact')" class="text-decoration-none text-muted small">Kontakt</a></li>
+                    <li class="list-inline-item"><a href="javascript:appLoadPage('Home', 'tos')" class="text-decoration-none text-muted small">AGB</a></li>
+                </ul>
+                <div class="mt-2 text-muted" style="font-size: 0.75rem;">
+                    &copy; 2026 TurnierService. Realisiert mit Scala.js & WordPress.
+                </div>
+            </div>
         </div>
     </div>
-</div>
+</footer>

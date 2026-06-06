@@ -15,8 +15,11 @@ object ContextHeader extends BaseComp with JsWrapper:
       services.RoundDB.rounds.toSeq.filter(r => r != null && r.coId == c.id && !r.deleted)
     }.getOrElse(Seq.empty)
     
-    setHtml(gE(NavbarId), cviews.comps.html.ContextHeader(Global.currentSelection, comps, rounds))
+    setHtml(gE(ContextHeaderId), cviews.comps.html.ContextHeader(Global.currentSelection, comps, rounds))
     true
+
+  def hide(): Unit =
+    setHtml(gE(ContextHeaderId), "")
 
   override def handleEvent(elem: HTMLElement, event: dom.Event): Unit = 
     debug(s"ContextHeader handleEvent: ${elem.id}")

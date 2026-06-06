@@ -22,6 +22,7 @@ object MainIds:
   val WordpressId  : HtmlId = genId(name)
   val DynContentId : HtmlId = genId(name)
   val NavbarId     : HtmlId = genId(name)
+  val ContextHeaderId: HtmlId = genId(name)
   val ParamId      : HtmlId = genId(name)
   val ContentId    : HtmlId = genId(name)
   val SidebarId    : HtmlId = genId(name)

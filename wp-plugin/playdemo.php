@@ -97,15 +97,18 @@ function playdemo_render($atts) {
     $tourney = isset($_GET['tourney']) ? $_GET['tourney'] : '';
 
     $output = '<span id="Main_ParamId" data-page="' . esc_attr($atts['page']) . '" data-dataurl="' . esc_url($dataUrl) . '" data-imgurl="' . esc_url($imgUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" data-pageid="' . esc_attr($pageId) . '" ></span>';
-    $output .= '<span id="Main_DynContentId"></span>';
     $output .= '<span id="Main_NavbarId"></span>';
-    $output .= '<div class="container-fluid mt-3">';
-    $output .= '   <div id="Main_ContentId" class="d-flex mt-2 mr-2 justify-content-center">';
-    $output .= '      Main Content';
+    $output .= '<span id="Main_ContextHeaderId"></span>';
+    $output .= '<div id="Main_AppWrapper" class="d-flex flex-column min-vh-100">';
+    $output .= '   <div id="Main_ContentId" class="flex-grow-1">';
+    $output .= '      <div class="d-flex mt-5 justify-content-center"><span>Wird geladen...</span></div>';
     $output .= '   </div>';
+    $output .= '   <span id="Main_FooterId"></span>';
     $output .= '</div>';
     $output .= '<span id="Footer_ConsoleClickId" data-command=""></span>';
+    $output .= '<span id="Main_DynContentId"></span>';
     $output .= '<script type="module">';
+
     $output .= 'import { startApp } from "' . esc_url($jsUrl) . '";';
     $output .= 'startApp("001DE1970-01", "' . esc_attr($atts['mode']) . '", "' . esc_attr($logLevel) . '", "' . esc_attr($tourney) . '");';
     $output .= '</script>';

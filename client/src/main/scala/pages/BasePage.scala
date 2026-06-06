@@ -6,10 +6,9 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import org.scalajs.dom.Event
 import org.scalajs.dom.raw.HTMLElement
 import base.Logging.* 
-import comps.Sidebar
+import comps.{Sidebar, ContextHeader}
 import shared.basic.AppError
 import shared.PageNameTyp.PageName
-import javax.swing.text.View
 
 // pagesMap maps page names to page objecpts   
 val pagesMap = List(pages.Home, Auth, Console, PgError,
@@ -22,6 +21,8 @@ def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, asy
   //debug(s"loadPage -> ${pagesMap.mkString(":")}")
   try
     debug(s"loadPage -> pageName:${pageName} param:${param}")
+    ContextHeader.hide()
+    
     if async then
       pagesMap(pageName).renderAsync(param).map { success =>
         if success then
