@@ -8,17 +8,6 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * Represents a tournament with all its related data.
  */
-enum TourneyTyp:
-  case Unknown
-  case TableTennis
-
-object TourneyTyp:
-  given rw: ReadWriter[TourneyTyp] =
-    readwriter[String].bimap[TourneyTyp](
-      _.toString,
-      s => try TourneyTyp.valueOf(s) catch { case _: Exception => TourneyTyp.Unknown }
-    )
-
 case class Tourney(
   var id:           Int,             // Wordpress Page Id, 0 for new entries
   var name:         String,          // Tournament name
@@ -26,7 +15,7 @@ case class Tourney(
   var startDate:    Int,             // Format: yyyymmdd
   var endDate:      Int,
   var ident:        String,          // clickTT id
-  var typ:          TourneyTyp,
+  var category:     CompCategory,
   var contact:      Option[Contact] = None,
   var address:      Option[Address] = None,
   var version:      Int = 0,
@@ -65,7 +54,7 @@ case class Tourney(
   // ===========================================================================
 
   /** Adds a new competition to the tournament. */
-  def addCompetition(name: String, typ: CompTyp, startDate: String, doSync: Boolean = true): Either[AppError, Competition] =
+  def addCompetition(name: String, typ: CompTyp, category: CompCategory, startDate: String, doSync: Boolean = true): Either[AppError, Competition] =
     val firstNull = competitions.indexOf(null)
     val index = if (firstNull != -1) firstNull else competitions.indexWhere(c => c != null && c.deleted)
     
@@ -74,6 +63,7 @@ case class Tourney(
         id = CompId(index + 1), 
         name = name, 
         typ = typ, 
+        category = category,
         startDate = startDate, 
         status = CompStatus.READY,
         startRound = None,
@@ -533,7 +523,7 @@ object Tourney:
     startDate = 0, 
     endDate = 0, 
     ident = "", 
-    typ = TourneyTyp.Unknown,
+    category = CompCategory.UNKNOWN,
     contact = None,
     address = None,
     version = 0,

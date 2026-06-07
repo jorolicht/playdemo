@@ -16,7 +16,9 @@ object Home extends BasePage with JsWrapper:
       case "welcome"  => setMain(s"""<div class='d-flex mt-5 justify-content-center'><h5>WELCOME</h5></div>""")
       case "start"    => setMain(s"""<div class='d-flex mt-5 justify-content-center'><h5>START</h5></div>""")
       case "verified" => setMain(s"""<div class='d-flex mt-5 justify-content-center'><h5>VERIFIED</h5></div>""")
-      case _          => setMain(s"""<div class='d-flex mt-5 justify-content-center'><h5>${param}</h5></div>""")
+      case _          => 
+        setMain(cviews.pages.html.Home(Global.user))
+    true
 
 
   override def handleEvent(elem: HTMLElement, event: dom.Event) =   

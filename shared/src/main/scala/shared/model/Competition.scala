@@ -5,6 +5,19 @@ import shared.basic.AppError
 import scala.collection.mutable. { ArrayBuffer, Map, Stack }
 
 
+enum CompCategory:
+  case UNKNOWN
+  case TT  // Table Tennis
+
+object CompCategory:
+  import shared.basic.Pickle.*
+
+  given rw: ReadWriter[CompCategory] =
+    readwriter[String].bimap[CompCategory](
+      _.toString,
+      s => try CompCategory.valueOf(s) catch { case _: Exception => CompCategory.UNKNOWN }
+    )
+
 enum CompTyp(val id: Int):
   case UNKN   extends CompTyp(0)
   case SINGLE extends CompTyp(1)
@@ -123,7 +136,8 @@ case class Competition(
   id:                   CompId,
   var name:             String,
   var typ:              CompTyp,
-  var startDate:        String,
+  var category:         CompCategory,
+  var startDate:        String, // Format: yyyy-MM-dd HH:mm:ss
   var status:           CompStatus,
   var startRound:       Option[RoundId] = None,
   var activ:            Boolean = true,
@@ -154,7 +168,7 @@ case class Competition(
 
 object Competition:
   given rw: ReadWriter[Competition] = macroRW
-  def dummy: Competition = Competition(CompId(0), "", CompTyp.UNKN, "", CompStatus.UNKN)
+  def dummy: Competition = Competition(CompId(0), "", CompTyp.UNKN, CompCategory.UNKNOWN, "", CompStatus.UNKN)
 
 
 object CompDB:

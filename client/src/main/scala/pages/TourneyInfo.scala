@@ -48,16 +48,19 @@ object TourneyInfo extends BasePage with JsWrapper:
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
       case `BtnAddComp` => 
-        DlgCompetition.show().map {
+        val currentCategory = Global.currentSelection.tourney.map(_.category).getOrElse(CompCategory.TT)
+        DlgCompetition.show(currentCategory).map {
           case Right(res) => 
-            debug(s"Adding competition: ${res.competition.name}")
+            val comp = res.competition
+            debug(s"Adding competition: ${comp.name}")
             services.TourneyDB.tourney.addCompetition(
-              res.competition.name, 
-              res.competition.typ, 
-              res.competition.startDate.replace("-", "")
+              comp.name, 
+              comp.typ, 
+              comp.category,
+              comp.startDate.replace("-", "")
             ) match {
-              case Right(c) => 
-                info(s"Competition added: ${c.name}")
+              case Right(newComp) => 
+                info(s"Competition added: ${newComp.name}")
                 render() // Re-render page
               case Left(err) => 
                 error(s"Failed to add competition: ${err.msgCode}")

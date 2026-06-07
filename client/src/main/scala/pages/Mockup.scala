@@ -15,12 +15,12 @@ object Mockup extends BasePage with JsWrapper:
       startDate = 20260515,
       endDate = 20260517,
       ident = "STM26",
-      typ = TourneyTyp.TableTennis
+      category = CompCategory.TT
     )
 
-    val comp1 = Competition(CompId(1), "Herren A Einzel", CompTyp.SINGLE, "20260515", CompStatus.RUN)
-    val comp2 = Competition(CompId(2), "Herren B Einzel", CompTyp.SINGLE, "20260515", CompStatus.CFG)
-    val comp3 = Competition(CompId(3), "Damen Einzel", CompTyp.SINGLE, "20260516", CompStatus.FIN)
+    val comp1 = Competition(CompId(1), "Herren A Einzel", CompTyp.SINGLE, CompCategory.TT, "2026-05-15 09:00:00", CompStatus.RUN)
+    val comp2 = Competition(CompId(2), "Herren B Einzel", CompTyp.SINGLE, CompCategory.TT, "2026-05-15 11:00:00", CompStatus.CFG)
+    val comp3 = Competition(CompId(3), "Damen Einzel", CompTyp.SINGLE, CompCategory.TT, "2026-05-16 14:00:00", CompStatus.FIN)
     
     // Add participants to comp3 for ResultList testing
     comp3.pants += Pant(SNO.single(PlayerId(10)), "Siegfried, Siggi", "TTV Winner", 1800, place = (1, 0), status = PantStatus.FINI)

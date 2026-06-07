@@ -10,6 +10,7 @@ object RoundResult extends BasePage with JsWrapper:
   def render(param: String = ""): Boolean = 
     Global.currentSelection.round match
       case Some(r) => 
+        comps.ContextHeader.render()
         val groups = r.groups.toSeq
         setMain(cviews.comps.html.RoundLayout(r, "RES")(cviews.pages.html.RoundResult(r, groups)))
         true

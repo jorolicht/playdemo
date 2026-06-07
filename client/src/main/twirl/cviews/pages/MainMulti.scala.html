@@ -9,8 +9,12 @@
     <div class="hero-section text-white d-flex align-items-center justify-content-center text-center shadow-lg mb-5">
         <div class="hero-overlay"></div>
         <div class="hero-content px-3 py-5" style="z-index: 2;">
-            <h1 class="display-3 fw-bold mb-3">Willkommen zur Turnierverwaltung</h1>
-            <p class="lead mb-4 fs-4">Professionelle Organisation für Ihre sportlichen Events – schnell, einfach und übersichtlich.</p>
+            <h1 class="display-4 fw-bold mb-3 hero-title-custom">Willkommen zur Turnierverwaltung</h1>
+            <p class="lead mb-4 fs-5">Professionelle Organisation für Ihre sportlichen Events – schnell, einfach und übersichtlich.</p>
+            <p class="small opacity-75 mx-auto" style="max-width: 600px;">
+                Verwalten Sie Ihre Turniere und Wettbewerbe effizient an einem zentralen Ort. 
+                Vom ersten Teilnehmer bis zur Siegerehrung unterstützen wir Sie bei jedem Schritt.
+            </p>
         </div>
     </div>
 
@@ -20,13 +24,13 @@
             <!-- Create Tournament -->
             <div class="col-md-4">
                 <div class="card h-100 border-0 shadow hover-lift">
-                    <div class="card-body text-center p-4">
+                    <div class="card-body text-center p-4 d-flex flex-column">
                         <div class="feature-icon bg-primary bg-gradient text-white mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
                             <i class="bi bi-trophy fs-3"></i>
                         </div>
                         <h3 class="h4 mb-3">Neues Turnier</h3>
-                        <p class="text-muted">Erstellen Sie ein komplettes Turnier mit mehreren Wettbewerben, Zeitplänen und Teilnehmerlisten.</p>
-                        <button class="btn btn-primary mt-auto" @id(BtnOption1, "onclick")>Jetzt starten</button>
+                        <p class="text-muted small">Erstellen Sie ein komplettes Turnier mit mehreren Wettbewerben, Zeitplänen und Teilnehmerlisten.</p>
+                        <button class="btn btn-primary mt-auto fw-bold" @id(BtnOption1, "onclick")>Ganzes Turnier</button>
                     </div>
                 </div>
             </div>
@@ -34,13 +38,13 @@
             <!-- Create Single Competition -->
             <div class="col-md-4">
                 <div class="card h-100 border-0 shadow hover-lift">
-                    <div class="card-body text-center p-4">
+                    <div class="card-body text-center p-4 d-flex flex-column">
                         <div class="feature-icon bg-success bg-gradient text-white mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
                             <i class="bi bi-lightning-charge fs-3"></i>
                         </div>
-                        <h3 class="h4 mb-3">Einzelner Wettbewerb</h3>
-                        <p class="text-muted">Erstellen Sie schnell einen einzelnen Wettbewerb für ein unkompliziertes schnelles Event.</p>
-                        <button class="btn btn-success mt-auto" @id(BtnOption2, "onclick")>Schnellstart</button>
+                        <h3 class="h4 mb-3">Schnellstart</h3>
+                        <p class="text-muted small">Erstellen Sie schnell einen einzelnen Wettbewerb für ein unkompliziertes, schnelles Event.</p>
+                        <button class="btn btn-success mt-auto fw-bold" @id(BtnOption2, "onclick")>Wettbewerb starten</button>
                     </div>
                 </div>
             </div>
@@ -48,13 +52,13 @@
             <!-- Search -->
             <div class="col-md-4">
                 <div class="card h-100 border-0 shadow hover-lift">
-                    <div class="card-body text-center p-4">
+                    <div class="card-body text-center p-4 d-flex flex-column">
                         <div class="feature-icon bg-info bg-gradient text-white mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
                             <i class="bi bi-search fs-3"></i>
                         </div>
                         <h3 class="h4 mb-3">Suchen & Finden</h3>
-                        <p class="text-muted">Finden Sie bestehende Turniere oder Wettbewerbe nach Name, Datum oder Veranstalter.</p>
-                        <button class="btn btn-info text-white mt-auto" @id(BtnSearch, "onclick")>Suche öffnen</button>
+                        <p class="text-muted small">Finden Sie bestehende Turniere oder Wettbewerbe nach Name, Datum oder Veranstalter.</p>
+                        <button class="btn btn-info text-white mt-auto fw-bold" @id(BtnSearch, "onclick")>Suche öffnen</button>
                     </div>
                 </div>
             </div>
@@ -63,32 +67,9 @@
 
         <div class="row mt-5 pt-4">
             <div class="col-lg-10 mx-auto text-center">
-                <button class="btn btn-outline-secondary" onclick="appLoadPage('Mockup', '')">
+                <button class="btn btn-outline-secondary btn-sm" onclick="appLoadPage('Mockup', '')">
                     <i class="bi bi-bug me-2"></i>Mockup mit Testdaten laden
                 </button>
-            </div>
-        </div>
-
-        <!-- Inline Search Section (Quick Access) -->
-        <div class="row mt-5 pt-4">
-            <div class="col-lg-10 mx-auto">
-                <div class="bg-light p-4 rounded shadow-sm border">
-                    <h4 class="mb-4 text-center">Direktsuche</h4>
-                    <form class="row g-3" onsubmit="return false;">
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" placeholder="Name (Turnier/Bewerb)">
-                        </div>
-                        <div class="col-md-3">
-                            <input type="date" class="form-control">
-                        </div>
-                        <div class="col-md-3">
-                            <input type="text" class="form-control" placeholder="Veranstalter (User)">
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-dark w-100">Suchen</button>
-                        </div>
-                    </form>
-                </div>
             </div>
         </div>
     </div>
@@ -97,19 +78,17 @@
 <style>
     .hero-section {
         position: relative;
-        min-height: 40vh;
-        background-color: #2c3e50;
-        /* Falls ein Bild vorhanden ist: 
-        background-image: url('...'); 
-        background-size: cover;
-        background-position: center;
-        */
+        min-height: 35vh;
+        background-color: #336699;
         overflow: hidden;
     }
     .hero-overlay {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: linear-gradient(45deg, rgba(44, 62, 80, 0.9), rgba(52, 152, 219, 0.7));
+        background: linear-gradient(135deg, rgba(51, 102, 153, 0.95) 0%, rgba(51, 102, 153, 0.7) 100%);
+    }
+    .hero-title-custom {
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
     .hover-lift {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;

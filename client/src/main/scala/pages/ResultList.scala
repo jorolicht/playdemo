@@ -10,6 +10,7 @@ object ResultList extends BasePage with JsWrapper:
   case class DisplayResult(name: String, club: String, compName: String, place: Int)
 
   def render(param: String = ""): Boolean = 
+    comps.ContextHeader.render()
     val competitions = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
     
     val results = competitions.flatMap { c =>

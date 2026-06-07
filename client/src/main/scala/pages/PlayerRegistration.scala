@@ -43,6 +43,8 @@ object PlayerRegistration extends BasePage with JsWrapper:
     val selection = Global.currentSelection
     val competitions = services.TourneyDB.tourney.competitions.toSeq.filter(_ != null)
     
+    comps.ContextHeader.render()
+
     selection.competition match
       case Some(c) => 
         val participants = sortParticipants(c.pants.toSeq)

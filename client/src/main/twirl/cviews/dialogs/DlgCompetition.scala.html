@@ -1,67 +1,67 @@
+@import dialogs.DlgCompetition.*
+@import cviews.helper.html.*
 @import shared.model.CompTyp
-@import shared.model.TourneyTyp
+@import shared.model.CompCategory
 
 @()
 
-<div class="modal fade" id="DlgCompetition-modal" tabindex="-1" aria-labelledby="DlgCompetition-label" aria-hidden="true">
+<div class="modal fade" @id(ModalId) tabindex="-1" aria-labelledby="DlgCompetition-label" aria-hidden="true">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title" id="DlgCompetition-label">Wettbewerb erstellen</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" id="DlgCompetition-close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" @id(CloseId)></button>
             </div>
             <div class="modal-body">
-                <form id="DlgCompetition-form" onsubmit="return false;">
-                    <!-- Tournament Type (Only for Option 2) -->
-                    <div id="DlgCompetition-tourneyTypSection" class="mb-3 d-none">
-                        <label for="DlgCompetition-tourneyTyp" class="form-label fw-bold">Turniertyp</label>
-                        <select class="form-select border-primary" id="DlgCompetition-tourneyTyp">
-                            @TourneyTyp.values.map { t =>
-                                <option value="@t.toString">@t.toString</option>
+                <form onsubmit="return false;">
+                    
+                    <div class="mb-3">
+                        <label @forAttr(CompCategoryId) class="form-label fw-bold">Kategorie (Sportart)</label>
+                        <select class="form-select border-primary" @id(CompCategoryId)>
+                            @CompCategory.values.map { c =>
+                                <option value="@c.toString">@c.toString</option>
                             }
                         </select>
-                        <div class="form-text text-muted small">Wählen Sie die Sportart für das automatisch erstellte Turnier.</div>
-                        <hr>
                     </div>
 
                     <div class="mb-3">
-                        <label for="DlgCompetition-name" class="form-label">Name des Wettbewerbs</label>
-                        <input type="text" class="form-control" id="DlgCompetition-name" placeholder="z.B. Herren A Einzel" required>
+                        <label @forAttr(CompNameId) class="form-label">Name des Wettbewerbs</label>
+                        <input type="text" class="form-control" @id(CompNameId) placeholder="z.B. Herren A Einzel" required>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label for="DlgCompetition-typ" class="form-label">Wettbewerbstyp</label>
-                            <select class="form-select" id="DlgCompetition-typ">
+                            <label @forAttr(CompTypId) class="form-label">Wettbewerbstyp</label>
+                            <select class="form-select" @id(CompTypId)>
                                 @CompTyp.values.filter(_ != CompTyp.Typ).map { t =>
-                                    <option value="@t.toString">@t.toString</option>
+                                    <option value="@t.toString" @if(t == CompTyp.SINGLE){selected}>@t.toString</option>
                                 }
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label for="DlgCompetition-startDate" class="form-label">Startdatum</label>
-                            <input type="date" class="form-control" id="DlgCompetition-startDate" required>
+                            <label @forAttr(StartDateId) class="form-label">Beginn (Datum & Zeit)</label>
+                            <input type="datetime-local" class="form-control" @id(StartDateId) required>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label for="DlgCompetition-ttrFrom" class="form-label">TTR von</label>
-                            <input type="number" class="form-control" id="DlgCompetition-ttrFrom" placeholder="0">
+                            <label @forAttr(TtrFromId) class="form-label">TTR von</label>
+                            <input type="number" class="form-control" @id(TtrFromId) placeholder="0">
                         </div>
                         <div class="col-md-6">
-                            <label for="DlgCompetition-ttrTo" class="form-label">TTR bis</label>
-                            <input type="number" class="form-control" id="DlgCompetition-ttrTo" placeholder="3000">
+                            <label @forAttr(TtrToId) class="form-label">TTR bis</label>
+                            <input type="number" class="form-control" @id(TtrToId) placeholder="3000">
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="DlgCompetition-cancel">Abbrechen</button>
-                <button type="button" class="btn btn-success" id="DlgCompetition-apply">Erstellen</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>Abbrechen</button>
+                <button type="button" class="btn btn-success" @id(ApplyId)>Erstellen</button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="DlgCompetition-load" data-loaded="false"></div>
+<div @id(LoadId) data-loaded="false"></div>

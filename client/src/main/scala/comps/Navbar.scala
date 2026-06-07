@@ -1,6 +1,11 @@
 package comps
 
+import org.scalajs.dom
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import base.*
 import shared.MainIds.NavbarId
+import shared.DomTypes.*
+import shared.PageNameTyp.*
 import comps.Sidebar.AsideId
 
 object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
@@ -9,6 +14,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
   val ConsoleClickId: HtmlId = genId(name)
   val ShowLoginId: HtmlId = genId(name)
   val DoLogoutId: HtmlId = genId(name)
+  val ShowQuickCompId: HtmlId = genId(name)
 
   def render(param: String = "") = 
     setHtml(gE(NavbarId), cviews.comps.html.navbar()) 
@@ -18,12 +24,48 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     HtmlId(elem.id) match
       case `ToggleSidebarId` => toggleClass(gE(AsideId), "d-none")
       case `DoLogoutId`      => doLogout()
+      case `ShowQuickCompId` => doQuickStart()
       case _                 => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}")
+
+  def doQuickStart(): Unit =
+    import dialogs.*
+    import shared.model.*
+    import services.*
+    import base.Global
+
+    DlgCompetition.show(CompCategory.TT).map {
+      case Right(res) =>
+        val c = res.competition
+        val dateInt = c.startDate.replace("-", "").toIntOption.getOrElse(0)
+        
+        // 1. Create SIMPLE dummy tournament
+        val dummy = Tourney(
+          id = 0,
+          name = c.name,
+          organizer = Global.user.map(_.username).getOrElse("System"),
+          startDate = dateInt,
+          endDate = dateInt,
+          ident = "SIMPLE",
+          category = c.category
+        )
+        
+        // 2. Initialize TourneyDB with dummy
+        TourneyDB.update(dummy)
+        
+        // 3. Add the competition
+        TourneyDB.tourney.addCompetition(c.name, c.typ, c.category, c.startDate) match {
+          case Right(newComp) =>
+            Global.currentSelection = Selection(Some(TourneyDB.tourney), Some(newComp))
+            comps.ContextHeader.render()
+            pages.loadPage(PageNameTyp("CompetitionInfo"), "")
+          case Left(err) =>
+            dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
+        }
+      case Left(_) => debug("Quick Start cancelled")
+    }
 
   private def doLogout(): Unit =
     import services.*
-    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-    import org.scalajs.dom
     import base.Global
 
     ajaxPost[String, String]("/wp-json/playdemo/v1/auth/logout", List(), "", host = Global.homeUrl).map { _ =>

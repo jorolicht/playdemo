@@ -37,7 +37,7 @@ object TestTourney:
         endDate = 20260101,
         ident = "123",
         version = 0,
-        typ = TourneyTyp.TableTennis
+        category = CompCategory.TT
       )
     val updated = current.copy(name = name)
     TourneyDB.update(updated)
@@ -111,7 +111,7 @@ object TestTourney:
       startDate = date,
       endDate = date,
       ident = "i36eIvYBUqxYW1OUCKu2pT5v50i4mxM0",
-      typ = TourneyTyp.TableTennis
+      category = CompCategory.TT
     )
 
     addOutput(s"Creating tournament via API: ${t.name} ($date)...")
@@ -142,7 +142,7 @@ object TestTourney:
       startDate = date,
       endDate = date,
       ident = "i36eIvYBUqxYW1OUCKu2pT5v50i4mxM0",
-      typ = TourneyTyp.TableTennis,
+      category = CompCategory.TT,
       address = Some(Address("Luitpoldhalle", "Luitpoldanlage 1", "85356", "Freising", "DE"))
     )
 

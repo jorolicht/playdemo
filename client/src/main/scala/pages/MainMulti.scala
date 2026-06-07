@@ -25,35 +25,6 @@ object MainMulti extends BasePage with JsWrapper:
     HtmlId(elem.id) match
       case `BtnOption1` => loadPage(TourneyNew.name, "")
       case `BtnOption2` => 
-        DlgCompetition.show(isOption2 = true).map {
-          case Right(res) => 
-            // 1. Create and save Dummy Tourney
-            val dummyTourney = Tourney(
-              id = 0,
-              name = s"Quick: ${res.competition.name}",
-              organizer = Global.user.map(_.org).getOrElse("System"),
-              startDate = res.competition.startDate.replace("-", "").toInt,
-              endDate = res.competition.startDate.replace("-", "").toInt,
-              ident = "COMPETITION",
-              typ = res.tourneyTyp.getOrElse(TourneyTyp.Unknown),
-              version = 1
-            )
-            services.TourneyDB.update(dummyTourney)
-            
-            // 2. Add Competition to DB
-            services.TourneyDB.tourney.addCompetition(
-              res.competition.name, 
-              res.competition.typ, 
-              res.competition.startDate.replace("-", "")
-            ) match {
-              case Right(c) => 
-                Global.currentSelection = Selection(Some(dummyTourney), Some(c))
-                comps.ContextHeader.render()
-                loadPage(PageNameTyp("CompetitionInfo"), "")
-              case Left(err) => 
-                error(s"Failed to create quick competition: ${err.msgCode}")
-            }
-          case Left(_) => debug("Option 2 cancelled")
-        }
+        comps.Navbar.doQuickStart()
       case `BtnSearch` => loadPage(MainSearch.name, "")
       case _ => debug(s"MainMulti handleEvent: ${elem.id}")

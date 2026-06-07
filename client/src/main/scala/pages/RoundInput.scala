@@ -10,6 +10,7 @@ object RoundInput extends BasePage with JsWrapper:
   def render(param: String = ""): Boolean = 
     Global.currentSelection.round match
       case Some(r) => 
+        comps.ContextHeader.render()
         val comp = Global.currentSelection.competition
         val pants = comp.map(_.pants).getOrElse(Seq.empty)
         

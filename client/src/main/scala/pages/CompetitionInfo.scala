@@ -40,6 +40,7 @@ object CompetitionInfo extends BasePage with JsWrapper:
 
     Global.currentSelection.competition match
       case Some(c) => 
+        comps.ContextHeader.render()
         // Real participants from the competition object, filtered by active and sorted
         val participants = sortParticipants(c.pants.toSeq.filter(_.active))
         

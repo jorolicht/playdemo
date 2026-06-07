@@ -1,0 +1,70 @@
+@import pages.CompetitionNew.*
+@import cviews.helper.html.*
+@import shared.model.CompTyp
+@import shared.model.CompCategory
+
+@()
+
+<div class="container mt-4 mb-5">
+    <div class="card shadow">
+        <div class="card-header bg-success text-white">
+            <h2 class="h4 mb-0"><i class="bi bi-lightning-charge me-2"></i>Einzelnen Wettbewerb starten</h2>
+        </div>
+        <div class="card-body p-4">
+            <p class="text-muted mb-4">
+                Nutzen Sie den Schnellstart, um sofort einen einzelnen Wettbewerb anzulegen. 
+                Es wird automatisch ein einfaches Turnier im Hintergrund erstellt.
+            </p>
+
+            <form onsubmit="return false;">
+                
+                <div class="mb-4">
+                    <label @forAttr(CompCategoryId) class="form-label fw-bold">Kategorie (Sportart)</label>
+                    <select class="form-select border-primary" @id(CompCategoryId)>
+                        @CompCategory.values.map { c =>
+                            <option value="@c.toString" @if(c == CompCategory.TT){selected}>@c.toString</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label @forAttr(CompNameId) class="form-label fw-bold">Name des Wettbewerbs</label>
+                    <input type="text" class="form-control" @id(CompNameId) placeholder="z.B. Firmen-Cup 2026" required autofocus>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label @forAttr(CompTypId) class="form-label fw-bold">Wettbewerbstyp</label>
+                        <select class="form-select" @id(CompTypId)>
+                            @CompTyp.values.filter(_ != CompTyp.Typ).map { t =>
+                                <option value="@t.toString" @if(t == CompTyp.SINGLE){selected}>@t.toString</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label @forAttr(StartDateId) class="form-label fw-bold">Beginn (Datum & Zeit)</label>
+                        <input type="datetime-local" class="form-control border-primary" @id(StartDateId) required>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label @forAttr(TtrFromId) class="form-label fw-bold">TTR von (optional)</label>
+                        <input type="number" class="form-control" @id(TtrFromId) placeholder="0">
+                    </div>
+                    <div class="col-md-6">
+                        <label @forAttr(TtrToId) class="form-label fw-bold">TTR bis (optional)</label>
+                        <input type="number" class="form-control" @id(TtrToId) placeholder="3000">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 border-top pt-4">
+                    <button type="button" class="btn btn-outline-secondary px-4" onclick="appLoadPage('Home', '')">Abbrechen</button>
+                    <button type="submit" class="btn btn-success px-5 fw-bold" @id(BtnSave, "onclick")>
+                        <i class="bi bi-play-fill me-2"></i>SCHNELLSTART
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

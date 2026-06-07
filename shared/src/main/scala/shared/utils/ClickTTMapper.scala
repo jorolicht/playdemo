@@ -21,7 +21,7 @@ object ClickTTMapper:
       target.startDate = formatDate(ctt.startDate)
       target.endDate = formatDate(ctt.endDate)
       target.ident = ctt.tournamentId
-      target.typ = TourneyTyp.TableTennis
+      target.category = CompCategory.TT
       
       ctt.locations.headOption.foreach { loc =>
         target.address = Some(Address(
@@ -50,6 +50,7 @@ object ClickTTMapper:
           id = compId,
           name = compName,
           typ = if (cttComp.typ.toLowerCase.contains("doppel")) CompTyp.DOUBLE else CompTyp.SINGLE,
+          category = CompCategory.TT,
           startDate = cttComp.startDate,
           status = CompStatus.UNKN,
           startRound = None,

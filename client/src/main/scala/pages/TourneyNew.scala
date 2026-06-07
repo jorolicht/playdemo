@@ -95,7 +95,7 @@ object TourneyNew extends BasePage with JsWrapper:
         startDate = tStart,
         endDate = tEnd,
         ident = tIdent,
-        typ = if (tTyp == "TableTennis") TourneyTyp.TableTennis else TourneyTyp.Unknown,
+        category = if (tTyp == "TT") CompCategory.TT else CompCategory.UNKNOWN,
         contact = Some(contact),
         address = Some(address),
         version = 0

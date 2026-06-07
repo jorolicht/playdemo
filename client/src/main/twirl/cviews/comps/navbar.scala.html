@@ -56,8 +56,15 @@
                 <li class="nav-item ms-lg-3">
                     <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainSearch', '')">Suchen</a>
                 </li>
-                <li class="nav-item ms-lg-3 d-flex align-items-center">
-                    <a class="btn btn-primary fw-bold btn-start-custom" href="javascript:appLoadPage('MainMulti', '')">STARTEN</a>
+                <li class="nav-item ms-lg-3 dropdown d-flex align-items-center">
+                    <a class="btn btn-primary fw-bold btn-start-custom dropdown-toggle" href="#" id="navbarStart" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        STARTEN
+                    </a>
+                    <ul class="dropdown-menu shadow" aria-labelledby="navbarStart">
+                        <li><a class="dropdown-item fw-bold" href="javascript:appLoadPage('TourneyNew', '')"><i class="bi bi-trophy me-2"></i>Ganzes Turnier</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item fw-bold" href="javascript:appLoadPage('CompetitionNew', '')"><i class="bi bi-lightning-charge me-2"></i>Einzelner Wettbewerb</a></li>
+                    </ul>
                 </li>
             </ul>
 

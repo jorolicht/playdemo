@@ -41,6 +41,7 @@ object RoundAdmin extends BasePage with JsWrapper:
 
     Global.currentSelection.round match
       case Some(r) => 
+        comps.ContextHeader.render()
         val comp = Global.currentSelection.competition
         val participants = comp.map(_.pants.toSeq).getOrElse(Seq.empty)
         

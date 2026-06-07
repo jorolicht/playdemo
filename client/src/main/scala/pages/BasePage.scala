@@ -13,7 +13,7 @@ import shared.PageNameTyp.PageName
 // pagesMap maps page names to page objecpts   
 val pagesMap = List(pages.Home, Auth, Console, PgError,
                     ChatExample, 
-                    ViewOrganizer, MainMulti, TourneyNew, TourneyInfo, Mockup, CompetitionInfo, PlayerRegistration, UserRegistration, UserLogin, VerifyAccount, RoundAdmin, RoundDraw, RoundInput, RoundResult, PlayerList, ResultList, Certificate, MainSearch)
+                    ViewOrganizer, MainMulti, TourneyNew, CompetitionNew, TourneyInfo, Mockup, CompetitionInfo, PlayerRegistration, UserRegistration, UserLogin, VerifyAccount, RoundAdmin, RoundDraw, RoundInput, RoundResult, PlayerList, ResultList, Certificate, MainSearch)
                     .map(pg => pg.name -> pg).toMap              
 
 
