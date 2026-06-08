@@ -19,6 +19,8 @@ case class User(id:               (String, Int),  // (UUID (e.g. from google), w
   def verifyInfo = write[((String, Int), String, Long)]((id, email, entryTime))
   def name = if firstname != "" || lastname != "" then s"$firstname $lastname" else if username != "" then username else email
 
+  def isTurnierAdmin: Boolean = roles.exists(r => List("administrator", "editor", "turnier_admin").contains(r))
+
 
 object User:
   implicit val rw: RW[User] = macroRW

@@ -140,7 +140,7 @@ lazy val server = project
       IO.copyDirectory(clientTargetDir, wpJsDestination)
       IO.copyDirectory(clientCssSource, wpCssDestination)
       IO.copyDirectory(clientTargetDir, wpJsDestination2)
-      IO.copyDirectory(clientCssSource, wpCssDestination2)
+      IO.copyDirectory(wpCssDestination, wpCssDestination2)
 
       // Copy playdemo.php and includes to docker
       IO.copyFile(wpPluginDir / "playdemo.php", dockerWpPluginDir / "playdemo.php")

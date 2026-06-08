@@ -15,6 +15,8 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
   val ShowLoginId: HtmlId = genId(name)
   val DoLogoutId: HtmlId = genId(name)
   val ShowQuickCompId: HtmlId = genId(name)
+  val StartFullId: HtmlId = genId(name)
+  val StartSimpleId: HtmlId = genId(name)
 
   def render(param: String = "") = 
     setHtml(gE(NavbarId), cviews.comps.html.navbar()) 
@@ -25,7 +27,29 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
       case `ToggleSidebarId` => toggleClass(gE(AsideId), "d-none")
       case `DoLogoutId`      => doLogout()
       case `ShowQuickCompId` => doQuickStart()
+      case `StartFullId`     => confirmLeave(() => pages.loadPage(PageNameTyp("TourneyNew"), ""))
+      case `StartSimpleId`   => confirmLeave(() => pages.loadPage(PageNameTyp("CompetitionNew"), ""))
       case _                 => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}")
+
+  private def confirmLeave(action: () => Unit): Unit =
+    import shared.BoxButton
+    import shared.model.Selection
+    
+    if (base.Global.currentSelection.tourney.isDefined) {
+      dialogs.DlgMsgbox.show(
+        "Möchten Sie das aktuelle Turnier / den aktuellen Wettbewerb wirklich verlassen? Nicht gespeicherte Änderungen gehen verloren.",
+        "Aktion bestätigen",
+        List(BoxButton.Yes, BoxButton.No)
+      ).map {
+        case BoxButton.Yes => 
+          base.Global.currentSelection = Selection()
+          comps.ContextHeader.hide()
+          action()
+        case _ => debug("Leave cancelled")
+      }
+    } else {
+      action()
+    }
 
   def doQuickStart(): Unit =
     import dialogs.*

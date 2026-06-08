@@ -70,16 +70,19 @@ object CompetitionNew extends BasePage with JsWrapper with services.ComWrapper:
         category = cat
       )
       
-      // 1. Initialize TourneyDB with dummy
-      services.TourneyDB.update(dummy)
-      
-      // 2. Add the competition
-      services.TourneyDB.tourney.addCompetition(nameStr, typ, cat, startFormatted) match {
-        case Right(newComp) =>
-          Global.currentSelection = Selection(Some(services.TourneyDB.tourney), Some(newComp))
-          comps.ContextHeader.render()
-          loadPage(PageNameTyp("CompetitionInfo"), "")
+      // 1. Create dummy tournament on server
+      services.TourneyDB.apiCreate(dummy).map {
+        case Right(slug) =>
+          // 2. Add the competition
+          services.TourneyDB.tourney.addCompetition(nameStr, typ, cat, startFormatted) match {
+            case Right(newComp) =>
+              Global.currentSelection = Selection(Some(services.TourneyDB.tourney), Some(newComp))
+              comps.ContextHeader.render()
+              loadPage(PageNameTyp("CompetitionInfo"), "")
+            case Left(err) =>
+              dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
+          }
         case Left(err) =>
-          dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
+          dom.window.alert(s"Fehler beim Erstellen des Turniers auf dem Server: ${err.msgCode}")
       }
     }

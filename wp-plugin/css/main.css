@@ -13,6 +13,9 @@
   border-radius: 0.1rem;
 }
 
+.box-btn {
+  width: 100px;
+}
 
 /* Sidebar Styling - HIDDEN */
 aside {

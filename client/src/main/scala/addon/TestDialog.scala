@@ -4,6 +4,7 @@ import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 import shared.basic.AppError
+import javax.swing.Box
 
 object TestDialog:
 
@@ -17,6 +18,6 @@ object TestDialog:
 
   def testBasic_Msgbox(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     import dialogs.DlgMsgbox
-    import shared.BoxValueTypes.BoxValue
-    import shared.BoxValues.*      
-    DlgMsgbox.show("body text", "title text", List(Cancel, Ok)).map { x => addOutput(x.asString); Right(x.asString) }
+    import shared.BoxButton    
+    DlgMsgbox.show("body text", "title text", List(BoxButton.Cancel, BoxButton.Ok)).map { 
+      x => addOutput(x.value); Right(x.value) }

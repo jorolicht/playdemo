@@ -214,7 +214,7 @@ object RoundAdmin extends BasePage with JsWrapper:
     }
 
   private def handleDeleteRound(): Unit =
-    import shared.BoxValues.*
+    import shared.BoxButton
     val r = Global.currentSelection.round.get
     val msg = if (r.nextIds.nonEmpty) {
       s"Möchten Sie diese Runde und ALLE ${r.nextIds.length} nachfolgenden Runden wirklich löschen?"
@@ -222,8 +222,8 @@ object RoundAdmin extends BasePage with JsWrapper:
       "Möchten Sie diese Runde wirklich löschen?"
     }
     
-    DlgMsgbox.show(msg, "Runde löschen", List(Yes, No)).map {
-      case Yes => 
+    DlgMsgbox.show(msg, "Runde löschen", List(BoxButton.Yes, BoxButton.No)).map {
+      case BoxButton.Yes => 
         services.TourneyDB.tourney.deleteRound(r.id) match {
           case Right(_) => 
             Global.currentSelection = Global.currentSelection.copy(round = None)

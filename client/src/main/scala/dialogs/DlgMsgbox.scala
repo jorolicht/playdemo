@@ -11,8 +11,7 @@ import org.scalajs.dom.raw.HTMLElement
 
 import base.*
 import base.Bootstrap.*
-import shared.BoxValueTypes.BoxValue
-import shared.BoxValues.*
+import shared.BoxButton
 
 
 object DlgMsgbox extends BaseDialog with JsWrapper:
@@ -26,8 +25,8 @@ object DlgMsgbox extends BaseDialog with JsWrapper:
   var modal: Modal = null
   def render(param: String = ""): Boolean = true     
   
-  def show(body: String, title: String, btns: List[BoxValue]): Future[BoxValue] =
-    val p = Promise[BoxValue]()
+  def show(body: String, title: String, btns: List[BoxButton]): Future[BoxButton] =
+    val p = Promise[BoxButton]()
     val f = p.future
 
     // init modal dialog, always copy
@@ -36,7 +35,7 @@ object DlgMsgbox extends BaseDialog with JsWrapper:
     modal.show()
 
     gE(CloseId).addEventListener("click", (e: MouseEvent) => {
-      if (!p.isCompleted) then p success Cancel
+      if (!p.isCompleted) then p success BoxButton.Cancel
       modal.hide()      
     })
 
@@ -46,4 +45,4 @@ object DlgMsgbox extends BaseDialog with JsWrapper:
         modal.hide()      
       })
 
-    f.recover { case e: Exception =>  Cancel }
+    f.recover { case e: Exception =>  BoxButton.Cancel }

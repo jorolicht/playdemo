@@ -13,27 +13,6 @@ object PageNameTyp:
     def value: String = u
 
 
-object BoxValueTypes:
-  import DomTypes.HtmlId
-  opaque type BoxValue = String
-
-  object BoxValue:
-    def apply(s: String): BoxValue = s
-
-    extension (bv: BoxValue)
-      def asString: String = bv
-      def msgCode: String = "btn." + bv.toLowerCase
-      def getId: HtmlId = HtmlId("BoxValue_" + bv)
-
-    // Dieses Makro liest den Namen der Definition aus, der es zugewiesen wird
-    inline def myName: BoxValue = ${ useMyNameImpl }
-
-    private def useMyNameImpl(using Quotes): Expr[BoxValue] =
-      import quotes.reflect.*
-      // Greift den Namen des Symbols der umschließenden Definition
-      val name = Symbol.spliceOwner.name
-      Expr(name).asInstanceOf[Expr[BoxValue]]
-
 
 object DialogTypes:
   opaque type DialogId = String

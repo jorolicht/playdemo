@@ -97,9 +97,9 @@ object CompetitionInfo extends BasePage with JsWrapper:
         }
 
       case `BtnDeleteComp` => 
-        import shared.BoxValues.*
-        DlgMsgbox.show("Möchten Sie diesen Wettbewerb wirklich löschen?", "Wettbewerb löschen", List(Yes, No)).map {
-          case Yes => 
+        import shared.BoxButton
+        DlgMsgbox.show("Möchten Sie diesen Wettbewerb wirklich löschen?", "Wettbewerb löschen", List(BoxButton.Yes, BoxButton.No)).map {
+          case BoxButton.Yes => 
             val cId = Global.currentSelection.competition.map(_.id).getOrElse(CompId(0))
             services.TourneyDB.tourney.deleteCompetition(cId) match {
               case Right(_) => 

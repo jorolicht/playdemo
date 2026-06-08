@@ -9,6 +9,7 @@ import base.*
 import shared.MainIds.*
 import shared.model.*
 import dialogs.*
+import javax.swing.Box
 
 object TourneyInfo extends BasePage with JsWrapper:
   def name = PageNameTyp("TourneyInfo")
@@ -68,9 +69,9 @@ object TourneyInfo extends BasePage with JsWrapper:
           case Left(_) => debug("Add competition cancelled")
         }
       case `BtnDeleteTourney` => 
-        import shared.BoxValues.*
-        DlgMsgbox.show("Möchten Sie dieses Turnier wirklich unwiderruflich löschen?", "Turnier löschen", List(Yes, No)).map {
-          case Yes => 
+        import shared.BoxButton
+        DlgMsgbox.show("Möchten Sie dieses Turnier wirklich unwiderruflich löschen?", "Turnier löschen", List(BoxButton.Yes, BoxButton.No)).map {
+          case BoxButton.Yes => 
             // In a real app, we would call an API here. 
             // For now, we clear the local state.
             services.TourneyDB.tourney = Tourney.default

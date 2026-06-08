@@ -1,10 +1,10 @@
 
 
 @import cviews.helper.html.*
-@import shared.BoxValueTypes.BoxValue
 @import dialogs.DlgMsgbox.*
+@import shared.BoxButton
 
-@(title: String, body: String, btns: List[BoxValue])
+@(title: String, body: String, btns: List[BoxButton])
 
 <!-- Modal -->
 <div @id(ModalId)  class="modal fade" tabindex="-1">
@@ -19,7 +19,7 @@
       </div>
       <div class="modal-footer">
         @for(btn <- btns) {
-          <button @id(btn.getId) type="button" class="btn btn-outline-secondary btn-xs" >@gM(btn.msgCode)</button>
+          <button @id(btn.getId) type="button" class="btn btn-outline-secondary btn-xs box-btn">@gM(btn.msgCode)</button>
         }
       </div>
     </div>

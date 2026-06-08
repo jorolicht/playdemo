@@ -3,18 +3,24 @@ package shared
 // import shared.PageTypes.PageId
 import shared.DomTypes.HtmlId
 import shared.DomTypes.genId
-import shared.BoxValueTypes.BoxValue
+//import shared.BoxValueTypes.BoxValue
 
 
-object BoxValues:
-  val Cancel:   BoxValue = BoxValue.myName
-  val Ok:       BoxValue = BoxValue.myName
-  val Abort:    BoxValue = BoxValue.myName
-  val Retry:    BoxValue = BoxValue.myName
-  val Ignore:   BoxValue = BoxValue.myName
-  val Yes:      BoxValue = BoxValue.myName
-  val No:       BoxValue = BoxValue.myName
-  val Close:    BoxValue = BoxValue.myName  
+enum BoxButton(val value: String):
+  case Cancel extends BoxButton("Cancel")
+  case Ok     extends BoxButton("Ok")
+  case Abort  extends BoxButton("Abort")
+  case Retry  extends BoxButton("Retry")
+  case Ignore extends BoxButton("Ignore")
+  case Yes    extends BoxButton("Yes")
+  case No     extends BoxButton("No")
+  case Close  extends BoxButton("Close")
+
+  def msgCode: String =
+    s"btn.${value.toLowerCase}"
+
+  def getId: HtmlId =
+    HtmlId(s"BoxButton_$value")
 
 
 object MainIds:
