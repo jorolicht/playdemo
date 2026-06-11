@@ -3,7 +3,7 @@
 # ~~~~
 
 # Home page
-GET        /                             controllers.Main.home(name: String?="Home", param: String?="start")
+GET        /                             controllers.Main.home(name: String?="MainView", param: String?="start")
 GET        /main/:name                   controllers.Main.home(name: String, param: String?="")
 
 # Authentication endpoints

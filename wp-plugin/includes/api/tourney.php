@@ -40,7 +40,160 @@ add_action('rest_api_init', function () {
         'permission_callback' => '__return_true'
     ]);
 
+    // GET /tourney/v1/meta-data
+    register_rest_route('tourney/v1', '/meta-data', [
+        'methods' => 'GET',
+        'callback' => 'tourney_get_meta_data',
+        'permission_callback' => '__return_true'
+    ]);
+
+    // POST /tourney/v1/meta-data
+    register_rest_route('tourney/v1', '/meta-data', [
+        'methods' => 'POST',
+        'callback' => 'tourney_update_meta_data',
+        'permission_callback' => function () {
+            return current_user_can('edit_posts');
+        }
+    ]);
+
+    // DELETE /tourney/v1/delete
+    register_rest_route('tourney/v1', '/delete', [
+        'methods' => 'DELETE',
+        'callback' => 'tourney_api_delete',
+        'permission_callback' => function () {
+            return current_user_can('edit_posts');
+        }
+    ]);
+
+    // POST /tourney/v1/convert-to-page
+    register_rest_route('tourney/v1', '/convert-to-page', [
+        'methods' => 'POST',
+        'callback' => 'tourney_api_convert_to_page',
+        'permission_callback' => function () {
+            return current_user_can('edit_posts');
+        }
+    ]);
+
 });
+
+/**
+ * Wandelt ein Turnier (CPT 'tourney') in eine normale Seite ('page') um.
+ */
+function tourney_api_convert_to_page(WP_REST_Request $request) {
+    $post_id = ApiHelper::getPostId($request);
+    if (!$post_id) {
+        return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
+    }
+
+    $post = get_post($post_id);
+    if (!$post || $post->post_type !== 'tourney') {
+        return ApiHelper::error("invalid_type", "Post existiert nicht oder ist kein Turnier", "", "", HttpStatus::BAD_REQUEST);
+    }
+
+    // Post in eine Seite umwandeln und aus der Turnier-Hierarchie lösen
+    $result = wp_update_post([
+        'ID'          => $post_id,
+        'post_type'   => 'page',
+        'post_parent' => 0
+    ]);
+
+    if (is_wp_error($result)) {
+        return ApiHelper::error("update_failed", $result->get_error_message(), "", "", HttpStatus::INTERNAL_SERVER_ERROR);
+    }
+
+    return [
+        'success'  => true,
+        'new_type' => 'page',
+        'post_id'  => $post_id
+    ];
+}
+
+/**
+ * Löscht ein Turnier unwiderruflich.
+ */
+function tourney_api_delete(WP_REST_Request $request) {
+    $post_id = ApiHelper::getPostId($request);
+    if (!$post_id) {
+        return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
+    }
+
+    if (get_post_type($post_id) !== 'tourney') {
+        return ApiHelper::error("invalid_type", "Post is not a tournament", "", "", HttpStatus::BAD_REQUEST);
+    }
+
+    // Unwiderruflich löschen
+    $result = wp_delete_post($post_id, true);
+
+    if (!$result) {
+        return ApiHelper::error("delete_failed", "Konnte Turnier nicht löschen", "", "", HttpStatus::INTERNAL_SERVER_ERROR);
+    }
+
+    return ['success' => true];
+}
+
+/**
+ * Hilfsfunktion zum Abrufen des Organisators mit Fallback.
+ */
+function tourney_get_organizer_fallback($post_id) {
+    $organizer = get_post_meta($post_id, 'organizer', true);
+    if (!empty($organizer)) {
+        return $organizer;
+    }
+    
+    $post = get_post($post_id);
+    if (!$post) return 'Unbekannt';
+    
+    $author_id = $post->post_author;
+    $user_org = get_user_meta($author_id, 'organizer', true);
+    if (!empty($user_org)) {
+        return $user_org;
+    }
+    
+    $user_data = get_userdata($author_id);
+    if ($user_data) {
+        return !empty($user_data->display_name) ? $user_data->display_name : $user_data->user_login;
+    }
+    
+    return 'Unbekannt';
+}
+
+/**
+ * Gibt die speziellen Meta-Felder zurück.
+ */
+function tourney_get_meta_data(WP_REST_Request $request) {
+    $post_id = ApiHelper::getPostId($request);
+    if (!$post_id) {
+        return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
+    }
+    
+    return [
+        'startDate' => get_post_meta($post_id, 'startDate', true),
+        'endDate'   => get_post_meta($post_id, 'endDate', true),
+        'ident'     => get_post_meta($post_id, 'ident', true),
+        'category'  => get_post_meta($post_id, 'category', true),
+        'organizer' => tourney_get_organizer_fallback($post_id),
+    ];
+}
+
+/**
+ * Aktualisiert die speziellen Meta-Felder.
+ */
+function tourney_update_meta_data(WP_REST_Request $request) {
+    $post_id = ApiHelper::getPostId($request);
+    if (!$post_id) {
+        return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
+    }
+
+    $params = $request->get_json_params();
+    
+    if (isset($params['startDate'])) update_post_meta($post_id, 'startDate', sanitize_text_field($params['startDate']));
+    if (isset($params['endDate']))   update_post_meta($post_id, 'endDate',   sanitize_text_field($params['endDate']));
+    if (isset($params['ident']))     update_post_meta($post_id, 'ident',     sanitize_text_field($params['ident']));
+    if (isset($params['category']))  update_post_meta($post_id, 'category',  sanitize_text_field($params['category']));
+    if (isset($params['organizer'])) update_post_meta($post_id, 'organizer', sanitize_text_field($params['organizer']));
+    
+    return ['success' => true];
+}
 
 /**
  * Gibt eine Liste aller Organisatoren (Parent-Posts) zurück.
@@ -82,11 +235,11 @@ function tourney_get_organizers(WP_REST_Request $request) {
  */
 function tourney_get_read(WP_REST_Request $request)
 {
-    $post_id = intval($request->get_param('postId'));
+    $post_id = ApiHelper::getPostId($request);
     $meta = $request->get_param('metafield-name') ?: 'basic';
 
     if (!$post_id) {
-        return ApiHelper::error("missing_param", "Missing parameters", "", "", HttpStatus::BAD_REQUEST);
+        return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
     }
 
     $meta_ver = $meta . "_ts";
@@ -95,11 +248,24 @@ function tourney_get_read(WP_REST_Request $request)
     $tourney_json = get_post_meta($post_id, $meta, true);
     $tourney = $tourney_json ? json_decode($tourney_json, true) : null;
     
-    // Include the current full slug for the client
+    // Migration & Consistency: Ensure wpId and organizer are correct and legacy id is removed
     if ($tourney && $meta === 'basic') {
+        $tourney['wpId'] = intval($post_id);
+        if (isset($tourney['id'])) unset($tourney['id']);
+        
+        if (empty($tourney['organizer'])) {
+            $tourney['organizer'] = tourney_get_organizer_fallback($post_id);
+        }
+        
         $post = get_post($post_id);
         if ($post) {
-            $parent_slug = substr($post->post_name, 0, 4);
+            $parent_slug = 'unbekannt';
+            if ($post->post_parent) {
+                $parent_post = get_post($post->post_parent);
+                if ($parent_post) {
+                    $parent_slug = $parent_post->post_name;
+                }
+            }
             $tourney['slug'] = "tourney/" . $parent_slug . "/" . $post->post_name;
         }
     }
@@ -119,11 +285,11 @@ function tourney_sync_tourney(WP_REST_Request $request)
         return ApiHelper::error("auth_required", "Sie müssen angemeldet sein, um diese Aktion auszuführen.", "", "tourney_sync_tourney", HttpStatus::UNAUTHORIZED);
     }
 
-    $post_id = intval($request->get_param('postId'));
+    $post_id = ApiHelper::getPostId($request);
     $meta = $request->get_param('metafield-name') ?: 'basic';
 
     if (!$post_id) {
-        return ApiHelper::error("missing_param", "Missing parameters", "", "", HttpStatus::BAD_REQUEST);
+        return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
     }
 
     $body = json_decode($request->get_body(), true);
@@ -158,7 +324,7 @@ function tourney_sync_tourney(WP_REST_Request $request)
         
         // Index meta fields for searching if this is the basic meta
         if ($meta === 'basic') {
-            // Update Post Title if name is present
+            // 1. Seitentitel synchronisieren
             if (!empty($new_tourney['name'])) {
                 wp_update_post([
                     'ID'         => $post_id,
@@ -166,6 +332,7 @@ function tourney_sync_tourney(WP_REST_Request $request)
                 ]);
             }
 
+            // 2. Einzelne Metafelder für Abfragen synchronisieren
             if (isset($new_tourney['startDate'])) {
                 update_post_meta($post_id, 'startDate', intval($new_tourney['startDate']));
             }
@@ -175,20 +342,15 @@ function tourney_sync_tourney(WP_REST_Request $request)
             if (isset($new_tourney['ident'])) {
                 update_post_meta($post_id, 'ident', sanitize_text_field($new_tourney['ident']));
             }
+            if (isset($new_tourney['category'])) {
+                update_post_meta($post_id, 'category', sanitize_text_field($new_tourney['category']));
+            }
 
-            // Organizer logic with hierarchical fallback
+            // Organizer Logik
             $organizer = $new_tourney['organizer'] ?? '';
             if (empty($organizer)) {
                 $author_id = get_post_field('post_author', $post_id);
                 $organizer = get_user_meta($author_id, 'organizer', true);
-                if (empty($organizer)) {
-                    $user_data = get_userdata($author_id);
-                    if ($user_data) {
-                        $organizer = !empty($user_data->display_name) ? $user_data->display_name : $user_data->user_login;
-                    } else {
-                        $organizer = 'user';
-                    }
-                }
             }
             update_post_meta($post_id, 'organizer', sanitize_text_field($organizer));
         }
@@ -295,8 +457,8 @@ function tourney_api_create(WP_REST_Request $request) {
         return ApiHelper::error("db_error", $result_id->get_error_message(), "", "tourney_api_create_tourney", HttpStatus::INTERNAL_SERVER_ERROR);
     }
 
-    // Aktualisiere die ID im Body, damit sie mit der WordPress Post-ID übereinstimmt
-    $body['id'] = $result_id;
+    // Aktualisiere die ID im Body, damit sie mit der WordPress Post-ID übereinstimmt (wpId für Scala Model)
+    $body['wpId'] = $result_id;
 
     // Speichere den gesamten Payload als initialen Stand in 'basic'
     update_post_meta($result_id, 'basic', wp_json_encode($body, JSON_UNESCAPED_UNICODE));
@@ -306,6 +468,9 @@ function tourney_api_create(WP_REST_Request $request) {
     update_post_meta($result_id, 'organizer', sanitize_text_field($body['organizer'] ?? $organizer));
     if (isset($body['endDate'])) {
         update_post_meta($result_id, 'endDate', intval($body['endDate']));
+    }
+    if (isset($body['category'])) {
+        update_post_meta($result_id, 'category', sanitize_text_field($body['category']));
     }
 
     // Initialisiere Version auf 1, falls neu
@@ -361,7 +526,7 @@ function tourney_api_search(WP_REST_Request $request) {
     $results = [];
     foreach ($posts as $post) {
         $start_date = get_post_meta($post->ID, 'startDate', true);
-        $org_meta   = get_post_meta($post->ID, 'organizer', true);
+        $org_meta   = tourney_get_organizer_fallback($post->ID);
         
         $basic_json = get_post_meta($post->ID, 'basic', true);
         $basic = $basic_json ? json_decode($basic_json, true) : null;
@@ -369,9 +534,6 @@ function tourney_api_search(WP_REST_Request $request) {
         // Fallbacks für Altdaten aus dem JSON
         if (empty($start_date) && $basic && isset($basic['startDate'])) {
             $start_date = $basic['startDate'];
-        }
-        if (empty($org_meta) && $basic && isset($basic['organizer'])) {
-            $org_meta = $basic['organizer'];
         }
 
         $start_date_int = intval($start_date);
@@ -391,26 +553,12 @@ function tourney_api_search(WP_REST_Request $request) {
             continue;
         }
 
-        // Organisator Fallback über Autor (wie zuvor)
-        if (empty($org_meta)) {
-            $author_id = $post->post_author;
-            $user_org  = get_user_meta($author_id, 'organizer', true);
-            if (!empty($user_org)) {
-                $org_meta = $user_org;
-            } else {
-                $user_data = get_userdata($author_id);
-                if ($user_data) {
-                    $org_meta = !empty($user_data->display_name) ? $user_data->display_name : $user_data->user_login;
-                }
-            }
-        }
-        
         $status = $basic['status'] ?? 'Active';
 
         $results[] = [
             'id'        => $post->ID,
             'name'      => $post->post_title,
-            'organizer' => $org_meta ?: 'Unbekannt',
+            'organizer' => $org_meta,
             'startDate' => $start_date_int,
             'status'    => $status,
             'slug'      => $post->post_name

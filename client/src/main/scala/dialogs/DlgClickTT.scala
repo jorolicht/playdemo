@@ -101,8 +101,8 @@ object DlgClickTT extends BaseDialog with JsWrapper:
               // 2. Create on server to get PageId
               TourneyDB.apiCreate(t).map {
                 case Right(slug) =>
-                  // ID is now set in t.id by apiCreate
-                  Global.pageId = t.id
+                  // ID is now set in t.wpId by apiCreate
+                  Global.pageId = t.wpId
                   
                   // 3. Bulk Sync the rest
                   t.syncClubs()

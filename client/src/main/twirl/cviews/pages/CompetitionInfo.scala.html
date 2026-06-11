@@ -11,8 +11,8 @@
         <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
             <h3 class="h5 mb-0"><i class="bi bi-info-circle me-2"></i>Wettbewerb: @comp.name</h3>
             <div class="btn-group btn-group-sm">
-                <button class="btn btn-light" @id(BtnEditComp, "onclick")>Edit</button>
-                <button class="btn btn-danger" @id(BtnDeleteComp, "onclick")>Löschen</button>
+                <button class="btn btn-light" @id(BtnEditComp, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>Edit</button>
+                <button class="btn btn-danger" @id(BtnDeleteComp, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>Löschen</button>
             </div>
         </div>
         <div class="card-body bg-light">
@@ -38,7 +38,7 @@
     <div class="card shadow-sm border-info mb-4">
         <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
             <h4 class="h5 mb-0 fw-bold"><i class="bi bi-layers me-2"></i>Spielrunden</h4>
-            <button class="btn btn-dark btn-sm" @id(BtnStartRound, "onclick")>
+            <button class="btn btn-dark btn-sm" @id(BtnStartRound, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
                 <i class="bi bi-plus-lg me-1"></i>Runde starten
             </button>
         </div>
@@ -75,7 +75,7 @@
                                         <button class="btn btn-primary" onclick="appLoadPage('RoundAdmin', '@r.id.value')">
                                             <i class="bi bi-eye me-1"></i>Anzeigen
                                         </button>
-                                        <button class="btn btn-outline-danger">
+                                        <button class="btn btn-outline-danger" @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>

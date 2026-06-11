@@ -28,9 +28,9 @@ object TestTourney:
    */
   def testTourney_update(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     val name = if (param.isEmpty) "Test Tournament" else param
-    val current = if (TourneyDB.tourney.id != 0) TourneyDB.tourney else
+    val current = if (TourneyDB.tourney.wpId != 0) TourneyDB.tourney else
       Tourney(
-        0, // id
+        0, // wpId
         name = name,
         organizer = "Test Org",
         startDate = 20260101,
@@ -48,13 +48,13 @@ object TestTourney:
    * Test 2: Load tournament data.
    */
   def testTourney_load(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    val id = try param.toInt catch { case _: Exception => TourneyDB.tourney.id }
-    TourneyDB.load(id).map {
+    val wpId = try param.toInt catch { case _: Exception => TourneyDB.tourney.wpId }
+    TourneyDB.load(wpId).map {
       case Left(err) =>
         addOutput(s"Error loading tournament: ${err.msg}")
         Left(err)
       case Right(ver) =>
-        val info = if (TourneyDB.tourney.id != 0) TourneyDB.tourney.name else "No tournament loaded"
+        val info = if (TourneyDB.tourney.wpId != 0) TourneyDB.tourney.name else "No tournament loaded"
         addOutput(s"Tournament loaded: $info (Version: $ver)")
         Right(s"FINISHED: ${group}-Test:${number}")
     }
@@ -78,14 +78,14 @@ object TestTourney:
    */
   def testTourney_init(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     addOutput("Initialisiere alle Datenbanken vom Server...")
-    val id = try param.toInt catch { case _: Exception => TourneyDB.tourney.id }
-    TourneyDB.init(id).map {
+    val wpId = try param.toInt catch { case _: Exception => TourneyDB.tourney.wpId }
+    TourneyDB.init(wpId).map {
       case Left(err) =>
         addOutput(s"Fehler bei der Initialisierung: ${err.msgCode} (${err.in1})")
         Left(err)
       case Right(_) =>
         addOutput("Alle Daten erfolgreich geladen:")
-        addOutput(s"- Turnier: ${if (TourneyDB.tourney.id != 0) TourneyDB.tourney.name else "keines"}")
+        addOutput(s"- Turnier: ${if (TourneyDB.tourney.wpId != 0) TourneyDB.tourney.name else "keines"}")
         addOutput(s"- Wettbewerbe: ${CompetitionDB.competitions.count(_ != null)}")
         addOutput(s"- Vereine: ${TourneyDB.tourney.clubs.length}")
         addOutput(s"- Spieler: ${TourneyDB.tourney.players.length}")
@@ -105,7 +105,7 @@ object TestTourney:
     val date = try dateStr.toInt catch { case _: Exception => 20220402 }
     
     val t = Tourney(
-      id = 0,
+      wpId = 0,
       name = name,
       organizer = "TTV Freising",
       startDate = date,
@@ -136,7 +136,7 @@ object TestTourney:
     val date = try dateStr.toInt catch { case _: Exception => 20220402 }
 
     val t = Tourney(
-      id = 0,
+      wpId = 0,
       name = name,
       organizer = "TTV Freising",
       startDate = date,

@@ -1,5 +1,5 @@
 # Start with a base image for Java
-FROM localhost:5555/eclipse-temurin:21-jdk AS mainstage
+FROM eclipse-temurin:21-jdk AS mainstage
 
 ARG DEMON_USER
 ARG DEMON_USERID

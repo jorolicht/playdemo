@@ -1,5 +1,5 @@
-# Use the official WordPress image with PHP 8.2 and Apache as the base
-FROM localhost:5555/wordpress:php8.2-apache
+# Use the official WordPress image with PHP 8.3 and Apache as the base
+FROM wordpress:7.0-php8.3-apache
 
 # Update package lists and install required development libraries
 # libgmp-dev: Required for the GMP (GNU Multiple Precision) extension

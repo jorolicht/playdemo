@@ -11,11 +11,11 @@
             <h3 class="h5 mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Turnier-Anmeldung</h3>
             <div class="d-flex gap-2">
                 @if(selection.competition.isDefined) {
-                    <button class="btn btn-outline-dark btn-sm fw-bold" @id(BtnUploadCsv, "onclick")>
+                    <button class="btn btn-outline-dark btn-sm fw-bold" @id(BtnUploadCsv, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
                         <i class="bi bi-file-earmark-spreadsheet me-1"></i>
                         CSV Upload
                     </button>
-                    <button class="btn btn-dark btn-sm fw-bold" @id(BtnAddParticipant, "onclick")>
+                    <button class="btn btn-dark btn-sm fw-bold" @id(BtnAddParticipant, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
                         <i class="bi bi-plus-lg me-1"></i>
                         @if(selection.competition.exists(_.typ == CompTyp.DOUBLE)) { Doppel hinzufügen } else { Teilnehmer hinzufügen }
                     </button>
@@ -104,11 +104,11 @@
                                     <td class="text-center small">@p.birthYear</td>
                                     <td class="text-center">
                                         <div class="form-check d-flex justify-content-center">
-                                            <input @id(IdCheckActive, "onchange", p.id.toString) class="form-check-input" type="checkbox" data-sno="@p.id" @if(p.active){checked}>
+                                            <input @id(IdCheckActive, "onchange", p.id.toString) class="form-check-input" type="checkbox" data-sno="@p.id" @if(p.active){checked} @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
                                         </div>
                                     </td>
                                     <td class="text-end pe-3">
-                                        <button class="btn btn-link btn-sm text-danger p-0" title="Entfernen">
+                                        <button class="btn btn-link btn-sm text-danger p-0" title="Entfernen" @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>

@@ -88,10 +88,33 @@ add_action('rest_api_init', function () {
         'callback' => function ($request) {
 
             $post_id = $request->get_param('post_id');
+            $slug = $request->get_param('slug');
             $target_type = $request->get_param('target_type');
 
-            if (!$post_id || !$target_type) {
-                return ApiHelper::error("missing_params", "post_id oder target_type fehlt", "", "", HttpStatus::BAD_REQUEST);
+            if (!$post_id && !$slug) {
+                return ApiHelper::error("missing_params", "post_id oder slug fehlt", "", "", HttpStatus::BAD_REQUEST);
+            }
+
+            if (!$target_type) {
+                return ApiHelper::error("missing_params", "target_type fehlt", "", "", HttpStatus::BAD_REQUEST);
+            }
+
+            // Find post by slug if no ID provided
+            if (!$post_id && $slug) {
+                $args = [
+                    'name'        => $slug,
+                    'post_type'   => ['page', 'post'], // Search in pages and posts
+                    'post_status' => 'any',
+                    'numberposts' => 1
+                ];
+                $posts = get_posts($args);
+                if (!empty($posts)) {
+                    $post_id = $posts[0]->ID;
+                }
+            }
+
+            if (!$post_id) {
+                return ApiHelper::error("not_found", "Post nicht gefunden (ID oder Slug ungültig)", "", "", HttpStatus::NOT_FOUND);
             }
 
             $post = get_post($post_id);
@@ -112,5 +135,27 @@ add_action('rest_api_init', function () {
                 'new_type' => $target_type
             ];
         }
+    ]);
+});
+
+add_action('rest_api_init', function () {
+    // Registriert das Feld 'translations' für Seiten (page) und Beiträge (post)
+    // Falls du Custom Post Types hast, erweitere das Array, z.B. ['page', 'post', 'turnier']
+    register_rest_field(['page', 'post'], 'translations', [
+        'get_callback' => function ($post_array) {
+            $post_id = $post_array['id'];
+            
+            // Prüfen, ob Polylang aktiv ist und die Funktion existiert
+            if (function_exists('pll_get_post_translations')) {
+                // Gibt ein Array zurück: ['de' => 123, 'en' => 456]
+                return pll_get_post_translations($post_id);
+            }
+            
+            return null;
+        },
+        'schema' => [
+            'description' => __('Polylang translations IDs mapping.'),
+            'type'        => 'object',
+        ],
     ]);
 });

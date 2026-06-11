@@ -19,49 +19,68 @@ import addon.Console
 object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
   def name = PageNameTyp("Main")
   
-  @JSExportTopLevel("startApp")
-  def startApp(version: String, mode: String, logLevel: String, tourney: String = ""): Unit = 
-    Global.lang = dom.window.navigator.language.take(2)
-    Global.dataUrl  = getData(gE(ParamId), "dataurl", "./data/")
-    Global.imgUrl   = getData(gE(ParamId), "imgurl", "./img/")
+  // Direct Start without Shortcode
+  @JSExportTopLevel("appMain")
+  def appMain(): Unit = 
+    val config = dom.window.asInstanceOf[js.Dynamic].playdemoConfig
+
+    val version = "001DE1970-01"
+    val mode        = config.mode.asInstanceOf[String]
+    val logLevel    = config.logLevel.asInstanceOf[String]
     Logging.setLogLevel(logLevel.toLowerCase())
-    //Global.tourney  = tourney
+    
+    Global.dataUrl  = config.dataUrl.asInstanceOf[String]
+    Global.imgUrl   = config.imgUrl.asInstanceOf[String]
+    Global.playUrl  = config.playUrl.asInstanceOf[String]
+    Global.homeUrl  = config.homeUrl.asInstanceOf[String]
+    Global.wpNonce  = config.nonce.asInstanceOf[String]
+    Global.pageId   = config.pageId.asInstanceOf[String].toIntOption.getOrElse(0)
+    Global.turnstileSitekey = config.turnstileSitekey.asInstanceOf[String]
+    Global.lang = dom.window.navigator.language.take(2)
+    
+    println(s"appMain -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} mode:${mode} PageId:${Global.pageId}  logLevel:${logLevel}")    
 
-    Logging.setLogLevel(logLevel)
-    println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} mode:${mode} logLevel:${logLevel} tourney:${tourney}")
-
-    dom.window.asInstanceOf[js.Dynamic].sayHello    = (name: String) => s"Hello $name"
     dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
     dom.window.asInstanceOf[js.Dynamic].appEvent    = (elem: HTMLElement, event: dom.Event) => appEvent(elem, event)
+    dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
 
+    Messages.initMsg(version, Global.dataUrl, Global.lang).map {
+      case true   => initApp(mode.toLowerCase())
+       case false => println("Main program failed to initialize")  
+    }
+
+  // Start through Shortcode (non tourney CPT)
+  @JSExportTopLevel("startApp")
+  def startApp(version: String, mode: String, logLevel: String, tourney: String = ""): Unit = 
+
+    Global.dataUrl  = getData(gE(ParamId), "dataurl", "./data/")
+    Global.imgUrl   = getData(gE(ParamId), "imgurl", "./img/")
+    Global.playUrl  = getData(gE(ParamId), "playurl","")
+    Global.homeUrl  = getData(gE(ParamId), "homeurl", "")
+    Global.wpNonce  = getData(gE(ParamId), "nonce", "")
+    Global.pageId   = getData(gE(ParamId), "pageid", 0)
+    Global.turnstileSitekey = getData(gE(ParamId), "turnstileSitekey", "")
+    Global.lang     = dom.window.navigator.language.take(2)
+    Logging.setLogLevel(logLevel.toLowerCase())
+
+    println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} mode:${mode} PageId:${Global.pageId}  logLevel:${logLevel} tourney:${tourney}")
+
+    dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
+    dom.window.asInstanceOf[js.Dynamic].appEvent    = (elem: HTMLElement, event: dom.Event) => appEvent(elem, event)
     // expose addon Console.start function, only if addon is included, otherwise dummy function
     dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
 
     Messages.initMsg(version, Global.dataUrl, Global.lang).map {
-      case true  => mode.toLowerCase() match 
-        case "play" => startPlay()
-        case _      => startWp(mode.toLowerCase())
-       case false => println("Main program failed to initialize")  
+      case true  => initApp(mode)        
+      case false => println("Main program failed to initialize")  
     }
 
-  def startWp(mode: String): Unit =
-    import services.*
-    import shared.model.*
-
-    Global.playUrl = getData(gE(ParamId), "playurl","")
-    Global.homeUrl = getData(gE(ParamId), "homeurl", "")
-    Global.wpNonce = getData(gE(ParamId), "nonce", "")
-    Global.pageId  = getData(gE(ParamId), "pageid", 0)
-
-    initApp(mode)
 
   def initApp(mode: String): Unit =
     import services.*
     import shared.model.*
     import shared.model.UserInfo
     import shared.model.User
-    
-    debug(s"initApp -> mode: $mode, playUrl: ${Global.playUrl}")
 
     ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl).map {
       case Right(ui) => 
@@ -88,87 +107,45 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
           case "login"     => pages.loadPage(pages.UserLogin.name, "")
           case "register"  => pages.loadPage(pages.UserRegistration.name, "")
           case "verify"    => pages.loadPage(pages.VerifyAccount.name, "")
-          case "multi"     => modeMulti()
-          case "single"    => modeSingle()
-          case "page"      => modePage(getData(gE(ParamId), "page", ""))
-          case _           => pages.loadPage(pages.Home.name, "")
+          case "tourney"   => modeTourney(Global.pageId) // Use modeTourney for 'multi' mode
+          case "view"      => modeView(Global.pageId)
+          case "home"      => modeHome()
+          case _           => modeDefault(Global.pageId)
         }
 
       case Left(err) => 
         debug(s"initApp -> Error loading user info: ${err}")
         Navbar.render()
         Footer.render()
-        pages.loadPage(pages.Home.name, "")
+        pages.loadPage(pages.MainView.name, "")
     }
 
-  def modePage(page: String): Unit =
-    pages.loadPage(PageNameTyp(page), "", withSidebar = false, async = true)
+  def modeView(pageId: Int): Unit = 
+    pages.loadPage(pages.MainView.name, pageId.toString)
 
+  def modeHome(): Unit = 
+    pages.loadPage(pages.MainView.name, "")
 
-  def modeSingle(): Unit =
+  def modeDefault(pageId: Int): Unit = 
+    pages.loadPage(pages.MainView.name, pageId.toString)
+
+  def modeTourney(pageId: Int): Unit = 
     import services.*
     import shared.model.*
 
-    debug(s"modeSingle -> playUrl: ${Global.playUrl}, pageId: ${Global.pageId}")
-
-    TourneyDB.init(Global.pageId).map {
-      case Right(_) =>
-        val html = cviews.pages.html.ViewTourney(
-          TourneyDB.tourney,
-          CompetitionDB.competitions.toSeq.filter(_ != null),
-          RoundDB.rounds.toSeq.filter(_ != null),
-          TourneyDB.tourney.clubs.toSeq,
-          TourneyDB.tourney.players.toSeq
-        )
-        setHtml(gE(ContentId), html)
-      case Left(err) =>
-        error(s"Initialization failed in modeSingle: ${err.msgCode}")
-        setHtml(gE(ContentId), s"<div class='alert alert-danger'>Fehler beim Laden der Daten: ${err.msgCode}</div>")
-    }
-
-
-  def modeMulti(): Unit = 
-    import services.*
-    import shared.model.*
-    import cats.data.EitherT
-    import cats.implicits._ 
-
-    debug(s"modeMulti -> pageId: ${Global.pageId}")
-
-    TourneyDB.init(Global.pageId).map {
-      case Right(ts) => 
-        debug(s"Tourney initialized, timestamp: $ts")
-        // Navigation logic based on tourney.ident
-        if (TourneyDB.tourney.ident == "IGNORE") {
-          pages.loadPage(pages.MainMulti.name, "")
-        } else {
+    debug(s"modeTourney -> pageId: ${pageId}")
+    if (pageId > 0) {
+      TourneyDB.init(pageId).map {
+        case Right(ts) => 
+          debug(s"Tourney initialized, timestamp: $ts")
           pages.loadPage(pages.TourneyInfo.name, "")
-        }
-      case Left(err) => 
-        debug(s"Error loading tournament: ${err}")
-        pages.loadPage(pages.MainMulti.name, "")
+        case Left(err) => 
+          error(s"Error loading tournament: ${err}")
+          pages.loadPage(pages.MainView.name, "")
+      }
+    } else {
+      pages.loadPage(pages.MainView.name, "")
     }
-
-
-  def startPlay() : Unit = 
-    val usecase = gE(ParamId).getAttribute("data-usecase")
-    val param   = gE(ParamId).getAttribute("data-param")
-    Global.csrf  = gE(ParamId).getAttribute("data-csrf")
-
-    debug(s"startPlay -> usecase:${usecase} param:${param} csrf:${Global.csrf}")
-    
-    // set visibility of basic html elements
-    addClass(gE(JScriptId), "d-none")
-
-    val evtSource = new dom.raw.EventSource(s"/helper/sse?id=${randomString(6)}")  
-    evtSource.onmessage = { (e: dom.MessageEvent) => debug(s"Message from Server: ${e.data}") }
-
-    // add context header
-    ContextHeader.render("")
-    // Sidebar.render("") - Removed as requested
-
-    appLoadPage(usecase, param)  
-
 
   def handleGoogleCredential(credentials: String): Unit = pages.Auth.googleLogin(credentials)
 

@@ -42,13 +42,17 @@ object PlayerDB extends ComWrapper with Debouncer:
    * Synchronizes pending player events with the WordPress server.
    */
   def sync(all: Seq[Player]): Future[Either[AppError, Unit]] = {
-    if (TourneyDB.tourney.id == 0) {
+    if (base.Global.isDemoMode) {
+      val req = PlayerSyncRequest(version, all)
+      org.scalajs.dom.window.localStorage.setItem("App.demo_players", write(req))
+      Future.successful(Right(()))
+    } else if (TourneyDB.tourney.wpId == 0) {
       Future.successful(Right(()))
     } else {
       val route = "/wp-json/tourney/v1/players-sync"
       // Send all players since they are stored in a single meta field
       val req = PlayerSyncRequest(version, all)
-      val params = List("postId" -> TourneyDB.tourney.id.toString)
+      val params = List("postId" -> TourneyDB.tourney.wpId.toString)
 
       ajaxPost[PlayerSyncRequest, PlayerSyncResponse](
         route,
@@ -71,15 +75,27 @@ object PlayerDB extends ComWrapper with Debouncer:
    * Loads players from the WordPress server.
    */
   def load(): Future[Either[AppError, Long]] = {
-    if (TourneyDB.tourney.id == 0) {
+    if (base.Global.isDemoMode) {
+      val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_players")
+      if (jsStr != null && jsStr.nonEmpty) {
+        val req = read[PlayerSyncRequest](jsStr)
+        TourneyDB.tourney.players.clear()
+        TourneyDB.tourney.players ++= req.players
+        TourneyDB.tourney.dirtyPlayer.clear()
+        initHandler()
+        version = req.version
+        Logging.debug(s"PlayerDB.load(demo): loaded ${req.players.length} players")
+      }
+      return Future.successful(Right(version.toLong))
+    } else if (TourneyDB.tourney.wpId == 0) {
       Logging.debug("PlayerDB.load: tourney.id is 0, skipping load")
       return Future.successful(Right(0L))
     }
 
-    val params = List("postId" -> TourneyDB.tourney.id.toString)
+    val params = List("postId" -> TourneyDB.tourney.wpId.toString)
     ajaxGet[PlayersResponse]("/wp-json/tourney/v1/players", params).map {
       case Right(res) =>
-        if (TourneyDB.tourney.id != 0) {
+        if (TourneyDB.tourney.wpId != 0) {
           TourneyDB.tourney.players.clear()
           TourneyDB.tourney.players ++= res.players
           TourneyDB.tourney.dirtyPlayer.clear()

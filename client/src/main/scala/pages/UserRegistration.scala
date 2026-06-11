@@ -49,13 +49,20 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
     if (pwd.length < 8) { dom.window.alert("Passwort muss mind. 8 Zeichen haben"); return }
     if (isAdmin && org.length < 6) { dom.window.alert("Veranstalter-Name muss mind. 6 Zeichen haben"); return }
 
+    // Turnstile Token (falls konfiguriert)
+    val turnstileElements = dom.document.getElementsByName("cf-turnstile-response")
+    val turnstileToken = if (turnstileElements.length > 0) {
+      turnstileElements(0).asInstanceOf[dom.html.Input].value
+    } else ""
+
     // API Call
     val data = Map(
       "name"      -> nameStr,
       "email"     -> email,
       "password"  -> pwd,
       "role"      -> (if (isAdmin) "turnier_admin" else "subscriber"),
-      "organizer" -> org
+      "organizer" -> org,
+      "turnstileToken" -> turnstileToken
     )
 
     ajaxPost[Map[String, String], Map[String, String]]("/wp-json/playdemo/v1/auth/register", List(), data).map {

@@ -89,7 +89,7 @@ object TourneyNew extends BasePage with JsWrapper:
       )
 
       val tourney = Tourney(
-        id = 0,         // New entry, DB will assign ID
+        wpId = 0,         // New entry, DB will assign ID
         name = tName,
         organizer = tOrganizer,
         startDate = tStart,
@@ -109,7 +109,7 @@ object TourneyNew extends BasePage with JsWrapper:
       services.TourneyDB.apiCreate(tourney).map {
         case Right(slug) =>
           // 2. Update DB and Selection (ID is set by apiCreate)
-          Global.pageId = tourney.id
+          Global.pageId = tourney.wpId
           services.TourneyDB.update(tourney, doSync = false)
           Global.currentSelection = Selection(Some(tourney))
           comps.ContextHeader.render()

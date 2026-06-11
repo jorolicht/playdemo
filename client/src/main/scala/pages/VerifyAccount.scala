@@ -46,7 +46,7 @@ object VerifyAccount extends BasePage with JsWrapper with ComWrapper:
                 <h2 class='mt-4'>Fehler</h2>
                 <p class='fs-5 mt-3'>Verifizierung fehlgeschlagen: $err</p>
                 <hr class='my-4'>
-                <button class='btn btn-outline-secondary px-4' onclick='appLoadPage("Home", "")'>Zur Startseite</button>
+                <button class='btn btn-outline-secondary px-4' onclick='appLoadPage("MainView", "")'>Zur Startseite</button>
               </div>
             </div>""")
       }
@@ -58,7 +58,7 @@ object VerifyAccount extends BasePage with JsWrapper with ComWrapper:
             <h2 class='mt-4'>Ungültiger Link</h2>
             <p class='fs-5 mt-3'>Der Verifizierungslink ist unvollständig oder ungültig.</p>
             <hr class='my-4'>
-            <button class='btn btn-outline-secondary px-4' onclick='appLoadPage("Home", "")'>Zur Startseite</button>
+            <button class='btn btn-outline-secondary px-4' onclick='appLoadPage("MainView", "")'>Zur Startseite</button>
           </div>
         </div>""")
     }

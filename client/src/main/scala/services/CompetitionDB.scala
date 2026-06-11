@@ -43,11 +43,15 @@ object CompetitionDB extends ComWrapper with Debouncer:
    * Synchronizes pending competition events with the WordPress server.
    */
   def sync(dirty: Seq[Competition]): Future[Either[AppError, Unit]] = {
-    if (dirty.isEmpty || TourneyDB.tourney.id == 0) {
+    if (base.Global.isDemoMode) {
+      val req = CompetitionSyncRequest(TourneyDB.tourney.competitions.filter(_ != null).toSeq)
+      org.scalajs.dom.window.localStorage.setItem("App.demo_comps", write(req))
+      Future.successful(Right(()))
+    } else if (dirty.isEmpty || TourneyDB.tourney.wpId == 0) {
       Future.successful(Right(()))
     } else {
       val req = CompetitionSyncRequest(dirty)
-      val params = List("postId" -> TourneyDB.tourney.id.toString)
+      val params = List("postId" -> TourneyDB.tourney.wpId.toString)
 
       ajaxPost[CompetitionSyncRequest, CompetitionSyncResponse](
         route,
@@ -69,15 +73,32 @@ object CompetitionDB extends ComWrapper with Debouncer:
    * Loads competitions from the WordPress server.
    */
   def load(): Future[Either[AppError, Long]] = {
-    if (TourneyDB.tourney.id == 0) {
+    if (base.Global.isDemoMode) {
+      val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_comps")
+      if (jsStr != null && jsStr.nonEmpty) {
+        val req = read[CompetitionSyncRequest](jsStr)
+        val t = TourneyDB.tourney
+        t.competitions.clear()
+        for (i <- 0 until 64) t.competitions += null
+        req.events.foreach { c =>
+           val i = c.id.value - 1
+           if (i >= 0 && i < 64) then
+             t.competitions(i) = c
+        }
+        t.dirtyCompetition.clear()
+        initHandler()
+        Logging.debug(s"CompetitionDB.load(demo): loaded ${req.events.length} competitions")
+      }
+      return Future.successful(Right(0L))
+    } else if (TourneyDB.tourney.wpId == 0) {
       Logging.debug("CompetitionDB.load: tourney.id is 0, skipping load")
       return Future.successful(Right(0L))
     }
 
-    val params = List("postId" -> TourneyDB.tourney.id.toString)
+    val params = List("postId" -> TourneyDB.tourney.wpId.toString)
     ajaxGet[CompetitionsResponse]("/wp-json/tourney/v1/competitions", params).map {
       case Right(res) =>
-        if (TourneyDB.tourney.id != 0) {
+        if (TourneyDB.tourney.wpId != 0) {
           val t = TourneyDB.tourney
           t.competitions.clear()
           for (i <- 0 until 64) t.competitions += null

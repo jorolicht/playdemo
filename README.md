@@ -7,42 +7,49 @@ Install Playframework with Scala.js skeleton through a Giter8 template.
 This shows how you can integrate a Play project with a Scala.js project.
 For details see https://github.com/vmunier/play-scalajs.g8
 
-See file projects/plugins.sbt for necessary plugins (versions):
+See file project/plugins.sbt for necessary plugins (versions):
 
 ```
 addSbtPlugin("com.vmunier"               % "sbt-web-scalajs"           % "1.3.0")
-addSbtPlugin("org.scala-js"              % "sbt-scalajs"               % "1.16.0")
+addSbtPlugin("org.scala-js"              % "sbt-scalajs"               % "1.19.0")
 addSbtPlugin("org.playframework"         % "sbt-plugin"                % "3.0.2")
 addSbtPlugin("org.portable-scala"        % "sbt-scalajs-crossproject"  % "1.3.2")
 addSbtPlugin("com.typesafe.sbt"          % "sbt-gzip"                  % "1.0.2")
 addSbtPlugin("com.typesafe.sbt"          % "sbt-digest"                % "1.1.4")
 ```
 
-Set Scala version in build.sbt: ```ThisBuild / scalaVersion := "3.3.3"```
+Set Scala version in build.sbt: ```ThisBuild / scalaVersion := "3.3.7"```
 
 
 ### uPickle
 uPickle (pronounced micro-pickle) is a lightweight JSON and binary (MessagePack) serialization library for Scala and ScalaJs (see http://com-lihaoyi.github.io/upickle/)
 
-Add to build.sbt: ```libraryDependencies += "com.lihaoyi" %%% "upickle" % "3.2.0"``` for client and 
-                  ```libraryDependencies += "com.lihaoyi" %% "upickle" % "3.2.0"```  for server
+Add to build.sbt: ```libraryDependencies += "com.lihaoyi" %%% "upickle" % "3.3.1"``` for client and 
+                  ```libraryDependencies += "com.lihaoyi" %% "upickle" % "3.3.1"```  for server
 
 
 ### Bootstrap
 Bootstrap is a free and open-source CSS framework directed at responsive, mobile-first front-end web development.
-See https://getbootstrap.com/docs/5.0/getting-started/introduction
+See https://getbootstrap.com/docs/5.3/getting-started/introduction
 
 Copy-paste the stylesheet <link> into your <head> before all other stylesheets to load our CSS.
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
 Include every Bootstrap JavaScript plugin and dependency with one of our two bundles.
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 You have to escape the @-Symbol (double @@), twirl-Template!
 
 Or download the distribution and copy it to the public folder, then:
-<link rel="stylesheet" href='@routes.Assets.versioned("bootstrap-5.0.2/css/bootstrap.min.css")'>
-<script src='@routes.Assets.versioned("bootstrap-5.0.2/js/bootstrap.bundle.min.js")'></script>
+<link rel="stylesheet" href='@routes.Assets.at("bootstrap-5.3.3/css/bootstrap.min.css")'>
+<script src='@routes.Assets.at("bootstrap-5.3.3/js/bootstrap.bundle.min.js")'></script>
+
+### Bootstrap Icons
+Bootstrap Icons is a free, high quality, open source icon library.
+See https://icons.getbootstrap.com/
+
+Or download the distribution and copy it to the public folder, then:
+<link rel="stylesheet" href='@routes.Assets.at("bootstrap-icons-1.11.3/font/bootstrap-icons.css")'>
 
 
 ### Font Awesome
@@ -172,6 +179,7 @@ Add cats-core library for client and server targets to get [EitherT](https://typ
 ```
 libraryDependencies += "org.typelevel" %% "cats-core" % "2.12.0"   //server
 libraryDependencies += "org.typelevel" %%% "cats-core" % "2.12.0"  //client
+libraryDependencies += "org.typelevel" %%% "cats-core" % "2.13.0"  //shared
 ```
 
 ## Wordpress Integration
@@ -193,20 +201,21 @@ libraryDependencies += "org.typelevel" %%% "cats-core" % "2.12.0"  //client
 
 ## Test Environment
 
-Set environment and start application in server directory
+Set environment and start application in `server/docker` directory using the provided shell scripts:
 ```
-<projectbase>/server> . ../env/docker.env
-<projectbase>/server> docker compose -f docker_compose.yml --env-file ../env/docker.env up -d
-<projectbase>/server> docker ps                                                              
+<projectbase>/server/docker> ./start.sh
+```
+
+Or run docker compose manually from `server/docker`:
+```
+<projectbase>/server/docker> docker compose -f docker-compose.yml --env-file ../env/docker.env up -d
+```
+
+Check running containers:
+```
+<projectbase>/server/docker> docker ps
 CONTAINER ID   IMAGE       COMMAND                  CREATED       STATUS         PORTS                    NAMES
 c133fed8b580   wordpress   "docker-entrypoint.s…"   5 weeks ago   Up 6 minutes   0.0.0.0:8080->80/tcp     playdemoapp-wordpress-1
 71b8158f51cc   playsrv     "./bin/server -Dappl…"   5 weeks ago   Up 5 minutes   0.0.0.0:9500->9500/tcp   playdemoapp-playsrv-1
 d0c2c92c8b65   mysql       "docker-entrypoint.s…"   5 weeks ago   Up 6 minutes   3306/tcp, 33060/tcp      playdemoapp-db-1
 ```
-
-
-
-
-
-
-

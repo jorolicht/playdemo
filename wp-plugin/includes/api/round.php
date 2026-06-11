@@ -26,10 +26,10 @@ add_action('rest_api_init', function () {
  */
 function tourney_get_rounds(WP_REST_Request $request)
 {
-    $post_id = intval($request->get_param('postId'));
+    $post_id = ApiHelper::getPostId($request);
 
     if (!$post_id) {
-        return ApiHelper::error("missing_param", "Missing parameters", "", "", HttpStatus::BAD_REQUEST);
+        return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
     }
 
     $rounds = [];
@@ -56,10 +56,10 @@ function tourney_get_rounds(WP_REST_Request $request)
  */
 function tourney_sync_rounds(WP_REST_Request $request)
 {
-    $post_id = intval($request->get_param('postId'));
+    $post_id = ApiHelper::getPostId($request);
 
     if (!$post_id) {
-        return ApiHelper::error("missing_param", "Missing parameters", "", "", HttpStatus::BAD_REQUEST);
+        return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
     }
 
     $body = json_decode($request->get_body(), true);

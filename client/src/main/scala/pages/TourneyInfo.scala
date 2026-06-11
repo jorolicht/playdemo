@@ -20,20 +20,17 @@ object TourneyInfo extends BasePage with JsWrapper:
 
   def render(param: String = ""): Boolean = 
     // When viewing tourney info, we usually want to clear the competition/round selection
-    if (Global.currentSelection.competition.isDefined || Global.currentSelection.round.isDefined) {
-      Global.currentSelection = Global.currentSelection.copy(competition = None, round = None)
-      comps.ContextHeader.render()
-    }
+    Global.currentSelection = Global.currentSelection.copy(competition = None, round = None)
 
     // Get tournament from Selection or TourneyDB
     val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
 
-    if (tourney.id != 0) {
-        // Update selection if it was empty
-        if (Global.currentSelection.tourney.isEmpty) {
-          Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney))
-          comps.ContextHeader.render()
-        }
+    if (tourney.wpId != 0) {
+        // Update selection to ensure tournament is set
+        Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney))
+        
+        // Always render ContextHeader because loadPage hides it by default
+        comps.ContextHeader.render()
 
         // Get real competitions from DB
         val compList = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
@@ -42,7 +39,7 @@ object TourneyInfo extends BasePage with JsWrapper:
         true
     } else {
         debug("TourneyInfo: No tournament found, redirecting to Home")
-        loadPage(MainMulti.name, "")
+        loadPage(MainView.name, "")
         false
     }
 
@@ -68,17 +65,24 @@ object TourneyInfo extends BasePage with JsWrapper:
             }
           case Left(_) => debug("Add competition cancelled")
         }
-      case `BtnDeleteTourney` => 
+      case `BtnDeleteTourney` =>
         import shared.BoxButton
+        val tourney = services.TourneyDB.tourney
         DlgMsgbox.show("Möchten Sie dieses Turnier wirklich unwiderruflich löschen?", "Turnier löschen", List(BoxButton.Yes, BoxButton.No)).map {
-          case BoxButton.Yes => 
-            // In a real app, we would call an API here. 
-            // For now, we clear the local state.
-            services.TourneyDB.tourney = Tourney.default
-            Global.currentSelection = Selection()
-            comps.ContextHeader.render()
-            loadPage(MainMulti.name, "")
+          case BoxButton.Yes =>
+            services.TourneyDB.apiDelete(tourney.wpId).map {
+              case Right(_) =>
+                info(s"Turnier '${tourney.name}' wurde gelöscht.")
+                services.TourneyDB.tourney = Tourney.default
+                Global.currentSelection = Selection()
+                comps.ContextHeader.render()
+                loadPage(MainView.name, "")
+              case Left(err) =>
+                error(s"Löschen fehlgeschlagen: ${err.msgCode}")
+                dom.window.alert(s"Fehler beim Löschen des Turniers: ${err.msgCode}")
+            }
           case _ => debug("Delete cancelled")
         }
+
       case _ => 
         debug(s"TourneyInfo handleEvent: ${elem.id}")

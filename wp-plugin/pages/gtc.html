@@ -1,0 +1,587 @@
+<!--
+ * Allgemeine Geschäftsbedingungen (AGB)
+ *
+ * Diese Datei enthält die Allgemeinen Geschäftsbedingungen der Firma Cloud-Application Lifecycle Management (Calysima).
+ * Die AGB regeln die vertraglichen Beziehungen bei Bestellungen von digitalen Inhalten, Softwarefreischaltungen
+ * und Webanwendungen.
+ *
+ * @package    Playdemo
+ * @subpackage Pages
+ * @since      1.0.0
+ * @author     Robert Lichtenegger
+ * @date       2026-06-11
+ -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Allgemeine Geschäftsbedingungen (AGB) von Cloud-Application Lifecycle Management (Calysima).">
+    <title>Allgemeine Geschäftsbedingungen | Calysima</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Modern CSS Reset & Design Tokens */
+        :root {
+            --primary-color: #6366f1; /* Indigo 500 */
+            --primary-hover: #4f46e5; /* Indigo 600 */
+            --primary-light: rgba(99, 102, 241, 0.08);
+            --bg-color: #f8fafc; /* Slate 50 */
+            --card-bg: #ffffff;
+            --text-color: #1e293b; /* Slate 800 */
+            --text-muted: #64748b; /* Slate 500 */
+            --border-color: #e2e8f0; /* Slate 200 */
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --border-radius: 12px;
+            --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a; /* Slate 900 */
+                --card-bg: #1e293b; /* Slate 800 */
+                --text-color: #f1f5f9; /* Slate 100 */
+                --text-muted: #94a3b8; /* Slate 400 */
+                --border-color: #334155; /* Slate 700 */
+                --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+                --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.625;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Hero Header */
+        .header-bg {
+            background: linear-gradient(135deg, #4f46e5, #0ea5e9);
+            color: #ffffff;
+            padding: 5rem 1rem 7rem 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-bg::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: var(--bg-color);
+            transform: skewY(-2deg);
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header-content h1 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-badge {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Layout Container */
+        .main-container {
+            max-width: 1200px;
+            margin: -3.5rem auto 5rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2.5rem;
+            position: relative;
+            z-index: 20;
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                margin-top: -2.5rem;
+                gap: 1.5rem;
+            }
+            .header-bg {
+                padding: 4rem 1rem 5rem 1rem;
+            }
+            .header-content h1 {
+                font-size: 2.25rem;
+            }
+        }
+
+        /* Sticky Navigation Sidebar */
+        aside {
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.75rem 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        @media (max-width: 900px) {
+            aside {
+                position: relative;
+                top: 0;
+            }
+        }
+
+        .toc-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .toc-list {
+            list-style: none;
+        }
+
+        .toc-item {
+            margin-bottom: 0.35rem;
+        }
+
+        .toc-link {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toc-link:hover {
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transform: translateX(4px);
+        }
+
+        .toc-link.active {
+            color: var(--primary-color);
+            background-color: var(--primary-light);
+            font-weight: 600;
+            transform: translateX(4px);
+        }
+
+        .toc-prefix {
+            display: inline-block;
+            width: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        /* Document Body / Content */
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            box-shadow: var(--shadow-sm);
+            scroll-margin-top: 2rem;
+            transition: box-shadow 0.3s ease;
+        }
+
+        section:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        @media (max-width: 768px) {
+            section {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        section h2 {
+            font-size: 1.625rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-badge {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        section p {
+            margin-bottom: 1.25rem;
+            color: var(--text-color);
+            font-size: 1rem;
+            text-align: justify;
+        }
+
+        section p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Sub-structure formatting */
+        .paragraph-block {
+            background-color: var(--bg-color);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 0 8px 8px 0;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .paragraph-block h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .paragraph-block p {
+            margin-bottom: 0;
+            font-size: 0.975rem;
+            text-align: left;
+        }
+
+        /* Provider Card */
+        .provider-card {
+            background: linear-gradient(135deg, var(--card-bg), var(--bg-color));
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        @media (max-width: 768px) {
+            .provider-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        .provider-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .provider-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 2rem;
+        }
+
+        .provider-col h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .provider-col p {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .provider-col p:last-child {
+            margin-bottom: 0;
+        }
+
+        .provider-col a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .provider-col a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        .footer-tag {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-bg">
+        <div class="header-content">
+            <h1>Allgemeine Geschäftsbedingungen</h1>
+            <span class="header-badge">Stand: 6. Januar 2021</span>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar Navigation -->
+        <aside>
+            <h3 class="toc-title">Navigation</h3>
+            <ul class="toc-list">
+                <li class="toc-item"><a href="#geltungsbereich" class="toc-link"><span class="toc-prefix">A</span> Geltungsbereich</a></li>
+                <li class="toc-item"><a href="#vertragsschluss" class="toc-link"><span class="toc-prefix">B</span> Vertragsschluss</a></li>
+                <li class="toc-item"><a href="#preise" class="toc-link"><span class="toc-prefix">C</span> Preise & Versand</a></li>
+                <li class="toc-item"><a href="#bereitstellung" class="toc-link"><span class="toc-prefix">D</span> Bereitstellung & Nutzung</a></li>
+                <li class="toc-item"><a href="#vertragsinhalt" class="toc-link"><span class="toc-prefix">E</span> Vertragsinhalt</a></li>
+                <li class="toc-item"><a href="#zahlung" class="toc-link"><span class="toc-prefix">F</span> Zahlungsbedingungen</a></li>
+                <li class="toc-item"><a href="#gewaehrleistung" class="toc-link"><span class="toc-prefix">G</span> Gewährleistung & Haftung</a></li>
+                <li class="toc-item"><a href="#widerruf" class="toc-link"><span class="toc-prefix">H</span> Widerrufsrecht</a></li>
+                <li class="toc-item"><a href="#sonstiges" class="toc-link"><span class="toc-prefix">I</span> Sonstiges</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            <!-- Section A -->
+            <section id="geltungsbereich">
+                <h2><span class="section-badge">A</span> Geltungsbereich</h2>
+                <p>Diese Geschäftsbedingungen liegen allen Verträgen über Lieferungen und Leistungen der Firma Cloud-Application Lifecycle Management (nachfolgend auch Calysima oder wir) aufgrund von Bestellungen über das Internet oder anderen Fernkommunikationsmitteln (E-Mail, Brief, Fax, Telefon usw.) durch den Kunden (nachfolgend Kunde oder Sie) zugrunde.</p>
+                <p>Der Kunde ist Verbraucher, soweit der Zweck der georderten Lieferungen und Leistungen nicht überwiegend seiner gewerblichen oder selbstständigen beruflichen Tätigkeit zugerechnet werden kann. Dagegen ist Unternehmer jede natürliche oder juristische Person oder rechtsfähige Personengesellschaft, die beim Abschluss des Vertrags in Ausübung ihrer gewerblichen oder selbstständigen beruflichen Tätigkeit handelt.</p>
+                <p>Abweichende und/oder ergänzende Vereinbarungen bedürfen unserer ausdrücklichen schriftlichen Zustimmung.</p>
+            </section>
+
+            <!-- Section B -->
+            <section id="vertragsschluss">
+                <h2><span class="section-badge">B</span> Vertragsschluss</h2>
+                <p>Die Darstellung der Produkte im Online-Shop stellt noch kein rechtlich bindendes Angebot zum Abschluss eines Kaufvertrages dar, sondern dient zur Abgabe eines verbindlichen Angebotes durch den Kunden.</p>
+                <p>Der Kunde kann die Produkte des Online-Shops zunächst unverbindlich in den Warenkorb legen und die Eingaben vor Absenden der verbindlichen Bestellung jederzeit korrigieren. Der Kunde gibt mit Klick auf den Button zur kostenpflichtigen Bestellung der Ware („KOSTENPFLICHTIG KAUFEN“) ein verbindliches Angebot zum Abschluss eines Kaufvertrages ab.</p>
+                <p>Der Vertrag kommt innerhalb von zwei Tagen nach der Bestellung des Kunden durch die Annahmeerklärung von Calysima zustande. Alternativ auch dann, wenn der Kunde innerhalb dieser Frist die Ware geliefert erhält bzw. ihm die vertraglich vereinbarte Leistung bereitgestellt wird.</p>
+                <p>Der Vertragsschluss erfolgt in deutscher Sprache. Der Vertragstext wird nicht gespeichert.</p>
+            </section>
+
+            <!-- Section C -->
+            <section id="preise">
+                <h2><span class="section-badge">C</span> Preise und Versandkosten</h2>
+                <p>Die auf den Produktseiten genannten Preise sind grundsätzlich Bruttopreise inklusive der gesetzlichen Umsatzsteuer. Ausgenommen davon sind Angebote, die sich ausschließlich an Unternehmer richten.</p>
+            </section>
+
+            <!-- Section D -->
+            <section id="bereitstellung">
+                <h2><span class="section-badge">D</span> Bereitstellung & Nutzung</h2>
+                <p>Downloads und Softwarefreischaltungen (nicht auf einem körperlichen Datenträger befindliche digitale Inhalte) werden mit Zustimmung des Kunden sofort erbracht und können direkt genutzt werden.</p>
+                <p>Bei Webanwendungen handelt es sich um Software, die zur Nutzung allein über das Internet bereitgestellt wird. Je nach Produkt können bestimmte Funktionalitäten kostenlos und anonym getestet werden, andere stehen nach kostenpflichtiger Freischaltung zur Verfügung. Je nach Produkt kann bei der Freischaltung zwischen verschiedenen Funktionalitäten und/oder Zeiträumen gewählt werden. Calysima ist bemüht, dem Kunden jederzeit den Zugang zu seinen Webanwendungen zu ermöglichen, kann eine jederzeitige Erreichbarkeit aber nicht garantieren. Der Zugriff kann z. B. aus technischen Gründen oder aufgrund von Wartungsarbeiten zeitweise beschränkt sein.</p>
+                <p>Bevor der Kunde im Rahmen der Nutzung einer Webanwendung personenbezogene Daten erheben, verarbeiten oder nutzen darf, muss er – soweit kein gesetzlicher Erlaubnistatbestand eingreift – die erforderliche Einwilligung des jeweils Betroffenen einholen. Im Falle der Verarbeitung personenbezogener Daten im Auftrag wird Calysima personenbezogene Daten ausschließlich nach Maßgabe einer mit dem Kunden vorher zu schließenden Vereinbarung zur Auftragsverarbeitung verarbeiten, nutzen oder auf diese zugreifen. Falls Calysima im Auftrag des Kunden besondere Kategorien personenbezogener Daten im Sinne des Art. 9 Datenschutz-Grundverordnung (DSGVO) verarbeiten soll, hat der Kunde Calysima hierüber unverzüglich schriftlich zu unterrichten. Soweit der Kunde die Webanwendungen rechtswidrig und/oder vertragswidrig verwendet, hat er Calysima und seine Erfüllungsgehilfen von sämtlichen Ansprüchen Dritter freizustellen.</p>
+            </section>
+
+            <!-- Section E -->
+            <section id="vertragsinhalt">
+                <h2><span class="section-badge">E</span> Vertragsinhalt</h2>
+                <p>Nutzungsumfang, -zeitraum und -kosten sowie etwaige zusätzlich geltende Lizenz- und/oder Nutzungsbedingungen des Herstellers sind von Produkt zu Produkt unterschiedlich und werden bei Vertragsschluss jeweils individuell angegeben. Es steht Calysima frei, die vertragsgegenständlichen Leistungen ganz oder teilweise durch Subunternehmer bzw. Erfüllungsgehilfen (insbesondere durch den Hersteller eines Produkts) zu erbringen.</p>
+                <p>Soweit nicht bei Vertragsschluss anders angegeben (z. B. in den Lizenz- und Nutzungsbedingungen des Herstellers oder in der Produktbeschreibung), erhält der Kunde bei Webanwendungen das nicht-ausschließliche, auf die Vertragslaufzeit beschränkte Recht, auf die Softwarefunktionalitäten via Internet zuzugreifen. Darüber hinausgehende Rechte erhält der Kunde nicht.</p>
+                <p>Vertragskunden (Aktualitätsgarantie-Vertrag, Steuerspar-Vertrag) erhalten während der Vertragslaufzeit neu erscheinende Programmversionen kostenlos, die kontinuierliche Anpassung an technische und rechtliche Rahmenbedingungen (automatische Updates, Service-Packs) und die Bereitstellung von Diensten und Funktionen, die die Softwarenutzung ermöglichen. Die Aktualisierungen werden kostenfrei als Download bereitgestellt.</p>
+                <p>Soweit nicht bei Vertragsschluss anders angegeben (z. B. in den Lizenz- und Nutzungsbedingungen des Herstellers oder in der Produktbeschreibung) gelten folgende Regelungen für die Vertragslaufzeit: Verträge ohne automatische Verlängerung enden nach Ablauf der Vertragslaufzeit, ohne dass es einer Kündigung bedarf. Verträge mit automatischer Verlängerung können von beiden Seiten jederzeit ohne Angabe von Gründen mit Wirkung zum Ende der jeweiligen Nutzungsperiode (diese finden Sie in Ihrer Vertragsbestätigung oder im Kundencenter unter „Mein Kundenkonto“ im Abschnitt „Meine Produkte und Verträge“) gekündigt werden, ansonsten verlängern sie sich automatisch jeweils um eine weitere Nutzungsperiode.</p>
+                <p>Das Nutzungsentgelt für alle Vertragsleistungen wird jeweils zu Beginn einer neuen Nutzungsperiode in Rechnung gestellt. Der telefonische Support ist eine freiwillige Zusatzleistung und nicht Vertragsbestandteil; er kann von Calysima jederzeit geändert oder eingestellt werden.</p>
+                <p>Zum regelmäßigen Bezug von ausgewählten Zeitschriften und Publikationen ist der Abschluss eines Abonnementvertrags möglich. Der Bezugszeitraum beträgt 12 Monate (Jahresabonnement). Entsprechende Informationen finden Sie bei den Angeboten. Der Jahresbetrag wird nach Bestellung für den gesamten Bezugszeitraum im Voraus erhoben. Die Inhalte werden in digitaler Form monatlich bereitgestellt. Das Jahresabonnement kann jederzeit ohne Angabe von Gründen mit Wirkung zum Ende des jeweiligen Bezugszeitraums gekündigt werden, ansonsten verlängern es sich automatisch um jeweils einen weiteren Bezugszeitraum.</p>
+            </section>
+
+            <!-- Section F -->
+            <section id="zahlung">
+                <h2><span class="section-badge">F</span> Zahlungsbedingungen</h2>
+                <p>Unsere Rechnungen sind, wenn nichts anderes angegeben ist, sofort fällig und ohne Abzug zahlbar. Ohne dass es einer Mahnung bedarf, geraten Sie bei Nichtzahlung 30 Tage nach Fälligkeit und Zugang der Rechnung in Verzug, wenn wir Sie in der Rechnung auf diese Folge hingewiesen haben. Wir können Sie durch eine Mahnung jedoch schon vorher in Verzug setzen. Die Verzugszinsen für Verbraucher betragen 5 Prozentpunkte und für Unternehmer 9 Prozentpunkte über dem jeweiligen Basiszinssatz, sofern wir aus einem anderen Grund keine höheren Zinsen verlangen können. Schecks werden nur erfüllungshalber angenommen. Etwaige Bankspesen gehen zu Ihren Lasten. Ein Zurückbehaltungsrecht können Sie nur dann geltend machen, soweit es auf demselben Vertragsverhältnis beruht.</p>
+                <p>Werden Rechnungen aus Lieferungen und Leistungen über das SEPA-Basislastschrift- oder SEPA-Firmenlastschriftverfahren bezahlt, wird der Rechnungsbetrag nicht vor Beginn der Leistungserbringung von Ihrem Konto abgebucht, und Sie erhalten eine Vorabinformation zum Lastschrifteinzug spätestens einen Tag vor dem Fälligkeitstermin. Diese Vorabinformation kann z. B. mit Übermittlung der einzuziehenden Rechnung erfolgen. Widerrufen Sie unberechtigterweise die erteilte Einzugsermächtigung nachträglich, so sind wir berechtigt, Ihnen die entstehenden Rückbuchungskosten zu berechnen.</p>
+                <p>Die gelieferte Ware bleibt bis zur vollständigen Bezahlung unser Eigentum. Uns steht es frei, Ihnen die Rechnungen per Briefpost oder auf elektronischem Weg (z. B. per E-Mail oder über das Calysima-Kundenportal) bereitzustellen. Wenn Sie in Zahlungsverzug geraten, sind wir berechtigt, die geschuldete Leistung bis zur vollständigen Bewirkung der Gegenleistung zu verweigern (Zurückbehaltungsrecht) oder den Vertrag aus wichtigem Grund außerordentlich kündigen.</p>
+            </section>
+
+            <!-- Section G -->
+            <section id="gewaehrleistung">
+                <h2><span class="section-badge">G</span> Gewährleistung & Haftung</h2>
+                
+                <div class="paragraph-block">
+                    <h3>Gewährleistung</h3>
+                    <p>Calysima gewährleistet, dass die Produkte im Sinne der jeweiligen Programmbeschreibung brauchbar und die Leistungen ordnungsgemäß sind. Die Gewährleistungsfrist für Kaufverträge beträgt für Verbraucher zwei Jahre, für Unternehmer 12 Monate und beginnt mit der Übergabe bzw. Bereitstellung der Ware bzw. Leistung.</p>
+                </div>
+
+                <div class="paragraph-block">
+                    <h3>Instandhaltung</h3>
+                    <p>Vertragskunden (Aktualitätsgarantie-Vertrag, Steuerspar-Vertrag) wird die aktuelle Software während der gesamten Vertragsdauer instandgehalten, d. h. die Nutzbarkeit der Software wird gemäß der Leistungsbeschreibung sichergestellt.</p>
+                </div>
+
+                <div class="paragraph-block">
+                    <h3>Haftung</h3>
+                    <p>Für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit haftet Calysima nach den gesetzlichen Bestimmungen. Für sonstige Schäden haftet Calysima (vorbehaltlich des nächsten Satzes) nur für Vorsatz und grobe Fahrlässigkeit. Für sonstige Schäden, die auf der Verletzung einer Pflicht beruhen, deren Erfüllung die ordnungsgemäße Durchführung des Vertrags überhaupt erst ermöglicht und auf deren Einhaltung der Kunde regelmäßig vertrauen darf, haftet Calysima auch bei einfacher Fahrlässigkeit, allerdings beschränkt auf die zum Zeitpunkt der Vertragsverletzung vorhersehbaren Schäden. Die Haftung nach dem Produkthaftungsgesetz und die Haftung für Schäden aus der Verletzung von Garantien bleiben von den vorstehenden Regelungen unberührt. Die verschuldensunabhängige Haftung von Calysima auf Schadensersatz (§ 536a BGB) für bei Vertragsschluss vorhandene Mängel ist ausgeschlossen. Die vorstehenden Regelungen gelten auch für Pflichtverletzungen von Angestellten, Arbeitnehmern, Mitarbeitern, Vertretern und Erfüllungsgehilfen von Calysima.</p>
+                </div>
+
+                <div class="paragraph-block">
+                    <h3>Mängelbeseitigung</h3>
+                    <p>Der Kunde ist verpflichtet, Calysima bei der Fehlerfeststellung und Mängelbeseitigung zu unterstützen und auf Wunsch Hilfsinformationen zu erstellen bzw. zur Verfügung zu stellen. Calysima ist berechtigt, einen eventuell auftretenden Fehler zu umgehen, wenn dieser selbst nur mit unverhältnismäßigem Aufwand zu beseitigen ist und dadurch die Nutzung der Software nicht erheblich leidet. Liegt ein Mangel vor, wird Calysima innerhalb angemessener Frist die Software nachbessern oder eine fehlerfreie Software bereitstellen. Gelingt die Nachbesserung oder der Ersatz weder innerhalb dieser Frist noch einer angemessenen Nachfrist, ist der Kunde berechtigt, nach seiner Wahl den Leistungspreis angemessen herabzusetzen oder den Vertrag zu beenden.</p>
+                </div>
+
+                <div class="paragraph-block">
+                    <h3>Mitwirkungspflichten</h3>
+                    <p>Der Kunde ist verpflichtet, bereitgestellte Updates, Patches und/oder Servicepacks für die Software zu nutzen sowie vor der Installation der Software und anschließend regelmäßig, insbesondere bevor er eine Änderung der Hard- oder Softwareumgebung vornimmt, seine Daten zu sichern. Der Kunde darf seine Zugangsdaten nicht an Dritte weitergeben, muss sie vor dem Zugriff Dritter geschützt aufbewahren und in regelmäßigen Abständen ändern. Auf Endgeräten oder Datenträgern darf er sie nicht unverschlüsselt speichern. Wenn dem Kunden eine missbräuchliche Nutzung seiner Zugangsdaten bekannt wird oder Tatsachen Anlass zu einem solchen Verdacht geben, ist er verpflichtet, unverzüglich seine Zugangsdaten zu ändern und Calysima zu informieren. Soweit den Kunden ein Mitverschulden durch die Verletzung vertraglicher Pflichten oder durch von ihm oder einem Dritten vorgenommene Änderungen an der Software oder durch unsachgemäße Behandlung oder Fehlbedienung des Produktes trifft, haftet Calysima nicht. Calysima übernimmt keine Gewähr für die Auswahl, die Installation und die Nutzung sowie die damit beabsichtigten Ergebnisse der Software.</p>
+                </div>
+            </section>
+
+            <!-- Section H -->
+            <section id="widerruf">
+                <h2><span class="section-badge">H</span> Widerrufsrecht</h2>
+                <p>Soweit Ihnen als Verbraucher ein gesetzliches Widerrufsrecht zusteht, erhalten Sie mit unserer Bestellbestätigung eine Widerrufsbelehrung und ein Muster-Widerrufsformular. Wenn Sie bei Abschluss eines Rechtsgeschäfts nicht als Verbraucher handeln, besteht kein Widerrufsrecht.</p>
+
+                <div class="paragraph-block">
+                    <h3>Datenträger</h3>
+                    <p>Das Widerrufsrecht besteht gemäß § 312g Abs. 2 Nr. 6 BGB nicht bei Fernabsatzverträgen zur Lieferung von Ton- oder Videoaufnahmen oder Computersoftware in einer versiegelten Packung, wenn die Versiegelung nach der Lieferung entfernt wurde.</p>
+                </div>
+
+                <div class="paragraph-block">
+                    <h3>Downloads & Softwarefreischaltungen</h3>
+                    <p>Das Widerrufsrecht erlischt gemäß § 356 Abs. 5 BGB bei einem Vertrag über die Lieferung von nicht auf einem körperlichen Datenträger befindlichen digitalen Inhalten auch dann, wenn der Unternehmer mit der Ausführung des Vertrags begonnen hat, nachdem der Verbraucher ausdrücklich zugestimmt hat, dass der Unternehmer mit der Ausführung des Vertrags vor Ablauf der Widerrufsfrist beginnt, und seine Kenntnis davon bestätigt hat, dass er durch seine Zustimmung mit Beginn der Ausführung des Vertrags sein Widerrufsrecht verliert.</p>
+                </div>
+
+                <div class="paragraph-block">
+                    <h3>(Online-)Dienstleistungen</h3>
+                    <p>Das Widerrufsrecht erlischt gemäß § 356 Abs. 4 BGB bei einem Vertrag zur Erbringung von Dienstleistungen auch dann, wenn der Unternehmer die Dienstleistung vollständig erbracht hat und mit der Ausführung der Dienstleistung erst begonnen hat, nachdem der Verbraucher dazu seine ausdrückliche Zustimmung gegeben hat und gleichzeitig seine Kenntnis davon bestätigt hat, dass er sein Widerrufsrecht bei vollständiger Vertragserfüllung durch den Unternehmer verliert.</p>
+                </div>
+            </section>
+
+            <!-- Section I -->
+            <section id="sonstiges">
+                <h2><span class="section-badge">I</span> Sonstiges</h2>
+
+                <div class="paragraph-block">
+                    <h3>Informationspflichten gemäß Art. 14 ODR-VO, § 36 VSBG</h3>
+                    <p>Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit, die Sie unter <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">https://ec.europa.eu/consumers/odr/</a> finden. Unsere E-Mail-Adresse lautet info@turnier-service.com. Wir werden freiwillig an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilnehmen. Die für uns zuständige Verbraucherschlichtungsstelle ist die „Universalschlichtungsstelle des Bundes, Zentrum für Schlichtung e. V., Straßburger Str. 8, 77694 Kehl, <a href="https://www.verbraucher-schlichter.de" target="_blank" rel="noopener">www.verbraucher-schlichter.de</a>“.</p>
+                </div>
+
+                <div class="paragraph-block">
+                    <h3>Gerichtsstand</h3>
+                    <p>Gerichtsstand ist Freising, wenn der Kunde Kaufmann oder eine juristische Person des öffentlichen Rechts ist oder keinen allgemeinen Gerichtsstand im Gebiet der Bundesrepublik Deutschland hat. Wir sind berechtigt, auch an jedem anderen gesetzlich vorgesehenen Gerichtsstand zu klagen.</p>
+                </div>
+
+                <div class="paragraph-block">
+                    <h3>Rechtswahl</h3>
+                    <p>Es gilt ausschließlich das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts und vorbehaltlich zwingender international-privatrechtlicher Vorschriften und/oder verbraucherschützender Vorschriften des Wohnsitzstaates des Kunden.</p>
+                </div>
+
+                <div class="paragraph-block">
+                    <h3>Änderungsvorbehalt</h3>
+                    <p>Calysima behält sich das Recht vor, diese Bedingungen in Zukunft zu ändern oder zu ergänzen, soweit dies für den Kunden zumutbar ist, d. h. insbesondere soweit dem Kunden dadurch keine wirtschaftlichen und/oder rechtlichen Nachteile entstehen oder die Änderung oder Ergänzung aufgrund einer Veränderung der Gesetzeslage oder der höchstrichterlichen Rechtsprechung erforderlich ist. Über eine Änderung dieser Bedingungen wird Calysima den Kunden per E-Mail an die von ihm benannte E-Mail-Adresse informieren. Die Änderung der Bedingungen tritt in Kraft, wenn der Kunde dieser nicht innerhalb von sechs Wochen ab der Änderungsmitteilung widerspricht. Calysima wird den Kunden hierauf in der Änderungsmitteilung besonders hinweisen.</p>
+                </div>
+            </section>
+
+            <!-- Provider Card / Impressum -->
+            <div class="provider-card">
+                <h3>Vertragspartner & Anbieterkennzeichnung</h3>
+                <div class="provider-grid">
+                    <div class="provider-col">
+                        <h4>Unternehmen</h4>
+                        <p><strong>Cloud-Application Lifecycle Management</strong></p>
+                        <p>Unternehmensbezeichnung: Cloud-Application Lifecycle Management (Calysima)</p>
+                    </div>
+                    <div class="provider-col">
+                        <h4>Inhaber</h4>
+                        <p>Robert Lichtenegger</p>
+                    </div>
+                    <div class="provider-col">
+                        <h4>Kontakt</h4>
+                        <p>Telefon: +49 157 76434434</p>
+                        <p>E-Mail: <a href="mailto:info@turnier-service.com">info@turnier-service.com</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-tag">
+                &copy; 2026 Cloud-Application Lifecycle Management. Alle Rechte vorbehalten.
+            </div>
+        </main>
+    </div>
+
+    <!-- ScrollSpy Script for Active Links -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.toc-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px',
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const activeId = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            if (link.getAttribute('href') === `#${activeId}`) {
+                                link.classList.add('active');
+                            } else {
+                                link.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>

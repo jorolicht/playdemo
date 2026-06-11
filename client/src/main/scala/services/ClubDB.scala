@@ -36,13 +36,17 @@ object ClubDB extends ComWrapper with Debouncer:
 
 
   def sync(all: Seq[Club]): Future[Either[AppError, Unit]] = {
-    if (TourneyDB.tourney.id == 0) {
+    if (base.Global.isDemoMode) {
+      val req = ClubSyncRequest(version, all)
+      org.scalajs.dom.window.localStorage.setItem("App.demo_clubs", write(req))
+      Future.successful(Right(()))
+    } else if (TourneyDB.tourney.wpId == 0) {
       Future.successful(Right(()))
     } else {
       val route = "/wp-json/tourney/v1/clubs-sync"
       // Send all clubs since they are stored in a single meta field
       val req = ClubSyncRequest(version, all)
-      val params = List("postId" -> TourneyDB.tourney.id.toString)
+      val params = List("postId" -> TourneyDB.tourney.wpId.toString)
 
       ajaxPost[ClubSyncRequest, ClubSyncResponse](
         route,
@@ -62,15 +66,27 @@ object ClubDB extends ComWrapper with Debouncer:
   }
 
   def load(): Future[Either[AppError, Long]] = {
-    if (TourneyDB.tourney.id == 0) {
+    if (base.Global.isDemoMode) {
+      val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_clubs")
+      if (jsStr != null && jsStr.nonEmpty) {
+        val req = read[ClubSyncRequest](jsStr)
+        TourneyDB.tourney.clubs.clear()
+        TourneyDB.tourney.clubs ++= req.clubs
+        TourneyDB.tourney.dirtyClubs.clear()
+        initHandler()
+        version = req.version
+        Logging.debug(s"ClubDB.load(demo): loaded ${req.clubs.length} clubs")
+      }
+      return Future.successful(Right(version.toLong))
+    } else if (TourneyDB.tourney.wpId == 0) {
       Logging.debug("ClubDB.load: tourney.id is 0, skipping load")
       return Future.successful(Right(0L))
     }
 
-    val params = List("postId" -> TourneyDB.tourney.id.toString)
+    val params = List("postId" -> TourneyDB.tourney.wpId.toString)
     ajaxGet[ClubsResponse](s"/wp-json/tourney/v1/clubs", params).map {
       case Right(res) =>
-        if (TourneyDB.tourney.id != 0) {
+        if (TourneyDB.tourney.wpId != 0) {
           TourneyDB.tourney.clubs.clear()
           TourneyDB.tourney.clubs ++= res.clubs
           TourneyDB.tourney.dirtyClubs.clear()

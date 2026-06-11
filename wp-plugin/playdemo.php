@@ -79,8 +79,9 @@ require_once PLAYPLUGIN_PATH . 'includes/helpers.php';
  * @return string The complete HTML output for the shortcode.
  */
 function playdemo_render($atts) {
+
     $atts = shortcode_atts( array(
-        'mode' => 'multi', // default mode
+        'mode' => 'app', // default mode
         'page' => '',      // optional page parameter for more specific views    
     ), $atts );
 
@@ -93,10 +94,26 @@ function playdemo_render($atts) {
     $homeUrl = home_url();
     $nonce   = wp_create_nonce('wp_rest');
 
+    $post = get_post($pageId);
+    $slug = $post ? $post->post_name : '';
+    error_log('Slug=' . print_r($slug, true));
+
+    // URL Parameter 
     $logLevel  = isset($_GET['logLevel']) ? $_GET['logLevel'] : 'debug';
     $tourney = isset($_GET['tourney']) ? $_GET['tourney'] : '';
 
-    $output = '<span id="Main_ParamId" data-page="' . esc_attr($atts['page']) . '" data-dataurl="' . esc_url($dataUrl) . '" data-imgurl="' . esc_url($imgUrl) . '" data-homeurl="' . esc_url($homeUrl) . '" data-playurl="' . esc_url($playUrl) . '" data-nonce="' . esc_attr($nonce) . '" data-pageid="' . esc_attr($pageId) . '" ></span>';
+    $output = '<span id="Main_ParamId" 
+        data-page="' . esc_attr($atts['page']) . '" 
+        data-slug="' . esc_attr($slug) . '"
+        data-posttype="' . esc_attr($post->post_type) . '"
+        data-dataurl="' . esc_url($dataUrl) . '" 
+        data-imgurl="' . esc_url($imgUrl) . '" 
+        data-homeurl="' . esc_url($homeUrl) . '" 
+        data-playurl="' . esc_url($playUrl) . '" 
+        data-nonce="' . esc_attr($nonce) . '" 
+        data-pageid="' . esc_attr($pageId) . '" 
+    ></span>';   
+   
     $output .= '<span id="Main_NavbarId"></span>';
     $output .= '<span id="Main_ContextHeaderId"></span>';
     $output .= '<div id="Main_AppWrapper" class="d-flex flex-column min-vh-100">';
@@ -119,33 +136,67 @@ add_shortcode('playdemo', 'playdemo_render');
 
 
 /**
- * Filters the template for "tourney" single posts to ensure the shortcode is rendered
- * even if the theme doesn't support the custom post type content out of the box.
- *
- * @param string $template The path to the template.
- * @return string The path to the template.
+ * 2. Das leere Template erzwingen
  */
-add_filter('template_include', function ($template) {
-    if (is_singular('tourney')) {
-        // If the theme has a specific template, use it.
-        // Otherwise, we can force a basic output that includes our shortcode.
-        // For simplicity and to ensure it works, we can hook into the_content
-        // or ensure the loop is handled.
+function playdemo_force_blank_template( $template ) {
+    if ( is_singular( 'tourney' ) ) {
+        playdemo_render_direct_blank_page();
+        exit;
     }
     return $template;
-});
-
+}
+add_filter( 'template_include', 'playdemo_force_blank_template', 999 );
 
 /**
- * Ensures that the shortcode is added to the content of 'tourney' posts
- * if it's missing, or just makes sure it's processed correctly.
+ * 3. Das nackte HTML-Gerüst inklusive App-Root ausgeben
  */
-add_filter('the_content', function ($content) {
-    if (is_singular('tourney') && !has_shortcode($content, 'playdemo')) {
-        $content .= '[playdemo mode="single"]';
-    }
-    return $content;
-});
+function playdemo_render_direct_blank_page() {
+    ?>
+    <!DOCTYPE html>
+    <html <?php language_attributes(); ?>>
+    <head>
+        <meta charset="<?php bloginfo( 'charset' ); ?>">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title><?php wp_title('|', true, 'right'); ?></title>
+        <?php 
+        // Lädt Header-Metas, CSS-Dateien und das globale playdemoConfig-Objekt
+        wp_head(); 
+        ?>
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow-x: hidden;
+            }
+        </style>
+    </head>
+    <body <?php body_class(); ?>>
+        <!-- SPA Container Elements -->
+        <span id="Main_NavbarId"></span>
+        <span id="Main_ContextHeaderId"></span>
+        <div id="Main_AppWrapper" class="d-flex flex-column min-vh-100">
+           <div id="Main_ContentId" class="flex-grow-1">
+              <div class="d-flex mt-5 justify-content-center">
+                  <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Lade...</span>
+                  </div>
+              </div>
+           </div>
+           <span id="Main_FooterId"></span>
+        </div>
+        <span id="Footer_ConsoleClickId" data-command=""></span>
+        <span id="Main_DynContentId"></span>
+
+        <?php 
+        // Lädt das Modul-Skript (appMain) im Footer
+        wp_footer(); 
+        ?>
+    </body>
+    </html>
+    <?php
+}
 
 
 /**
@@ -183,8 +234,48 @@ function js_enqueue_scripts_styles() {
     wp_enqueue_style( 'bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css', array(), '1.11.3' );
     wp_enqueue_script( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', array(), '5.3.3', false );
 
-    //wp_enqueue_script('tourney_js', plugin_dir_url(__FILE__) . 'js/main.js', [], '1.0', false);
     wp_enqueue_style( 'tourney_style', plugin_dir_url(__FILE__) . 'css/main.css', [], '1.0');
+    
+    // Scala.js Integration for Tourney CPT
+    if (is_singular('tourney')) {
+        $jsPath  = plugin_dir_path(__FILE__) . 'js/main.js';
+        $jsUrl   = plugins_url('js/main.js', __FILE__) . '?v=' . filemtime($jsPath);
+        
+        // Register a dummy handle to attach localized data
+        wp_register_script('playdemo-config-script', '', [], '', false);
+        wp_enqueue_script('playdemo-config-script');
+
+        // Hole den Cloudflare Turnstile Sitekey (falls das Plugin installiert und konfiguriert ist)
+        $turnstile_key = get_option('cfturnstile_key', '');
+        
+        if (!empty($turnstile_key)) {
+             wp_enqueue_script('cloudflare-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', array(), null, true);
+        }
+
+        $config = [
+            'mode'     => 'multi',
+            'dataUrl'  => plugins_url('data/', __FILE__),
+            'imgUrl'   => plugins_url('img/', __FILE__),
+            'playUrl'  => get_option('playdemo_url', ''),
+            'homeUrl'  => home_url(),
+            'nonce'    => wp_create_nonce('wp_rest'),
+            'pageId'   => strval(get_the_ID()),
+            'logLevel' => isset($_GET['logLevel']) ? sanitize_text_field($_GET['logLevel']) : 'debug',
+            'slug'     => get_post_field('post_name', get_post()),
+            'turnstileSitekey' => $turnstile_key
+        ];
+
+        // Creates a global JS variable `playdemoConfig` containing our parameters
+        wp_localize_script('playdemo-config-script', 'playdemoConfig', $config);
+        
+        // Output the ES Module script tag directly to the footer to invoke the application
+        add_action('wp_footer', function() use ($jsUrl) {
+            echo "<script type='module'>\n";
+            echo "import { appMain } from '" . esc_url($jsUrl) . "';\n";
+            echo "appMain();\n";
+            echo "</script>\n";
+        }, 100);
+    }
 }
 add_action('wp_enqueue_scripts', 'js_enqueue_scripts_styles');
 
@@ -205,6 +296,22 @@ function allow_json_mime_type( $mimes ) {
     return $mimes;
 }
 add_filter( 'upload_mimes', 'allow_json_mime_type' );
+
+/**
+ * Enable 'lang' parameter for Polylang in WP REST API (Free version workaround).
+ * Allows fetching pages/posts by specific language using ?lang=XX.
+ */
+function playdemo_polylang_rest_query_filter($args, $request) {
+    $lang = $request->get_param('lang');
+    if (!empty($lang)) {
+        $args['lang'] = $lang;
+    }
+    return $args;
+}
+add_filter('rest_post_query', 'playdemo_polylang_rest_query_filter', 10, 2);
+add_filter('rest_page_query', 'playdemo_polylang_rest_query_filter', 10, 2);
+add_filter('rest_tourney_query', 'playdemo_polylang_rest_query_filter', 10, 2);
+
 
 
 

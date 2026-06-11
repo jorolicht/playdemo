@@ -128,6 +128,28 @@ trait ComWrapper:
         case _: Throwable               => Left(AppError("err00009.ajax.get", s"${route}/${params.mkString(":")}", "request status unknown", name))   
     })
 
+  /** ajaxDelete - basic wrapper for delete requests   
+   * @return either an error or a result type T 
+   */
+  def ajaxDelete[T](route: String, params: List[(String,String)]=List(), hdrs: Map[String,String]=Map("X-WP-Nonce" -> Global.wpNonce), host: String = Global.homeUrl)
+                   (using r: Reader[T], ct: ClassTag[T]): Future[Either[AppError,T]] =
+    val name = route.split("/").lastOption.getOrElse("ajaxDelete")
+    debug(s"ajaxDelete -> route:${route} params:${params.mkString("=")} hdrs: ${hdrs.mkString("=")}")
+    Ajax(
+      method = "DELETE", 
+      url = genPath(host, route, params), 
+      data = "", 
+      timeout = 0, 
+      headers = hdrs,
+      withCredentials = true,
+      responseType = ""
+    ).map(_.responseText)
+      .map(content => parseJson[T](content) )  
+      .recover({
+        case dom.ext.AjaxException(req) => Left(parseError(req.responseText, name)) 
+        case _: Throwable               => Left(AppError("err00010.ajax.delete", s"${route}/${params.mkString(":")}", "request status unknown", name))   
+    })
+
 
   // genPath - encodes params to URL encoded 
   def genPath(host: String, route: String, params: List[(String,String)]): String = 

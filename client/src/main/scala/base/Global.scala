@@ -48,6 +48,7 @@ object Global:
   var currentSelection = Selection()
   var lang    = ""
   var version = ""
+  var isDemoMode: Boolean = false
   var csrf    = ""
   var homeUrl = ""
   var dataUrl = ""
@@ -55,6 +56,7 @@ object Global:
   var playUrl = ""
   var pageId  = 0
   var wpNonce   = ""
+  var turnstileSitekey = ""
 
   var authMode: AuthMode = AuthMode.Nonce
   var wpUserName: String = ""
@@ -62,6 +64,14 @@ object Global:
 
   def setUser(usr: User) = user = Some(usr)
   def resetUser = user = None
+
+  def hasTourneyAccess(tourney: shared.model.Tourney): Boolean =
+    if (isDemoMode) return true
+    user match {
+      case Some(u) => 
+        u.isTurnierAdmin && (u.org == tourney.organizer || u.username == tourney.organizer || u.roles.contains("administrator"))
+      case None => false
+    }
 
 
                             

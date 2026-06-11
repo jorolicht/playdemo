@@ -25,7 +25,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm sticky-top">
     <div class="container-fluid">
         <!-- Logo und Titel -->
-        <a class="navbar-brand d-flex align-items-center navbar-brand-large" href="javascript:appLoadPage('Home', '')">
+        <a class="navbar-brand d-flex align-items-center navbar-brand-large" href="javascript:appLoadPage('MainView', '')">
             <img src="@{Global.imgUrl}logo.png" alt="Logo" width="70" height="47" class="d-inline-block align-text-top me-2">
             <span class="fw-bold">TurnierService</span>
         </a>
@@ -39,17 +39,17 @@
             <!-- Linke Seite -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('Home', 'functions')">Funktionen</a>
+                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainView', 'functions')">Funktionen</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('Home', 'pricing')">Support/Kosten</a>
+                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainView', 'pricing')">Support/Kosten</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle nav-link-bold" href="#" id="navbarTools" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Tools
                     </a>
                     <ul class="dropdown-menu shadow" aria-labelledby="navbarTools">
-                        <li><a class="dropdown-item" href="javascript:appLoadPage('MainMulti', '')">Wordpress-Plugin</a></li>
+                        <li><a class="dropdown-item" href="javascript:appLoadPage('MainView', '')">Wordpress-Plugin</a></li>
                         <li><a class="dropdown-item" href="javascript:appLoadPage('Mockup', '')">Excel-Vorlage</a></li>
                     </ul>
                 </li>
@@ -72,6 +72,19 @@
 
             <!-- Rechte Seite: User / Login -->
             <ul class="navbar-nav align-items-center">
+                @if(Global.user.isDefined) {
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link dropdown-toggle nav-link-bold" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-gear-fill me-1"></i>Administration
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item" @id(AdminExportId, "onclick")><i class="bi bi-download me-2"></i>Aktuelles Turnier exportieren</a></li>
+                            <li><a class="dropdown-item" @id(AdminImportId, "onclick")><i class="bi bi-upload me-2"></i>Turnier importieren</a></li>
+                        </ul>
+                        <input type="file" id="adminImportFile" style="display: none;" accept=".json" />
+                    </li>
+                }
+
                 @if(Global.user.isDefined) {
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center nav-link-bold" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

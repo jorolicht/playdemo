@@ -32,6 +32,11 @@
                         <input @id(OrganizerId) type="text" class="form-control" placeholder="TTC Beispielstadt">
                     </div>
 
+                    <!-- Optional: Cloudflare Turnstile -->
+                    @if(base.Global.turnstileSitekey.nonEmpty) {
+                        <div class="cf-turnstile mb-3 d-flex justify-content-center" data-sitekey="@base.Global.turnstileSitekey"></div>
+                    }
+
                     <hr>
                     <button @id(BtnSubmit, "onclick") class="btn btn-success w-100">
                         Registrieren & Verifizierungsemail senden

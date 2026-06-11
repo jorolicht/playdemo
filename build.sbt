@@ -145,8 +145,9 @@ lazy val server = project
       // Copy playdemo.php and includes to docker
       IO.copyFile(wpPluginDir / "playdemo.php", dockerWpPluginDir / "playdemo.php")
       IO.copyDirectory(wpPluginDir / "includes", dockerWpPluginDir / "includes")
+      IO.copyDirectory(wpPluginDir / "pages", dockerWpPluginDir / "pages")
 
-      log.info(s"Copied files to wordpress (including php and includes)")
+      log.info(s"Copied files to wordpress (including php, includes, and pages)")
     },
     Universal / dist := {
       // Build ZIP explicitly

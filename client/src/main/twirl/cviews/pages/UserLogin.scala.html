@@ -5,7 +5,7 @@
 
 @(user: Option[User])
 
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
             <div class="card shadow-lg border-0" style="min-height: 600px;">
@@ -62,19 +62,22 @@
                                 </div>
                             </div>
                             
-                            <div class="mb-4">
+                            <div class="mb-2">
                                 <label class="form-label text-muted small fw-bold text-uppercase">Passwort</label>
                                 <div class="input-group input-group-lg shadow-sm">
                                     <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
                                     <input @id(PasswordId) type="password" class="form-control border-start-0 fs-6" placeholder="********" required>
                                 </div>
                             </div>
-
-                            <div @id(CaptchaId) class="mb-4">
-                                <div class="p-3 border bg-light small text-muted text-center w-100 rounded d-flex align-items-center justify-content-center shadow-xs">
-                                    <i class="bi bi-shield-check text-success fs-5 me-2"></i> Captcha Schutz aktiv
+                            
+                            <!-- Optional: Cloudflare Turnstile (if enabled via plugin on login form) -->
+                            @if(base.Global.turnstileSitekey.nonEmpty) {
+                                <div class="cf-turnstile mb-3 d-flex justify-content-center" data-sitekey="@base.Global.turnstileSitekey"></div>
+                            } else {
+                                <div @id(CaptchaId) class="mb-4 text-end">
+                                    <span class="small text-muted" style="font-size: 0.75rem;"><i class="bi bi-shield-check text-success"></i> Gesichert durch Turnstile</span>
                                 </div>
-                            </div>
+                            }
                         </div>
 
                         <div class="d-grid gap-2 mt-auto">

@@ -11,7 +11,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0 bg-transparent p-0 align-items-center">
                     <li class="breadcrumb-item">
-                        <a href="javascript:appLoadPage('MainMulti', '')" class="text-white-50 text-decoration-none hover-white">
+                        <a href="javascript:appLoadPage('MainView', '')" class="text-white-50 text-decoration-none hover-white">
                             <i class="bi bi-house-door"></i>
                         </a>
                     </li>
@@ -79,8 +79,9 @@
             <!-- Horizontal Menu based on context -->
             <div class="context-menu d-flex gap-2 align-items-center">
                 @if(selection.tourney.isDefined) {
+                    @{ val hasAccess = base.Global.hasTourneyAccess(selection.tourney.get) }
                     <div class="vr mx-2 bg-secondary opacity-50" style="height: 24px;"></div>
-                    <button class="btn btn-outline-warning btn-sm py-1 fw-bold" onclick="appLoadPage('PlayerRegistration', '')">
+                    <button class="btn btn-outline-warning btn-sm py-1 fw-bold" onclick="appLoadPage('PlayerRegistration', '')" @if(!base.Global.hasTourneyAccess(selection.tourney.get)){disabled}>
                         <i class="bi bi-pencil-square me-1"></i>Anmeldung
                     </button>
                     <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('PlayerList', '')">

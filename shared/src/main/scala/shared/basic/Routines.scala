@@ -44,7 +44,7 @@ extension (str: String)
 
 
 def parseJson[T: Pickle.Reader](x: String): Either[AppError, T] =
-  println(s"parseJson: parsing string: ${x}") 
+  // println(s"parseJson: parsing string: ${x}") 
   if x.isEmpty then
     Left(AppError("err00006.parseJson", "empty string"))
   else
@@ -53,22 +53,6 @@ def parseJson[T: Pickle.Reader](x: String): Either[AppError, T] =
       .leftMap(e =>
         AppError("err00006.parseJson", e.getMessage, x.take(10))
       )
-
-// inline def parseJson[T](x: String)(using r: Pickle.Reader[T], ct: ClassTag[T]): Either[AppError, T] = {
-//   import scala.util.Try
-//   if      (x == "")                            Left(AppError("err00006.parseJson", "empty string"))
-//   if      (ct.runtimeClass == classOf[String]) Right(x.asInstanceOf[T])
-//   else if (ct.runtimeClass == classOf[Int])    {
-//     Try(x.toInt).toOption match {
-//       case Some(value) => Right(value.asInstanceOf[T])
-//       case None        => Left(AppError("err00006.parseJson", "invalid integer"))  
-//     }
-//   }  
-//   else { 
-//     try Right(Pickle.read[T](x))
-//     catch { case e: Throwable => Left(AppError("err00006.parseJson", e.getMessage, x.take(10))) }
-//   }  
-// }
 
 inline def toJson[T](x: T)(using w: Pickle.Writer[T]): String = Pickle.write[T](x)  
 

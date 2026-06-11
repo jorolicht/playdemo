@@ -159,15 +159,15 @@ services:
       - proxy
       - backend
 
-  composer:
-    image: composer:2
-    container_name: composer-instance
-    working_dir: /app
-    volumes:
-      - ./wp_data:/app
-    user: "${UID:-1000}:${GID:-1000}"
-    networks:
-      - backend      
+  # composer:
+  #   image: composer:2
+  #   container_name: composer-instance
+  #   working_dir: /app
+  #   volumes:
+  #     - ./wp_data:/app
+  #   user: "${UID:-1000}:${GID:-1000}"
+  #   networks:
+  #     - backend      
 
 networks:
   proxy:

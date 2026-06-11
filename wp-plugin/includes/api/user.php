@@ -96,6 +96,30 @@ function pd_api_logout_handler() {
 function pd_api_register_user($request) {
     $params = $request->get_json_params();
     
+    // Cloudflare Turnstile Verifizierung
+    $turnstile_key = get_option('cfturnstile_key');
+    if (!empty($turnstile_key)) {
+        $token = $params['turnstileToken'] ?? '';
+        $secret_key = get_option('cfturnstile_secret');
+        
+        if (empty($token) || empty($secret_key)) {
+            return new WP_Error('turnstile_failed', 'Sicherheitsprüfung fehlgeschlagen (Fehlendes Token).', array('status' => 403));
+        }
+
+        $response = wp_remote_post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+            'body' => [
+                'secret'   => $secret_key,
+                'response' => $token,
+                'remoteip' => $_SERVER['REMOTE_ADDR']
+            ]
+        ]);
+        
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        if (empty($body['success']) || $body['success'] !== true) {
+            return new WP_Error('bot_detected', 'Bitte bestätigen Sie, dass Sie ein Mensch sind.', array('status' => 403));
+        }
+    }
+
     $user_id = wp_insert_user(array(
         'user_login' => $params['email'],
         'user_email' => $params['email'],

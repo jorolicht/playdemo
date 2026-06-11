@@ -124,7 +124,7 @@ class Auth @Inject()(cc: ControllerComponents, mailer: MailerClient, cfg: Config
       case Right(vCode) => userRepo.setEmailVerified(vCode._1._1).map {
         case Left(err)  => Ok(views.html.main("Error", encode64(toJson(AppError("verifyUserNotPossible"))) ))
         case Right(res) => if (res) 
-          then Ok(views.html.main("Home", "verified")) 
+          then Ok(views.html.main("MainView", "verified")) 
           else Ok(views.html.main("Error", encode64(toJson(AppError("verifyUserNotPossible"))) ))
       }
   }     

@@ -61,7 +61,7 @@ object CompetitionNew extends BasePage with JsWrapper with services.ComWrapper:
       val dateInt = startFormatted.take(10).replace("-", "").toIntOption.getOrElse(0)
       
       val dummy = Tourney(
-        id = 0,
+        wpId = 0,
         name = nameStr,
         organizer = Global.user.map(_.org).getOrElse("System"),
         startDate = dateInt,

@@ -73,14 +73,14 @@ object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
     if (validEmail && validPwFormat) then
       basicLogin(eMail, password).map {
         case Left(err)  => Global.resetUser; updateUserInfo; loadPage(PageNameTyp("PgError"), err.toString) 
-        case Right(usr) => Global.setUser(usr); updateUserInfo; loadPage(PageNameTyp("Home"), "welcome") 
+        case Right(usr) => Global.setUser(usr); updateUserInfo; loadPage(pages.MainView.name, "welcome") 
       } 
 
       
   def doLogout() =
     logout(getUser).map {
       case Left(err)  => Global.resetUser; updateUserInfo; loadPage(PageNameTyp("PgError"), err.toString)
-      case Right(res) => Global.resetUser; updateUserInfo; loadPage(PageNameTyp("Home"), "goodbye") 
+      case Right(res) => Global.resetUser; updateUserInfo; loadPage(pages.MainView.name, "goodbye") 
     }
 
 
@@ -88,7 +88,7 @@ object Auth extends BasePage with JsWrapper with Mgmt with Authentication:
   def googleLogin(credentials: String): Unit = 
     ajaxPost[String, User]("/auth/googleLogin", List(), credentials).map { 
       case Left(err)  => println(s"Error: ${err}") 
-      case Right(usr) => Global.setUser(usr); updateUserInfo; loadPage(PageNameTyp("Home"), "welcome")
+      case Right(usr) => Global.setUser(usr); updateUserInfo; loadPage(pages.MainView.name, "welcome")
     }      
 
   def doForgot() =

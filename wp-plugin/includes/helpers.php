@@ -10,6 +10,26 @@ if (!class_exists('ApiHelper')) {
                 "callStack" => (string)$callStack
             ], $status);
         }
+
+        public static function getPostId(WP_REST_Request $request) {
+            $post_id = intval($request->get_param('postId'));
+            if (!$post_id) {
+                $slug = $request->get_param('slug');
+                if ($slug) {
+                    $posts = get_posts([
+                        'name'           => $slug,
+                        'post_type'      => ['tourney', 'page', 'post', 'playdemo'],
+                        'post_status'    => 'any',
+                        'numberposts'    => 1,
+                        'fields'         => 'ids'
+                    ]);
+                    if (!empty($posts)) {
+                        $post_id = $posts[0];
+                    }
+                }
+            }
+            return $post_id;
+        }
     }
 }
 

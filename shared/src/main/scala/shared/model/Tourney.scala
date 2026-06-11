@@ -9,7 +9,7 @@ import scala.collection.mutable.ArrayBuffer
  * Represents a tournament with all its related data.
  */
 case class Tourney(
-  var id:           Int,             // Wordpress Page Id, 0 for new entries
+  var wpId:         Int,             // Wordpress Page Id, 0 for new entries
   var name:         String,          // Tournament name
   var organizer:    String,          // Organizer name (club or registered program user)
   var startDate:    Int,             // Format: yyyymmdd
@@ -517,7 +517,7 @@ object Tourney:
   given rw: ReadWriter[Tourney] = macroRW
 
   def default: Tourney = Tourney(
-    id = 0, 
+    wpId = 0, 
     name = "", 
     organizer = "", 
     startDate = 0, 

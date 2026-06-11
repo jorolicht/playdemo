@@ -44,11 +44,15 @@ object RoundDB extends ComWrapper with Debouncer:
    * Synchronizes pending round events with the WordPress server.
    */
   def sync(dirty: Seq[Round]): Future[Either[AppError, Unit]] = {
-    if (dirty.isEmpty || TourneyDB.tourney.id == 0) {
+    if (base.Global.isDemoMode) {
+      val req = RoundSyncRequest(TourneyDB.tourney.rounds.filter(_ != null).toSeq)
+      org.scalajs.dom.window.localStorage.setItem("App.demo_rounds", write(req))
+      Future.successful(Right(()))
+    } else if (dirty.isEmpty || TourneyDB.tourney.wpId == 0) {
       Future.successful(Right(()))
     } else {
       val req = RoundSyncRequest(dirty)
-      val params = List("postId" -> TourneyDB.tourney.id.toString)
+      val params = List("postId" -> TourneyDB.tourney.wpId.toString)
 
       ajaxPost[RoundSyncRequest, RoundSyncResponse](
         route,
@@ -70,15 +74,32 @@ object RoundDB extends ComWrapper with Debouncer:
    * Loads rounds from the WordPress server.
    */
   def load(): Future[Either[AppError, Long]] = {
-    if (TourneyDB.tourney.id == 0) {
+    if (base.Global.isDemoMode) {
+      val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_rounds")
+      if (jsStr != null && jsStr.nonEmpty) {
+        val req = read[RoundSyncRequest](jsStr)
+        val t = TourneyDB.tourney
+        t.rounds.clear()
+        for (i <- 0 until 128) t.rounds += null
+        req.events.foreach { r =>
+           val i = r.id.value - 1
+           if (i >= 0 && i < 128) then
+             t.rounds(i) = r
+        }
+        t.dirtyRound.clear()
+        initHandler()
+        Logging.debug(s"RoundDB.load(demo): loaded ${req.events.length} rounds")
+      }
+      return Future.successful(Right(0L))
+    } else if (TourneyDB.tourney.wpId == 0) {
       Logging.debug("RoundDB.load: tourney.id is 0, skipping load")
       return Future.successful(Right(0L))
     }
 
-    val params = List("postId" -> TourneyDB.tourney.id.toString)
+    val params = List("postId" -> TourneyDB.tourney.wpId.toString)
     ajaxGet[RoundsResponse]("/wp-json/tourney/v1/rounds", params).map {
       case Right(res) =>
-        if (TourneyDB.tourney.id != 0) {
+        if (TourneyDB.tourney.wpId != 0) {
           val t = TourneyDB.tourney
           t.rounds.clear()
           for (i <- 0 until 128) t.rounds += null

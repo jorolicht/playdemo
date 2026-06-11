@@ -35,7 +35,7 @@ object TourneyDB extends ComWrapper with Debouncer:
     Logging.info(s"Initialisiere TourneyDB für ID $tourneyId: Lade alle Daten vom Server...")
     
     // Set internal ID immediately to provide context for other loaders
-    this.tourney = Tourney.default.copy(id = tourneyId)
+    this.tourney = Tourney.default.copy(wpId = tourneyId)
 
     // Explicitly define each load to keep track of this.load()
     val loadTourney = this.load(tourneyId)
@@ -75,31 +75,42 @@ object TourneyDB extends ComWrapper with Debouncer:
   private val routeSync   = "/wp-json/tourney/v1/tourney-sync"
   private val routeGet    = "/wp-json/tourney/v1/read"
   private val routeCreate = "/wp-json/tourney/v1/create"
+  private val routeDelete = "/wp-json/tourney/v1/delete"
 
   /**
    * Creates a new tournament post on the server.
    */
   def apiCreate(t: Tourney): Future[Either[AppError, String]] =
-    ajaxPost[Tourney, TourneyCreateResponse](routeCreate, List(), t).map {
-      case Right(res) =>
-        t.id = res.pageId
-        t.version = res.version
-        t.slug = res.slug
-        this.version = res.version
-        Right(res.slug)
-      case Left(err) => Left(err)
-    }
+    if (base.Global.isDemoMode) then
+      t.wpId = 999999
+      val req = TourneySyncRequest(1, t)
+      org.scalajs.dom.window.localStorage.setItem("App.demo_tourney", write(req))
+      Future.successful(Right("demo-slug"))
+    else
+      ajaxPost[Tourney, TourneyCreateResponse](routeCreate, List(), t).map {
+        case Right(res) =>
+          t.wpId = res.pageId
+          t.version = res.version
+          t.slug = res.slug
+          this.version = res.version
+          Right(res.slug)
+        case Left(err) => Left(err)
+      }
 
   /**
    * Synchronizes pending tourney changes with the WordPress server.
    * If a version mismatch occurs (conflict), it reloads the data from the server.
    */
   def sync(): Future[Either[AppError, Unit]] =
-    if (tourney.id == 0) then
+    if (base.Global.isDemoMode) then
+      val req = TourneySyncRequest(version, tourney)
+      org.scalajs.dom.window.localStorage.setItem("App.demo_tourney", write(req))
+      Future.successful(Right(()))
+    else if (tourney.wpId == 0) then
       Future.successful(Right(()))
     else
       val req = TourneySyncRequest(version, tourney)
-      val params = List("postId" -> tourney.id.toString)
+      val params = List("postId" -> tourney.wpId.toString)
 
       ajaxPost[TourneySyncRequest, TourneySyncResponse](
         routeSync,
@@ -111,7 +122,7 @@ object TourneyDB extends ComWrapper with Debouncer:
           Future.successful(Right(()))
         case Left(err) if err.is("version_mismatch") =>
           Logging.error(s"Sync fehlgeschlagen: Version-Mismatch bei Turnierdaten. Lade neu... ${err.msg}")
-          load(tourney.id).map(_ => Left(err))
+          load(tourney.wpId).map(_ => Left(err))
         case Left(err) =>
           Future.successful(Left(err))
       }
@@ -120,7 +131,21 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Loads basic tournament data from the WordPress server.
    */
   def load(trnyId: Int): Future[Either[AppError, Long]] =
-    if (trnyId == 0) then
+    if (base.Global.isDemoMode) then
+      val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_tourney")
+      if (jsStr != null && jsStr.nonEmpty) {
+        val req = read[TourneySyncRequest](jsStr)
+        tourney = req.tourney
+        version = req.version
+        ClubDB.initHandler() 
+        PlayerDB.initHandler()
+        CompetitionDB.initHandler()
+        RoundDB.initHandler()
+        Future.successful(Right(version.toLong))
+      } else {
+        Future.successful(Right(0L))
+      }
+    else if (trnyId == 0) then
       Logging.debug("TourneyDB.load: trnyId is 0, skipping load")
       Future.successful(Right(0L))
     else
@@ -135,6 +160,28 @@ object TourneyDB extends ComWrapper with Debouncer:
           RoundDB.initHandler()
           Logging.debug(s"TourneyDB.load: tournament loaded, version: $version")
           Right(version.toLong)
+        case Left(err) => Left(err)
+      }
+
+  /**
+   * Deletes the current tournament from the WordPress server.
+   */
+  def apiDelete(trnyId: Int): Future[Either[AppError, Unit]] =
+    if (base.Global.isDemoMode) then
+      org.scalajs.dom.window.localStorage.removeItem("App.demo_tourney")
+      org.scalajs.dom.window.localStorage.removeItem("App.demo_clubs")
+      org.scalajs.dom.window.localStorage.removeItem("App.demo_players")
+      org.scalajs.dom.window.localStorage.removeItem("App.demo_comps")
+      org.scalajs.dom.window.localStorage.removeItem("App.demo_rounds")
+      Future.successful(Right(()))
+    else if (trnyId == 0) then
+      Future.successful(Right(()))
+    else
+      val params = List("postId" -> trnyId.toString)
+      ajaxDelete[Unit](routeDelete, params).map {
+        case Right(_) => 
+          Logging.info(s"Tournament $trnyId deleted from server.")
+          Right(())
         case Left(err) => Left(err)
       }
 
