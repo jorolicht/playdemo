@@ -31,14 +31,17 @@ object TourneyDB extends ComWrapper with Debouncer:
   /**
    * Initializes the application state by loading all data from the server.
    */
-  def init(tourneyId: Int): Future[Either[AppError, Long]] =
-    Logging.info(s"Initialisiere TourneyDB für ID $tourneyId: Lade alle Daten vom Server...")
+  def init(idOrSlug: Int | String): Future[Either[AppError, Long]] =
+    Logging.info(s"Initialisiere TourneyDB für $idOrSlug: Lade alle Daten vom Server...")
     
-    // Set internal ID immediately to provide context for other loaders
-    this.tourney = Tourney.default.copy(wpId = tourneyId)
+    // Set internal ID immediately if it's an Int
+    idOrSlug match {
+      case id: Int => this.tourney = Tourney.default.copy(wpId = id)
+      case _ => // slug will be resolved during load
+    }
 
     // Explicitly define each load to keep track of this.load()
-    val loadTourney = this.load(tourneyId)
+    val loadTourney = this.load(idOrSlug)
     val loads = Seq(
       loadTourney,
       CompetitionDB.load(),
@@ -130,7 +133,7 @@ object TourneyDB extends ComWrapper with Debouncer:
   /**
    * Loads basic tournament data from the WordPress server.
    */
-  def load(trnyId: Int): Future[Either[AppError, Long]] =
+  def load(idOrSlug: Int | String): Future[Either[AppError, Long]] =
     if (base.Global.isDemoMode) then
       val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_tourney")
       if (jsStr != null && jsStr.nonEmpty) {
@@ -145,23 +148,35 @@ object TourneyDB extends ComWrapper with Debouncer:
       } else {
         Future.successful(Right(0L))
       }
-    else if (trnyId == 0) then
-      Logging.debug("TourneyDB.load: trnyId is 0, skipping load")
-      Future.successful(Right(0L))
-    else
-      val params = List("postId" -> trnyId.toString)
-      ajaxGet[TourneyResponse](routeGet, params).map {
-        case Right(res) =>
-          tourney = res.tourney
-          version = res.version
-          ClubDB.initHandler() 
-          PlayerDB.initHandler()
-          CompetitionDB.initHandler()
-          RoundDB.initHandler()
-          Logging.debug(s"TourneyDB.load: tournament loaded, version: $version")
-          Right(version.toLong)
-        case Left(err) => Left(err)
+    else {
+      val paramsOpt = idOrSlug match {
+        case id: Int if id == 0 => 
+           Logging.debug("TourneyDB.load: trnyId is 0, skipping load")
+           None
+        case id: Int => Some(List("postId" -> id.toString))
+        case slug: String if slug.isEmpty =>
+           Logging.debug("TourneyDB.load: slug is empty, skipping load")
+           None
+        case slug: String => Some(List("slug" -> slug))
       }
+
+      paramsOpt match {
+        case Some(params) =>
+          ajaxGet[TourneyResponse](routeGet, params).map {
+            case Right(res) =>
+              tourney = res.tourney
+              version = res.version
+              ClubDB.initHandler() 
+              PlayerDB.initHandler()
+              CompetitionDB.initHandler()
+              RoundDB.initHandler()
+              Logging.debug(s"TourneyDB.load: tournament loaded, version: $version")
+              Right(version.toLong)
+            case Left(err) => Left(err)
+          }
+        case None => Future.successful(Right(0L))
+      }
+    }
 
   /**
    * Deletes the current tournament from the WordPress server.

@@ -55,6 +55,7 @@ object Global:
   var imgUrl  = ""
   var playUrl = ""
   var pageId  = 0
+  var hostPageId = 0
   var wpNonce   = ""
   var turnstileSitekey = ""
 

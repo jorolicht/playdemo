@@ -115,9 +115,11 @@ object RoundAdmin extends BasePage with JsWrapper:
       
       // Update options (skip the first "Please select" option at index 0)
       modes.zipWithIndex.foreach { case (m, i) =>
-        val option = select.options.item(i + 1)
+        val option = select.options.item(i + 1).asInstanceOf[dom.html.Option]
         if (option != null) {
           option.disabled = !m.isEnabled
+          val suffix = if (!m.isEnabled) " (nicht mgl.)" else ""
+          option.text = m.label + suffix
           if (!m.isEnabled) option.classList.add("text-muted")
           else option.classList.remove("text-muted")
         }

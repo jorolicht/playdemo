@@ -253,7 +253,7 @@ function js_enqueue_scripts_styles() {
         }
 
         $config = [
-            'mode'     => 'multi',
+            'mode'     => 'tourney',
             'dataUrl'  => plugins_url('data/', __FILE__),
             'imgUrl'   => plugins_url('img/', __FILE__),
             'playUrl'  => get_option('playdemo_url', ''),
