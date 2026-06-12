@@ -139,7 +139,7 @@ case class Competition(
   var category:         CompCategory,
   var startDate:        String, // Format: yyyy-MM-dd HH:mm:ss
   var status:           CompStatus,
-  var startRound:       Option[RoundId] = None,
+  var startStage:       Option[StageId] = None,
   var activ:            Boolean = true,
   var webRegister:      Boolean = false,
   var lowLevel:         Option[Int] = None,
@@ -172,8 +172,8 @@ object Competition:
 
 
 object CompDB:
-  val MaxRound = 32
-  val comps: Array[Competition] = Array.fill(MaxRound)(null)
+  val MaxStage = 32
+  val comps: Array[Competition] = Array.fill(MaxStage)(null)
   var compIdx: Map[CompId, Int] = Map.empty
 
-  private val free = Stack.from(0 until MaxRound)
+  private val free = Stack.from(0 until MaxStage)

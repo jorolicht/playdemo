@@ -37,10 +37,10 @@ function register_trny_custom_meta_fields() {
         'organizer'     => 'Organisator'
     ];
 
-    // Runden 001–128 hinzufügen
+    // Stages 001–128 hinzufügen
     for ($i = 1; $i <= 128; $i++) {
-        $key = sprintf('round%03d', $i);
-        $meta_fields[$key] = 'Runde ' . $i;
+        $key = sprintf('stage%03d', $i);
+        $meta_fields[$key] = 'Stage ' . $i;
     }
 
     // Wettbewerbe 01–64 hinzufügen

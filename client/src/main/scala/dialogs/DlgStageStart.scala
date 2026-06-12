@@ -13,15 +13,15 @@ import shared.model.*
 import services.*
 
 /**
- * Result structure for DlgRoundStart
+ * Result structure for DlgStageStart
  */
-case class DlgRoundStartResult(
+case class DlgStageStartResult(
   name:   String,
-  prefId: Option[RoundId]
+  prefId: Option[StageId]
 )
 
-object DlgRoundStart extends BaseDialog with JsWrapper:
-  def name = PageNameTyp("DlgRoundStart")
+object DlgStageStart extends BaseDialog with JsWrapper:
+  def name = PageNameTyp("DlgStageStart")
   
   val LoadId:         HtmlId = genId(name)
   val FormId:         HtmlId = genId(name)
@@ -38,19 +38,19 @@ object DlgRoundStart extends BaseDialog with JsWrapper:
   def render(param: String = ""): Boolean = true
 
   /**
-   * Shows the round start dialog.
-   * @param existingRounds List of existing rounds in the competition.
+   * Shows the stage start dialog.
+   * @param existingStages List of existing stages in the competition.
    */
-  def show(existingRounds: Seq[Round]): Future[Either[AppError, DlgRoundStartResult]] =
-    val p = Promise[Either[AppError, DlgRoundStartResult]]()
+  def show(existingStages: Seq[Stage]): Future[Either[AppError, DlgStageStartResult]] =
+    val p = Promise[Either[AppError, DlgStageStartResult]]()
     val f = p.future
 
     if isEmpty(eE(LoadId, "span")) then
-      setHtml(gE(LoadId), cviews.dialogs.html.DlgRoundStart(existingRounds))
+      setHtml(gE(LoadId), cviews.dialogs.html.DlgStageStart(existingStages))
       modal = Modal(gE(ModalId))
     else
-      // Update rounds dropdown in case it changed
-      setHtml(gE(LoadId), cviews.dialogs.html.DlgRoundStart(existingRounds))
+      // Update stages dropdown in case it changed
+      setHtml(gE(LoadId), cviews.dialogs.html.DlgStageStart(existingStages))
       modal = Modal(gE(ModalId))
     
     setInput(gE(InputNameId), "")
@@ -60,14 +60,14 @@ object DlgRoundStart extends BaseDialog with JsWrapper:
     gE(ApplyId).onclick = { (_: MouseEvent) =>
       val rName = getInput(gE(InputNameId)).trim
       if (rName.length < 2) {
-        dom.window.alert("Bitte geben Sie einen gültigen Namen für die Runde ein.")
-      } else if (existingRounds.exists(_.name.equalsIgnoreCase(rName))) {
-        dom.window.alert("Eine Runde mit diesem Namen existiert bereits in diesem Wettbewerb.")
+        dom.window.alert("Bitte geben Sie einen gültigen Namen für die Stage ein.")
+      } else if (existingStages.exists(_.name.equalsIgnoreCase(rName))) {
+        dom.window.alert("Eine Stage mit diesem Namen existiert bereits in diesem Wettbewerb.")
       } else {
         val prefVal = getInput(gE(InputPrefId)).toInt
-        val prefId = if (prefVal == 0) None else Some(RoundId.fromInt(prefVal))
+        val prefId = if (prefVal == 0) None else Some(StageId.fromInt(prefVal))
         
-        if (!p.isCompleted) p.success(Right(DlgRoundStartResult(rName, prefId)))
+        if (!p.isCompleted) p.success(Right(DlgStageStartResult(rName, prefId)))
         modal.hide()
       }
     }

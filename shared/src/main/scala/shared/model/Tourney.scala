@@ -23,14 +23,14 @@ case class Tourney(
   val clubs:        ArrayBuffer[Club] = ArrayBuffer(),
   val players:      ArrayBuffer[Player] = ArrayBuffer(),
   val competitions: ArrayBuffer[Competition] = ArrayBuffer.fill(64)(null),
-  val rounds:       ArrayBuffer[Round] = ArrayBuffer.fill(128)(null)
+  val stages:       ArrayBuffer[Stage] = ArrayBuffer.fill(128)(null)
 ):
 
   // --- Buffers for tracking changes ---
   val dirtyClubs: ArrayBuffer[Club] = ArrayBuffer()
   val dirtyPlayer: ArrayBuffer[Player] = ArrayBuffer()
   val dirtyCompetition: ArrayBuffer[Competition] = ArrayBuffer()
-  val dirtyRound: ArrayBuffer[Round] = ArrayBuffer()
+  val dirtyStage: ArrayBuffer[Stage] = ArrayBuffer()
 
   // --- Callbacks for client-side synchronization ---
   private var onSyncClubs: Option[Seq[Club] => Unit] = None
@@ -42,8 +42,8 @@ case class Tourney(
   private var onSyncCompetitions: Option[Seq[Competition] => Unit] = None
   def setCompSyncHandler(handler: Seq[Competition] => Unit): Unit = onSyncCompetitions = Some(handler)
 
-  private var onSyncRounds: Option[Seq[Round] => Unit] = None
-  def setRoundSyncHandler(handler: Seq[Round] => Unit): Unit = onSyncRounds = Some(handler)
+  private var onSyncStages: Option[Seq[Stage] => Unit] = None
+  def setStageSyncHandler(handler: Seq[Stage] => Unit): Unit = onSyncStages = Some(handler)
 
   // --- Helpers ---
   def nextClubId(): ClubId = ClubId(clubs.length + 1)
@@ -66,7 +66,7 @@ case class Tourney(
         category = category,
         startDate = startDate, 
         status = CompStatus.READY,
-        startRound = None,
+        startStage = None,
         activ = true,
         webRegister = false,
         lowLevel = None,
@@ -133,22 +133,22 @@ case class Tourney(
     }
 
   // ===========================================================================
-  // Round Management
+  // Stage Management
   // ===========================================================================
 
-  /** Adds a new round to a competition, optionally linking to a predecessor. */
-  def addRound(coId: CompId, prefId: Option[RoundId], name: String, rndCfg: RoundCfg, size: Int, noPlayers: Int, doSync: Boolean = true): Either[AppError, Round] =
-    val firstNull = rounds.indexOf(null)
-    val index = if (firstNull != -1) firstNull else rounds.indexWhere(r => r != null && r.deleted)
+  /** Adds a new stage to a competition, optionally linking to a predecessor. */
+  def addStage(coId: CompId, prefId: Option[StageId], name: String, stageConfig: StageConfig, size: Int, noPlayers: Int, doSync: Boolean = true): Either[AppError, Stage] =
+    val firstNull = stages.indexOf(null)
+    val index = if (firstNull != -1) firstNull else stages.indexWhere(r => r != null && r.deleted)
 
     if (index != -1) {
-      val id = RoundId(index + 1)
-      val r = Round(
+      val id = StageId(index + 1)
+      val r = Stage(
         id = id, 
         coId = coId, 
         name = name, 
-        rndCfg = rndCfg, 
-        status = RoundStatus.CFG, 
+        stageConfig = stageConfig, 
+        status = StageStatus.CFG, 
         demo = false, 
         size = size, 
         noPlayers = noPlayers, 
@@ -159,27 +159,27 @@ case class Tourney(
         deleted = false,
         version = 1
       )
-      rounds(index) = r
-      if (!dirtyRound.exists(_.id == r.id)) dirtyRound += r
+      stages(index) = r
+      if (!dirtyStage.exists(_.id == r.id)) dirtyStage += r
 
       // Update predecessor
       prefId.foreach { pid =>
         val pIdx = pid.value - 1
-        if (pIdx >= 0 && pIdx < 128 && rounds(pIdx) != null) {
-          val pref = rounds(pIdx)
+        if (pIdx >= 0 && pIdx < 128 && stages(pIdx) != null) {
+          val pref = stages(pIdx)
           val updatedPref = pref.copy(nextIds = pref.nextIds :+ id, version = pref.version + 1)
-          rounds(pIdx) = updatedPref
-          if (!dirtyRound.exists(_.id == updatedPref.id)) dirtyRound += updatedPref
+          stages(pIdx) = updatedPref
+          if (!dirtyStage.exists(_.id == updatedPref.id)) dirtyStage += updatedPref
         }
       }
 
-      // Update Competition if no predecessor (sets as startRound)
+      // Update Competition if no predecessor (sets as startStage)
       if (prefId.isEmpty) {
         val cIdx = coId.value - 1
         if (cIdx >= 0 && cIdx < 64 && competitions(cIdx) != null) {
           val comp = competitions(cIdx)
-          if (comp.startRound.isEmpty) {
-            val updatedComp = comp.copy(startRound = Some(id), version = comp.version + 1)
+          if (comp.startStage.isEmpty) {
+            val updatedComp = comp.copy(startStage = Some(id), version = comp.version + 1)
             competitions(cIdx) = updatedComp
             if (!dirtyCompetition.exists(_.id == updatedComp.id)) dirtyCompetition += updatedComp
             if (doSync) triggerCompSync()
@@ -187,86 +187,86 @@ case class Tourney(
         }
       }
 
-      if (doSync) triggerRoundSync()
+      if (doSync) triggerStageSync()
       Right(r)
     } else {
-      Left(AppError("max.rounds.reached"))
+      Left(AppError("max.stages.reached"))
     }
 
-  /** Deletes a round and its successors recursively (soft delete). */
-  def deleteRound(id: RoundId, doSync: Boolean = true): Either[AppError, Unit] =
+  /** Deletes a stage and its successors recursively (soft delete). */
+  def deleteStage(id: StageId, doSync: Boolean = true): Either[AppError, Unit] =
     val i = id.value - 1
-    if (i < 0 || i >= 128 || rounds(i) == null) {
-      Left(AppError("round.notFound"))
+    if (i < 0 || i >= 128 || stages(i) == null) {
+      Left(AppError("stage.notFound"))
     } else {
-      val r = rounds(i)
+      val r = stages(i)
       // Delete successors recursively
-      r.nextIds.foreach(nid => deleteRound(nid, doSync = false))
+      r.nextIds.foreach(nid => deleteStage(nid, doSync = false))
 
-      // Soft delete current round
+      // Soft delete current stage
       val updatedR = r.copy(deleted = true, version = r.version + 1)
-      rounds(i) = updatedR
-      if (!dirtyRound.exists(_.id == updatedR.id)) dirtyRound += updatedR
+      stages(i) = updatedR
+      if (!dirtyStage.exists(_.id == updatedR.id)) dirtyStage += updatedR
 
       // Remove from predecessor's nextIds
       r.prefId.foreach { pid =>
         val pIdx = pid.value - 1
-        if (pIdx >= 0 && pIdx < 128 && rounds(pIdx) != null) {
-          val pref = rounds(pIdx)
+        if (pIdx >= 0 && pIdx < 128 && stages(pIdx) != null) {
+          val pref = stages(pIdx)
           val updatedPref = pref.copy(nextIds = pref.nextIds.filterNot(_ == id), version = pref.version + 1)
-          rounds(pIdx) = updatedPref
-          if (!dirtyRound.exists(_.id == updatedPref.id)) dirtyRound += updatedPref
+          stages(pIdx) = updatedPref
+          if (!dirtyStage.exists(_.id == updatedPref.id)) dirtyStage += updatedPref
         }
       }
 
-      // Update Competition if it was startRound
+      // Update Competition if it was startStage
       val cIdx = r.coId.value - 1
       if (cIdx >= 0 && cIdx < 64 && competitions(cIdx) != null) {
         val comp = competitions(cIdx)
-        if (comp.startRound.contains(id)) {
-          val updatedComp = comp.copy(startRound = None, version = comp.version + 1)
+        if (comp.startStage.contains(id)) {
+          val updatedComp = comp.copy(startStage = None, version = comp.version + 1)
           competitions(cIdx) = updatedComp
           if (!dirtyCompetition.exists(_.id == updatedComp.id)) dirtyCompetition += updatedComp
           if (doSync) triggerCompSync()
         }
       }
 
-      if (doSync) triggerRoundSync()
+      if (doSync) triggerStageSync()
       Right(())
     }
 
-  /** Updates an existing round. */
-  def updateRound(round: Round, doSync: Boolean = true): Either[AppError, Round] =
-    val i = round.id.value - 1
-    if (i < 0 || i >= 128 || rounds(i) == null) {
-      Left(AppError("round.notFound"))
+  /** Updates an existing stage. */
+  def updateStage(stage: Stage, doSync: Boolean = true): Either[AppError, Stage] =
+    val i = stage.id.value - 1
+    if (i < 0 || i >= 128 || stages(i) == null) {
+      Left(AppError("stage.notFound"))
     } else {
-      val updatedR = round.copy(version = round.version + 1)
-      rounds(i) = updatedR
-      if (!dirtyRound.exists(_.id == updatedR.id)) dirtyRound += updatedR
-      if (doSync) triggerRoundSync()
+      val updatedR = stage.copy(version = stage.version + 1)
+      stages(i) = updatedR
+      if (!dirtyStage.exists(_.id == updatedR.id)) dirtyStage += updatedR
+      if (doSync) triggerStageSync()
       Right(updatedR)
     }
 
-  /** Bulk synchronizes rounds from external data. */
-  def syncRounds(newRounds: Seq[Round] = Nil): Unit = 
-    if (newRounds.nonEmpty) {
-      newRounds.foreach { r =>
+  /** Bulk synchronizes stages from external data. */
+  def syncStages(newStages: Seq[Stage] = Nil): Unit = 
+    if (newStages.nonEmpty) {
+      newStages.foreach { r =>
         val i = r.id.value - 1
         if (i >= 0 && i < 128) {
-           rounds(i) = r
-           if (!dirtyRound.exists(_.id == r.id)) dirtyRound += r
+           stages(i) = r
+           if (!dirtyStage.exists(_.id == r.id)) dirtyStage += r
         }
       }
     }
-    triggerRoundSync()
+    triggerStageSync()
 
-  /** Internal trigger for client-side round synchronization. */
-  private def triggerRoundSync(): Unit = 
-    if (dirtyRound.nonEmpty) {
-      val dirty = dirtyRound.toSeq
-      dirtyRound.clear()
-      onSyncRounds.foreach(_(dirty))
+  /** Internal trigger for client-side stage synchronization. */
+  private def triggerStageSync(): Unit = 
+    if (dirtyStage.nonEmpty) {
+      val dirty = dirtyStage.toSeq
+      dirtyStage.clear()
+      onSyncStages.foreach(_(dirty))
     }
 
   // ===========================================================================
@@ -531,7 +531,7 @@ object Tourney:
     clubs = ArrayBuffer(),
     players = ArrayBuffer(),
     competitions = ArrayBuffer.fill(64)(null),
-    rounds = ArrayBuffer.fill(128)(null)
+    stages = ArrayBuffer.fill(128)(null)
   )
 
   /**

@@ -53,7 +53,7 @@ object ClickTTMapper:
           category = CompCategory.TT,
           startDate = cttComp.startDate,
           status = CompStatus.UNKN,
-          startRound = None,
+          startStage = None,
           activ = true,
           webRegister = false,
           lowLevel = cttComp.ttrFrom,

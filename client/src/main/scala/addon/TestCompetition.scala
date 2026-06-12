@@ -147,7 +147,7 @@ object TestCompetition:
   def testCompetition_jsonDecode(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     import shared.basic.Pickle.*
     
-    val json = """{"id":1,"version":4,"name":"Wettbewerb 1","typ":"SINGLE","category":"TT","startDate":"2026-04-14","status":"RUN","startRound":null,"activ":true,"webRegister":true,"lowLevel":0,"upperLevel":2500,"cttInfo":{"ageGroup":"Herren","ratingRemark":"A-Klasse","ratingLowLevel":0,"ratingUpperLevel":2500,"sex":1,"maxPersons":64,"entryFee":"15,00 \u20ac","ageFrom":"","ageTo":"","preliminaryRoundMode":"Gruppen","finalRoundMode":"KO-System","manualFinalRankings":false},"pants":[],"deleted":false}"""
+    val json = """{"id":1,"version":4,"name":"Wettbewerb 1","typ":"SINGLE","category":"TT","startDate":"2026-04-14","status":"RUN","startStage":null,"activ":true,"webRegister":true,"lowLevel":0,"upperLevel":2500,"cttInfo":{"ageGroup":"Herren","ratingRemark":"A-Klasse","ratingLowLevel":0,"ratingUpperLevel":2500,"sex":1,"maxPersons":64,"entryFee":"15,00 \u20ac","ageFrom":"","ageTo":"","preliminaryRoundMode":"Gruppen","finalRoundMode":"KO-System","manualFinalRankings":false},"pants":[],"deleted":false}"""
     
     addOutput(s"Starting JSON decode test...")
     try

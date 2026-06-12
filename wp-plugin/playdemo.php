@@ -59,7 +59,7 @@ require_once PLAYPLUGIN_PATH . 'includes/api/player.php';
 require_once PLAYPLUGIN_PATH . 'includes/api/club.php';
 require_once PLAYPLUGIN_PATH . 'includes/api/tourney.php';
 require_once PLAYPLUGIN_PATH . 'includes/api/competition.php';
-require_once PLAYPLUGIN_PATH . 'includes/api/round.php';
+require_once PLAYPLUGIN_PATH . 'includes/api/stage.php';
 require_once PLAYPLUGIN_PATH . 'includes/api/json.php';
 require_once PLAYPLUGIN_PATH . 'includes/helpers.php';
 

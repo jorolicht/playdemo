@@ -34,19 +34,19 @@ object Mockup extends BasePage with JsWrapper:
     services.CompetitionDB.competitions(1) = comp2
     services.CompetitionDB.competitions(2) = comp3
 
-    // Seed RoundDB for all competitions in mockup
-    services.RoundDB.rounds.clear()
-    for (i <- 1 to 128) services.RoundDB.rounds += null
+    // Seed StageDB for all competitions in mockup
+    services.StageDB.stages.clear()
+    for (i <- 1 to 128) services.StageDB.stages += null
     
-    // Rounds for Herren A
-    services.RoundDB.rounds(0) = Round(RoundId(1), comp1.id, "A-Vorrunde", RoundCfg.VRGR, RoundStatus.FIN, false, 8, 8)
-    services.RoundDB.rounds(1) = Round(RoundId(2), comp1.id, "A-Endrunde", RoundCfg.KO, RoundStatus.CFG, false, 4, 4)
+    // Stages for Herren A
+    services.StageDB.stages(0) = Stage(StageId(1), comp1.id, "A-Vorrunde", StageConfig.VRGR, StageStatus.FIN, false, 8, 8)
+    services.StageDB.stages(1) = Stage(StageId(2), comp1.id, "A-Endrunde", StageConfig.KO, StageStatus.CFG, false, 4, 4)
     
-    // Rounds for Herren B
-    services.RoundDB.rounds(2) = Round(RoundId(3), comp2.id, "B-Vorrunde", RoundCfg.VRGR, RoundStatus.CFG, false, 12, 12)
+    // Stages for Herren B
+    services.StageDB.stages(2) = Stage(StageId(3), comp2.id, "B-Vorrunde", StageConfig.VRGR, StageStatus.CFG, false, 12, 12)
     
-    // Rounds for Damen
-    services.RoundDB.rounds(3) = Round(RoundId(4), comp3.id, "D-Endrunde", RoundCfg.KO, RoundStatus.FIN, false, 4, 4)
+    // Stages for Damen
+    services.StageDB.stages(3) = Stage(StageId(4), comp3.id, "D-Endrunde", StageConfig.KO, StageStatus.FIN, false, 4, 4)
 
     Global.currentSelection = Selection(Some(tourney), Some(comp1))
     comps.ContextHeader.render()

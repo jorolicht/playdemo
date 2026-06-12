@@ -1,13 +1,10 @@
-package shared.model
+package shared.format
 
 import scala.collection.mutable.{ ArrayBuffer, HashMap, Map }
-
 import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
-
-import shared.model.MEntryGr
-import shared.model.Pant
+import shared.model.*
 import shared.basic.AppError
-
+import StageHelper.*
 
 case class GroupConfig(id: Int, name: String, size: Int, quali: Int, pos: Int)
 
@@ -19,8 +16,8 @@ case class GroupEntry(
   var balls:    Array[String]
 ) {
   
-  // def toResultEntry(pos: (Int, Int), sno: (String, String)) =  ResultEntry(valid, pos, sno, sets, balls)
-  // def invert = new GroupEntry(valid,(points._2,points._1),(sets._2,sets._1),(ballDiff._2,ballDiff._1),balls.map(invBall(_)))
+  def toResultEntry(pos: (Int, Int), sno: (String, String)) =  ResultEntry(valid, pos, sno, sets, balls)
+  def invert = new GroupEntry(valid,(points._2,points._1),(sets._2,sets._1),(ballDiff._2,ballDiff._1),balls.map(invBall(_)))
 }
 
 object GroupEntry {

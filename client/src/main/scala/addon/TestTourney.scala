@@ -89,7 +89,7 @@ object TestTourney:
         addOutput(s"- Wettbewerbe: ${CompetitionDB.competitions.count(_ != null)}")
         addOutput(s"- Vereine: ${TourneyDB.tourney.clubs.length}")
         addOutput(s"- Spieler: ${TourneyDB.tourney.players.length}")
-        addOutput(s"- Runden: ${RoundDB.rounds.count(_ != null)}")
+        addOutput(s"- Stages: ${StageDB.stages.count(_ != null)}")
         Right(s"FINISHED: ${group}-Test:${number}")
     }
 

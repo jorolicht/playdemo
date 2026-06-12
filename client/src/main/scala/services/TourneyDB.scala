@@ -47,7 +47,7 @@ object TourneyDB extends ComWrapper with Debouncer:
       CompetitionDB.load(),
       ClubDB.load(),
       PlayerDB.load(),
-      RoundDB.load()
+      StageDB.load()
     )
 
     Future.sequence(loads).flatMap { results =>
@@ -143,7 +143,7 @@ object TourneyDB extends ComWrapper with Debouncer:
         ClubDB.initHandler() 
         PlayerDB.initHandler()
         CompetitionDB.initHandler()
-        RoundDB.initHandler()
+        StageDB.initHandler()
         Future.successful(Right(version.toLong))
       } else {
         Future.successful(Right(0L))
@@ -169,7 +169,7 @@ object TourneyDB extends ComWrapper with Debouncer:
               ClubDB.initHandler() 
               PlayerDB.initHandler()
               CompetitionDB.initHandler()
-              RoundDB.initHandler()
+              StageDB.initHandler()
               Logging.debug(s"TourneyDB.load: tournament loaded, version: $version")
               Right(version.toLong)
             case Left(err) => Left(err)
@@ -187,7 +187,7 @@ object TourneyDB extends ComWrapper with Debouncer:
       org.scalajs.dom.window.localStorage.removeItem("App.demo_clubs")
       org.scalajs.dom.window.localStorage.removeItem("App.demo_players")
       org.scalajs.dom.window.localStorage.removeItem("App.demo_comps")
-      org.scalajs.dom.window.localStorage.removeItem("App.demo_rounds")
+      org.scalajs.dom.window.localStorage.removeItem("App.demo_stages")
       Future.successful(Right(()))
     else if (trnyId == 0) then
       Future.successful(Right(()))
@@ -208,5 +208,5 @@ object TourneyDB extends ComWrapper with Debouncer:
     ClubDB.initHandler()
     PlayerDB.initHandler()
     CompetitionDB.initHandler()
-    RoundDB.initHandler()
+    StageDB.initHandler()
     if (doSync) triggerSync()

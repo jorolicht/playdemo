@@ -5,5 +5,5 @@ import shared.basic.Pickle.*
 case class Selection(
   tourney:     Option[Tourney]     = None,
   competition: Option[Competition] = None,
-  round:       Option[Round]       = None
+  stage:       Option[Stage]       = None
 ) derives ReadWriter

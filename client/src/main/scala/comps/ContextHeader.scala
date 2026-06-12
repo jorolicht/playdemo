@@ -11,11 +11,11 @@ object ContextHeader extends BaseComp with JsWrapper:
 
   def render(param: String = ""): Boolean = 
     val comps = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
-    val rounds = Global.currentSelection.competition.map { c =>
-      services.RoundDB.rounds.toSeq.filter(r => r != null && r.coId == c.id && !r.deleted)
+    val stages = Global.currentSelection.competition.map { c =>
+      services.StageDB.stages.toSeq.filter(s => s != null && s.coId == c.id && !s.deleted)
     }.getOrElse(Seq.empty)
     
-    setHtml(gE(ContextHeaderId), cviews.comps.html.ContextHeader(Global.currentSelection, comps, rounds))
+    setHtml(gE(ContextHeaderId), cviews.comps.html.ContextHeader(Global.currentSelection, comps, stages))
     true
 
   def hide(): Unit =

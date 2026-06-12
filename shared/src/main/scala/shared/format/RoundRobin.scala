@@ -1,3 +1,5 @@
+//package shared.format
+
 // package shared.model.tabletennis
 
 // import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}

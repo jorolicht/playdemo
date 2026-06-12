@@ -3,7 +3,7 @@
 @import cviews.helper.html.*
 @import pages.CompetitionInfo.*
 
-@(comp: Competition, participants: Seq[Pant], rounds: Seq[Round], sortCol: String, sortAsc: Boolean)
+@(comp: Competition, participants: Seq[Pant], stages: Seq[Stage], sortCol: String, sortAsc: Boolean)
 
 <div class="container mt-4">
     <!-- Competition Header Card -->
@@ -34,12 +34,12 @@
         </div>
     </div>
 
-    <!-- Rounds List Section (Moved up) -->
+    <!-- Stages List Section -->
     <div class="card shadow-sm border-info mb-4">
         <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
-            <h4 class="h5 mb-0 fw-bold"><i class="bi bi-layers me-2"></i>Spielrunden</h4>
-            <button class="btn btn-dark btn-sm" @id(BtnStartRound, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
-                <i class="bi bi-plus-lg me-1"></i>Runde starten
+            <h4 class="h5 mb-0 fw-bold"><i class="bi bi-layers me-2"></i>Spielstages</h4>
+            <button class="btn btn-dark btn-sm" @id(BtnStartStage, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
+                <i class="bi bi-plus-lg me-1"></i>Stage starten
             </button>
         </div>
         <div class="card-body p-0">
@@ -47,32 +47,32 @@
                 <table class="table table-hover mb-0 align-middle">
                     <thead class="table-light small text-muted">
                         <tr>
-                            <th class="ps-3">Runde</th>
+                            <th class="ps-3">Stage</th>
                             <th>Teilnehmer</th>
                             <th>Status</th>
                             <th class="text-end pe-3">Aktionen</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if(rounds.isEmpty) {
-                            <tr><td colspan="4" class="text-center py-4 text-muted">Keine Runden angelegt.</td></tr>
+                        @if(stages.isEmpty) {
+                            <tr><td colspan="4" class="text-center py-4 text-muted">Keine Stages angelegt.</td></tr>
                         }
-                        @rounds.map { r =>
+                        @stages.map { r =>
                             <tr>
                                 <td class="ps-3 fw-bold">@r.name</td>
                                 <td>@r.noPlayers</td>
                                 <td>
                                     <span class="badge @{r.status match {
-                                        case RoundStatus.CFG => "bg-secondary"
-                                        case RoundStatus.AUS => "bg-info text-dark"
-                                        case RoundStatus.EIN => "bg-warning text-dark"
-                                        case RoundStatus.FIN => "bg-success"
+                                        case StageStatus.CFG => "bg-secondary"
+                                        case StageStatus.AUS => "bg-info text-dark"
+                                        case StageStatus.EIN => "bg-warning text-dark"
+                                        case StageStatus.FIN => "bg-success"
                                         case _ => "bg-light text-dark"
                                     }}">@r.status</span>
                                 </td>
                                 <td class="text-end pe-3">
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-primary" onclick="appLoadPage('RoundAdmin', '@r.id.value')">
+                                        <button class="btn btn-primary" onclick="appLoadPage('StageAdmin', '@r.id.value')">
                                             <i class="bi bi-eye me-1"></i>Anzeigen
                                         </button>
                                         <button class="btn btn-outline-danger" @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
@@ -88,7 +88,7 @@
         </div>
     </div>
 
-    <!-- Participants Accordion (Moved down) -->
+    <!-- Participants Accordion -->
     <div class="accordion mb-4 shadow-sm" id="participantsAccordion">
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingParticipants">

@@ -95,7 +95,7 @@ class Helper @Inject()(system: ActorSystem, cc: ControllerComponents, userRepo: 
               // Create a clean copy for JSON output without null padding
               val cleanTourney = tourney.copy(
                 competitions = tourney.competitions.filter(_ != null),
-                rounds = tourney.rounds.filter(_ != null)
+                stages = tourney.stages.filter(_ != null)
               )
 
               // Using writeJs for consistent serialization and pretty printing

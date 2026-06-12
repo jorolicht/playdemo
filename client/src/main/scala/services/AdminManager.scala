@@ -16,7 +16,7 @@ object AdminManager extends ComWrapper {
     clubs: Seq[Club],
     players: Seq[Player],
     competitions: Seq[Competition],
-    rounds: Seq[Round],
+    stages: Seq[Stage],
     extraMeta: Map[String, String]
   ) derives ReadWriter
 
@@ -32,7 +32,7 @@ object AdminManager extends ComWrapper {
       clubs = t.clubs.toSeq,
       players = t.players.toSeq,
       competitions = t.competitions.filter(_ != null).toSeq,
-      rounds = t.rounds.filter(_ != null).toSeq,
+      stages = t.stages.filter(_ != null).toSeq,
       extraMeta = Map(
         "startDate" -> t.startDate.toString,
         "endDate" -> t.endDate.toString,
@@ -84,11 +84,11 @@ object AdminManager extends ComWrapper {
             if (i >= 0 && i < 64) TourneyDB.tourney.competitions(i) = c
           }
           
-          TourneyDB.tourney.rounds.clear()
-          for (i <- 0 until 128) TourneyDB.tourney.rounds += null
-          importedData.rounds.foreach { r =>
+          TourneyDB.tourney.stages.clear()
+          for (i <- 0 until 128) TourneyDB.tourney.stages += null
+          importedData.stages.foreach { r =>
             val i = r.id.value - 1
-            if (i >= 0 && i < 128) TourneyDB.tourney.rounds(i) = r
+            if (i >= 0 && i < 128) TourneyDB.tourney.stages(i) = r
           }
           
           // Meta-Data Update
@@ -106,7 +106,7 @@ object AdminManager extends ComWrapper {
             _ <- ClubDB.sync(TourneyDB.tourney.clubs.toSeq)
             _ <- PlayerDB.sync(TourneyDB.tourney.players.toSeq)
             _ <- CompetitionDB.sync(importedData.competitions)
-            _ <- RoundDB.sync(importedData.rounds)
+            _ <- StageDB.sync(importedData.stages)
             _ <- ajaxPost[Map[String,String], String]("/wp-json/tourney/v1/meta-data", List("postId" -> newTourney.wpId.toString), extraMetaPayload, host = Global.homeUrl)
           } yield Right(slug)
         case Left(err) => Future.successful(Left(err))

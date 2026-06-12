@@ -31,7 +31,7 @@ object ResultEntry {
   //     }  
   //     case CompPhaseTyp.KO => {
   //       val m = mEntry.asInstanceOf[MEntryKo]
-  //       ResultEntry(m.status >= 2 & m.validSets(), (m.round, m.maNo), (m.stNoA,m.stNoB), m.sets, m.result.split('·'))
+  //       ResultEntry(m.status >= 2 & m.validSets(), (m.stageId, m.maNo), (m.stNoA,m.stNoB), m.sets, m.result.split('·'))
   //     }  
   //     case _      => ResultEntry(false, (0,0), ("",""), (0,0), Array(""))
   //   }

@@ -3,6 +3,7 @@ package shared.basic
 import scala.util.{Try, Success, Failure}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.matching.Regex
+import scala.math.Numeric.Implicits.*
 
 import scala.concurrent.Future
 import scala.reflect.ClassTag
@@ -268,3 +269,24 @@ def swap[T](buffer: ArrayBuffer[T], i: Int, j: Int): Unit =
   val tmp = buffer(i)
   buffer(i) = buffer(j)
   buffer(j) = tmp
+
+
+
+// 1. & 2. Erweiterungen für Tupel (Zusammengefasst in einen Extension-Block)
+extension [A: Numeric, B: Numeric](t: (A, B))
+
+  // Hinweis: Ihre ursprüngliche swap-Methode hat den Parameter p vertauscht, 
+  // aber t ignoriert. Wenn Sie t (die Instanz selbst) swappen möchten:
+  def swap: (B, A) = (t._2, t._1)
+
+  // Wenn Sie die Methode so beibehalten wollen, dass sie ein anderes Tupel p swappt:
+  def swapOther(p: (A, B)): (B, A) = (p._2, p._1)
+
+  def + (p: (A, B)): (A, B) = 
+    (p._1 + t._1, p._2 + t._2)
+
+
+// 3. Sortierung (View Bound `<%` ersetzt durch Context Bound `Ordering`)
+class OrderTupleBySecond[X, Y: Ordering] extends Ordering[(X, Y)]:
+  def compare(x: (X, Y), y: (X, Y)): Int =
+    summon[Ordering[Y]].compare(x._2, y._2)  

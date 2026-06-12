@@ -4,17 +4,17 @@ import org.scalajs.dom
 import base.*
 import shared.model.*
 
-object RoundDraw extends BasePage with JsWrapper:
-  def name = PageNameTyp("RoundDraw")
+object StageDraw extends BasePage with JsWrapper:
+  def name = PageNameTyp("StageDraw")
 
   def render(param: String = ""): Boolean = 
-    Global.currentSelection.round match
+    Global.currentSelection.stage match
       case Some(r) => 
         comps.ContextHeader.render()
         val groups = r.groups.toSeq
-        setMain(cviews.comps.html.RoundLayout(r, "DRW")(cviews.pages.html.RoundDraw(r, groups)))
+        setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.html.StageDraw(r, groups)))
         true
       case None => 
-        debug("RoundDraw: No round selected, redirecting to Competition Info")
+        debug("StageDraw: No stage selected, redirecting to Competition Info")
         loadPage(CompetitionInfo.name, "")
         false

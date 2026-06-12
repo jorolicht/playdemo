@@ -40,7 +40,7 @@ object DemoManager extends ComWrapper {
     TourneyDB.tourney.clubs.clear()
     TourneyDB.tourney.players.clear()
     TourneyDB.tourney.competitions.clear()
-    TourneyDB.tourney.rounds.clear()
+    TourneyDB.tourney.stages.clear()
     proceedAction()
   }
 
@@ -68,7 +68,7 @@ object DemoManager extends ComWrapper {
             ClubDB.sync(TourneyDB.tourney.clubs.toSeq)
             PlayerDB.sync(TourneyDB.tourney.players.toSeq)
             CompetitionDB.sync(TourneyDB.tourney.competitions.filter(_ != null).toSeq)
-            RoundDB.sync(TourneyDB.tourney.rounds.filter(_ != null).toSeq)
+            StageDB.sync(TourneyDB.tourney.stages.filter(_ != null).toSeq)
             
             true
           case Left(err) =>

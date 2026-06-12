@@ -15,7 +15,7 @@ object CompetitionInfo extends BasePage with JsWrapper:
 
   val BtnEditComp:       HtmlId = genId(name)
   val BtnDeleteComp:     HtmlId = genId(name)
-  val BtnStartRound:     HtmlId = genId(name)
+  val BtnStartStage:     HtmlId = genId(name)
 
   // Header IDs for sorting
   val IdHeaderSno:       HtmlId = genId(name)
@@ -32,8 +32,8 @@ object CompetitionInfo extends BasePage with JsWrapper:
     if (param.nonEmpty) {
       val cId = CompId(param.toInt)
       services.CompetitionDB.competitions.find(c => c != null && c.id == cId).foreach { c =>
-        // Clear round when switching competition
-        Global.currentSelection = Global.currentSelection.copy(competition = Some(c), round = None)
+        // Clear stage when switching competition
+        Global.currentSelection = Global.currentSelection.copy(competition = Some(c), stage = None)
         comps.ContextHeader.render()
       }
     }
@@ -44,10 +44,10 @@ object CompetitionInfo extends BasePage with JsWrapper:
         // Real participants from the competition object, filtered by active and sorted
         val participants = sortParticipants(c.pants.toSeq.filter(_.active))
         
-        // Real rounds from the tourney object (shared model)
-        val rounds = services.TourneyDB.tourney.rounds.toSeq.filter(r => r != null && r.coId == c.id && !r.deleted)
+        // Real stages from the tourney object (shared model)
+        val stages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == c.id && !s.deleted)
 
-        setMain(cviews.pages.html.CompetitionInfo(c, participants, rounds, sortCol, sortAsc))
+        setMain(cviews.pages.html.CompetitionInfo(c, participants, stages, sortCol, sortAsc))
         true
       case None => 
         debug("CompetitionInfo: No competition selected, redirecting to Tourney Info")
@@ -72,28 +72,28 @@ object CompetitionInfo extends BasePage with JsWrapper:
       case `IdHeaderTtr`    => toggleSort("ttr")
       case `IdHeaderYear`   => toggleSort("year")
 
-      case `BtnStartRound` => 
+      case `BtnStartStage` => 
         val c = Global.currentSelection.competition.get
-        val existingRounds = services.TourneyDB.tourney.rounds.toSeq.filter(r => r != null && r.coId == c.id && !r.deleted)
+        val existingStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == c.id && !s.deleted)
         
-        dialogs.DlgRoundStart.show(existingRounds).map {
+        dialogs.DlgStageStart.show(existingStages).map {
           case Right(res) => 
-            services.TourneyDB.tourney.addRound(
+            services.TourneyDB.tourney.addStage(
               coId = c.id, 
               prefId = res.prefId, 
               name = res.name, 
-              rndCfg = RoundCfg.VRGR, 
+              stageConfig = StageConfig.VRGR, 
               size = 8, 
               noPlayers = 0
             ) match {
               case Right(r) => 
-                Global.currentSelection = Global.currentSelection.copy(round = Some(r))
+                Global.currentSelection = Global.currentSelection.copy(stage = Some(r))
                 comps.ContextHeader.render()
-                loadPage(RoundAdmin.name, "")
+                loadPage(StageAdmin.name, "")
               case Left(err) => 
-                error(s"Failed to start round: ${err.msgCode}")
+                error(s"Failed to start stage: ${err.msgCode}")
             }
-          case _ => debug("Start round cancelled")
+          case _ => debug("Start stage cancelled")
         }
 
       case `BtnDeleteComp` => 
@@ -103,7 +103,7 @@ object CompetitionInfo extends BasePage with JsWrapper:
             val cId = Global.currentSelection.competition.map(_.id).getOrElse(CompId(0))
             services.TourneyDB.tourney.deleteCompetition(cId) match {
               case Right(_) => 
-                Global.currentSelection = Global.currentSelection.copy(competition = None, round = None)
+                Global.currentSelection = Global.currentSelection.copy(competition = None, stage = None)
                 comps.ContextHeader.render()
                 loadPage(TourneyInfo.name, "")
               case Left(err) => 

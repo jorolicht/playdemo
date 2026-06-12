@@ -4,11 +4,11 @@ import org.scalajs.dom
 import base.*
 import shared.model.*
 
-object RoundInput extends BasePage with JsWrapper:
-  def name = PageNameTyp("RoundInput")
+object StageInput extends BasePage with JsWrapper:
+  def name = PageNameTyp("StageInput")
 
   def render(param: String = ""): Boolean = 
-    Global.currentSelection.round match
+    Global.currentSelection.stage match
       case Some(r) => 
         comps.ContextHeader.render()
         val comp = Global.currentSelection.competition
@@ -22,9 +22,9 @@ object RoundInput extends BasePage with JsWrapper:
           (m, getName(m.stNoA), getName(m.stNoB))
         }
 
-        setMain(cviews.comps.html.RoundLayout(r, "INP")(cviews.pages.html.RoundInput(r, matches)))
+        setMain(cviews.comps.html.StageLayout(r, "INP")(cviews.pages.html.StageInput(r, matches)))
         true
       case None => 
-        debug("RoundInput: No round selected, redirecting to Competition Info")
+        debug("StageInput: No stage selected, redirecting to Competition Info")
         loadPage(CompetitionInfo.name, "")
         false

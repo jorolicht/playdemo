@@ -10,13 +10,15 @@ import scala.collection.mutable.ArrayBuffer
 import base.*
 import shared.MainIds.*
 import shared.model.*
+import shared.format.*
 import shared.utils.DrawRules
 import dialogs.*
 
-object RoundAdmin extends BasePage with JsWrapper:
-  def name = PageNameTyp("RoundAdmin")
+object StageAdmin extends BasePage with JsWrapper:
+  def name = PageNameTyp("StageAdmin")
 
-  val BtnStartPlaying: HtmlId = genId(name)
+  val BtnStartDrawing: HtmlId = genId(name)
+  val BtnAddDummy:     HtmlId = genId(name)
   val BtnResetInp:     HtmlId = genId(name)
   val BtnResetDrw:     HtmlId = genId(name)
   val BtnResetCfg:     HtmlId = genId(name)
@@ -26,20 +28,17 @@ object RoundAdmin extends BasePage with JsWrapper:
   val SelectDrawMode:  HtmlId = genId(name)
   val LabelDrawCnt:    HtmlId = genId(name)
 
-  //private val IdModeSelect  = "draw-mode-select"
-  //private val IdCountLabel  = "draw-count-info"
-
   def render(param: String = ""): Boolean = 
     // Selection logic
     if (param.nonEmpty) {
-      val rId = RoundId(param.toInt)
-      services.TourneyDB.tourney.rounds.find(r => r != null && r.id == rId).foreach { r =>
-        Global.currentSelection = Global.currentSelection.copy(round = Some(r))
+      val rId = StageId(param.toInt)
+      services.TourneyDB.tourney.stages.find(r => r != null && r.id == rId).foreach { r =>
+        Global.currentSelection = Global.currentSelection.copy(stage = Some(r))
         comps.ContextHeader.render()
       }
     }
 
-    Global.currentSelection.round match
+    Global.currentSelection.stage match
       case Some(r) => 
         comps.ContextHeader.render()
         val comp = Global.currentSelection.competition
@@ -49,37 +48,56 @@ object RoundAdmin extends BasePage with JsWrapper:
         val activeCount = participants.count(_.status == PantStatus.PLAY)
         val modes = DrawRules.getAvailableModes(activeCount)
 
-        setMain(cviews.comps.html.RoundLayout(r, "CFG")(
-          cviews.pages.html.RoundAdmin(r, participants, modes)
+        setMain(cviews.comps.html.StageLayout(r, "CFG")(
+          cviews.pages.html.StageAdmin(r, participants, modes)
         ))
         
         // Initial state update
         dom.window.setTimeout(() => updateModes(), 50)
         true
       case None => 
-        debug("RoundAdmin: No round selected, redirecting to Competition Info")
+        debug("StageAdmin: No stage selected, redirecting to Competition Info")
         loadPage(CompetitionInfo.name, "")
         false
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
-      case `BtnStartPlaying` => 
+      case `BtnStartDrawing` => 
         generateDraw()
+
+      case `BtnAddDummy` =>
+        Global.currentSelection.competition.foreach { comp =>
+          val dummyIndex = comp.pants.length + 1
+          val newId = SNO.single(PlayerId(9000 + dummyIndex))
+          val dummyRating = 1200 + scala.util.Random.nextInt(400)
+          val newPant = Pant(
+            id = newId,
+            name = s"Dummy $dummyIndex",
+            club = "TTC Dummy",
+            rating = dummyRating,
+            birthYear = "2000",
+            status = PantStatus.PLAY,
+            active = true
+          )
+          comp.pants += newPant
+          debug(s"Added dummy player: ${newPant.name}")
+          render()
+        }
 
       case `BtnResetInp` => 
         debug("Resetting results...")
-        loadPage(RoundInput.name, "")
+        loadPage(StageInput.name, "")
 
       case `BtnResetDrw` => 
         debug("Resetting draw and results...")
-        loadPage(RoundDraw.name, "")
+        loadPage(StageDraw.name, "")
 
       case `BtnResetCfg` => 
         debug("Resetting full configuration...")
         render()
 
       case `BtnDeleteFull` => 
-        handleDeleteRound()
+        handleDeleteStage()
 
       case `ChkBoxAll` =>
         // ChkBoxAll is now a button
@@ -95,7 +113,7 @@ object RoundAdmin extends BasePage with JsWrapper:
         updateButtonState()
 
       case _ => 
-        debug(s"RoundAdmin handleEvent: ${elem.id}")
+        debug(s"StageAdmin handleEvent: ${elem.id}")
 
   /**
    * Updates the game mode dropdown and count info based on checkboxes.
@@ -134,7 +152,7 @@ object RoundAdmin extends BasePage with JsWrapper:
 
   private def updateButtonState(): Unit =
     val select = gE(SelectDrawMode).asInstanceOf[dom.html.Select]
-    val btn = gE(BtnStartPlaying).asInstanceOf[dom.html.Button]
+    val btn = gE(BtnStartDrawing).asInstanceOf[dom.html.Button]
     if (select != null && btn != null) {
       val isDefault = select.value == "UNKN"
       btn.disabled = isDefault
@@ -143,12 +161,12 @@ object RoundAdmin extends BasePage with JsWrapper:
     }
 
   private def generateDraw(): Unit =
-    Global.currentSelection.round.foreach { r =>
+    Global.currentSelection.stage.foreach { r =>
       val select = gE(SelectDrawMode).asInstanceOf[dom.html.Select]
       val modeStr = select.value
       
       if (modeStr != "UNKN") {
-        val cfg = try RoundCfg.valueOf(modeStr) catch { case _: Exception => RoundCfg.UNKN }
+        val cfg = try StageConfig.valueOf(modeStr) catch { case _: Exception => StageConfig.UNKN }
 
         // Read configuration from UI
         val setsSelect = dom.document.getElementById("rnd-sets").asInstanceOf[dom.html.Select]
@@ -173,27 +191,27 @@ object RoundAdmin extends BasePage with JsWrapper:
         } else {
           // Generation Logic
           r.groups.clear()
-          r.rndCfg = cfg
+          r.stageConfig = cfg
           
           cfg match
-            case RoundCfg.RR =>
+            case StageConfig.RR =>
               val g = Group(1, selectedPants.length, 1, "Gruppe 1", r.noWinSets)
               selectedPants.zipWithIndex.foreach { case (p, i) => g.pants(i) = p }
               r.groups += g
               
-            case RoundCfg.KO =>
+            case StageConfig.KO =>
               val g = Group(1, selectedPants.length, 1, "KO-Baum (Setzung)", r.noWinSets)
               selectedPants.zipWithIndex.foreach { case (p, i) => g.pants(i) = p }
               r.groups += g
               
-            case RoundCfg.SW =>
+            case StageConfig.SW =>
               selectedPants.grouped(2).zipWithIndex.foreach { case (pair, i) =>
                 val g = Group(i + 1, pair.length, 1, s"Paarung ${i + 1}", r.noWinSets)
                 pair.zipWithIndex.foreach { case (p, j) => g.pants(j) = p }
                 r.groups += g
               }
               
-            case _ if cfg.typ == RoundTyp.GR =>
+            case _ if cfg.format == StageFormat.GR =>
               val dist = DrawRules.calculateDistribution(cfg, selectedPants.length)
               var currentPants = selectedPants
               dist.zipWithIndex.foreach { case (size, i) =>
@@ -206,33 +224,33 @@ object RoundAdmin extends BasePage with JsWrapper:
             
             case _ => debug(s"Unsupported generation for mode $cfg")
 
-          r.status = RoundStatus.AUS
-          services.TourneyDB.tourney.updateRound(r)
+          r.status = StageStatus.AUS
+          services.TourneyDB.tourney.updateStage(r)
           
           // Navigate to Draw page to show results
-          loadPage(RoundDraw.name, "")
+          loadPage(StageDraw.name, "")
         }
       }
     }
 
-  private def handleDeleteRound(): Unit =
+  private def handleDeleteStage(): Unit =
     import shared.BoxButton
-    val r = Global.currentSelection.round.get
+    val r = Global.currentSelection.stage.get
     val msg = if (r.nextIds.nonEmpty) {
-      s"Möchten Sie diese Runde und ALLE ${r.nextIds.length} nachfolgenden Runden wirklich löschen?"
+      s"Möchten Sie diese Stage und ALLE ${r.nextIds.length} nachfolgenden Stages wirklich löschen?"
     } else {
-      "Möchten Sie diese Runde wirklich löschen?"
+      "Möchten Sie diese Stage wirklich löschen?"
     }
     
-    DlgMsgbox.show(msg, "Runde löschen", List(BoxButton.Yes, BoxButton.No)).map {
+    DlgMsgbox.show(msg, "Stage löschen", List(BoxButton.Yes, BoxButton.No)).map {
       case BoxButton.Yes => 
-        services.TourneyDB.tourney.deleteRound(r.id) match {
+        services.TourneyDB.tourney.deleteStage(r.id) match {
           case Right(_) => 
-            Global.currentSelection = Global.currentSelection.copy(round = None)
+            Global.currentSelection = Global.currentSelection.copy(stage = None)
             comps.ContextHeader.render()
             loadPage(CompetitionInfo.name, "")
           case Left(err) => 
-            error(s"Failed to delete round: ${err.msgCode}")
+            error(s"Failed to delete stage: ${err.msgCode}")
         }
       case _ => debug("Delete cancelled")
     }

@@ -1,14 +1,15 @@
 @import shared.model.*
+@import shared.format.*
 
-@(round: Round, groups: Seq[Group])
+@(stage: Stage, groups: Seq[Group])
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">Rundenergebnisse / Tabellen: @round.name</h5>
+        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">Stageergebnisse / Tabellen: @stage.name</h5>
         
         <div class="row row-cols-1 row-cols-md-2 g-4">
             @if(groups.isEmpty) {
-                <div class="col-12 text-center py-5 text-muted italic">Keine Ergebnisse für diese Runde verfügbar.</div>
+                <div class="col-12 text-center py-5 text-muted italic">Keine Ergebnisse für diese Stage verfügbar.</div>
             }
             @groups.map { g =>
                 <div class="col">
@@ -44,7 +45,7 @@
                 <i class="bi bi-printer me-1"></i>Tabelle drucken
             </button>
             <button class="btn btn-primary" onclick="appLoadPage('CompetitionInfo', '')">
-                Nächste Runde vorbereiten <i class="bi bi-arrow-right ms-1"></i>
+                Nächste Stage vorbereiten <i class="bi bi-arrow-right ms-1"></i>
             </button>
         </div>
     </div>

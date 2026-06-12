@@ -20,7 +20,7 @@ object TourneyInfo extends BasePage with JsWrapper:
 
   def render(param: String = ""): Boolean = 
     // When viewing tourney info, we usually want to clear the competition/round selection
-    Global.currentSelection = Global.currentSelection.copy(competition = None, round = None)
+    Global.currentSelection = Global.currentSelection.copy(competition = None, stage = None)
 
     // Get tournament from Selection or TourneyDB
     val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
