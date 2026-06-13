@@ -31,3 +31,18 @@ case class KoStage(
  */
 object KoStage:
   implicit def rw: RW[KoStage] = macroRW
+
+/**
+ * Companion object for Single Elimination format providing initialization logic.
+ */
+object SingleElimination {
+  /**
+   * Initializes a KnockoutStage stage data structure with a new KoStage.
+   */
+  def init(id: Int, name: String, coId: Long, noWinSets: Int, selectedPants: Seq[Pant]): StageData.KnockoutStage = {
+    val state = KoStage(id, name, coId, noWinSets)
+    state.size = selectedPants.length
+    selectedPants.foreach(p => state.pants += p)
+    StageData.KnockoutStage(state)
+  }
+}

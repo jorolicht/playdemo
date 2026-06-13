@@ -1,12 +1,19 @@
-//package shared.format
+package shared.format
 
-// package shared.model.tabletennis
+import shared.model.*
 
-// import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
-// import shared.basic.Pickle.*
+type RrGroup = Group
 
-// import shared.utils.Constants._
-// import shared.model.ParticipantEntry
-// import shared.model.tabletennis.utility._
-
-
+/**
+ * Companion object for Round Robin format providing initialization logic.
+ */
+object RoundRobin {
+  /**
+   * Initializes a RoundRobinStage stage data structure with a single group.
+   */
+  def init(selectedPants: Seq[Pant], noWinSets: Int): StageData.RoundRobinStage = {
+    val g = Group(1, selectedPants.length, 1, "Gruppe 1", noWinSets)
+    selectedPants.zipWithIndex.foreach { case (p, i) => g.pants(i) = p }
+    StageData.RoundRobinStage(g)
+  }
+}

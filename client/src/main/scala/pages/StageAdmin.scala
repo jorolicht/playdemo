@@ -190,38 +190,21 @@ object StageAdmin extends BasePage with JsWrapper:
           dom.window.alert("Bitte wählen Sie mindestens einen Teilnehmer aus.")
         } else {
           // Generation Logic
-          r.groups.clear()
           r.stageConfig = cfg
           
-          cfg match
-            case StageConfig.RR =>
-              val g = Group(1, selectedPants.length, 1, "Gruppe 1", r.noWinSets)
-              selectedPants.zipWithIndex.foreach { case (p, i) => g.pants(i) = p }
-              r.groups += g
+          cfg.format match
+            case StageFormat.RR => 
+              r.data = RoundRobin.init(selectedPants, r.noWinSets)
+     
+            case StageFormat.KO => 
+              r.data = SingleElimination.init(r.id.value, r.name, r.coId.value.toLong, r.noWinSets, selectedPants)
               
-            case StageConfig.KO =>
-              val g = Group(1, selectedPants.length, 1, "KO-Baum (Setzung)", r.noWinSets)
-              selectedPants.zipWithIndex.foreach { case (p, i) => g.pants(i) = p }
-              r.groups += g
+            case StageFormat.SW =>
+              r.data = SwissSystem.init(selectedPants, r.noWinSets)
               
-            case StageConfig.SW =>
-              selectedPants.grouped(2).zipWithIndex.foreach { case (pair, i) =>
-                val g = Group(i + 1, pair.length, 1, s"Paarung ${i + 1}", r.noWinSets)
-                pair.zipWithIndex.foreach { case (p, j) => g.pants(j) = p }
-                r.groups += g
-              }
-              
-            case _ if cfg.format == StageFormat.GR =>
-              val dist = DrawRules.calculateDistribution(cfg, selectedPants.length)
-              var currentPants = selectedPants
-              dist.zipWithIndex.foreach { case (size, i) =>
-                val groupPants = currentPants.take(size)
-                currentPants = currentPants.drop(size)
-                val g = Group(i + 1, size, 2, s"Gruppe ${i + 1}", r.noWinSets)
-                groupPants.zipWithIndex.foreach { case (p, j) => g.pants(j) = p }
-                r.groups += g
-              }
-            
+            case StageFormat.GR =>
+              r.data = Groups.init(cfg, selectedPants, r.noWinSets)
+        
             case _ => debug(s"Unsupported generation for mode $cfg")
 
           r.status = StageStatus.AUS

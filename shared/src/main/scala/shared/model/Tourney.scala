@@ -4,6 +4,7 @@ import shared.basic.Pickle.*
 import shared.basic.*
 import scala.util.control.NonFatal
 import scala.collection.mutable.ArrayBuffer
+import shared.format.*
 
 /**
  * Represents a tournament with all its related data.
@@ -152,6 +153,13 @@ case class Tourney(
         demo = false, 
         size = size, 
         noPlayers = noPlayers, 
+        data = stageConfig.format match {
+          case StageFormat.GR => StageData.GroupsStage(ArrayBuffer.empty)
+          case StageFormat.KO => StageData.KnockoutStage(KoStage(id.value, name, coId.value.toLong, 0, 0))
+          case StageFormat.SW => StageData.SwissStage(Group(1, 0, 1, name, 0))
+          case StageFormat.RR => StageData.RoundRobinStage(Group(1, 0, 1, name, 0))
+          case _              => StageData.GroupsStage(ArrayBuffer.empty)
+        },
         noWinSets = 0,
         prefId = prefId, 
         nextIds = List(), 

@@ -143,6 +143,21 @@ object StageStatus:
   def fromName(name: String): StageStatus = values.find(_.productPrefix == name).getOrElse(UNKN)
 
 
+enum StageData:
+  case GroupsStage(groups: ArrayBuffer[Group])
+  case KnockoutStage(state: KoStage)
+  case SwissStage(swGroup: SwGroup)
+  case RoundRobinStage(rrGroup: RrGroup)
+
+object StageData:
+  given rwGroupsStage: ReadWriter[StageData.GroupsStage] = macroRW
+  given rwKnockoutStage: ReadWriter[StageData.KnockoutStage] = macroRW
+  given rwSwissStage: ReadWriter[StageData.SwissStage] = macroRW
+  given rwRoundRobinStage: ReadWriter[StageData.RoundRobinStage] = macroRW
+
+  given rw: ReadWriter[StageData] = macroRW
+
+
 case class Stage(
   id:                   StageId,
   coId:                 CompId,
@@ -152,6 +167,7 @@ case class Stage(
   var demo:             Boolean,
   var size:             Int,
   var noPlayers:        Int,
+  var data:             StageData,
   var noWinSets:        Int = 0,
   var prefId:           Option[StageId] = None,
   var nextIds:          List[StageId] = List(),
@@ -166,8 +182,21 @@ case class Stage(
   val candidates: ArrayBuffer[(Pant, Boolean)] = ArrayBuffer.empty
   var candInfo: String = ""
   val matches: ArrayBuffer[MEntry] = ArrayBuffer.empty
-  val groups: ArrayBuffer[Group] = ArrayBuffer.empty
-  var ko: KoStage = KoStage(0, "", 0L ,0 ,0)
+  
+  def groups: ArrayBuffer[Group] = data match {
+    case StageData.GroupsStage(g)     => g
+    case StageData.SwissStage(g)      => ArrayBuffer(g)
+    case StageData.RoundRobinStage(g) => ArrayBuffer(g)
+    case StageData.KnockoutStage(k)   => 
+      val g = Group(1, k.size, 1, "KO-Baum (Setzung)", noWinSets)
+      k.pants.zipWithIndex.foreach { case (p, i) => if (i < g.pants.length) g.pants(i) = p }
+      ArrayBuffer(g)
+  }
+
+  def ko: KoStage = data match {
+    case StageData.KnockoutStage(k) => k
+    case _                          => KoStage(0, "", 0L, 0, 0)
+  }
 
   // -----------------------------
   // Derived counters (safer)
@@ -185,4 +214,4 @@ case class Stage(
 
 object Stage:
   given rw: ReadWriter[Stage] = macroRW
-  def dummy: Stage = Stage(StageId(0), CompId(0), "", StageConfig.UNKN, StageStatus.UNKN, false, 0, 0)
+  // def dummy: Stage = Stage(StageId(0), CompId(0), "", StageConfig.UNKN, StageStatus.UNKN, false, 0, 0)

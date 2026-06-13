@@ -2,6 +2,8 @@ package pages
 
 import shared.model.*
 import base.*
+import shared.format.*
+import scala.collection.mutable.ArrayBuffer
 
 object Mockup extends BasePage with JsWrapper:
   def name = PageNameTyp("Mockup")
@@ -39,14 +41,14 @@ object Mockup extends BasePage with JsWrapper:
     for (i <- 1 to 128) services.StageDB.stages += null
     
     // Stages for Herren A
-    services.StageDB.stages(0) = Stage(StageId(1), comp1.id, "A-Vorrunde", StageConfig.VRGR, StageStatus.FIN, false, 8, 8)
-    services.StageDB.stages(1) = Stage(StageId(2), comp1.id, "A-Endrunde", StageConfig.KO, StageStatus.CFG, false, 4, 4)
+    services.StageDB.stages(0) = Stage(StageId(1), comp1.id, "A-Vorrunde", StageConfig.VRGR, StageStatus.FIN, false, 8, 8, StageData.GroupsStage(ArrayBuffer.empty))
+    services.StageDB.stages(1) = Stage(StageId(2), comp1.id, "A-Endrunde", StageConfig.KO, StageStatus.CFG, false, 4, 4, StageData.KnockoutStage(KoStage(2, "A-Endrunde", comp1.id.value.toLong, 0, 0)))
     
     // Stages for Herren B
-    services.StageDB.stages(2) = Stage(StageId(3), comp2.id, "B-Vorrunde", StageConfig.VRGR, StageStatus.CFG, false, 12, 12)
+    services.StageDB.stages(2) = Stage(StageId(3), comp2.id, "B-Vorrunde", StageConfig.VRGR, StageStatus.CFG, false, 12, 12, StageData.GroupsStage(ArrayBuffer.empty))
     
     // Stages for Damen
-    services.StageDB.stages(3) = Stage(StageId(4), comp3.id, "D-Endrunde", StageConfig.KO, StageStatus.FIN, false, 4, 4)
+    services.StageDB.stages(3) = Stage(StageId(4), comp3.id, "D-Endrunde", StageConfig.KO, StageStatus.FIN, false, 4, 4, StageData.KnockoutStage(KoStage(4, "D-Endrunde", comp3.id.value.toLong, 0, 0)))
 
     Global.currentSelection = Selection(Some(tourney), Some(comp1))
     comps.ContextHeader.render()
