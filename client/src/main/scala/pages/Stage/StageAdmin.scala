@@ -244,16 +244,16 @@ object StageAdmin extends BasePage with JsWrapper:
           
           cfg.format match
             case StageFormat.RR => 
-              r.data = RoundRobin.draw(selectedPants, r.noWinSets)
+              r.data = RoundRobin.draw(selectedPants, r.noWinSets, DrawOption.Unknown)
      
             case StageFormat.KO => 
-              r.data = SingleElimination.draw(r.id.value, r.name, r.coId.value.toLong, r.noWinSets, selectedPants)
+              r.data = SingleElimination.draw(r.id.value, r.name, r.coId.value.toLong, r.noWinSets, selectedPants, DrawOption.Unknown)
               
             case StageFormat.SW =>
-              r.data = SwissSystem.draw(selectedPants, r.noWinSets)
+              r.data = SwissSystem.draw(selectedPants, r.noWinSets, DrawOption.Unknown)
               
             case StageFormat.GR =>
-              r.data = Groups.draw(cfg, selectedPants, r.noWinSets)
+              r.data = Groups.draw(cfg, selectedPants, r.noWinSets, DrawOption.Unknown)
         
             case _ => debug(s"Unsupported generation for mode $cfg")
 

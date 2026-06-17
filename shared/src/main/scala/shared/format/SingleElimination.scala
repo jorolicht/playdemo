@@ -41,7 +41,7 @@ object SingleElimination {
   /**
    * Initializes a KnockoutStage stage data structure with a new KoStage.
    */
-  def draw(id: Int, name: String, coId: Long, noWinSets: Int, selectedPants: Seq[Pant], stageOption: StageOption = StageOption.Unknown): StageData.KnockoutStage = {
+  def draw(id: Int, name: String, coId: Long, noWinSets: Int, selectedPants: Seq[Pant], drawOption: DrawOption = DrawOption.Unknown): StageData.KnockoutStage = {
     val state = KoStage(id, name, coId, noWinSets)
     state.size = selectedPants.length
     selectedPants.foreach(p => state.pants += p)

@@ -104,11 +104,11 @@ object Groups {
   /**
    * Initializes a GroupsStage stage data structure with distributed groups.
    */
-  def draw(cfg: StageConfig, selectedPants: Seq[Pant], noWinSets: Int, stageOption: StageOption = StageOption.Unknown): StageData.GroupsStage =
+  def draw(cfg: StageConfig, selectedPants: Seq[Pant], noWinSets: Int, drawOption: DrawOption = DrawOption.Unknown): StageData.GroupsStage =
     draw_GrpStart(cfg, selectedPants, noWinSets)
-    // stageOption match
-    //   case StageOption.GrpStart    => draw_GrpStart(cfg, selectedPants, noWinSets)
-    //   case StageOption.GrpAfterGrp => draw_GrpAfterGrp(cfg, selectedPants, noWinSets)
+    // drawOption match
+    //   case DrawOption.GrpStart    => draw_GrpStart(cfg, selectedPants, noWinSets)
+    //   case DrawOption.GrpAfterGrp => draw_GrpAfterGrp(cfg, selectedPants, noWinSets)
     //   case _                       => StageData.GroupsStage(ArrayBuffer.empty[Group])
 
 

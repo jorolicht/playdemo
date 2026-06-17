@@ -72,16 +72,16 @@ object StageConfig:
     values.find(_.id == id).getOrElse(UNKN)
       
 
-enum StageOption(val id: Int, val format: StageFormat) derives CanEqual:
-  case Unknown      extends StageOption(0, StageFormat.UNKN)
-  case GrpStart     extends StageOption(1, StageFormat.GR)		
-  case GrpAfterGrp	extends StageOption(2, StageFormat.GR)
-  case KoStart   	  extends StageOption(3, StageFormat.KO)
-  case KoAfterGrp	  extends StageOption(4, StageFormat.KO)
-  case RrStart  	  extends StageOption(5, StageFormat.RR)
-  case RrAfterGrp  	extends StageOption(6, StageFormat.RR)
-  case SwStart  	  extends StageOption(7, StageFormat.SW)
-  case SwAfterSw  	extends StageOption(8, StageFormat.SW)
+enum DrawOption(val id: Int, val format: StageFormat) derives CanEqual:
+  case Unknown      extends DrawOption(0, StageFormat.UNKN)
+  case GrpStart     extends DrawOption(1, StageFormat.GR)		
+  case GrpAfterGrp	extends DrawOption(2, StageFormat.GR)
+  case KoStart   	  extends DrawOption(3, StageFormat.KO)
+  case KoAfterGrp	  extends DrawOption(4, StageFormat.KO)
+  case RrStart  	  extends DrawOption(5, StageFormat.RR)
+  case RrAfterGrp  	extends DrawOption(6, StageFormat.RR)
+  case SwStart  	  extends DrawOption(7, StageFormat.SW)
+  case SwAfterSw  	extends DrawOption(8, StageFormat.SW)
 
 // -----------------------------
 // QualifyTyp
@@ -193,7 +193,6 @@ case class Stage(
   var candInfo: String = ""
   val matches: ArrayBuffer[MEntry] = ArrayBuffer.empty
   
-
 
   def initMatches(coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
     matches.clear()
