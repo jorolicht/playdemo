@@ -34,7 +34,8 @@ object AdminManager extends ComWrapper {
       stages = t.stages.filter(_ != null)
     )
 
-    val jsonString = write(cleanTourney, indent = 2)
+    val rawJson = write(cleanTourney, indent = 2)
+    val jsonString = collapseJsonArrays(rawJson, Seq("points", "sets", "ballDiff", "balls"))
     val blob = new dom.Blob(js.Array(jsonString), dom.BlobPropertyBag(`type` = "application/json"))
     val url = dom.URL.createObjectURL(blob)
     val a = dom.document.createElement("a").asInstanceOf[dom.html.Anchor]
@@ -44,6 +45,24 @@ object AdminManager extends ComWrapper {
     a.click()
     dom.document.body.removeChild(a)
     dom.URL.revokeObjectURL(url)
+  }
+
+  /**
+   * Collapses multi-line JSON arrays for specified keys so they are formatted on a single line.
+   * Useful for keys like "points", "sets", "ballDiff", and "balls" to make the JSON more readable and compact.
+   */
+  private def collapseJsonArrays(json: String, keys: Seq[String]): String = {
+    val keysPattern = keys.map(scala.util.matching.Regex.quote).mkString("|")
+    val regex = s"""(?s)"($keysPattern)"\\s*:\\s*\\[([^\\]]*?)\\]""".r
+    regex.replaceAllIn(json, m => {
+      val key = m.group(1)
+      val content = m.group(2)
+      val cleaned = content.split(",")
+        .map(_.trim)
+        .filter(_.nonEmpty)
+        .mkString(",")
+      s""""$key": [$cleaned]"""
+    })
   }
 
   /**
