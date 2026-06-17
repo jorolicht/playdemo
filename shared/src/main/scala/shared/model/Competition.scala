@@ -145,7 +145,7 @@ case class Competition(
   var lowLevel:         Option[Int] = None,
   var upperLevel:       Option[Int] = None,
   var cttInfo:          Option[CompCTT] = None,
-  val pants:            ArrayBuffer[Pant] = ArrayBuffer(),
+  val pants1Stage:      ArrayBuffer[Pant] = ArrayBuffer(),
   var deleted:          Boolean = false,
   var version:          Int = 0
 ):

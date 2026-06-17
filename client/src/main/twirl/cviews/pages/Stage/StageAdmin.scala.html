@@ -1,51 +1,54 @@
 @import shared.model.*
 @import shared.DomTypes.HtmlId
 @import cviews.helper.html.*
-@import pages.StageAdmin.*
+@import pages.Stage.StageAdmin.*
 @import shared.utils.DrawRules.ModeOption
 
 @(stage: Stage, participants: Seq[Pant], modes: Seq[ModeOption])
 
-@disabledIfAus = @{ if(stage.status == StageStatus.AUS || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)) "disabled" else "" }
-@disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)) "disabled" else "" }
+@compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
+@isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
+
+@disabledIfAus = @{ if(stage.status != StageStatus.CFG || !base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin) "disabled" else "" }
+@disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin) "disabled" else "" }
 
 <div class="stage-cfg-container">
     <!-- SECTION 1: CONTROL -->
     <div class="card shadow-sm mb-4 border-primary">
         <div class="card-header bg-primary text-white py-2">
-            <h5 class="mb-0 small text-uppercase fw-bold"><i class="bi bi-controller me-2"></i>Steuerung</h5>
+            <h5 class="mb-0 small text-uppercase fw-bold"><i class="bi bi-controller me-2"></i>@gM("+title")</h5>
         </div>
         <div class="card-body py-3">
             <div class="row align-items-center">
                 <!-- Left: Start -->
                 <div class="col-md-4 border-end text-center">
                     <button class="btn btn-success w-100 py-2 fw-bold" @id(BtnStartDrawing, "onclick") @disabledIfAus>
-                        <i class="bi bi-shuffle me-2 fs-5"></i>AUSLOSUNG GENERIEREN
+                        <i class="bi bi-shuffle me-2 fs-5"></i>@gM("+btn_draw")
                     </button>
                     <div class="mt-2 text-muted small" @id(LabelDrawCnt)>
-                        @participants.count(_.status == PantStatus.PLAY) Teilnehmer ausgewählt
+                        @gM("+selected_players", participants.count(_.status == PantStatus.PLAY).toString)
                     </div>
                 </div>
                 <!-- Right: Reset Actions -->
                 <div class="col-md-8">
                     <div class="d-flex flex-wrap gap-2 justify-content-center">
                         <button class="btn btn-outline-warning btn-sm" @id(BtnResetInp, "onclick") title="Danach Anzeige Eingabe" @disabledNoAccess>
-                            <i class="bi bi-eraser me-1"></i>Ergebnisse löschen
+                            <i class="bi bi-eraser me-1"></i>@gM("+btn_reset_results")
                         </button>
                         <button class="btn btn-outline-warning btn-sm" @id(BtnResetDrw, "onclick") title="Danach Anzeige Auslosung" @disabledNoAccess>
-                            <i class="bi bi-shuffle me-1"></i>Auslosung löschen
+                            <i class="bi bi-shuffle me-1"></i>@gM("+btn_reset_draw")
                         </button>
                         <button class="btn btn-outline-danger btn-sm" @id(BtnResetCfg, "onclick") title="Danach Anzeige Konfiguration" @disabledNoAccess>
-                            <i class="bi bi-gear-wide-connected me-1"></i>Konfiguration löschen
+                            <i class="bi bi-gear-wide-connected me-1"></i>@gM("+btn_reset_cfg")
                         </button>
                         <button class="btn btn-danger btn-sm" @id(BtnDeleteFull, "onclick") @disabledNoAccess>
-                            <i class="bi bi-trash3-fill me-1"></i>Stage löschen
+                            <i class="bi bi-trash3-fill me-1"></i>@gM("+btn_delete_stage")
                         </button>
                     </div>
                     @if(stage.nextIds.nonEmpty) {
                         <div class="mt-2 text-center text-danger small">
                             <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                            Achtung: @stage.nextIds.length nachfolgende Stage(n) werden ebenfalls gelöscht!
+                            @gM("+delete_warning", stage.nextIds.length.toString)
                         </div>
                     }
                 </div>
@@ -56,14 +59,14 @@
     <!-- SECTION 2: CONFIGURATION -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-light py-2">
-            <h5 class="mb-0 small text-uppercase fw-bold text-muted"><i class="bi bi-sliders me-2"></i>Konfiguration</h5>
+            <h5 class="mb-0 small text-uppercase fw-bold text-muted"><i class="bi bi-sliders me-2"></i>@gM("+config_title")</h5>
         </div>
         <div class="card-body">
             <div class="row g-4">
                 <div class="col-md-8">
-                    <label class="form-label fw-bold">Spielmodus</label>
+                    <label class="form-label fw-bold">@gM("+game_mode")</label>
                     <select class="form-select border-primary" @id(SelectDrawMode, "onchange") @disabledIfAus>
-                        <option value="UNKN" @{if(stage.stageConfig == StageConfig.UNKN || stage.stageConfig == StageConfig.CFG) "selected" else ""}>-- Spielmodus auswählen --</option>
+                        <option value="UNKN" @{if(stage.stageConfig == StageConfig.UNKN || stage.stageConfig == StageConfig.CFG) "selected" else ""}>@gM("+select_mode")</option>
                         @modes.map { m =>
                             <option value="@m.stageConfig.productPrefix" @if(!m.isEnabled){disabled class="text-muted"} @{if(stage.stageConfig == m.stageConfig) "selected" else ""}>
                                 @m.label @if(!m.isEnabled){ (nicht mgl.)}
@@ -72,11 +75,11 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label fw-bold">Gewinnsätze</label>
+                    <label class="form-label fw-bold">@gM("+sets_label")</label>
                     <select class="form-select" id="rnd-sets" @disabledIfAus>
-                        <option value="2" @{if(stage.noWinSets == 2) "selected" else ""}>Best-of-3 (2 Gewinnsätze)</option>
-                        <option value="3" @{if(stage.noWinSets == 3 || stage.noWinSets < 2 || stage.noWinSets > 4) "selected" else ""}>Best-of-5 (3 Gewinnsätze)</option>
-                        <option value="4" @{if(stage.noWinSets == 4) "selected" else ""}>Best-of-7 (4 Gewinnsätze)</option>
+                        <option value="2" @{if(stage.noWinSets == 2) "selected" else ""}>@gM("+best_of_3")</option>
+                        <option value="3" @{if(stage.noWinSets == 3 || stage.noWinSets < 2 || stage.noWinSets > 4) "selected" else ""}>@gM("+best_of_5")</option>
+                        <option value="4" @{if(stage.noWinSets == 4) "selected" else ""}>@gM("+best_of_7")</option>
                     </select>
                 </div>
             </div>
@@ -86,13 +89,13 @@
     <!-- SECTION 3: PLAYER -->
     <div class="card shadow-sm">
         <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 small text-uppercase fw-bold text-muted"><i class="bi bi-person-check me-2"></i>Spieler</h5>
+            <h5 class="mb-0 small text-uppercase fw-bold text-muted"><i class="bi bi-person-check me-2"></i>@gM("+players_title")</h5>
             <div class="d-flex gap-2">
                 <button class="btn btn-outline-secondary btn-sm fw-bold" @id(BtnAddDummy, "onclick") @disabledIfAus>
-                    <i class="bi bi-plus-circle me-1"></i>+ DUMMY HINZUFÜGEN
+                    <i class="bi bi-plus-circle me-1"></i>@gM("+btn_add_dummy")
                 </button>
                 <button class="btn btn-outline-primary btn-sm fw-bold" @id(ChkBoxAll, "onclick") @disabledIfAus>
-                    <i class="bi bi-check2-all me-1"></i>ALLE AUSWÄHLEN
+                    <i class="bi bi-check2-all me-1"></i>@gM("+btn_select_all")
                 </button>
             </div>
         </div>
@@ -102,14 +105,14 @@
                     <thead class="table-light">
                         <tr>
                             <th class="ps-3" style="width: 40px;"></th>
-                            <th>Name, Vorname</th>
-                            <th>Verein</th>
-                            <th class="text-center" style="width: 80px;">TTR</th>
+                            <th>@gM("+name_header")</th>
+                            <th>@gM("+club_header")</th>
+                            <th class="text-center" style="width: 80px;">@gM("+ttr_header")</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if(participants.isEmpty) {
-                            <tr><td colspan="4" class="text-center py-4 text-muted">Keine Teilnehmer im Wettbewerb gefunden.</td></tr>
+                            <tr><td colspan="4" class="text-center py-4 text-muted">@gM("+no_players")</td></tr>
                         }
                         @participants.map { p =>
                             <tr class="cursor-pointer @{if(p.status == PantStatus.PLAY) "table-success" else ""}">
@@ -126,7 +129,7 @@
             </div>
         </div>
         <div class="card-footer bg-white py-2 small text-muted">
-            <i class="bi bi-info-circle me-1"></i> @participants.length Spieler verfügbar. Nur aktivierte Spieler nehmen an der Auslosung teil.
+            <i class="bi bi-info-circle me-1"></i> @gM("+footer_info", participants.length.toString)
         </div>
     </div>
 </div>

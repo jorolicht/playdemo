@@ -1,0 +1,9 @@
+StageInput.title = Enter Results: {0}
+StageInput.game_no = No.
+StageInput.match_label = Match
+StageInput.result_label = Result (Sets)
+StageInput.status_label = Status
+StageInput.no_matches = No matches available for this stage.
+StageInput.finished = Done
+StageInput.open = Open
+StageInput.btn_finalize = FINALIZE RESULTS

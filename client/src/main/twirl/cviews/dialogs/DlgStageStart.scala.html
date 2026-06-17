@@ -22,7 +22,7 @@
                         <div class="mb-3">
                             <label @forAttr(InputPrefId) class="form-label fw-bold">Nachfolge-Stage von:</label>
                             <select class="form-select" @id(InputPrefId)>
-                                <option value="0">-- Neue Startstage (keine Vorgänger) --</option>
+                                <option value="0">-- Bitte Vorgänger-Stage auswählen --</option>
                                 @stages.map { r =>
                                     <option value="@r.id.value">@r.name (@r.status)</option>
                                 }
@@ -31,7 +31,7 @@
                     } else {
                         <input type="hidden" @id(InputPrefId) value="0">
                         <div class="alert alert-info py-2 small">
-                            <i class="bi bi-info-circle me-2"></i>Dies wird die erste Stage für diesen Wettbewerb sein.
+                            <i class="bi bi-info-circle me-2"></i><strong>Hinweis: Startstage</strong> (Erste Stage für diesen Wettbewerb).
                         </div>
                     }
                 </form>

@@ -37,7 +37,7 @@ object SNO:
   // ----------------------------    
   extension (s: SNO)
 
-    private def content: String =  s.substring(1, s.length - 1)
+    private def content: String =  s.substring(1, s.length - 1) // remove the surrounding brackets
     private def parts: Array[String] = content.split(",")
     
     def isSingle: Boolean = parts.length == 1 && !content.startsWith("-") && content != "0"
@@ -45,6 +45,13 @@ object SNO:
     def startId: String =  String.format("%03d", parts(0).toInt)
     def isBye: Boolean = parts.length == 1 && content.startsWith("-")
     def isNN: Boolean = s == "[0]"  
+
+    /**
+     * Generates a safe suffix for HTML element IDs by stripping brackets
+     * and replacing commas/hyphens with safe characters.
+     */
+    def idSaveSuffix: String = 
+      content.replaceAll(",", "_").replaceAll("-", "m")
 
     def singleId: PlayerId =
       val p = parts
@@ -163,4 +170,5 @@ case class Pant(
   var status:  PantStatus = PantStatus.UNKN,
   var active: Boolean = false,
   var ident: String = ""
-) derives ReadWriter
+) derives ReadWriter:
+  def getEffRating(value: Int=0) = if (rating == 0) value else rating

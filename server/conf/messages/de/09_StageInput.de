@@ -1,0 +1,9 @@
+StageInput.title = Ergebniseingabe: {0}
+StageInput.game_no = Nr.
+StageInput.match_label = Begegnung
+StageInput.result_label = Ergebnis (Sätze)
+StageInput.status_label = Status
+StageInput.no_matches = Keine Spiele für diese Stage vorhanden.
+StageInput.finished = Fertig
+StageInput.open = Offen
+StageInput.btn_finalize = ERGEBNISSE FINALISIEREN

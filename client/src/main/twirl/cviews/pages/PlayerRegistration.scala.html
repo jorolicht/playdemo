@@ -8,26 +8,28 @@
 <div class="container mt-4">
     <div class="card shadow-sm mb-4 border-warning">
         <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-            <h3 class="h5 mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Turnier-Anmeldung</h3>
+            <h3 class="h5 mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>@gM("+title")</h3>
             <div class="d-flex gap-2">
                 @if(selection.competition.isDefined) {
-                    <button class="btn btn-outline-dark btn-sm fw-bold" @id(BtnUploadCsv, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
-                        <i class="bi bi-file-earmark-spreadsheet me-1"></i>
-                        CSV Upload
-                    </button>
-                    <button class="btn btn-dark btn-sm fw-bold" @id(BtnAddParticipant, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
-                        <i class="bi bi-plus-lg me-1"></i>
-                        @if(selection.competition.exists(_.typ == CompTyp.DOUBLE)) { Doppel hinzufügen } else { Teilnehmer hinzufügen }
-                    </button>
+                    @defining(selection.competition.exists(isLocked)) { isLocked =>
+                        <button class="btn btn-outline-dark btn-sm fw-bold" @id(BtnUploadCsv, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isLocked){disabled}>
+                            <i class="bi bi-file-earmark-spreadsheet me-1"></i>
+                            @gM("+csv_upload")
+                        </button>
+                        <button class="btn btn-dark btn-sm fw-bold" @id(BtnAddParticipant, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isLocked){disabled}>
+                            <i class="bi bi-plus-lg me-1"></i>
+                            @if(selection.competition.exists(_.typ == CompTyp.DOUBLE)) { @gM("+add_double") } else { @gM("+add_single") }
+                        </button>
+                    }
                 }
             </div>
         </div>
         <div class="card-body bg-light py-3">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <label class="form-label fw-bold small text-uppercase text-muted mb-1">Wettbewerb auswählen</label>
+                    <label class="form-label fw-bold small text-uppercase text-muted mb-1">@gM("+select_comp")</label>
                     <select class="form-select border-warning" @id(SelectComp, "onchange")>
-                        <option value="0" @if(selection.competition.isEmpty){selected}>-- Bitte Wettbewerb wählen --</option>
+                        <option value="0" @if(selection.competition.isEmpty){selected}>@gM("+please_select")</option>
                         @competitions.map { c =>
                             <option value="@c.id.value" @if(selection.competition.exists(_.id == c.id)){selected}>
                                 @c.name (@c.typ)
@@ -37,13 +39,13 @@
                 </div>
                 <div class="col-md-6 text-md-end mt-3 mt-md-0">
                     <div class="stats-box d-inline-block p-2 bg-white border rounded shadow-xs">
-                        <span class="text-muted small me-2">Status:</span>
+                        <span class="text-muted small me-2">@gM("+status")</span>
                         @selection.competition.map { c =>
                             <span class="badge @if(c.status == CompStatus.RUN){bg-warning}else{bg-secondary}">@c.status</span>
-                            <span class="ms-3 text-muted small me-2">Teilnehmer:</span>
+                            <span class="ms-3 text-muted small me-2">@gM("+participants")</span>
                             <span class="fw-bold text-primary">@participants.count(_.active) / @participants.length</span>
                         }.getOrElse {
-                            <span class="text-muted small italic">Kein Wettbewerb gewählt</span>
+                            <span class="text-muted small italic">@gM("+no_comp_selected")</span>
                         }
                     </div>
                 </div>
@@ -60,32 +62,32 @@
                             <tr class="small text-muted text-uppercase">
                                 <th class="ps-3" style="width: 80px;">
                                     <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderSno, "onclick")>
-                                        SNr @sortIcon("sno", sortCol, sortAsc)
+                                        @gM("+snr_header") @sortIcon("sno", sortCol, sortAsc)
                                     </button>
                                 </th>
                                 <th>
                                     <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
-                                        Name, Vorname @sortIcon("name", sortCol, sortAsc)
+                                        @gM("+name_header") @sortIcon("name", sortCol, sortAsc)
                                     </button>
                                 </th>
                                 <th>
                                     <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderClub, "onclick")>
-                                        Verein @sortIcon("club", sortCol, sortAsc)
+                                        @gM("+club_header") @sortIcon("club", sortCol, sortAsc)
                                     </button>
                                 </th>
                                 <th class="text-center" style="width: 80px;">
                                     <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
-                                        TTR @sortIcon("ttr", sortCol, sortAsc)
+                                        @gM("+ttr_header") @sortIcon("ttr", sortCol, sortAsc)
                                     </button>
                                 </th>
                                 <th class="text-center" style="width: 80px;">
                                     <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderYear, "onclick")>
-                                        JG @sortIcon("year", sortCol, sortAsc)
+                                        @gM("+year_header") @sortIcon("year", sortCol, sortAsc)
                                     </button>
                                 </th>
                                 <th class="text-center" style="width: 100px;">
                                     <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderActive, "onclick")>
-                                        Teilnahme @sortIcon("active", sortCol, sortAsc)
+                                        @gM("+active_header") @sortIcon("active", sortCol, sortAsc)
                                     </button>
                                 </th>
                                 <th class="text-end pe-3" style="width: 50px;"></th>
@@ -93,7 +95,7 @@
                         </thead>
                         <tbody>
                             @if(participants.isEmpty) {
-                                <tr><td colspan="7" class="text-center py-4 text-muted italic">Noch keine Teilnehmer für diesen Wettbewerb registriert.</td></tr>
+                                <tr><td colspan="7" class="text-center py-4 text-muted italic">@gM("+no_players")</td></tr>
                             }
                             @participants.map { p =>
                                 <tr class="@if(!p.active){text-muted opacity-75}">
@@ -102,16 +104,18 @@
                                     <td>@p.club</td>
                                     <td class="text-center">@p.rating</td>
                                     <td class="text-center small">@p.birthYear</td>
-                                    <td class="text-center">
-                                        <div class="form-check d-flex justify-content-center">
-                                            <input @id(IdCheckActive, "onchange", p.id.toString) class="form-check-input" type="checkbox" data-sno="@p.id" @if(p.active){checked} @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
-                                        </div>
-                                    </td>
-                                    <td class="text-end pe-3">
-                                        <button class="btn btn-link btn-sm text-danger p-0" title="Entfernen" @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
+                                    @defining(selection.competition.exists(isLocked)) { isLocked =>
+                                        <td class="text-center">
+                                            <div class="form-check d-flex justify-content-center">
+                                                <input @id(IdCheckActive, "onchange", p.id.idSaveSuffix) class="form-check-input" type="checkbox" data-sno="@p.id" @if(p.active){checked} @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isLocked){disabled}>
+                                            </div>
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <button class="btn btn-link btn-sm text-danger p-0" title="@gM("+remove")" @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isLocked){disabled}>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    }
                                 </tr>
                             }
                         </tbody>
@@ -119,14 +123,14 @@
                 </div>
             </div>
             <div class="card-footer bg-white py-2 small text-muted">
-                <i class="bi bi-info-circle me-1"></i> Klicken Sie auf die Spaltenköpfe zum Sortieren. Startnummern werden automatisch vergeben.
+                <i class="bi bi-info-circle me-1"></i> @gM("+footer_info")
             </div>
         </div>
     } else {
         <div class="text-center py-5 bg-light border rounded shadow-sm">
             <i class="bi bi-arrow-up-circle text-muted opacity-25" style="font-size: 4rem;"></i>
-            <h4 class="mt-3 text-muted">Wettbewerb auswählen</h4>
-            <p class="text-muted small">Bitte wählen Sie oben einen Wettbewerb aus, um die Anmeldungen zu verwalten.</p>
+            <h4 class="mt-3 text-muted">@gM("+select_comp_prompt")</h4>
+            <p class="text-muted small">@gM("+select_comp_prompt_desc")</p>
         </div>
     }
 </div>

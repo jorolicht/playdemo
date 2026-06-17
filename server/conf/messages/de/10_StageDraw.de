@@ -1,0 +1,9 @@
+StageDraw.title = Auslosung & Setzung: {0}
+StageDraw.draw_help = Überprüfen Sie die Gruppenzuordnung für {0}. Sie können zwei Spieler anklicken, um sie zu vertauschen.
+StageDraw.groups_suffix = Gruppen/Paarungen
+StageDraw.no_groups = Keine Gruppen für diese Stage generiert.
+StageDraw.btn_back = ZURÜCK ZUR KONFIGURATION
+StageDraw.btn_start = START SPIELSTAGE
+StageDraw.dummy_rr = Dummy-Vorlage für Jeder-gegen-Jeden.
+StageDraw.dummy_se = Dummy-Vorlage für KO-System.
+StageDraw.dummy_swiss = Dummy-Vorlage für Schweizer System.

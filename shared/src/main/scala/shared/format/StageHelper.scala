@@ -1,5 +1,7 @@
 package shared.format
 
+import scala.collection.mutable.{ ArrayBuffer }
+import shared.model.*
 import shared.basic.*
 
 /**
@@ -134,5 +136,75 @@ object StageHelper {
     else if (sets._2 == noSets & sets._1 < noSets) { (0,1) } 
     else                                           { (0,0) }
   } 
+
+  def convertToExcelColumn(num: Int): String = {
+    if (num < 1) return "" // Wenn die Eingabezahl kleiner als 1 ist, geben wir einen leeren String zurück    
+    val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+    def convertToExcelColumnHelper(n: Int): StringBuilder = {
+      var num = n
+      val result = new StringBuilder
+      
+      while (num > 0) {
+        num -= 1 // Da wir die Zahl um 1 reduzieren, muss der Modulo-Rest angepasst werden
+        val remainder = num % 26
+        result.append(alphabet(remainder))
+        num /= 26
+      }      
+      result.reverse
+    }
+    convertToExcelColumnHelper(num).toString()
+  }
+
+
+  def cvrt2ExcelCol(grpId: Int): String = {
+    if (grpId < 1) return "?" // Wenn die Eingabezahl kleiner als 1 ist, geben wir einen Fragezeichen-String zurück
+    val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    
+    def buildColumnName(n: Int): String = {
+      var num = n
+      var name = new StringBuilder
+      
+      while (num > 0) {
+        num -= 1 // Da wir die Zahl um 1 reduzieren, muss der Modulo-Rest angepasst werden
+        val remainder = num % 26
+        name.append(alphabet(remainder))
+        num /= 26
+      } 
+      name.reverse.toString()
+    }      
+    buildColumnName(grpId)
+  }
+
+
+  // target function for descrete optimization
+  def getMinOccBestAvg(pant: Pant, grps: ArrayBuffer[Group], pantSize: Int, maxRating: Int, maxGrpSize: Int, pantAvgRating: Int): ArrayBuffer[Long] = {
+    val result = ArrayBuffer.fill[Long](grps.size)(0)
+
+    for (i <- 0 until grps.size) {
+      result(i) = {
+        if (grps(i).fillCnt == grps(i).size) {
+          0L 
+        } else {
+          // calculate improvement of average rating 
+          val curDiffRating = if (grps(i).avgRating==0) 0 else (pantAvgRating - grps(i).avgRating).abs 
+          val newDiffRating = (pantAvgRating - ((grps(i).avgRating * grps(i).fillCnt + pant.getEffRating(pantAvgRating)) / (grps(i).fillCnt+1))).abs
+          val improveRating = maxRating + (curDiffRating - newDiffRating)
+
+          // calculate free level
+          val freeGrpLevel = (grps(i).size - grps(i).fillCnt)
+          //val freeGrpLevel = (maxGrpSize - grps(i).cnt)
+
+          // calculate occu level
+          val occuLevel    = (pantSize - grps(i).occu(pant.club)) 
+          println(s"Pant: ${pant} improvementRating: ${improveRating} freeGrpLevel: ${freeGrpLevel } occuLevel: ${occuLevel}")
+
+          ((1000*occuLevel) + freeGrpLevel) * (2 * maxRating) + improveRating 
+        }
+      }
+    }
+    result
+  }
+
 
 }

@@ -1,0 +1,15 @@
+@import shared.model.*
+@import shared.format.*
+@import pages.Stage.StageDraw.*
+
+@(stage: Stage, groups: Seq[Group])
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name + " (Swiss System)")</h5>
+        <div class="alert alert-info py-2 small">
+            <span><i class="bi bi-info-circle me-2"></i>@gM("+dummy_swiss")</span>
+        </div>
+    </div>
+</div>
+

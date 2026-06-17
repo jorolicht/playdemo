@@ -1,0 +1,70 @@
+@import shared.model.*
+@import shared.format.*
+@import pages.Stage.StageDraw.*
+@import cviews.helper.html.*
+
+@(stage: Stage, groups: Seq[Group])
+
+@compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
+@isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
+@disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin) "disabled" else "" }
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name)</h5>
+        
+        <div class="alert alert-info py-2 small d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-info-circle me-2"></i>@gM("+draw_help", stage.stageConfig.productPrefix)</span>
+            <span class="badge bg-primary">@groups.length @gM("+groups_suffix")</span>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @if(groups.isEmpty) {
+                <div class="col-12 text-center py-5 text-muted italic">@gM("+no_groups")</div>
+            }
+            @groups.map { g =>
+                <div class="col">
+                    <div class="card h-100 border-info border-opacity-25 bg-light bg-opacity-10">
+                        <div class="card-header bg-info bg-opacity-10 py-1 text-center fw-bold small">@g.name</div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush x-small">
+                                @defining(g.pants.filter(p => p != null && p.id != SNO.nn).sortBy(-_.rating)) { sortedPants =>
+                                    @sortedPants.zipWithIndex.map { case (p, i) =>
+                                      @defining(p.club.trim.nonEmpty && sortedPants.count(other => other != null && other.club.trim.equalsIgnoreCase(p.club.trim)) > 1) { hasDuplicate =>
+                                        <li @id(PlayerItem, "onclick", s"${g.grId}-${p.id.toString}") class="list-group-item d-flex justify-content-between align-items-center py-1 player-draw-item cursor-pointer" style="cursor: pointer;">
+                                            <span>
+                                                <span class="text-muted me-2">@{i + 1}.</span> 
+                                                <strong>@p.name</strong>
+                                                @if(p.club.trim.nonEmpty) {
+                                                    <span class="ms-2 @{if (hasDuplicate) "text-danger fw-bold" else "text-muted"}" style="font-size: 0.75rem;">
+                                                        (@p.club)
+                                                    </span>
+                                                }
+                                            </span>
+                                            <span class="badge bg-white text-dark border fw-normal" style="font-size: 0.7rem;">@p.rating</span>
+                                        </li>
+                                      }
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-danger" onclick="appLoadPage('StageAdmin', '')">
+                <i class="bi bi-arrow-left me-1"></i>@gM("+btn_back")
+            </button>
+            <button class="btn btn-success px-4 fw-bold" @id(BtnStartPlaying, "onclick") @disabledNoAccess>
+                @gM("+btn_start") <i class="bi bi-play-circle ms-1"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .x-small { font-size: 0.85rem; }
+    .player-draw-item:hover:not(.bg-warning) { background-color: rgba(255, 193, 7, 0.1); }
+</style>

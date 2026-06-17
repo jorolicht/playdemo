@@ -14,7 +14,7 @@ object ResultList extends BasePage with JsWrapper:
     val competitions = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
     
     val results = competitions.flatMap { c =>
-      c.pants.filter(_.place._1 > 0).map { p =>
+      c.pants1Stage.filter(_.place._1 > 0).map { p =>
         DisplayResult(p.name, p.club, c.name, p.place._1)
       }
     }.sortBy(_.place)

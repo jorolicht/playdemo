@@ -88,13 +88,51 @@ lazy val server = project
         }
         
         val generatedFile = new File(msgFile.getAbsolutePath + "_json")
+        
+        // Parse the generated JSON, sort alphabetically, and write it back
+        log.info(s"Sorting ${generatedFile.getAbsolutePath} alphabetically...")
+        val lines = IO.readLines(generatedFile)
+        val entries = lines.flatMap { line =>
+          val cleanLine = line.trim
+          if (cleanLine.startsWith("\"") && cleanLine.contains("\": \"")) {
+            val idx = cleanLine.indexOf("\": \"")
+            val key = cleanLine.substring(1, idx)
+            val valueWithQuotes = cleanLine.substring(idx + 4)
+            val value = if (valueWithQuotes.endsWith(",")) {
+              valueWithQuotes.substring(0, valueWithQuotes.length - 2)
+            } else {
+              valueWithQuotes.substring(0, valueWithQuotes.length - 1)
+            }
+            Some((key, value))
+          } else {
+            None
+          }
+        }
+        
+        val sortedEntries = entries.sortBy(_._1)
+        val jsonLines = sortedEntries.map { case (k, v) =>
+          s"""  "$k": "$v""""
+        }
+        val sortedJsonContent = "{\n" + jsonLines.mkString(",\n") + "\n}"
+        
         val lang = msgFile.name.split('.').last
         val targetFileSrv  = baseDirectory.value / ".." / "server" / "public" / "data" / ("msgs_" + lang + ".json")
         val targetFileWp   = baseDirectory.value / ".." / "wp-plugin" / "data" / ("msgs_" + lang + ".json")
+        val targetFileDk   = baseDirectory.value / "docker" / "wp_data" / "wp-content" / "plugins" / "playdemo" / "data" / ("msgs_" + lang + ".json")
 
-        IO.copyFile(generatedFile, targetFileWp)
-        IO.copyFile(generatedFile, targetFileSrv)
-        log.info(s"Generated ${targetFileWp.getAbsolutePath} und ${targetFileSrv.getAbsolutePath}")
+        IO.createDirectory(targetFileWp.getParentFile)
+        IO.createDirectory(targetFileSrv.getParentFile)
+        IO.createDirectory(targetFileDk.getParentFile)
+
+        IO.write(targetFileWp, sortedJsonContent)
+        IO.write(targetFileSrv, sortedJsonContent)
+        IO.write(targetFileDk, sortedJsonContent)
+        
+        log.info(s"Generated sorted JSON files at:")
+        log.info(s"  - ${targetFileWp.getAbsolutePath}")
+        log.info(s"  - ${targetFileSrv.getAbsolutePath}")
+        log.info(s"  - ${targetFileDk.getAbsolutePath}")
+        
         targetFileSrv
       }
     },

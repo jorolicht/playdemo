@@ -10,11 +10,18 @@ import shared.MainIds.*
 import shared.model.*
 import dialogs.*
 
+/**
+ * Page handling the registration of players for a selected competition.
+ * Allows adding single or double participants, and toggling active status.
+ */
 object PlayerRegistration extends BasePage with JsWrapper:
   def name = PageNameTyp("PlayerRegistration")
 
+  /** Button to add a new participant. */
   val BtnAddParticipant: HtmlId = genId(name)
+  /** Button to upload participant list from CSV. */
   val BtnUploadCsv:      HtmlId = genId(name)
+  /** Select element to choose a competition. */
   val SelectComp:        HtmlId = genId(name)
 
   // Header IDs for sorting
@@ -47,7 +54,7 @@ object PlayerRegistration extends BasePage with JsWrapper:
 
     selection.competition match
       case Some(c) => 
-        val participants = sortParticipants(c.pants.toSeq)
+        val participants = sortParticipants(c.pants1Stage.toSeq)
         setMain(cviews.pages.html.PlayerRegistration(selection, competitions, participants, sortCol, sortAsc))
         true
       case None => 
@@ -108,10 +115,20 @@ object PlayerRegistration extends BasePage with JsWrapper:
     }
     render()
 
+  /**
+   * Checks if player registration modifications are locked for the given competition.
+   * Registration is locked if the competition status is FIN or its start stage is no longer in CFG status.
+   *
+   * @param comp The competition to check.
+   * @return True if registration changes should be disabled.
+   */
+  def isLocked(comp: Competition): Boolean =
+    services.TourneyDB.tourney.isRegLocked(comp)
+
   private def updateParticipation(snoStr: String, active: Boolean): Unit =
-    Global.currentSelection.competition.foreach { c =>
+    Global.currentSelection.competition.filter(!isLocked(_)).foreach { c =>
       val sno = SNO.fromString(snoStr)
-      c.pants.find(_.id == sno).foreach { p =>
+      c.pants1Stage.find(_.id == sno).foreach { p =>
         p.active = active
         p.status = if (active) PantStatus.PLAY else PantStatus.REGI
         debug(s"Updated participant ${p.name}: active=$active")
@@ -121,7 +138,7 @@ object PlayerRegistration extends BasePage with JsWrapper:
     }
 
   private def handleAddParticipant(): Unit =
-    Global.currentSelection.competition.foreach { c =>
+    Global.currentSelection.competition.filter(!isLocked(_)).foreach { c =>
       val tourney = services.TourneyDB.tourney
       if (c.typ == CompTyp.DOUBLE) {
         val players = tourney.players.toSeq
@@ -144,7 +161,7 @@ object PlayerRegistration extends BasePage with JsWrapper:
               active = res.enroll,
               status = if (res.enroll) PantStatus.PLAY else PantStatus.REGI
             )
-            c.pants += p
+            c.pants1Stage += p
             tourney.updateCompetition(c)
             render()
           case _ => debug("Add Double cancelled")
@@ -176,7 +193,7 @@ object PlayerRegistration extends BasePage with JsWrapper:
                   active = res.enroll,
                   status = if (res.enroll) PantStatus.PLAY else PantStatus.REGI
                 )
-                c.pants += p
+                c.pants1Stage += p
                 tourney.updateCompetition(c)
                 render()
                 

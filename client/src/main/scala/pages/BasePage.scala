@@ -9,6 +9,7 @@ import base.Logging.*
 import comps.{Sidebar, ContextHeader}
 import shared.basic.AppError
 import shared.PageNameTyp.PageName
+import pages.Stage.*
 
 // pagesMap maps page names to page objecpts   
 val pagesMap = List(Auth, Console, PgError,

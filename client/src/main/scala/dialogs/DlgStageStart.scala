@@ -13,13 +13,21 @@ import shared.model.*
 import services.*
 
 /**
- * Result structure for DlgStageStart
+ * Result structure for DlgStageStart.
+ *
+ * @param name The name of the new stage.
+ * @param prefId The optional predecessor stage ID.
  */
 case class DlgStageStartResult(
   name:   String,
   prefId: Option[StageId]
 )
 
+/**
+ * Dialog for starting a new stage in a competition.
+ * Displays a "Startstage" notice for the first stage and forces a predecessor
+ * selection for any subsequent stages.
+ */
 object DlgStageStart extends BaseDialog with JsWrapper:
   def name = PageNameTyp("DlgStageStart")
   
@@ -39,7 +47,9 @@ object DlgStageStart extends BaseDialog with JsWrapper:
 
   /**
    * Shows the stage start dialog.
+   *
    * @param existingStages List of existing stages in the competition.
+   * @return A Future that completes with either an AppError or a DlgStageStartResult.
    */
   def show(existingStages: Seq[Stage]): Future[Either[AppError, DlgStageStartResult]] =
     val p = Promise[Either[AppError, DlgStageStartResult]]()
@@ -65,10 +75,13 @@ object DlgStageStart extends BaseDialog with JsWrapper:
         dom.window.alert("Eine Stage mit diesem Namen existiert bereits in diesem Wettbewerb.")
       } else {
         val prefVal = getInput(gE(InputPrefId)).toInt
-        val prefId = if (prefVal == 0) None else Some(StageId.fromInt(prefVal))
-        
-        if (!p.isCompleted) p.success(Right(DlgStageStartResult(rName, prefId)))
-        modal.hide()
+        if (existingStages.nonEmpty && prefVal == 0) {
+          dom.window.alert("Bitte wählen Sie eine Vorgänger-Stage aus.")
+        } else {
+          val prefId = if (prefVal == 0) None else Some(StageId.fromInt(prefVal))
+          if (!p.isCompleted) p.success(Right(DlgStageStartResult(rName, prefId)))
+          modal.hide()
+        }
       }
     }
 

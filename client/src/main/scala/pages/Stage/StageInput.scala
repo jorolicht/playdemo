@@ -1,4 +1,5 @@
 package pages
+package Stage
 
 import org.scalajs.dom
 import base.*
@@ -12,7 +13,7 @@ object StageInput extends BasePage with JsWrapper:
       case Some(r) => 
         comps.ContextHeader.render()
         val comp = Global.currentSelection.competition
-        val pants = comp.map(_.pants).getOrElse(Seq.empty)
+        val pants = comp.map(_.pants1Stage).getOrElse(Seq.empty)
         
         // Resolve SNO to Name helper
         def getName(sno: SNO): String = 
@@ -22,7 +23,7 @@ object StageInput extends BasePage with JsWrapper:
           (m, getName(m.stNoA), getName(m.stNoB))
         }
 
-        setMain(cviews.comps.html.StageLayout(r, "INP")(cviews.pages.html.StageInput(r, matches)))
+        setMain(cviews.comps.html.StageLayout(r, "INP")(cviews.pages.Stage.html.StageInput(r, matches)))
         true
       case None => 
         debug("StageInput: No stage selected, redirecting to Competition Info")

@@ -52,7 +52,7 @@ object ClickTTMapper:
           typ = if (cttComp.typ.toLowerCase.contains("doppel")) CompTyp.DOUBLE else CompTyp.SINGLE,
           category = CompCategory.TT,
           startDate = cttComp.startDate,
-          status = CompStatus.UNKN,
+          status = CompStatus.CFG,
           startStage = None,
           activ = true,
           webRegister = false,
@@ -72,7 +72,7 @@ object ClickTTMapper:
             finalRoundMode = cttComp.finalRoundPlaymode.getOrElse(""),
             manualFinalRankings = cttComp.manualFinalRankings
           )),
-          pants = ArrayBuffer(),
+          pants1Stage = ArrayBuffer(),
           deleted = false,
           version = 1
         )
@@ -82,7 +82,7 @@ object ClickTTMapper:
           val mappedPant = mapPlayerToPant(cttPlayer, personMap, target)
           mappedPant.foreach { p =>
             p.ident = cttPlayer.id
-            comp.pants += p
+            comp.pants1Stage += p
           }
         }
 

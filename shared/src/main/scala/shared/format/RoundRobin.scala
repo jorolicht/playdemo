@@ -11,7 +11,7 @@ object RoundRobin {
   /**
    * Initializes a RoundRobinStage stage data structure with a single group.
    */
-  def init(selectedPants: Seq[Pant], noWinSets: Int): StageData.RoundRobinStage = {
+  def draw(selectedPants: Seq[Pant], noWinSets: Int, stageOption: StageOption = StageOption.Unknown): StageData.RoundRobinStage = {
     val g = Group(1, selectedPants.length, 1, "Gruppe 1", noWinSets)
     selectedPants.zipWithIndex.foreach { case (p, i) => g.pants(i) = p }
     StageData.RoundRobinStage(g)

@@ -1,0 +1,9 @@
+StageDraw.title = Draw & Seeding: {0}
+StageDraw.draw_help = Check the group assignments for {0}. You can click two players to swap them.
+StageDraw.groups_suffix = Groups/Draws
+StageDraw.no_groups = No groups generated for this stage.
+StageDraw.btn_back = BACK TO CONFIGURATION
+StageDraw.btn_start = START PLAY STAGE
+StageDraw.dummy_rr = Dummy template for Round Robin.
+StageDraw.dummy_se = Dummy template for Single Elimination.
+StageDraw.dummy_swiss = Dummy template for Swiss System.

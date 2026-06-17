@@ -9,25 +9,34 @@
     <!-- Competition Header Card -->
     <div class="card shadow-sm mb-4 border-success">
         <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-            <h3 class="h5 mb-0"><i class="bi bi-info-circle me-2"></i>Wettbewerb: @comp.name</h3>
+            <h3 class="h5 mb-0"><i class="bi bi-info-circle me-2"></i>@gM("+title", comp.name)</h3>
             <div class="btn-group btn-group-sm">
-                <button class="btn btn-light" @id(BtnEditComp, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>Edit</button>
-                <button class="btn btn-danger" @id(BtnDeleteComp, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>Löschen</button>
+                <button class="btn btn-light" @id(BtnEditComp, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN){disabled}>@gM("+edit")</button>
+                @if(comp.status == CompStatus.FIN) {
+                    <button class="btn btn-warning" @id(BtnToggleStatus, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
+                        <i class="bi bi-unlock me-1"></i>@gM("+reactivate")
+                    </button>
+                } else {
+                    <button class="btn btn-secondary" @id(BtnToggleStatus, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status != CompStatus.RUN){disabled}>
+                        <i class="bi bi-lock me-1"></i>@gM("+finish")
+                    </button>
+                }
+                <button class="btn btn-danger" @id(BtnDeleteComp, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN){disabled}>@gM("+delete")</button>
             </div>
         </div>
         <div class="card-body bg-light">
             <div class="row text-center small">
                 <div class="col-md-3 border-end">
-                    <span class="text-muted fw-bold">Typ:</span> @comp.typ
+                    <span class="text-muted fw-bold">@gM("+type")</span> @comp.typ
                 </div>
                 <div class="col-md-3 border-end">
-                    <span class="text-muted fw-bold">Start:</span> @comp.startDate
+                    <span class="text-muted fw-bold">@gM("+start")</span> @comp.startDate
                 </div>
                 <div class="col-md-3 border-end">
-                    <span class="text-muted fw-bold">TTR:</span> @{comp.lowLevel.getOrElse(0)} - @{comp.upperLevel.getOrElse("∞")}
+                    <span class="text-muted fw-bold">@gM("+ttr")</span> @{comp.lowLevel.getOrElse(0)} - @{comp.upperLevel.getOrElse("∞")}
                 </div>
                 <div class="col-md-3">
-                    <span class="text-muted fw-bold">Status:</span> 
+                    <span class="text-muted fw-bold">@gM("+status")</span> 
                     <span class="badge @{if(comp.status == CompStatus.RUN) "bg-warning" else "bg-secondary"}">@comp.status</span>
                 </div>
             </div>
@@ -37,9 +46,9 @@
     <!-- Stages List Section -->
     <div class="card shadow-sm border-info mb-4">
         <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
-            <h4 class="h5 mb-0 fw-bold"><i class="bi bi-layers me-2"></i>Spielstages</h4>
-            <button class="btn btn-dark btn-sm" @id(BtnStartStage, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
-                <i class="bi bi-plus-lg me-1"></i>Stage starten
+            <h4 class="h5 mb-0 fw-bold"><i class="bi bi-layers me-2"></i>@gM("+stages_title")</h4>
+            <button class="btn btn-dark btn-sm" @id(BtnStartStage, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN){disabled}>
+                <i class="bi bi-plus-lg me-1"></i>@gM("+start_stage")
             </button>
         </div>
         <div class="card-body p-0">
@@ -47,15 +56,15 @@
                 <table class="table table-hover mb-0 align-middle">
                     <thead class="table-light small text-muted">
                         <tr>
-                            <th class="ps-3">Stage</th>
-                            <th>Teilnehmer</th>
-                            <th>Status</th>
-                            <th class="text-end pe-3">Aktionen</th>
+                            <th class="ps-3">@gM("+stage_header")</th>
+                            <th>@gM("+participants_header")</th>
+                            <th>@gM("+status_header")</th>
+                            <th class="text-end pe-3">@gM("+actions_header")</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if(stages.isEmpty) {
-                            <tr><td colspan="4" class="text-center py-4 text-muted">Keine Stages angelegt.</td></tr>
+                            <tr><td colspan="4" class="text-center py-4 text-muted">@gM("+no_stages")</td></tr>
                         }
                         @stages.map { r =>
                             <tr>
@@ -73,9 +82,9 @@
                                 <td class="text-end pe-3">
                                     <div class="btn-group btn-group-sm">
                                         <button class="btn btn-primary" onclick="appLoadPage('StageAdmin', '@r.id.value')">
-                                            <i class="bi bi-eye me-1"></i>Anzeigen
+                                            <i class="bi bi-eye me-1"></i>@gM("+show_action")
                                         </button>
-                                        <button class="btn btn-outline-danger" @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
+                                        <button class="btn btn-outline-danger" @id(BtnDeleteStage, "onclick", r.id.value.toString) @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN){disabled}>
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
@@ -93,7 +102,7 @@
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingParticipants">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParticipants" aria-expanded="true" aria-controls="collapseParticipants">
-                    <i class="bi bi-people me-2"></i>Teilnehmerliste (@participants.length)
+                    <i class="bi bi-people me-2"></i>@gM("+participants_list", participants.length.toString)
                 </button>
             </h2>
             <div id="collapseParticipants" class="accordion-collapse collapse show" aria-labelledby="headingParticipants" data-bs-parent="#participantsAccordion">
@@ -102,36 +111,36 @@
                         <table class="table table-sm table-hover mb-0">
                             <thead class="table-light">
                                 <tr class="small text-muted text-uppercase">
-                                    <th class="ps-3" style="width: 80px;">
+                                     <th class="ps-3" style="width: 80px;">
                                         <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderSno, "onclick")>
-                                            SNr @sortIcon("sno", sortCol, sortAsc)
+                                            @gM("+snr_header") @sortIcon("sno", sortCol, sortAsc)
                                         </button>
                                     </th>
                                     <th>
                                         <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
-                                            Name, Vorname @sortIcon("name", sortCol, sortAsc)
+                                            @gM("+name_header") @sortIcon("name", sortCol, sortAsc)
                                         </button>
                                     </th>
                                     <th>
                                         <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderClub, "onclick")>
-                                            Verein @sortIcon("club", sortCol, sortAsc)
+                                            @gM("+club_header") @sortIcon("club", sortCol, sortAsc)
                                         </button>
                                     </th>
                                     <th class="text-center" style="width: 80px;">
                                         <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
-                                            TTR @sortIcon("ttr", sortCol, sortAsc)
+                                            @gM("+ttr_header") @sortIcon("ttr", sortCol, sortAsc)
                                         </button>
                                     </th>
                                     <th class="text-center" style="width: 80px;">
                                         <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderYear, "onclick")>
-                                            JG @sortIcon("year", sortCol, sortAsc)
+                                            @gM("+year_header") @sortIcon("year", sortCol, sortAsc)
                                         </button>
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @if(participants.isEmpty) {
-                                    <tr><td colspan="5" class="text-center py-3 text-muted">Keine Teilnehmer aktiv.</td></tr>
+                                    <tr><td colspan="5" class="text-center py-3 text-muted">@gM("+no_participants")</td></tr>
                                 }
                                 @participants.map { p =>
                                     <tr>

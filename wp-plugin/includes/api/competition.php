@@ -84,27 +84,15 @@ function tourney_sync_competitions(WP_REST_Request $request)
         $client_ver = intval($comp["version"] ?? 0);
 
         // Optimistic Locking:
-        // Client inkrementiert die Version, bevor er sendet.
-        if ($stored_ver === 0) {
-            if ($client_ver !== 1) {
-                return ApiHelper::error(
-                    "version_mismatch", 
-                    "Competition $id is new but version is not 1.", 
-                    "Sent: $client_ver", 
-                    "tourney_sync_competitions", 
-                    HttpStatus::CONFLICT
-                );
-            }
-        } else {
-            if ($client_ver !== ($stored_ver + 1)) {
-                return ApiHelper::error(
-                    "version_mismatch", 
-                    "Competition $id has been modified by another user.", 
-                    "Stored Version: $stored_ver, Sent Version: $client_ver", 
-                    "tourney_sync_competitions", 
-                    HttpStatus::CONFLICT
-                );
-            }
+        // Client version must be greater than or equal to stored version to prevent overwriting newer updates.
+        if ($client_ver < $stored_ver) {
+            return ApiHelper::error(
+                "version_mismatch", 
+                "Competition $id has been modified by another user.", 
+                "Stored Version: $stored_ver, Sent Version: $client_ver", 
+                "tourney_sync_competitions", 
+                HttpStatus::CONFLICT
+            );
         }
     }
 

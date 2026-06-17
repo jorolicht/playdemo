@@ -1,27 +1,28 @@
 @import shared.model.*
 @import shared.format.*
+@import pages.Stage.StageResult.*
 
 @(stage: Stage, groups: Seq[Group])
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">Stageergebnisse / Tabellen: @stage.name</h5>
+        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name)</h5>
         
         <div class="row row-cols-1 row-cols-md-2 g-4">
             @if(groups.isEmpty) {
-                <div class="col-12 text-center py-5 text-muted italic">Keine Ergebnisse für diese Stage verfügbar.</div>
+                <div class="col-12 text-center py-5 text-muted italic">@gM("+no_results")</div>
             }
             @groups.map { g =>
                 <div class="col">
                     <div class="border rounded p-0 overflow-hidden shadow-sm">
-                        <div class="bg-dark text-white p-2 text-center fw-bold">Tabelle @g.name</div>
+                        <div class="bg-dark text-white p-2 text-center fw-bold">@gM("+table_title", g.name)</div>
                         <table class="table table-sm table-striped mb-0 small">
                             <thead class="table-secondary">
                                 <tr>
-                                    <th class="ps-2">Platz</th>
-                                    <th>Name</th>
-                                    <th class="text-center">Spiele</th>
-                                    <th class="text-center">Sätze</th>
+                                    <th class="ps-2">@gM("+rank_header")</th>
+                                    <th>@gM("+name_header")</th>
+                                    <th class="text-center">@gM("+matches_header")</th>
+                                    <th class="text-center">@gM("+sets_header")</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -42,10 +43,10 @@
 
         <div class="mt-4 pt-3 border-top d-flex justify-content-between">
             <button class="btn btn-outline-primary">
-                <i class="bi bi-printer me-1"></i>Tabelle drucken
+                <i class="bi bi-printer me-1"></i>@gM("+btn_print")
             </button>
             <button class="btn btn-primary" onclick="appLoadPage('CompetitionInfo', '')">
-                Nächste Stage vorbereiten <i class="bi bi-arrow-right ms-1"></i>
+                @gM("+btn_next") <i class="bi bi-arrow-right ms-1"></i>
             </button>
         </div>
     </div>

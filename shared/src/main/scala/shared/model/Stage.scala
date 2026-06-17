@@ -72,6 +72,16 @@ object StageConfig:
     values.find(_.id == id).getOrElse(UNKN)
       
 
+enum StageOption(val id: Int, val format: StageFormat) derives CanEqual:
+  case Unknown      extends StageOption(0, StageFormat.UNKN)
+  case GrpStart     extends StageOption(1, StageFormat.GR)		
+  case GrpAfterGrp	extends StageOption(2, StageFormat.GR)
+  case KoStart   	  extends StageOption(3, StageFormat.KO)
+  case KoAfterGrp	  extends StageOption(4, StageFormat.KO)
+  case RrStart  	  extends StageOption(5, StageFormat.RR)
+  case RrAfterGrp  	extends StageOption(6, StageFormat.RR)
+  case SwStart  	  extends StageOption(7, StageFormat.SW)
+  case SwAfterSw  	extends StageOption(8, StageFormat.SW)
 
 // -----------------------------
 // QualifyTyp
@@ -183,20 +193,41 @@ case class Stage(
   var candInfo: String = ""
   val matches: ArrayBuffer[MEntry] = ArrayBuffer.empty
   
-  def groups: ArrayBuffer[Group] = data match {
-    case StageData.GroupsStage(g)     => g
-    case StageData.SwissStage(g)      => ArrayBuffer(g)
-    case StageData.RoundRobinStage(g) => ArrayBuffer(g)
-    case StageData.KnockoutStage(k)   => 
-      val g = Group(1, k.size, 1, "KO-Baum (Setzung)", noWinSets)
-      k.pants.zipWithIndex.foreach { case (p, i) => if (i < g.pants.length) g.pants(i) = p }
-      ArrayBuffer(g)
-  }
 
-  def ko: KoStage = data match {
-    case StageData.KnockoutStage(k) => k
-    case _                          => KoStage(0, "", 0L, 0, 0)
-  }
+
+  def initMatches(coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
+    matches.clear()
+    data match
+      case StageData.GroupsStage(groups) => initGrMatches(groups, coTyp)
+      case StageData.RoundRobinStage(rr) => initRrMatches(rr, coTyp)
+      case StageData.SwissStage(sw)      => initSwMatches(sw, coTyp)
+      case StageData.KnockoutStage(ko)   => initKoMatches(ko, coTyp)
+
+  private def initGrMatches(groups: ArrayBuffer[Group], coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
+    import shared.format.Groups
+    Groups.initGrMatches(coId, coTyp, id, stageConfig.format, noWinSets, groups) match
+      case Right(grMatches) =>
+        matches ++= grMatches
+        Right(true)
+      case Left(err) =>
+        Left(err)
+
+  private def initRrMatches(rrGroup: Group, coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
+    initGrMatches(ArrayBuffer(rrGroup), coTyp)
+
+  private def initSwMatches(swGroup: Group, coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
+    initGrMatches(ArrayBuffer(swGroup), coTyp)
+
+  private def initKoMatches(ko: KoStage, coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
+    import shared.format.SingleElimination
+    SingleElimination.initKoMatches(coId, coTyp, id, stageConfig.format, noWinSets, ko) match
+      case Right(koMatches) =>
+        matches ++= koMatches
+        Right(true)
+      case Left(err) =>
+        Left(err)
+
+
 
   // -----------------------------
   // Derived counters (safer)

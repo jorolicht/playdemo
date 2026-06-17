@@ -11,7 +11,7 @@ trait MEntry {
   def stageFormat: StageFormat
   def stNoA: SNO
   def stNoB: SNO
-  def koStage: Int
+  def round: Int
   def gameNo: Int
   def status: Int
   def playfield: String
@@ -124,7 +124,7 @@ case class MEntryBase(coId: CompId,
                       stageId: StageId, 
                       stageFormat: StageFormat, 
                       var gameNo: Int=0,
-                      koStage: Int=0, 
+                      round: Int=0, 
                       var playfield:String="", 
                       var status:Int=0,
                       var info: String="", 
@@ -162,8 +162,8 @@ case class MEntryKo(
   var stNoA:  SNO,                        //(1) participant A start number
   var stNoB:  SNO,                        //(2) participant B start number
   
-  var koStage:  Int,                        //(3) (KO-Stage (7 ... 0) for 128-field/7, 64-field/6 ... Final/1, 3rdPlace/0 
-  var maNo:   Int,                        //(4) Match number within koStage
+  var round:  Int,                        //(3) (round (7 ... 0) for 128-field/7, 64-field/6 ... Final/1, 3rdPlace/0 
+  var maNo:   Int,                        //(4) Match number within round
   var winPos: String,                     //(5) Next position of winner within match array (gameNo, matchNo within Stage, intStage, pos(0/1))
   var looPos: String,                     //(6) Next position of looser within match array
  
@@ -179,11 +179,11 @@ case class MEntryKo(
   var result:     String                  //(15) result details, depending on kind of sport
 
 ) extends MEntry {
-  def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, s"${gameNo}^${stNoA}^${stNoB}^${koStage}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
-  def encode: String = s"""{"coId":${coId},"coTyp":${coTyp.id},"stageId":${stageId},"stageFormat":${stageFormat.id},"content":"${gameNo}^${stNoA}^${stNoB}^${koStage}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
+  def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, s"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
+  def encode: String = s"""{"coId":${coId},"coTyp":${coTyp.id},"stageId":${stageId},"stageFormat":${stageFormat.id},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
   override def toString(): String = s"""
     |  Ko-Match: SnoA: ${stNoA} - SnoB: ${stNoB} Winner->${winPos} Looser->${looPos}
-    |    gameNo: ${gameNo} koStage: ${koStage} maNo: ${maNo} info: ${info} winSets: ${winSets}
+    |    gameNo: ${gameNo} round: ${round} maNo: ${maNo} info: ${info} winSets: ${winSets}
     |    coId: ${coId} coTyp: ${coTyp} stageId: ${stageId} stageFormat: ${stageFormat}
     |    playfield: ${playfield} status: ${MEntry.statusInfo(status)} sets: ${sets._1}:${sets._2} result: [${result}]
     """.stripMargin('|')
@@ -208,26 +208,26 @@ case class MEntryKo(
   }
 
   def setWinLoo() = {
-    val rndSize    = if (koStage >=2) scala.math.pow(2,koStage-1).toInt else 1
+    val rndSize    = if (round >=2) scala.math.pow(2,round-1).toInt else 1
     val nextGameNo = gameNo + rndSize - maNo + (maNo + 1) / 2
     val nextPos    = (maNo + 1) % 2
-    koStage match {
-      case x if x > 2  => { winPos = s"${nextGameNo}·${(maNo + 1)/2}·${koStage - 1}·${nextPos}"; looPos = "" }
+    round match {
+      case x if x > 2  => { winPos = s"${nextGameNo}·${(maNo + 1)/2}·${round - 1}·${nextPos}"; looPos = "" }
       case 2           => { 
-        winPos = s"${nextGameNo}·${(maNo + 1)/2}·${koStage - 1}·${nextPos}"
-        looPos = s"${nextGameNo+1}·${(maNo + 1)/2}·${koStage - 2}·${nextPos}"        
+        winPos = s"${nextGameNo}·${(maNo + 1)/2}·${round - 1}·${nextPos}"
+        looPos = s"${nextGameNo+1}·${(maNo + 1)/2}·${round - 2}·${nextPos}"        
       }
       case _           => { winPos = ""; looPos = "" } 
     }
   } 
 
-  def getWinLoo(koStage: Int, gameNo: Int, maNo: Int): (String,String) = {
-    val rndSize    = if (koStage >=2) scala.math.pow(2,koStage-1).toInt else 1
+  def getWinLoo(round: Int, gameNo: Int, maNo: Int): (String,String) = {
+    val rndSize    = if (round >=2) scala.math.pow(2,round-1).toInt else 1
     val nextGameNo = gameNo + rndSize - maNo + (maNo + 1) / 2
     val nextPos    = (maNo + 1) % 2
-    koStage match {
-      case x if x > 2  => (s"${nextGameNo}·${(maNo + 1)/2}·${koStage - 1}·${nextPos}", "")
-      case 2           => (s"${nextGameNo}·${(maNo + 1)/2}·${koStage - 1}·${nextPos}", s"${nextGameNo+1}·${(maNo + 1)/2}·${koStage - 2}·${nextPos}")        
+    round match {
+      case x if x > 2  => (s"${nextGameNo}·${(maNo + 1)/2}·${round - 1}·${nextPos}", "")
+      case 2           => (s"${nextGameNo}·${(maNo + 1)/2}·${round - 1}·${nextPos}", s"${nextGameNo+1}·${(maNo + 1)/2}·${round - 2}·${nextPos}")        
       case _           => ("","")
     }
   } 
@@ -236,22 +236,22 @@ case class MEntryKo(
 
 
 object MEntryKo {
-  def getWinLooSingleKo(koStage: Int, gameNo: Int, maNo: Int): (String,String) = {
-    val rndSize    = if (koStage >=2) scala.math.pow(2,koStage-1).toInt else 1
+  def getWinLooSingleKo(round: Int, gameNo: Int, maNo: Int): (String,String) = {
+    val rndSize    = if (round >=2) scala.math.pow(2,round-1).toInt else 1
     val nextGameNo = gameNo + rndSize - maNo + (maNo + 1) / 2
     val nextPos    = (maNo + 1) % 2
-    koStage match {
-      case x if x > 2  => (s"${nextGameNo}·${(maNo + 1)/2}·${koStage - 1}·${nextPos}", "")
-      case 2           => (s"${nextGameNo}·${(maNo + 1)/2}·${koStage - 1}·${nextPos}", s"${nextGameNo+1}·${(maNo + 1)/2}·${koStage - 2}·${nextPos}")        
+    round match {
+      case x if x > 2  => (s"${nextGameNo}·${(maNo + 1)/2}·${round - 1}·${nextPos}", "")
+      case 2           => (s"${nextGameNo}·${(maNo + 1)/2}·${round - 1}·${nextPos}", s"${nextGameNo+1}·${(maNo + 1)/2}·${round - 2}·${nextPos}")        
       case _           => ("","")
     }
   } 
 
-  def init(coId: CompId, coTyp: CompTyp, stageId: StageId, stageFormat: StageFormat, stNoA: SNO, stNoB: SNO, gameNo: Int, koStage: Int, maNo: Int,
+  def init(coId: CompId, coTyp: CompTyp, stageId: StageId, stageFormat: StageFormat, stNoA: SNO, stNoB: SNO, gameNo: Int, round: Int, maNo: Int,
             winPos: String, looPos: String, status: Int, sets: (Int,Int), winSets: Int,
             playfield: String="", info: String="", startTime: String="", endTime: String="", result: String = "") = {
-              val wl = getWinLooSingleKo(koStage, gameNo, maNo)
-              MEntryKo(coId, coTyp, stageId, stageFormat, gameNo, stNoA, stNoB, koStage, maNo, wl._1, wl._2, playfield, info, startTime, endTime, status, sets, winSets, result)
+              val wl = getWinLooSingleKo(round, gameNo, maNo)
+              MEntryKo(coId, coTyp, stageId, stageFormat, gameNo, stNoA, stNoB, round, maNo, wl._1, wl._2, playfield, info, startTime, endTime, status, sets, winSets, result)
             }
 }
 
@@ -266,7 +266,7 @@ case class MEntryGr(
   var stNoA:     SNO,                    //(1) participant A start number
   var stNoB:     SNO,                    //(2) participant B start number
   
-  var koStage:     Int,                    //(3) Group stage 1 ...  
+  var round:     Int,                    //(3) Group stage 1 ...  
   var grId:      Int,                    //(4) Group Identification
   var wgw:       (Int,Int),              //(5,6) who against who
   var depend:    String,                 //(7) List of games that should be finished before, 
@@ -285,11 +285,11 @@ case class MEntryGr(
   var result:    String                  //(17) result details, depending on kind of sport
 ) extends MEntry {
 
-  def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, s"${gameNo}^${stNoA}^${stNoB}^${koStage}^${grId}^${wgw._1}^${wgw._2}^${depend}^${trigger}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
-  def encode: String = s"""{"coId":${coId.value},"coTyp":${coTyp.id},"stageId":${stageId.value},"stageFormat":${stageFormat.id},"content":"${gameNo}^${stNoA}^${stNoB}^${koStage}^${grId}^${wgw._1}^${wgw._2}^${depend}^${trigger}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
+  def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, s"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${depend}^${trigger}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
+  def encode: String = s"""{"coId":${coId.value},"coTyp":${coTyp.id},"stageId":${stageId.value},"stageFormat":${stageFormat.id},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${depend}^${trigger}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
   override def toString(): String = s"""
       |  Group-Match: ${wgw._1}-${wgw._2} SnoA: ${stNoA} - SnoB: ${stNoB} 
-      |    gameNo: ${gameNo} koStage: ${koStage} grId: ${grId} info: ${info} winSets: ${winSets}
+      |    gameNo: ${gameNo} round: ${round} grId: ${grId} info: ${info} winSets: ${winSets}
       |    coId: ${coId.value} coTyp: ${coTyp} stageId: ${stageId.value} stageFormat: ${stageFormat}
       |    depend: ${depend} trigger: ${trigger} playfield: ${playfield} 
       |    status: ${MEntry.statusInfo(status)} sets: ${sets._1}:${sets._2} result: [${result}]
@@ -311,8 +311,8 @@ case class MEntryGr(
 
 
 object MEntryGr {
-   def init(coId: CompId, coTyp: CompTyp, stageId: StageId, stageFormat: StageFormat, gameNo: Int, stNoA: SNO, stNoB: SNO, koStage: Int, grId: Int, wgw: (Int,Int), winSets: Int) = {
-     MEntryGr(coId, coTyp, stageId, stageFormat, gameNo, stNoA, stNoB, koStage, grId, wgw, "_default_", "", "", "", "", "", 0, (0,0), winSets, "")
+   def init(coId: CompId, coTyp: CompTyp, stageId: StageId, stageFormat: StageFormat, gameNo: Int, stNoA: SNO, stNoB: SNO, round: Int, grId: Int, wgw: (Int,Int), winSets: Int) = {
+     MEntryGr(coId, coTyp, stageId, stageFormat, gameNo, stNoA, stNoB, round, grId, wgw, "_default_", "", "", "", "", "", 0, (0,0), winSets, "")
    }
 }
 
@@ -322,17 +322,17 @@ case class MEntryTx(coId: CompId, coTyp: CompTyp, stageId: StageId, stageFormat:
       case StageFormat.GR | StageFormat.RR => {
       try { 
           val m = content.split("\\^")
-          val (gameNo,     stNoA, stNoB,                 koStage,      grId,       wgw1,       wgw2,       depend, trigger, playfield, info, startTime, endTime, status,      sets1,       sets2,       winSets,     result) =
+          val (gameNo,     stNoA, stNoB,                 round,      grId,       wgw1,       wgw2,       depend, trigger, playfield, info, startTime, endTime, status,      sets1,       sets2,       winSets,     result) =
               (m(0).toInt, m(1),  m(2),  m(3).toInt, m(4).toInt, m(5).toInt, m(6).toInt, m(7),   m(8),    m(9),      m(10), m(11),    m(12),   m(13).toInt, m(14).toInt, m(15).toInt, m(16).toInt, m(17))
-          MEntryGr(coId, coTyp, stageId, stageFormat, gameNo, SNO.fromString(m(1)), SNO.fromString(m(2)), koStage, grId, (wgw1,wgw2), depend, trigger, playfield, info, startTime, endTime, status, (sets1,sets2), winSets, result)
+          MEntryGr(coId, coTyp, stageId, stageFormat, gameNo, SNO.fromString(m(1)), SNO.fromString(m(2)), round, grId, (wgw1,wgw2), depend, trigger, playfield, info, startTime, endTime, status, (sets1,sets2), winSets, result)
         } catch { case _: Throwable => MEntryGr(coId, coTyp, stageId, stageFormat, 0, SNO.nn, SNO.nn, 0, 0, (0,0), "", "", "", "", "", "", 0, (0,0), 0, "") }
       }
       case StageFormat.KO => {
         try { 
           val m = content.split("\\^")
-          val (gameNo,     stNoA,                 stNoB,                 koStage,      maNo,       winPos, looPos, playfield, info, startTime, endTime, status,      sets1,       sets2,       winSets,    result) =
+          val (gameNo,     stNoA,                 stNoB,                 round,      maNo,       winPos, looPos, playfield, info, startTime, endTime, status,      sets1,       sets2,       winSets,    result) =
               (m(0).toInt, SNO.fromString(m(1)),  SNO.fromString(m(2)),  m(3).toInt, m(4).toInt, m(5),   m(6),   m(7),      m(8), m(9),      m(10),   m(11).toInt, m(12).toInt, m(13).toInt, m(14).toInt, m(15))
-          MEntryKo(coId, coTyp, stageId, stageFormat, gameNo, stNoA, stNoB, koStage, maNo, winPos, looPos, playfield, info, 
+          MEntryKo(coId, coTyp, stageId, stageFormat, gameNo, stNoA, stNoB, round, maNo, winPos, looPos, playfield, info, 
                    startTime, endTime, status, (sets1,sets2), winSets, result)
         } catch { case _: Throwable => MEntryKo(coId, coTyp, stageId, stageFormat, 0, SNO.nn, SNO.nn, 0, 0, "", "", "", "", "", "", 0, (0,0), 0, "") }
       }   

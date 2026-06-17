@@ -1,0 +1,9 @@
+StageResult.title = Ergebnisse der Wettbewerbsphase / Tabellen: {0}
+StageResult.no_results = Keine Ergebnisse für diese Wettbewerbsphase verfügbar.
+StageResult.table_title = Tabelle {0}
+StageResult.rank_header = Platz
+StageResult.name_header = Name
+StageResult.matches_header = Spiele
+StageResult.sets_header = Sätze
+StageResult.btn_print = Tabelle drucken
+StageResult.btn_next = Nächste Wettbewerbsphase vorbereiten

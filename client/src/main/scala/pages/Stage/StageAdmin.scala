@@ -1,4 +1,5 @@
 package pages
+package Stage
 
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement
@@ -14,18 +15,32 @@ import shared.format.*
 import shared.utils.DrawRules
 import dialogs.*
 
+/**
+ * Page handling the configuration and administration of a game stage.
+ * Allows drawing generation, selecting participants, resetting data, and deleting stages.
+ */
 object StageAdmin extends BasePage with JsWrapper:
   def name = PageNameTyp("StageAdmin")
 
+  /** Button to generate/start the draw. */
   val BtnStartDrawing: HtmlId = genId(name)
+  /** Button to add a dummy player to the stage. */
   val BtnAddDummy:     HtmlId = genId(name)
+  /** Button to reset input results. */
   val BtnResetInp:     HtmlId = genId(name)
+  /** Button to reset the draw. */
   val BtnResetDrw:     HtmlId = genId(name)
+  /** Button to reset configuration. */
   val BtnResetCfg:     HtmlId = genId(name)
+  /** Button to delete the entire stage. */
   val BtnDeleteFull:   HtmlId = genId(name)
+  /** Checkbox to select all available players. */
   val ChkBoxAll:       HtmlId = genId(name)
+  /** Checkbox prefix for selecting/deselecting individual players. */
   val ChkBoxPlayer:    HtmlId = genId(name)
+  /** Selection dropdown for game draw mode. */
   val SelectDrawMode:  HtmlId = genId(name)
+  /** Label displaying count of selected players. */
   val LabelDrawCnt:    HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
@@ -42,14 +57,18 @@ object StageAdmin extends BasePage with JsWrapper:
       case Some(r) => 
         comps.ContextHeader.render()
         val comp = Global.currentSelection.competition
-        val participants = comp.map(_.pants.toSeq).getOrElse(Seq.empty)
+        val isStartStage = r.prefId.isEmpty
+        val participants = comp.map { c =>
+          val all = c.pants1Stage.toSeq
+          if (isStartStage) all.filter(_.active) else all
+        }.getOrElse(Seq.empty)
         
         // Active count for rules
         val activeCount = participants.count(_.status == PantStatus.PLAY)
         val modes = DrawRules.getAvailableModes(activeCount)
 
         setMain(cviews.comps.html.StageLayout(r, "CFG")(
-          cviews.pages.html.StageAdmin(r, participants, modes)
+          cviews.pages.Stage.html.StageAdmin(r, participants, modes)
         ))
         
         // Initial state update
@@ -61,13 +80,18 @@ object StageAdmin extends BasePage with JsWrapper:
         false
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
+    val isFin = Global.currentSelection.competition.exists(_.status == CompStatus.FIN)
+    if (isFin) {
+      debug(s"StageAdmin handleEvent blocked for event ${elem.id} because competition is finalized.")
+      return
+    }
     HtmlId(elem.id) match
       case `BtnStartDrawing` => 
         generateDraw()
 
       case `BtnAddDummy` =>
         Global.currentSelection.competition.foreach { comp =>
-          val dummyIndex = comp.pants.length + 1
+          val dummyIndex = comp.pants1Stage.length + 1
           val newId = SNO.single(PlayerId(9000 + dummyIndex))
           val dummyRating = 1200 + scala.util.Random.nextInt(400)
           val newPant = Pant(
@@ -79,7 +103,7 @@ object StageAdmin extends BasePage with JsWrapper:
             status = PantStatus.PLAY,
             active = true
           )
-          comp.pants += newPant
+          comp.pants1Stage += newPant
           debug(s"Added dummy player: ${newPant.name}")
           render()
         }
@@ -100,14 +124,32 @@ object StageAdmin extends BasePage with JsWrapper:
         handleDeleteStage()
 
       case `ChkBoxAll` =>
-        // ChkBoxAll is now a button
-        dom.document.querySelectorAll(".player-draw-check").foreach { node =>
-          node.asInstanceOf[dom.html.Input].checked = true
+        Global.currentSelection.competition.foreach { comp =>
+          comp.pants1Stage.foreach { p =>
+            p.status = PantStatus.PLAY
+          }
+          services.TourneyDB.tourney.updateCompetition(comp) match {
+            case Right(updatedComp) =>
+              Global.currentSelection = Global.currentSelection.copy(competition = Some(updatedComp))
+            case _ =>
+          }
         }
-        updateModes(resetSelection = true)
+        render()
 
       case id if id.id.startsWith(ChkBoxPlayer.id) =>
-        updateModes(resetSelection = true)
+        val sno = SNO.fromString(elem.id.substring(ChkBoxPlayer.id.length + 1))
+        val checked = elem.asInstanceOf[dom.html.Input].checked
+        Global.currentSelection.competition.foreach { comp =>
+          comp.pants1Stage.find(_.id == sno).foreach { p =>
+            p.status = if (checked) PantStatus.PLAY else PantStatus.REGI
+          }
+          services.TourneyDB.tourney.updateCompetition(comp) match {
+            case Right(updatedComp) =>
+              Global.currentSelection = Global.currentSelection.copy(competition = Some(updatedComp))
+            case _ =>
+          }
+        }
+        render()
 
       case `SelectDrawMode` =>
         updateButtonState()
@@ -153,11 +195,18 @@ object StageAdmin extends BasePage with JsWrapper:
   private def updateButtonState(): Unit =
     val select = gE(SelectDrawMode).asInstanceOf[dom.html.Select]
     val btn = gE(BtnStartDrawing).asInstanceOf[dom.html.Button]
-    if (select != null && btn != null) {
+    val stageOpt = Global.currentSelection.stage
+    if (select != null && btn != null && stageOpt.isDefined) {
+      val stage = stageOpt.get
       val isDefault = select.value == "UNKN"
-      btn.disabled = isDefault
-      if (isDefault) btn.classList.add("opacity-50")
-      else btn.classList.remove("opacity-50")
+      val isAllowed = stage.status == StageStatus.CFG && base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+      
+      btn.disabled = isDefault || !isAllowed
+      if (isDefault || !isAllowed) {
+        btn.classList.add("opacity-50")
+      } else {
+        btn.classList.remove("opacity-50")
+      }
     }
 
   private def generateDraw(): Unit =
@@ -183,7 +232,7 @@ object StageAdmin extends BasePage with JsWrapper:
         }
 
         val comp = Global.currentSelection.competition.get
-        val allPants = comp.pants.toSeq
+        val allPants = comp.pants1Stage.toSeq
         val selectedPants = allPants.filter(p => selectedSnos.contains(p.id.toString)).sortBy(-_.rating)
 
         if (selectedPants.isEmpty) {
@@ -191,19 +240,20 @@ object StageAdmin extends BasePage with JsWrapper:
         } else {
           // Generation Logic
           r.stageConfig = cfg
+          r.noPlayers = selectedPants.length
           
           cfg.format match
             case StageFormat.RR => 
-              r.data = RoundRobin.init(selectedPants, r.noWinSets)
+              r.data = RoundRobin.draw(selectedPants, r.noWinSets)
      
             case StageFormat.KO => 
-              r.data = SingleElimination.init(r.id.value, r.name, r.coId.value.toLong, r.noWinSets, selectedPants)
+              r.data = SingleElimination.draw(r.id.value, r.name, r.coId.value.toLong, r.noWinSets, selectedPants)
               
             case StageFormat.SW =>
-              r.data = SwissSystem.init(selectedPants, r.noWinSets)
+              r.data = SwissSystem.draw(selectedPants, r.noWinSets)
               
             case StageFormat.GR =>
-              r.data = Groups.init(cfg, selectedPants, r.noWinSets)
+              r.data = Groups.draw(cfg, selectedPants, r.noWinSets)
         
             case _ => debug(s"Unsupported generation for mode $cfg")
 

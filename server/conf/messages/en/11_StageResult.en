@@ -1,0 +1,9 @@
+StageResult.title = Stage Results / Standings: {0}
+StageResult.no_results = No results available for this stage.
+StageResult.table_title = Table {0}
+StageResult.rank_header = Rank
+StageResult.name_header = Name
+StageResult.matches_header = Matches
+StageResult.sets_header = Sets
+StageResult.btn_print = Print Standings
+StageResult.btn_next = Prepare Next Stage

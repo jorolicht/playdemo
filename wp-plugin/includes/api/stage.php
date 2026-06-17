@@ -84,29 +84,15 @@ function tourney_sync_stages(WP_REST_Request $request)
         $client_ver = intval($stage["version"] ?? 0);
 
         // Optimistic Locking:
-        // Da der Client die Version bereits lokal inkrementiert hat (z.B. von 1 auf 2),
-        // muss sie um genau 1 höher sein als auf dem Server (bzw. 1 für neue Stages).
-        
-        if ($stored_ver === 0) {
-            if ($client_ver !== 1) {
-                return ApiHelper::error(
-                    "version_mismatch", 
-                    "Stage $id is new but version is not 1.", 
-                    "Sent: $client_ver", 
-                    "tourney_sync_stages", 
-                    HttpStatus::CONFLICT
-                );
-            }
-        } else {
-            if ($client_ver !== ($stored_ver + 1)) {
-                return ApiHelper::error(
-                    "version_mismatch", 
-                    "Stage $id has been modified by another user.", 
-                    "Stored Version: $stored_ver, Sent Version: $client_ver", 
-                    "tourney_sync_stages", 
-                    HttpStatus::CONFLICT
-                );
-            }
+        // Client version must be greater than or equal to stored version to prevent overwriting newer updates.
+        if ($client_ver < $stored_ver) {
+            return ApiHelper::error(
+                "version_mismatch", 
+                "Stage $id has been modified by another user.", 
+                "Stored Version: $stored_ver, Sent Version: $client_ver", 
+                "tourney_sync_stages", 
+                HttpStatus::CONFLICT
+            );
         }
     }
 

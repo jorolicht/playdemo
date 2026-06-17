@@ -25,9 +25,9 @@ object Mockup extends BasePage with JsWrapper:
     val comp3 = Competition(CompId(3), "Damen Einzel", CompTyp.SINGLE, CompCategory.TT, "2026-05-16 14:00:00", CompStatus.FIN)
     
     // Add participants to comp3 for ResultList testing
-    comp3.pants += Pant(SNO.single(PlayerId(10)), "Siegfried, Siggi", "TTV Winner", 1800, place = (1, 0), status = PantStatus.FINI)
-    comp3.pants += Pant(SNO.single(PlayerId(11)), "Zweiter, Zenzi", "SV Silber", 1750, place = (2, 0), status = PantStatus.FINI)
-    comp3.pants += Pant(SNO.single(PlayerId(12)), "Dritter, Dieter", "TTC Bronze", 1700, place = (3, 0), status = PantStatus.FINI)
+    comp3.pants1Stage += Pant(SNO.single(PlayerId(10)), "Siegfried, Siggi", "TTV Winner", 1800, place = (1, 0), status = PantStatus.FINI)
+    comp3.pants1Stage += Pant(SNO.single(PlayerId(11)), "Zweiter, Zenzi", "SV Silber", 1750, place = (2, 0), status = PantStatus.FINI)
+    comp3.pants1Stage += Pant(SNO.single(PlayerId(12)), "Dritter, Dieter", "TTC Bronze", 1700, place = (3, 0), status = PantStatus.FINI)
     
     // Seed CompetitionDB for dropdown mockup
     services.CompetitionDB.competitions.clear()

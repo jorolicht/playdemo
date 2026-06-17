@@ -74,12 +74,12 @@ object TestCompetition:
     val activeComps = TourneyDB.tourney.competitions.filter(c => c != null)
     addOutput(s"Competitions in DB (${activeComps.length}):")
     activeComps.foreach { c =>
-      val pantsInfo = if (c.pants.isEmpty) "no participants" else s"${c.pants.length} participants"
+      val pantsInfo = if (c.pants1Stage.isEmpty) "no participants" else s"${c.pants1Stage.length} participants"
       addOutput(s"- [${c.id.value}] ${c.name} (Type: ${c.typ}, Date: ${c.startDate}, Pants: $pantsInfo, Deleted: ${c.deleted}, Version: ${c.version})")
-      c.pants.take(3).foreach { p =>
+      c.pants1Stage.take(3).foreach { p =>
         addOutput(s"  * ${p.name} (${p.club})")
       }
-      if (c.pants.length > 3) addOutput("  * ...")
+      if (c.pants1Stage.length > 3) addOutput("  * ...")
     }
     Future(Right(s"FINISHED: ${group}-Test:${number}"))
 
@@ -118,7 +118,7 @@ object TestCompetition:
         val name = pParts(0).trim
         val club = if (pParts.length > 1) pParts(1).trim else ""
         Pant(
-          id = SNO.fromString(s"P${comp.pants.length + 1}"),
+          id = SNO.fromString(s"P${comp.pants1Stage.length + 1}"),
           name = name,
           club = club,
           status = PantStatus.REDY
@@ -126,14 +126,14 @@ object TestCompetition:
       }
 
       val updatedComp = comp.copy()
-      updatedComp.pants ++= newPants
+      updatedComp.pants1Stage ++= newPants
       
       t.updateCompetition(updatedComp) match
         case Left(err) =>
           addOutput(s"Error updating competition: ${err.msg}")
           Future(Left(err))
         case Right(c) =>
-          addOutput(s"Added ${newPants.length} participants to competition ${c.name} (ID: ${c.id.value}, Total: ${c.pants.length}, Version: ${c.version})")
+          addOutput(s"Added ${newPants.length} participants to competition ${c.name} (ID: ${c.id.value}, Total: ${c.pants1Stage.length}, Version: ${c.version})")
           Future(Right(s"FINISHED: ${group}-Test:${number}"))
 
     catch
