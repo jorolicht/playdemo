@@ -20,25 +20,54 @@ val pagesMap = List(Auth, Console, PgError,
 
 def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, async: Boolean = false): Unit =
   try
-    debug(s"loadPage -> pageName:${pageName} param:${param}")
+    var targetPage = pageName
+    var targetParam = param
+
+    if (pageName.value == "StageAdmin" && param.nonEmpty) {
+      try {
+        val rId = shared.model.StageId(param.toInt)
+        services.TourneyDB.tourney.stages.find(s => s != null && s.id == rId).foreach { r =>
+          base.Global.currentSelection = base.Global.currentSelection.copy(stage = Some(r))
+          r.status match {
+            case shared.model.StageStatus.CFG =>
+              targetPage = shared.PageNameTyp("StageAdmin")
+              targetParam = ""
+            case shared.model.StageStatus.AUS =>
+              targetPage = shared.PageNameTyp("StageDraw")
+              targetParam = ""
+            case shared.model.StageStatus.EIN =>
+              targetPage = shared.PageNameTyp("StageInput")
+              targetParam = ""
+            case shared.model.StageStatus.FIN =>
+              targetPage = shared.PageNameTyp("StageResult")
+              targetParam = ""
+            case _ =>
+          }
+        }
+      } catch {
+        case e: Exception => // ignore parsing exceptions
+      }
+    }
+
+    debug(s"loadPage -> pageName:${targetPage} param:${targetParam}")
     ContextHeader.hide()
     
     if async then
-      pagesMap(pageName).renderAsync(param).map { success =>
+      pagesMap(targetPage).renderAsync(targetParam).map { success =>
         if success then
-          if withSidebar then Sidebar.setNavLink(pageName.value)
-          savePageState(pageName, param)
+          if withSidebar then Sidebar.setNavLink(targetPage.value)
+          savePageState(targetPage, targetParam)
         else   
-          error(s"loadPage -> page:${pageName} param:${param}")
+          error(s"loadPage -> page:${targetPage} param:${targetParam}")
       }
     else
-      if pagesMap(pageName).render(param) then
-        if withSidebar then Sidebar.setNavLink(pageName.value)
-        savePageState(pageName, param)
+      if pagesMap(targetPage).render(targetParam) then
+        if withSidebar then Sidebar.setNavLink(targetPage.value)
+        savePageState(targetPage, targetParam)
       else   
-        error(s"loadPage -> page:${pageName} param:${param}")
+        error(s"loadPage -> page:${targetPage} param:${targetParam}")
   catch
-    case e: Exception => error(s"loadPage -> page:${pageName} param:${param} not found")
+    case e: Exception => error(s"loadPage -> page:${pageName} param:${param} not found: ${e.getMessage}")
 
 private def savePageState(pageName: PageName, param: String): Unit =
   try
