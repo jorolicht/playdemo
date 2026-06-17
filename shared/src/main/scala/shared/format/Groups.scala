@@ -101,15 +101,31 @@ object Group {
  * Companion object for Groups format providing initialization logic.
  */
 object Groups {
-  /**
-   * Initializes a GroupsStage stage data structure with distributed groups.
-   */
-  def draw(cfg: StageConfig, selectedPants: Seq[Pant], noWinSets: Int, drawOption: DrawOption = DrawOption.Unknown): StageData.GroupsStage =
-    draw_GrpStart(cfg, selectedPants, noWinSets)
-    // drawOption match
-    //   case DrawOption.GrpStart    => draw_GrpStart(cfg, selectedPants, noWinSets)
-    //   case DrawOption.GrpAfterGrp => draw_GrpAfterGrp(cfg, selectedPants, noWinSets)
-    //   case _                       => StageData.GroupsStage(ArrayBuffer.empty[Group])
+  def draw(id: StageId, coId: CompId, coTyp: CompTyp, cfg: StageConfig, selectedPants: Seq[Pant], noWinSets: Int, drawOption: DrawOption = DrawOption.Unknown): StageData.GroupsStage = {
+    val arrBuffer: StageData.GroupsStage = drawOption match {
+      case DrawOption.GrpStart    => draw_GrpStart(cfg, selectedPants, noWinSets)
+      case DrawOption.GrpAfterGrp => draw_GrpAfterGrp(cfg, selectedPants, noWinSets)
+      case _                      => StageData.GroupsStage(ArrayBuffer.empty[Group])
+    }
+    initGrMatches(coId, coTyp, id, cfg.format, noWinSets, arrBuffer.groups) match {
+      case Right(grMatches) =>
+        //stage.matches.clear
+        //stage.matches = grMatches
+
+        arrBuffer
+      case Left(err) =>
+        println(s"Error initializing group matches: ${err.msg}")
+        StageData.GroupsStage(ArrayBuffer.empty[Group])
+    }
+  } 
+    
+    // coId: CompId,
+    // coTyp: CompTyp,
+    // stageId: StageId,
+    // stageFormat: StageFormat, 
+    // noWinSets: Int,
+    // groups: ArrayBuffer[Group]
+
 
 
   def draw_GrpAfterGrp(cfg: StageConfig, selectedPants: Seq[Pant], noWinSets: Int): StageData.GroupsStage = {
