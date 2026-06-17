@@ -3,6 +3,10 @@ package base
 import org.scalajs.logging._
 
 object Logging extends JsWrapper:
+  // Register with shared logger delegate
+  shared.basic.Log.setErrorLogger(msg => Logging.error(msg))
+  shared.basic.Log.setInfoLogger(msg => Logging.info(msg))
+
   def debug(msg: => String) = logger.debug(msg)
   def info(msg: => String)  = logger.info(msg)
   def warn(msg: => String)  = logger.warn(msg)

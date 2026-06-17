@@ -3,7 +3,7 @@ package shared.format
 import scala.collection.mutable.{ ArrayBuffer, HashMap, Map }
 import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
 import shared.model.*
-import shared.basic.AppError
+import shared.basic.{AppError, Log}
 import StageHelper.*
 
 case class GroupConfig(id: Int, name: String, size: Int, quali: Int, pos: Int)
@@ -100,7 +100,7 @@ object Group {
 /**
  * Companion object for Groups format providing initialization logic.
  */
-object Groups {
+object Groups:
   def draw(stage: Stage, coTyp: CompTyp, cfg: StageConfig, selectedPants: Seq[Pant], drawOption: DrawOption = DrawOption.Unknown): StageData.GroupsStage = {
     val groupsStage: StageData.GroupsStage = drawOption match {
       case DrawOption.GrpStart    => draw_GrpStart(cfg, selectedPants, stage.noWinSets)
@@ -114,7 +114,7 @@ object Groups {
         stage.data = groupsStage
         groupsStage
       case Left(err) =>
-        println(s"Error initializing group matches: ${err.msg}")
+        Log.error(s"Error initializing group matches: ${err.msg}")
         val emptyStage: StageData.GroupsStage = StageData.GroupsStage(ArrayBuffer.empty[Group])
         stage.data = emptyStage
         emptyStage
@@ -210,14 +210,111 @@ object Groups {
       }
       val sorted = buf.collect { case m: MEntryGr => m }.sortBy(m => (m.round, m.grId))
       for (i <- 0 until sorted.size) { sorted(i).setGameNo(i + 1) }
-      Right(sorted.toSeq)
+      genGrMatchDependencies(groups, sorted.toSeq).map { _ =>
+        for (i <- 0 until sorted.size) {
+          if (sorted(i).hasDepend) {
+            sorted(i).setStatus(MEntry.MS_BLOCK)
+          }
+        }
+        sorted.toSeq
+      }
     } catch {
       case NonFatal(e) =>
         Left(AppError("stage.initGrMatches.failed", e.getMessage))
     }
   }
 
-}
+  /**
+   * Generates match dependency (depend) and trigger values for group matches.
+   * Calculates which games block a player, and which next game is triggered by this match's completion.
+   * Works for both SINGLE and DOUBLE competitions.
+   *
+   * @param groups  The list of groups in this stage.
+   * @param matches The sequence of matches generated for the groups.
+   * @return Either an AppError on failure, or true on successful calculation.
+   */
+  def genGrMatchDependencies(groups: ArrayBuffer[Group], matches: Seq[MEntryGr]): Either[AppError, Boolean] = {
+    import scala.collection.mutable.ListBuffer
+    import scala.collection.mutable.HashSet
+    import scala.util.control.NonFatal
+
+    try {
+      val depMap = scala.collection.mutable.Map[PlayerId, ListBuffer[Int]]()
+      
+      // Initialize dependency map with empty ListBuffers for all valid player IDs in the groups
+      groups.foreach { g =>
+        g.pants.foreach { p =>
+          if (p != null) {
+            getPlayerIdsFromSNO(p.id).foreach { pid =>
+              depMap(pid) = ListBuffer()
+            }
+          }
+        }
+      }
+      
+      // Setup list player -> game numbers
+      for (m <- matches) {
+        val playerIds = getPlayerIdsFromSNO(m.stNoA) ++ getPlayerIdsFromSNO(m.stNoB)
+        playerIds.foreach { pid =>
+          if (depMap.contains(pid)) {
+            depMap(pid) += m.gameNo
+          }
+        }
+      }         
+
+      // Calculate depend and trigger values, splitting on current game number
+      for (m <- matches) {
+        val pidsA = getPlayerIdsFromSNO(m.stNoA)
+        val pidsB = getPlayerIdsFromSNO(m.stNoB)
+
+        val depend  = HashSet[Int]()
+        val trigger = HashSet[Int]()
+
+        pidsA.foreach { pid =>
+          if (depMap.contains(pid)) {
+            val (before, after) = depMap(pid).partition(_ <= m.gameNo)
+            if (after.nonEmpty) trigger += after.sorted.head
+            if (before.size > 1) depend += before.sorted.reverse(1)
+          }
+        }
+
+        pidsB.foreach { pid =>
+          if (depMap.contains(pid)) {
+            val (before, after) = depMap(pid).partition(_ <= m.gameNo)
+            if (after.nonEmpty) trigger += after.sorted.head
+            if (before.size > 1) depend += before.sorted.reverse(1)
+          }
+        }
+
+        m.depend  = depend.mkString("·")
+        m.trigger = trigger.mkString("·")          
+      }  
+      Right(true)
+    } catch {
+      case NonFatal(e) =>
+        Log.error(s"genGrMatchDependencies - ${e.getMessage}")
+        Left(AppError("err0249.genGrMatchDependencies", e.getMessage))
+    }
+  }
+
+  /**
+   * Extracts valid PlayerIds from a Start Number (SNO).
+   * Supports both singles and doubles, returning an empty sequence for BYEs and NNs.
+   *
+   * @param s The start number (SNO) to extract player IDs from.
+   * @return A sequence of PlayerIds associated with the start number.
+   */
+  private def getPlayerIdsFromSNO(s: SNO): Seq[PlayerId] = {
+    if (s.isNN || s.isBye) {
+      Seq.empty
+    } else if (s.isDouble) {
+      val (id1, id2) = s.doubleId
+      Seq(id1, id2)
+    } else {
+      Seq(s.singleId)
+    }
+  }
+
 
   // //*****************************************************************************
   // // Initialize Match Routines
