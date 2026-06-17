@@ -168,6 +168,27 @@ object StageData:
   given rw: ReadWriter[StageData] = macroRW
 
 
+/**
+ * Represents a single stage (round/phase) of a competition.
+ * Contains configuration, player size, current stage data and matches.
+ *
+ * @param id Unique identifier of the stage.
+ * @param coId Parent competition identifier.
+ * @param name Name of the stage.
+ * @param stageConfig Format configuration.
+ * @param status Current status of the stage.
+ * @param demo Flag indicating if this is a demo stage.
+ * @param size Number of participants or size configuration.
+ * @param noPlayers Number of players registered.
+ * @param data Specific stage data format.
+ * @param noWinSets Number of winning sets required.
+ * @param prefId Option reference to predecessor stage.
+ * @param nextIds List of successor stage IDs.
+ * @param quali Qualification type.
+ * @param deleted Soft delete flag.
+ * @param version Optimistic locking version.
+ * @param matches ArrayBuffer of matches assigned to this stage.
+ */
 case class Stage(
   id:                   StageId,
   coId:                 CompId,
@@ -183,7 +204,8 @@ case class Stage(
   var nextIds:          List[StageId] = List(),
   var quali:            QualifyTyp = QualifyTyp.ALL,
   var deleted:          Boolean = false,
-  var version:          Int = 0
+  var version:          Int = 0,
+  val matches:          ArrayBuffer[MEntry] = ArrayBuffer.empty
 ):
 
   // -----------------------------
@@ -191,7 +213,7 @@ case class Stage(
   // -----------------------------
   val candidates: ArrayBuffer[(Pant, Boolean)] = ArrayBuffer.empty
   var candInfo: String = ""
-  val matches: ArrayBuffer[MEntry] = ArrayBuffer.empty
+
   
 
   def initMatches(coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =

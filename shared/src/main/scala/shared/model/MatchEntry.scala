@@ -4,7 +4,7 @@ import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
 import shared.basic.*
 
 
-trait MEntry {
+sealed trait MEntry {
   def coId: CompId 
   def coTyp: CompTyp 
   def stageId: StageId
@@ -343,6 +343,11 @@ case class MEntryTx(coId: CompId, coTyp: CompTyp, stageId: StageId, stageFormat:
 
 
 object MEntry {
+  given rwBase: RW[MEntryBase] = macroRW
+  given rwKo: RW[MEntryKo] = macroRW
+  given rwGr: RW[MEntryGr] = macroRW
+  given rw: RW[MEntry] = macroRW
+
   import scala.collection.mutable.HashSet
   import scala.collection.mutable.Map
 
