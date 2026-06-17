@@ -101,31 +101,25 @@ object Group {
  * Companion object for Groups format providing initialization logic.
  */
 object Groups {
-  def draw(id: StageId, coId: CompId, coTyp: CompTyp, cfg: StageConfig, selectedPants: Seq[Pant], noWinSets: Int, drawOption: DrawOption = DrawOption.Unknown): StageData.GroupsStage = {
-    val arrBuffer: StageData.GroupsStage = drawOption match {
-      case DrawOption.GrpStart    => draw_GrpStart(cfg, selectedPants, noWinSets)
-      case DrawOption.GrpAfterGrp => draw_GrpAfterGrp(cfg, selectedPants, noWinSets)
+  def draw(stage: Stage, coTyp: CompTyp, cfg: StageConfig, selectedPants: Seq[Pant], drawOption: DrawOption = DrawOption.Unknown): StageData.GroupsStage = {
+    val groupsStage: StageData.GroupsStage = drawOption match {
+      case DrawOption.GrpStart    => draw_GrpStart(cfg, selectedPants, stage.noWinSets)
+      case DrawOption.GrpAfterGrp => draw_GrpAfterGrp(cfg, selectedPants, stage.noWinSets)
       case _                      => StageData.GroupsStage(ArrayBuffer.empty[Group])
     }
-    initGrMatches(coId, coTyp, id, cfg.format, noWinSets, arrBuffer.groups) match {
+    initGrMatches(stage.coId, coTyp, stage.id, cfg.format, stage.noWinSets, groupsStage.groups) match {
       case Right(grMatches) =>
-        //stage.matches.clear
-        //stage.matches = grMatches
-
-        arrBuffer
+        stage.matches.clear()
+        stage.matches ++= grMatches
+        stage.data = groupsStage
+        groupsStage
       case Left(err) =>
         println(s"Error initializing group matches: ${err.msg}")
-        StageData.GroupsStage(ArrayBuffer.empty[Group])
+        val emptyStage: StageData.GroupsStage = StageData.GroupsStage(ArrayBuffer.empty[Group])
+        stage.data = emptyStage
+        emptyStage
     }
-  } 
-    
-    // coId: CompId,
-    // coTyp: CompTyp,
-    // stageId: StageId,
-    // stageFormat: StageFormat, 
-    // noWinSets: Int,
-    // groups: ArrayBuffer[Group]
-
+  }
 
 
   def draw_GrpAfterGrp(cfg: StageConfig, selectedPants: Seq[Pant], noWinSets: Int): StageData.GroupsStage = {
