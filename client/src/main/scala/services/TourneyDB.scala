@@ -30,6 +30,8 @@ object TourneyDB extends ComWrapper with Debouncer:
 
   /**
    * Initializes the application state by loading all data from the server.
+   * Loads the basic tournament data first to resolve the WP ID/Slug,
+   * then loads competitions, clubs, players, and stages in parallel.
    */
   def init(idOrSlug: Int | String): Future[Either[AppError, Long]] =
     Logging.info(s"Initialisiere TourneyDB für $idOrSlug: Lade alle Daten vom Server...")
@@ -40,25 +42,25 @@ object TourneyDB extends ComWrapper with Debouncer:
       case _ => // slug will be resolved during load
     }
 
-    // Explicitly define each load to keep track of this.load()
-    val loadTourney = this.load(idOrSlug)
-    val loads = Seq(
-      loadTourney,
-      CompetitionDB.load(),
-      ClubDB.load(),
-      PlayerDB.load(),
-      StageDB.load()
-    )
-
-    Future.sequence(loads).flatMap { results =>
-      val errors = results.collect { case Left(err) => err }
-      if (errors.nonEmpty) then
-        val combinedMsg = errors.map(_.msgCode).mkString(", ")
-        Future.successful(Left(AppError("init.failed", combinedMsg)))
-      else
-        Logging.info("TourneyDB erfolgreich initialisiert.")
-        // Return the result of loadTourney
-        loadTourney
+    this.load(idOrSlug).flatMap {
+      case Right(version) =>
+        val loads = Seq(
+          CompetitionDB.load(),
+          ClubDB.load(),
+          PlayerDB.load(),
+          StageDB.load()
+        )
+        Future.sequence(loads).map { results =>
+          val errors = results.collect { case Left(err) => err }
+          if (errors.nonEmpty) then
+            val combinedMsg = errors.map(_.msgCode).mkString(", ")
+            Left(AppError("init.failed", combinedMsg))
+          else
+            Logging.info("TourneyDB erfolgreich initialisiert.")
+            Right(version)
+        }
+      case Left(err) =>
+        Future.successful(Left(err))
     }
 
   case class TourneySyncRequest(version: Int, tourney: Tourney) derives ReadWriter
