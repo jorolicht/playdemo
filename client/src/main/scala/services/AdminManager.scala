@@ -42,7 +42,7 @@ object AdminManager extends ComWrapper {
       )
     )
 
-    val jsonString = write(exportData)
+    val jsonString = write(exportData, indent = 2)
     val blob = new dom.Blob(js.Array(jsonString), dom.BlobPropertyBag(`type` = "application/json"))
     val url = dom.URL.createObjectURL(blob)
     val a = dom.document.createElement("a").asInstanceOf[dom.html.Anchor]

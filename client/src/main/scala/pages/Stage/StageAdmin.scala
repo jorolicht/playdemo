@@ -258,7 +258,7 @@ object StageAdmin extends BasePage with JsWrapper:
               }.exists(_.stageConfig.format == StageFormat.GR)
               
               val drawOption = if (hasPrevGrStage) DrawOption.GrpAfterGrp else DrawOption.GrpStart
-              Groups.draw(r, comp.typ, cfg, selectedPants, drawOption)
+              r.data = Groups.draw(r, comp.typ, cfg, selectedPants, drawOption)
         
             case _ => debug(s"Unsupported generation for mode $cfg")
 
