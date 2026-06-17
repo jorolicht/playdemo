@@ -253,7 +253,12 @@ object StageAdmin extends BasePage with JsWrapper:
               r.data = SwissSystem.draw(selectedPants, r.noWinSets, DrawOption.Unknown)
               
             case StageFormat.GR =>
-              r.data = Groups.draw(cfg, selectedPants, r.noWinSets, DrawOption.Unknown)
+              val hasPrevGrStage = r.prefId.flatMap { pId =>
+                services.TourneyDB.tourney.stages.find(s => s != null && s.id == pId)
+              }.exists(_.stageConfig.format == StageFormat.GR)
+              
+              val drawOption = if (hasPrevGrStage) DrawOption.GrpAfterGrp else DrawOption.GrpStart
+              r.data = Groups.draw(cfg, selectedPants, r.noWinSets, drawOption)
         
             case _ => debug(s"Unsupported generation for mode $cfg")
 
