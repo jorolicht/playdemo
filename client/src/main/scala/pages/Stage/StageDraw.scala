@@ -56,26 +56,22 @@ object StageDraw extends BasePage with JsWrapper:
         val stage = Global.currentSelection.stage.get
         val comp = Global.currentSelection.competition.get
         val isFin = comp.status == CompStatus.FIN || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)
-        if (stage.status == StageStatus.AUS) {
-          if (isFin) {
-            debug("Cannot start playing: competition is finalized or no write access.")
-          } else {
-            stage.initMatches(comp.typ) match {
-              case Right(_) =>
-                stage.status = StageStatus.EIN
-                services.TourneyDB.tourney.updateStage(stage) match {
-                  case Right(updatedStage) =>
-                    Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
-                    loadPage(StageInput.name, "")
-                  case Left(err) =>
-                    error(s"Failed to update stage status: ${err.msgCode}")
-                }
-              case Left(err) =>
-                error(s"Failed to initialize matches: ${err.msgCode}")
-            }
-          }
+        if (isFin) {
+          debug("Cannot start playing: competition is finalized or no write access.")
         } else {
-          loadPage(StageInput.name, "")
+          stage.initMatches(comp.typ) match {
+            case Right(_) =>
+              stage.status = StageStatus.EIN
+              services.TourneyDB.tourney.updateStage(stage) match {
+                case Right(updatedStage) =>
+                  Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                  loadPage(StageInput.name, "")
+                case Left(err) =>
+                  error(s"Failed to update stage status: ${err.msgCode}")
+              }
+            case Left(err) =>
+              error(s"Failed to initialize matches: ${err.msgCode}")
+          }
         }
 
       case id if id.id.startsWith(PlayerItem.id) =>
