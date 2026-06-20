@@ -214,6 +214,20 @@ case class Stage(
   val candidates: ArrayBuffer[(Pant, Boolean)] = ArrayBuffer.empty
   var candInfo: String = ""
 
+  // -----------------------------
+  // Derived counters (safer)
+  // -----------------------------
+  def mFinished: Int = 0
+  def mTotal: Int    = 0
+  def mFix: Int      = 0
+
+  // -----------------------------
+  // Convenience helpers
+  // -----------------------------
+  def isGroupStage: Boolean = stageConfig.format == StageFormat.GR
+  def isKoStage: Boolean = stageConfig.format == StageFormat.KO
+
+
   /**
    * Initialisiert die Matches für diese Stage basierend auf dem Wettbewerbstyp.
    *
@@ -302,18 +316,7 @@ case class Stage(
 
 
 
-  // -----------------------------
-  // Derived counters (safer)
-  // -----------------------------
-  def mFinished: Int = 0
-  def mTotal: Int    = 0
-  def mFix: Int      = 0
 
-  // -----------------------------
-  // Convenience helpers
-  // -----------------------------
-  def isGroupStage: Boolean = stageConfig.format == StageFormat.GR
-  def isKoStage: Boolean = stageConfig.format == StageFormat.KO
 
 
 object Stage:

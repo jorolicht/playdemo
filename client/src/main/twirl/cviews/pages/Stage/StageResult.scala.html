@@ -19,20 +19,36 @@
                         <table class="table table-sm table-striped mb-0 small">
                             <thead class="table-secondary">
                                 <tr>
-                                    <th class="ps-2">@gM("+rank_header")</th>
+                                    <th class="ps-2 text-center" style="width: 50px;">Pos</th>
                                     <th>@gM("+name_header")</th>
                                     <th class="text-center">@gM("+matches_header")</th>
                                     <th class="text-center">@gM("+sets_header")</th>
+                                    <th class="text-center">Bälle</th>
+                                    <th class="text-center">Diff.</th>
+                                    <th class="text-center" style="width: 60px;">Platz</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @g.pants.zipWithIndex.map { case (p, i) =>
-                                    <tr>
-                                        <td class="ps-2 fw-bold text-center">@{i + 1}.</td>
-                                        <td>@p.name</td>
-                                        <td class="text-center">@g.points(i)._1:@g.points(i)._2</td>
-                                        <td class="text-center">@g.sets(i)._1:@g.sets(i)._2</td>
-                                    </tr>
+                                @{
+                                    val zipped = g.pants.indices.map { i =>
+                                        (g.pants(i), g.points(i), g.sets(i), g.balls(i))
+                                    }
+                                    val sorted = zipped.sortBy { case (p, _, _, _) => 
+                                        if (p.place._1 == 0) Int.MaxValue else p.place._1
+                                    }
+                                    sorted.zipWithIndex.map { case ((p, pts, sts, bls), idx) =>
+                                        val diff = bls._1 - bls._2
+                                        val diffStr = if (diff > 0) s"+$diff" else diff.toString
+                                        <tr>
+                                            <td class="ps-2 fw-bold text-center">@{idx + 1}.</td>
+                                            <td>@p.name</td>
+                                            <td class="text-center">@{pts._1}:@{pts._2}</td>
+                                            <td class="text-center">@{sts._1}:@{sts._2}</td>
+                                            <td class="text-center">@{bls._1}:@{bls._2}</td>
+                                            <td class="text-center">@diffStr</td>
+                                            <td class="text-center fw-bold">@{if (p.place._1 > 0) p.place._1.toString else "-"}</td>
+                                        </tr>
+                                    }
                                 }
                             </tbody>
                         </table>
