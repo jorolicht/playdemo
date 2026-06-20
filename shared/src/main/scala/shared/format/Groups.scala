@@ -77,61 +77,138 @@ case class Group(
   }
 
   /**
-   * Calculates the position/ranking of participants in this group.
-   * Ranking is computed lexicographically using:
-   * 1. Points difference (most significant)
-   * 2. Sets difference (secondary)
-   * 3. Balls difference (least significant)
+   * Berechnet die Platzierungen (Rankings) der Teilnehmer in dieser Gruppe.
    *
-   * Results are set dynamically in each participant's place field.
+   * Die Platzierung wird lexikografisch anhand folgender Kriterien ermittelt:
+   * 1. Punktdifferenz (höchste Priorität)
+   * 2. Satzdifferenz (mittlere Priorität)
+   * 3. Balldifferenz (niedrigste Priorität)
+   *
+   * Die errechneten Platzierungen werden direkt in das `place`-Feld jedes
+   * Teilnehmers (`Pant`) eingetragen.
+   *
+   * @return Left(AppError) im Fehlerfall oder Right(()) bei erfolgreicher Berechnung.
    */
-  def calc(): Unit =
+  def calc(): Either[AppError, Unit] =
     try
-      if (size <= 0) return
+      if size > 0 then
+        // Hilfsfunktion zur Summierung der Punkte eines Teilnehmers
+        def sumPoints(pos: Int): (Int, Int) =
+          results(pos).filter(_.valid).foldLeft((0, 0)) { case ((acc1, acc2), entry) =>
+            (acc1 + entry.points._1, acc2 + entry.points._2)
+          }
 
-      // Helper function to sum up points for a participant
-      def sumPoints(pos: Int): (Int, Int) =
-        results(pos).filter(_.valid).foldLeft((0, 0)) { case ((acc1, acc2), entry) =>
-          (acc1 + entry.points._1, acc2 + entry.points._2)
-        }
+        // Hilfsfunktion zur Summierung der Sätze eines Teilnehmers
+        def sumSets(pos: Int): (Int, Int) =
+          results(pos).filter(_.valid).foldLeft((0, 0)) { case ((acc1, acc2), entry) =>
+            (acc1 + entry.sets._1, acc2 + entry.sets._2)
+          }
 
-      // Helper function to sum up sets for a participant
-      def sumSets(pos: Int): (Int, Int) =
-        results(pos).filter(_.valid).foldLeft((0, 0)) { case ((acc1, acc2), entry) =>
-          (acc1 + entry.sets._1, acc2 + entry.sets._2)
-        }
+        // Hilfsfunktion zur Summierung der Balldifferenzen eines Teilnehmers
+        def sumBallDiffs(pos: Int): (Int, Int) =
+          results(pos).filter(_.valid).foldLeft((0, 0)) { case ((acc1, acc2), entry) =>
+            (acc1 + entry.ballDiff._1, acc2 + entry.ballDiff._2)
+          }
 
-      // Helper function to sum up ball differences for a participant
-      def sumBallDiffs(pos: Int): (Int, Int) =
-        results(pos).filter(_.valid).foldLeft((0, 0)) { case ((acc1, acc2), entry) =>
-          (acc1 + entry.ballDiff._1, acc2 + entry.ballDiff._2)
-        }
+        var tmpPos = Array.ofDim[(Int, Long)](size)
+        for i <- 0 until size do
+          balls(i)  = sumBallDiffs(i)
+          sets(i)   = sumSets(i)
+          points(i) = sumPoints(i)
+          
+          // Gewichtungsbasierte Formel zur Sortierung nach Punkten, Sätzen und Bällen
+          val score = (balls(i)._1 - balls(i)._2) + 2000L +
+                      ((sets(i)._1 - sets(i)._2) + 50) * 10000L +
+                      ((points(i)._1 - points(i)._2) + 50) * 10000000L
+          tmpPos(i) = (i, score)
 
-      var tmpPos = Array.ofDim[(Int, Long)](size)
-      for (i <- 0 until size) {
-        balls(i)  = sumBallDiffs(i)
-        sets(i)   = sumSets(i)
-        points(i) = sumPoints(i)
+        // Absteigend nach Score sortieren
+        tmpPos = tmpPos.sortBy(_._2).reverse
         
-        // Weight-based score formula to sort by points diff, sets diff, and balls diff
-        val score = (balls(i)._1 - balls(i)._2) + 2000L +
-                    ((sets(i)._1 - sets(i)._2) + 50) * 10000L +
-                    ((points(i)._1 - points(i)._2) + 50) * 10000000L
-        tmpPos(i) = (i, score)
-      }
-
-      // Sort descending by score
-      tmpPos = tmpPos.sortBy(_._2).reverse
+        var cnt = 1 
+        pants(tmpPos(0)._1).place = (cnt, 0)
+        for i <- 1 until size do 
+          if tmpPos(i)._2 < tmpPos(i-1)._2 then cnt = cnt + 1
+          pants(tmpPos(i)._1).place = (cnt, 0)
       
-      var cnt = 1 
-      pants(tmpPos(0)._1).place = (cnt, 0)
-      for (i <- 1 until size) { 
-        if (tmpPos(i)._2 < tmpPos(i-1)._2) { cnt = cnt + 1 }
-        pants(tmpPos(i)._1).place = (cnt, 0) 
-      }
+      Right(())
     catch
       case e: Throwable =>
         Log.error(s"ERROR Group.calc (grId: ${grId}): ${e.getMessage}")
+        Left(AppError("Group_calc"))
+
+
+  /**
+   * Setzt alle Spielergebnisse in der Ergebnismatrix zurück (valid = false)
+   * und berechnet die Platzierungen neu.
+   *
+   * @return Left(AppError) bei Berechnungsfehlern oder Right(()) bei Erfolg.
+   */
+  def resetResults(): Either[AppError, Unit] =
+    for
+      i <- 0 until size
+      j <- 0 until size
+      if j != i
+    do
+      results(i)(j).valid = false
+    calc()
+
+
+  /**
+   * Alias für resetResults. Setzt alle Spielergebnisse in der Ergebnismatrix zurück
+   * und berechnet die Platzierungen neu.
+   *
+   * @return Left(AppError) bei Berechnungsfehlern oder Right(()) bei Erfolg.
+   */
+  def resetMatches(): Either[AppError, Unit] = resetResults()
+
+
+  /**
+   * Trägt das Spielergebnis eines Gruppenspiels in die Ergebnismatrix ein.
+   *
+   * Validiert zunächst die Spieler-Indizes. Wenn das Spiel beendet ist (Status MS_FIN,
+   * MS_FIX oder MS_DRAW) und die Sätze gültig sind, werden die Ergebnisse, Sätze,
+   * Punkte und Balldifferenzen für das Spiel sowie der invertierte Eintrag für den
+   * gegnerischen Spieler eingetragen. Falls das Ergebnis und die Sätze leer sind,
+   * wird der Eintrag zurückgesetzt.
+   *
+   * @param m Der einzutragende Match-Eintrag (MEntryGr).
+   * @return Left(AppError) im Fehlerfall oder Right(Boolean) zur Bestätigung (true bei
+   *         erfolgreicher Eintragung/Rücksetzung, false bei ungültigen Eingabedaten).
+   */
+  def setMatch(m: MEntryGr): Either[AppError, Boolean] =
+    import shared.model.MEntry.*
+
+    try
+      val balls = if m.result == "" then new Array[String](0) else m.result.split('·')
+
+      if m.wgw._1 < 1 || m.wgw._1 > size || m.wgw._2 < 1 || m.wgw._2 > size then
+        Left(AppError("err0225.systemgroup.invalid.whoagainstwho"))
+      else if (m.status == MS_FIN || m.status == MS_FIX || m.status == MS_DRAW) && validSets(m.sets, noWinSets) then
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).valid    = true
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).balls    = balls
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).sets     = m.sets
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).points   = getPoints(m.sets, noWinSets)
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).ballDiff = getBalls(balls, noWinSets)
+        results(m.wgw._2 - 1)(m.wgw._1 - 1)          = results(m.wgw._1 - 1)(m.wgw._2 - 1).invert
+        Right(true)
+      else if m.result == "" && m.sets == (0, 0) then
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).valid    = false
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).balls    = new Array[String](0)
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).sets     = (0, 0)
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).points   = (0, 0)
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).ballDiff = (0, 0)
+        results(m.wgw._2 - 1)(m.wgw._1 - 1)          = results(m.wgw._1 - 1)(m.wgw._2 - 1).invert
+        Right(true)
+      else
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).valid = false
+        results(m.wgw._2 - 1)(m.wgw._1 - 1).valid = false
+        Right(false)
+    catch
+      case e: Throwable =>
+        Log.error(s"ERROR Group.setMatch (grId: ${grId}): ${e.getMessage} für Match: $m")
+        Left(AppError("Group_setMatch"))
+
 
 
 

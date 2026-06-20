@@ -214,8 +214,15 @@ case class Stage(
   val candidates: ArrayBuffer[(Pant, Boolean)] = ArrayBuffer.empty
   var candInfo: String = ""
 
-  
-
+  /**
+   * Initialisiert die Matches für diese Stage basierend auf dem Wettbewerbstyp.
+   *
+   * Löscht zunächst alle vorhandenen Matches und fügt dann die neu generierten Matches
+   * entsprechend des Stage-Formats (Gruppen, Round Robin, Swiss oder Knockout) hinzu.
+   *
+   * @param coTyp Der Wettbewerbstyp (CompTyp).
+   * @return Left(AppError) im Fehlerfall oder Right(Boolean) zur Bestätigung des Erfolgs.
+   */
   def initMatches(coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
     matches.clear()
     data match
@@ -223,6 +230,51 @@ case class Stage(
       case StageData.RoundRobinStage(rr) => initRrMatches(rr, coTyp)
       case StageData.SwissStage(sw)      => initSwMatches(sw, coTyp)
       case StageData.KnockoutStage(ko)   => initKoMatches(ko, coTyp)
+
+  /**
+   * Setzt alle Matches dieser Stage zurück und berechnet die Gruppenplatzierungen neu.
+   *
+   * @return Left(AppError) bei Berechnungsfehlern oder Right(()) bei Erfolg.
+   */
+  def resetMatches(): Either[shared.basic.AppError, Unit] = 
+    for i <- 0 until matches.length do matches(i).reset()
+    data match
+      case StageData.GroupsStage(groups) => resetGrMatches(groups)
+      case StageData.RoundRobinStage(rr) => resetRrMatches(rr)
+      case StageData.SwissStage(sw)      => resetSwMatches(sw)
+      case StageData.KnockoutStage(ko)   => resetKoMatches(ko)
+
+  /**
+   * Setzt alle Gruppenspiele zurück und berechnet die Platzierungen für jede Gruppe neu.
+   *
+   * @param groups Die Liste der Gruppen dieser Stage.
+   * @return Left(AppError) bei Berechnungsfehlern oder Right(()) bei Erfolg.
+   */
+  private def resetGrMatches(groups: ArrayBuffer[Group]): Either[shared.basic.AppError, Unit] =
+    groups.foldLeft[Either[shared.basic.AppError, Unit]](Right(())) { (acc, group) =>
+      acc.flatMap(_ => group.resetMatches())
+    }
+
+  /**
+   * Dummy-Methode zum Zurücksetzen von Round-Robin-Matches.
+   */
+  private def resetRrMatches(rrGroup: RrGroup): Either[shared.basic.AppError, Unit] =
+    Right(())
+
+  /**
+   * Dummy-Methode zum Zurücksetzen von Swiss-System-Matches.
+   */
+  private def resetSwMatches(swGroup: SwGroup): Either[shared.basic.AppError, Unit] =
+    Right(())
+
+  /**
+   * Dummy-Methode zum Zurücksetzen von Knockout-Matches.
+   */
+  private def resetKoMatches(ko: KoStage): Either[shared.basic.AppError, Unit] =
+    Right(())
+
+
+
 
   private def initGrMatches(groups: ArrayBuffer[Group], coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
     import shared.format.Groups
