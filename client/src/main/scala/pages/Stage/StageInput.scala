@@ -37,8 +37,10 @@ object StageInput extends BasePage with JsWrapper:
         
         // Setup initial validation states and input change listeners
         attachInputListeners(r)
+        startRunningTimer()
         true
       case None => 
+        stopRunningTimer()
         debug("StageInput: No stage selected, redirecting to Competition Info")
         loadPage(CompetitionInfo.name, "")
         false
@@ -225,6 +227,16 @@ object StageInput extends BasePage with JsWrapper:
       checkMatchValidity(m.gameNo, stage.noWinSets)
     }
     
+    // Attach event listeners for table number input
+    val tableInputs = dom.document.querySelectorAll(".match-table-input")
+    for (i <- 0 until tableInputs.length) {
+      val tInput = tableInputs.item(i).asInstanceOf[dom.html.Input]
+      val gameNo = tInput.getAttribute("data-game").toInt
+      tInput.onchange = (e: dom.Event) => {
+        updateMatchTable(gameNo, tInput.value.trim, stage)
+      }
+    }
+    
     // Set colors according to status
     updateColors(stage)
 
@@ -360,3 +372,87 @@ object StageInput extends BasePage with JsWrapper:
         }
       }
     }
+
+
+  private def nowTimestamp(): String =
+    val d = new scala.scalajs.js.Date()
+    val yyyy = d.getFullYear().toInt.toString
+    val mm = f"${d.getMonth().toInt + 1}%02d"
+    val dd = f"${d.getDate().toInt}%02d"
+    val hh = f"${d.getHours().toInt}%02d"
+    val min = f"${d.getMinutes().toInt}%02d"
+    val ss = f"${d.getSeconds().toInt}%02d"
+    s"$yyyy$mm$dd$hh$min$ss"
+
+  def getRunningTime(startTimeStr: String): String =
+    if startTimeStr == null || startTimeStr.length != 14 then return "-"
+    try
+      val year = startTimeStr.substring(0, 4).toInt
+      val month = startTimeStr.substring(4, 6).toInt - 1
+      val day = startTimeStr.substring(6, 8).toInt
+      val hour = startTimeStr.substring(8, 10).toInt
+      val minute = startTimeStr.substring(10, 12).toInt
+      val second = startTimeStr.substring(12, 14).toInt
+      
+      val startMs = new scala.scalajs.js.Date(year, month, day, hour, minute, second).getTime()
+      val nowMs = new scala.scalajs.js.Date().getTime()
+      val diffSeconds = ((nowMs - startMs) / 1000).toLong
+      if diffSeconds < 0 then return "00:00"
+      
+      val m = diffSeconds / 60
+      val s = diffSeconds % 60
+      f"$m%02d:$s%02d"
+    catch
+      case _: Throwable => "-"
+
+  import scala.scalajs.js.timers.*
+  private var runningTimer: Option[SetIntervalHandle] = None
+
+  def startRunningTimer(): Unit =
+    stopRunningTimer()
+    val intervalId = setInterval(1000) {
+      val elements = dom.document.querySelectorAll("[id^='running-time-']")
+      if elements.length == 0 then
+        stopRunningTimer()
+      else
+        for i <- 0 until elements.length do
+          val elem = elements.item(i).asInstanceOf[dom.raw.HTMLElement]
+          val status = elem.getAttribute("data-status")
+          val startTime = elem.getAttribute("data-start-time")
+          if status == MEntry.MS_RUN.toString && startTime != null && startTime.nonEmpty then
+            elem.textContent = getRunningTime(startTime)
+    }
+    runningTimer = Some(intervalId)
+
+  def stopRunningTimer(): Unit =
+    runningTimer.foreach(clearInterval)
+    runningTimer = None
+
+  def updateMatchTable(gameNo: Int, tableVal: String, stage: Stage): Unit =
+    stage.matches.find(_.gameNo == gameNo) match
+      case Some(m: MEntryGr) =>
+        m.playfield = tableVal
+        
+        if (!m.finished) {
+          if (tableVal.nonEmpty) {
+            if (m.status != MEntry.MS_RUN) {
+              m.status = MEntry.MS_RUN
+              if (m.startTime == null || m.startTime.trim.isEmpty) {
+                m.startTime = nowTimestamp()
+              }
+            }
+          } else {
+            m.status = MEntry.MS_READY
+            m.startTime = ""
+            updateStageMatchStatuses(stage)
+          }
+        }
+        
+        services.TourneyDB.tourney.updateStage(stage) match
+          case Right(updatedStage) =>
+            Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+            render()
+          case Left(err) =>
+            error(s"StageInput: Failed to update table number: ${err.msgCode}")
+      case _ =>
+

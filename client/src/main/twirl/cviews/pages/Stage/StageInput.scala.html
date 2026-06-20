@@ -41,9 +41,10 @@
                                     <th style="width: 80px;" class="text-center">Gruppe</th>
                                     <th style="width: 80px;" class="text-center">WGW</th>
                                     <th class="text-end" style="width: 250px;">Spieler A</th>
-                                    <th style="width: 30px;" class="text-center">-</th>
+                                    <th style="width: 80px;" class="text-center">Zeit</th>
                                     <th class="text-start" style="width: 250px;">Spieler B</th>
                                     <th style="width: 60px;" class="text-center">Nr.</th>
+                                    <th style="width: 80px;" class="text-center">Tisch</th>
                                     @* Input fields headers *@
                                     @for(i <- 1 to (stage.noWinSets * 2 - 1)) {
                                         <th style="width: 50px;" class="text-center">Satz @i</th>
@@ -66,12 +67,33 @@
                                             <td class="text-end">
                                                 <span id="nameA-@m.gameNo" class="fw-bold player-name-display">@nameA</span>
                                             </td>
-                                            <td class="text-center text-muted">-</td>
+                                            <td class="text-center fw-bold font-monospace" 
+                                                id="running-time-@m.gameNo" 
+                                                data-start-time="@m.startTime" 
+                                                data-status="@m.status"
+                                                style="width: 80px;">
+                                                @{
+                                                    if (m.status == MEntry.MS_RUN) {
+                                                        pages.Stage.StageInput.getRunningTime(m.startTime)
+                                                    } else {
+                                                        "-"
+                                                    }
+                                                }
+                                            </td>
                                             <td class="text-start">
                                                 <span id="nameB-@m.gameNo" class="fw-bold player-name-display">@nameB</span>
                                             </td>
                                             <td class="text-center text-muted small">
                                                 @m.gameNo
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="text" 
+                                                       id="table_@m.gameNo" 
+                                                       class="form-control form-control-sm text-center match-table-input" 
+                                                       style="width: 3.5rem; display: inline-block;" 
+                                                       value="@m.playfield"
+                                                       data-game="@m.gameNo"
+                                                       @disabledNoAccess />
                                             </td>
                                             @* Render input fields *@
                                             @for(setIdx <- 1 to (stage.noWinSets * 2 - 1)) {
