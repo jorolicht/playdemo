@@ -136,6 +136,21 @@ object StageInput extends BasePage with JsWrapper:
             
             // Re-evaluate stage match statuses based on dependencies
             updateStageMatchStatuses(stage)
+
+            // Set match into stage format and recalculate standings
+            stage.data match
+              case StageData.GroupsStage(groups) =>
+                groups.find(_.grId == m.grId) match
+                  case Some(group) =>
+                    group.setMatch(m) match
+                      case Left(err) => error(s"StageInput: setMatch failed: ${err.msgCode}")
+                      case Right(_) =>
+                        group.calc() match
+                          case Left(err) => error(s"StageInput: calc failed: ${err.msgCode}")
+                          case Right(_)  => ()
+                  case None =>
+                    error(s"StageInput: Group with grId ${m.grId} not found")
+              case _ =>
             
             services.TourneyDB.tourney.updateStage(stage) match
               case Right(updatedStage) =>
@@ -165,6 +180,21 @@ object StageInput extends BasePage with JsWrapper:
             
             // Re-evaluate stage match statuses
             updateStageMatchStatuses(stage)
+
+            // Set match into stage format and recalculate standings
+            stage.data match
+              case StageData.GroupsStage(groups) =>
+                groups.find(_.grId == m.grId) match
+                  case Some(group) =>
+                    group.setMatch(m) match
+                      case Left(err) => error(s"StageInput: setMatch failed: ${err.msgCode}")
+                      case Right(_) =>
+                        group.calc() match
+                          case Left(err) => error(s"StageInput: calc failed: ${err.msgCode}")
+                          case Right(_)  => ()
+                  case None =>
+                    error(s"StageInput: Group with grId ${m.grId} not found")
+              case _ =>
             
             services.TourneyDB.tourney.updateStage(stage) match
               case Right(updatedStage) =>

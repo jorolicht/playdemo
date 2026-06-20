@@ -243,7 +243,7 @@ object Groups:
       case DrawOption.GrpAfterGrp => draw_GrpAfterGrp(cfg, selectedPants, stage.noWinSets)
       case _                      => StageData.GroupsStage(ArrayBuffer.empty[Group])
     }
-    
+
     initGrMatches(stage.coId, coTyp, stage.id, cfg.format, stage.noWinSets, groupsStage.groups) match {
       case Right(grMatches) =>
         stage.matches.clear()
@@ -511,70 +511,3 @@ object Groups:
     }
   }
 
-
-  // //*****************************************************************************
-  // // Initialize Match Routines
-  // //*****************************************************************************
-  // // initialize Group matches
-  // def initGrMatches(coTyp: CompTyp.Value): Either[Error, Boolean] = {
-  //   import shared.utils.GroupPlan
-  //   matches = ArrayBuffer[MEntry]()
-
-  //   try { groups.foreach { g =>
-  //     val gPE = GroupPlan.get(g.size)
-  //     for (rnd <-1 to gPE.noRounds) { gPE.rounds(rnd-1).foreach { wgw =>
-  //       matches += MEntryGr.init(coId, coTyp, coPhId, getTyp, 0, g.pants(wgw._1-1).sno, g.pants(wgw._2-1).sno, rnd, g.grId, wgw, noWinSets)
-  //     }}  
-  //   }} catch { case _: Throwable => println("ERROR: initGrMatches -> exception generating matches according to plan"); Left(Error("err0197.msg.initGrMatches.generating")) }
-
-  //   matches = matches.sortBy(r => (r.round, r.asInstanceOf[MEntryGr].grId))
-  //   for (i <- 0 until matches.size) { matches(i).setGameNo(i+1) } 
-  //   genGrMatchDependencies() match {
-  //     case Left(err)  => Left(err)
-  //     case Right(res) => {
-  //       for (i <- 0 until matches.size) { if (matches(i).asInstanceOf[MEntryGr].hasDepend) { matches(i).setStatus(MEntry.MS_BLOCK)} } 
-  //       Right(res)
-  //     }
-  //   }
-  // } 
-
-  // // initialize matches for KO-System
-  // def initKoMatches(coTyp: CompTyp.Value): Either[Error, Int] = {
-  //   matches = ArrayBuffer[MEntry]()
-  //   var err      = Error.dummy
-  //   var gameNo   = 0
-  //   var byeCount = 0
-
-  //   for (r <- ko.rnds to 0 by -1) {
-  //     for (m <- 1 to KoRound.getMatchesPerRound(r)) {
-  //       gameNo = gameNo + 1
-  //       if (r == ko.rnds) {
-  //         // first/highest round initialize with participants
-  //         val pantNo = (m-1)*2
-  //         val byeStatus = (SNO.isBye(ko.pants(pantNo).sno), SNO.isBye(ko.pants(pantNo+1).sno))
-  //         val mtch = byeStatus match {
-  //           case (false, false) => MEntryKo.init(coId, coTyp, coPhId, getTyp, ko.pants(pantNo).sno, ko.pants(pantNo+1).sno, gameNo, r, m, "","", MEntry.MS_READY, (0,0), noWinSets)
-  //           case (false, true)  => {
-  //             byeCount = byeCount +1
-  //             MEntryKo.init(coId, coTyp, coPhId, getTyp, ko.pants(pantNo).sno, ko.pants(pantNo+1).sno, gameNo, r, m, "","", MEntry.MS_FIX, (noWinSets, 0), noWinSets)
-  //           }  
-  //           case (true, false)  => {
-  //             byeCount = byeCount +1
-  //             MEntryKo.init(coId, coTyp, coPhId, getTyp, ko.pants(pantNo).sno, ko.pants(pantNo+1).sno, gameNo, r, m, "","", MEntry.MS_FIX, (0, noWinSets), noWinSets)
-  //           }
-  //           case (true, true)   => {
-  //             err = Error("initKoMatches_invalid_ko_match")
-  //             MEntryKo.init(coId, coTyp, coPhId, getTyp, ko.pants(pantNo).sno, ko.pants(pantNo+1).sno, gameNo, r, m, "","", MEntry.MS_UNKN, (0,0), noWinSets)
-  //           }  
-  //         }
-  //         matches += mtch
-  //       } else {
-  //         matches += MEntryKo.init(coId, coTyp, coPhId, getTyp, "", "", gameNo, r, m, "","", MEntry.MS_MISS, (0,0), noWinSets)
-  //       }
-  //     }
-  //   }
-
-  //   // propagate bye matches
-  //   for (g <- 1 to KoRound.getMatchesPerRound(ko.rnds)) { val x = propMatch(g) }
-  //   if (err.isDummy) Right(byeCount) else Left(err)
-  // }
