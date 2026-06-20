@@ -76,6 +76,65 @@ case class Group(
     avgRating = sum/pantCnt
   }
 
+  /**
+   * Calculates the position/ranking of participants in this group.
+   * Ranking is computed lexicographically using:
+   * 1. Points difference (most significant)
+   * 2. Sets difference (secondary)
+   * 3. Balls difference (least significant)
+   *
+   * Results are set dynamically in each participant's place field.
+   */
+  def calc(): Unit =
+    try
+      if (size <= 0) return
+
+      // Helper function to sum up points for a participant
+      def sumPoints(pos: Int): (Int, Int) =
+        results(pos).filter(_.valid).foldLeft((0, 0)) { case ((acc1, acc2), entry) =>
+          (acc1 + entry.points._1, acc2 + entry.points._2)
+        }
+
+      // Helper function to sum up sets for a participant
+      def sumSets(pos: Int): (Int, Int) =
+        results(pos).filter(_.valid).foldLeft((0, 0)) { case ((acc1, acc2), entry) =>
+          (acc1 + entry.sets._1, acc2 + entry.sets._2)
+        }
+
+      // Helper function to sum up ball differences for a participant
+      def sumBallDiffs(pos: Int): (Int, Int) =
+        results(pos).filter(_.valid).foldLeft((0, 0)) { case ((acc1, acc2), entry) =>
+          (acc1 + entry.ballDiff._1, acc2 + entry.ballDiff._2)
+        }
+
+      var tmpPos = Array.ofDim[(Int, Long)](size)
+      for (i <- 0 until size) {
+        balls(i)  = sumBallDiffs(i)
+        sets(i)   = sumSets(i)
+        points(i) = sumPoints(i)
+        
+        // Weight-based score formula to sort by points diff, sets diff, and balls diff
+        val score = (balls(i)._1 - balls(i)._2) + 2000L +
+                    ((sets(i)._1 - sets(i)._2) + 50) * 10000L +
+                    ((points(i)._1 - points(i)._2) + 50) * 10000000L
+        tmpPos(i) = (i, score)
+      }
+
+      // Sort descending by score
+      tmpPos = tmpPos.sortBy(_._2).reverse
+      
+      var cnt = 1 
+      pants(tmpPos(0)._1).place = (cnt, 0)
+      for (i <- 1 until size) { 
+        if (tmpPos(i)._2 < tmpPos(i-1)._2) { cnt = cnt + 1 }
+        pants(tmpPos(i)._1).place = (cnt, 0) 
+      }
+    catch
+      case e: Throwable =>
+        Log.error(s"ERROR Group.calc (grId: ${grId}): ${e.getMessage}")
+
+
+
 object Group {
   given rw: RW[Group] = macroRW
 
