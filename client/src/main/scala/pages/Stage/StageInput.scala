@@ -157,7 +157,15 @@ object StageInput extends BasePage with JsWrapper:
             services.TourneyDB.tourney.updateStage(stage) match
               case Right(updatedStage) =>
                 Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
-                render()
+                // Disable save button, stop running time, and update colors without full page re-render
+                val saveBtn = dom.document.getElementById(s"${SaveMatchBtn.id}-$gameNo").asInstanceOf[dom.html.Button]
+                if (saveBtn != null) saveBtn.disabled = true
+                val timeCell = dom.document.getElementById(s"running-time-$gameNo").asInstanceOf[dom.raw.HTMLElement]
+                if (timeCell != null) {
+                  timeCell.setAttribute("data-status", MEntry.MS_FIN.toString)
+                  timeCell.textContent = "-"
+                }
+                updateColors(updatedStage)
               case Left(err) =>
                 error(s"StageInput: Failed to save match result: ${err.msgCode}")
           case _ =>
@@ -209,7 +217,23 @@ object StageInput extends BasePage with JsWrapper:
             services.TourneyDB.tourney.updateStage(stage) match
               case Right(updatedStage) =>
                 Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
-                render()
+                // Clear input fields, recalculate validity, reset time display, and update colors without full render
+                (1 to (stage.noWinSets * 2) - 1).foreach { setNo =>
+                  val el = dom.document.getElementById(s"input_${gameNo}_$setNo").asInstanceOf[dom.html.Input]
+                  if (el != null) el.value = ""
+                }
+                checkMatchValidity(gameNo, stage.noWinSets)
+                val timeCell = dom.document.getElementById(s"running-time-$gameNo").asInstanceOf[dom.raw.HTMLElement]
+                if (timeCell != null) {
+                  timeCell.setAttribute("data-status", m.status.toString)
+                  timeCell.setAttribute("data-start-time", m.startTime)
+                  if (m.status == MEntry.MS_RUN) {
+                    timeCell.textContent = getRunningTime(m.startTime)
+                  } else {
+                    timeCell.textContent = "-"
+                  }
+                }
+                updateColors(updatedStage)
               case Left(err) =>
                 error(s"StageInput: Failed to delete match result: ${err.msgCode}")
           case _ =>
@@ -459,7 +483,18 @@ object StageInput extends BasePage with JsWrapper:
         services.TourneyDB.tourney.updateStage(stage) match
           case Right(updatedStage) =>
             Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
-            render()
+            // Update time display attributes and colors without full render
+            val timeCell = dom.document.getElementById(s"running-time-$gameNo").asInstanceOf[dom.raw.HTMLElement]
+            if (timeCell != null) {
+              timeCell.setAttribute("data-status", m.status.toString)
+              timeCell.setAttribute("data-start-time", m.startTime)
+              if (m.status == MEntry.MS_RUN) {
+                timeCell.textContent = getRunningTime(m.startTime)
+              } else {
+                timeCell.textContent = "-"
+              }
+            }
+            updateColors(updatedStage)
           case Left(err) =>
             error(s"StageInput: Failed to update table number: ${err.msgCode}")
       case _ =>
