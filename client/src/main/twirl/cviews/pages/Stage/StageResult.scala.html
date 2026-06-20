@@ -29,8 +29,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @defining(g.pants.indices.map(i => (g.pants(i), g.points(i), g.sets(i), g.balls(i))).sortBy(t => if(t._1.place._1 == 0) Int.MaxValue else t._1.place._1)) { sorted =>
-                                    @sorted.zipWithIndex.map { case ((p, pts, sts, bls), idx) =>
+                                @defining(g.pants.indices.map(i => (g.pants(i), g.points(i), g.sets(i), g.balls(i)))) { zipped =>
+                                    @zipped.zipWithIndex.map { case ((p, pts, sts, bls), idx) =>
                                         @defining(bls._1 - bls._2) { diff =>
                                             <tr>
                                                 <td class="ps-2 fw-bold text-center">@{idx + 1}.</td>
