@@ -243,6 +243,7 @@ object Groups:
       case DrawOption.GrpAfterGrp => draw_GrpAfterGrp(cfg, selectedPants, stage.noWinSets)
       case _                      => StageData.GroupsStage(ArrayBuffer.empty[Group])
     }
+    
     initGrMatches(stage.coId, coTyp, stage.id, cfg.format, stage.noWinSets, groupsStage.groups) match {
       case Right(grMatches) =>
         stage.matches.clear()
@@ -256,6 +257,65 @@ object Groups:
         emptyStage
     }
   }
+
+
+  /**
+   * Vertauscht zwei Spieler zwischen oder innerhalb von Gruppen in einer Gruppenphase.
+   * Berechnet anschließend das durchschnittliche Rating sowie die Vereinsbelegung der betroffenen Gruppen neu.
+   *
+   * @param stage Die Wettbewerbsstufe (Stage), in der getauscht werden soll.
+   * @param gId1  Die Gruppen-ID der ersten Gruppe.
+   * @param sno1  Die Startnummer (SNO) des ersten Spielers.
+   * @param gId2  Die Gruppen-ID der zweiten Gruppe.
+   * @param sno2  Die Startnummer (SNO) des zweiten Spielers.
+   */
+  def swapPlayers(stage: Stage, gId1: Int, sno1: SNO, gId2: Int, sno2: SNO): Unit =
+    stage.data match
+      case StageData.GroupsStage(groups) =>
+        val g1Opt = groups.find(_.grId == gId1)
+        val g2Opt = groups.find(_.grId == gId2)
+        
+        for
+          g1 <- g1Opt
+          g2 <- g2Opt
+          idx1 = g1.pants.indexWhere(p => p != null && p.id == sno1)
+          idx2 = g2.pants.indexWhere(p => p != null && p.id == sno2)
+          if idx1 != -1 && idx2 != -1
+        do
+          val temp = g1.pants(idx1)
+          g1.pants(idx1) = g2.pants(idx2)
+          g2.pants(idx2) = temp
+          
+          recalcGroupAvgRating(g1)
+          recalcGroupAvgRating(g2)
+          recalcGroupOccu(g1)
+          recalcGroupOccu(g2)
+      case _ =>
+
+  /**
+   * Berechnet das durchschnittliche Rating (avgRating) einer Gruppe basierend auf ihren aktiven Teilnehmern neu.
+   *
+   * @param g Die Gruppe, deren durchschnittliches Rating neu berechnet werden soll.
+   */
+  def recalcGroupAvgRating(g: Group): Unit =
+    val activePants = g.pants.filter(p => p != null && p.id != SNO.nn)
+    if activePants.nonEmpty then
+      g.avgRating = activePants.map(_.rating).sum / activePants.length
+    else
+      g.avgRating = 0
+
+  /**
+   * Berechnet die Vereinsbelegung (occu) einer Gruppe basierend auf ihren aktiven Teilnehmern neu.
+   *
+   * @param g Die Gruppe, deren Vereinsbelegung neu berechnet werden soll.
+   */
+  def recalcGroupOccu(g: Group): Unit =
+    val newOccu = scala.collection.mutable.Map[String, Int]().withDefaultValue(0)
+    g.pants.foreach { p =>
+      if p != null && p.id != SNO.nn && p.club.trim.nonEmpty then
+        newOccu(p.club) = newOccu(p.club) + 1
+    }
+    g.occu = newOccu
 
 
   def draw_GrpAfterGrp(cfg: StageConfig, selectedPants: Seq[Pant], noWinSets: Int): StageData.GroupsStage = {

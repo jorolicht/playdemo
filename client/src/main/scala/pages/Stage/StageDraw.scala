@@ -113,7 +113,7 @@ object StageDraw extends BasePage with JsWrapper:
                   List(shared.BoxButton.Yes, shared.BoxButton.No)
                 ).map {
                   case shared.BoxButton.Yes =>
-                    swapPlayers(stage, oldGrId, oldSno, grId, sno)
+                    Groups.swapPlayers(stage, oldGrId, oldSno, grId, sno)
                     services.TourneyDB.tourney.updateStage(stage) match {
                       case Right(updatedStage) =>
                         Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
@@ -132,45 +132,3 @@ object StageDraw extends BasePage with JsWrapper:
           }
         }
       case _ =>
-
-  private def swapPlayers(stage: Stage, gId1: Int, sno1: SNO, gId2: Int, sno2: SNO): Unit =
-    stage.data match {
-      case StageData.GroupsStage(groups) =>
-        val g1Opt = groups.find(_.grId == gId1)
-        val g2Opt = groups.find(_.grId == gId2)
-        
-        for {
-          g1 <- g1Opt
-          g2 <- g2Opt
-          idx1 = g1.pants.indexWhere(p => p != null && p.id == sno1)
-          idx2 = g2.pants.indexWhere(p => p != null && p.id == sno2)
-          if idx1 != -1 && idx2 != -1
-        } {
-          val temp = g1.pants(idx1)
-          g1.pants(idx1) = g2.pants(idx2)
-          g2.pants(idx2) = temp
-          
-          recalcGroupAvgRating(g1)
-          recalcGroupAvgRating(g2)
-          recalcGroupOccu(g1)
-          recalcGroupOccu(g2)
-        }
-      case _ =>
-    }
-
-  private def recalcGroupAvgRating(g: Group): Unit =
-    val activePants = g.pants.filter(p => p != null && p.id != SNO.nn)
-    if (activePants.nonEmpty) {
-      g.avgRating = activePants.map(_.rating).sum / activePants.length
-    } else {
-      g.avgRating = 0
-    }
-
-  private def recalcGroupOccu(g: Group): Unit =
-    val newOccu = scala.collection.mutable.Map[String, Int]().withDefaultValue(0)
-    g.pants.foreach { p =>
-      if (p != null && p.id != SNO.nn && p.club.trim.nonEmpty) {
-        newOccu(p.club) = newOccu(p.club) + 1
-      }
-    }
-    g.occu = newOccu
