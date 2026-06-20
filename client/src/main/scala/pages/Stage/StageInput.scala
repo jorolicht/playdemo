@@ -184,16 +184,27 @@ object StageInput extends BasePage with JsWrapper:
       } else {
         stage.matches.find(_.gameNo == gameNo) match
           case Some(m: MEntryGr) =>
-            m.sets = (0, 0)
-            m.result = ""
-            if (m.playfield.nonEmpty) {
-              m.status = MEntry.MS_RUN
-              if (m.startTime == null || m.startTime.trim.isEmpty) {
-                m.startTime = nowTimestamp()
-              }
-            } else {
+            // If the match was running (no result, has table assigned)
+            if (!m.finished && m.playfield.nonEmpty) {
+              m.playfield = ""
+              m.sets = (0, 0)
+              m.result = ""
               m.status = MEntry.MS_READY
               m.startTime = ""
+            } else {
+              // Otherwise, it was finished, so we delete its result.
+              m.sets = (0, 0)
+              m.result = ""
+              // If it had a table, it goes back to running (MS_RUN), otherwise ready (MS_READY)
+              if (m.playfield.nonEmpty) {
+                m.status = MEntry.MS_RUN
+                if (m.startTime == null || m.startTime.trim.isEmpty) {
+                  m.startTime = nowTimestamp()
+                }
+              } else {
+                m.status = MEntry.MS_READY
+                m.startTime = ""
+              }
             }
             
             // Re-evaluate stage match statuses
@@ -217,11 +228,14 @@ object StageInput extends BasePage with JsWrapper:
             services.TourneyDB.tourney.updateStage(stage) match
               case Right(updatedStage) =>
                 Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
-                // Clear input fields, recalculate validity, reset time display, and update colors without full render
+                // Clear input fields, update table input value, reset time display, and update colors without full render
                 (1 to (stage.noWinSets * 2) - 1).foreach { setNo =>
                   val el = dom.document.getElementById(s"input_${gameNo}_$setNo").asInstanceOf[dom.html.Input]
                   if (el != null) el.value = ""
                 }
+                val tInput = dom.document.getElementById(s"table_$gameNo").asInstanceOf[dom.html.Input]
+                if (tInput != null) tInput.value = m.playfield
+
                 checkMatchValidity(gameNo, stage.noWinSets)
                 val timeCell = dom.document.getElementById(s"running-time-$gameNo").asInstanceOf[dom.raw.HTMLElement]
                 if (timeCell != null) {
