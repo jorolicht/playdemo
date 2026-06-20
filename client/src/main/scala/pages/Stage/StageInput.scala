@@ -178,7 +178,15 @@ object StageInput extends BasePage with JsWrapper:
           case Some(m: MEntryGr) =>
             m.sets = (0, 0)
             m.result = ""
-            m.status = MEntry.MS_READY
+            if (m.playfield.nonEmpty) {
+              m.status = MEntry.MS_RUN
+              if (m.startTime == null || m.startTime.trim.isEmpty) {
+                m.startTime = nowTimestamp()
+              }
+            } else {
+              m.status = MEntry.MS_READY
+              m.startTime = ""
+            }
             
             // Re-evaluate stage match statuses
             updateStageMatchStatuses(stage)
@@ -321,7 +329,7 @@ object StageInput extends BasePage with JsWrapper:
     while (changed) {
       changed = false
       matches.foreach { m =>
-        if (!m.finished) {
+        if (!m.finished && m.status != MEntry.MS_RUN) {
           val deps = m.getDepend()
           val allDepsFinished = deps.forall { depGameNo =>
             matches.find(_.gameNo == depGameNo).exists(_.finished)
