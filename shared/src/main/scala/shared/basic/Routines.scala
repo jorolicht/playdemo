@@ -14,6 +14,13 @@ import cats.syntax.either.*
 // Custom upickle bundle for nullable Option support
 // ---------------------------------------------------------------------------
 object Pickle extends upickle.AttributeTagged:
+  override def objectTypeKeyReadMap(s: CharSequence): CharSequence =
+    s.toString match
+      case "shared.model.MEntryKo"   => "MEntryKo"
+      case "shared.model.MEntryGr"   => "MEntryGr"
+      case "shared.model.MEntryBase" => "MEntryBase"
+      case other                     => other
+
   override implicit def OptionWriter[T: Writer]: Writer[Option[T]] =
     writer[ujson.Value].comap[Option[T]] {
       case Some(v) => writeJs(v)
