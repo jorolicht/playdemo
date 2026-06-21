@@ -3,6 +3,7 @@ package shared.model
 import shared.basic.Pickle.*
 import scala.collection.mutable.{ ArrayBuffer, Map, Set, Stack }
 import shared.format.*
+import shared.basic.Log
 
 opaque type StageId = Int
 object StageId:
@@ -499,7 +500,7 @@ case class Stage(
     val mTotal = matches.length
     
     status match {
-      case StageStatus.CFG  => println(s"ERROR: Stage.updateStatus -> status=${status}" ) 
+      case StageStatus.CFG  => Log.error(s"Stage.updateStatus -> status=${status}") 
       case StageStatus.AUS  => 
       case StageStatus.EIN  => if (mFinished == mTotal) status = StageStatus.FIN
       case StageStatus.FIN  => if (mFinished < mTotal)  status = StageStatus.EIN

@@ -1,6 +1,7 @@
 package shared.model
 
 import scala.collection.mutable.{ Set, Map }
+import shared.basic.Log
 
 case class DrawTree[T](
   val name: String, 
@@ -25,7 +26,7 @@ case class DrawTree[T](
       case None     => tree.rightOccu(item) 
       case Some(rT) => tree.rightOccu(item) + rT.getOcc(rT, pos, item)
     } else {
-      println(s"ERROR: getOcc -> out of bound ${name} ${pos}"); size
+      Log.error(s"getOcc -> out of bound ${name} ${pos}"); size
     }
 
   def check4BestDrawPos(tree: DrawTree[T], pos1: Int, item1: T, pos2: Int, item2: T): Boolean = {
@@ -46,7 +47,7 @@ case class DrawTree[T](
       if (!(item == skipValue)) tree.rightOccu(item) = tree.rightOccu(item) + 1
       tree.rightFree -= pos
       tree.rightTree match { case None => {}; case Some(rT) => rT.addItem(rT, pos, item) }
-    } else println(s"ERROR: addItem -> no pos ${pos} for item ${item}") 
+    } else Log.error(s"addItem -> no pos ${pos} for item ${item}") 
   }
 
 object DrawTree:      
@@ -67,7 +68,7 @@ object DrawTree:
 
   def init[T](lBound:Int, uBound: Int, skipValue: T): Option[DrawTree[T]] = {
     val size = uBound - lBound + 1
-    if (!isPowerOfTwo(size)) println(s"ERROR: DrawTree.init -> not power of two lBound:${lBound} uBound:${uBound}")
+    if (!isPowerOfTwo(size)) Log.error(s"DrawTree.init -> not power of two lBound:${lBound} uBound:${uBound}")
     if (uBound-lBound > 2) {
       val middle = lBound + (uBound-lBound)/2
       val lFree = Set[Int]().addAll(lBound to middle)  

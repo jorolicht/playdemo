@@ -38,7 +38,7 @@ case class KoStage(
     stages = KoRound.getNoRounds(size)
 
     if (size == 0 || stages == 0) {
-      println(s"ERROR: initDraw_Grp -> invalid size or stages") 
+      Log.error(s"initDraw_Grp -> invalid size or stages") 
       Left(shared.basic.AppError("err0243.systemKO.draw.size"))
     } else {
       val upDownScheme = List.fill(size/4)(List(true, false, false, true)).flatten.toArray
@@ -52,7 +52,7 @@ case class KoStage(
       dInfo.zip(upDownScheme).foreach { case (item, updo) => 
         if (!upDownMap.contains((item._2, minPos))) {
           upDownMap += ((item._2, item._3) -> updo)
-          println(s"ERROR: initDraw_Grp -> upDownMap does not contain all values e.g. ${item._2} ${minPos}")  
+          Log.error(s"initDraw_Grp -> upDownMap does not contain all values e.g. ${item._2} ${minPos}")  
         } else {
           upDownMap += ( (item._2, item._3) -> changeUpDown( (item._3-minPos)%2 == 1, upDownMap((item._2, minPos))) )   
         }
@@ -95,7 +95,7 @@ case class KoStage(
       }
 
       if (upListBuf.nonEmpty || downListBuf.nonEmpty) {
-        println(s"ERROR: initDraw -> upList.size or downList.size > 0") 
+        Log.error(s"initDraw -> upList.size or downList.size > 0") 
         Left(shared.basic.AppError("err0244.systemKO.draw.updown"))
       } else {  
         sno2pos = scala.collection.mutable.Map[String, Int]()
@@ -114,7 +114,7 @@ case class KoStage(
     val dT = DrawTree.get[String](1, size, "")
 
     if (size == 0 || !DrawTree.isPowerOfTwo(size) || stages == 0) {
-      println(s"ERROR: initDraw_Rating -> invalid size: ${size} or stages: ${stages}") 
+      Log.error(s"initDraw_Rating -> invalid size: ${size} or stages: ${stages}") 
       Left(shared.basic.AppError("err0243.systemKO.draw.size"))
     } else {
       pants = ArrayBuffer.tabulate(size)(i => Pant(SNO.bye(i), name = ""))

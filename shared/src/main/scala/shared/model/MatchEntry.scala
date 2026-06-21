@@ -1,6 +1,7 @@
 package shared.model
 
 import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
+import upickle.implicits.key
 import shared.basic.*
 
 
@@ -158,6 +159,7 @@ case class MEntryBase(coId: CompId,
 }
 
 
+@key("MEntryKo")
 case class MEntryKo(
   val coId:   CompId,                     // competition identifier
   val coTyp:  CompTyp,                    // competition typ, e.g. CT_SINGLE, CT_DOUBLE
@@ -262,6 +264,7 @@ object MEntryKo {
 }
 
 
+@key("MEntryGr")
 case class MEntryGr(
   val coId:      CompId,                 // competition identifier
   val coTyp:     CompTyp,                // competition typ, e.g. CT_SINGLE, CT_DOUBLE
