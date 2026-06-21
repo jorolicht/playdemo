@@ -236,7 +236,7 @@ object StageAdmin extends BasePage with JsWrapper:
         val selectedPants = allPants.filter(p => selectedSnos.contains(p.id.toString)).sortBy(-_.rating)
 
         if (selectedPants.length < 3) {
-          dom.window.alert("Bitte wählen Sie mindestens drei Teilnehmer aus.")
+          dom.window.alert(gM("+err_min_players"))
         } else {
           // Generation Logic
           r.stageConfig = cfg

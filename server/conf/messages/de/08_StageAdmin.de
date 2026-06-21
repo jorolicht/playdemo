@@ -21,3 +21,5 @@ StageAdmin.club_header = Verein
 StageAdmin.ttr_header = TTR
 StageAdmin.no_players = Keine Teilnehmer im Wettbewerb gefunden.
 StageAdmin.footer_info = {0} Spieler verfügbar. Nur aktivierte Spieler nehmen an der Auslosung teil.
+StageAdmin.err_min_players = Bitte wählen Sie mindestens drei Teilnehmer aus.
+
