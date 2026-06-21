@@ -172,3 +172,5 @@ case class Pant(
   var ident: String = ""
 ) derives ReadWriter:
   def getEffRating(value: Int=0) = if (rating == 0) value else rating
+  def getName(byeText: String): String = if (id.isBye) byeText else name
+  def getRatingInfo: String = if (id.isBye) "" else rating.toString

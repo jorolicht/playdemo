@@ -54,7 +54,11 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
     services.WebAuthnService.loginPasskey().map {
       case Right(msg) => 
         debug(s"Passkey Login successful: $msg")
-        dom.window.location.href = Global.homeUrl
+        val alert = dom.document.getElementById("LoginSuccessAlert")
+        if (alert != null) alert.classList.remove("d-none")
+        dom.window.setTimeout(() => {
+          dom.window.location.href = Global.homeUrl
+        }, 2000)
       case Left(err) =>
         dom.window.alert(s"Passkey Login fehlgeschlagen: ${err.msg}")
     }
@@ -79,8 +83,11 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
     ajaxPost[Map[String, String], Map[String, String]]("/wp-json/playdemo/v1/auth/login", List(), data, host = Global.homeUrl).map {
       case Right(res) => 
         debug(s"Login successful: $res")
-        // Redirect to home or reload to show WP Admin bar/state
-        dom.window.location.href = Global.homeUrl
+        val alert = dom.document.getElementById("LoginSuccessAlert")
+        if (alert != null) alert.classList.remove("d-none")
+        dom.window.setTimeout(() => {
+          dom.window.location.href = Global.homeUrl
+        }, 2000)
       case Left(err) => 
         dom.window.alert(s"Login fehlgeschlagen: $err")
     }

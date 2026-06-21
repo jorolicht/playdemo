@@ -5,5 +5,5 @@ StageDraw.no_groups = No groups generated for this stage.
 StageDraw.btn_back = BACK TO CONFIGURATION
 StageDraw.btn_start = START PLAY STAGE
 StageDraw.dummy_rr = Dummy template for Round Robin.
-StageDraw.dummy_se = Dummy template for Single Elimination.
+StageDraw.dummy_se = You can click two positions to swap them, or enter custom seeding positions and apply them with the "SETZEN" button. Players from the same club playing each other in the first round are highlighted in red.
 StageDraw.dummy_swiss = Dummy template for Swiss System.

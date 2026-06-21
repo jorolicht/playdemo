@@ -57,3 +57,10 @@ ChatExample.lbl.Msg                                 = Nachricht
 ChatExample.plh.RcvIdExample                        = z.B. iK78T45b 
 ChatExample.plh.sendMsgExample                      = Hella Max Mustermann!
 ChatExample.btn.send                                = SENDEN
+
+bye = Freilos
+table.pos = Pos.
+table.name = Name
+table.dbl.name = Name (Doppel)
+table.club = Verein
+table.ttr = TTR

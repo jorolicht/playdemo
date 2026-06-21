@@ -109,12 +109,52 @@ object StageAdmin extends BasePage with JsWrapper:
         }
 
       case `BtnResetInp` => 
-        debug("Resetting results...")
-        loadPage(StageInput.name, "")
+        import shared.BoxButton
+        Global.currentSelection.stage.foreach { stage =>
+          DlgMsgbox.show("Möchten Sie wirklich alle Ergebnisse dieser Stage löschen?", "Ergebnisse löschen", List(BoxButton.Yes, BoxButton.No)).map {
+            case BoxButton.Yes =>
+              stage.resetMatchesPropagate() match {
+                case Left(err) => 
+                  error(s"StageAdmin: resetMatchesPropagate failed: ${err.msgCode}")
+                case Right(_) =>
+                  services.TourneyDB.tourney.updateStage(stage) match {
+                    case Right(updatedStage) =>
+                      Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                      debug("StageAdmin: Results successfully reset.")
+                      loadPage(StageInput.name, "")
+                    case Left(err) =>
+                      error(s"StageAdmin: Failed to update stage in database: ${err.msgCode}")
+                  }
+              }
+            case _ => 
+              debug("StageAdmin: Reset cancelled")
+          }
+        }
 
       case `BtnResetDrw` => 
-        debug("Resetting draw and results...")
-        loadPage(StageDraw.name, "")
+        import shared.BoxButton
+        val comp = Global.currentSelection.competition.get
+        Global.currentSelection.stage.foreach { stage =>
+          DlgMsgbox.show("Möchten Sie wirklich die gesamte Auslosung neu initialisieren? Alle Ergebnisse werden gelöscht!", "Auslosung löschen", List(BoxButton.Yes, BoxButton.No)).map {
+            case BoxButton.Yes =>
+              stage.initMatches(comp.typ) match {
+                case Left(err) =>
+                  error(s"StageAdmin: initMatches failed: ${err.msgCode}")
+                case Right(_) =>
+                  stage.status = StageStatus.AUS
+                  services.TourneyDB.tourney.updateStage(stage) match {
+                    case Right(updatedStage) =>
+                      Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                      debug("StageAdmin: Draw successfully re-initialized.")
+                      loadPage(StageDraw.name, "")
+                    case Left(err) =>
+                      error(s"StageAdmin: Failed to update stage in database: ${err.msgCode}")
+                  }
+              }
+            case _ => 
+              debug("StageAdmin: Reset draw cancelled")
+          }
+        }
 
       case `BtnResetCfg` => 
         debug("Resetting full configuration...")
@@ -246,13 +286,41 @@ object StageAdmin extends BasePage with JsWrapper:
             case StageFormat.RR => 
               r.data = RoundRobin.draw(selectedPants, r.noWinSets, DrawOption.Unknown)
      
-            case StageFormat.KO => 
-              r.data = SingleElimination.draw(r.id.value, r.name, r.coId.value.toLong, r.noWinSets, selectedPants, DrawOption.Unknown)
+            case StageFormat.KO =>
+              val prevStageOpt = r.prefId.flatMap { pId =>
+                services.TourneyDB.tourney.stages.find(s => s != null && s.id == pId)
+              }
+              val hasPrevGrStage = prevStageOpt.exists(_.stageConfig.format == StageFormat.GR)
+              val drawOption = if (hasPrevGrStage) DrawOption.KoAfterGrp else DrawOption.KoStart
+
+              val preparedPants = if (hasPrevGrStage) {
+                prevStageOpt.map(_.data) match {
+                  case Some(StageData.GroupsStage(groups)) =>
+                    selectedPants.map { p =>
+                      val grpOpt = groups.find(_.pants.exists(gp => gp != null && gp.id == p.id))
+                      grpOpt match {
+                        case Some(g) =>
+                          val pos = g.pants.find(gp => gp != null && gp.id == p.id).map(_.place._1).getOrElse(1)
+                          val pCopy = p.copy()
+                          pCopy.qInfo = s"${g.name};${g.grId};${pos};0"
+                          pCopy.place = (pos, 0)
+                          pCopy
+                        case None => p
+                      }
+                    }
+                  case _ => selectedPants
+                }
+              } else {
+                selectedPants
+              }
+
+              r.data = SingleElimination.draw(r, comp.typ, cfg, preparedPants, drawOption)
               
             case StageFormat.SW =>
               r.data = SwissSystem.draw(selectedPants, r.noWinSets, DrawOption.Unknown)
               
             case StageFormat.GR =>
+              // select draw option based on whether there is a previous group stage
               val hasPrevGrStage = r.prefId.flatMap { pId =>
                 services.TourneyDB.tourney.stages.find(s => s != null && s.id == pId)
               }.exists(_.stageConfig.format == StageFormat.GR)

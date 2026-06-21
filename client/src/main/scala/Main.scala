@@ -46,6 +46,14 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     dom.window.asInstanceOf[js.Dynamic].appEvent    = (elem: HTMLElement, event: dom.Event) => appEvent(elem, event)
     dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
 
+    dom.window.addEventListener("beforeunload", (e: dom.Event) => {
+      services.StageDB.flushSync()
+      services.CompetitionDB.flushSync()
+      services.ClubDB.flushSync()
+      services.PlayerDB.flushSync()
+      services.TourneyDB.flushSync()
+    })
+
     Messages.initMsg(version, Global.dataUrl, Global.lang).map {
       case true   => initApp(mode.toLowerCase(), slug)
        case false => println("Main program failed to initialize")  
@@ -79,6 +87,14 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     dom.window.asInstanceOf[js.Dynamic].appEvent    = (elem: HTMLElement, event: dom.Event) => appEvent(elem, event)
     // expose addon Console.start function, only if addon is included, otherwise dummy function
     dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
+
+    dom.window.addEventListener("beforeunload", (e: dom.Event) => {
+      services.StageDB.flushSync()
+      services.CompetitionDB.flushSync()
+      services.ClubDB.flushSync()
+      services.PlayerDB.flushSync()
+      services.TourneyDB.flushSync()
+    })
 
     Messages.initMsg(version, Global.dataUrl, Global.lang).map {
       case true  => initApp(effectiveMode, effectiveTourney)        

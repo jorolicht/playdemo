@@ -8,6 +8,7 @@ import scala.scalajs.js.timers._
  */
 trait Debouncer:
   private var syncHandle: Option[SetTimeoutHandle] = None
+  private var pendingAction: Option[() => Unit] = None
 
   /**
    * Executes the given 'block' function after 'delay' ms.
@@ -15,8 +16,10 @@ trait Debouncer:
    */
   def debounce(delay: Int = 500)(block: => Unit): Unit =
     syncHandle.foreach(clearTimeout)
+    pendingAction = Some(() => block)
     syncHandle = Some(setTimeout(delay) {
-      block
+      pendingAction.foreach(_())
+      pendingAction = None
       syncHandle = None
     })
 
@@ -26,3 +29,15 @@ trait Debouncer:
   def cancelSync(): Unit =
     syncHandle.foreach(clearTimeout)
     syncHandle = None
+    pendingAction = None
+
+  /**
+   * Immediately executes any pending action synchronously and cancels the timer.
+   */
+  def flushSync(): Unit =
+    pendingAction.foreach { action =>
+      syncHandle.foreach(clearTimeout)
+      action()
+      pendingAction = None
+      syncHandle = None
+    }

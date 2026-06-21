@@ -7,7 +7,7 @@
 
 @compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
 @isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
-@disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin) "disabled" else "" }
+@disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || stage.status != StageStatus.AUS) "disabled" else "" }
 
 <div class="card shadow-sm">
     <div class="card-body">

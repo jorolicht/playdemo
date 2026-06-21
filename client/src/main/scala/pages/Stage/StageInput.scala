@@ -29,7 +29,7 @@ object StageInput extends BasePage with JsWrapper:
         val comp = Global.currentSelection.competition
         val pants = comp.map(_.pants1Stage.toSeq).getOrElse(Seq.empty)
         
-        val matches = r.matches.collect { case m: MEntryGr => m }.toSeq.map { m =>
+        val matches = r.matches.toSeq.map { m =>
           (m, formatSnoName(m.stNoA, pants), formatSnoName(m.stNoB, pants))
         }
 
@@ -63,8 +63,8 @@ object StageInput extends BasePage with JsWrapper:
    * For doubles, it displays first names formatted as "Vorname1/Vorname2".
    */
   def formatSnoName(sno: SNO, pants: Seq[Pant]): String =
-    if (sno.isNN) "Spielfrei"
-    else if (sno.isBye) "Freilos"
+    if (sno.isNN) gM("+not_determined")
+    else if (sno.isBye) gM("+bye")
     else
       pants.find(_.id == sno) match
         case Some(p) =>
@@ -109,9 +109,9 @@ object StageInput extends BasePage with JsWrapper:
   def saveMatchResult(gameNo: Int): Unit =
     Global.currentSelection.stage.foreach { stage =>
       val comp = Global.currentSelection.competition.get
-      val isFin = comp.status == CompStatus.FIN || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+      val isFin = comp.status == CompStatus.FIN || stage.status != StageStatus.EIN || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)
       if (isFin) {
-        debug("StageInput: Cannot save match result because competition is finalized or user has no write access.")
+        debug("StageInput: Cannot save match result because stage is not in EIN status, competition is finalized, or user has no write access.")
       } else {
         val winSets = stage.noWinSets
         val inputs = (1 to (winSets * 2) - 1).map { setNo =>
@@ -130,31 +130,12 @@ object StageInput extends BasePage with JsWrapper:
           }
         }
         
-        stage.matches.find(_.gameNo == gameNo) match
-          case Some(m: MEntryGr) =>
-            m.sets = (aWins, bWins)
-            m.result = parsedBalls.mkString("·")
-            m.status = MEntry.MS_FIN
-            
-            // Re-evaluate stage match statuses based on dependencies
-            updateStageMatchStatuses(stage)
-
-            // Set match into stage format and recalculate standings
-            stage.data match
-              case StageData.GroupsStage(groups) =>
-                groups.find(_.grId == m.grId) match
-                  case Some(group) =>
-                    group.setMatch(m) match
-                      case Left(err) => error(s"StageInput: setMatch failed: ${err.msgCode}")
-                      case Right(_) =>
-                        group.calc() match
-                          case Left(err) => error(s"StageInput: calc failed: ${err.msgCode}")
-                          case Right(_)  => ()
-                  case None =>
-                    error(s"StageInput: Group with grId ${m.grId} not found")
-              case _ =>
-            
-            services.TourneyDB.tourney.updateStage(stage) match
+        val playfieldInput = dom.document.getElementById(s"table_$gameNo").asInstanceOf[dom.html.Input]
+        val playfieldVal = if (playfieldInput != null) playfieldInput.value.trim else ""
+        stage.inputMatch(gameNo, (aWins, bWins), parsedBalls.mkString("·"), "", playfieldVal) match {
+          case Left(err) => error(s"StageInput: inputMatch failed: ${err.msgCode}")
+          case Right(triggered) =>
+            services.TourneyDB.tourney.updateStage(stage) match {
               case Right(updatedStage) =>
                 Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
                 // Disable save button, stop running time, and update colors without full page re-render
@@ -168,7 +149,8 @@ object StageInput extends BasePage with JsWrapper:
                 updateColors(updatedStage)
               case Left(err) =>
                 error(s"StageInput: Failed to save match result: ${err.msgCode}")
-          case _ =>
+            }
+        }
       }
     }
 
@@ -178,56 +160,19 @@ object StageInput extends BasePage with JsWrapper:
   def deleteMatchResult(gameNo: Int): Unit =
     Global.currentSelection.stage.foreach { stage =>
       val comp = Global.currentSelection.competition.get
-      val isFin = comp.status == CompStatus.FIN || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+      val isFin = comp.status == CompStatus.FIN || stage.status != StageStatus.EIN || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)
       if (isFin) {
-        debug("StageInput: Cannot delete match result because competition is finalized or user has no write access.")
+        debug("StageInput: Cannot delete match result because stage is not in EIN status, competition is finalized, or user has no write access.")
       } else {
-        stage.matches.find(_.gameNo == gameNo) match
-          case Some(m: MEntryGr) =>
-            // If the match was running (no result, has table assigned)
-            if (!m.finished && m.playfield.nonEmpty) {
-              m.playfield = ""
-              m.sets = (0, 0)
-              m.result = ""
-              m.status = MEntry.MS_READY
-              m.startTime = ""
-            } else {
-              // Otherwise, it was finished, so we delete its result.
-              m.sets = (0, 0)
-              m.result = ""
-              // If it had a table, it goes back to running (MS_RUN), otherwise ready (MS_READY)
-              if (m.playfield.nonEmpty) {
-                m.status = MEntry.MS_RUN
-                if (m.startTime == null || m.startTime.trim.isEmpty) {
-                  m.startTime = nowTimestamp()
-                }
-              } else {
-                m.status = MEntry.MS_READY
-                m.startTime = ""
-              }
-            }
-            
-            // Re-evaluate stage match statuses
-            updateStageMatchStatuses(stage)
-
-            // Set match into stage format and recalculate standings
-            stage.data match
-              case StageData.GroupsStage(groups) =>
-                groups.find(_.grId == m.grId) match
-                  case Some(group) =>
-                    group.setMatch(m) match
-                      case Left(err) => error(s"StageInput: setMatch failed: ${err.msgCode}")
-                      case Right(_) =>
-                        group.calc() match
-                          case Left(err) => error(s"StageInput: calc failed: ${err.msgCode}")
-                          case Right(_)  => ()
-                  case None =>
-                    error(s"StageInput: Group with grId ${m.grId} not found")
-              case _ =>
-            
-            services.TourneyDB.tourney.updateStage(stage) match
+        stage.resetMatch(gameNo) match {
+          case Left(err) => error(s"StageInput: resetMatch failed: ${err.msgCode}")
+          case Right(triggered) =>
+            services.TourneyDB.tourney.updateStage(stage) match {
               case Right(updatedStage) =>
                 Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                
+                val m = stage.getMatch(gameNo)
+                
                 // Clear input fields, update table input value, reset time display, and update colors without full render
                 (1 to (stage.noWinSets * 2) - 1).foreach { setNo =>
                   val el = dom.document.getElementById(s"input_${gameNo}_$setNo").asInstanceOf[dom.html.Input]
@@ -250,7 +195,8 @@ object StageInput extends BasePage with JsWrapper:
                 updateColors(updatedStage)
               case Left(err) =>
                 error(s"StageInput: Failed to delete match result: ${err.msgCode}")
-          case _ =>
+            }
+        }
       }
     }
 
@@ -269,7 +215,7 @@ object StageInput extends BasePage with JsWrapper:
     }
     
     // Run validation on load for all matches
-    stage.matches.collect { case m: MEntryGr => m }.foreach { m =>
+    stage.matches.foreach { m =>
       checkMatchValidity(m.gameNo, stage.noWinSets)
     }
     
@@ -362,6 +308,10 @@ object StageInput extends BasePage with JsWrapper:
    * MS_READY if all their dependencies are finished, or MS_BLOCK otherwise.
    */
   private def updateStageMatchStatuses(stage: Stage): Unit =
+    if (stage.isKoStage) updateKoMatchStatuses(stage)
+    else updateGrMatchStatuses(stage)
+
+  private def updateGrMatchStatuses(stage: Stage): Unit =
     val matches = stage.matches.collect { case m: MEntryGr => m }.toSeq
     var changed = true
     while (changed) {
@@ -381,11 +331,64 @@ object StageInput extends BasePage with JsWrapper:
       }
     }
 
+  private def updateKoMatchStatuses(stage: Stage): Unit =
+    var changed = true
+    while (changed) {
+      changed = false
+      stage.matches.foreach {
+        case m: MEntryKo =>
+          if (m.stNoA.isNN || m.stNoB.isNN) {
+            val targetStatus = MEntry.MS_BLOCK
+            if (m.status != targetStatus || m.sets != (0, 0) || m.result != "") {
+              m.status = targetStatus
+              m.setSets((0, 0))
+              m.setResult("")
+              changed = true
+            }
+          } else if (!m.finished && m.status != MEntry.MS_RUN) {
+            val aReady = m.stNoA != SNO.nn
+            val bReady = m.stNoB != SNO.nn
+            val targetStatus = if (aReady && bReady) {
+              if (m.stNoA.isBye || m.stNoB.isBye) {
+                val winnerSno = if (m.stNoA.isBye) m.stNoB else m.stNoA
+                val (nextGameNo, nextPos) = m.getWinPos()
+                if (nextGameNo > 0) {
+                  stage.matches.find(_.gameNo == nextGameNo).foreach { nm =>
+                    val currentSno = if (nextPos == 0) nm.stNoA else nm.stNoB
+                    if (currentSno != winnerSno) {
+                      nm.setPant(nextPos, winnerSno)
+                      changed = true
+                    }
+                  }
+                }
+                val (setsA, setsB) = if (m.stNoA.isBye) (0, m.winSets) else (m.winSets, 0)
+                m.setSets((setsA, setsB))
+                m.setResult("")
+                MEntry.MS_FIX
+              } else {
+                MEntry.MS_READY
+              }
+            } else {
+              MEntry.MS_BLOCK
+            }
+            if (m.status != targetStatus) {
+              m.status = targetStatus
+              changed = true
+            }
+          }
+        case _ =>
+      }
+    }
+
   /**
    * Dynamically colors the player name display elements.
    * Green for playable, Black for finished, Red for blocked.
    */
   private def updateColors(stage: Stage): Unit =
+    if (stage.isKoStage) updateKoColors(stage)
+    else updateGrColors(stage)
+
+  private def updateGrColors(stage: Stage): Unit =
     val matches = stage.matches.collect { case m: MEntryGr => m }.toSeq
     matches.foreach { m =>
       val nameAEl = dom.document.getElementById(s"nameA-${m.gameNo}").asInstanceOf[dom.html.Span]
@@ -419,6 +422,56 @@ object StageInput extends BasePage with JsWrapper:
       }
     }
 
+  private def updateKoColors(stage: Stage): Unit =
+    val comp = Global.currentSelection.competition
+    val pants = comp.map(_.pants1Stage.toSeq).getOrElse(Seq.empty)
+    stage.matches.foreach {
+      case m: MEntryKo =>
+        val nameAEl = dom.document.getElementById(s"nameA-${m.gameNo}").asInstanceOf[dom.html.Span]
+        val nameBEl = dom.document.getElementById(s"nameB-${m.gameNo}").asInstanceOf[dom.html.Span]
+        
+        if (nameAEl != null && nameBEl != null) {
+          nameAEl.textContent = formatSnoName(m.stNoA, pants)
+          nameBEl.textContent = formatSnoName(m.stNoB, pants)
+          nameAEl.className = "fw-bold player-name-display"
+          nameBEl.className = "fw-bold player-name-display"
+          
+          if (m.finished) {
+            nameAEl.classList.add("text-dark")
+            nameBEl.classList.add("text-dark")
+          } else {
+            if (m.status == MEntry.MS_READY || m.status == MEntry.MS_RUN) {
+              nameAEl.classList.add("text-success")
+              nameBEl.classList.add("text-success")
+            } else {
+              nameAEl.classList.add("text-danger")
+              nameBEl.classList.add("text-danger")
+            }
+          }
+        }
+
+        // Enable/disable inputs and buttons based on access and player determination
+        val isBlocked = m.stNoA.isNN || m.stNoB.isNN || m.stNoA.isBye || m.stNoB.isBye || m.status == MEntry.MS_FIX
+        val hasNoAccess = !base.Global.hasTourneyAccess(services.TourneyDB.tourney) || 
+                          comp.exists(_.status == CompStatus.FIN) || 
+                          stage.status != StageStatus.EIN
+        val rowDisabled = hasNoAccess || isBlocked
+
+        val tableInput = dom.document.getElementById(s"table_${m.gameNo}").asInstanceOf[dom.html.Input]
+        if (tableInput != null) tableInput.disabled = rowDisabled
+
+        (1 to (stage.noWinSets * 2) - 1).foreach { setNo =>
+          val el = dom.document.getElementById(s"input_${m.gameNo}_$setNo").asInstanceOf[dom.html.Input]
+          if (el != null) el.disabled = rowDisabled
+        }
+
+        val deleteBtn = dom.document.getElementById(s"${DeleteMatchBtn.id}-${m.gameNo}").asInstanceOf[dom.html.Button]
+        if (deleteBtn != null) deleteBtn.disabled = rowDisabled
+
+        val saveBtn = dom.document.getElementById(s"${SaveMatchBtn.id}-${m.gameNo}").asInstanceOf[dom.html.Button]
+        if (saveBtn != null && rowDisabled) saveBtn.disabled = true
+      case _ =>
+    }
 
   private def nowTimestamp(): String =
     val d = new scala.scalajs.js.Date()
@@ -475,41 +528,47 @@ object StageInput extends BasePage with JsWrapper:
     runningTimer = None
 
   def updateMatchTable(gameNo: Int, tableVal: String, stage: Stage): Unit =
-    stage.matches.find(_.gameNo == gameNo) match
-      case Some(m: MEntryGr) =>
-        m.playfield = tableVal
-        
-        if (!m.finished) {
-          if (tableVal.nonEmpty) {
-            if (m.status != MEntry.MS_RUN) {
-              m.status = MEntry.MS_RUN
-              if (m.startTime == null || m.startTime.trim.isEmpty) {
-                m.startTime = nowTimestamp()
+    val comp = Global.currentSelection.competition.get
+    val isFin = comp.status == CompStatus.FIN || stage.status != StageStatus.EIN || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+    if (isFin) {
+      debug("StageInput: Cannot update table number because stage is not in EIN status, competition is finalized, or user has no write access.")
+    } else {
+      stage.matches.find(_.gameNo == gameNo) match
+        case Some(m) =>
+          m.setPlayfield(tableVal)
+          
+          if (!m.finished) {
+            if (tableVal.nonEmpty) {
+              if (m.status != MEntry.MS_RUN) {
+                m.setStatus(MEntry.MS_RUN)
+                if (m.startTime == null || m.startTime.trim.isEmpty) {
+                  m.startTime = nowTimestamp()
+                }
               }
+            } else {
+              m.setStatus(MEntry.MS_READY)
+              m.startTime = ""
+              updateStageMatchStatuses(stage)
             }
-          } else {
-            m.status = MEntry.MS_READY
-            m.startTime = ""
-            updateStageMatchStatuses(stage)
           }
-        }
-        
-        services.TourneyDB.tourney.updateStage(stage) match
-          case Right(updatedStage) =>
-            Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
-            // Update time display attributes and colors without full render
-            val timeCell = dom.document.getElementById(s"running-time-$gameNo").asInstanceOf[dom.raw.HTMLElement]
-            if (timeCell != null) {
-              timeCell.setAttribute("data-status", m.status.toString)
-              timeCell.setAttribute("data-start-time", m.startTime)
-              if (m.status == MEntry.MS_RUN) {
-                timeCell.textContent = getRunningTime(m.startTime)
-              } else {
-                timeCell.textContent = "-"
+          
+          services.TourneyDB.tourney.updateStage(stage) match
+            case Right(updatedStage) =>
+              Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+              // Update time display attributes and colors without full render
+              val timeCell = dom.document.getElementById(s"running-time-$gameNo").asInstanceOf[dom.raw.HTMLElement]
+              if (timeCell != null) {
+                timeCell.setAttribute("data-status", m.status.toString)
+                timeCell.setAttribute("data-start-time", m.startTime)
+                if (m.status == MEntry.MS_RUN) {
+                  timeCell.textContent = getRunningTime(m.startTime)
+                } else {
+                  timeCell.textContent = "-"
+                }
               }
-            }
-            updateColors(updatedStage)
-          case Left(err) =>
-            error(s"StageInput: Failed to update table number: ${err.msgCode}")
-      case _ =>
+              updateColors(updatedStage)
+            case Left(err) =>
+              error(s"StageInput: Failed to update table number: ${err.msgCode}")
+        case _ =>
+    }
 

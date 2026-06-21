@@ -217,9 +217,9 @@ case class Stage(
   // -----------------------------
   // Derived counters (safer)
   // -----------------------------
-  def mFinished: Int = 0
-  def mTotal: Int    = 0
-  def mFix: Int      = 0
+  def mFinished: Int = matches.count(_.finished)
+  def mTotal: Int    = matches.length
+  def mFix: Int      = matches.count(_.status == MEntry.MS_FIX)
 
   // -----------------------------
   // Convenience helpers
@@ -287,9 +287,6 @@ case class Stage(
   private def resetKoMatches(ko: KoStage): Either[shared.basic.AppError, Unit] =
     Right(())
 
-
-
-
   private def initGrMatches(groups: ArrayBuffer[Group], coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
     import shared.format.Groups
     Groups.initGrMatches(coId, coTyp, id, stageConfig.format, noWinSets, groups) match
@@ -316,7 +313,265 @@ case class Stage(
 
 
 
+  // getMatch
+  def getMatch(game: Int): MEntry = 
+    matches(game - 1)
 
+  // existsMatchNo
+  def existsMatchNo(gameNo: Int): Boolean =
+    gameNo >= 1 && gameNo <= matches.length
+
+  // depFinished
+  def depFinished(gameNo: Int, format: StageFormat): Boolean =
+    format match {
+      case StageFormat.GR | StageFormat.RR | StageFormat.SW =>
+        getMatch(gameNo) match {
+          case mgr: MEntryGr =>
+            mgr.getDepend().forall { depGameNo =>
+              matches.find(_.gameNo == depGameNo).exists(_.finished)
+            }
+          case _ => true
+        }
+      case _ =>
+        true
+    }
+
+  // inputMatch - set match result, info, playfield ....
+  def inputMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String): Either[shared.basic.AppError, List[Int]] = {
+    try {
+      val m = getMatch(gameNo)
+      m.setSets(sets)
+      m.setResult(result)
+      m.setInfo(info)
+      m.setPlayfield(playfield)
+      m.setStatus(depFinished(gameNo, m.stageFormat))
+      setModel(m)
+      updateStatus() 
+      Right(propMatch(gameNo))
+    } catch { case _: Throwable => Left(shared.basic.AppError("err0224.coph.inputMatch.invalidGameNo", gameNo.toString))} 
+  }  
+
+  // propMatch
+  def propMatch(gameNo: Int): List[Int] = 
+    try {
+      val triggerList = scala.collection.mutable.ListBuffer[Int](gameNo)
+      val m = getMatch(gameNo)
+
+      m.stageFormat match {
+        case StageFormat.GR | StageFormat.RR | StageFormat.SW => {
+          val trigger = m.asInstanceOf[MEntryGr].getTrigger()
+          for (g <- trigger) { 
+            val nm = getMatch(g)
+            nm.setStatus(depFinished(g, m.stageFormat))
+            setModel(nm)
+            triggerList.append(g) 
+          }
+        }
+
+        case StageFormat.KO => {
+          val (gWin, pWin) = m.asInstanceOf[MEntryKo].getWinPos()
+          // propagate winner
+          if (existsMatchNo(gWin) && m.finished) { 
+            val nmWin = getMatch(gWin)
+            nmWin.setPant(pWin, m.getWinner())
+            nmWin.setStatus(true)
+            
+            // Check if this next match is now a bye match
+            if (nmWin.stNoA.isBye || nmWin.stNoB.isBye) {
+              val (setsA, setsB) = if (nmWin.stNoA.isBye) (0, nmWin.winSets) else (nmWin.winSets, 0)
+              nmWin.setSets((setsA, setsB))
+              nmWin.setResult("")
+              nmWin.setStatus(MEntry.MS_FIX)
+            }
+
+            setModel(nmWin)
+            triggerList.append(gWin)
+            if (nmWin.finished) {
+              triggerList ++= propMatch(gWin)
+            }
+          }  
+          // propagate looser i.e. 3rd place match
+          val (gLoo, pLoo) = m.asInstanceOf[MEntryKo].getLooPos()
+          if (existsMatchNo(gLoo) && m.finished) {
+            val nmLoo = getMatch(gLoo)
+            nmLoo.setPant(pLoo, m.getLooser())
+            nmLoo.setStatus(true)
+
+            // Check if this next match is now a bye match
+            if (nmLoo.stNoA.isBye || nmLoo.stNoB.isBye) {
+              val (setsA, setsB) = if (nmLoo.stNoA.isBye) (0, nmLoo.winSets) else (nmLoo.winSets, 0)
+              nmLoo.setSets((setsA, setsB))
+              nmLoo.setResult("")
+              nmLoo.setStatus(MEntry.MS_FIX)
+            }
+
+            setModel(nmLoo)
+            triggerList.append(gLoo)
+            if (nmLoo.finished) {
+              triggerList ++= propMatch(gLoo)
+            }
+          }
+        }
+        case _ => {}
+      }
+      updateStatus() 
+      triggerList.toList.distinct
+    } catch { case _: Throwable => println("ERROR propMatch exception"); List() }  
+
+  // resetMatchesPropagate
+  def resetMatchesPropagate(): Either[shared.basic.AppError, List[Int]] = 
+    try {
+      var error = shared.basic.AppError.dummy
+      val triggerList = scala.collection.mutable.ListBuffer[Int]()
+      
+      stageConfig.format match {
+        case StageFormat.KO | StageFormat.GR | StageFormat.RR | StageFormat.SW  => 
+          for (i <- 0 until matches.length) {
+            if (matches(i).status == MEntry.MS_FIN || matches(i).status == MEntry.MS_RUN) {
+              resetMatch(matches(i).gameNo) match {
+                case Left(err)  => error = err
+                case Right(res) => triggerList ++= res
+              }
+            }
+          }
+        case _ => {}
+      }
+      if (error.isDummy) Right(triggerList.distinct.sorted.toList) else Left(error)
+    } catch { case _: Throwable => Left(shared.basic.AppError("err0229.svc.resetMatches.failed")) }
+
+  // resetMatch
+  def resetMatch(gameNo: Int, resetPantA: Boolean = false, resetPantB: Boolean = false): Either[shared.basic.AppError, List[Int]] = 
+    try {
+      var error = shared.basic.AppError.dummy
+      val triggerList = scala.collection.mutable.ListBuffer[Int](gameNo)
+      val m = getMatch(gameNo)
+      if (m.status == MEntry.MS_FIX && !resetPantA && !resetPantB) {
+        return Right(List())
+      }
+      m.reset(resetPantA, resetPantB)
+
+      m.stageFormat match {
+        case StageFormat.GR | StageFormat.RR  | StageFormat.SW  => {
+          m.setStatus(depFinished(gameNo, m.stageFormat))
+          setModel(m)
+
+          // set status for every match to be triggered
+          val trigger = m.asInstanceOf[MEntryGr].getTrigger()
+          for (g <- trigger) { 
+            val nm = getMatch(g)
+            nm.setStatus(depFinished(g, m.stageFormat))
+            setModel(nm)
+            triggerList.append(g)
+          }  
+        }
+
+        case StageFormat.KO => {
+          m.setStatus(true)
+          setModel(m)      
+          
+          // propagate deletion of that position
+          val (gWin, pWin) = m.asInstanceOf[MEntryKo].getWinPos()
+          if (existsMatchNo(gWin)) {
+            resetMatch(gWin, pWin == 0, pWin == 1) match {
+              case Left(err)  => error = err
+              case Right(res) => triggerList ++= res
+            }
+          }
+          
+          // propagate looser i.e. 3rd place match
+          val (gLoo, pLoo) = m.asInstanceOf[MEntryKo].getLooPos()
+          if (existsMatchNo(gLoo)) {
+            resetMatch(gLoo, pLoo == 0, pLoo == 1) match {
+              case Left(err) => error = err
+              case Right(res) => triggerList ++= res
+            }
+          }
+        }
+        case _ => {}
+      }
+      updateStatus() 
+      if (error.isDummy) Right(triggerList.toList.distinct) else Left(error)
+    } catch { case _: Throwable => Left(shared.basic.AppError("err0230.svc.resetMatch.game", gameNo.toString))}
+
+  // updateStatus
+  def updateStatus(): Unit = { 
+    val mFinished = matches.count(_.finished)
+    val mTotal = matches.length
+    
+    status match {
+      case StageStatus.CFG  => println(s"ERROR: Stage.updateStatus -> status=${status}" ) 
+      case StageStatus.AUS  => 
+      case StageStatus.EIN  => if (mFinished == mTotal) status = StageStatus.FIN
+      case StageStatus.FIN  => if (mFinished < mTotal)  status = StageStatus.EIN
+      case _ =>
+    }
+  }
+
+  // setModel enter result into the corresponding model 
+  def setModel(m: MEntry): Unit = {  
+    try {
+      if (m.gameNo - 1 >= 0 && m.gameNo - 1 < matches.length) {
+        matches(m.gameNo - 1) = m 
+      } else {
+        println(s"ERROR setModel index out of range ${m.gameNo}")
+      }
+
+      m.stageFormat match {
+        case StageFormat.GR | StageFormat.RR | StageFormat.SW =>
+          val mtch = m.asInstanceOf[MEntryGr]
+          data match {
+            case StageData.GroupsStage(groups) =>
+              if (mtch.grId > 0 && mtch.grId <= groups.length) {
+                groups(mtch.grId - 1).setMatch(mtch) match {
+                  case Left(err) => println(s"ERROR setModel: group match: ${err.toString}")
+                  case Right(res) => if (res) groups(mtch.grId - 1).calc() match {
+                    case Left(err) => println(s"ERROR setModel: calc failed: ${err.toString}")
+                    case Right(_) => ()
+                  } else {
+                    println("ERROR setModel: set group match, invalid param")
+                  }
+                }
+              } else {
+                println("ERROR setModel set group match, invalid group id")
+              }
+            case StageData.RoundRobinStage(rrGroup) =>
+              if (mtch.grId == 1) {
+                rrGroup.setMatch(mtch) match {
+                  case Left(err) => println(s"ERROR setModel: rr match: ${err.toString}")
+                  case Right(res) => if (res) rrGroup.calc() match {
+                    case Left(err) => println(s"ERROR setModel: calc failed: ${err.toString}")
+                    case Right(_) => ()
+                  } else {
+                    println("ERROR setModel: set rr match, invalid param")
+                  }
+                }
+              }
+            case StageData.SwissStage(swGroup) =>
+              if (mtch.grId == 1) {
+                swGroup.setMatch(mtch) match {
+                  case Left(err) => println(s"ERROR setModel: sw match: ${err.toString}")
+                  case Right(res) => if (res) swGroup.calc() match {
+                    case Left(err) => println(s"ERROR setModel: calc failed: ${err.toString}")
+                    case Right(_) => ()
+                  } else {
+                    println("ERROR setModel: set sw match, invalid param")
+                  }
+                }
+              }
+            case _ =>
+              println("ERROR setModel: stage data doesn't match group format")
+          }
+
+        case StageFormat.KO =>
+          // KO matches are stored directly in Stage.matches, no separate calculations needed in KoStage
+
+        case _ =>
+          println(s"ERROR setModel: invalid competition phase type")
+      }
+    } catch {
+      case e: Throwable => println(s"ERROR setModel ${m.toString}: ${e.getMessage}")
+    }
+  }
 
 
 object Stage:

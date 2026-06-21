@@ -24,7 +24,6 @@ object StageDB extends ComWrapper with Debouncer:
       Logging.debug(s"Synchronisiere ${dirty.length} Stages mit dem Server...")
       sync(dirty)
     }
-
   // Helper to access the current tourney's stages
   def stages: ArrayBuffer[Stage] = TourneyDB.tourney.stages
 

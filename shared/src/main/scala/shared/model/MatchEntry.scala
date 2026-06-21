@@ -22,6 +22,10 @@ sealed trait MEntry {
   def encode: String
   def toString: String
   def toTx: MEntryTx
+  def startTime: String
+  def startTime_=(value: String): Unit
+  def endTime: String
+  def endTime_=(value: String): Unit
 
   def setPantA(sNoA: SNO):Unit
   def setPantB(sNoB: SNO):Unit
@@ -132,7 +136,9 @@ case class MEntryBase(coId: CompId,
                       var result:String="",
                       val winSets: Int=0, 
                       var stNoA: SNO=SNO.nn, 
-                      var stNoB: SNO=SNO.nn 
+                      var stNoB: SNO=SNO.nn,
+                      var startTime: String = "",
+                      var endTime: String = ""
                        
 ) extends MEntry { 
     

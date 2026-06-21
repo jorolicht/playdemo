@@ -5,5 +5,5 @@ StageDraw.no_groups = Keine Gruppen für diese Stage generiert.
 StageDraw.btn_back = ZURÜCK ZUR KONFIGURATION
 StageDraw.btn_start = START SPIELSTAGE
 StageDraw.dummy_rr = Dummy-Vorlage für Jeder-gegen-Jeden.
-StageDraw.dummy_se = Dummy-Vorlage für KO-System.
+StageDraw.dummy_se = Sie können zwei Positionen anklicken, um sie zu vertauschen. Alternativ können Sie neue Setzpositionen eingeben und diese mit dem Button "SETZEN" übernehmen. Spieler vom gleichen Verein, die in der ersten Runde gegeneinander spielen, werden rot markiert.
 StageDraw.dummy_swiss = Dummy-Vorlage für Schweizer System.

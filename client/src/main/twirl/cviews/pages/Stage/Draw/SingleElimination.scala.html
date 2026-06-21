@@ -1,15 +1,220 @@
 @import shared.model.*
 @import shared.format.*
 @import pages.Stage.StageDraw.*
+@import cviews.helper.html.*
 
 @(stage: Stage, groups: Seq[Group])
 
+@compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
+@isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
+@disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || stage.status != StageStatus.AUS) "disabled" else "" }
+@compTyp = @{ compOpt.map(_.typ).getOrElse(CompTyp.SINGLE) }
+
+@ko = @{ 
+  stage.data match {
+    case StageData.KnockoutStage(state) => state
+    case _ => KoStage(0, "", 0L, 0)
+  }
+}
+
+@prefStageOpt = @{ stage.prefId.flatMap(pid => services.TourneyDB.tourney.stages.find(s => s != null && s.id == pid)) }
+@showQuali = @{ prefStageOpt.exists(_.stageConfig.format == StageFormat.GR) }
+
+@hasClubClash(pos: Int) = @{
+  val idx = pos - 1
+  val oppIdx = if (pos % 2 == 1) idx + 1 else idx - 1
+  if (idx >= 0 && idx < ko.pants.length && oppIdx >= 0 && oppIdx < ko.pants.length) {
+    val p1 = ko.pants(idx)
+    val p2 = ko.pants(oppIdx)
+    val p1IsBye = p1.id.isBye || p1.id.isNN
+    val p2IsBye = p2.id.isBye || p2.id.isNN
+    !p1IsBye && !p2IsBye && p1.club.trim.nonEmpty && p1.club == p2.club
+  } else {
+    false
+  }
+}
+
+@bTR = @{ """<td class="tdDrawGroup border-top border-right"></td>""" }
+@bBR = @{ """<td class="tdDrawGroup border-bottom border-right"></td>""" }
+@bR  = @{ """<td class="tdDrawGroup border-right"></td>""" }
+@bN  = @{ """<td class="tdDrawGroup"></td>""" }
+
+@koMatch(stage: Stage, pos: Int) = @{  Html(s"""  
+  ${koEntry(ko.pants(pos+0), pos+1, bN  + bN + bN + bN + bN, bTR + bN + bN + bN + bN)} 
+  ${koEntry(ko.pants(pos+1), pos+2, bBR + bN + bN + bN + bN, bN  + bN + bN + bN + bN)} 
+""") } 
+@koMatch2(stage: Stage, pos: Int) = @{  Html(s"""  
+  ${koEntry(ko.pants(pos+0), pos+1, bN  + bN  + bN + bN + bN, bTR + bN  + bN + bN + bN)} 
+  ${koEntry(ko.pants(pos+1), pos+2, bBR + bTR + bN + bN + bN, bN  + bR  + bN + bN + bN)} 
+  ${koEntry(ko.pants(pos+2), pos+3, bN  + bR  + bN + bN + bN, bTR + bBR + bN + bN + bN)} 
+  ${koEntry(ko.pants(pos+3), pos+4, bBR + bN  + bN + bN + bN, bN  + bN  + bN + bN + bN)} 
+  """) } 
+
+@koMatch4(stage: Stage, pos: Int) = @{  Html(s"""  
+  ${koEntry(ko.pants(pos+0), pos+1, bN  + bN  + bN  + bN + bN, bTR + bN  + bN  + bN + bN)} 
+  ${koEntry(ko.pants(pos+1), pos+2, bBR + bTR + bN  + bN + bN, bN  + bR  + bN  + bN + bN)} 
+  ${koEntry(ko.pants(pos+2), pos+3, bN  + bR  + bTR + bN + bN, bTR + bBR + bR  + bN + bN)} 
+  ${koEntry(ko.pants(pos+3), pos+4, bBR + bN  + bR  + bN + bN, bN  + bN  + bR  + bN + bN)}
+  ${koEntry(ko.pants(pos+4), pos+5, bN  + bN  + bR  + bN + bN, bTR + bN  + bR  + bN + bN)} 
+  ${koEntry(ko.pants(pos+5), pos+6, bBR + bTR + bR  + bN + bN, bN  + bR  + bBR + bN + bN)} 
+  ${koEntry(ko.pants(pos+6), pos+7, bN  + bR  + bN  + bN + bN, bTR + bBR + bN  + bN + bN)} 
+  ${koEntry(ko.pants(pos+7), pos+8, bBR + bN  + bN  + bN + bN, bN  + bN  + bN  + bN + bN)}   
+""") } 
+
+@koMatch8(stage: Stage, pos: Int) = @{  Html(s""" 
+  ${koEntry(ko.pants(pos+0),   pos+1,  bN  + bN  + bN  + bN  + bN, bTR + bN  + bN  + bN  + bN)} 
+  ${koEntry(ko.pants(pos+1),   pos+2,  bBR + bTR + bN  + bN  + bN, bN  + bR  + bN  + bN  + bN)} 
+  ${koEntry(ko.pants(pos+2),   pos+3,  bN  + bR  + bTR + bN  + bN, bTR + bBR + bR  + bN  + bN)} 
+  ${koEntry(ko.pants(pos+3),   pos+4,  bBR + bN  + bR  + bN  + bN, bN  + bN  + bR  + bN  + bN)}
+  ${koEntry(ko.pants(pos+4),   pos+5,  bN  + bN  + bR  + bTR + bN, bTR + bN  + bR  + bR  + bN)} 
+  ${koEntry(ko.pants(pos+5),   pos+6,  bBR + bTR + bR  + bR  + bN, bN  + bR  + bBR + bR  + bN)} 
+  ${koEntry(ko.pants(pos+6),   pos+7,  bN  + bR  + bN  + bR  + bN, bTR + bBR + bN  + bR  + bN)} 
+  ${koEntry(ko.pants(pos+7),   pos+8,  bBR + bN  + bN  + bR  + bN, bN  + bN  + bN  + bR  + bN)}
+  ${koEntry(ko.pants(pos+8),   pos+9,  bN  + bN  + bN  + bR  + bN, bTR + bN  + bN  + bR  + bN)} 
+  ${koEntry(ko.pants(pos+9),   pos+10, bBR + bTR + bN  + bR  + bN, bN  + bR  + bN  + bR  + bN)} 
+  ${koEntry(ko.pants(pos+10),  pos+11, bN  + bR  + bTR + bR  + bN, bTR + bBR + bR  + bR  + bN)} 
+  ${koEntry(ko.pants(pos+11),  pos+12, bBR + bN  + bR  + bR  + bN, bN  + bN  + bR  + bBR + bN)}
+  ${koEntry(ko.pants(pos+12),  pos+13, bN  + bN  + bR  + bN  + bN, bTR + bN  + bR  + bN  + bN)} 
+  ${koEntry(ko.pants(pos+13),  pos+14, bBR + bTR + bR  + bN  + bN, bN  + bR  + bBR + bN  + bN)} 
+  ${koEntry(ko.pants(pos+14),  pos+15, bN  + bR  + bN  + bN  + bN, bTR + bBR + bN  + bN  + bN)} 
+  ${koEntry(ko.pants(pos+15),  pos+16, bBR + bN  + bN  + bN  + bN, bN  + bN  + bN  + bN  + bN)}   
+""") } 
+
+
+@koEntry(pant: Pant, pos: Int, up: String, down: String ) = @{
+  val clashClass = if (hasClubClash(pos)) "table-danger text-danger" else ""
+  val qInfoCell = if (showQuali) {
+    s"""<td rowspan="2" class="border-top border-bottom border-right text-center p-1"><small data-qInfo="${pos}" class="font-weight-bold">${pant.qInfo}</small></td>"""
+  } else {
+    ""
+  }
+  val inputField = if (stage.status == StageStatus.AUS && disabledNoAccess.isEmpty) {
+    s"""<input type="text" pattern="[0-9]*" value="${pos}" class="form-control form-control-sm text-center p-0 font-weight-bold text-info draw-pos-input" data-orig-pos="${pos}" style="width: 40px; height: 25px; margin: 0 auto;">"""
+  } else {
+    s"""<span class="font-weight-bold text-info">${pos}</span>"""
+  }
+
+  Html(s""" 
+    <tr class="player-draw-item ${clashClass}" data-pantPos="${pos}" data-sno="${pant.id.toString}">
+      <td id="${PlayerItem.id}-1-${pant.id.toString}" onclick="window.appEvent(this, event); false" style="cursor: pointer;" rowspan="2" class="border p-1 text-center"><small class="font-weight-bold">${pos}</small></td>
+      <td rowspan="2" class="border-top border-bottom border-right text-center p-1" style="width:50px;">
+        ${inputField}
+      </td>
+      <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-name="${pos}">${pant.getName(gM("bye"))}</small></td>
+      <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-club="${pos}">${pant.club}</small></td>
+      <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-rating="${pos}">${pant.getRatingInfo}</small></td>
+      ${qInfoCell}
+      ${up}
+    </tr>
+    <tr>
+      ${down}
+    </tr>
+  """) }
+
 <div class="card shadow-sm">
-    <div class="card-body">
-        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name + " (Single Elimination)")</h5>
-        <div class="alert alert-info py-2 small">
-            <span><i class="bi bi-info-circle me-2"></i>@gM("+dummy_se")</span>
-        </div>
+  <div class="card-body">
+    <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name)</h5>
+
+    <div class="alert alert-info py-2 small d-flex justify-content-between align-items-center mb-4">
+        <span><i class="bi bi-info-circle me-2"></i>@gM("StageDraw.dummy_se")</span>
+        <span class="badge bg-primary">KO-Feld: @ko.size</span>
     </div>
+
+    <div class="table-responsive">
+      <table class="m-1 table-sm table-draw">
+        <thead>
+          <tr class="text-secondary">
+            <th><small class="font-weight-bold ml-1 mr-1">@gM("table.pos")</small></th>
+            <th>
+              @if(stage.status == StageStatus.AUS && disabledNoAccess.isEmpty) {
+                <button @id(BtnSetzen, "onclick") type="button" class="btn btn-xs btn-outline-info font-weight-bold px-2 py-0 border">SETZEN</button>
+              } else {
+                <small class="font-weight-bold ml-1 mr-1">Setz.</small>
+              }
+            </th>
+            @compTyp match {
+              case CompTyp.SINGLE  =>  { <th><small class="font-weight-bold ml-1 mr-1">@gM("table.name")</small></th> }
+              case CompTyp.DOUBLE  =>  { <th><small class="font-weight-bold ml-1 mr-1">@gM("table.dbl.name")</small></th> }
+              case CompTyp.MIXED   =>  { <th><small class="font-weight-bold ml-1 mr-1">@gM("table.dbl.name")</small></th> }
+              case _               =>  { <th><small class="font-weight-bold ml-1 mr-1">@gM("table.name")</small></th> }
+            }
+            <th><small class="font-weight-bold ml-1 mr-1">@gM("table.club")</small></th>
+            <th><small class="font-weight-bold ml-1 mr-1">@gM("table.ttr")</small></th>
+            @if(showQuali) {
+              <th><small class="font-weight-bold ml-1 mr-1">Quali-Info</small></th>
+            }
+            <th colspan="5"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @ko.size match {
+            case 2  =>  { @koMatch(stage,  0) }				
+            case 4  =>  { @koMatch2(stage, 0) }
+            case 8  =>  { @koMatch4(stage, 0) }
+            case 16 =>  { @koMatch8(stage, 0) }
+            case 32 =>  { @koMatch8(stage, 0) @koMatch8(stage, 16)}
+            case 64 =>  { @koMatch8(stage, 0) @koMatch8(stage, 16) @koMatch8(stage, 32) @koMatch8(stage, 48)}
+            case 128 => { 
+              @koMatch8(stage, 0)  @koMatch8(stage, 16) @koMatch8(stage, 32) @koMatch8(stage, 48) 
+              @koMatch8(stage, 64) @koMatch8(stage, 80) @koMatch8(stage, 96) @koMatch8(stage, 112)
+            }
+            case _ => { <tr><td colspan="10" class="text-center text-muted">Ungültige KO-Größe: @ko.size</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+      <button class="btn btn-outline-danger" onclick="appLoadPage('StageAdmin', '')">
+        <i class="bi bi-arrow-left me-1"></i>@gM("StageDraw.btn_back")
+      </button>
+      <button class="btn btn-success px-4 fw-bold" @id(BtnStartPlaying, "onclick") @disabledNoAccess>
+        @gM("StageDraw.btn_start") <i class="bi bi-play-circle ms-1"></i>
+      </button>
+    </div>
+  </div>
 </div>
 
+<style>
+    .tdDrawGroup {
+        width: 30px;
+        min-width: 30px;
+        height: 18px;
+        padding: 0;
+        border: none !important;
+    }
+    .tdDrawGroup.border-top {
+        border-top: 2px solid #6c757d !important;
+    }
+    .tdDrawGroup.border-bottom {
+        border-bottom: 2px solid #6c757d !important;
+    }
+    .tdDrawGroup.border-right {
+        border-right: 2px solid #6c757d !important;
+    }
+    .table-draw td {
+        vertical-align: middle;
+    }
+    
+    /* Highlight the selected Pos cell when it has class bg-warning */
+    .player-draw-item td.bg-warning {
+        background-color: #ffc107 !important; /* Bootstrap warning color */
+        color: #212529 !important;            /* Bootstrap dark text */
+    }
+    
+    /* Hover effect for clickable Pos cells */
+    .player-draw-item td[id^="StageDraw_PlayerItem"]:hover {
+        background-color: #e9ecef !important;
+        cursor: pointer;
+    }
+    
+    /* Highlight only the player info cells, up to TTR / Quali-Info, when row has class table-danger */
+    .player-draw-item.table-danger td[rowspan="2"] {
+        background-color: #f8d7da !important; /* Bootstrap danger color */
+        color: #842029 !important;            /* Bootstrap dark red text */
+    }
+    tr.player-draw-item.table-danger {
+        background-color: transparent !important;
+        color: inherit !important;
+    }
+</style>

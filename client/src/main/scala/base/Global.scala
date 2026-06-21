@@ -45,7 +45,20 @@ object Global:
   import shared.model.{User, Selection}
   val localStoragePrefix = "App."
   var user : Option[User] = None
-  var currentSelection = Selection()
+  private var _currentSelection = Selection()
+  def currentSelection: Selection = _currentSelection
+  def currentSelection_=(value: Selection): Unit = {
+    _currentSelection = value
+    try {
+      val storage = org.scalajs.dom.window.sessionStorage
+      if (storage != null) {
+        val selectionJson = shared.basic.Pickle.write(value)
+        storage.setItem("playdemo_last_selection", selectionJson)
+      }
+    } catch {
+      case _: Exception => // ignore during testing or if storage is not available
+    }
+  }
   var lang    = ""
   var version = ""
   var isDemoMode: Boolean = false
