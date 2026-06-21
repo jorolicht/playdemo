@@ -20,7 +20,6 @@ sealed trait MEntry {
   def info: String
   def result: String
   def winSets: Int
-  def encode: String
   def toString: String
   def toTx: MEntryTx
   def startTime: String
@@ -144,7 +143,6 @@ case class MEntryBase(coId: CompId,
 ) extends MEntry { 
     
   def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, "")
-  def encode: String = s"""{  "coId":${coId.value}, "coTyp":${coTyp.id}, "stageId":${stageId.value}, "stageFormat":${stageFormat.id}, "content"="^_" } """
   override def toString(): String = s"""  Base-Match"""
 
   def setPantA(sNoA: SNO) = stNoA = sNoA
@@ -188,7 +186,6 @@ case class MEntryKo(
 
 ) extends MEntry {
   def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, s"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
-  def encode: String = s"""{"coId":${coId},"coTyp":${coTyp.id},"stageId":${stageId},"stageFormat":${stageFormat.id},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
   override def toString(): String = s"""
     |  Ko-Match: SnoA: ${stNoA} - SnoB: ${stNoB} Winner->${winPos} Looser->${looPos}
     |    gameNo: ${gameNo} round: ${round} maNo: ${maNo} info: ${info} winSets: ${winSets}
@@ -295,7 +292,6 @@ case class MEntryGr(
 ) extends MEntry {
 
   def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, s"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${depend}^${trigger}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
-  def encode: String = s"""{"coId":${coId.value},"coTyp":${coTyp.id},"stageId":${stageId.value},"stageFormat":${stageFormat.id},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${depend}^${trigger}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
   override def toString(): String = s"""
       |  Group-Match: ${wgw._1}-${wgw._2} SnoA: ${stNoA} - SnoB: ${stNoB} 
       |    gameNo: ${gameNo} round: ${round} grId: ${grId} info: ${info} winSets: ${winSets}
@@ -325,37 +321,76 @@ object MEntryGr {
    }
 }
 
-case class MEntryTx(coId: CompId, coTyp: CompTyp, stageId: StageId, stageFormat: StageFormat, content: String) {
-  def decode: MEntry = {
-    stageFormat match {
-      case StageFormat.GR | StageFormat.RR => {
-      try { 
-          val m = content.split("\\^")
-          val (gameNo,     stNoA, stNoB,                 round,      grId,       wgw1,       wgw2,       depend, trigger, playfield, info, startTime, endTime, status,      sets1,       sets2,       winSets,     result) =
-              (m(0).toInt, m(1),  m(2),  m(3).toInt, m(4).toInt, m(5).toInt, m(6).toInt, m(7),   m(8),    m(9),      m(10), m(11),    m(12),   m(13).toInt, m(14).toInt, m(15).toInt, m(16).toInt, m(17))
-          MEntryGr(coId, coTyp, stageId, stageFormat, gameNo, SNO.fromString(m(1)), SNO.fromString(m(2)), round, grId, (wgw1,wgw2), depend, trigger, playfield, info, startTime, endTime, status, (sets1,sets2), winSets, result)
-        } catch { case _: Throwable => MEntryGr(coId, coTyp, stageId, stageFormat, 0, SNO.nn, SNO.nn, 0, 0, (0,0), "", "", "", "", "", "", 0, (0,0), 0, "") }
-      }
-      case StageFormat.KO => {
-        try { 
-          val m = content.split("\\^")
-          val (gameNo,     stNoA,                 stNoB,                 round,      maNo,       winPos, looPos, playfield, info, startTime, endTime, status,      sets1,       sets2,       winSets,    result) =
-              (m(0).toInt, SNO.fromString(m(1)),  SNO.fromString(m(2)),  m(3).toInt, m(4).toInt, m(5),   m(6),   m(7),      m(8), m(9),      m(10),   m(11).toInt, m(12).toInt, m(13).toInt, m(14).toInt, m(15))
-          MEntryKo(coId, coTyp, stageId, stageFormat, gameNo, stNoA, stNoB, round, maNo, winPos, looPos, playfield, info, 
-                   startTime, endTime, status, (sets1,sets2), winSets, result)
-        } catch { case _: Throwable => MEntryKo(coId, coTyp, stageId, stageFormat, 0, SNO.nn, SNO.nn, 0, 0, "", "", "", "", "", "", 0, (0,0), 0, "") }
-      }   
-      case _      => MEntryBase(coId, coTyp, stageId, stageFormat)
-    }
-  }
-}
+case class MEntryTx(coId: CompId, coTyp: CompTyp, stageId: StageId, stageFormat: StageFormat, content: String)
 
 
 object MEntry {
   given rwBase: RW[MEntryBase] = macroRW
   given rwKo: RW[MEntryKo] = macroRW
   given rwGr: RW[MEntryGr] = macroRW
-  given rw: RW[MEntry] = macroRW
+  given rwTx: RW[MEntryTx] = macroRW
+
+  given rw: RW[MEntry] = Pickle.readwriter[ujson.Value].bimap[MEntry](
+    (m: MEntry) => Pickle.writeJs(m.toTx),
+    (json: ujson.Value) => {
+      if (json.obj.contains("content")) {
+        val tx = Pickle.read[MEntryTx](json)
+        tx.stageFormat match {
+          case StageFormat.GR | StageFormat.RR | StageFormat.SW =>
+            val m = tx.content.split("\\^", -1)
+            val gameNo = m(0).toInt
+            val stNoA = SNO.fromString(m(1))
+            val stNoB = SNO.fromString(m(2))
+            val round = m(3).toInt
+            val grId = m(4).toInt
+            val wgw1 = m(5).toInt
+            val wgw2 = m(6).toInt
+            val depend = m(7)
+            val trigger = m(8)
+            val playfield = m(9)
+            val info = m(10)
+            val startTime = m(11)
+            val endTime = m(12)
+            val status = m(13).toInt
+            val sets1 = m(14).toInt
+            val sets2 = m(15).toInt
+            val winSets = m(16).toInt
+            val result = m(17)
+            MEntryGr(tx.coId, tx.coTyp, tx.stageId, tx.stageFormat, gameNo, stNoA, stNoB, round, grId, (wgw1, wgw2), depend, trigger, playfield, info, startTime, endTime, status, (sets1, sets2), winSets, result)
+
+          case StageFormat.KO =>
+            val m = tx.content.split("\\^", -1)
+            val gameNo = m(0).toInt
+            val stNoA = SNO.fromString(m(1))
+            val stNoB = SNO.fromString(m(2))
+            val round = m(3).toInt
+            val maNo = m(4).toInt
+            val winPos = m(5)
+            val looPos = m(6)
+            val playfield = m(7)
+            val info = m(8)
+            val startTime = m(9)
+            val endTime = m(10)
+            val status = m(11).toInt
+            val sets1 = m(12).toInt
+            val sets2 = m(13).toInt
+            val winSets = m(14).toInt
+            val result = m(15)
+            MEntryKo(tx.coId, tx.coTyp, tx.stageId, tx.stageFormat, gameNo, stNoA, stNoB, round, maNo, winPos, looPos, playfield, info, startTime, endTime, status, (sets1, sets2), winSets, result)
+
+          case _ =>
+            MEntryBase(tx.coId, tx.coTyp, tx.stageId, tx.stageFormat)
+        }
+      } else {
+        val typeTag = json.obj.get("$type").map(_.str).getOrElse("")
+        typeTag match {
+          case "MEntryKo" | "shared.model.MEntryKo" => Pickle.read[MEntryKo](json)
+          case "MEntryGr" | "shared.model.MEntryGr" => Pickle.read[MEntryGr](json)
+          case _ => Pickle.read[MEntryBase](json)
+        }
+      }
+    }
+  )
 
   import scala.collection.mutable.HashSet
   import scala.collection.mutable.Map
