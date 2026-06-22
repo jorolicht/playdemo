@@ -25,9 +25,12 @@ object StageDraw extends BasePage with JsWrapper:
   val PlayerItem:      HtmlId = genId(name)
 
   private var selectedPlayer: Option[(Int, SNO, HTMLElement)] = None
+  private var rrResizeListener: Option[scala.scalajs.js.Function1[dom.Event, Unit]] = None
 
   def render(param: String = ""): Boolean = 
     selectedPlayer = None
+    rrResizeListener.foreach(l => dom.window.removeEventListener("resize", l))
+    rrResizeListener = None
     Global.currentSelection.stage match
       case Some(r) => 
         comps.ContextHeader.render()
@@ -37,6 +40,7 @@ object StageDraw extends BasePage with JsWrapper:
             true
           case StageData.RoundRobinStage(rrGroup) =>
             setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.RoundRobin(r, Seq(rrGroup))))
+            initRoundRobinConnections(rrGroup.size)
             true
           case StageData.SwissStage(swGroup) =>
             setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.SwissSystem(r, Seq(swGroup))))
@@ -191,3 +195,64 @@ object StageDraw extends BasePage with JsWrapper:
         case _ =>
       }
     }
+
+  private def initRoundRobinConnections(size: Int): Unit =
+    def parseFloat(s: String): Double =
+      val clean = s.replaceAll("[^0-9.]", "")
+      if (clean.isEmpty) 0.0 else clean.toDouble
+
+    def updateConnections(): Unit =
+      val svg = dom.document.querySelector(".rr-draw-connections").asInstanceOf[dom.html.Element]
+      val ul = dom.document.querySelector(".list-group").asInstanceOf[dom.html.UList]
+      if (svg == null || ul == null) return
+      
+      // Clear SVG children
+      while (svg.lastChild != null) {
+        svg.removeChild(svg.lastChild)
+      }
+      
+      val listItems = ul.querySelectorAll(".player-draw-item")
+      if (listItems.length < size) return
+      
+      import shared.utils.GroupPlan
+      val plan = GroupPlan.get(size)
+      if (plan.rounds.length == 0) return
+      val round1Matches = plan.rounds(0)
+      
+      val W = ul.offsetWidth.toDouble
+      val colors = Array("#0d6efd", "#198754", "#0dcaf0", "#e67e22")
+      
+      round1Matches.zipWithIndex.foreach { case (wgw, idx) =>
+        val p1 = wgw._1
+        val p2 = wgw._2
+        
+        // Only draw connection if both players are valid (not BYEs)
+        if (p1 <= size && p2 <= size) {
+          val idx1 = p1 - 1
+          val idx2 = p2 - 1
+          val li1 = listItems.item(idx1).asInstanceOf[dom.html.LI]
+          val li2 = listItems.item(idx2).asInstanceOf[dom.html.LI]
+          
+          if (li1 != null && li2 != null) {
+            val y1 = li1.offsetTop.toDouble + li1.offsetHeight.toDouble / 2.0
+            val y2 = li2.offsetTop.toDouble + li2.offsetHeight.toDouble / 2.0
+            
+            val span = scala.math.abs(idx2 - idx1)
+            val xStart = W - 70.0
+            val xOffset = xStart + (span * 6.0)
+            
+            val path = dom.document.createElementNS("http://www.w3.org/2000/svg", "path").asInstanceOf[dom.Element]
+            path.setAttribute("d", s"M ${xStart} ${y1} C ${xOffset} ${y1}, ${xOffset} ${y2}, ${xStart} ${y2}")
+            
+            val color = colors(idx % colors.length)
+            path.setAttribute("style", s"stroke: ${color}; stroke-width: 2px; stroke-opacity: 0.5; fill: none; stroke-dasharray: 4 2;")
+            svg.appendChild(path)
+          }
+        }
+      }
+
+    val rListener: scala.scalajs.js.Function1[dom.Event, Unit] = (_: dom.Event) => updateConnections()
+    rrResizeListener = Some(rListener)
+    dom.window.addEventListener("resize", rListener)
+    
+    dom.window.setTimeout(() => updateConnections(), 100)
