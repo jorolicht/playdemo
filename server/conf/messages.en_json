@@ -216,6 +216,7 @@
   "StageDraw.dummy_rr": "Dummy template for Round Robin.",
   "addon.version": "Demo Play Application Version 1.0 / Robert Lichtenegger",
   "StageResult.title": "Stage Results / Standings: {0}",
+  "StageResult.title_rr": "Stage Results / Table: {0}",
   "PlayerList.no_players": "No participants registered.",
   "Sidebar.UseCase53": "UseCase53",
   "StageAdmin.best_of_7": "Best-of-7 (4 sets to win)",

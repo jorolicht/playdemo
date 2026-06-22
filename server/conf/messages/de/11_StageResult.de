@@ -1,4 +1,5 @@
 StageResult.title = Ergebnisse der Wettbewerbsphase / Tabellen: {0}
+StageResult.title_rr = Ergebnisse der Wettbewerbsphase / Tabelle: {0}
 StageResult.no_results = Keine Ergebnisse für diese Wettbewerbsphase verfügbar.
 StageResult.table_title = Tabelle {0}
 StageResult.rank_header = Platz

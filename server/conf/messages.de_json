@@ -223,6 +223,7 @@
   "StageDraw.dummy_rr": "Dummy-Vorlage für Jeder-gegen-Jeden.",
   "addon.version": "Demo Play Application Version 1.0 / Robert Lichtenegger",
   "StageResult.title": "Ergebnisse der Wettbewerbsphase / Tabellen: {0}",
+  "StageResult.title_rr": "Ergebnisse der Wettbewerbsphase / Tabelle: {0}",
   "PlayerList.no_players": "Keine Teilnehmer angemeldet.",
   "Sidebar.UseCase53": "UseCase53",
   "StageAdmin.best_of_7": "Best-of-7 (4 Gewinnsätze)",

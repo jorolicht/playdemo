@@ -1,4 +1,5 @@
 StageResult.title = Stage Results / Standings: {0}
+StageResult.title_rr = Stage Results / Table: {0}
 StageResult.no_results = No results available for this stage.
 StageResult.table_title = Table {0}
 StageResult.rank_header = Rank
