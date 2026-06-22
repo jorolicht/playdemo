@@ -131,6 +131,8 @@
   "StageDraw.title": "Draw & Seeding: {0}",
   "btn.retry": "RETRY",
   "StageDraw.draw_help": "Check the group assignments for {0}. You can click two players to swap them.",
+  "StageDraw.draw_help_rr": "Check the group assignments for {0}. You can click two players to swap them. The pairings of the first round are displayed at the edge.",
+  "StageDraw.group_rr_name": "Round Robin Group",
   "StageResult.btn_next": "Prepare Next Stage",
   "StageDraw.no_groups": "No groups generated for this stage.",
   "StageResult.round_last128": "Round of 128",

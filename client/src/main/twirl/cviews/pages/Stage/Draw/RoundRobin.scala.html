@@ -14,7 +14,7 @@
         <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name)</h5>
         
         <div class="alert alert-info py-2 small d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-info-circle me-2"></i>@gM("+draw_help", stage.stageConfig.productPrefix)</span>
+            <span><i class="bi bi-info-circle me-2"></i>@gM("+draw_help_rr", stage.stageConfig.productPrefix)</span>
             <span class="badge bg-primary">@groups.length @gM("+groups_suffix")</span>
         </div>
 
@@ -28,7 +28,7 @@
                     <svg class="rr-draw-connections" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;"></svg>
                     
                     <div class="card border-info border-opacity-25 bg-white shadow-sm position-relative" style="z-index: 1;">
-                        <div class="card-header bg-info bg-opacity-10 py-2 text-center fw-bold">@g.name</div>
+                        <div class="card-header bg-info bg-opacity-10 py-2 text-center fw-bold">@{ if (g.name == "Gruppe 1") gM("+group_rr_name") else g.name }</div>
                         <div class="card-body p-0">
                             <ul class="list-group list-group-flush x-small">
                                 @defining(g.pants.filter(p => p != null && p.id != SNO.nn)) { activePants =>

@@ -134,6 +134,8 @@
   "PlayerRegistration.ttr_header": "TTR",
   "StageDraw.title": "Auslosung & Setzung: {0}",
   "StageDraw.draw_help": "Überprüfen Sie die Gruppenzuordnung für {0}. Sie können zwei Spieler anklicken, um sie zu vertauschen.",
+  "StageDraw.draw_help_rr": "Überprüfen Sie die Gruppenzuordnung für {0}. Sie können zwei Spieler anklicken, um sie zu vertauschen. Am Rand werden die Paarungen der ersten Runde angezeigt.",
+  "StageDraw.group_rr_name": "Gruppe Jeder-gegen-Jeden",
   "StageResult.btn_next": "Nächste Wettbewerbsphase vorbereiten",
   "btn.retry": "WIEDERHOLEN",
   "err00050.wordpress.notfound.parse": "No post found for slug {0} or ID could not be parsed",
