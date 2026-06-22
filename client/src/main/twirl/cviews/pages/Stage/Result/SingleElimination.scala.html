@@ -42,121 +42,98 @@
     }
 }
 
+@renderMatch(m: MEntryKo, isThirdPlace: Boolean) = {
+    <div class="bracket-match shadow-sm @{if(isThirdPlace) "third-place-card" else ""}">
+        @if(!isThirdPlace) {
+            <div class="bracket-connector">
+                <div class="connector-horizontal-in"></div>
+                <div class="connector-vertical"></div>
+                <div class="connector-horizontal-out-top"></div>
+                <div class="connector-horizontal-out-bottom"></div>
+            </div>
+        }
+        <div class="bracket-match-header">
+            <span>@{if(isThirdPlace) gM("+round_3rd") else s"Spiel ${m.gameNo}"}</span>
+            <span class="badge @{m.status match {
+                case MEntry.MS_FIN | MEntry.MS_FIX => "bg-success"
+                case MEntry.MS_RUN => "bg-warning text-dark animate-pulse"
+                case MEntry.MS_READY => "bg-primary"
+                case _ => "bg-light text-dark border"
+            }}">
+                @{m.status match {
+                    case MEntry.MS_FIN | MEntry.MS_FIX => gM("+status_finished")
+                    case MEntry.MS_RUN => gM("+status_running")
+                    case MEntry.MS_READY => gM("+status_ready")
+                    case _ => gM("+status_open")
+                }}
+            </span>
+        </div>
+        <div class="bracket-match-body">
+            <div class="bracket-player-row @{if(m.finished && m.sets._1 > m.sets._2) "winner" else if(m.finished) "loser" else ""}">
+                <div class="d-flex flex-column text-start overflow-hidden">
+                    <span class="bracket-player-name" title="@getPlayerName(m.stNoA)">@getPlayerName(m.stNoA)</span>
+                    @if(getPlayerClub(m.stNoA).nonEmpty) {
+                        <span class="bracket-player-club">@getPlayerClub(m.stNoA)</span>
+                    }
+                </div>
+                <span class="bracket-player-score">@{if(m.finished || m.status == MEntry.MS_RUN) m.sets._1.toString else "-"}</span>
+            </div>
+            <div class="bracket-player-row @{if(m.finished && m.sets._2 > m.sets._1) "winner" else if(m.finished) "loser" else ""}">
+                <div class="d-flex flex-column text-start overflow-hidden">
+                    <span class="bracket-player-name" title="@getPlayerName(m.stNoB)">@getPlayerName(m.stNoB)</span>
+                    @if(getPlayerClub(m.stNoB).nonEmpty) {
+                        <span class="bracket-player-club">@getPlayerClub(m.stNoB)</span>
+                    }
+                </div>
+                <span class="bracket-player-score">@{if(m.finished || m.status == MEntry.MS_RUN) m.sets._2.toString else "-"}</span>
+            </div>
+        </div>
+        @if(m.result.trim.nonEmpty) {
+            <div class="bracket-match-footer border-top">
+                <span class="bracket-result-details">
+                    @m.result.replace("·", " | ")
+                </span>
+            </div>
+        }
+    </div>
+}
+
 <div class="card shadow-sm">
     <div class="card-body">
         <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name)</h5>
         
-        <div class="bracket-wrapper">
-            <div class="bracket-container">
+        <div class="tournament-container" id="tournamentContainer">
+            <!-- Navigation Buttons -->
+            <button class="nav-btn btn-prev btn btn-light shadow-sm" id="prevBtn" aria-label="Vorherige Runde">
+                <i class="bi bi-chevron-left fw-bold"></i>
+            </button>
+            <button class="nav-btn btn-next btn btn-light shadow-sm" id="nextBtn" aria-label="Nächste Runde">
+                <i class="bi bi-chevron-right fw-bold"></i>
+            </button>
+            
+            <div class="tournament-wrapper" id="tournamentWrapper">
                 @for(rNo <- maxRound to 1 by -1) {
                     @defining(koMatches.filter(_.round == rNo).sortBy(_.maNo)) { rMatches =>
                         <div class="bracket-column">
                             <div class="bracket-round-header">@getRoundName(rNo)</div>
                             <div class="bracket-round-content">
-                                @for(m <- rMatches) {
-                                    <div class="bracket-match shadow-sm">
-                                        <div class="bracket-match-header">
-                                            <span>Spiel @m.gameNo</span>
-                                            <span class="badge @{m.status match {
-                                                case MEntry.MS_FIN | MEntry.MS_FIX => "bg-success"
-                                                case MEntry.MS_RUN => "bg-warning text-dark animate-pulse"
-                                                case MEntry.MS_READY => "bg-primary"
-                                                case _ => "bg-light text-dark border"
-                                            }}">
-                                                @{m.status match {
-                                                    case MEntry.MS_FIN | MEntry.MS_FIX => gM("+status_finished")
-                                                    case MEntry.MS_RUN => gM("+status_running")
-                                                    case MEntry.MS_READY => gM("+status_ready")
-                                                    case _ => gM("+status_open")
-                                                }}
-                                            </span>
-                                        </div>
-                                        <div class="bracket-match-body">
-                                            <div class="bracket-player-row @{if(m.finished && m.sets._1 > m.sets._2) "winner" else if(m.finished) "loser" else ""}">
-                                                <div class="d-flex flex-column text-start overflow-hidden">
-                                                    <span class="bracket-player-name" title="@getPlayerName(m.stNoA)">@getPlayerName(m.stNoA)</span>
-                                                    @if(getPlayerClub(m.stNoA).nonEmpty) {
-                                                        <span class="bracket-player-club">@getPlayerClub(m.stNoA)</span>
-                                                    }
-                                                </div>
-                                                <span class="bracket-player-score">@{if(m.finished || m.status == MEntry.MS_RUN) m.sets._1.toString else "-"}</span>
-                                            </div>
-                                            <div class="bracket-player-row @{if(m.finished && m.sets._2 > m.sets._1) "winner" else if(m.finished) "loser" else ""}">
-                                                <div class="d-flex flex-column text-start overflow-hidden">
-                                                    <span class="bracket-player-name" title="@getPlayerName(m.stNoB)">@getPlayerName(m.stNoB)</span>
-                                                    @if(getPlayerClub(m.stNoB).nonEmpty) {
-                                                        <span class="bracket-player-club">@getPlayerClub(m.stNoB)</span>
-                                                    }
-                                                </div>
-                                                <span class="bracket-player-score">@{if(m.finished || m.status == MEntry.MS_RUN) m.sets._2.toString else "-"}</span>
-                                            </div>
-                                        </div>
-                                        @if(m.result.trim.nonEmpty) {
-                                            <div class="bracket-match-footer border-top">
-                                                <span class="bracket-result-details">
-                                                    @m.result.replace("·", " | ")
-                                                </span>
-                                            </div>
+                                @if(rNo == 1 && thirdPlaceOpt.isDefined) {
+                                    <div class="bracket-final-wrapper">
+                                        @for(m <- rMatches) {
+                                            @renderMatch(m, isThirdPlace = false)
+                                        }
+                                        @for(m <- thirdPlaceOpt) {
+                                            @renderMatch(m, isThirdPlace = true)
                                         }
                                     </div>
+                                } else {
+                                    @for(m <- rMatches) {
+                                        @renderMatch(m, isThirdPlace = false)
+                                    }
                                 }
                             </div>
                         </div>
                     }
-                }
-
-                @* Spiel um Platz 3 rendering if it exists *@
-                @for(m <- thirdPlaceOpt) {
-                    <div class="bracket-column">
-                        <div class="bracket-round-header">@getRoundName(0)</div>
-                        <div class="bracket-round-content justify-content-center">
-                            <div class="bracket-match shadow-sm">
-                                <div class="bracket-match-header">
-                                    <span>Spiel @m.gameNo</span>
-                                    <span class="badge @{m.status match {
-                                        case MEntry.MS_FIN | MEntry.MS_FIX => "bg-success"
-                                        case MEntry.MS_RUN => "bg-warning text-dark animate-pulse"
-                                        case MEntry.MS_READY => "bg-primary"
-                                        case _ => "bg-light text-dark border"
-                                    }}">
-                                        @{m.status match {
-                                            case MEntry.MS_FIN | MEntry.MS_FIX => gM("+status_finished")
-                                            case MEntry.MS_RUN => gM("+status_running")
-                                            case MEntry.MS_READY => gM("+status_ready")
-                                            case _ => gM("+status_open")
-                                        }}
-                                    </span>
-                                </div>
-                                <div class="bracket-match-body">
-                                    <div class="bracket-player-row @{if(m.finished && m.sets._1 > m.sets._2) "winner" else if(m.finished) "loser" else ""}">
-                                        <div class="d-flex flex-column text-start overflow-hidden">
-                                            <span class="bracket-player-name" title="@getPlayerName(m.stNoA)">@getPlayerName(m.stNoA)</span>
-                                            @if(getPlayerClub(m.stNoA).nonEmpty) {
-                                                <span class="bracket-player-club">@getPlayerClub(m.stNoA)</span>
-                                            }
-                                        </div>
-                                        <span class="bracket-player-score">@{if(m.finished || m.status == MEntry.MS_RUN) m.sets._1.toString else "-"}</span>
-                                    </div>
-                                    <div class="bracket-player-row @{if(m.finished && m.sets._2 > m.sets._1) "winner" else if(m.finished) "loser" else ""}">
-                                        <div class="d-flex flex-column text-start overflow-hidden">
-                                            <span class="bracket-player-name" title="@getPlayerName(m.stNoB)">@getPlayerName(m.stNoB)</span>
-                                            @if(getPlayerClub(m.stNoB).nonEmpty) {
-                                                <span class="bracket-player-club">@getPlayerClub(m.stNoB)</span>
-                                            }
-                                        </div>
-                                        <span class="bracket-player-score">@{if(m.finished || m.status == MEntry.MS_RUN) m.sets._2.toString else "-"}</span>
-                                    </div>
-                                </div>
-                                @if(m.result.trim.nonEmpty) {
-                                    <div class="bracket-match-footer border-top">
-                                        <span class="bracket-result-details">
-                                            @m.result.replace("·", " | ")
-                                        </span>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    </div>
                 }
             </div>
         </div>
@@ -173,39 +150,36 @@
 </div>
 
 <style>
-    .bracket-wrapper {
+    .tournament-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
         background-color: #f8f9fa;
         border-radius: 12px;
-        padding: 1.5rem;
+        padding: 1.5rem 2.5rem; /* Space for absolute navigation buttons */
         margin-top: 1rem;
         border: 1px solid #e9ecef;
     }
     
-    .bracket-container {
+    .tournament-wrapper {
         display: flex;
+        transition: transform 0.4s ease-in-out;
+        width: max-content;
         gap: 2.5rem;
-        overflow-x: auto;
-        padding-bottom: 1rem;
-        scrollbar-width: thin;
-        scrollbar-color: #dee2e6 transparent;
-    }
-    
-    .bracket-container::-webkit-scrollbar {
-        height: 6px;
-    }
-    .bracket-container::-webkit-scrollbar-thumb {
-        background-color: #dee2e6;
-        border-radius: 3px;
     }
     
     .bracket-column {
         display: flex;
         flex-direction: column;
-        min-width: 250px;
-        flex: 1 0 250px;
+        justify-content: space-around;
+        align-items: center;
+        width: 280px; /* Fixed column width */
+        min-height: 600px;
+        box-sizing: border-box;
     }
     
     .bracket-round-header {
+        width: 100%;
         text-align: center;
         font-weight: 700;
         font-size: 0.85rem;
@@ -220,22 +194,70 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
     
+    .nav-btn {
+        position: absolute;
+        top: 2.6rem; /* aligned vertically centered with round headers */
+        z-index: 10;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #dee2e6;
+        background-color: #ffffff;
+        color: #495057;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+        padding: 0;
+    }
+    
+    .nav-btn:hover {
+        background-color: #f8f9fa;
+        color: #0d6efd;
+        transform: scale(1.05);
+    }
+    
+    .nav-btn:disabled {
+        opacity: 0.3;
+        pointer-events: none;
+    }
+    
+    .btn-prev {
+        left: 0.5rem;
+    }
+    
+    .btn-next {
+        right: 0.5rem;
+    }
+    
     .bracket-round-content {
         display: flex;
         flex-direction: column;
-        justify-content: space-around;
+        justify-content: flex-start;
         flex-grow: 1;
         gap: 1rem;
-        min-height: 380px;
+        width: 100%;
+        transition: gap 0.4s ease-in-out;
     }
     
     .bracket-match {
         background-color: #ffffff;
         border: 1px solid #dee2e6;
         border-radius: 10px;
-        padding: 0.75rem 1rem;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 0.6rem 0.8rem;
+        height: 130px; /* Fixed height to ensure perfect vertical alignment */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 0.3rem;
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                    margin-top 0.4s ease-in-out,
+                    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                    border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
+        width: 100%;
+        box-sizing: border-box;
     }
     
     .bracket-match:hover {
@@ -340,5 +362,74 @@
     @@keyframes pulse-ring {
         0%, 100% { opacity: 1; }
         50% { opacity: .5; }
+    }
+
+    /* Connection lines styling */
+    .bracket-connector {
+        display: none;
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .bracket-match.has-connector .bracket-connector {
+        display: block;
+    }
+
+    .connector-horizontal-in {
+        position: absolute;
+        right: 100%;
+        top: 0;
+        width: 20px; /* half of 40px gap */
+        height: 2px;
+        background-color: #cbd5e1;
+        transform: translateY(-50%);
+    }
+
+    .connector-vertical {
+        position: absolute;
+        right: calc(100% + 20px);
+        top: 0;
+        width: 2px;
+        height: calc(2 * var(--parent-distance));
+        background-color: #cbd5e1;
+        transform: translateY(-50%);
+        transition: height 0.4s ease-in-out;
+    }
+
+    .connector-horizontal-out-top {
+        position: absolute;
+        right: calc(100% + 20px);
+        top: calc(-1 * var(--parent-distance));
+        width: 20px;
+        height: 2px;
+        background-color: #cbd5e1;
+        transform: translateY(-50%);
+        transition: top 0.4s ease-in-out;
+    }
+
+    .connector-horizontal-out-bottom {
+        position: absolute;
+        right: calc(100% + 20px);
+        top: var(--parent-distance);
+        width: 20px;
+        height: 2px;
+        background-color: #cbd5e1;
+        transform: translateY(-50%);
+        transition: top 0.4s ease-in-out;
+    }
+
+    .bracket-final-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem; /* spacing between final and third-place card */
+        width: 100%;
+    }
+
+    .third-place-card {
+        border-color: #e67e22 !important; /* distinct border color for third-place match */
     }
 </style>
