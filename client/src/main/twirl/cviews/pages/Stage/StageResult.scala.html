@@ -4,52 +4,207 @@
 
 @(stage: Stage, groups: Seq[Group])
 
+@compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
+@pants = @{ compOpt.map(_.pants1Stage.toSeq).getOrElse(Seq.empty) }
+
+@getPlayerName(sno: SNO) = @{
+    if (sno.isNN) "NOCH OFFEN"
+    else if (sno.isBye) "Freilos"
+    else pants.find(_.id == sno).map(_.name).getOrElse(sno.toString)
+}
+
+@getPlayerClub(sno: SNO) = @{
+    if (sno.isNN || sno.isBye) ""
+    else pants.find(_.id == sno).map(_.club).getOrElse("")
+}
+
+@koMatches = @{
+    stage.matches.collect { case m: MEntryKo => m }.toSeq
+}
+
+@maxRound = @{
+    if (koMatches.nonEmpty) koMatches.map(_.round).max else 1
+}
+
+@thirdPlaceOpt = @{ koMatches.find(_.round == 0) }
+
+@getRoundName(roundNo: Int) = @{
+    roundNo match {
+        case 0 => "Spiel um Platz 3"
+        case 1 => "Finale"
+        case 2 => "Halbfinale"
+        case 3 => "Viertelfinale"
+        case 4 => "Achtelfinale"
+        case 5 => "Sechzehntelfinale"
+        case 6 => "32stel-Finale"
+        case 7 => "64stel-Finale"
+        case _ => s"Runde ${maxRound - roundNo + 1}"
+    }
+}
+
 <div class="card shadow-sm">
     <div class="card-body">
         <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name)</h5>
         
-        <div class="row row-cols-1 row-cols-md-2 g-4">
-            @if(groups.isEmpty) {
-                <div class="col-12 text-center py-5 text-muted italic">@gM("+no_results")</div>
-            }
-            @groups.map { g =>
-                <div class="col">
-                    <div class="border rounded p-0 overflow-hidden shadow-sm">
-                        <div class="bg-dark text-white p-2 text-center fw-bold">@gM("+table_title", g.name)</div>
-                        <table class="table table-sm table-striped mb-0 small">
-                            <thead class="table-secondary">
-                                <tr>
-                                    <th class="ps-2 text-center" style="width: 50px;">Pos</th>
-                                    <th>@gM("+name_header")</th>
-                                    <th class="text-center">@gM("+matches_header")</th>
-                                    <th class="text-center">@gM("+sets_header")</th>
-                                    <th class="text-center">Bälle</th>
-                                    <th class="text-center">Diff.</th>
-                                    <th class="text-center" style="width: 60px;">Platz</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @defining(g.pants.indices.map(i => (g.pants(i), g.points(i), g.sets(i), g.balls(i)))) { zipped =>
-                                    @zipped.zipWithIndex.map { case ((p, pts, sts, bls), idx) =>
-                                        @defining(bls._1 - bls._2) { diff =>
-                                            <tr>
-                                                <td class="ps-2 fw-bold text-center">@{idx + 1}.</td>
-                                                <td>@p.name</td>
-                                                <td class="text-center">@pts._1:@pts._2</td>
-                                                <td class="text-center">@sts._1:@sts._2</td>
-                                                <td class="text-center">@bls._1:@bls._2</td>
-                                                <td class="text-center">@{if(diff > 0) "+" + diff else diff}</td>
-                                                <td class="text-center fw-bold">@{if(p.place._1 > 0) p.place._1 else "-"}</td>
-                                            </tr>
+        @if(stage.isKoStage) {
+            <div class="bracket-wrapper">
+                <div class="bracket-container">
+                    @for(rNo <- maxRound to 1 by -1) {
+                        @defining(koMatches.filter(_.round == rNo).sortBy(_.maNo)) { rMatches =>
+                            <div class="bracket-column">
+                                <div class="bracket-round-header">@getRoundName(rNo)</div>
+                                <div class="bracket-round-content">
+                                    @for(m <- rMatches) {
+                                        <div class="bracket-match shadow-sm">
+                                            <div class="bracket-match-header">
+                                                <span>Spiel @m.gameNo</span>
+                                                <span class="badge @{m.status match {
+                                                    case MEntry.MS_FIN | MEntry.MS_FIX => "bg-success"
+                                                    case MEntry.MS_RUN => "bg-warning text-dark animate-pulse"
+                                                    case MEntry.MS_READY => "bg-primary"
+                                                    case _ => "bg-light text-dark border"
+                                                }}">
+                                                    @{m.status match {
+                                                        case MEntry.MS_FIN | MEntry.MS_FIX => "Beendet"
+                                                        case MEntry.MS_RUN => "Läuft"
+                                                        case MEntry.MS_READY => "Bereit"
+                                                        case _ => "Offen"
+                                                    }}
+                                                </span>
+                                            </div>
+                                            <div class="bracket-match-body">
+                                                <div class="bracket-player-row @{if(m.finished && m.sets._1 > m.sets._2) "winner" else if(m.finished) "loser" else ""}">
+                                                    <div class="d-flex flex-column text-start overflow-hidden">
+                                                        <span class="bracket-player-name" title="@getPlayerName(m.stNoA)">@getPlayerName(m.stNoA)</span>
+                                                        @if(getPlayerClub(m.stNoA).nonEmpty) {
+                                                            <span class="bracket-player-club">@getPlayerClub(m.stNoA)</span>
+                                                        }
+                                                    </div>
+                                                    <span class="bracket-player-score">@{if(m.finished || m.status == MEntry.MS_RUN) m.sets._1.toString else "-"}</span>
+                                                </div>
+                                                <div class="bracket-player-row @{if(m.finished && m.sets._2 > m.sets._1) "winner" else if(m.finished) "loser" else ""}">
+                                                    <div class="d-flex flex-column text-start overflow-hidden">
+                                                        <span class="bracket-player-name" title="@getPlayerName(m.stNoB)">@getPlayerName(m.stNoB)</span>
+                                                        @if(getPlayerClub(m.stNoB).nonEmpty) {
+                                                            <span class="bracket-player-club">@getPlayerClub(m.stNoB)</span>
+                                                        }
+                                                    </div>
+                                                    <span class="bracket-player-score">@{if(m.finished || m.status == MEntry.MS_RUN) m.sets._2.toString else "-"}</span>
+                                                </div>
+                                            </div>
+                                            @if(m.result.trim.nonEmpty) {
+                                                <div class="bracket-match-footer border-top">
+                                                    <span class="bracket-result-details">
+                                                        @m.result.replace("·", " | ")
+                                                    </span>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    @* Spiel um Platz 3 rendering if it exists *@
+                    @for(m <- thirdPlaceOpt) {
+                        <div class="bracket-column">
+                            <div class="bracket-round-header">@getRoundName(0)</div>
+                            <div class="bracket-round-content justify-content-center">
+                                <div class="bracket-match shadow-sm">
+                                    <div class="bracket-match-header">
+                                        <span>Spiel @m.gameNo</span>
+                                        <span class="badge @{m.status match {
+                                            case MEntry.MS_FIN | MEntry.MS_FIX => "bg-success"
+                                            case MEntry.MS_RUN => "bg-warning text-dark animate-pulse"
+                                            case MEntry.MS_READY => "bg-primary"
+                                            case _ => "bg-light text-dark border"
+                                        }}">
+                                            @{m.status match {
+                                                case MEntry.MS_FIN | MEntry.MS_FIX => "Beendet"
+                                                case MEntry.MS_RUN => "Läuft"
+                                                case MEntry.MS_READY => "Bereit"
+                                                case _ => "Offen"
+                                            }}
+                                        </span>
+                                    </div>
+                                    <div class="bracket-match-body">
+                                        <div class="bracket-player-row @{if(m.finished && m.sets._1 > m.sets._2) "winner" else if(m.finished) "loser" else ""}">
+                                            <div class="d-flex flex-column text-start overflow-hidden">
+                                                <span class="bracket-player-name" title="@getPlayerName(m.stNoA)">@getPlayerName(m.stNoA)</span>
+                                                @if(getPlayerClub(m.stNoA).nonEmpty) {
+                                                    <span class="bracket-player-club">@getPlayerClub(m.stNoA)</span>
+                                                }
+                                            </div>
+                                            <span class="bracket-player-score">@{if(m.finished || m.status == MEntry.MS_RUN) m.sets._1.toString else "-"}</span>
+                                        </div>
+                                        <div class="bracket-player-row @{if(m.finished && m.sets._2 > m.sets._1) "winner" else if(m.finished) "loser" else ""}">
+                                            <div class="d-flex flex-column text-start overflow-hidden">
+                                                <span class="bracket-player-name" title="@getPlayerName(m.stNoB)">@getPlayerName(m.stNoB)</span>
+                                                @if(getPlayerClub(m.stNoB).nonEmpty) {
+                                                    <span class="bracket-player-club">@getPlayerClub(m.stNoB)</span>
+                                                }
+                                            </div>
+                                            <span class="bracket-player-score">@{if(m.finished || m.status == MEntry.MS_RUN) m.sets._2.toString else "-"}</span>
+                                        </div>
+                                    </div>
+                                    @if(m.result.trim.nonEmpty) {
+                                        <div class="bracket-match-footer border-top">
+                                            <span class="bracket-result-details">
+                                                @m.result.replace("·", " | ")
+                                            </span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        } else {
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                @if(groups.isEmpty) {
+                    <div class="col-12 text-center py-5 text-muted italic">@gM("+no_results")</div>
+                }
+                @groups.map { g =>
+                    <div class="col">
+                        <div class="border rounded p-0 overflow-hidden shadow-sm">
+                            <div class="bg-dark text-white p-2 text-center fw-bold">@gM("+table_title", g.name)</div>
+                            <table class="table table-sm table-striped mb-0 small">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th class="ps-2 text-center" style="width: 50px;">Pos</th>
+                                        <th>@gM("+name_header")</th>
+                                        <th class="text-center">@gM("+matches_header")</th>
+                                        <th class="text-center">@gM("+sets_header")</th>
+                                        <th class="text-center">Bälle</th>
+                                        <th class="text-center">Diff.</th>
+                                        <th class="text-center" style="width: 60px;">Platz</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @defining(g.pants.indices.map(i => (g.pants(i), g.points(i), g.sets(i), g.balls(i)))) { zipped =>
+                                        @zipped.zipWithIndex.map { case ((p, pts, sts, bls), idx) =>
+                                            @defining(bls._1 - bls._2) { diff =>
+                                                <tr>
+                                                    <td class="ps-2 fw-bold text-center">@{idx + 1}.</td>
+                                                    <td>@p.name</td>
+                                                    <td class="text-center">@pts._1:@pts._2</td>
+                                                    <td class="text-center">@sts._1:@sts._2</td>
+                                                    <td class="text-center">@bls._1:@bls._2</td>
+                                                    <td class="text-center">@{if(diff > 0) "+" + diff else diff}</td>
+                                                    <td class="text-center fw-bold">@{if(p.place._1 > 0) p.place._1 else "-"}</td>
+                                                </tr>
+                                            }
                                         }
                                     }
-                                }
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-            }
-        </div>
+                }
+            </div>
+        }
 
         <div class="mt-4 pt-3 border-top d-flex justify-content-between">
             <button class="btn btn-outline-primary">
@@ -61,3 +216,174 @@
         </div>
     </div>
 </div>
+
+<style>
+    .bracket-wrapper {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    .bracket-container {
+        display: flex;
+        gap: 2.5rem;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+        scrollbar-width: thin;
+        scrollbar-color: #dee2e6 transparent;
+    }
+    
+    .bracket-container::-webkit-scrollbar {
+        height: 6px;
+    }
+    .bracket-container::-webkit-scrollbar-thumb {
+        background-color: #dee2e6;
+        border-radius: 3px;
+    }
+    
+    .bracket-column {
+        display: flex;
+        flex-direction: column;
+        min-width: 250px;
+        flex: 1 0 250px;
+    }
+    
+    .bracket-round-header {
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #495057;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 1.25rem;
+        padding: 0.5rem;
+        background-color: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    
+    .bracket-round-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        flex-grow: 1;
+        gap: 1rem;
+        min-height: 380px;
+    }
+    
+    .bracket-match {
+        background-color: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+    
+    .bracket-match:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06) !important;
+        border-color: #a5b4fc;
+    }
+    
+    .bracket-match-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #868e96;
+        margin-bottom: 0.5rem;
+    }
+    
+    .bracket-match-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .bracket-player-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        padding: 0.25rem 0;
+        border-radius: 4px;
+    }
+    
+    .bracket-player-row.winner {
+        font-weight: 700;
+        color: #0f172a;
+    }
+    
+    .bracket-player-row.loser {
+        color: #94a3b8;
+    }
+    
+    .bracket-player-name {
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 170px;
+    }
+    
+    .bracket-player-club {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 170px;
+        margin-top: -2px;
+    }
+    
+    .bracket-player-score {
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+        font-size: 0.9rem;
+        min-width: 24px;
+        text-align: center;
+        background-color: #f1f5f9;
+        border-radius: 4px;
+        padding: 2px 4px;
+    }
+    
+    .bracket-player-row.winner .bracket-player-score {
+        background-color: #dcfce7;
+        color: #15803d;
+    }
+    
+    .bracket-player-row.loser .bracket-player-score {
+        background-color: #f8fafc;
+        color: #94a3b8;
+    }
+    
+    .bracket-match-footer {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        font-size: 0.7rem;
+        font-family: monospace;
+        color: #64748b;
+        text-align: center;
+    }
+    
+    .bracket-result-details {
+        background-color: #f8fafc;
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: 1px solid #f1f5f9;
+    }
+    
+    .animate-pulse {
+        animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @@keyframes pulse-ring {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
+    }
+</style>
