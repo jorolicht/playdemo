@@ -30,8 +30,7 @@ object StageResult extends BasePage with JsWrapper:
             setMain(cviews.comps.html.StageLayout(stage, "RES")(play.twirl.api.Html("<span>Schweizer System Ergebnisse (Platzhalter)</span>")))
             true
           case StageData.RoundRobinStage(rr) => 
-            // TODO: Implement Round Robin Result View
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(play.twirl.api.Html("<span>Round Robin Ergebnisse (Platzhalter)</span>")))
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.RoundRobin(stage, Seq(rr))))
             true
       case None => 
         debug("StageResult: No stage selected, redirecting to Competition Info")

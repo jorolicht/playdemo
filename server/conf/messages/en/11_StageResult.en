@@ -21,4 +21,5 @@ StageResult.round_n = Round {0}
 StageResult.status_finished = Finished
 StageResult.status_running = Running
 StageResult.status_ready = Ready
+StageResult.group_rr_name = Round Robin Group
 StageResult.status_open = Open

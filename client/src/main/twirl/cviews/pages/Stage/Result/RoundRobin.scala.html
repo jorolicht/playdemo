@@ -1,0 +1,65 @@
+@import shared.model.*
+@import shared.format.*
+@import pages.Stage.StageResult.*
+
+@(stage: Stage, groups: Seq[Group])
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name)</h5>
+
+        <div class="row justify-content-center">
+            @if(groups.isEmpty) {
+                <div class="col-12 text-center py-5 text-muted italic">@gM("+no_results")</div>
+            }
+            @groups.headOption.map { g =>
+                <div class="col-md-10 col-lg-8">
+                    <div class="border rounded p-0 overflow-hidden shadow-sm bg-white">
+                        <div class="bg-dark text-white p-2 text-center fw-bold">
+                            @{ if (g.name == "Gruppe 1") gM("+group_rr_name") else g.name }
+                        </div>
+                        <table class="table table-sm table-striped mb-0 small">
+                            <thead class="table-secondary">
+                                <tr>
+                                    <th class="ps-3 text-center" style="width: 60px;">Pos</th>
+                                    <th>@gM("+name_header")</th>
+                                    <th class="text-center" style="width: 100px;">@gM("+matches_header")</th>
+                                    <th class="text-center" style="width: 100px;">@gM("+sets_header")</th>
+                                    <th class="text-center" style="width: 100px;">Bälle</th>
+                                    <th class="text-center" style="width: 80px;">Diff.</th>
+                                    <th class="text-center" style="width: 80px;">Platz</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @defining(g.pants.indices.map(i => (g.pants(i), g.points(i), g.sets(i), g.balls(i)))) { zipped =>
+                                    @zipped.zipWithIndex.map { case ((p, pts, sts, bls), idx) =>
+                                        @defining(bls._1 - bls._2) { diff =>
+                                            <tr>
+                                                <td class="ps-3 fw-bold text-center">@{idx + 1}.</td>
+                                                <td>@p.name</td>
+                                                <td class="text-center">@pts._1:@pts._2</td>
+                                                <td class="text-center">@sts._1:@sts._2</td>
+                                                <td class="text-center">@bls._1:@bls._2</td>
+                                                <td class="text-center">@{if(diff > 0) "+" + diff else diff}</td>
+                                                <td class="text-center fw-bold">@{if(p.place._1 > 0) p.place._1 else "-"}</td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mt-4 pt-3 border-top d-flex justify-content-between">
+            <button class="btn btn-outline-primary" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i>@gM("+btn_print")
+            </button>
+            <button class="btn btn-primary" onclick="appLoadPage('CompetitionInfo', '')">
+                @gM("+btn_next") <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </div>
+    </div>
+</div>

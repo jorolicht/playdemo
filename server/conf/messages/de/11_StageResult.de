@@ -21,4 +21,5 @@ StageResult.round_n = Runde {0}
 StageResult.status_finished = Beendet
 StageResult.status_running = Läuft
 StageResult.status_ready = Bereit
+StageResult.group_rr_name = Gruppe Jeder-gegen-Jeden
 StageResult.status_open = Offen
