@@ -196,15 +196,18 @@ object StageDraw extends BasePage with JsWrapper:
       }
     }
 
+  /**
+   * Initializes the connection lines representing the first round pairings in a Round Robin stage.
+   * Draws straight, rectangular elbow lines outside the group card, updated dynamically on resize.
+   *
+   * @param size The number of players/positions in the group.
+   */
   private def initRoundRobinConnections(size: Int): Unit =
-    def parseFloat(s: String): Double =
-      val clean = s.replaceAll("[^0-9.]", "")
-      if (clean.isEmpty) 0.0 else clean.toDouble
-
     def updateConnections(): Unit =
       val svg = dom.document.querySelector(".rr-draw-connections").asInstanceOf[dom.html.Element]
       val ul = dom.document.querySelector(".list-group").asInstanceOf[dom.html.UList]
-      if (svg == null || ul == null) return
+      val card = dom.document.querySelector(".draw-wrapper .card").asInstanceOf[dom.html.Element]
+      if (svg == null || ul == null || card == null) return
       
       // Clear SVG children
       while (svg.lastChild != null) {
@@ -219,7 +222,10 @@ object StageDraw extends BasePage with JsWrapper:
       if (plan.rounds.length == 0) return
       val round1Matches = plan.rounds(0)
       
-      val W = ul.offsetWidth.toDouble
+      val cardRect = card.getBoundingClientRect()
+      val svgRect = svg.getBoundingClientRect()
+      val xStart = cardRect.right - svgRect.left
+      val xStartAdjusted = xStart - 2.0
       val colors = Array("#0d6efd", "#198754", "#0dcaf0", "#e67e22")
       
       round1Matches.zipWithIndex.foreach { case (wgw, idx) =>
@@ -234,18 +240,21 @@ object StageDraw extends BasePage with JsWrapper:
           val li2 = listItems.item(idx2).asInstanceOf[dom.html.LI]
           
           if (li1 != null && li2 != null) {
-            val y1 = li1.offsetTop.toDouble + li1.offsetHeight.toDouble / 2.0
-            val y2 = li2.offsetTop.toDouble + li2.offsetHeight.toDouble / 2.0
+            val li1Rect = li1.getBoundingClientRect()
+            val li2Rect = li2.getBoundingClientRect()
+            
+            val y1 = li1Rect.top - svgRect.top + li1Rect.height / 2.0
+            val y2 = li2Rect.top - svgRect.top + li2Rect.height / 2.0
             
             val span = scala.math.abs(idx2 - idx1)
-            val xStart = W - 70.0
-            val xOffset = xStart + (span * 6.0)
+            val xOffset = xStart + 15.0 + (span * 8.0)
             
             val path = dom.document.createElementNS("http://www.w3.org/2000/svg", "path").asInstanceOf[dom.Element]
-            path.setAttribute("d", s"M ${xStart} ${y1} C ${xOffset} ${y1}, ${xOffset} ${y2}, ${xStart} ${y2}")
+            // Straight, rectangular elbow line
+            path.setAttribute("d", s"M ${xStartAdjusted} ${y1} L ${xOffset} ${y1} L ${xOffset} ${y2} L ${xStartAdjusted} ${y2}")
             
             val color = colors(idx % colors.length)
-            path.setAttribute("style", s"stroke: ${color}; stroke-width: 2px; stroke-opacity: 0.5; fill: none; stroke-dasharray: 4 2;")
+            path.setAttribute("style", s"stroke: ${color}; stroke-width: 2px; stroke-opacity: 0.7; fill: none; stroke-dasharray: 4 2;")
             svg.appendChild(path)
           }
         }
