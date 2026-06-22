@@ -270,11 +270,8 @@ case class Stage(
       acc.flatMap(_ => group.resetMatches())
     }
 
-  /**
-   * Dummy-Methode zum Zurücksetzen von Round-Robin-Matches.
-   */
   private def resetRrMatches(rrGroup: RrGroup): Either[shared.basic.AppError, Unit] =
-    Right(())
+    rrGroup.resetMatches()
 
   /**
    * Dummy-Methode zum Zurücksetzen von Swiss-System-Matches.

@@ -284,7 +284,7 @@ object StageAdmin extends BasePage with JsWrapper:
           
           cfg.format match
             case StageFormat.RR => 
-              r.data = RoundRobin.draw(selectedPants, r.noWinSets, DrawOption.Unknown)
+              r.data = RoundRobin.draw(r, comp.typ, cfg, selectedPants, DrawOption.Unknown)
      
             case StageFormat.KO =>
               val prevStageOpt = r.prefId.flatMap { pId =>
