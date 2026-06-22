@@ -2,6 +2,7 @@ StageDraw.title = Auslosung & Setzung: {0}
 StageDraw.draw_help = Überprüfen Sie die Gruppenzuordnung für {0}. Sie können zwei Spieler anklicken, um sie zu vertauschen.
 StageDraw.draw_help_rr = Überprüfen Sie die Gruppenzuordnung für {0}. Sie können zwei Spieler anklicken, um sie zu vertauschen. Am Rand werden die Paarungen der ersten Runde angezeigt.
 StageDraw.group_rr_name = Gruppe Jeder-gegen-Jeden
+StageDraw.group_suffix = Gruppe
 StageDraw.groups_suffix = Gruppen/Paarungen
 StageDraw.no_groups = Keine Gruppen für diese Stage generiert.
 StageDraw.btn_back = ZURÜCK ZUR KONFIGURATION
