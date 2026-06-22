@@ -270,27 +270,31 @@ object Groups:
    * @param sno2  Die Startnummer (SNO) des zweiten Spielers.
    */
   def swapPlayers(stage: Stage, gId1: Int, sno1: SNO, gId2: Int, sno2: SNO): Unit =
-    stage.data match
-      case StageData.GroupsStage(groups) =>
-        val g1Opt = groups.find(_.grId == gId1)
-        val g2Opt = groups.find(_.grId == gId2)
+    val groupsOpt = stage.data match
+      case StageData.GroupsStage(groups) => Some(groups)
+      case StageData.RoundRobinStage(rr) => Some(ArrayBuffer(rr))
+      case _ => None
+
+    groupsOpt.foreach { groups =>
+      val g1Opt = groups.find(_.grId == gId1)
+      val g2Opt = groups.find(_.grId == gId2)
+      
+      for
+        g1 <- g1Opt
+        g2 <- g2Opt
+        idx1 = g1.pants.indexWhere(p => p != null && p.id == sno1)
+        idx2 = g2.pants.indexWhere(p => p != null && p.id == sno2)
+        if idx1 != -1 && idx2 != -1
+      do
+        val temp = g1.pants(idx1)
+        g1.pants(idx1) = g2.pants(idx2)
+        g2.pants(idx2) = temp
         
-        for
-          g1 <- g1Opt
-          g2 <- g2Opt
-          idx1 = g1.pants.indexWhere(p => p != null && p.id == sno1)
-          idx2 = g2.pants.indexWhere(p => p != null && p.id == sno2)
-          if idx1 != -1 && idx2 != -1
-        do
-          val temp = g1.pants(idx1)
-          g1.pants(idx1) = g2.pants(idx2)
-          g2.pants(idx2) = temp
-          
-          recalcGroupAvgRating(g1)
-          recalcGroupAvgRating(g2)
-          recalcGroupOccu(g1)
-          recalcGroupOccu(g2)
-      case _ =>
+        recalcGroupAvgRating(g1)
+        recalcGroupAvgRating(g2)
+        recalcGroupOccu(g1)
+        recalcGroupOccu(g2)
+    }
 
   /**
    * Berechnet das durchschnittliche Rating (avgRating) einer Gruppe basierend auf ihren aktiven Teilnehmern neu.
