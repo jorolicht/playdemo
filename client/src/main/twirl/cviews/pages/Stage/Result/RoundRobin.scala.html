@@ -21,27 +21,25 @@
                         <table class="table table-sm table-striped mb-0 small">
                             <thead class="table-secondary">
                                 <tr>
-                                    <th class="ps-3 text-center" style="width: 60px;">Pos</th>
+                                    <th class="ps-3 text-center" style="width: 80px;">@gM("+rank_header")</th>
                                     <th>@gM("+name_header")</th>
                                     <th class="text-center" style="width: 100px;">@gM("+matches_header")</th>
                                     <th class="text-center" style="width: 100px;">@gM("+sets_header")</th>
                                     <th class="text-center" style="width: 100px;">Bälle</th>
                                     <th class="text-center" style="width: 80px;">Diff.</th>
-                                    <th class="text-center" style="width: 80px;">Platz</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @defining(g.pants.indices.map(i => (g.pants(i), g.points(i), g.sets(i), g.balls(i)))) { zipped =>
-                                    @zipped.zipWithIndex.map { case ((p, pts, sts, bls), idx) =>
+                                @defining(g.pants.indices.map(i => (g.pants(i), g.points(i), g.sets(i), g.balls(i))).sortBy { case (p, _, _, _) => if (p.place._1 > 0) p.place._1 else Int.MaxValue }) { zipped =>
+                                    @zipped.map { case (p, pts, sts, bls) =>
                                         @defining(bls._1 - bls._2) { diff =>
                                             <tr>
-                                                <td class="ps-3 fw-bold text-center">@{idx + 1}.</td>
+                                                <td class="ps-3 fw-bold text-center">@{if(p.place._1 > 0) p.place._1 else "-"}</td>
                                                 <td>@p.name</td>
                                                 <td class="text-center">@pts._1:@pts._2</td>
                                                 <td class="text-center">@sts._1:@sts._2</td>
                                                 <td class="text-center">@bls._1:@bls._2</td>
                                                 <td class="text-center">@{if(diff > 0) "+" + diff else diff}</td>
-                                                <td class="text-center fw-bold">@{if(p.place._1 > 0) p.place._1 else "-"}</td>
                                             </tr>
                                         }
                                     }
