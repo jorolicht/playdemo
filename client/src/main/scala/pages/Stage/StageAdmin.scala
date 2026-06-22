@@ -157,8 +157,30 @@ object StageAdmin extends BasePage with JsWrapper:
         }
 
       case `BtnResetCfg` => 
-        debug("Resetting full configuration...")
-        render()
+        import shared.BoxButton
+        Global.currentSelection.stage.foreach { stage =>
+          DlgMsgbox.show("Möchten Sie wirklich die gesamte Konfiguration dieser Stage löschen und zurücksetzen?", "Konfiguration löschen", List(BoxButton.Yes, BoxButton.No)).map {
+            case BoxButton.Yes =>
+              stage.stageConfig = StageConfig.CFG
+              stage.status = StageStatus.CFG
+              stage.size = 0
+              stage.noPlayers = 0
+              stage.noWinSets = 3
+              stage.data = StageData.GroupsStage(ArrayBuffer.empty)
+              stage.matches.clear()
+              
+              services.TourneyDB.tourney.updateStage(stage) match {
+                case Right(updatedStage) =>
+                  Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                  debug("StageAdmin: Configuration successfully reset.")
+                  render()
+                case Left(err) =>
+                  error(s"StageAdmin: Failed to reset stage config: ${err.msgCode}")
+              }
+            case _ => 
+              debug("StageAdmin: Reset config cancelled")
+          }
+        }
 
       case `BtnDeleteFull` => 
         handleDeleteStage()
