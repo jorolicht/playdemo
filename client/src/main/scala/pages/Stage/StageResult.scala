@@ -14,12 +14,10 @@ object StageResult extends BasePage with JsWrapper:
         comps.ContextHeader.render()
         stage.data match
           case StageData.GroupsStage(groups) => 
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.html.StageResult(stage, groups.toSeq)))
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.Groups(stage, groups.toSeq)))
             true
           case StageData.KnockoutStage(ko) => 
-            val g = shared.format.Group(1, ko.size, 1, "KO-Baum", stage.noWinSets)
-            ko.pants.zipWithIndex.foreach { case (p, i) => if (i < g.pants.length) g.pants(i) = p }
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.html.StageResult(stage, Seq(g))))
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.SingleElimination(stage)))
             true
           case StageData.SwissStage(sw) => 
             // TODO: Implement Swiss System Result View
