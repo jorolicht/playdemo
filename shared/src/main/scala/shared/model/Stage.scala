@@ -310,6 +310,12 @@ case class Stage(
   private def initRrMatches(rrGroup: Group, coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
     initGrMatches(ArrayBuffer(rrGroup), coTyp)
 
+  private def getTtrRank(p: Pant, swGroup: Group, default: Int): Int = {
+    val activePants = swGroup.pants.filter(x => x != null && x.id != SNO.nn && !x.id.isBye).sortBy(-_.rating)
+    val idx = activePants.indexWhere(_.id == p.id)
+    if (idx != -1) idx + 1 else default
+  }
+
   private def initSwMatches(swGroup: Group, coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
     val buf = ArrayBuffer[MEntry]()
     val n = swGroup.pants.length
@@ -327,7 +333,7 @@ case class Stage(
           stNoB       = p2.id,
           round       = 1,
           grId        = swGroup.grId,
-          wgw         = (if (p1.place._1 > 0) p1.place._1 else i + 1, if (p2.place._1 > 0) p2.place._1 else i + 2),
+          wgw         = (getTtrRank(p1, swGroup, i + 1), getTtrRank(p2, swGroup, i + 2)),
           winSets     = noWinSets
         )
       }
@@ -357,7 +363,7 @@ case class Stage(
               stNoB       = p2.id,
               round       = nextRound,
               grId        = swGroup.grId,
-              wgw         = (if (p1.place._1 > 0) p1.place._1 else i + 1, if (p2.place._1 > 0) p2.place._1 else i + 2),
+              wgw         = (getTtrRank(p1, swGroup, i + 1), getTtrRank(p2, swGroup, i + 2)),
               winSets     = noWinSets
             )
           }

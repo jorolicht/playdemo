@@ -17,6 +17,12 @@
 @numTabs = @{ (if (canDrawNext) maxRound + 1 else maxRound).max(1) }
 @activeDrawRound = @{ if (canDrawNext) maxRound + 1 else 0 }
 
+@ttrRank(p: Pant) = @{
+  val activePants = g.pants.filter(x => x != null && x.id != SNO.nn && !x.id.isBye).sortBy(-_.rating)
+  val idx = activePants.indexWhere(_.id == p.id)
+  if (idx != -1) idx + 1 else 0
+}
+
 @renderMatchPairings(rMatches: Seq[MEntryGr]) = {
   <div class="row row-cols-1 g-3">
     @if(rMatches.isEmpty) {
@@ -31,7 +37,7 @@
                 <div class="player-draw-item card p-2 h-100 border @{if (m.stNoA.isBye) "bg-light bg-opacity-50 text-muted" else ""}" style="min-height: 50px;">
                   <div class="d-flex justify-content-between align-items-center w-100 h-100">
                     <div class="d-flex align-items-center gap-2">
-                      <span class="badge bg-secondary bg-opacity-25 text-dark fw-bold">@{if (p1.place._1 > 0) p1.place._1 else g.pants.indexOf(p1) + 1}</span>
+                      <span class="badge bg-secondary bg-opacity-25 text-dark fw-bold">@{val tr1 = ttrRank(p1); if (tr1 > 0) tr1.toString else "-"}</span>
                       <div>
                         <strong class="player-name">@{if (m.stNoA.isBye) "Freilos" else p1.name}</strong>
                         @if(!m.stNoA.isBye && p1.club.trim.nonEmpty) {
@@ -56,7 +62,7 @@
                 <div class="player-draw-item card p-2 h-100 border @{if (m.stNoB.isBye) "bg-light bg-opacity-50 text-muted" else ""}" style="min-height: 50px;">
                   <div class="d-flex justify-content-between align-items-center w-100 h-100">
                     <div class="d-flex align-items-center gap-2">
-                      <span class="badge bg-secondary bg-opacity-25 text-dark fw-bold">@{if (p2.place._1 > 0) p2.place._1 else g.pants.indexOf(p2) + 1}</span>
+                      <span class="badge bg-secondary bg-opacity-25 text-dark fw-bold">@{val tr2 = ttrRank(p2); if (tr2 > 0) tr2.toString else "-"}</span>
                       <div>
                         <strong class="player-name">@{if (m.stNoB.isBye) "Freilos" else p2.name}</strong>
                         @if(!m.stNoB.isBye && p2.club.trim.nonEmpty) {
@@ -159,13 +165,13 @@
                             <div class="col">
                               <div class="row align-items-center">
                                 <div class="col-md-5">
-                                  @playerBox(p1, if (p1.place._1 > 0) p1.place._1 else i + 1)
+                                  @playerBox(p1, ttrRank(p1))
                                 </div>
                                 <div class="col-md-2 text-center py-2">
                                   <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-1">VS</span>
                                 </div>
                                 <div class="col-md-5">
-                                  @playerBox(p2, if (p2.place._1 > 0) p2.place._1 else i + 2)
+                                  @playerBox(p2, ttrRank(p2))
                                 </div>
                               </div>
                             </div>
