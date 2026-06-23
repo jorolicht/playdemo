@@ -327,7 +327,7 @@ case class Stage(
           stNoB       = p2.id,
           round       = 1,
           grId        = swGroup.grId,
-          wgw         = (i + 1, i + 2),
+          wgw         = (if (p1.place._1 > 0) p1.place._1 else i + 1, if (p2.place._1 > 0) p2.place._1 else i + 2),
           winSets     = noWinSets
         )
       }
@@ -357,7 +357,7 @@ case class Stage(
               stNoB       = p2.id,
               round       = nextRound,
               grId        = swGroup.grId,
-              wgw         = (i + 1, i + 2),
+              wgw         = (if (p1.place._1 > 0) p1.place._1 else i + 1, if (p2.place._1 > 0) p2.place._1 else i + 2),
               winSets     = noWinSets
             )
           }

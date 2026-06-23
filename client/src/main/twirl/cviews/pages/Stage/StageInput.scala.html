@@ -57,7 +57,7 @@
                                 <thead class="table-light small">
                                     <tr>
                                         @if(!stage.isKoStage) {
-                                            @if(stage.stageConfig.format != StageFormat.RR) {
+                                            @if(stage.stageConfig.format == StageFormat.GR) {
                                                 <th style="width: 80px;" class="text-center">Gruppe</th>
                                             }
                                             <th style="width: 80px;" class="text-center">WGW</th>
@@ -83,7 +83,7 @@
                                                 @defining(if (disabledTrashNoAccess == "disabled" || m.stNoA.isNN || m.stNoB.isNN || m.stNoA.isBye || m.stNoB.isBye || m.status == MEntry.MS_FIX) "disabled" else "") { disabledTrash =>
                                                     <tr id="row-@m.gameNo">
                                                     @if(!stage.isKoStage) {
-                                                        @if(stage.stageConfig.format != StageFormat.RR) {
+                                                        @if(stage.stageConfig.format == StageFormat.GR) {
                                                             <td class="text-center fw-bold text-secondary">
                                                                 @{
                                                                     m match {
