@@ -60,13 +60,13 @@
                     <div class="col">
                       <div class="row align-items-center">
                         <div class="col-md-5">
-                          @playerBox(p1, i + 1)
+                          @playerBox(p1, if (p1.place._1 > 0) p1.place._1 else i + 1)
                         </div>
                         <div class="col-md-2 text-center py-2">
                           <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-1">VS</span>
                         </div>
                         <div class="col-md-5">
-                          @playerBox(p2, i + 2)
+                          @playerBox(p2, if (p2.place._1 > 0) p2.place._1 else i + 2)
                         </div>
                       </div>
                     </div>
