@@ -137,6 +137,8 @@ lazy val server = project
       }
     },
     Compile / resourceGenerators += convertMessagesToJson.taskValue,
+    watchSources ++= (baseDirectory.value / "conf" / "messages" / "de" ** "*.de").get,
+    watchSources ++= (baseDirectory.value / "conf" / "messages" / "en" ** "*.en").get,
     scalaJSProjects := Seq(client),
     Assets / pipelineStages  := Seq(scalaJSPipeline),
     pipelineStages := Seq(digest, gzip),
