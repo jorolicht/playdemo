@@ -75,7 +75,9 @@ case class KoStage(
       drawInfo           = ArrayBuffer.fill(size) (("Freilos", 0, 0, 0)) 
 
       val (upList, downList) = pantsWithDInfo.partition(x => upDownMap.getOrElse((x._2._2, x._2._3), true))
-      
+      //PRINT upList and downList for debugging
+      Log.info(s"initDraw_Grp -> upList: ${upList.map(x => s"${x._1.name}(${x._2._1}, ${x._2._3})").mkString(", ")}")
+      Log.info(s"initDraw_Grp -> downList: ${downList.map(x => s"${x._1.name}(${x._2._1}, ${x._2._3})").mkString(", ")}")
       val upListBuf = upList.to(ArrayBuffer)
       val downListBuf = downList.to(ArrayBuffer)
 
