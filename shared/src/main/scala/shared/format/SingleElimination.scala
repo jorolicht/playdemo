@@ -78,8 +78,8 @@ case class KoStage(
       //PRINT upList and downList for debugging
       Log.info(s"initDraw_Grp -> upList: ${upList.map(x => s"${x._1.name}(${x._2._1}, ${x._2._3})").mkString(", ")}")
       Log.info(s"initDraw_Grp -> downList: ${downList.map(x => s"${x._1.name}(${x._2._1}, ${x._2._3})").mkString(", ")}")
-      val upListBuf = upList.to(ArrayBuffer)
-      val downListBuf = downList.to(ArrayBuffer)
+      val upListBuf = upList.to(ArrayBuffer).sortBy(_._2._3)      // muss aufsteigend sortiert sein nach x._2._3
+      val downListBuf = downList.to(ArrayBuffer).sortBy(_._2._3) // muss aufsteigend sortiert sein nach x._2._3
 
       for (i <- 0 until size) {
         val pos = settingPositions(i+1)
