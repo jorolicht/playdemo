@@ -160,16 +160,16 @@ object PantStatus:
  * Immutable and type-safe.
  */
 case class Pant(
-  id:      SNO,
-  name:    String = "",
-  club:    String = "",
-  rating:  Int = 0,
-  var birthYear: String = "",
-  var qInfo:   String = "",
-  var place:   (Int, Int) = (0, 0),
-  var status:  PantStatus = PantStatus.UNKN,
-  var active: Boolean = false,
-  var ident: String = ""
+  id:             SNO,
+  name:           String = "",
+  club:           String = "",
+  rating:         Int = 0,
+  var birthYear:  String = "",
+  var qInfo:      String = "",
+  var place:      (Int, Int) = (0, 0),
+  var status:     PantStatus = PantStatus.UNKN,
+  var active:     Boolean = false,
+  var ident:      String = ""
 ) derives ReadWriter:
   def getEffRating(value: Int=0) = if (rating == 0) value else rating
   def getName(byeText: String): String = if (id.isBye) byeText else name

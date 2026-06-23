@@ -103,7 +103,7 @@ object CompetitionInfo extends BasePage with JsWrapper:
               coId = c.id, 
               prefId = res.prefId, 
               name = res.name, 
-              stageConfig = StageConfig.VRGR, 
+              stageConfig = StageConfig.CFG, 
               size = 8, 
               noPlayers = initialNoPlayers
             ) match {

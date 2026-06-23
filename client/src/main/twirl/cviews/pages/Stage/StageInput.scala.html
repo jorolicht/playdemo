@@ -9,6 +9,7 @@
 @compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
 @isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
 @disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || stage.status != StageStatus.EIN) "disabled" else "" }
+@disabledTrashNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || (stage.status != StageStatus.EIN && stage.status != StageStatus.FIN)) "disabled" else "" }
 
 <div class="card shadow-sm">
     <div class="card-body">
@@ -79,7 +80,8 @@
                                         @* Split result by middle dot to fill inputs *@
                                         @defining(if (m.result.trim.isEmpty) Array.empty[String] else m.result.split("·")) { setInputs =>
                                             @defining(if (disabledNoAccess == "disabled" || m.stNoA.isNN || m.stNoB.isNN || m.stNoA.isBye || m.stNoB.isBye || m.status == MEntry.MS_FIX) "disabled" else "") { disabledRow =>
-                                                <tr id="row-@m.gameNo">
+                                                @defining(if (disabledTrashNoAccess == "disabled" || m.stNoA.isNN || m.stNoB.isNN || m.stNoA.isBye || m.stNoB.isBye || m.status == MEntry.MS_FIX) "disabled" else "") { disabledTrash =>
+                                                    <tr id="row-@m.gameNo">
                                                     @if(!stage.isKoStage) {
                                                         @if(stage.stageConfig.format != StageFormat.RR) {
                                                             <td class="text-center fw-bold text-secondary">
@@ -165,12 +167,13 @@
                                                         </button>
                                                         <button class="btn btn-outline-danger" 
                                                                 @id(DeleteMatchBtn, "onclick", m.gameNo.toString)
-                                                                @disabledRow>
+                                                                @disabledTrash>
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </div>
                                                 </td>
                                             </tr>
+                                            }
                                             }
                                         }
                                     }

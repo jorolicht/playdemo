@@ -17,6 +17,7 @@ object DlgPrompt extends BaseDialog with JsWrapper:
   def name = PageNameTyp("DlgPrompt")
   val LoadId:           HtmlId = genId(name)
   val ModalId:          HtmlId = genId(name)
+  val HeaderId:         HtmlId = genId(name)
   val ResultId:         HtmlId = genId(name)
   val ResultContentId:  HtmlId = genId(name)
   val InputId:          HtmlId = genId(name)
@@ -26,9 +27,12 @@ object DlgPrompt extends BaseDialog with JsWrapper:
   val CancelId:         HtmlId = genId(name) 
   val ToggleId:         HtmlId = genId(name)
 
+  private var isDragging: Boolean = false
+  private var startX: Double = 0.0
+  private var startY: Double = 0.0
+  private var initialLeft: Double = 0.0
+  private var initialTop: Double = 0.0
 
-  var modal:        Modal = null
-  var collapse:  Collapse = null
   var output: HTMLElement = null
   var input:  HTMLElement = null
 
@@ -64,13 +68,38 @@ object DlgPrompt extends BaseDialog with JsWrapper:
     if isEmpty(eE(LoadId,"span")) then
       setHtml(gE(LoadId), cviews.dialogs.html.DlgPrompt())
       initHistory()
-      modal    = js.Dynamic.newInstance(js.Dynamic.global.bootstrap.Modal)(
-        gE(ModalId),
-        js.Dynamic.literal(backdrop = false, focus = false)
-      ).asInstanceOf[Modal]
-      collapse = Collapse(gE(ResultId))
       output   = gE(ResultContentId)
       input    = gE(InputId)
+
+      // Mouse dragging logic for modeless dialog
+      val header = gE(HeaderId)
+      val card   = gE(ModalId)
+
+      header.addEventListener("mousedown", (e: MouseEvent) => {
+        if (e.button == 0) { // Left mouse button
+          isDragging = true
+          startX = e.clientX
+          startY = e.clientY
+          val rect = card.getBoundingClientRect()
+          initialLeft = rect.left
+          initialTop = rect.top
+          card.style.right = "auto"
+          e.preventDefault()
+        }
+      })
+
+      org.scalajs.dom.document.addEventListener("mousemove", (e: MouseEvent) => {
+        if (isDragging) {
+          val dx = e.clientX - startX
+          val dy = e.clientY - startY
+          card.style.left = s"${initialLeft + dx}px"
+          card.style.top = s"${initialTop + dy}px"
+        }
+      })
+
+      org.scalajs.dom.document.addEventListener("mouseup", (e: MouseEvent) => {
+        isDragging = false
+      })
 
       // Add event listeners once during initialization
       gE(ClearId).addEventListener("click", (e: MouseEvent) => {
@@ -90,7 +119,7 @@ object DlgPrompt extends BaseDialog with JsWrapper:
         currentPromise.foreach { cp =>
           if (!cp.isCompleted) then cp success Left(AppError("dlg.cancel"))
         }
-        modal.hide()      
+        setVisible(gE(ModalId), false)      
       })    
 
       // Add an event listener to the close button
@@ -98,7 +127,7 @@ object DlgPrompt extends BaseDialog with JsWrapper:
         currentPromise.foreach { cp =>
           if (!cp.isCompleted) then cp success Left(AppError("dlg.cancel"))
         }
-        modal.hide()      
+        setVisible(gE(ModalId), false)      
       })   
 
       // Check Input for up/down and enter keykey 
@@ -118,8 +147,9 @@ object DlgPrompt extends BaseDialog with JsWrapper:
         if (Seq(40).contains(e.keyCode.toInt)) { e.preventDefault(); setInput(input, downHistory()) }
       }
     
-    modal.show()
+    setVisible(gE(ModalId), true)
     if (command == "") setInput(input, getHistory()) else setInput(input, command)
+    focusCmd
     
     f.map {
       case Left(err)  => Left(err)
@@ -134,4 +164,4 @@ object DlgPrompt extends BaseDialog with JsWrapper:
   def clearCmd = setInput(input, "")
   def focusCmd = input.focus() 
 
-  def hide     = modal.hide()
+  def hide     = setVisible(gE(ModalId), false)

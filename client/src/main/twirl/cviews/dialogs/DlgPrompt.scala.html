@@ -1,41 +1,30 @@
 @import dialogs.DlgPrompt.*
 @import cviews.helper.html.*
 
-
 @()
-<!-- Modal -->
-<div @id(ModalId) class="modal fade" tabindex="-1" style="pointer-events: none;">
-  <div class="modal-dialog" style="pointer-events: auto;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">@gM("+title")</h5>
-        <button @id(CloseId) type="button" class="btn-close"></button>
+<!-- Modeless Floating Developer Console Card -->
+<div @id(ModalId) class="card shadow-lg" style="position: fixed; top: 100px; right: 20px; width: 380px; z-index: 9999; display: none; border-color: #0d6efd;">
+  <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2" style="cursor: move; user-select: none;" @id(HeaderId)>
+    <h6 class="mb-0 small text-uppercase fw-bold"><i class="bi bi-terminal me-2"></i>TurnierService Console</h6>
+    <button @id(CloseId) type="button" class="btn-close btn-close-white" style="font-size: 0.75rem;"></button>
+  </div>
+  
+  <div class="card-body p-3">
+    <input @id(InputId) @plh("command") type="text" class="form-control form-control-sm mb-2" placeholder="Befehl eingeben...">
+    
+    <div class="d-flex justify-content-between gap-1 mb-3">
+      <button @id(ClearId) class="btn btn-outline-secondary btn-xs py-1 px-2" type="button" style="font-size: 0.7rem; font-weight: bold;">CLEAR</button>
+      <div>
+        <button @id(CancelId) class="btn btn-outline-danger btn-xs py-1 px-2 me-1" type="button" style="font-size: 0.7rem; font-weight: bold;">CLOSE</button>
+        <button @id(ExecuteId) class="btn btn-success btn-xs py-1 px-2" type="button" style="font-size: 0.7rem; font-weight: bold;">EXECUTE</button>
       </div>
-      <div class="modal-body">
-        <input @id(InputId) @plh("command") type='text' class='form-control form-control-sm mb-2'> 
+    </div>
+
+    <div class="border-top pt-2">
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <span class="small fw-bold text-secondary" style="font-size: 0.75rem;">Ausgabe / Ergebnisse:</span>
       </div>
-
-
-      <div class="modal-footer">
-        <button @id(ClearId)   class="btn btn-outline-secondary btn-xs" type="button">CLEAR</button>
-        <button @id(CancelId)  class="btn btn-outline-secondary btn-xs" type="button" autofocus>CLOSE</button>
-        <button @id(ExecuteId) class="btn btn-outline-secondary btn-xs" type="button">EXECUTE</button>
-      </div>
-
-      <div class="card border-0">
-        <div class="card-header d-flex justify-content-between pt-0 pb-0">
-          <div>
-            <a @id(ToggleId, "onclick")>
-              <h6 class="text-dark pb-0 mt-1 mb-1"><i class="fa fa-fw fa-bars"></i>Result / Output</h6>
-            </a>			
-          </div>
-        </div>
-        
-        <div @id(ResultId) class="card-body small">
-          <pre @id(ResultContentId) class='form-control w-100' style='font-size:0.6rem; height:120px;'></pre>
-        </div>
-      </div> 
-
+      <pre @id(ResultContentId) class="form-control bg-light mb-0" style="font-size: 0.65rem; height: 160px; overflow-y: auto; font-family: monospace; white-space: pre-wrap; background-color: #f8f9fa; border: 1px solid #dee2e6; color: #212529;"></pre>
     </div>
   </div>
 </div>

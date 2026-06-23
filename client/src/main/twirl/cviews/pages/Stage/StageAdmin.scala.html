@@ -88,15 +88,46 @@
 
     <!-- SECTION 3: PLAYER -->
     <div class="card shadow-sm">
-        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h5 class="mb-0 small text-uppercase fw-bold text-muted"><i class="bi bi-person-check me-2"></i>@gM("+players_title")</h5>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-secondary btn-sm fw-bold" @id(BtnAddDummy, "onclick") @disabledIfAus>
-                    <i class="bi bi-plus-circle me-1"></i>@gM("+btn_add_dummy")
-                </button>
-                <button class="btn btn-outline-primary btn-sm fw-bold" @id(ChkBoxAll, "onclick") @disabledIfAus>
-                    <i class="bi bi-check2-all me-1"></i>@gM("+btn_select_all")
-                </button>
+            <div class="d-flex align-items-center flex-wrap gap-3">
+                @if(stage.prefId.isDefined) {
+                    <!-- Radio Button Group for Predecessor filtering -->
+                    <div class="d-flex align-items-center gap-2 border-end pe-3 me-2">
+                        <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input" type="radio" name="stageFilter" @id(RadAll, "onclick") @if(currentFilterOption == "ALL") {checked} @disabledIfAus>
+                            <label class="form-check-label small fw-bold" @forAttr(RadAll)>
+                                @if(base.Global.lang == "de") { ALLE AUSWÄHLEN } else { ALL PLAYERS }
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input" type="radio" name="stageFilter" @id(RadTop, "onclick") @if(currentFilterOption == "TOP") {checked} @disabledIfAus>
+                            <label class="form-check-label small fw-bold" @forAttr(RadTop)>
+                                @if(base.Global.lang == "de") { OBERE HÄLFTE } else { TOP HALF }
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input" type="radio" name="stageFilter" @id(RadBottom, "onclick") @if(currentFilterOption == "BOTTOM") {checked} @disabledIfAus>
+                            <label class="form-check-label small fw-bold" @forAttr(RadBottom)>
+                                @if(base.Global.lang == "de") { UNTERE HÄLFTE (TROSTRUNDE) } else { BOTTOM HALF }
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-outline-secondary btn-sm fw-bold" @id(BtnAddDummy, "onclick") @disabledIfAus>
+                        <i class="bi bi-plus-circle me-1"></i>@if(base.Global.lang == "de") { DUMMY HINZUFÜGEN } else { ADD DUMMY }
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm fw-bold" @id(BtnAddPlayer, "onclick") @disabledIfAus>
+                        <i class="bi bi-person-plus me-1"></i>@if(base.Global.lang == "de") { SPIELER HINZUFÜGEN } else { ADD PLAYER }
+                    </button>
+                } else {
+                    <button class="btn btn-outline-secondary btn-sm fw-bold" @id(BtnAddDummy, "onclick") @disabledIfAus>
+                        <i class="bi bi-plus-circle me-1"></i>@gM("+btn_add_dummy")
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm fw-bold" @id(ChkBoxAll, "onclick") @disabledIfAus>
+                        <i class="bi bi-check2-all me-1"></i>@gM("+btn_select_all")
+                    </button>
+                }
             </div>
         </div>
         <div class="card-body p-0">
@@ -104,15 +135,22 @@
                 <table class="table table-hover table-sm mb-0 align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-3" style="width: 40px;"></th>
+                            <th class="ps-2 text-center" style="width: 50px;">
+                                <button class="btn btn-link btn-sm p-0 @{if(sortBySelected) "text-primary fw-bold" else "text-muted"}" @id(BtnSortSelected, "onclick") title="Nach Auswahl sortieren">
+                                    <i class="bi bi-arrow-down-up"></i>
+                                </button>
+                            </th>
                             <th>@gM("+name_header")</th>
                             <th>@gM("+club_header")</th>
+                            @if(stage.prefId.isDefined) {
+                                <th>@if(base.Global.lang == "de") { Vorrunde } else { Prev. Stage }</th>
+                            }
                             <th class="text-center" style="width: 80px;">@gM("+ttr_header")</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if(participants.isEmpty) {
-                            <tr><td colspan="4" class="text-center py-4 text-muted">@gM("+no_players")</td></tr>
+                            <tr><td colspan="@{if(stage.prefId.isDefined) 5 else 4}" class="text-center py-4 text-muted">@gM("+no_players")</td></tr>
                         }
                         @participants.map { p =>
                             <tr class="cursor-pointer @{if(p.status == PantStatus.PLAY) "table-success" else ""}">
@@ -121,6 +159,9 @@
                                 </td>
                                 <td class="fw-bold">@p.name</td>
                                 <td class="small">@p.club</td>
+                                @if(stage.prefId.isDefined) {
+                                    <td class="small text-muted">@pages.Stage.StageAdmin.getPredecessorResultDesc(stage, p.id)</td>
+                                }
                                 <td class="text-center"><span class="badge bg-light text-dark border">@p.rating</span></td>
                             </tr>
                         }

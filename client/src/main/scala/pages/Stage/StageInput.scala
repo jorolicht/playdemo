@@ -160,42 +160,35 @@ object StageInput extends BasePage with JsWrapper:
   def deleteMatchResult(gameNo: Int): Unit =
     Global.currentSelection.stage.foreach { stage =>
       val comp = Global.currentSelection.competition.get
-      val isFin = comp.status == CompStatus.FIN || stage.status != StageStatus.EIN || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)
-      if (isFin) {
-        debug("StageInput: Cannot delete match result because stage is not in EIN status, competition is finalized, or user has no write access.")
+      val hasAccess = base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+      val allowedStatus = stage.status == StageStatus.EIN || stage.status == StageStatus.FIN
+      val cannotDelete = comp.status == CompStatus.FIN || !allowedStatus || !hasAccess
+      if (cannotDelete) {
+        debug("StageInput: Cannot delete match result because stage status is not allowed, competition is finalized, or user has no write access.")
       } else {
-        stage.resetMatch(gameNo) match {
-          case Left(err) => error(s"StageInput: resetMatch failed: ${err.msgCode}")
-          case Right(triggered) =>
-            services.TourneyDB.tourney.updateStage(stage) match {
-              case Right(updatedStage) =>
-                Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
-                
-                val m = stage.getMatch(gameNo)
-                
-                // Clear input fields, update table input value, reset time display, and update colors without full render
-                (1 to (stage.noWinSets * 2) - 1).foreach { setNo =>
-                  val el = dom.document.getElementById(s"input_${gameNo}_$setNo").asInstanceOf[dom.html.Input]
-                  if (el != null) el.value = ""
-                }
-                val tInput = dom.document.getElementById(s"table_$gameNo").asInstanceOf[dom.html.Input]
-                if (tInput != null) tInput.value = m.playfield
+        import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+        import dialogs.DlgMsgbox
+        import shared.BoxButton
 
-                checkMatchValidity(gameNo, stage.noWinSets)
-                val timeCell = dom.document.getElementById(s"running-time-$gameNo").asInstanceOf[dom.raw.HTMLElement]
-                if (timeCell != null) {
-                  timeCell.setAttribute("data-status", m.status.toString)
-                  timeCell.setAttribute("data-start-time", m.startTime)
-                  if (m.status == MEntry.MS_RUN) {
-                    timeCell.textContent = getRunningTime(m.startTime)
-                  } else {
-                    timeCell.textContent = "-"
-                  }
+        DlgMsgbox.show(
+          "Möchten Sie das Ergebnis dieses Spiels wirklich löschen?",
+          "Spielergebnis löschen",
+          List(BoxButton.Yes, BoxButton.No)
+        ).map {
+          case BoxButton.Yes =>
+            stage.resetMatch(gameNo) match {
+              case Left(err) => error(s"StageInput: resetMatch failed: ${err.msgCode}")
+              case Right(triggered) =>
+                services.TourneyDB.tourney.updateStage(stage) match {
+                  case Right(updatedStage) =>
+                    Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                    render()
+                  case Left(err) =>
+                    error(s"StageInput: Failed to delete match result: ${err.msgCode}")
                 }
-                updateColors(updatedStage)
-              case Left(err) =>
-                error(s"StageInput: Failed to delete match result: ${err.msgCode}")
             }
+          case _ =>
+            debug("StageInput: Match deletion cancelled by user.")
         }
       }
     }

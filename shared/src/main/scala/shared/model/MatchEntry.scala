@@ -83,6 +83,8 @@ sealed trait MEntry {
     setInfo("") 
     setSets((0,0)) 
     setResult("")
+    startTime = ""
+    endTime = ""
     this
   } 
 

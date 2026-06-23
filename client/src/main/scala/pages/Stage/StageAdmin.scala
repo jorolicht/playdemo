@@ -43,12 +43,25 @@ object StageAdmin extends BasePage with JsWrapper:
   /** Label displaying count of selected players. */
   val LabelDrawCnt:    HtmlId = genId(name)
 
+  val RadAll:          HtmlId = genId(name)
+  val RadTop:          HtmlId = genId(name)
+  val RadBottom:       HtmlId = genId(name)
+  val BtnAddPlayer:    HtmlId = genId(name)
+  val BtnSortSelected: HtmlId = genId(name)
+
+  var currentFilterOption: String = "ALL"
+  var sortBySelected: Boolean = false
+  private var lastStageId: Option[StageId] = None
+
   def render(param: String = ""): Boolean = 
     // Selection logic
     if (param.nonEmpty) {
       val rId = StageId(param.toInt)
       services.TourneyDB.tourney.stages.find(r => r != null && r.id == rId).foreach { r =>
         Global.currentSelection = Global.currentSelection.copy(stage = Some(r))
+        currentFilterOption = "ALL"
+        sortBySelected = false
+        lastStageId = Some(rId)
         comps.ContextHeader.render()
       }
     }
@@ -57,11 +70,58 @@ object StageAdmin extends BasePage with JsWrapper:
       case Some(r) => 
         comps.ContextHeader.render()
         val comp = Global.currentSelection.competition
-        val isStartStage = r.prefId.isEmpty
+        
+        if (!lastStageId.contains(r.id)) {
+          currentFilterOption = "ALL"
+          sortBySelected = false
+          lastStageId = Some(r.id)
+        }
+
         val participants = comp.map { c =>
-          val all = c.pants1Stage.toSeq
-          if (isStartStage) all.filter(_.active) else all
+          val all = c.pants1Stage.toSeq.filter(_.active)
+          if (sortBySelected) {
+            all.sortBy(p => (p.status != PantStatus.PLAY, p.name.toLowerCase))
+          } else {
+            all
+          }
         }.getOrElse(Seq.empty)
+
+        // Dynamic detection of currentFilterOption from active selection
+        val prevStageOpt = r.prefId.flatMap { pId =>
+          services.TourneyDB.tourney.stages.find(s => s != null && s.id == pId)
+        }
+        currentFilterOption = prevStageOpt match {
+          case Some(prevStage) =>
+            val checkedPants = participants.filter(_.status == PantStatus.PLAY)
+            val topHalfPants = participants.filter { p =>
+              prevStage.data match {
+                case StageData.GroupsStage(groups) =>
+                  groups.find(_.pants.exists(gp => gp != null && gp.id == p.id)).exists { g =>
+                    val place = g.pants.find(gp => gp != null && gp.id == p.id).map(_.place._1).getOrElse(0)
+                    val maxPlace = g.pants.count(_ != null)
+                    val threshold = (maxPlace + 1) / 2
+                    place > 0 && place <= threshold
+                  }
+                case _ => false
+              }
+            }
+            val bottomHalfPants = participants.filter { p =>
+              prevStage.data match {
+                case StageData.GroupsStage(groups) =>
+                  groups.find(_.pants.exists(gp => gp != null && gp.id == p.id)).exists { g =>
+                    val place = g.pants.find(gp => gp != null && gp.id == p.id).map(_.place._1).getOrElse(0)
+                    val maxPlace = g.pants.count(_ != null)
+                    val threshold = (maxPlace + 1) / 2
+                    place > threshold
+                  }
+                case _ => false
+              }
+            }
+            if (checkedPants.nonEmpty && checkedPants.toSet == topHalfPants.toSet) "TOP"
+            else if (checkedPants.nonEmpty && checkedPants.toSet == bottomHalfPants.toSet) "BOTTOM"
+            else "ALL"
+          case None => "ALL"
+        }
         
         // Active count for rules
         val activeCount = participants.count(_.status == PantStatus.PLAY)
@@ -185,6 +245,10 @@ object StageAdmin extends BasePage with JsWrapper:
       case `BtnDeleteFull` => 
         handleDeleteStage()
 
+      case `BtnSortSelected` =>
+        sortBySelected = !sortBySelected
+        render()
+
       case `ChkBoxAll` =>
         Global.currentSelection.competition.foreach { comp =>
           comp.pants1Stage.foreach { p =>
@@ -197,6 +261,127 @@ object StageAdmin extends BasePage with JsWrapper:
           }
         }
         render()
+
+      case `RadAll` =>
+        currentFilterOption = "ALL"
+        Global.currentSelection.competition.foreach { comp =>
+          comp.pants1Stage.foreach { p =>
+            if (p.active) {
+              p.status = PantStatus.PLAY
+            }
+          }
+          services.TourneyDB.tourney.updateCompetition(comp) match {
+            case Right(updatedComp) =>
+              Global.currentSelection = Global.currentSelection.copy(competition = Some(updatedComp))
+            case _ =>
+          }
+        }
+        render()
+
+      case `RadTop` =>
+        currentFilterOption = "TOP"
+        Global.currentSelection.stage.flatMap { stage =>
+          stage.prefId.flatMap { pId =>
+            services.TourneyDB.tourney.stages.find(s => s != null && s.id == pId)
+          }
+        }.foreach { prevStage =>
+          Global.currentSelection.competition.foreach { comp =>
+            comp.pants1Stage.foreach { p =>
+              if (p.active) {
+                val isTop = prevStage.data match {
+                  case StageData.GroupsStage(groups) =>
+                    groups.find(_.pants.exists(gp => gp != null && gp.id == p.id)).exists { g =>
+                      val place = g.pants.find(gp => gp != null && gp.id == p.id).map(_.place._1).getOrElse(0)
+                      val maxPlace = g.pants.count(_ != null)
+                      val threshold = (maxPlace + 1) / 2
+                      place > 0 && place <= threshold
+                    }
+                  case _ => false
+                }
+                p.status = if (isTop) PantStatus.PLAY else PantStatus.REGI
+              }
+            }
+            services.TourneyDB.tourney.updateCompetition(comp) match {
+              case Right(updatedComp) =>
+                Global.currentSelection = Global.currentSelection.copy(competition = Some(updatedComp))
+              case _ =>
+            }
+          }
+        }
+        render()
+
+      case `RadBottom` =>
+        currentFilterOption = "BOTTOM"
+        Global.currentSelection.stage.flatMap { stage =>
+          stage.prefId.flatMap { pId =>
+            services.TourneyDB.tourney.stages.find(s => s != null && s.id == pId)
+          }
+        }.foreach { prevStage =>
+          Global.currentSelection.competition.foreach { comp =>
+            comp.pants1Stage.foreach { p =>
+              if (p.active) {
+                val isBottom = prevStage.data match {
+                  case StageData.GroupsStage(groups) =>
+                    groups.find(_.pants.exists(gp => gp != null && gp.id == p.id)).exists { g =>
+                      val place = g.pants.find(gp => gp != null && gp.id == p.id).map(_.place._1).getOrElse(0)
+                      val maxPlace = g.pants.count(_ != null)
+                      val threshold = (maxPlace + 1) / 2
+                      place > threshold
+                    }
+                  case _ => false
+                }
+                p.status = if (isBottom) PantStatus.PLAY else PantStatus.REGI
+              }
+            }
+            services.TourneyDB.tourney.updateCompetition(comp) match {
+              case Right(updatedComp) =>
+                Global.currentSelection = Global.currentSelection.copy(competition = Some(updatedComp))
+              case _ =>
+            }
+          }
+        }
+        render()
+
+      case `BtnAddPlayer` =>
+        val tourney = services.TourneyDB.tourney
+        val comp = Global.currentSelection.competition.get
+        val activeSnos = comp.pants1Stage.filter(_.active).map(_.id).toSet
+        val sortedPlayers = tourney.players.toSeq
+          .filterNot(p => activeSnos.contains(SNO.single(p.id)))
+          .sortBy(_.displayName.toLowerCase)
+        val clubsMap = tourney.clubs.map(c => c.id.toInt -> c.name).toMap
+        
+        dialogs.DlgAddPlayer.show(sortedPlayers, clubsMap).map {
+          case Right(selectedPlayer) =>
+            Global.currentSelection.competition.foreach { comp =>
+              val sno = SNO.single(selectedPlayer.id)
+              val existingOpt = comp.pants1Stage.find(_.id == sno)
+              existingOpt match {
+                case Some(existing) =>
+                  existing.active = true
+                  existing.status = PantStatus.PLAY
+                case None =>
+                  val newPant = Pant(
+                    id = sno,
+                    name = selectedPlayer.displayName,
+                    club = tourney.clubs.find(_.id.toInt == selectedPlayer.clubId).map(_.name).getOrElse(""),
+                    rating = selectedPlayer.meta.ttr.getOrElse(0),
+                    birthYear = selectedPlayer.birthYear.map(_.toString).getOrElse(""),
+                    active = true,
+                    status = PantStatus.PLAY
+                  )
+                  comp.pants1Stage += newPant
+              }
+              tourney.updateCompetition(comp) match {
+                case Right(updatedComp) =>
+                  Global.currentSelection = Global.currentSelection.copy(competition = Some(updatedComp))
+                case _ =>
+              }
+              render()
+            }
+          case _ =>
+            debug("DlgAddPlayer: Add player cancelled or error.")
+        }
 
       case id if id.id.startsWith(ChkBoxPlayer.id) =>
         val sno = SNO.fromString(elem.id.substring(ChkBoxPlayer.id.length + 1))
@@ -382,3 +567,18 @@ object StageAdmin extends BasePage with JsWrapper:
         }
       case _ => debug("Delete cancelled")
     }
+
+  def getPredecessorResultDesc(stage: Stage, sno: SNO): String =
+    stage.prefId.flatMap { pId =>
+      services.TourneyDB.tourney.stages.find(s => s != null && s.id == pId)
+    }.map { prevStage =>
+      prevStage.data match {
+        case StageData.GroupsStage(groups) =>
+          groups.find(_.pants.exists(gp => gp != null && gp.id == sno)).map { g =>
+            val place = g.pants.find(gp => gp != null && gp.id == sno).map(_.place._1).getOrElse(0)
+            if (place > 0) s"${g.name}, PLATZ $place"
+            else g.name
+          }.getOrElse("-")
+        case _ => "-"
+      }
+    }.getOrElse("-")

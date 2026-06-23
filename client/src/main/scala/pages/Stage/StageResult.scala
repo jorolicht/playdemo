@@ -8,6 +8,7 @@ import scala.scalajs.js
 
 object StageResult extends BasePage with JsWrapper:
   def name = PageNameTyp("StageResult")
+  val NextStageBtn:   HtmlId = genId(name)
 
   private var currentStartIndex: Int = 0
   private var resizeListener: Option[js.Function1[dom.Event, Unit]] = None
@@ -187,3 +188,35 @@ object StageResult extends BasePage with JsWrapper:
     dom.document.addEventListener("keydown", kListener)
 
     dom.window.setTimeout(() => updateView(), 100)
+
+  override def handleEvent(elem: org.scalajs.dom.raw.HTMLElement, event: org.scalajs.dom.Event): Unit =
+    HtmlId(elem.id) match
+      case `NextStageBtn` =>
+        import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+        Global.currentSelection.stage.foreach { currentStage =>
+          val comp = Global.currentSelection.competition.get
+          val existingStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == comp.id && !s.deleted)
+          
+          dialogs.DlgStageStart.show(existingStages, Some(currentStage.id)).map {
+            case Right(res) =>
+              val initialNoPlayers = if (existingStages.isEmpty) comp.pants1Stage.count(_.active) else 0
+
+              services.TourneyDB.tourney.addStage(
+                coId = comp.id, 
+                prefId = res.prefId, 
+                name = res.name, 
+                stageConfig = StageConfig.CFG, 
+                size = 8, 
+                noPlayers = initialNoPlayers
+              ) match {
+                case Right(newStage) => 
+                  Global.currentSelection = Global.currentSelection.copy(stage = Some(newStage))
+                  comps.ContextHeader.render()
+                  loadPage(PageNameTyp("StageAdmin"), "")
+                case Left(err) => 
+                  error(s"Failed to start stage: ${err.msgCode}")
+              }
+            case _ => debug("Start stage cancelled")
+          }
+        }
+      case _ =>

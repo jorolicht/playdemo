@@ -1,5 +1,6 @@
 @import shared.model.*
 @import shared.format.*
+@import cviews.helper.html.*
 @import pages.Stage.StageResult.*
 
 @(stage: Stage, groups: Seq[Group])
@@ -55,7 +56,7 @@
             <button class="btn btn-outline-primary" onclick="window.print()">
                 <i class="bi bi-printer me-1"></i>@gM("+btn_print")
             </button>
-            <button class="btn btn-primary" onclick="appLoadPage('CompetitionInfo', '')">
+            <button class="btn btn-primary" @id(NextStageBtn, "onclick")>
                 @gM("+btn_next") <i class="bi bi-arrow-right ms-1"></i>
             </button>
         </div>

@@ -51,7 +51,7 @@ object DlgStageStart extends BaseDialog with JsWrapper:
    * @param existingStages List of existing stages in the competition.
    * @return A Future that completes with either an AppError or a DlgStageStartResult.
    */
-  def show(existingStages: Seq[Stage]): Future[Either[AppError, DlgStageStartResult]] =
+  def show(existingStages: Seq[Stage], preSelectedPrefId: Option[StageId] = None): Future[Either[AppError, DlgStageStartResult]] =
     val p = Promise[Either[AppError, DlgStageStartResult]]()
     val f = p.future
 
@@ -64,6 +64,10 @@ object DlgStageStart extends BaseDialog with JsWrapper:
       modal = Modal(gE(ModalId))
     
     setInput(gE(InputNameId), "")
+    preSelectedPrefId.foreach { prefId =>
+      val el = gE(InputPrefId)
+      if (el != null) el.asInstanceOf[js.Dynamic].value = prefId.value.toString
+    }
     
     modal.show()
 

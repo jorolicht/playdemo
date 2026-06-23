@@ -27,8 +27,8 @@ object StageId:
 enum StageConfig(val id: Int, val format: StageFormat) derives CanEqual:
 
   // --- Basic Phases ---
-  case UNKN   extends StageConfig(-1, StageFormat.UNKN)
-  case CFG    extends StageConfig(0,  StageFormat.UNKN)
+  case UNKN   extends StageConfig(-1, StageFormat.TBD)
+  case CFG    extends StageConfig(0,  StageFormat.TBD)
 
   case VRGR   extends StageConfig(1,  StageFormat.GR)
   case ZRGR   extends StageConfig(2,  StageFormat.GR)
@@ -74,7 +74,7 @@ object StageConfig:
       
 
 enum DrawOption(val id: Int, val format: StageFormat) derives CanEqual:
-  case Unknown      extends DrawOption(0, StageFormat.UNKN)
+  case Unknown      extends DrawOption(0, StageFormat.TBD)
   case GrpStart     extends DrawOption(1, StageFormat.GR)		
   case GrpAfterGrp	extends DrawOption(2, StageFormat.GR)
   case KoStart   	  extends DrawOption(3, StageFormat.KO)
@@ -111,7 +111,7 @@ object QualifyTyp:
 // -----------------------------
 enum StageFormat(val id: Int) derives CanEqual:
 
-  case UNKN extends StageFormat(-1)
+  case TBD  extends StageFormat(-1)
   case GR   extends StageFormat(1)
   case KO   extends StageFormat(2)
   case SW   extends StageFormat(3)
@@ -123,11 +123,11 @@ object StageFormat:
   given rw: ReadWriter[StageFormat] =
     readwriter[String].bimap[StageFormat](
       _.toString,
-      s => try StageFormat.valueOf(s) catch { case _: Exception => StageFormat.UNKN }
+      s => try StageFormat.valueOf(s) catch { case _: Exception => StageFormat.TBD }
     )
 
-  def fromId(id: Int): StageFormat = values.find(_.id == id).getOrElse(UNKN)
-  def fromName(name: String): StageFormat = values.find(_.productPrefix == name).getOrElse(UNKN)
+  def fromId(id: Int): StageFormat = values.find(_.id == id).getOrElse(TBD)
+  def fromName(name: String): StageFormat = values.find(_.productPrefix == name).getOrElse(TBD)
   def apply(id: Int): StageFormat = fromId(id)  
 
 
