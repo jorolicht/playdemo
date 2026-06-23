@@ -23,15 +23,15 @@
       <div class="col text-center py-5 text-muted italic">Keine Spiele für diese Runde vorhanden.</div>
     }
     @rMatches.map { m =>
-      @defining(compOpt.flatMap(_.pants1Stage.find(_.id == m.stNoA)).getOrElse(Pant(m.stNoA, name = if(m.stNoA.isBye) "Freilos" else ""))) { p1 =>
-        @defining(compOpt.flatMap(_.pants1Stage.find(_.id == m.stNoB)).getOrElse(Pant(m.stNoB, name = if(m.stNoB.isBye) "Freilos" else ""))) { p2 =>
+      @defining(g.pants.find(_.id == m.stNoA).getOrElse(Pant(m.stNoA, name = if(m.stNoA.isBye) "Freilos" else ""))) { p1 =>
+        @defining(g.pants.find(_.id == m.stNoB).getOrElse(Pant(m.stNoB, name = if(m.stNoB.isBye) "Freilos" else ""))) { p2 =>
           <div class="col">
             <div class="row align-items-center">
               <div class="col-md-5">
                 <div class="player-draw-item card p-2 h-100 border @{if (m.stNoA.isBye) "bg-light bg-opacity-50 text-muted" else ""}" style="min-height: 50px;">
                   <div class="d-flex justify-content-between align-items-center w-100 h-100">
                     <div class="d-flex align-items-center gap-2">
-                      <span class="badge bg-secondary bg-opacity-25 text-dark fw-bold">@{p1.place._1}</span>
+                      <span class="badge bg-secondary bg-opacity-25 text-dark fw-bold">@{if (p1.place._1 > 0) p1.place._1 else g.pants.indexOf(p1) + 1}</span>
                       <div>
                         <strong class="player-name">@{if (m.stNoA.isBye) "Freilos" else p1.name}</strong>
                         @if(!m.stNoA.isBye && p1.club.trim.nonEmpty) {
@@ -56,7 +56,7 @@
                 <div class="player-draw-item card p-2 h-100 border @{if (m.stNoB.isBye) "bg-light bg-opacity-50 text-muted" else ""}" style="min-height: 50px;">
                   <div class="d-flex justify-content-between align-items-center w-100 h-100">
                     <div class="d-flex align-items-center gap-2">
-                      <span class="badge bg-secondary bg-opacity-25 text-dark fw-bold">@{p2.place._1}</span>
+                      <span class="badge bg-secondary bg-opacity-25 text-dark fw-bold">@{if (p2.place._1 > 0) p2.place._1 else g.pants.indexOf(p2) + 1}</span>
                       <div>
                         <strong class="player-name">@{if (m.stNoB.isBye) "Freilos" else p2.name}</strong>
                         @if(!m.stNoB.isBye && p2.club.trim.nonEmpty) {
