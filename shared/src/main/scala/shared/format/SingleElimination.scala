@@ -31,9 +31,11 @@ case class KoStage(
 
   def initDraw_Grp(participants: ArrayBuffer[Pant]): Either[shared.basic.AppError, Int] = {
     val (validPants, invalidPants) = participants.partition(_.qInfo.split(";").length >= 3)
-    // DEBUG AUSGABE validPants
-    Log.info(s"initDraw_Grp -> validPants: ${validPants.map(p => s"${p.name}(qInfo: ${p.qInfo})").mkString(", ")}")
-    val dInfo = validPants.map { p =>
+    // validPants sortieren nach qInfo (sodass zuerst Gruppe A ...)
+    val sortedValidPants = validPants.sortBy(_.qInfo)
+
+    Log.info(s"initDraw_Grp -> validPants: ${sortedValidPants.map(p => s"${p.name}(qInfo: ${p.qInfo})").mkString(", ")}")
+    val dInfo = sortedValidPants.map { p =>
       val parts = p.qInfo.split(";")
       (parts(0), parts(1).toInt, parts(2).toInt, 0)
     }
@@ -67,7 +69,7 @@ case class KoStage(
         } 
       }
 
-      val pantsWithDInfo = validPants.zip(dInfo)
+      val pantsWithDInfo = sortedValidPants.zip(dInfo)
       for(i <- 0 until pantsWithDInfo.size) {
         pantsWithDInfo(i)._1.qInfo = s"${pantsWithDInfo(i)._2._1} [${pantsWithDInfo(i)._2._3}]" 
       }
