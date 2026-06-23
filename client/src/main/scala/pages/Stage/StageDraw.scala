@@ -23,6 +23,7 @@ object StageDraw extends BasePage with JsWrapper:
   val BtnSetzen:       HtmlId = genId(name)
   /** HTML ID prefix for interactive player items (allows drag/click swap). */
   val PlayerItem:      HtmlId = genId(name)
+  val BtnGoToConfig:   HtmlId = genId(name)
 
   private var selectedPlayer: Option[(Int, SNO, HTMLElement)] = None
   private var rrResizeListener: Option[scala.scalajs.js.Function1[dom.Event, Unit]] = None
@@ -34,22 +35,53 @@ object StageDraw extends BasePage with JsWrapper:
     Global.currentSelection.stage match
       case Some(r) => 
         comps.ContextHeader.render()
-        r.data match
-          case StageData.GroupsStage(groups) =>
-            setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.Groups(r, groups.toSeq)))
-            true
-          case StageData.RoundRobinStage(rrGroup) =>
-            setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.RoundRobin(r, Seq(rrGroup))))
-            initRoundRobinConnections(rrGroup.size)
-            true
-          case StageData.SwissStage(swGroup) =>
-            setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.SwissSystem(r, Seq(swGroup))))
-            true
-          case StageData.KnockoutStage(state) =>
-            val g = Group(1, state.size, 1, "KO-Baum (Setzung)", r.noWinSets)
-            state.pants.zipWithIndex.foreach { case (p, i) => if (i < g.pants.length) g.pants(i) = p }
-            setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.SingleElimination(r, Seq(g))))
-            true
+        if (r.status == StageStatus.CFG) {
+          setMain(cviews.comps.html.StageLayout(r, "DRW")(
+            play.twirl.api.Html(s"""
+              <div class="container py-5 text-center">
+                  <div class="card shadow-sm border-warning mx-auto" style="max-width: 500px;">
+                      <div class="card-body py-5">
+                          <div class="text-warning mb-4">
+                              <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
+                          </div>
+                          <h4 class="card-title fw-bold text-dark mb-3">
+                              ${if(base.Global.lang == "de") "Keine Auslosung vorhanden" else "No Draw Available"}
+                          </h4>
+                          <p class="card-text text-muted mb-4">
+                              ${if(base.Global.lang == "de") {
+                                "Für diese Wettbewerbsphase wurde noch keine Auslosung durchgeführt."
+                              } else {
+                                "No draw has been generated for this stage yet."
+                              }}
+                          </p>
+                          <button class="btn btn-warning fw-bold text-white shadow-sm" id="${BtnGoToConfig.id}" onclick="window.appEvent(this, event); false">
+                              <i class="bi bi-gear-fill me-2"></i>
+                              ${if(base.Global.lang == "de") "Zur Konfiguration" else "Go to Configuration"}
+                          </button>
+                      </div>
+                  </div>
+              </div>
+            """)
+          ))
+          true
+        } else {
+          r.data match
+            case StageData.GroupsStage(groups) =>
+              setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.Groups(r, groups.toSeq)))
+              true
+            case StageData.RoundRobinStage(rrGroup) =>
+              setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.RoundRobin(r, Seq(rrGroup))))
+              initRoundRobinConnections(rrGroup.size)
+              true
+            case StageData.SwissStage(swGroup) =>
+              setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.SwissSystem(r, Seq(swGroup))))
+              true
+            case StageData.KnockoutStage(state) =>
+              val g = Group(1, state.size, 1, "KO-Baum (Setzung)", r.noWinSets)
+              state.pants.zipWithIndex.foreach { case (p, i) => if (i < g.pants.length) g.pants(i) = p }
+              setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.SingleElimination(r, Seq(g))))
+              true
+        }
 
       case None => 
         debug("StageDraw: No stage selected, redirecting to Competition Info")
@@ -58,6 +90,8 @@ object StageDraw extends BasePage with JsWrapper:
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
+      case `BtnGoToConfig` =>
+        loadPage(StageAdmin.name, "")
       case `BtnSetzen` =>
         applySeeding()
       case `BtnStartPlaying` =>
