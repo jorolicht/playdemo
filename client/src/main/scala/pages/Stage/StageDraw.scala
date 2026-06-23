@@ -156,6 +156,9 @@ object StageDraw extends BasePage with JsWrapper:
                     } else {
                       Groups.swapPlayers(stage, oldGrId, oldSno, grId, sno)
                     }
+                    if (stage.stageConfig.format == StageFormat.SW) {
+                      lastSwissDrawOption = DrawOption.SwManual
+                    }
                     services.TourneyDB.tourney.updateStage(stage) match {
                       case Right(updatedStage) =>
                         Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
