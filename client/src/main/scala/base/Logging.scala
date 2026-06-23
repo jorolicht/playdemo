@@ -6,6 +6,7 @@ object Logging extends JsWrapper:
   // Register with shared logger delegate
   shared.basic.Log.setErrorLogger(msg => Logging.error(msg))
   shared.basic.Log.setInfoLogger(msg => Logging.info(msg))
+  shared.basic.Log.setDebugLogger(msg => Logging.debug(msg))
 
   def debug(msg: => String) = logger.debug(msg)
   def info(msg: => String)  = logger.info(msg)

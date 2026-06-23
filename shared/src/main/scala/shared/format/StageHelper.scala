@@ -197,7 +197,7 @@ object StageHelper {
 
           // calculate occu level
           val occuLevel    = (pantSize - grps(i).occu(pant.club)) 
-          println(s"Pant: ${pant} improvementRating: ${improveRating} freeGrpLevel: ${freeGrpLevel } occuLevel: ${occuLevel}")
+          Log.debug(s"Pant: ${pant} improvementRating: ${improveRating} freeGrpLevel: ${freeGrpLevel } occuLevel: ${occuLevel}")
 
           ((1000*occuLevel) + freeGrpLevel) * (2 * maxRating) + improveRating 
         }

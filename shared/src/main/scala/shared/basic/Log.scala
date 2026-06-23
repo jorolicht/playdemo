@@ -7,6 +7,7 @@ package shared.basic
 object Log:
   private var errorFn: String => Unit = (msg: String) => println(s"ERROR: $msg")
   private var infoFn: String => Unit = (msg: String) => println(s"INFO: $msg")
+  private var debugFn: String => Unit = (msg: String) => println(s"DEBUG: $msg")
 
   /**
    * Sets the error logging delegate function.
@@ -25,6 +26,14 @@ object Log:
     infoFn = fn
 
   /**
+   * Sets the debug logging delegate function.
+   *
+   * @param fn The logging function to use for debug messages.
+   */
+  def setDebugLogger(fn: String => Unit): Unit =
+    debugFn = fn
+
+  /**
    * Logs an error message.
    *
    * @param msg The message to log.
@@ -37,3 +46,10 @@ object Log:
    * @param msg The message to log.
    */
   def info(msg: => String): Unit = infoFn(msg)
+
+  /**
+   * Logs a debug message.
+   *
+   * @param msg The message to log.
+   */
+  def debug(msg: => String): Unit = debugFn(msg)
