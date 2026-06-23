@@ -56,7 +56,9 @@
                                 <thead class="table-light small">
                                     <tr>
                                         @if(!stage.isKoStage) {
-                                            <th style="width: 80px;" class="text-center">Gruppe</th>
+                                            @if(stage.stageConfig.format != StageFormat.RR) {
+                                                <th style="width: 80px;" class="text-center">Gruppe</th>
+                                            }
                                             <th style="width: 80px;" class="text-center">WGW</th>
                                         }
                                         <th class="text-end" style="width: 250px;">Spieler A</th>
@@ -79,14 +81,16 @@
                                             @defining(if (disabledNoAccess == "disabled" || m.stNoA.isNN || m.stNoB.isNN || m.stNoA.isBye || m.stNoB.isBye || m.status == MEntry.MS_FIX) "disabled" else "") { disabledRow =>
                                                 <tr id="row-@m.gameNo">
                                                     @if(!stage.isKoStage) {
-                                                        <td class="text-center fw-bold text-secondary">
-                                                            @{
-                                                                m match {
-                                                                    case gr: MEntryGr => StageHelper.cvrt2ExcelCol(gr.grId)
-                                                                    case _ => "-"
+                                                        @if(stage.stageConfig.format != StageFormat.RR) {
+                                                            <td class="text-center fw-bold text-secondary">
+                                                                @{
+                                                                    m match {
+                                                                        case gr: MEntryGr => StageHelper.cvrt2ExcelCol(gr.grId)
+                                                                        case _ => "-"
+                                                                    }
                                                                 }
-                                                            }
-                                                        </td>
+                                                            </td>
+                                                        }
                                                         <td class="text-center text-muted small">
                                                             @{
                                                                 m match {
