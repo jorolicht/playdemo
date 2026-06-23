@@ -236,6 +236,7 @@
   "table.club": "Club",
   "CompetitionInfo.ttr": "TTR:",
   "ChatExample.lbl.Rcv": "Receiver",
+  "StageDraw.btn_start_round": "Start Round {0}",
   "table.dbl.name": "Name (Double)",
   "PlayerRegistration.no_players": "No participants registered for this competition yet."
 }

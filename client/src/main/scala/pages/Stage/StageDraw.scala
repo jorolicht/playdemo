@@ -98,9 +98,17 @@ object StageDraw extends BasePage with JsWrapper:
         if (isFin) {
           debug("Cannot start playing: competition is finalized or no write access.")
         } else {
-          stage.initMatches(comp.typ) match {
-            case Right(_) =>
+          val startResult = if (stage.stageConfig.format == StageFormat.SW && stage.matches.nonEmpty) {
+            stage.initNextSwRound(comp.typ)
+          } else {
+            stage.initMatches(comp.typ).map { _ =>
               stage.status = StageStatus.EIN
+              true
+            }
+          }
+          
+          startResult match {
+            case Right(_) =>
               services.TourneyDB.tourney.updateStage(stage) match {
                 case Right(updatedStage) =>
                   Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))

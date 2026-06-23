@@ -311,7 +311,64 @@ case class Stage(
     initGrMatches(ArrayBuffer(rrGroup), coTyp)
 
   private def initSwMatches(swGroup: Group, coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
-    initGrMatches(ArrayBuffer(swGroup), coTyp)
+    val buf = ArrayBuffer[MEntry]()
+    val n = swGroup.pants.length
+    for (i <- 0 until n by 2) {
+      if (i + 1 < n) {
+        val p1 = swGroup.pants(i)
+        val p2 = swGroup.pants(i+1)
+        buf += MEntryGr.init(
+          coId        = coId,
+          coTyp       = coTyp,
+          stageId     = id,
+          stageFormat = stageConfig.format,
+          gameNo      = (i / 2) + 1,
+          stNoA       = p1.id,
+          stNoB       = p2.id,
+          round       = 1,
+          grId        = swGroup.grId,
+          wgw         = (i + 1, i + 2),
+          winSets     = noWinSets
+        )
+      }
+    }
+    matches ++= buf
+    Right(true)
+
+  def initNextSwRound(coTyp: CompTyp): Either[shared.basic.AppError, Boolean] = {
+    data match {
+      case StageData.SwissStage(swGroup) =>
+        val maxRound = if (matches.isEmpty) 0 else matches.collect { case m: MEntryGr => m.round }.maxOption.getOrElse(0)
+        val nextRound = maxRound + 1
+        val buf = ArrayBuffer[MEntry]()
+        val n = swGroup.pants.length
+        val startIndex = matches.length
+        for (i <- 0 until n by 2) {
+          if (i + 1 < n) {
+            val p1 = swGroup.pants(i)
+            val p2 = swGroup.pants(i+1)
+            buf += MEntryGr.init(
+              coId        = coId,
+              coTyp       = coTyp,
+              stageId     = id,
+              stageFormat = stageConfig.format,
+              gameNo      = startIndex + (i / 2) + 1,
+              stNoA       = p1.id,
+              stNoB       = p2.id,
+              round       = nextRound,
+              grId        = swGroup.grId,
+              wgw         = (i + 1, i + 2),
+              winSets     = noWinSets
+            )
+          }
+        }
+        matches ++= buf
+        status = StageStatus.EIN
+        Right(true)
+      case _ =>
+        Left(shared.basic.AppError("error.not_swiss_stage", ""))
+    }
+  }
 
   private def initKoMatches(ko: KoStage, coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
     import shared.format.SingleElimination
