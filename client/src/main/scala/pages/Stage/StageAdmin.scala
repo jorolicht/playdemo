@@ -554,7 +554,10 @@ object StageAdmin extends BasePage with JsWrapper:
       case BoxButton.Yes => 
         services.TourneyDB.tourney.deleteStage(r.id) match {
           case Right(_) => 
-            Global.currentSelection = Global.currentSelection.copy(stage = None)
+            val updatedCompOpt = Global.currentSelection.competition.flatMap { comp =>
+              services.TourneyDB.tourney.competitions.find(c => c != null && c.id == comp.id)
+            }
+            Global.currentSelection = Global.currentSelection.copy(stage = None, competition = updatedCompOpt)
             comps.ContextHeader.render()
             loadPage(CompetitionInfo.name, "")
           case Left(err) => 

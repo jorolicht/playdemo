@@ -210,7 +210,8 @@ object StageResult extends BasePage with JsWrapper:
                 noPlayers = initialNoPlayers
               ) match {
                 case Right(newStage) => 
-                  Global.currentSelection = Global.currentSelection.copy(stage = Some(newStage))
+                  val updatedCompOpt = services.TourneyDB.tourney.competitions.find(c => c != null && c.id == comp.id)
+                  Global.currentSelection = Global.currentSelection.copy(stage = Some(newStage), competition = updatedCompOpt)
                   comps.ContextHeader.render()
                   loadPage(PageNameTyp("StageAdmin"), "")
                 case Left(err) => 

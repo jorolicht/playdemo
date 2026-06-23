@@ -108,7 +108,8 @@ object CompetitionInfo extends BasePage with JsWrapper:
               noPlayers = initialNoPlayers
             ) match {
               case Right(r) => 
-                Global.currentSelection = Global.currentSelection.copy(stage = Some(r))
+                val updatedCompOpt = services.TourneyDB.tourney.competitions.find(comp => comp != null && comp.id == c.id)
+                Global.currentSelection = Global.currentSelection.copy(stage = Some(r), competition = updatedCompOpt)
                 comps.ContextHeader.render()
                 loadPage(StageAdmin.name, "")
               case Left(err) => 
@@ -174,6 +175,10 @@ object CompetitionInfo extends BasePage with JsWrapper:
               if (Global.currentSelection.stage.exists(_.id == stageId)) {
                 Global.currentSelection = Global.currentSelection.copy(stage = None)
               }
+              val updatedCompOpt = Global.currentSelection.competition.flatMap { comp =>
+                services.TourneyDB.tourney.competitions.find(c => c != null && c.id == comp.id)
+              }
+              Global.currentSelection = Global.currentSelection.copy(competition = updatedCompOpt)
               comps.ContextHeader.render()
               render()
             case Left(err) => 
