@@ -117,15 +117,7 @@ case class KoStage(
       if (upListBuf.nonEmpty || downListBuf.nonEmpty) {
         Log.error(s"initDraw -> upList.size or downList.size > 0") 
         Left(shared.basic.AppError("err0244.systemKO.draw.updown"))
-      } else {  
-        // // Place the invalid participants (treated like byes for group drawing, but they are actual players)
-        // var invalidIdx = 0
-        // for (i <- 0 until size if pants(i).id.isBye && invalidIdx < invalidPants.length) {
-        //   pants(i) = invalidPants(invalidIdx)
-        //   drawInfo(i) = ("Freilos", 0, 0, 0)
-        //   invalidIdx += 1
-        // }
-
+      } else {
         sno2pos = scala.collection.mutable.Map[String, Int]()
         for (i <- 0 until size) sno2pos += (pants(i).id.toString -> i) 
         Right(size) 
