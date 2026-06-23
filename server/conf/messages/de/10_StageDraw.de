@@ -19,4 +19,7 @@ StageDraw.draw_opt_accel3 = Beschleunigtes Schweizer System (drei Gruppen)
 StageDraw.draw_opt_top_bottom = Top gegen Bottom (extremes Seeding)
 StageDraw.draw_opt_random = Zufällige Auslosung der Paarungen
 StageDraw.draw_opt_manual = Manuelle Auslosung / Zuordnung
+StageDraw.round_tab_title = Runde {0}
+StageDraw.round_locked_message = Die Paarungen für Runde {0} werden nach Abschluss der vorherigen Runde berechnet.
+
 

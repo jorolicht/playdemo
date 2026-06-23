@@ -11,6 +11,8 @@
 
 @g = @{ groups.headOption.getOrElse(Group(1, 0, 1, stage.name, 0)) }
 @activeCount = @{ g.pants.count(p => p != null && p.id != SNO.nn && !p.id.isBye) }
+@numRounds = @{ if (g.size > 0) shared.utils.GroupPlan.get(g.size).noRounds else 1 }
+
 
 @playerBox(p: Pant, pos: Int) = {
   @defining(p.id.isBye || p.id.isNN) { isBye =>
@@ -44,52 +46,90 @@
             <span class="badge bg-primary">Wettbewerb: @{compOpt.map(_.name).getOrElse("")}</span>
         </div>
 
-        <div class="card border-primary border-opacity-25 shadow-sm mt-3">
-          <div class="card-header bg-primary bg-opacity-10 py-1 d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h6 class="card-title mb-0 text-primary fw-bold">
-              <i class="bi bi-grid-3x3-gap me-2"></i>Runde 1 / Pairings Round 1
-            </h6>
-            
-            <div class="d-flex align-items-center gap-2">
-              <small class="text-secondary fw-bold">@gM("+draw_option_label"):</small>
-              <select class="form-select form-select-sm border-primary" style="width: auto; max-width: 250px;" @id(SelectSwissDrawOption, "onchange") @disabledNoAccess>
-                <option value="SwUpperLower" @{if(currentOption == DrawOption.SwUpperLower) "selected" else ""}>@gM("+draw_opt_upper_lower")</option>
-                <option value="SwAccel2" @{if(currentOption == DrawOption.SwAccel2) "selected" else ""}>@gM("+draw_opt_accel2")</option>
-                @if(activeCount > 29) {
-                  <option value="SwAccel3" @{if(currentOption == DrawOption.SwAccel3) "selected" else ""}>@gM("+draw_opt_accel3")</option>
-                }
-                <option value="SwTopBottom" @{if(currentOption == DrawOption.SwTopBottom) "selected" else ""}>@gM("+draw_opt_top_bottom")</option>
-                <option value="SwRandom" @{if(currentOption == DrawOption.SwRandom) "selected" else ""}>@gM("+draw_opt_random")</option>
-                <option value="SwManual" @{if(currentOption == DrawOption.SwManual) "selected" else ""}>@gM("+draw_opt_manual")</option>
-              </select>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="row row-cols-1 g-3">
-              @if(g.pants.isEmpty) {
-                <div class="col text-center py-5 text-muted italic">Keine Spieler vorhanden.</div>
-              }
-              @for(i <- 0 until g.pants.length by 2) {
-                @defining(if (g.pants(i) != null) g.pants(i) else Pant(SNO.nn)) { p1 =>
-                  @defining(if (g.pants(i+1) != null) g.pants(i+1) else Pant(SNO.nn)) { p2 =>
-                    <div class="col">
-                      <div class="row align-items-center">
-                        <div class="col-md-5">
-                          @playerBox(p1, if (p1.place._1 > 0) p1.place._1 else i + 1)
-                        </div>
-                        <div class="col-md-2 text-center py-2">
-                          <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-1">VS</span>
-                        </div>
-                        <div class="col-md-5">
-                          @playerBox(p2, if (p2.place._1 > 0) p2.place._1 else i + 2)
-                        </div>
-                      </div>
-                    </div>
+        <!-- Tabs for Swiss System rounds -->
+        <ul class="nav nav-tabs border-bottom mb-3" id="swissDrawTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="round1-tab" data-bs-toggle="tab" data-bs-target="#round1-pane" type="button" role="tab" aria-controls="round1-pane" aria-selected="true">
+              @gM("+round_tab_title", "1")
+            </button>
+          </li>
+          @for(r <- 2 to numRounds) {
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="round@r-tab" data-bs-toggle="tab" data-bs-target="#round@r-pane" type="button" role="tab" aria-controls="round@r-pane" aria-selected="false">
+                @gM("+round_tab_title", r.toString)
+              </button>
+            </li>
+          }
+        </ul>
+
+        <div class="tab-content" id="swissDrawTabsContent">
+          <!-- Runde 1 Tab Pane -->
+          <div class="tab-pane fade show active" id="round1-pane" role="tabpanel" aria-labelledby="round1-tab">
+            <div class="card border-primary border-opacity-25 shadow-sm mt-3">
+              <div class="card-header bg-primary bg-opacity-10 py-1 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h6 class="card-title mb-0 text-primary fw-bold">
+                  <i class="bi bi-grid-3x3-gap me-2"></i>Runde 1 / Pairings Round 1
+                </h6>
+                
+                <div class="d-flex align-items-center gap-2">
+                  <small class="text-secondary fw-bold">@gM("+draw_option_label"):</small>
+                  <select class="form-select form-select-sm border-primary" style="width: auto; max-width: 250px;" @id(SelectSwissDrawOption, "onchange") @disabledNoAccess>
+                    <option value="SwUpperLower" @{if(currentOption == DrawOption.SwUpperLower) "selected" else ""}>@gM("+draw_opt_upper_lower")</option>
+                    <option value="SwAccel2" @{if(currentOption == DrawOption.SwAccel2) "selected" else ""}>@gM("+draw_opt_accel2")</option>
+                    @if(activeCount > 29) {
+                      <option value="SwAccel3" @{if(currentOption == DrawOption.SwAccel3) "selected" else ""}>@gM("+draw_opt_accel3")</option>
+                    }
+                    <option value="SwTopBottom" @{if(currentOption == DrawOption.SwTopBottom) "selected" else ""}>@gM("+draw_opt_top_bottom")</option>
+                    <option value="SwRandom" @{if(currentOption == DrawOption.SwRandom) "selected" else ""}>@gM("+draw_opt_random")</option>
+                    <option value="SwManual" @{if(currentOption == DrawOption.SwManual) "selected" else ""}>@gM("+draw_opt_manual")</option>
+                  </select>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="row row-cols-1 g-3">
+                  @if(g.pants.isEmpty) {
+                    <div class="col text-center py-5 text-muted italic">Keine Spieler vorhanden.</div>
                   }
-                }
-              }
+                  @for(i <- 0 until g.pants.length by 2) {
+                    @defining(if (g.pants(i) != null) g.pants(i) else Pant(SNO.nn)) { p1 =>
+                      @defining(if (g.pants(i+1) != null) g.pants(i+1) else Pant(SNO.nn)) { p2 =>
+                        <div class="col">
+                          <div class="row align-items-center">
+                            <div class="col-md-5">
+                              @playerBox(p1, if (p1.place._1 > 0) p1.place._1 else i + 1)
+                            </div>
+                            <div class="col-md-2 text-center py-2">
+                              <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-1">VS</span>
+                            </div>
+                            <div class="col-md-5">
+                              @playerBox(p2, if (p2.place._1 > 0) p2.place._1 else i + 2)
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    }
+                  }
+                </div>
+              </div>
             </div>
           </div>
+
+          @for(r <- 2 to numRounds) {
+            <!-- Runde @r Tab Pane -->
+            <div class="tab-pane fade" id="round@r-pane" role="tabpanel" aria-labelledby="round@r-tab">
+              <div class="card border-secondary border-opacity-25 shadow-sm mt-3">
+                <div class="card-header bg-secondary bg-opacity-10 py-2">
+                  <h6 class="card-title mb-0 text-secondary fw-bold">
+                    <i class="bi bi-grid-3x3-gap me-2"></i>Runde @r / Pairings Round @r
+                  </h6>
+                </div>
+                <div class="card-body py-5 text-center text-muted">
+                  <i class="bi bi-lock-fill fs-2 mb-3 d-block text-secondary opacity-50"></i>
+                  <p class="mb-0">@gM("+round_locked_message", r.toString)</p>
+                </div>
+              </div>
+            </div>
+          }
         </div>
 
         <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">

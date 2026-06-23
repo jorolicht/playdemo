@@ -172,7 +172,7 @@
   "CompetitionInfo.start_stage": "Start Stage",
   "CompetitionInfo.participants_list": "Participant List ({0})",
   "email.register.closing": "Thanks </br> Your XXX Team",
-  "StageDraw.dummy_swiss": "Dummy template for Swiss System.",
+  "StageDraw.dummy_swiss": "You can click two players to swap them.",
   "ChatExample.title.RcvMsgs": "Received Messages",
   "email.register.help": "If you have any trouble verifying your email, please don't hesitate to contact us at <a href=\"mailto:XXX@example.com\">XXX@example.com</a>.",
   "Sidebar.UseCase511": "UseCase511",

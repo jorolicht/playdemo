@@ -19,4 +19,7 @@ StageDraw.draw_opt_accel3 = Accelerated Swiss System (three groups)
 StageDraw.draw_opt_top_bottom = Top vs. Bottom (extreme seeding)
 StageDraw.draw_opt_random = Random draw of pairings
 StageDraw.draw_opt_manual = Manual draw / assignment
+StageDraw.round_tab_title = Round {0}
+StageDraw.round_locked_message = Pairings for Round {0} will be calculated after completion of the previous round.
+
 

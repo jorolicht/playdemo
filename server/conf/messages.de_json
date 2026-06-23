@@ -177,7 +177,7 @@
   "CompetitionInfo.start_stage": "Wettbewerbsphase starten",
   "CompetitionInfo.participants_list": "Teilnehmerliste ({0})",
   "email.register.closing": "Danke </br> Ihr XXX Team",
-  "StageDraw.dummy_swiss": "Dummy-Vorlage für Schweizer System.",
+  "StageDraw.dummy_swiss": "Sie können zwei Spieler anklicken, um sie zu vertauschen.",
   "ChatExample.title.RcvMsgs": "Erhaltene Nachrichten",
   "email.register.help": "Wenn Sie Probleme mit der Verifizierung Ihrer E-Mail haben, zögern Sie bitte nicht, uns unter <a href=\"mailto:XXX@example.com\">XXX@example.com</a> zu kontaktieren.",
   "Sidebar.UseCase511": "UseCase511",
