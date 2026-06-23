@@ -31,7 +31,8 @@ case class KoStage(
 
   def initDraw_Grp(participants: ArrayBuffer[Pant]): Either[shared.basic.AppError, Int] = {
     val (validPants, invalidPants) = participants.partition(_.qInfo.split(";").length >= 3)
-
+    // DEBUG AUSGABE validPants
+    Log.info(s"initDraw_Grp -> validPants: ${validPants.map(p => s"${p.name}(qInfo: ${p.qInfo})").mkString(", ")}")
     val dInfo = validPants.map { p =>
       val parts = p.qInfo.split(";")
       (parts(0), parts(1).toInt, parts(2).toInt, 0)
