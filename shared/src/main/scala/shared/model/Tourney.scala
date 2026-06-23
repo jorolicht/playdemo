@@ -110,7 +110,13 @@ case class Tourney(
       if (originalComp.status == CompStatus.FIN && comp.status == CompStatus.FIN) {
         Left(AppError("competition.finalized"))
       } else {
-        val updatedComp = comp.copy(version = comp.version + 1)
+        val activeStages = stages.filter(s => s != null && s.coId == comp.id && !s.deleted)
+        val finalComp = if (activeStages.isEmpty) {
+          comp.copy(status = CompStatus.CFG, startStage = None)
+        } else {
+          comp
+        }
+        val updatedComp = finalComp.copy(version = finalComp.version + 1)
         competitions(i) = updatedComp
         if (!dirtyCompetition.exists(_.id == updatedComp.id)) dirtyCompetition += updatedComp
         if (doSync) triggerCompSync()
@@ -264,11 +270,12 @@ case class Tourney(
           }
         }
 
-        // Update Competition if it was startStage
+        // Update Competition if it was startStage or if no active stages remain
         val compCIdx = r.coId.value - 1
         if (compCIdx >= 0 && compCIdx < 64 && competitions(compCIdx) != null) {
           val comp = competitions(compCIdx)
-          if (comp.startStage.contains(id)) {
+          val activeStages = stages.filter(s => s != null && s.coId == r.coId && !s.deleted)
+          if (activeStages.isEmpty || comp.startStage.contains(id)) {
             val updatedComp = comp.copy(startStage = None, status = CompStatus.CFG, version = comp.version + 1)
             competitions(compCIdx) = updatedComp
             if (!dirtyCompetition.exists(_.id == updatedComp.id)) dirtyCompetition += updatedComp
