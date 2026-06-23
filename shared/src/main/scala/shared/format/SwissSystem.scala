@@ -24,6 +24,11 @@ object SwissSystem {
       pCopy.place = (i + 1, 0)
       g.pants(i) = pCopy
     }
+    val opt = if (drawOption == DrawOption.Unknown) DrawOption.SwUpperLower else drawOption
+    val pairedPants = getPairings(g.pants.toSeq, opt)
+    for (i <- 0 until g.pants.length) {
+      if (i < pairedPants.length) g.pants(i) = pairedPants(i)
+    }
     StageData.SwissStage(g)
   }
 
