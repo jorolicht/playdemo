@@ -23,7 +23,6 @@ object StageDraw extends BasePage with JsWrapper:
   val BtnSetzen:       HtmlId = genId(name)
   /** HTML ID prefix for interactive player items (allows drag/click swap). */
   val PlayerItem:      HtmlId = genId(name)
-  val BtnGoToConfig:   HtmlId = genId(name)
 
   private var selectedPlayer: Option[(Int, SNO, HTMLElement)] = None
   private var rrResizeListener: Option[scala.scalajs.js.Function1[dom.Event, Unit]] = None
@@ -38,28 +37,8 @@ object StageDraw extends BasePage with JsWrapper:
         if (r.status == StageStatus.CFG) {
           setMain(cviews.comps.html.StageLayout(r, "DRW")(
             play.twirl.api.Html(s"""
-              <div class="container py-5 text-center">
-                  <div class="card shadow-sm border-warning mx-auto" style="max-width: 500px;">
-                      <div class="card-body py-5">
-                          <div class="text-warning mb-4">
-                              <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
-                          </div>
-                          <h4 class="card-title fw-bold text-dark mb-3">
-                              ${if(base.Global.lang == "de") "Keine Auslosung vorhanden" else "No Draw Available"}
-                          </h4>
-                          <p class="card-text text-muted mb-4">
-                              ${if(base.Global.lang == "de") {
-                                "Für diese Wettbewerbsphase wurde noch keine Auslosung durchgeführt."
-                              } else {
-                                "No draw has been generated for this stage yet."
-                              }}
-                          </p>
-                          <button class="btn btn-warning fw-bold text-white shadow-sm" id="${BtnGoToConfig.id}" onclick="window.appEvent(this, event); false">
-                              <i class="bi bi-gear-fill me-2"></i>
-                              ${if(base.Global.lang == "de") "Zur Konfiguration" else "Go to Configuration"}
-                          </button>
-                      </div>
-                  </div>
+              <div class="text-center py-5 text-muted italic">
+                  ${if(base.Global.lang == "de") "Keine Auslosung vorhanden." else "No draw has been generated yet."}
               </div>
             """)
           ))
@@ -90,8 +69,6 @@ object StageDraw extends BasePage with JsWrapper:
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
-      case `BtnGoToConfig` =>
-        loadPage(StageAdmin.name, "")
       case `BtnSetzen` =>
         applySeeding()
       case `BtnStartPlaying` =>
