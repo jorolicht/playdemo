@@ -193,23 +193,18 @@ object StageAdmin extends BasePage with JsWrapper:
 
       case `BtnResetDrw` => 
         import shared.BoxButton
-        val comp = Global.currentSelection.competition.get
         Global.currentSelection.stage.foreach { stage =>
-          DlgMsgbox.show("Möchten Sie wirklich die gesamte Auslosung neu initialisieren? Alle Ergebnisse werden gelöscht!", "Auslosung löschen", List(BoxButton.Yes, BoxButton.No)).map {
+          DlgMsgbox.show("Möchten Sie wirklich die gesamte Auslosung löschen? Alle Ergebnisse werden gelöscht!", "Auslosung löschen", List(BoxButton.Yes, BoxButton.No)).map {
             case BoxButton.Yes =>
-              stage.initMatches(comp.typ) match {
+              stage.matches.clear()
+              stage.status = StageStatus.CFG
+              services.TourneyDB.tourney.updateStage(stage) match {
+                case Right(updatedStage) =>
+                  Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                  debug("StageAdmin: Draw successfully deleted.")
+                  render()
                 case Left(err) =>
-                  error(s"StageAdmin: initMatches failed: ${err.msgCode}")
-                case Right(_) =>
-                  stage.status = StageStatus.AUS
-                  services.TourneyDB.tourney.updateStage(stage) match {
-                    case Right(updatedStage) =>
-                      Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
-                      debug("StageAdmin: Draw successfully re-initialized.")
-                      loadPage(StageDraw.name, "")
-                    case Left(err) =>
-                      error(s"StageAdmin: Failed to update stage in database: ${err.msgCode}")
-                  }
+                  error(s"StageAdmin: Failed to update stage in database: ${err.msgCode}")
               }
             case _ => 
               debug("StageAdmin: Reset draw cancelled")
