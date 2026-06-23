@@ -125,7 +125,7 @@ object StageAdmin extends BasePage with JsWrapper:
         
         // Active count for rules
         val activeCount = participants.count(_.status == PantStatus.PLAY)
-        val modes = DrawRules.getAvailableModes(activeCount)
+        val modes = DrawRules.getAvailableModes(activeCount, base.Global.lang)
 
         setMain(cviews.comps.html.StageLayout(r, "CFG")(
           cviews.pages.Stage.html.StageAdmin(r, participants, modes)
@@ -409,7 +409,7 @@ object StageAdmin extends BasePage with JsWrapper:
       if (checks.item(i).asInstanceOf[dom.html.Input].checked) count += 1
     }
     
-    val modes = DrawRules.getAvailableModes(count)
+    val modes = DrawRules.getAvailableModes(count, base.Global.lang)
     val select = gE(SelectDrawMode).asInstanceOf[dom.html.Select]
     
     if (select != null) {
@@ -420,7 +420,7 @@ object StageAdmin extends BasePage with JsWrapper:
         val option = select.options.item(i + 1).asInstanceOf[dom.html.Option]
         if (option != null) {
           option.disabled = !m.isEnabled
-          val suffix = if (!m.isEnabled) " (nicht mgl.)" else ""
+          val suffix = if (!m.isEnabled) s" (${gM("+not_possible")})" else ""
           option.text = m.label + suffix
           if (!m.isEnabled) option.classList.add("text-muted")
           else option.classList.remove("text-muted")

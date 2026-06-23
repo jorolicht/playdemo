@@ -22,4 +22,4 @@ StageAdmin.ttr_header = TTR
 StageAdmin.no_players = No participants found in competition.
 StageAdmin.footer_info = {0} players available. Only active players take part in the draw.
 StageAdmin.err_min_players = Please select at least three participants.
-
+StageAdmin.not_possible = not possible

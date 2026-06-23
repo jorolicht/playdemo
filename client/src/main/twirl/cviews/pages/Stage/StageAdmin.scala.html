@@ -69,7 +69,7 @@
                         <option value="UNKN" @{if(stage.stageConfig == StageConfig.UNKN || stage.stageConfig == StageConfig.CFG) "selected" else ""}>@gM("+select_mode")</option>
                         @modes.map { m =>
                             <option value="@m.stageConfig.productPrefix" @if(!m.isEnabled){disabled class="text-muted"} @{if(stage.stageConfig == m.stageConfig) "selected" else ""}>
-                                @m.label @if(!m.isEnabled){ (nicht mgl.)}
+                                @m.label @if(!m.isEnabled){ (@gM("+not_possible"))}
                             </option>
                         }
                     </select>

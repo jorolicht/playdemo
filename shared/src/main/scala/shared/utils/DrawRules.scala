@@ -21,36 +21,37 @@ object DrawRules:
   /**
    * Returns all available mode options for a given number of players.
    */
-  def getAvailableModes(count: Int): Seq[ModeOption] =
+  def getAvailableModes(count: Int, lang: String = "de"): Seq[ModeOption] = {
+    val isDe = lang.toLowerCase.startsWith("de")
     Seq(
-      ModeOption(StageConfig.RR, "Round Robin / Jeder-gegen-Jeden", count >= 3),
-      ModeOption(StageConfig.SW, "Schweizer-System", count > 6 && count % 2 == 0),
-      ModeOption(StageConfig.KO, "KO-System", count >= 4),
+      ModeOption(StageConfig.RR, if (isDe) "Round Robin / Jeder-gegen-Jeden" else "Round Robin", count >= 3),
+      ModeOption(StageConfig.SW, if (isDe) "Schweizer-System" else "Swiss System", count > 6),
+      ModeOption(StageConfig.KO, if (isDe) "KO-System" else "Knockout System", count >= 4),
       
       // 3er Gruppen
-      ModeOption(StageConfig.GRPS3, "3er Gruppen", (count / 3 >= 2) && (count % 3 == 0)),
+      ModeOption(StageConfig.GRPS3, if (isDe) "3er Gruppen" else "Groups of 3", (count / 3 >= 2) && (count % 3 == 0)),
       
       // 3er und 4er Gruppen
-      ModeOption(StageConfig.GRPS34, "3er und 4er Gruppen", 
+      ModeOption(StageConfig.GRPS34, if (isDe) "3er und 4er Gruppen" else "Groups of 3 and 4", 
         ((count / 3 == 2) && (count % 3 == 1)) || 
         ((count / 3 > 2) && (count % 3 == 1 || count % 3 == 2))
       ),
       
       // 4er Gruppen
-      ModeOption(StageConfig.GRPS4, "4er Gruppen", (count / 4 >= 2) && (count % 4 == 0)),
+      ModeOption(StageConfig.GRPS4, if (isDe) "4er Gruppen" else "Groups of 4", (count / 4 >= 2) && (count % 4 == 0)),
       
       // 4er und 5er Gruppen
-      ModeOption(StageConfig.GRPS45, "4er und 5er Gruppen", 
+      ModeOption(StageConfig.GRPS45, if (isDe) "4er und 5er Gruppen" else "Groups of 4 and 5", 
         ((count / 4 == 2) && (count % 4 == 1)) ||
         ((count / 4 == 3) && (count % 4 == 1 || count % 4 == 2)) ||
         ((count / 4 > 3) && (count % 4 >= 1 && count % 4 <= 3))
       ),
       
       // 5er Gruppen
-      ModeOption(StageConfig.GRPS5, "5er Gruppen", (count / 5 >= 2) && (count % 5 == 0)),
+      ModeOption(StageConfig.GRPS5, if (isDe) "5er Gruppen" else "Groups of 5", (count / 5 >= 2) && (count % 5 == 0)),
       
       // 5er und 6er Gruppen
-      ModeOption(StageConfig.GRPS56, "5er und 6er Gruppen",
+      ModeOption(StageConfig.GRPS56, if (isDe) "5er und 6er Gruppen" else "Groups of 5 and 6",
         ((count / 5 == 2) && (count % 5 == 1)) ||
         ((count / 5 == 3) && (count % 5 == 1 || count % 5 == 2)) ||
         ((count / 5 == 4) && (count % 5 >= 1 && count % 5 <= 3)) ||
@@ -58,10 +59,11 @@ object DrawRules:
       ),
       
       // Fixed size groups
-      ModeOption(StageConfig.GRPS6, "6er Gruppen", (count / 6 >= 2) && (count % 6 == 0)),
-      ModeOption(StageConfig.GRPS7, "7er Gruppen", (count / 7 >= 2) && (count % 7 == 0)),
-      ModeOption(StageConfig.GRPS8, "8er Gruppen", (count / 8 >= 2) && (count % 8 == 0))
+      ModeOption(StageConfig.GRPS6, if (isDe) "6er Gruppen" else "Groups of 6", (count / 6 >= 2) && (count % 6 == 0)),
+      ModeOption(StageConfig.GRPS7, if (isDe) "7er Gruppen" else "Groups of 7", (count / 7 >= 2) && (count % 7 == 0)),
+      ModeOption(StageConfig.GRPS8, if (isDe) "8er Gruppen" else "Groups of 8", (count / 8 >= 2) && (count % 8 == 0))
     )
+  }
 
   /**
    * Calculates the group distribution for a given mode and player count.
