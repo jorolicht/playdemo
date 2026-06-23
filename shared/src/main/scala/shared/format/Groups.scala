@@ -273,6 +273,7 @@ object Groups:
     val groupsOpt = stage.data match
       case StageData.GroupsStage(groups) => Some(groups)
       case StageData.RoundRobinStage(rr) => Some(ArrayBuffer(rr))
+      case StageData.SwissStage(sw)      => Some(ArrayBuffer(sw))
       case _ => None
 
     groupsOpt.foreach { groups =>

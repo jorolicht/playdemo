@@ -1,15 +1,108 @@
 @import shared.model.*
 @import shared.format.*
 @import pages.Stage.StageDraw.*
+@import cviews.helper.html.*
 
 @(stage: Stage, groups: Seq[Group])
 
+@compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
+@isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
+@disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || stage.status != StageStatus.AUS) "disabled" else "" }
+
+@g = @{ groups.headOption.getOrElse(Group(1, 0, 1, stage.name, 0)) }
+
+@playerBox(p: Pant, pos: Int) = {
+  @defining(p.id.isBye || p.id.isNN) { isBye =>
+    <div @id(PlayerItem, "onclick", s"${g.grId}-${p.id.toString}") 
+         class="player-draw-item card p-2 h-100 border @{if (isBye) "bg-light bg-opacity-50 text-muted" else ""}" 
+         style="cursor: pointer; min-height: 50px;">
+      <div class="d-flex justify-content-between align-items-center w-100 h-100">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-secondary bg-opacity-25 text-dark fw-bold">@pos</span>
+          <div>
+            <strong class="player-name">@{if (isBye) gM("bye") else p.name}</strong>
+            @if(!isBye && p.club.trim.nonEmpty) {
+              <small class="text-muted ms-1">(@p.club)</small>
+            }
+          </div>
+        </div>
+        @if(!isBye) {
+          <span class="badge bg-white text-dark border fw-normal" style="font-size: 0.75rem;">@p.rating</span>
+        }
+      </div>
+    </div>
+  }
+}
+
 <div class="card shadow-sm">
     <div class="card-body">
-        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name + " (Swiss System)")</h5>
-        <div class="alert alert-info py-2 small">
+        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name)</h5>
+        
+        <div class="alert alert-info py-2 small d-flex justify-content-between align-items-center">
             <span><i class="bi bi-info-circle me-2"></i>@gM("+dummy_swiss")</span>
+            <span class="badge bg-primary">Wettbewerb: @{compOpt.map(_.name).getOrElse("")}</span>
+        </div>
+
+        <div class="card border-primary border-opacity-25 shadow-sm mt-3">
+          <div class="card-header bg-primary bg-opacity-10 py-2">
+            <h6 class="card-title mb-0 text-primary fw-bold">
+              <i class="bi bi-grid-3x3-gap me-2"></i>Runde 1 / Pairings Round 1
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="row row-cols-1 g-3">
+              @if(g.pants.isEmpty) {
+                <div class="col text-center py-5 text-muted italic">Keine Spieler vorhanden.</div>
+              }
+              @for(i <- 0 until g.pants.length by 2) {
+                @defining(if (g.pants(i) != null) g.pants(i) else Pant(SNO.nn)) { p1 =>
+                  @defining(if (g.pants(i+1) != null) g.pants(i+1) else Pant(SNO.nn)) { p2 =>
+                    <div class="col">
+                      <div class="row align-items-center">
+                        <div class="col-md-5">
+                          @playerBox(p1, i + 1)
+                        </div>
+                        <div class="col-md-2 text-center py-2">
+                          <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-1">VS</span>
+                        </div>
+                        <div class="col-md-5">
+                          @playerBox(p2, i + 2)
+                        </div>
+                      </div>
+                    </div>
+                  }
+                }
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-danger" onclick="appLoadPage('StageAdmin', '')">
+                <i class="bi bi-arrow-left me-1"></i>@gM("StageDraw.btn_back")
+            </button>
+            <button class="btn btn-success px-4 fw-bold" @id(BtnStartPlaying, "onclick") @disabledNoAccess>
+                @gM("StageDraw.btn_start") <i class="bi bi-play-circle ms-1"></i>
+            </button>
         </div>
     </div>
 </div>
 
+<style>
+    .player-draw-item {
+        transition: all 0.15s ease-in-out;
+    }
+    .player-draw-item:hover:not(.bg-warning) {
+        background-color: rgba(255, 193, 7, 0.05) !important;
+        border-color: #ffc107 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .player-draw-item.bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+        border-color: #ffb300 !important;
+    }
+    .player-draw-item.bg-warning .text-muted {
+        color: #495057 !important;
+    }
+</style>

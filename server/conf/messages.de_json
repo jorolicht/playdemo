@@ -2,6 +2,7 @@
   "StageResult.round_semi": "Halbfinale",
   "email.register.link": "<a href=\"http://localhost:9000/auth/verifyUser/{0}\">VERIFICATION LINK</a>",
   "PlayerList.name_header": "Name, Vorname",
+  "StageAdmin.not_possible": "nicht mgl.",
   "StageInput.btn_finalize": "ERGEBNISSE FINALISIEREN",
   "StageResult.status_running": "Läuft",
   "app.test": "Test @$§%&/()öäü€ {0} {1}",
