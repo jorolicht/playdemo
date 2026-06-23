@@ -3,13 +3,14 @@
 @import pages.Stage.StageDraw.*
 @import cviews.helper.html.*
 
-@(stage: Stage, groups: Seq[Group])
+@(stage: Stage, groups: Seq[Group], currentOption: DrawOption)
 
 @compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
 @isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
 @disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || stage.status != StageStatus.AUS) "disabled" else "" }
 
 @g = @{ groups.headOption.getOrElse(Group(1, 0, 1, stage.name, 0)) }
+@activeCount = @{ g.pants.count(p => p != null && p.id != SNO.nn && !p.id.isBye) }
 
 @playerBox(p: Pant, pos: Int) = {
   @defining(p.id.isBye || p.id.isNN) { isBye =>
@@ -44,10 +45,24 @@
         </div>
 
         <div class="card border-primary border-opacity-25 shadow-sm mt-3">
-          <div class="card-header bg-primary bg-opacity-10 py-2">
+          <div class="card-header bg-primary bg-opacity-10 py-1 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h6 class="card-title mb-0 text-primary fw-bold">
               <i class="bi bi-grid-3x3-gap me-2"></i>Runde 1 / Pairings Round 1
             </h6>
+            
+            <div class="d-flex align-items-center gap-2">
+              <small class="text-secondary fw-bold">@gM("+draw_option_label"):</small>
+              <select class="form-select form-select-sm border-primary" style="width: auto; max-width: 250px;" @id(SelectSwissDrawOption, "onchange") @disabledNoAccess>
+                <option value="SwUpperLower" @{if(currentOption == DrawOption.SwUpperLower) "selected" else ""}>@gM("+draw_opt_upper_lower")</option>
+                <option value="SwAccel2" @{if(currentOption == DrawOption.SwAccel2) "selected" else ""}>@gM("+draw_opt_accel2")</option>
+                @if(activeCount > 29) {
+                  <option value="SwAccel3" @{if(currentOption == DrawOption.SwAccel3) "selected" else ""}>@gM("+draw_opt_accel3")</option>
+                }
+                <option value="SwTopBottom" @{if(currentOption == DrawOption.SwTopBottom) "selected" else ""}>@gM("+draw_opt_top_bottom")</option>
+                <option value="SwRandom" @{if(currentOption == DrawOption.SwRandom) "selected" else ""}>@gM("+draw_opt_random")</option>
+                <option value="SwManual" @{if(currentOption == DrawOption.SwManual) "selected" else ""}>@gM("+draw_opt_manual")</option>
+              </select>
+            </div>
           </div>
           <div class="card-body">
             <div class="row row-cols-1 g-3">

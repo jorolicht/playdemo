@@ -12,3 +12,11 @@ StageDraw.dummy_se = You can click two positions to swap them, or enter custom s
 StageDraw.dummy_swiss = Dummy template for Swiss System.
 StageDraw.btn_back_overview = Back to Overview
 StageDraw.no_draw = No draw has been generated yet.
+StageDraw.draw_option_label = Pairing Mode
+StageDraw.draw_opt_upper_lower = Upper vs. Lower Half
+StageDraw.draw_opt_accel2 = Accelerated Swiss System (two groups)
+StageDraw.draw_opt_accel3 = Accelerated Swiss System (three groups)
+StageDraw.draw_opt_top_bottom = Top vs. Bottom (extreme seeding)
+StageDraw.draw_opt_random = Random draw of pairings
+StageDraw.draw_opt_manual = Manual draw / assignment
+

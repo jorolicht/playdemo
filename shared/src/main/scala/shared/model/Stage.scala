@@ -83,6 +83,19 @@ enum DrawOption(val id: Int, val format: StageFormat) derives CanEqual:
   case RrAfterGrp  	extends DrawOption(6, StageFormat.RR)
   case SwStart  	  extends DrawOption(7, StageFormat.SW)
   case SwAfterSw  	extends DrawOption(8, StageFormat.SW)
+  case SwUpperLower extends DrawOption(9, StageFormat.SW)
+  case SwAccel2     extends DrawOption(10, StageFormat.SW)
+  case SwAccel3     extends DrawOption(11, StageFormat.SW)
+  case SwTopBottom  extends DrawOption(12, StageFormat.SW)
+  case SwRandom     extends DrawOption(13, StageFormat.SW)
+  case SwManual     extends DrawOption(14, StageFormat.SW)
+
+object DrawOption:
+  given rw: ReadWriter[DrawOption] =
+    readwriter[String].bimap[DrawOption](
+      _.toString,
+      s => try DrawOption.valueOf(s) catch { case _: Exception => DrawOption.Unknown }
+    )
 
 // -----------------------------
 // QualifyTyp

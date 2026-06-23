@@ -23,9 +23,12 @@ object StageDraw extends BasePage with JsWrapper:
   val BtnSetzen:       HtmlId = genId(name)
   /** HTML ID prefix for interactive player items (allows drag/click swap). */
   val PlayerItem:      HtmlId = genId(name)
+  /** Select menu for Swiss System draw pairing option. */
+  val SelectSwissDrawOption: HtmlId = genId(name)
 
   private var selectedPlayer: Option[(Int, SNO, HTMLElement)] = None
   private var rrResizeListener: Option[scala.scalajs.js.Function1[dom.Event, Unit]] = None
+  private var lastSwissDrawOption: DrawOption = DrawOption.SwUpperLower
 
   def render(param: String = ""): Boolean = 
     selectedPlayer = None
@@ -47,7 +50,7 @@ object StageDraw extends BasePage with JsWrapper:
               initRoundRobinConnections(rrGroup.size)
               true
             case StageData.SwissStage(swGroup) =>
-              setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.SwissSystem(r, Seq(swGroup))))
+              setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.SwissSystem(r, Seq(swGroup), lastSwissDrawOption)))
               true
             case StageData.KnockoutStage(state) =>
               val g = Group(1, state.size, 1, "KO-Baum (Setzung)", r.noWinSets)
@@ -63,6 +66,29 @@ object StageDraw extends BasePage with JsWrapper:
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
+      case `SelectSwissDrawOption` =>
+        val select = elem.asInstanceOf[dom.html.Select]
+        val optName = select.value
+        val stage = Global.currentSelection.stage.get
+        stage.data match {
+          case StageData.SwissStage(g) =>
+            val opt = try DrawOption.valueOf(optName) catch { case _: Exception => DrawOption.Unknown }
+            if (opt != DrawOption.Unknown) {
+              lastSwissDrawOption = opt
+              val newPants = SwissSystem.getPairings(g.pants.toSeq, opt)
+              for (i <- 0 until g.pants.length) {
+                if (i < newPants.length) g.pants(i) = newPants(i)
+              }
+              services.TourneyDB.tourney.updateStage(stage) match {
+                case Right(updatedStage) =>
+                  Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                  render()
+                case Left(err) =>
+                  dom.window.alert(s"Fehler beim Speichern der Paarung: ${err.msgCode}")
+              }
+            }
+          case _ =>
+        }
       case `BtnSetzen` =>
         applySeeding()
       case `BtnStartPlaying` =>

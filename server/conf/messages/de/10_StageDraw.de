@@ -12,3 +12,11 @@ StageDraw.dummy_se = Sie können zwei Positionen anklicken, um sie zu vertausche
 StageDraw.dummy_swiss = Dummy-Vorlage für Schweizer System.
 StageDraw.btn_back_overview = Zurück zur Übersicht
 StageDraw.no_draw = Keine Auslosung vorhanden.
+StageDraw.draw_option_label = Paarungs-Modus
+StageDraw.draw_opt_upper_lower = Obere Hälfte gegen untere Hälfte
+StageDraw.draw_opt_accel2 = Beschleunigtes Schweizer System (zwei Gruppen)
+StageDraw.draw_opt_accel3 = Beschleunigtes Schweizer System (drei Gruppen)
+StageDraw.draw_opt_top_bottom = Top gegen Bottom (extremes Seeding)
+StageDraw.draw_opt_random = Zufällige Auslosung der Paarungen
+StageDraw.draw_opt_manual = Manuelle Auslosung / Zuordnung
+
