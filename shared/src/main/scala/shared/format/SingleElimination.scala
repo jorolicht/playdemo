@@ -30,13 +30,11 @@ case class KoStage(
   def rnds: Int = if (size >= 2) (scala.math.log(size) / scala.math.log(2)).round.toInt else 0
 
   def initDraw_Grp(participants: ArrayBuffer[Pant]): Either[shared.basic.AppError, Int] = {
-    val dInfo = participants.map { p =>
+    val (validPants, invalidPants) = participants.partition(_.qInfo.split(";").length >= 3)
+
+    val dInfo = validPants.map { p =>
       val parts = p.qInfo.split(";")
-      if (parts.length >= 3) {
-        (parts(0), parts(1).toInt, parts(2).toInt, 0)
-      } else {
-        ("", 0, 0, 0)
-      }
+      (parts(0), parts(1).toInt, parts(2).toInt, 0)
     }
     var drawInfo = ArrayBuffer[(String, Int, Int, Int)]()
 
@@ -55,24 +53,26 @@ case class KoStage(
       val upDownMap = HashMap[(Int,Int), Boolean]()
       val minPos = if (dInfo.nonEmpty) dInfo.minBy(_._3)._3 else 1
 
-      dInfo.zip(upDownScheme).foreach { case (item, updo) => if (item._3 == minPos) upDownMap += ((item._2, minPos) -> updo) } 
-      
-      dInfo.zip(upDownScheme).foreach { case (item, updo) => 
-        if (!upDownMap.contains((item._2, minPos))) {
-          upDownMap += ((item._2, item._3) -> updo)
-          Log.error(s"initDraw_Grp -> upDownMap does not contain all values e.g. ${item._2} ${minPos}")  
-        } else {
-          upDownMap += ( (item._2, item._3) -> changeUpDown( (item._3-minPos)%2 == 1, upDownMap((item._2, minPos))) )   
-        }
-      } 
+      if (dInfo.nonEmpty) {
+        dInfo.zip(upDownScheme).foreach { case (item, updo) => if (item._3 == minPos) upDownMap += ((item._2, minPos) -> updo) } 
+        
+        dInfo.zip(upDownScheme).foreach { case (item, updo) => 
+          if (!upDownMap.contains((item._2, minPos))) {
+            upDownMap += ((item._2, item._3) -> updo)
+            Log.error(s"initDraw_Grp -> upDownMap does not contain all values e.g. ${item._2} ${minPos}")  
+          } else {
+            upDownMap += ( (item._2, item._3) -> changeUpDown( (item._3-minPos)%2 == 1, upDownMap((item._2, minPos))) )   
+          }
+        } 
+      }
 
-      val pantsWithDInfo = participants.zip(dInfo)
+      val pantsWithDInfo = validPants.zip(dInfo)
       for(i <- 0 until pantsWithDInfo.size) {
         pantsWithDInfo(i)._1.qInfo = s"${pantsWithDInfo(i)._2._1} [${pantsWithDInfo(i)._2._3}]" 
       }
 
       pants              = ArrayBuffer.tabulate(size)(i => Pant(SNO.bye(i), name = "")) 
-      drawInfo           = ArrayBuffer.fill(size) (("", 0, 0, 0)) 
+      drawInfo           = ArrayBuffer.fill(size) (("Freilos", 0, 0, 0)) 
 
       val (upList, downList) = pantsWithDInfo.partition(x => upDownMap.getOrElse((x._2._2, x._2._3), true))
       
@@ -106,6 +106,14 @@ case class KoStage(
         Log.error(s"initDraw -> upList.size or downList.size > 0") 
         Left(shared.basic.AppError("err0244.systemKO.draw.updown"))
       } else {  
+        // Place the invalid participants (treated like byes for group drawing, but they are actual players)
+        var invalidIdx = 0
+        for (i <- 0 until size if pants(i).id.isBye && invalidIdx < invalidPants.length) {
+          pants(i) = invalidPants(invalidIdx)
+          drawInfo(i) = ("Freilos", 0, 0, 0)
+          invalidIdx += 1
+        }
+
         sno2pos = scala.collection.mutable.Map[String, Int]()
         for (i <- 0 until size) sno2pos += (pants(i).id.toString -> i) 
         Right(size) 
