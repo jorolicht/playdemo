@@ -29,7 +29,15 @@ case class KoStage(
 
   def rnds: Int = if (size >= 2) (scala.math.log(size) / scala.math.log(2)).round.toInt else 0
 
-  def initDraw_Grp(participants: ArrayBuffer[Pant], dInfo: ArrayBuffer[(String, Int, Int, Int)]): Either[shared.basic.AppError, Int] = {
+  def initDraw_Grp(participants: ArrayBuffer[Pant]): Either[shared.basic.AppError, Int] = {
+    val dInfo = participants.map { p =>
+      val parts = p.qInfo.split(";")
+      if (parts.length >= 3) {
+        (parts(0), parts(1).toInt, parts(2).toInt, 0)
+      } else {
+        ("", 0, 0, 0)
+      }
+    }
     var drawInfo = ArrayBuffer[(String, Int, Int, Int)]()
 
     def changeUpDown(invert: Boolean, value: Boolean): Boolean = if (invert) !value else value
@@ -173,15 +181,7 @@ object SingleElimination {
     val participants = selectedPants.to(ArrayBuffer)
     val drawRes = drawOption match {
       case DrawOption.KoAfterGrp =>
-        val dInfo = participants.map { p =>
-          val parts = p.qInfo.split(";")
-          if (parts.length >= 3) {
-            (parts(0), parts(1).toInt, parts(2).toInt, 0)
-          } else {
-            ("", 0, 0, 0)
-          }
-        }
-        state.initDraw_Grp(participants, dInfo)
+        state.initDraw_Grp(participants)
       case _ =>
         state.initDraw_Rating(participants)
     }
