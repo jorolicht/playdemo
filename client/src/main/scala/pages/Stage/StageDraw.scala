@@ -35,25 +35,7 @@ object StageDraw extends BasePage with JsWrapper:
       case Some(r) => 
         comps.ContextHeader.render()
         if (r.status == StageStatus.CFG) {
-          setMain(cviews.comps.html.StageLayout(r, "DRW")(
-            play.twirl.api.Html(s"""
-              <div class="card shadow-sm">
-                  <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-                          <h5 class="card-title text-secondary mb-0">
-                              <i class="bi bi-shuffle me-2"></i>${if(base.Global.lang == "de") "Auslosung" else "Draw"}: ${r.name}
-                          </h5>
-                          <button class="btn btn-outline-danger btn-sm d-print-none" onclick="appLoadPage('StageAdmin', '')">
-                              <i class="bi bi-arrow-left me-1"></i>${if(base.Global.lang == "de") "Zurück zur Übersicht" else "Back to Overview"}
-                          </button>
-                      </div>
-                      <div class="text-center py-5 text-muted italic">
-                          ${if(base.Global.lang == "de") "Keine Auslosung vorhanden." else "No draw has been generated yet."}
-                      </div>
-                  </div>
-              </div>
-            """)
-          ))
+          setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.TBD(r)))
           true
         } else {
           r.data match
