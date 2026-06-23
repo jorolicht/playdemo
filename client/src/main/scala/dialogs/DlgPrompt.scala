@@ -32,6 +32,8 @@ object DlgPrompt extends BaseDialog with JsWrapper:
   var output: HTMLElement = null
   var input:  HTMLElement = null
 
+  private var currentPromise: Option[Promise[Either[AppError, String]]] = None
+
   // variable for command history
   var history = new ArrayBuffer[String]()
   val hLength = 50
@@ -56,61 +58,68 @@ object DlgPrompt extends BaseDialog with JsWrapper:
   def show(command: String): Future[Either[AppError, String]] =
     val p = Promise[Either[AppError, String]]()
     val f = p.future
-
-    // println(s"ModalId: ${ModalId.id} ResultId: ${ResultId.id} InputId: ${InputId.id} ExecuteId: ${ExecuteId.id} CancelId: ${CancelId.id} CloseId: ${CloseId.id} ")
-
+    currentPromise = Some(p)
 
     // Initialize modal dialog if not already loaded
     if isEmpty(eE(LoadId,"span")) then
       setHtml(gE(LoadId), cviews.dialogs.html.DlgPrompt())
       initHistory()
-      modal    = Modal(gE(ModalId))
+      modal    = js.Dynamic.newInstance(js.Dynamic.global.bootstrap.Modal)(
+        gE(ModalId),
+        js.Dynamic.literal(backdrop = false, focus = false)
+      ).asInstanceOf[Modal]
       collapse = Collapse(gE(ResultId))
       output   = gE(ResultContentId)
       input    = gE(InputId)
+
+      // Add event listeners once during initialization
+      gE(ClearId).addEventListener("click", (e: MouseEvent) => {
+        set("")
+      })
+
+      // Add an event listener to the execute button
+      gE(ExecuteId).addEventListener("click", (e: MouseEvent) => {
+        currentPromise.foreach { cp =>
+          if (!cp.isCompleted) then cp success Right(getInput(input))
+        }
+        add2History(getInput(input))
+      })
+
+      // Add an event listener to the cancel button
+      gE(CancelId).addEventListener("click", (e: MouseEvent) => {
+        currentPromise.foreach { cp =>
+          if (!cp.isCompleted) then cp success Left(AppError("dlg.cancel"))
+        }
+        modal.hide()      
+      })    
+
+      // Add an event listener to the close button
+      gE(CloseId).addEventListener("click", (e: MouseEvent) => {
+        currentPromise.foreach { cp =>
+          if (!cp.isCompleted) then cp success Left(AppError("dlg.cancel"))
+        }
+        modal.hide()      
+      })   
+
+      // Check Input for up/down and enter keykey 
+      gE(InputId).onkeydown = {(e: KeyboardEvent) =>
+        // ENTER key pressed
+        if (Seq(13).contains(e.keyCode.toInt)) 
+          e.preventDefault()
+          currentPromise.foreach { cp =>
+            if (!cp.isCompleted) then cp success Right(getInput(input))
+          }
+          add2History(getInput(input))
+        
+        // UP key pressed
+        if (Seq(38).contains(e.keyCode.toInt)) { e.preventDefault(); setInput(input, upHistory()) }
+
+        // DOWN key pressed
+        if (Seq(40).contains(e.keyCode.toInt)) { e.preventDefault(); setInput(input, downHistory()) }
+      }
     
     modal.show()
     if (command == "") setInput(input, getHistory()) else setInput(input, command)
-
-    // Add an event listener to the clear button
-    gE(ClearId).addEventListener("click", (e: MouseEvent) => {
-      set("")
-    })
-
-    // Add an event listener to the execute button
-    gE(ExecuteId).addEventListener("click", (e: MouseEvent) => {
-      if (!p.isCompleted) then p success Right(getInput(input))
-      add2History(getInput(input))
-      modal.hide()
-    })
-
-    // Add an event listener to the cancel button
-    gE(CancelId).addEventListener("click", (e: MouseEvent) => {
-      if (!p.isCompleted) then p success Left(AppError("dlg.cancel"))
-      modal.hide()      
-    })    
-
-    // Add an event listener to the close button
-    gE(CloseId).addEventListener("click", (e: MouseEvent) => {
-      if (!p.isCompleted) then p success Left(AppError("dlg.cancel"))
-      modal.hide()      
-    })   
-
-    // Check Input for up/down and enter keykey 
-    gE(InputId).onkeydown = {(e: KeyboardEvent) =>
-      // ENTER key pressed
-      if (Seq(13).contains(e.keyCode.toInt)) 
-        e.preventDefault()
-        if (!p.isCompleted) then p success Right(getInput(input))
-        add2History(getInput(input))
-        modal.hide()
-      
-      // UP key pressed
-      if (Seq(38).contains(e.keyCode.toInt)) { e.preventDefault(); setInput(input, upHistory()) }
-
-      // DOWN key pressed
-      if (Seq(40).contains(e.keyCode.toInt)) { e.preventDefault(); setInput(input, downHistory()) }
-    }
     
     f.map {
       case Left(err)  => Left(err)
