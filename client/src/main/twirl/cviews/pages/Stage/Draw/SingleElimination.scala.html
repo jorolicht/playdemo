@@ -84,7 +84,12 @@
 @koEntry(pant: Pant, pos: Int, up: String, down: String ) = @{
   val clashClass = if (hasClubClash(pos)) "table-danger text-danger" else ""
   val qInfoCell = if (showQuali) {
-    s"""<td rowspan="2" class="border-top border-bottom border-right text-center p-1"><small data-qInfo="${pos}" class="font-weight-bold">${pant.qInfo}</small></td>"""
+    val qText = {
+      val q = pant.qInfo.trim
+      if (q.isEmpty || q == "[0]" || q.endsWith("[0]") || q.contains("[0]")) ""
+      else q
+    }
+    s"""<td rowspan="2" class="border-top border-bottom border-right text-center p-1"><small data-qInfo="${pos}" class="font-weight-bold">${qText}</small></td>"""
   } else {
     ""
   }
