@@ -86,8 +86,15 @@
   val qInfoCell = if (showQuali) {
     val qText = {
       val q = pant.qInfo.trim
-      if (q.isEmpty || q == "[0]" || q.endsWith("[0]") || q.contains("[0]")) ""
-      else q
+      val Pattern = """(.*)\s+\[(\d+)\]""".r
+      q match {
+        case Pattern(_, placeStr) =>
+          val place = placeStr.toIntOption.getOrElse(0)
+          if (place > 0) q else ""
+        case _ =>
+          if (q.isEmpty || q == "0" || q == "[0]" || q.contains("[0]") || q.endsWith("[0]")) ""
+          else q
+      }
     }
     s"""<td rowspan="2" class="border-top border-bottom border-right text-center p-1"><small data-qInfo="${pos}" class="font-weight-bold">${qText}</small></td>"""
   } else {
