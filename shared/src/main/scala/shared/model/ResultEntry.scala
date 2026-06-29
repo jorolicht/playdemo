@@ -13,6 +13,7 @@ case class ResultEntry(
   var valid: Boolean, 
   var pos:   (Int,Int),                // KO:     pos._1 = rnd, pos._2 = match number
                                        // GROUP:  pos._1 = 1..size, pos._2 = 1..size (wgw)
+                                       // SwISS:  pos._1 = rnd, pos.2 = match number
   var sno:   (String, String),
   var sets:  (Int,Int),                // sets and balls with
   var balls: Array[String]             // view from player A

@@ -170,7 +170,8 @@ object ClickTTMapper:
           club = target.clubs.find(_.id.toInt == player.clubId).map(_.name).getOrElse(""),
           rating = player.meta.ttr.getOrElse(0),
           birthYear = player.birthYear.map(_.toString).getOrElse(""),
-          status = PantStatus.REGI
+          status = PantStatus.REGI,
+          clubId = player.clubId
         )
       }
     } else {
@@ -191,7 +192,8 @@ object ClickTTMapper:
           club = if (club1 == club2) club1 else s"$club1, $club2",
           rating = (player1.meta.ttr.getOrElse(0) + player2.meta.ttr.getOrElse(0)) / 2,
           birthYear = "", // Or combined if needed
-          status = PantStatus.REGI
+          status = PantStatus.REGI,
+          clubId = if (player1.clubId == player2.clubId) player1.clubId else 0
         )
       }
     }

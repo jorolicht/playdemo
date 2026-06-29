@@ -18,4 +18,5 @@ StageInput.round.0 = Spiel um Platz 3
 StageInput.round.final_combo = Finale / Spiel um Platz 3
 StageInput.round.default = Runde {0}
 StageInput.not_determined = NOCH OFFEN
+StageInput.btn_start_next_round = Starte nachfolgende Runde
 StageInput.bye = Freilos

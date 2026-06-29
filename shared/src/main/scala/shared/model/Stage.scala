@@ -79,16 +79,50 @@ enum DrawOption(val id: Int, val format: StageFormat) derives CanEqual:
   case GrpAfterGrp	extends DrawOption(2, StageFormat.GR)
   case KoStart   	  extends DrawOption(3, StageFormat.KO)
   case KoAfterGrp	  extends DrawOption(4, StageFormat.KO)
-  case RrStart  	  extends DrawOption(5, StageFormat.RR)
-  case RrAfterGrp  	extends DrawOption(6, StageFormat.RR)
-  case SwStart  	  extends DrawOption(7, StageFormat.SW)
-  case SwAfterSw  	extends DrawOption(8, StageFormat.SW)
-  case SwUpperLower extends DrawOption(9, StageFormat.SW)
-  case SwAccel2     extends DrawOption(10, StageFormat.SW)
-  case SwAccel3     extends DrawOption(11, StageFormat.SW)
-  case SwTopBottom  extends DrawOption(12, StageFormat.SW)
-  case SwRandom     extends DrawOption(13, StageFormat.SW)
-  case SwManual     extends DrawOption(14, StageFormat.SW)
+
+  case SwUpperLower extends DrawOption(5, StageFormat.SW)  // Upper - Lower (Das "Slide"-Prinzip)
+  case SwTopBottom  extends DrawOption(6, StageFormat.SW)  // Top - Bottom (Das "Fold"- oder "Zick-Zack"-Prinzip)
+  case SwAccel      extends DrawOption(7, StageFormat.SW)  // Accelerated Swiss System (Beschleunigtes Schweizer System)
+  case SwRandom     extends DrawOption(8, StageFormat.SW)
+  case SwManual     extends DrawOption(9, StageFormat.SW)
+
+// Upper - Lower (Das "Slide"-Prinzip)
+// Bei dieser Methode wird das Teilnehmerfeld exakt in der Mitte in eine obere Hälfte (Upper) 
+// und eine untere Hälfte (Lower) geteilt. Danach wird die obere Hälfte linear gegen die untere Hälfte gepaart. 
+// Spieler 1 spielt gegen den besten Spieler der unteren Hälfte.
+// Upper-Gruppe: 1, 2, 3, 4
+// Lower-Gruppe: 5, 6, 7, 8
+// Paarungen:
+// Spieler 1 vs. Spieler 5
+// Spieler 2 vs. Spieler 6
+// Spieler 3 vs. Spieler 7
+// Spieler 4 vs. Spieler 8
+// Eigenschaft: Dies ist der FIDE-Standard im Schach. Es sorgt dafür, dass die Top-Spieler 
+// in der ersten Runde eine machbare, aber nicht die absolut leichteste Aufgabe bekommen. 
+// Die Abstände in der Spielstärke sind innerhalb aller Paarungen konstant (hier immer genau 4 Plätze Unterschied).
+
+// Top - Bottom (Das "Fold"- oder "Zick-Zack"-Prinzip)
+// Hier wird das Feld metaphorisch in der Mitte zusammengeklappt (Fold). Der am besten gesetzte Spieler (Top) 
+// spielt gegen den am schlechtesten gesetzten Spieler (Bottom). Der Zweitbeste gegen den Zweitschlechtesten, 
+// und so weiter.
+// Äußere Paarung: 1 gegen 8
+// Nächste Paarung: 2 gegen 7
+
+// Das Accelerated Swiss System (Beschleunigtes Schweizer System) ist eine Variante des klassischen Schweizer Systems, 
+// die vor allem bei Turnieren mit sehr vielen Teilnehmern und wenigen Runden eingesetzt wird.
+// Das Hauptproblem beim normalen Schweizer System in solchen Szenarien: Nach der ersten Runde hat exakt die Hälfte  
+// der Spieler gewonnen. Bei 128 Spielern gibt es nach Runde 1 also 64 Spieler mit 1:0 Punkten. Es dauert viele Runden, 
+// bis sich die absolute Spitze herauskristallisiert.
+// Das beschleunigte System löst dies, indem es das Feld künstlich vorsortiert, um bereits ab 
+// Runde 1 Spitzenpaarungen zu erzwingen.
+// Wie funktioniert die Beschleunigung?
+// Die gängigste Methode (oft im Schach nach FIDE-Regeln genutzt) arbeitet mit virtuellen Punkten 
+// (auch Baku-Beschleunigung oder Verzögertes Schweizer System genannt):
+// Aufteilung in zwei Hälften: Vor der ersten Runde wird die Setzliste halbiert (obere Hälfte vs. untere Hälfte).
+// Virtueller Bonus: Die Spieler der oberen Hälfte erhalten für die Paarung der ersten beiden Runden einen 
+// virtuellen Zusatzpunkt (z.B. +1,0 oder +0,5 Punkte) auf ihr Konto addiert.
+//Paarung: Der Algorithmus paart die Spieler nun ganz normal nach ihren (echten + virtuellen) Punkten.
+
 
 object DrawOption:
   given rw: ReadWriter[DrawOption] =
@@ -170,7 +204,7 @@ object StageStatus:
 enum StageData:
   case GroupsStage(groups: ArrayBuffer[Group])
   case KnockoutStage(state: KoStage)
-  case SwissStage(swGroup: SwGroup)
+  case SwissStage(state: SwissSys)
   case RoundRobinStage(rrGroup: RrGroup)
 
 object StageData:
@@ -239,7 +273,7 @@ case class Stage(
   // Convenience helpers
   // -----------------------------
   def isGroupStage: Boolean = stageConfig.format == StageFormat.GR
-  def isKoStage: Boolean = stageConfig.format == StageFormat.KO
+  def isKoStage: Boolean    = stageConfig.format == StageFormat.KO
 
 
   /**
@@ -247,17 +281,20 @@ case class Stage(
    *
    * Löscht zunächst alle vorhandenen Matches und fügt dann die neu generierten Matches
    * entsprechend des Stage-Formats (Gruppen, Round Robin, Swiss oder Knockout) hinzu.
+   * Bei Schweizer System (Swiss) werden die Matches der ersten Runde neu erstellt,
+   * während für höhere Runden (round > 1) die Rundenmatches angehängt werden.
    *
    * @param coTyp Der Wettbewerbstyp (CompTyp).
-   * @return Left(AppError) im Fehlerfall oder Right(Boolean) zur Bestätigung des Erfolgs.
+   * @param round Die zu initialisierende Runde (standardmäßig 1).
+   * @return Left(AppError) im Fehlerfall oder Right(()) bei Erfolg.
    */
-  def initMatches(coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
-    matches.clear()
-    data match
-      case StageData.GroupsStage(groups) => initGrMatches(groups, coTyp)
-      case StageData.RoundRobinStage(rr) => initRrMatches(rr, coTyp)
-      case StageData.SwissStage(sw)      => initSwMatches(sw, coTyp)
-      case StageData.KnockoutStage(ko)   => initKoMatches(ko, coTyp)
+  def initMatches(coTyp: CompTyp, round: Int = 1): Either[shared.basic.AppError, Unit] =
+    val res = data match
+      case StageData.GroupsStage(groups) => initGrMatches(groups, coTyp, round)
+      case StageData.RoundRobinStage(rr) => initRrMatches(rr, coTyp, round)
+      case StageData.SwissStage(sw)      => initSwMatches(sw, coTyp, round)
+      case StageData.KnockoutStage(ko)   => initKoMatches(ko, coTyp, round)
+    res.map(_ => ())
 
   /**
    * Setzt alle Matches dieser Stage zurück und berechnet die Gruppenplatzierungen neu.
@@ -289,7 +326,7 @@ case class Stage(
   /**
    * Dummy-Methode zum Zurücksetzen von Swiss-System-Matches.
    */
-  private def resetSwMatches(swGroup: SwGroup): Either[shared.basic.AppError, Unit] =
+  private def resetSwMatches(sw: SwissSys): Either[shared.basic.AppError, Unit] =
     Right(())
 
   /**
@@ -298,8 +335,12 @@ case class Stage(
   private def resetKoMatches(ko: KoStage): Either[shared.basic.AppError, Unit] =
     Right(())
 
-  private def initGrMatches(groups: ArrayBuffer[Group], coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
+
+  /* Initializes matches stage based on the current state and competition type. */
+
+  private def initGrMatches(groups: ArrayBuffer[Group], coTyp: CompTyp, round: Int = 1): Either[shared.basic.AppError, Boolean] =
     import shared.format.Groups
+    matches.clear()
     Groups.initGrMatches(coId, coTyp, id, stageConfig.format, noWinSets, groups) match
       case Right(grMatches) =>
         matches ++= grMatches
@@ -307,77 +348,10 @@ case class Stage(
       case Left(err) =>
         Left(err)
 
-  private def initRrMatches(rrGroup: Group, coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
-    initGrMatches(ArrayBuffer(rrGroup), coTyp)
 
-  private def getTtrRank(p: Pant, swGroup: Group, default: Int): Int = {
-    val activePants = swGroup.pants.filter(x => x != null && x.id != SNO.nn && !x.id.isBye).sortBy(-_.rating)
-    val idx = activePants.indexWhere(_.id == p.id)
-    if (idx != -1) idx + 1 else default
-  }
-
-  private def initSwMatches(swGroup: Group, coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
-    val buf = ArrayBuffer[MEntry]()
-    val n = swGroup.pants.length
-    for (i <- 0 until n by 2) {
-      if (i + 1 < n) {
-        val p1 = swGroup.pants(i)
-        val p2 = swGroup.pants(i+1)
-        buf += MEntryGr.init(
-          coId        = coId,
-          coTyp       = coTyp,
-          stageId     = id,
-          stageFormat = stageConfig.format,
-          gameNo      = (i / 2) + 1,
-          stNoA       = p1.id,
-          stNoB       = p2.id,
-          round       = 1,
-          grId        = swGroup.grId,
-          wgw         = (getTtrRank(p1, swGroup, i + 1), getTtrRank(p2, swGroup, i + 2)),
-          winSets     = noWinSets
-        )
-      }
-    }
-    matches ++= buf
-    Right(true)
-
-  def initNextSwRound(coTyp: CompTyp): Either[shared.basic.AppError, Boolean] = {
-    data match {
-      case StageData.SwissStage(swGroup) =>
-        val maxRound = if (matches.isEmpty) 0 else matches.collect { case m: MEntryGr => m.round }.maxOption.getOrElse(0)
-        val nextRound = maxRound + 1
-        val buf = ArrayBuffer[MEntry]()
-        val n = swGroup.pants.length
-        val startIndex = matches.length
-        for (i <- 0 until n by 2) {
-          if (i + 1 < n) {
-            val p1 = swGroup.pants(i)
-            val p2 = swGroup.pants(i+1)
-            buf += MEntryGr.init(
-              coId        = coId,
-              coTyp       = coTyp,
-              stageId     = id,
-              stageFormat = stageConfig.format,
-              gameNo      = startIndex + (i / 2) + 1,
-              stNoA       = p1.id,
-              stNoB       = p2.id,
-              round       = nextRound,
-              grId        = swGroup.grId,
-              wgw         = (getTtrRank(p1, swGroup, i + 1), getTtrRank(p2, swGroup, i + 2)),
-              winSets     = noWinSets
-            )
-          }
-        }
-        matches ++= buf
-        status = StageStatus.EIN
-        Right(true)
-      case _ =>
-        Left(shared.basic.AppError("error.not_swiss_stage", ""))
-    }
-  }
-
-  private def initKoMatches(ko: KoStage, coTyp: CompTyp): Either[shared.basic.AppError, Boolean] =
+  private def initKoMatches(ko: KoStage, coTyp: CompTyp, round: Int = 1): Either[shared.basic.AppError, Boolean] =
     import shared.format.SingleElimination
+    matches.clear()
     SingleElimination.initKoMatches(coId, coTyp, id, stageConfig.format, noWinSets, ko) match
       case Right(koMatches) =>
         matches ++= koMatches
@@ -385,6 +359,19 @@ case class Stage(
       case Left(err) =>
         Left(err)
 
+
+  private def initRrMatches(rrGroup: Group, coTyp: CompTyp, round: Int = 1): Either[shared.basic.AppError, Boolean] =
+    initGrMatches(ArrayBuffer(rrGroup), coTyp)
+
+
+  private def initSwMatches(sw: SwissSys, coTyp: CompTyp, round: Int = 1): Either[shared.basic.AppError, Boolean] =
+    SwissSys.initSwMatches(coId, coTyp, id, stageConfig.format, noWinSets, round, sw) match
+      case Right(swMatches) =>
+        if round == 1 then matches.clear() // Clear matches only for the first round
+        matches ++= swMatches
+        Right(true)
+      case Left(err) =>
+        Left(err)
 
 
   // getMatch
@@ -432,7 +419,7 @@ case class Stage(
       val m = getMatch(gameNo)
 
       m.stageFormat match {
-        case StageFormat.GR | StageFormat.RR | StageFormat.SW => {
+        case StageFormat.GR | StageFormat.RR => {
           val trigger = m.asInstanceOf[MEntryGr].getTrigger()
           for (g <- trigger) { 
             val nm = getMatch(g)
@@ -440,6 +427,10 @@ case class Stage(
             setModel(nm)
             triggerList.append(g) 
           }
+        }
+
+        case StageFormat.SW => {
+          setModel(m)
         }
 
         case StageFormat.KO => {
@@ -525,7 +516,7 @@ case class Stage(
       m.reset(resetPantA, resetPantB)
 
       m.stageFormat match {
-        case StageFormat.GR | StageFormat.RR  | StageFormat.SW  => {
+        case StageFormat.GR | StageFormat.RR => {
           m.setStatus(depFinished(gameNo, m.stageFormat))
           setModel(m)
 
@@ -537,6 +528,11 @@ case class Stage(
             setModel(nm)
             triggerList.append(g)
           }  
+        }
+
+        case StageFormat.SW => {
+          m.setStatus(depFinished(gameNo, m.stageFormat))
+          setModel(m)
         }
 
         case StageFormat.KO => {
@@ -591,7 +587,7 @@ case class Stage(
       }
 
       m.stageFormat match {
-        case StageFormat.GR | StageFormat.RR | StageFormat.SW =>
+        case StageFormat.GR | StageFormat.RR  =>
           val mtch = m.asInstanceOf[MEntryGr]
           data match {
             case StageData.GroupsStage(groups) =>
@@ -620,21 +616,14 @@ case class Stage(
                   }
                 }
               }
-            case StageData.SwissStage(swGroup) =>
-              if (mtch.grId == 1) {
-                swGroup.setMatch(mtch) match {
-                  case Left(err) => println(s"ERROR setModel: sw match: ${err.toString}")
-                  case Right(res) => if (res) swGroup.calc() match {
-                    case Left(err) => println(s"ERROR setModel: calc failed: ${err.toString}")
-                    case Right(_) => ()
-                  } else {
-                    println("ERROR setModel: set sw match, invalid param")
-                  }
-                }
-              }
+
             case _ =>
               println("ERROR setModel: stage data doesn't match group format")
           }
+        
+        case StageFormat.SW =>
+          // Swiss matches are stored directly in Stage.matches, no separate calculations needed in SwissStage
+
 
         case StageFormat.KO =>
           // KO matches are stored directly in Stage.matches, no separate calculations needed in KoStage

@@ -19,6 +19,8 @@ object StageDraw extends BasePage with JsWrapper:
 
   /** Button to start playing the stage. */
   val BtnStartPlaying: HtmlId = genId(name)
+  /** Button to start Swiss round. */
+  val BtnStartSwiss:   HtmlId = genId(name)
   /** Button to apply custom seeding permutation. */
   val BtnSetzen:       HtmlId = genId(name)
   /** HTML ID prefix for interactive player items (allows drag/click swap). */
@@ -50,7 +52,7 @@ object StageDraw extends BasePage with JsWrapper:
               initRoundRobinConnections(rrGroup.size)
               true
             case StageData.SwissStage(swGroup) =>
-              setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.SwissSystem(r, Seq(swGroup), lastSwissDrawOption)))
+              setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.SwissSystem(r, swGroup, lastSwissDrawOption)))
               true
             case StageData.KnockoutStage(state) =>
               val g = Group(1, state.size, 1, "KO-Baum (Setzung)", r.noWinSets)
@@ -75,10 +77,7 @@ object StageDraw extends BasePage with JsWrapper:
             val opt = try DrawOption.valueOf(optName) catch { case _: Exception => DrawOption.Unknown }
             if (opt != DrawOption.Unknown) {
               lastSwissDrawOption = opt
-              val newPants = SwissSystem.getPairings(g.pants.toSeq, opt)
-              for (i <- 0 until g.pants.length) {
-                if (i < newPants.length) g.pants(i) = newPants(i)
-              }
+              g.pairing(0) = SwissSys.initPairing(g.swPants, opt)
               services.TourneyDB.tourney.updateStage(stage) match {
                 case Right(updatedStage) =>
                   Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
@@ -98,15 +97,32 @@ object StageDraw extends BasePage with JsWrapper:
         if (isFin) {
           debug("Cannot start playing: competition is finalized or no write access.")
         } else {
-          val startResult = if (stage.stageConfig.format == StageFormat.SW && stage.matches.nonEmpty) {
-            stage.initNextSwRound(comp.typ)
-          } else {
-            stage.initMatches(comp.typ).map { _ =>
+          stage.initMatches(comp.typ) match {
+            case Right(_) =>
               stage.status = StageStatus.EIN
-              true
-            }
+              services.TourneyDB.tourney.updateStage(stage) match {
+                case Right(updatedStage) =>
+                  Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                  loadPage(StageInput.name, "")
+                case Left(err) =>
+                  error(s"Failed to update stage status: ${err.msgCode}")
+              }
+            case Left(err) =>
+              error(s"Failed to initialize matches: ${err.msgCode}")
           }
-          
+        }
+
+      case `BtnStartSwiss` =>
+        val rnd   = getData(elem, "rnd", 0)
+        val stage = Global.currentSelection.stage.get
+        val comp = Global.currentSelection.competition.get
+        val isFin = comp.status == CompStatus.FIN || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+        if (isFin) {
+          debug("Cannot start Swiss round: competition is finalized or no write access.")
+        } else {
+          val startResult = stage.initMatches(comp.typ, rnd).map(_ => {
+            stage.status = StageStatus.EIN
+          })
           startResult match {
             case Right(_) =>
               services.TourneyDB.tourney.updateStage(stage) match {
@@ -161,11 +177,11 @@ object StageDraw extends BasePage with JsWrapper:
                   case shared.BoxButton.Yes =>
                     if (stage.isKoStage) {
                       SingleElimination.swapPlayers(stage, oldSno, sno)
+                    } else if (stage.stageConfig.format == StageFormat.SW) {
+                      lastSwissDrawOption = DrawOption.SwManual
+                      SwissSys.swapPlayers(stage, oldSno, sno)
                     } else {
                       Groups.swapPlayers(stage, oldGrId, oldSno, grId, sno)
-                    }
-                    if (stage.stageConfig.format == StageFormat.SW) {
-                      lastSwissDrawOption = DrawOption.SwManual
                     }
                     services.TourneyDB.tourney.updateStage(stage) match {
                       case Right(updatedStage) =>

@@ -21,6 +21,7 @@ object StageInput extends BasePage with JsWrapper:
   val PrintSrzBtn:    HtmlId = genId(name)
   val SaveMatchBtn:   HtmlId = genId(name)
   val DeleteMatchBtn: HtmlId = genId(name)
+  val BtnStartNextRound: HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
     Global.currentSelection.stage match
@@ -56,6 +57,8 @@ object StageInput extends BasePage with JsWrapper:
       case id if id.id.startsWith(DeleteMatchBtn.id) =>
         val gameNo = elem.id.substring(DeleteMatchBtn.id.length + 1).toInt
         deleteMatchResult(gameNo)
+      case `BtnStartNextRound` =>
+        startNextSwissRound()
       case _ =>
 
   /**
@@ -138,15 +141,19 @@ object StageInput extends BasePage with JsWrapper:
             services.TourneyDB.tourney.updateStage(stage) match {
               case Right(updatedStage) =>
                 Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
-                // Disable save button, stop running time, and update colors without full page re-render
-                val saveBtn = dom.document.getElementById(s"${SaveMatchBtn.id}-$gameNo").asInstanceOf[dom.html.Button]
-                if (saveBtn != null) saveBtn.disabled = true
-                val timeCell = dom.document.getElementById(s"running-time-$gameNo").asInstanceOf[dom.raw.HTMLElement]
-                if (timeCell != null) {
-                  timeCell.setAttribute("data-status", MEntry.MS_FIN.toString)
-                  timeCell.textContent = "-"
+                if (updatedStage.status == StageStatus.FIN) {
+                  render()
+                } else {
+                  // Disable save button, stop running time, and update colors without full page re-render
+                  val saveBtn = dom.document.getElementById(s"${SaveMatchBtn.id}-$gameNo").asInstanceOf[dom.html.Button]
+                  if (saveBtn != null) saveBtn.disabled = true
+                  val timeCell = dom.document.getElementById(s"running-time-$gameNo").asInstanceOf[dom.raw.HTMLElement]
+                  if (timeCell != null) {
+                    timeCell.setAttribute("data-status", MEntry.MS_FIN.toString)
+                    timeCell.textContent = "-"
+                  }
+                  updateColors(updatedStage)
                 }
-                updateColors(updatedStage)
               case Left(err) =>
                 error(s"StageInput: Failed to save match result: ${err.msgCode}")
             }
@@ -189,6 +196,33 @@ object StageInput extends BasePage with JsWrapper:
             }
           case _ =>
             debug("StageInput: Match deletion cancelled by user.")
+        }
+      }
+    }
+
+  /**
+   * Startet die nachfolgende Runde für das Schweizer System (Swiss Stage).
+   * Ermittelt die nächste Runden-Nummer, ruft stage.initMatches auf, setzt den Status
+   * auf EIN, aktualisiert die DB und lädt die Ansicht neu.
+   */
+  def startNextSwissRound(): Unit =
+    Global.currentSelection.stage.foreach { stage =>
+      val comp = Global.currentSelection.competition.get
+      val isFin = comp.status == CompStatus.FIN || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+      if (isFin) {
+        debug("StageInput: Cannot start next Swiss round because competition is finalized or no write access.")
+      } else {
+        SwissSys.generateNextRoundPairing(stage) match {
+          case Right(updatedStage) =>
+            services.TourneyDB.tourney.updateStage(updatedStage) match {
+              case Right(savedStage) =>
+                Global.currentSelection = Global.currentSelection.copy(stage = Some(savedStage))
+                loadPage(PageNameTyp("StageDraw"), "")
+              case Left(err) =>
+                error(s"Failed to update stage status: ${err.msgCode}")
+            }
+          case Left(err) =>
+            error(s"Failed to generate next Swiss round pairings: ${err.msgCode}")
         }
       }
     }
@@ -373,13 +407,40 @@ object StageInput extends BasePage with JsWrapper:
       }
     }
 
-  /**
-   * Dynamically colors the player name display elements.
-   * Green for playable, Black for finished, Red for blocked.
-   */
   private def updateColors(stage: Stage): Unit =
     if (stage.isKoStage) updateKoColors(stage)
+    else if (stage.stageConfig.format == StageFormat.SW) updateSwColors(stage)
     else updateGrColors(stage)
+
+  /**
+   * Aktualisiert die Farbcodierung für das Schweizer System (Swiss Stage).
+   * Bereits abgeschlossene Spiele werden dunkel gefärbt, noch offene Spiele werden
+   * grün markiert, da im Schweizer System alle Spiele einer Runde sofort spielbereit sind.
+   */
+  private def updateSwColors(stage: Stage): Unit =
+    val matches = stage.matches.collect { case m: MEntrySw => m }.toSeq
+    matches.foreach { m =>
+      val nameAEl = dom.document.getElementById(s"nameA-${m.gameNo}").asInstanceOf[dom.html.Span]
+      val nameBEl = dom.document.getElementById(s"nameB-${m.gameNo}").asInstanceOf[dom.html.Span]
+      
+      if (nameAEl != null && nameBEl != null) {
+        nameAEl.classList.remove("text-success")
+        nameAEl.classList.remove("text-danger")
+        nameAEl.classList.remove("text-dark")
+        
+        nameBEl.classList.remove("text-success")
+        nameBEl.classList.remove("text-danger")
+        nameBEl.classList.remove("text-dark")
+        
+        if (m.finished) {
+          nameAEl.classList.add("text-dark")
+          nameBEl.classList.add("text-dark")
+        } else {
+          nameAEl.classList.add("text-success")
+          nameBEl.classList.add("text-success")
+        }
+      }
+    }
 
   private def updateGrColors(stage: Stage): Unit =
     val matches = stage.matches.collect { case m: MEntryGr => m }.toSeq

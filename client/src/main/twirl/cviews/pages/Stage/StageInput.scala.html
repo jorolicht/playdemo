@@ -11,6 +11,137 @@
 @disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || stage.status != StageStatus.EIN) "disabled" else "" }
 @disabledTrashNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || (stage.status != StageStatus.EIN && stage.status != StageStatus.FIN)) "disabled" else "" }
 
+@matchTable(roundNo: Int, title: String, roundMatches: Seq[(MEntry, String, String)]) = {
+    <div class="round-section border rounded mb-4 shadow-sm overflow-hidden" id="round-section-@roundNo">
+        <div class="bg-light p-3 d-flex justify-content-between align-items-center border-bottom">
+            <h6 class="mb-0 fw-bold text-primary">@title</h6>
+            <button class="btn btn-sm btn-outline-primary d-print-none" 
+                    @id(PrintSrzBtn, "onclick", roundNo.toString)>
+                <i class="bi bi-printer me-1"></i>PRINT SRZ
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-nowrap">
+                <thead class="table-light small">
+                    <tr>
+                        @if(!stage.isKoStage) {
+                            @if(stage.stageConfig.format == StageFormat.GR) {
+                                <th style="width: 80px;" class="text-center">Gruppe</th>
+                            }
+                        }
+                        <th class="text-end" style="width: 250px;">Spieler A</th>
+                        <th style="width: 80px;" class="text-center">Zeit</th>
+                        <th class="text-start" style="width: 250px;">Spieler B</th>
+                        <th style="width: 60px;" class="text-center">Nr.</th>
+                        <th style="width: 80px;" class="text-center">Tisch</th>
+                        @* Input fields headers *@
+                        @for(i <- 1 to (stage.noWinSets * 2 - 1)) {
+                            <th style="width: 50px;" class="text-center">Satz @i</th>
+                        }
+                        <th style="width: 80px;" class="text-center">Sätze</th>
+                        <th style="width: 120px;" class="text-center d-print-none">Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @roundMatches.map { case (m, nameA, nameB) =>
+                        @* Split result by middle dot to fill inputs *@
+                        @defining(if (m.result.trim.isEmpty) Array.empty[String] else m.result.split("·")) { setInputs =>
+                            @defining(if (disabledNoAccess == "disabled" || m.stNoA.isNN || m.stNoB.isNN || m.stNoA.isBye || m.stNoB.isBye || m.status == MEntry.MS_FIX) "disabled" else "") { disabledRow =>
+                                @defining(if (disabledTrashNoAccess == "disabled" || m.stNoA.isNN || m.stNoB.isNN || m.stNoA.isBye || m.stNoB.isBye || m.status == MEntry.MS_FIX) "disabled" else "") { disabledTrash =>
+                                    <tr id="row-@m.gameNo">
+                                    @if(!stage.isKoStage) {
+                                        @if(stage.stageConfig.format == StageFormat.GR) {
+                                            <td class="text-center fw-bold text-secondary">
+                                                @{
+                                                    m match {
+                                                        case gr: MEntryGr => StageHelper.cvrt2ExcelCol(gr.grId)
+                                                        case _ => "-"
+                                                    }
+                                                }
+                                            </td>
+                                        }
+                                    }
+                                <td class="text-end">
+                                    <span id="nameA-@m.gameNo" class="fw-bold player-name-display">@nameA</span>
+                                </td>
+                                <td class="text-center fw-bold font-monospace" 
+                                    id="running-time-@m.gameNo" 
+                                    data-start-time="@m.startTime" 
+                                    data-status="@m.status"
+                                    style="width: 80px;">
+                                    @{
+                                        if (m.status == MEntry.MS_RUN) {
+                                            pages.Stage.StageInput.getRunningTime(m.startTime)
+                                        } else {
+                                            "-"
+                                        }
+                                    }
+                                </td>
+                                <td class="text-start">
+                                    <span id="nameB-@m.gameNo" class="fw-bold player-name-display">@nameB</span>
+                                </td>
+                                <td class="text-center text-muted small">
+                                    @m.gameNo
+                                </td>
+                                <td class="text-center">
+                                    <input type="text" 
+                                           id="table_@m.gameNo" 
+                                           class="form-control form-control-sm text-center match-table-input" 
+                                           style="width: 2.5rem; display: inline-block;" 
+                                           maxlength="2"
+                                           value="@m.playfield"
+                                           data-game="@m.gameNo"
+                                           @disabledRow />
+                                </td>
+                                @* Render input fields *@
+                                @for(setIdx <- 1 to (stage.noWinSets * 2 - 1)) {
+                                    <td class="text-center">
+                                        @defining(if (setIdx <= setInputs.length) setInputs(setIdx - 1) else "") { defaultVal =>
+                                            <input type="text" 
+                                                   id="input_@{m.gameNo}_@{setIdx}" 
+                                                   class="form-control form-control-sm text-center font-ballInput match-set-input" 
+                                                   style="width: 2.5rem; display: inline-block;" 
+                                                   maxlength="2"
+                                                   value="@defaultVal"
+                                                   data-game="@m.gameNo"
+                                                   data-set="@setIdx"
+                                                   @disabledRow />
+                                        }
+                                    </td>
+                                }
+                                @* Sets display *@
+                                <td class="text-center fw-bold">
+                                    <span id="sets_@m.gameNo" class="badge bg-light text-dark border">
+                                        @{if (m.finished) s"${m.sets._1}:${m.sets._2}" else ""}
+                                    </span>
+                                </td>
+                                @* Action buttons *@
+                                <td class="text-center d-print-none">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-success" 
+                                                @id(SaveMatchBtn, "onclick", m.gameNo.toString)
+                                                disabled
+                                                @disabledRow>
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" 
+                                                @id(DeleteMatchBtn, "onclick", m.gameNo.toString)
+                                                @disabledTrash>
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            }
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
 <div class="card shadow-sm">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
@@ -25,162 +156,77 @@
         @if(matches.isEmpty) {
             <div class="text-center py-5 text-muted italic">Keine Spiele vorhanden.</div>
         } else {
-            @* Define grouped sections for round matches *@
-            @defining({
-                if (stage.isKoStage) {
-                    val (finalMatches, otherMatches) = matches.partition(m => m._1.round == 0 || m._1.round == 1)
-                    val otherSections = otherMatches.groupBy(_._1.round).map { case (r, mList) =>
-                        val localized = gM(s"+round.$r")
-                        val title = if (localized == s"StageInput.round.$r") gM("+round.default", r.toString) else localized
-                        (r, title, mList, r)
-                    }.toSeq
-                    val mergedSectionOpt = if (finalMatches.nonEmpty) Some((1, gM("+round.final_combo"), finalMatches, 1)) else None
-                    val allSections = otherSections ++ mergedSectionOpt
-                    allSections.sortBy(-_._4)
-                } else {
-                    matches.groupBy(_._1.round).toSeq.sortBy(_._1).map { case (r, mList) =>
-                        (r, gM("+round.default", r.toString), mList, r)
-                    }
-                }
-            }) { roundSections =>
-                @roundSections.map { case (roundNo, title, roundMatches, _) =>
-                    <div class="round-section border rounded mb-4 shadow-sm overflow-hidden" id="round-section-@roundNo">
-                        <div class="bg-light p-3 d-flex justify-content-between align-items-center border-bottom">
-                            <h6 class="mb-0 fw-bold text-primary">@title</h6>
-                            <button class="btn btn-sm btn-outline-primary d-print-none" 
-                                    @id(PrintSrzBtn, "onclick", roundNo.toString)>
-                                <i class="bi bi-printer me-1"></i>PRINT SRZ
-                            </button>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0 text-nowrap">
-                                <thead class="table-light small">
-                                    <tr>
-                                        @if(!stage.isKoStage) {
-                                            @if(stage.stageConfig.format == StageFormat.GR) {
-                                                <th style="width: 80px;" class="text-center">Gruppe</th>
-                                            }
-                                            <th style="width: 80px;" class="text-center">WGW</th>
-                                        }
-                                        <th class="text-end" style="width: 250px;">Spieler A</th>
-                                        <th style="width: 80px;" class="text-center">Zeit</th>
-                                        <th class="text-start" style="width: 250px;">Spieler B</th>
-                                        <th style="width: 60px;" class="text-center">Nr.</th>
-                                        <th style="width: 80px;" class="text-center">Tisch</th>
-                                        @* Input fields headers *@
-                                        @for(i <- 1 to (stage.noWinSets * 2 - 1)) {
-                                            <th style="width: 50px;" class="text-center">Satz @i</th>
-                                        }
-                                        <th style="width: 80px;" class="text-center">Sätze</th>
-                                        <th style="width: 120px;" class="text-center d-print-none">Aktionen</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @roundMatches.map { case (m, nameA, nameB) =>
-                                        @* Split result by middle dot to fill inputs *@
-                                        @defining(if (m.result.trim.isEmpty) Array.empty[String] else m.result.split("·")) { setInputs =>
-                                            @defining(if (disabledNoAccess == "disabled" || m.stNoA.isNN || m.stNoB.isNN || m.stNoA.isBye || m.stNoB.isBye || m.status == MEntry.MS_FIX) "disabled" else "") { disabledRow =>
-                                                @defining(if (disabledTrashNoAccess == "disabled" || m.stNoA.isNN || m.stNoB.isNN || m.stNoA.isBye || m.stNoB.isBye || m.status == MEntry.MS_FIX) "disabled" else "") { disabledTrash =>
-                                                    <tr id="row-@m.gameNo">
-                                                    @if(!stage.isKoStage) {
-                                                        @if(stage.stageConfig.format == StageFormat.GR) {
-                                                            <td class="text-center fw-bold text-secondary">
-                                                                @{
-                                                                    m match {
-                                                                        case gr: MEntryGr => StageHelper.cvrt2ExcelCol(gr.grId)
-                                                                        case _ => "-"
-                                                                    }
-                                                                }
-                                                            </td>
-                                                        }
-                                                        <td class="text-center text-muted small">
-                                                            @{
-                                                                m match {
-                                                                    case gr: MEntryGr => s"${gr.wgw._1}-${gr.wgw._2}"
-                                                                    case _ => "-"
-                                                                }
-                                                            }
-                                                        </td>
-                                                    }
-                                                <td class="text-end">
-                                                    <span id="nameA-@m.gameNo" class="fw-bold player-name-display">@nameA</span>
-                                                </td>
-                                                <td class="text-center fw-bold font-monospace" 
-                                                    id="running-time-@m.gameNo" 
-                                                    data-start-time="@m.startTime" 
-                                                    data-status="@m.status"
-                                                    style="width: 80px;">
-                                                    @{
-                                                        if (m.status == MEntry.MS_RUN) {
-                                                            pages.Stage.StageInput.getRunningTime(m.startTime)
-                                                        } else {
-                                                            "-"
-                                                        }
-                                                    }
-                                                </td>
-                                                <td class="text-start">
-                                                    <span id="nameB-@m.gameNo" class="fw-bold player-name-display">@nameB</span>
-                                                </td>
-                                                <td class="text-center text-muted small">
-                                                    @m.gameNo
-                                                </td>
-                                                <td class="text-center">
-                                                    <input type="text" 
-                                                           id="table_@m.gameNo" 
-                                                           class="form-control form-control-sm text-center match-table-input" 
-                                                           style="width: 2.5rem; display: inline-block;" 
-                                                           maxlength="2"
-                                                           value="@m.playfield"
-                                                           data-game="@m.gameNo"
-                                                           @disabledRow />
-                                                </td>
-                                                @* Render input fields *@
-                                                @for(setIdx <- 1 to (stage.noWinSets * 2 - 1)) {
-                                                    <td class="text-center">
-                                                        @defining(if (setIdx <= setInputs.length) setInputs(setIdx - 1) else "") { defaultVal =>
-                                                            <input type="text" 
-                                                                   id="input_@{m.gameNo}_@{setIdx}" 
-                                                                   class="form-control form-control-sm text-center font-ballInput match-set-input" 
-                                                                   style="width: 2.5rem; display: inline-block;" 
-                                                                   maxlength="2"
-                                                                   value="@defaultVal"
-                                                                   data-game="@m.gameNo"
-                                                                   data-set="@setIdx"
-                                                                   @disabledRow />
-                                                        }
-                                                    </td>
-                                                }
-                                                @* Sets display *@
-                                                <td class="text-center fw-bold">
-                                                    <span id="sets_@m.gameNo" class="badge bg-light text-dark border">
-                                                        @{if (m.finished) s"${m.sets._1}:${m.sets._2}" else ""}
-                                                    </span>
-                                                </td>
-                                                @* Action buttons *@
-                                                <td class="text-center d-print-none">
-                                                    <div class="btn-group btn-group-sm">
-                                                        <button class="btn btn-success" 
-                                                                @id(SaveMatchBtn, "onclick", m.gameNo.toString)
-                                                                disabled
-                                                                @disabledRow>
-                                                            <i class="bi bi-check-lg"></i>
-                                                        </button>
-                                                        <button class="btn btn-outline-danger" 
-                                                                @id(DeleteMatchBtn, "onclick", m.gameNo.toString)
-                                                                @disabledTrash>
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            }
-                                            }
-                                        }
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
+            @if(stage.stageConfig.format == StageFormat.SW) {
+                @* Swiss System with Tabs *@
+                @defining(if (stage.matches.isEmpty) 0 else stage.matches.collect { case m: MEntrySw => m.round }.maxOption.getOrElse(0)) { maxRound =>
+                    <ul class="nav nav-tabs mb-3 d-print-none" id="swissInputTabs" role="tablist">
+                        @for(r <- 1 to maxRound) {
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link @{if(r == maxRound) "active fw-bold text-primary" else ""}" 
+                                        id="round@r-tab" 
+                                        data-bs-toggle="tab" 
+                                        data-bs-target="#round@r-pane" 
+                                        type="button" 
+                                        role="tab" 
+                                        aria-controls="round@r-pane" 
+                                        aria-selected="@{if(r == maxRound) "true" else "false"}">
+                                    @gM("StageDraw.round_tab_title", r.toString)
+                                </button>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="tab-content" id="swissInputTabsContent">
+                        @for(r <- 1 to maxRound) {
+                            <div class="tab-pane fade @{if(r == maxRound) "show active" else ""}" 
+                                 id="round@r-pane" 
+                                 role="tabpanel" 
+                                 aria-labelledby="round@r-tab">
+                                
+                                @* Match table for round r *@
+                                @matchTable(r, gM("StageDraw.round_tab_title", r.toString), matches.filter(_._1.round == r))
+                            </div>
+                        }
                     </div>
+
+                    @* Starte Nachfolgende Runde Button *@
+                    <div class="mt-4 d-flex justify-content-between align-items-center d-print-none border-top pt-3">
+                        <div class="text-muted">
+                            @if(stage.status == StageStatus.FIN || stage.status == StageStatus.AUS) {
+                                <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Alle Spiele der Runde abgeschlossen.</span>
+                            } else {
+                                <span class="text-warning fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i>Es sind noch Spiele offen.</span>
+                            }
+                        </div>
+                        <button class="btn btn-success px-4 fw-bold" 
+                                @id(BtnStartNextRound, "onclick") 
+                                @{if (stage.status == StageStatus.FIN && !isFin && base.Global.hasTourneyAccess(services.TourneyDB.tourney)) "" else "disabled"}>
+                            @gM("StageInput.btn_start_next_round") <i class="bi bi-arrow-right-circle ms-1"></i>
+                        </button>
+                    </div>
+                }
+            } else {
+                @* Original Groups, RoundRobin, KO layouts *@
+                @defining({
+                    if (stage.isKoStage) {
+                        val (finalMatches, otherMatches) = matches.partition(m => m._1.round == 0 || m._1.round == 1)
+                        val otherSections = otherMatches.groupBy(_._1.round).map { case (r, mList) =>
+                            val localized = gM(s"+round.$r")
+                            val title = if (localized == s"StageInput.round.$r") gM("+round.default", r.toString) else localized
+                            (r, title, mList, r)
+                        }.toSeq
+                        val mergedSectionOpt = if (finalMatches.nonEmpty) Some((1, gM("+round.final_combo"), finalMatches, 1)) else None
+                        val allSections = otherSections ++ mergedSectionOpt
+                        allSections.sortBy(-_._4)
+                    } else {
+                        matches.groupBy(_._1.round).toSeq.sortBy(_._1).map { case (r, mList) =>
+                            (r, gM("+round.default", r.toString), mList, r)
+                        }
+                    }
+                }) { roundSections =>
+                    @roundSections.map { case (roundNo, title, roundMatches, _) =>
+                        @matchTable(roundNo, title, roundMatches)
+                    }
                 }
             }
         }

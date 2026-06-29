@@ -363,7 +363,8 @@ object StageAdmin extends BasePage with JsWrapper:
                     rating = selectedPlayer.meta.ttr.getOrElse(0),
                     birthYear = selectedPlayer.birthYear.map(_.toString).getOrElse(""),
                     active = true,
-                    status = PantStatus.PLAY
+                    status = PantStatus.PLAY,
+                    clubId = selectedPlayer.clubId
                   )
                   comp.pants1Stage += newPant
               }
@@ -485,10 +486,10 @@ object StageAdmin extends BasePage with JsWrapper:
           r.noPlayers = selectedPants.length
           
           cfg.format match
-            case StageFormat.RR => 
+            case StageFormat.RR => // Round Robin
               r.data = RoundRobin.draw(r, comp.typ, cfg, selectedPants, DrawOption.Unknown)
      
-            case StageFormat.KO =>
+            case StageFormat.KO => // Knockout, Single Elimination
               val prevStageOpt = r.prefId.flatMap { pId =>
                 services.TourneyDB.tourney.stages.find(s => s != null && s.id == pId)
               }
@@ -515,13 +516,13 @@ object StageAdmin extends BasePage with JsWrapper:
               } else {
                 selectedPants
               }
-
               r.data = SingleElimination.draw(r, comp.typ, cfg, preparedPants, drawOption)
               
-            case StageFormat.SW =>
-              r.data = SwissSystem.draw(selectedPants, r.noWinSets, DrawOption.Unknown)
+            case StageFormat.SW => // Swiss System
+              //TODO: read DrawOption from UI
+              r.data = SwissSys.draw(r, comp.typ, cfg, selectedPants, DrawOption.SwUpperLower)
               
-            case StageFormat.GR =>
+            case StageFormat.GR => // Group Stage
               // select draw option based on whether there is a previous group stage
               val hasPrevGrStage = r.prefId.flatMap { pId =>
                 services.TourneyDB.tourney.stages.find(s => s != null && s.id == pId)
@@ -533,10 +534,13 @@ object StageAdmin extends BasePage with JsWrapper:
             case _ => debug(s"Unsupported generation for mode $cfg")
 
           r.status = StageStatus.AUS
-          services.TourneyDB.tourney.updateStage(r)
-          
-          // Navigate to Draw page to show results
-          loadPage(StageDraw.name, "")
+          services.TourneyDB.tourney.updateStage(r) match {
+            case Right(updatedStage) =>
+              Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+              loadPage(StageDraw.name, "")
+            case Left(err) =>
+              error(s"Failed to update stage: ${err.msgCode}")
+          }
         }
       }
     }

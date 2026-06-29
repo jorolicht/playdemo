@@ -1,0 +1,178 @@
+@import shared.model.*
+@import shared.format.*
+@import cviews.helper.html.*
+@import pages.Stage.StageResult.*
+
+@(stage: Stage, swissState: SwissSys)
+
+@compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
+@isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
+
+@findPant(sno: SNO) = @{
+  compOpt.flatMap(_.pants1Stage.find(_.id == sno)).getOrElse(Pant(sno, name = if (sno.isBye) "Freilos" else ""))
+}
+
+@* Standings dynamically computed from finished matches *@
+@standings = @{
+  val playersData = swissState.swPants.map { sp =>
+    val sno = sp.sno
+    var wins = 0
+    var losses = 0
+    var setsWon = 0
+    var setsLost = 0
+    val opponents = scala.collection.mutable.ListBuffer[SNO]()
+    
+    stage.matches.foreach { m =>
+      if (m.finished) {
+        if (m.stNoA == sno) {
+          setsWon += m.sets._1
+          setsLost += m.sets._2
+          if (m.sets._1 > m.sets._2) wins += 1 else losses += 1
+          opponents += m.stNoB
+        } else if (m.stNoB == sno) {
+          setsWon += m.sets._2
+          setsLost += m.sets._1
+          if (m.sets._2 > m.sets._1) wins += 1 else losses += 1
+          opponents += m.stNoA
+        }
+      }
+    }
+    (sp, wins, losses, setsWon, setsLost, opponents.toList)
+  }
+  
+  val winsMap = playersData.map(d => (d._1.sno, d._2)).toMap
+  
+  val finalData = playersData.map { case (sp, w, l, sw, sl, opps) =>
+    val bh = opps.filter(o => !o.isBye && !o.isNN).map(o => winsMap.getOrElse(o, 0)).sum
+    (sp, w, l, sw, sl, bh)
+  }
+  
+  // Sort by wins desc, Buchholz desc, sets diff desc, rating desc
+  finalData.sortBy { case (sp, w, l, sw, sl, bh) =>
+    (-w, -bh, -(sw - sl), -sp.rating)
+  }
+}
+
+@renderMatch(m: MEntry) = {
+  @defining(findPant(m.stNoA)) { p1 =>
+    @defining(findPant(m.stNoB)) { p2 =>
+      <div class="list-group-item py-3">
+          <div class="row align-items-center">
+              <div class="col-md-5 text-end">
+                  <span class="fw-bold @{if(m.finished && m.sets._1 > m.sets._2) "text-success text-opacity-75" else ""}">@p1.name</span>
+              </div>
+              <div class="col-md-2 text-center">
+                  @if(m.finished) {
+                      <span class="badge bg-primary px-3 py-2 fs-6">@m.sets._1 : @m.sets._2</span>
+                      @if(m.result.trim.nonEmpty) {
+                          <div class="small text-muted mt-1 font-monospace">@m.result</div>
+                      }
+                  } else {
+                      <span class="badge bg-secondary px-3 py-2 fs-6">- : -</span>
+                  }
+              </div>
+              <div class="col-md-5 text-start">
+                  <span class="fw-bold @{if(m.finished && m.sets._2 > m.sets._1) "text-success text-opacity-75" else ""}">@p2.name</span>
+              </div>
+          </div>
+      </div>
+    }
+  }
+}
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name)</h5>
+
+        @if(swissState.swPants.isEmpty) {
+            <div class="text-center py-5 text-muted italic">@gM("+no_results")</div>
+        } else {
+            @defining(if (stage.matches.isEmpty) 0 else stage.matches.collect { case m: MEntrySw => m.round }.maxOption.getOrElse(0)) { maxRound =>
+                <ul class="nav nav-tabs mb-4 d-print-none" id="swissResultTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold text-primary" 
+                                id="standings-tab" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#standings-pane" 
+                                type="button" 
+                                role="tab" 
+                                aria-controls="standings-pane" 
+                                aria-selected="true">
+                            <i class="bi bi-trophy me-1"></i>Tabelle / Standings
+                        </button>
+                    </li>
+                    @for(r <- 1 to maxRound) {
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-bold text-primary" 
+                                    id="round@r-tab" 
+                                    data-bs-toggle="tab" 
+                                    data-bs-target="#round@r-pane" 
+                                    type="button" 
+                                    role="tab" 
+                                    aria-controls="round@r-pane" 
+                                    aria-selected="false">
+                                @gM("StageDraw.round_tab_title", r.toString)
+                            </button>
+                        </li>
+                    }
+                </ul>
+
+                <div class="tab-content" id="swissResultTabsContent">
+                    @* Standings Tab Pane *@
+                    <div class="tab-pane fade show active" id="standings-pane" role="tabpanel" aria-labelledby="standings-tab">
+                        <div class="border rounded p-0 overflow-hidden shadow-sm">
+                            <table class="table table-hover align-middle mb-0 text-nowrap">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th class="ps-3 text-center" style="width: 60px;">Platz</th>
+                                        <th>@gM("+name_header")</th>
+                                        <th class="text-center" style="width: 120px;">Spiele (S:N)</th>
+                                        <th class="text-center" style="width: 120px;">Sätze</th>
+                                        <th class="text-center" style="width: 120px;">Buchholz</th>
+                                        <th class="text-center" style="width: 120px;">TTR-Rating</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @standings.zipWithIndex.map { case ((sp, w, l, sw, sl, bh), idx) =>
+                                        @defining(findPant(sp.sno)) { p =>
+                                            <tr>
+                                                <td class="ps-3 fw-bold text-center">@{idx + 1}.</td>
+                                                <td class="fw-bold">@p.name</td>
+                                                <td class="text-center">@w : @l</td>
+                                                <td class="text-center">@sw : @sl</td>
+                                                <td class="text-center fw-bold text-primary">@bh</td>
+                                                <td class="text-center text-muted">@{if(sp.rating > 0) sp.rating.toString else "-"}</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    @* Round Tabs Panes *@
+                    @for(r <- 1 to maxRound) {
+                        <div class="tab-pane fade" id="round@r-pane" role="tabpanel" aria-labelledby="round@r-tab">
+                            <div class="card border border-opacity-25 shadow-sm">
+                                <div class="list-group list-group-flush">
+                                    @stage.matches.filter(_.round == r).sortBy(_.gameNo).map { m =>
+                                        @renderMatch(m)
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="mt-4 pt-3 border-top d-flex justify-content-between">
+                    <button class="btn btn-outline-primary" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i>@gM("+btn_print")
+                    </button>
+                    <button class="btn btn-primary fw-bold" @id(NextStageBtn, "onclick")>
+                        @gM("StageInput.btn_start_next_round") <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            }
+        }
+    </div>
+</div>

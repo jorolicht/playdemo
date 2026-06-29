@@ -85,3 +85,58 @@ object GroupPlan {
   }  
 
 }
+
+object BergerTable {
+
+  case class Match(home: Int, away: Int)
+
+  /**
+   * Erzeugt Berger-Spielplan (jeder gegen jeden)
+   *
+   * @param players Anzahl der Teilnehmer
+   * @return Liste der Runden mit den jeweiligen Paarungen
+   */
+  def generate(players: Int): Seq[Seq[Match]] = {
+    val dummy = 0
+    // Bei ungerader Teilnehmerzahl Freilos hinzufügen
+    val list =
+      if (players % 2 == 0)
+        (1 to players).toVector
+      else
+        (1 to players).toVector :+ dummy
+
+    val n = list.length
+    val rounds = n - 1
+    var current = list
+    val result = collection.mutable.ArrayBuffer[Seq[Match]]()
+
+    for (round <- 0 until rounds) {
+      val matches =
+        for (i <- 0 until n / 2)
+          yield Match(current(i), current(n - 1 - i))
+
+      result += matches.filter(m => m.home != dummy && m.away != dummy)
+
+      // Rotation
+      current =
+        Vector(current.head) ++
+          Vector(current.last) ++
+          current.slice(1, n - 1)
+    }
+    result.toSeq
+  }
+
+  /**
+   * Erzeugt einen GroupPlan auf Basis der Berger-Tabelle.
+   */
+  def toGroupPlan(players: Int): GroupPlan = {
+    val rMatches = generate(players)
+    val roundsArray = rMatches.map { roundMatches =>
+      roundMatches.map(m => (m.home, m.away)).toArray
+    }.toArray
+    
+    val rnds = roundsArray.length
+    val noMatches = roundsArray.map(_.length).sum
+    GroupPlan(s"gameplan.berger.${players}", players, rnds, noMatches, roundsArray)
+  }
+}

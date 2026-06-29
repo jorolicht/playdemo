@@ -205,19 +205,7 @@ object SingleElimination {
         // Success
     }
 
-    val koStage: StageData.KnockoutStage = StageData.KnockoutStage(state)
-
-    initKoMatches(stage.coId, coTyp, stage.id, cfg.format, stage.noWinSets, state) match {
-      case Right(koMatches) =>
-        stage.matches.clear()
-        stage.matches ++= koMatches
-        stage.data = koStage
-        koStage
-      case Left(err) =>
-        Log.error(s"Error initializing knockout matches: ${err.msg}")
-        stage.data = koStage
-        koStage
-    }
+    StageData.KnockoutStage(state)
   }
 
   /**

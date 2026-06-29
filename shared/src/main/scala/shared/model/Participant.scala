@@ -169,7 +169,8 @@ case class Pant(
   var place:      (Int, Int) = (0, 0),
   var status:     PantStatus = PantStatus.UNKN,
   var active:     Boolean = false,
-  var ident:      String = ""
+  var ident:      String = "",
+  clubId:         Int = 0
 ) derives ReadWriter:
   def getEffRating(value: Int=0) = if (rating == 0) value else rating
   def getName(byeText: String): String = if (id.isBye) byeText else name

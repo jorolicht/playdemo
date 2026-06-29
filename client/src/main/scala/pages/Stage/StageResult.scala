@@ -4,6 +4,7 @@ package Stage
 import org.scalajs.dom
 import base.*
 import shared.model.*
+import shared.format.SwissSys
 import scala.scalajs.js
 
 object StageResult extends BasePage with JsWrapper:
@@ -27,8 +28,7 @@ object StageResult extends BasePage with JsWrapper:
             initSlidingWindow()
             true
           case StageData.SwissStage(sw) => 
-            // TODO: Implement Swiss System Result View
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(play.twirl.api.Html("<span>Schweizer System Ergebnisse (Platzhalter)</span>")))
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.SwissSystem(stage, sw)))
             true
           case StageData.RoundRobinStage(rr) => 
             setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.RoundRobin(stage, Seq(rr))))
@@ -193,10 +193,13 @@ object StageResult extends BasePage with JsWrapper:
     HtmlId(elem.id) match
       case `NextStageBtn` =>
         import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-        Global.currentSelection.stage.foreach { currentStage =>
-          val comp = Global.currentSelection.competition.get
+        val currentStage = Global.currentSelection.stage.get
+        val comp = Global.currentSelection.competition.get
+        
+        if (currentStage.stageConfig.format == StageFormat.SW) {
+          startNextSwissRound(currentStage)
+        } else {
           val existingStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == comp.id && !s.deleted)
-          
           dialogs.DlgStageStart.show(existingStages, Some(currentStage.id)).map {
             case Right(res) =>
               val initialNoPlayers = if (existingStages.isEmpty) comp.pants1Stage.count(_.active) else 0
@@ -221,3 +224,29 @@ object StageResult extends BasePage with JsWrapper:
           }
         }
       case _ =>
+
+  /**
+   * Startet die nachfolgende Runde für das Schweizer System (Swiss Stage) aus der Ergebnisansicht.
+   * Ermittelt die nächste Runden-Nummer, ruft stage.initMatches auf, setzt den Status
+   * auf EIN, aktualisiert die DB und navigiert zur Ergebniseingabe (StageInput).
+   */
+  private def startNextSwissRound(stage: Stage): Unit =
+    Global.currentSelection.competition.foreach { comp =>
+      val isFin = comp.status == CompStatus.FIN || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+      if (isFin) {
+        debug("StageResult: Cannot start next Swiss round because competition is finalized or no write access.")
+      } else {
+        SwissSys.generateNextRoundPairing(stage) match {
+          case Right(updatedStage) =>
+            services.TourneyDB.tourney.updateStage(updatedStage) match {
+              case Right(savedStage) =>
+                Global.currentSelection = Global.currentSelection.copy(stage = Some(savedStage))
+                loadPage(PageNameTyp("StageDraw"), "")
+              case Left(err) =>
+                error(s"Failed to update stage status: ${err.msgCode}")
+            }
+          case Left(err) =>
+            error(s"Failed to generate next Swiss round pairings: ${err.msgCode}")
+        }
+      }
+    }

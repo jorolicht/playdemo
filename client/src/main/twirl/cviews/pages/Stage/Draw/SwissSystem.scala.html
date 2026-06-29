@@ -3,34 +3,37 @@
 @import pages.Stage.StageDraw.*
 @import cviews.helper.html.*
 
-@(stage: Stage, groups: Seq[Group], currentOption: DrawOption)
+@(stage: Stage, swissState: SwissSys, currentOption: DrawOption)
 
 @compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
 @isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
 @disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || (stage.status != StageStatus.AUS && stage.status != StageStatus.FIN)) "disabled" else "" }
 
-@g = @{ groups.headOption.getOrElse(Group(1, 0, 1, stage.name, 0)) }
-@activeCount = @{ g.pants.count(p => p != null && p.id != SNO.nn && !p.id.isBye) }
+@g = @{ swissState }
+@findPant(sno: SNO) = @{
+  compOpt.flatMap(_.pants1Stage.find(_.id == sno)).getOrElse(Pant(sno, name = if (sno.isBye) "Freilos" else ""))
+}
+@pants = @{ g.swPants.map(sp => findPant(sp.sno)) }
+@activeCount = @{ pants.count(p => p != null && p.id != SNO.nn && !p.id.isBye) }
 @numRounds = @{ if (g.size > 0) shared.utils.GroupPlan.get(g.size).noRounds else 1 }
-@maxRound = @{ if (stage.matches.isEmpty) 0 else stage.matches.collect { case m: MEntryGr => m.round }.maxOption.getOrElse(0) }
-@canDrawNext = @{ stage.status == StageStatus.FIN || stage.matches.isEmpty }
-@numTabs = @{ (if (canDrawNext) maxRound + 1 else maxRound).max(1) }
-@activeDrawRound = @{ if (canDrawNext) maxRound + 1 else 0 }
+@maxRound = @{ if (stage.matches.isEmpty) 0 else stage.matches.collect { case m: MEntrySw => m.round }.maxOption.getOrElse(0) }
+@numTabs = @{ swissState.pairing.length.max(1) }
+@activeDrawRound = @{ if (maxRound < numTabs) maxRound + 1 else 0 }
 
 @ttrRank(p: Pant) = @{
-  val activePants = g.pants.filter(x => x != null && x.id != SNO.nn && !x.id.isBye).sortBy(-_.rating)
+  val activePants = pants.filter(x => x != null && x.id != SNO.nn && !x.id.isBye).sortBy(-_.rating)
   val idx = activePants.indexWhere(_.id == p.id)
   if (idx != -1) idx + 1 else 0
 }
 
-@renderMatchPairings(rMatches: Seq[MEntryGr]) = {
+@renderMatchPairings(rMatches: Seq[MEntrySw]) = {
   <div class="row row-cols-1 g-3">
     @if(rMatches.isEmpty) {
       <div class="col text-center py-5 text-muted italic">Keine Spiele für diese Runde vorhanden.</div>
     }
     @rMatches.map { m =>
-      @defining(g.pants.find(_.id == m.stNoA).getOrElse(Pant(m.stNoA, name = if(m.stNoA.isBye) "Freilos" else ""))) { p1 =>
-        @defining(g.pants.find(_.id == m.stNoB).getOrElse(Pant(m.stNoB, name = if(m.stNoB.isBye) "Freilos" else ""))) { p2 =>
+      @defining(findPant(m.stNoA)) { p1 =>
+        @defining(findPant(m.stNoB)) { p2 =>
           <div class="col">
             <div class="row align-items-center">
               <div class="col-md-5">
@@ -87,7 +90,7 @@
 
 @playerBox(p: Pant, pos: Int) = {
   @defining(p.id.isBye || p.id.isNN) { isBye =>
-    <div @id(PlayerItem, "onclick", s"${g.grId}-${p.id.toString}") 
+    <div @id(PlayerItem, "onclick", s"1-${p.id.toString}") 
          class="player-draw-item card p-2 h-100 border @{if (isBye) "bg-light bg-opacity-50 text-muted" else ""}" 
          style="cursor: pointer; min-height: 50px;">
       <div class="d-flex justify-content-between align-items-center w-100 h-100">
@@ -122,7 +125,7 @@
           @for(r <- 1 to numTabs) {
             <li class="nav-item" role="presentation">
               <button class="nav-link @{if(r == numTabs) "active" else ""}" id="round@r-tab" data-bs-toggle="tab" data-bs-target="#round@r-pane" type="button" role="tab" aria-controls="round@r-pane" aria-selected="@{if(r == numTabs) "true" else "false"}"
-                      onclick="@{if(r == activeDrawRound) s"document.getElementById('${BtnStartPlaying.id}').style.display = 'block'; document.getElementById('${BtnStartPlaying.id}').innerHTML = '${gM("+btn_start_round", r.toString)} <i class=\\'bi bi-play-circle ms-1\\'></i>';" else s"document.getElementById('${BtnStartPlaying.id}').style.display = 'none';" }">
+                      onclick="document.getElementById('@BtnStartSwiss.id').style.display = '@{if(r == activeDrawRound) "block" else "none"}';">
                 @gM("+round_tab_title", r.toString)
               </button>
             </li>
@@ -140,28 +143,27 @@
                       <i class="bi bi-grid-3x3-gap me-2"></i>Runde @r / Pairings Round @r
                     </h6>
                     
-                    <div class="d-flex align-items-center gap-2">
-                      <small class="text-secondary fw-bold">@gM("+draw_option_label"):</small>
-                      <select class="form-select form-select-sm border-primary" style="width: auto; max-width: 250px;" @id(SelectSwissDrawOption, "onchange") @disabledNoAccess>
-                        <option value="SwUpperLower" @{if(currentOption == DrawOption.SwUpperLower) "selected" else ""}>@gM("+draw_opt_upper_lower")</option>
-                        <option value="SwAccel2" @{if(currentOption == DrawOption.SwAccel2) "selected" else ""}>@gM("+draw_opt_accel2")</option>
-                        @if(activeCount > 29) {
-                          <option value="SwAccel3" @{if(currentOption == DrawOption.SwAccel3) "selected" else ""}>@gM("+draw_opt_accel3")</option>
-                        }
-                        <option value="SwTopBottom" @{if(currentOption == DrawOption.SwTopBottom) "selected" else ""}>@gM("+draw_opt_top_bottom")</option>
-                        <option value="SwRandom" @{if(currentOption == DrawOption.SwRandom) "selected" else ""}>@gM("+draw_opt_random")</option>
-                        <option value="SwManual" @{if(currentOption == DrawOption.SwManual) "selected" else ""}>@gM("+draw_opt_manual")</option>
-                      </select>
-                    </div>
+                    @if(r == 1) {
+                      <div class="d-flex align-items-center gap-2">
+                        <small class="text-secondary fw-bold">@gM("+draw_option_label"):</small>
+                        <select class="form-select form-select-sm border-primary" style="width: auto; max-width: 250px;" @id(SelectSwissDrawOption, "onchange") @disabledNoAccess>
+                          <option value="SwUpperLower" @{if(currentOption == DrawOption.SwUpperLower) "selected" else ""}>@gM("+draw_opt_upper_lower")</option>
+                          <option value="SwAccel" @{if(currentOption == DrawOption.SwAccel) "selected" else ""}>@gM("+draw_opt_accel2")</option>
+                          <option value="SwTopBottom" @{if(currentOption == DrawOption.SwTopBottom) "selected" else ""}>@gM("+draw_opt_top_bottom")</option>
+                          <option value="SwRandom" @{if(currentOption == DrawOption.SwRandom) "selected" else ""}>@gM("+draw_opt_random")</option>
+                          <option value="SwManual" @{if(currentOption == DrawOption.SwManual) "selected" else ""}>@gM("+draw_opt_manual")</option>
+                        </select>
+                      </div>
+                    }
                   </div>
                   <div class="card-body">
                     <div class="row row-cols-1 g-3">
-                      @if(g.pants.isEmpty) {
+                      @if(pants.isEmpty) {
                         <div class="col text-center py-5 text-muted italic">Keine Spieler vorhanden.</div>
                       }
-                      @for(i <- 0 until g.pants.length by 2) {
-                        @defining(if (g.pants(i) != null) g.pants(i) else Pant(SNO.nn)) { p1 =>
-                          @defining(if (g.pants(i+1) != null) g.pants(i+1) else Pant(SNO.nn)) { p2 =>
+                      @for(i <- 0 until pants.length by 2) {
+                        @defining(if (pants(i) != null) pants(i) else Pant(SNO.nn)) { p1 =>
+                          @defining(if (pants(i+1) != null) pants(i+1) else Pant(SNO.nn)) { p2 =>
                             <div class="col">
                               <div class="row align-items-center">
                                 <div class="col-md-5">
@@ -190,7 +192,7 @@
                     </h6>
                   </div>
                   <div class="card-body">
-                    @renderMatchPairings(stage.matches.collect { case m: MEntryGr if m.round == r => m }.sortBy(_.gameNo).toSeq)
+                    @renderMatchPairings(stage.matches.collect { case m: MEntrySw if m.round == r => m }.sortBy(_.gameNo).toSeq)
                   </div>
                 </div>
               }
@@ -202,7 +204,7 @@
             <button class="btn btn-outline-danger" onclick="appLoadPage('StageAdmin', '')">
                 <i class="bi bi-arrow-left me-1"></i>@gM("StageDraw.btn_back")
             </button>
-            <button class="btn btn-success px-4 fw-bold" @id(BtnStartPlaying, "onclick") @disabledNoAccess style="display: @{if(numTabs == activeDrawRound) "block" else "none"};">
+            <button class="btn btn-success px-4 fw-bold" @id(BtnStartSwiss, "onclick") data-rnd="@numTabs" @disabledNoAccess style="display: @{if(numTabs == activeDrawRound) "block" else "none"};">
                 @gM("+btn_start_round", numTabs.toString) <i class="bi bi-play-circle ms-1"></i>
             </button>
         </div>

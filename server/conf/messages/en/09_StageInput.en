@@ -18,4 +18,5 @@ StageInput.round.0 = Third-place match
 StageInput.round.final_combo = Final / Third-place match
 StageInput.round.default = Round {0}
 StageInput.not_determined = TBD
+StageInput.btn_start_next_round = Start subsequent round
 StageInput.bye = Bye
