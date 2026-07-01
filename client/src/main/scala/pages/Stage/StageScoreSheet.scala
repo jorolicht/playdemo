@@ -5,7 +5,20 @@ import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement
 import base.*
 import shared.model.*
+import shared.format.StageHelper
 import scala.scalajs.js
+import scala.scalajs.js.annotation.*
+
+trait QRCodeParam extends js.Object {
+  val width: Int
+  val height: Int
+}
+
+@js.native
+@JSGlobal
+class QRCode(elem: HTMLElement, param: QRCodeParam) extends js.Object {
+  def makeCode(url: String): js.Any = js.native
+}
 
 object StageScoreSheet extends BasePage with JsWrapper:
   def name = PageNameTyp("StageScoreSheet")
@@ -19,11 +32,29 @@ object StageScoreSheet extends BasePage with JsWrapper:
         val comp = Global.currentSelection.competition
         val pants = comp.map(_.pants1Stage.toSeq).getOrElse(Seq.empty)
         
-        val matches = stage.matches.toSeq.map { m =>
-          (m, formatSnoName(m.stNoA, pants), formatSnoName(m.stNoB, pants))
+        val mList = stage.matches.toSeq.map { m =>
+          val (nameA, clubA, _) = getPlayerInfo(m.stNoA, pants)
+          val (nameB, clubB, _) = getPlayerInfo(m.stNoB, pants)
+          val (info1, info2) = getInfoStrings(m, stage)
+          (m, nameA, nameB, clubA, clubB, info1, info2)
         }
 
-        setMain(cviews.comps.html.StageLayout(stage, "SCH")(cviews.pages.Stage.html.StageScoreSheet(stage, matches)))
+        setMain(cviews.comps.html.StageLayout(stage, "SCH")(cviews.pages.Stage.html.StageScoreSheet(stage, mList)))
+        
+        // Load QRCode library and generate QRCodes
+        loadQRCodeLib { () =>
+          generateAllQRCodes(stage, mList)
+          
+          // If a parameter is passed, print that single match immediately
+          if (param.nonEmpty) {
+            try {
+              val gameNo = param.toInt
+              dom.window.setTimeout(() => printSingle(gameNo), 300)
+            } catch {
+              case _: Exception => // ignore formatting error
+            }
+          }
+        }
         true
       case None => 
         debug("StageScoreSheet: No stage selected, redirecting to Competition Info")
@@ -78,25 +109,78 @@ object StageScoreSheet extends BasePage with JsWrapper:
       }, 500)
     }
 
-  def formatSnoName(sno: SNO, pants: Seq[Pant]): String =
-    if (sno.isNN) gM("+not_determined")
-    else if (sno.isBye) gM("+bye")
+  def getPlayerInfo(sno: SNO, pants: Seq[Pant]): (String, String, String) =
+    if (sno.isNN) (gM("+not_determined"), "", "")
+    else if (sno.isBye) (gM("+bye"), "", "")
     else
       pants.find(_.id == sno) match
         case Some(p) =>
-          if (sno.isDouble) {
+          val name = if (sno.isDouble) {
             val (id1, id2) = sno.doubleId
             val tourney = services.TourneyDB.tourney
             val p1Opt = tourney.players.find(_.id == id1)
             val p2Opt = tourney.players.find(_.id == id2)
             (p1Opt, p2Opt) match
-              case (Some(pl1), Some(pl2)) =>
-                s"${pl1.firstName}/${pl2.firstName}"
-              case _ =>
-                p.name.replace(" / ", "/")
+              case (Some(pl1), Some(pl2)) => s"${pl1.firstName}/${pl2.firstName}"
+              case _ => p.name.replace(" / ", "/")
           } else {
             val parts = p.name.split(",")
             if (parts.length > 0) parts(0).trim else p.name
           }
+          (name, p.club, if (p.rating > 0) p.rating.toString else "")
         case None =>
-          sno.toString
+          (sno.toString, "", "")
+
+  def getInfoStrings(m: MEntry, stage: Stage): (String, String) =
+    stage.stageConfig.format match
+      case StageFormat.GR =>
+        val grId = m.asInstanceOf[MEntryGr].grId
+        val round = m.asInstanceOf[MEntryGr].round
+        (s"Gruppe ${StageHelper.cvrt2ExcelCol(grId)}", s"Runde $round")
+      case StageFormat.RR =>
+        val round = m.asInstanceOf[MEntryGr].round
+        ("", s"Runde $round")
+      case StageFormat.KO =>
+        val round = m.asInstanceOf[MEntryKo].round
+        val nameStr = if (round > 0) gM(s"competition.koRound.$round") else ""
+        (nameStr, "")
+      case StageFormat.SW =>
+        ("", s"Runde ${m.round}")
+      case _ =>
+        ("", "")
+
+  private def loadQRCodeLib(callback: () => Unit): Unit =
+    if (!js.isUndefined(js.Dynamic.global.QRCode)) {
+      callback()
+    } else {
+      val script = dom.document.createElement("script").asInstanceOf[dom.html.Script]
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+      script.onload = (_: dom.Event) => callback()
+      dom.document.head.appendChild(script)
+    }
+
+  private def generateAllQRCodes(stage: Stage, mList: Seq[(MEntry, String, String, String, String, String, String)]): Unit =
+    mList.zipWithIndex.foreach { case ((m, _, _, _, _, _, _), idx) =>
+      val gameNo = m.gameNo
+      val qrElem = dom.document.getElementById(s"QRCode_${stage.coId.value}_${stage.id.value}_${idx + 1}")
+      val linkElem = dom.document.getElementById(s"QRCodeLink_${stage.coId.value}_${stage.id.value}_${gameNo}").asInstanceOf[dom.raw.HTMLAnchorElement]
+      
+      val nonce = s"${services.TourneyDB.tourney.wpId}-${stage.coId.value}-${stage.id.value}-${gameNo}"
+      val refereeAddr = s"${Global.homeUrl}/?tourney=${services.TourneyDB.tourney.wpId}&page=StageInput&gameNo=${gameNo}&nonce=${nonce}"
+      
+      if (qrElem != null) {
+        qrElem.innerHTML = "" // Clear container
+        val qrCodeParam = new QRCodeParam { val width = 80; val height = 80 }
+        try {
+          val qrCode = new QRCode(qrElem.asInstanceOf[HTMLElement], qrCodeParam)
+          qrCode.makeCode(refereeAddr)
+        } catch {
+          case e: Throwable =>
+            println(s"Error generating QR Code: ${e.getMessage}")
+        }
+      }
+      
+      if (linkElem != null) {
+        linkElem.href = refereeAddr
+      }
+    }

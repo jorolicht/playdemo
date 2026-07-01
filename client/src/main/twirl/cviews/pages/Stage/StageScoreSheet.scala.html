@@ -1,119 +1,136 @@
 @import shared.model.*
 @import shared.format.*
+@import shared.format.StageHelper
 @import pages.Stage.StageScoreSheet.*
 @import cviews.helper.html.*
 
-@(stage: Stage, matches: Seq[(MEntry, String, String)])
+@(stage: Stage, mList: Seq[(MEntry, String, String, String, String, String, String)])
 
 @compName = @{ services.TourneyDB.tourney.competitions.find(_.id == stage.coId).map(_.name).getOrElse(stage.name) }
-@maxSets = @{ stage.noWinSets * 2 - 1 }
+@comp = @{ services.TourneyDB.tourney.competitions.find(_.id == stage.coId).get }
 
-@* General sections grouping *@
+@* Translation helper *@
+@msg(key: String) = @{
+  val isDe = base.Global.lang == "de"
+  key match {
+    case "tableInfo1" => if (isDe) "Tisch" else "Table"
+    case "tableInfo2" => if (isDe) "" else ""
+    case "gameNo" => if (isDe) "Spiel-Nr." else "Game No."
+    case "set1" => if (isDe) "1. Satz" else "1st Set"
+    case "set2" => if (isDe) "2. Satz" else "2nd Set"
+    case "set3" => if (isDe) "3. Satz" else "3rd Set"
+    case "set4" => if (isDe) "4. Satz" else "4th Set"
+    case "set5" => if (isDe) "5. Satz" else "5th Set"
+    case "set6" => if (isDe) "6. Satz" else "6th Set"
+    case "set7" => if (isDe) "7. Satz" else "7th Set"
+    case "sets" => if (isDe) "Sätze" else "Sets"
+    case "winner" => if (isDe) "Sieger" else "Winner"
+    case _ => key
+  }
+}
+
+@* Grouping matches for tabs *@
 @sections = @{
   if (stage.stageConfig.format == StageFormat.GR) {
-    matches.groupBy { case (m, _, _) =>
+    mList.groupBy { case (m, _, _, _, _, _, _) =>
       m match {
         case gr: MEntryGr => gr.grId
         case _ => 0
       }
-    }.toSeq.sortBy(_._1).map { case (grId, mList) =>
+    }.toSeq.sortBy(_._1).map { case (grId, list) =>
       val name = s"Gruppe ${StageHelper.cvrt2ExcelCol(grId)}"
-      (grId, name, mList)
+      (grId, name, list)
     }
   } else {
-    matches.groupBy(_._1.round).toSeq.sortBy(_._1).map { case (r, mList) =>
+    mList.groupBy(_._1.round).toSeq.sortBy(_._1).map { case (r, list) =>
       val name = if (stage.isKoStage) {
         val localized = gM(s"+round.$r")
         if (localized == s"StageInput.round.$r") gM("+round.default", r.toString) else localized
       } else {
         gM("StageDraw.round_tab_title", r.toString)
       }
-      (r, name, mList)
+      (r, name, list)
     }
   }
 }
 
-@* Print Scoresheet Card Template *@
-@scoresheetCard(m: MEntry, nameA: String, nameB: String, sectionName: String) = {
-  <div class="scoresheet-card-container mb-5">
-    <div class="scoresheet-card p-4 border border-dark rounded bg-white text-dark mx-auto" style="max-width: 800px; font-family: 'Courier New', Courier, monospace;">
-      <div class="text-center border-bottom border-2 border-dark pb-2 mb-3">
-        <h4 class="fw-bold mb-0">SCHIEDSRICHTERZETTEL (SCORESHEET)</h4>
-        <div class="small fw-semibold text-uppercase">Playdemo Turnier-System</div>
-      </div>
-      
-      <div class="row mb-3 font-monospace fs-6">
-        <div class="col-6"><strong>Wettbewerb:</strong> @compName</div>
-        <div class="col-6 text-end"><strong>Tisch (Table):</strong> @{if(m.playfield.trim.isEmpty) "-" else m.playfield}</div>
-        <div class="col-6"><strong>Phase / Gruppe:</strong> @sectionName</div>
-        <div class="col-6 text-end"><strong>Spiel-Nr (Game):</strong> @m.gameNo</div>
-      </div>
-      
-      <div class="border border-2 border-dark p-2 mb-3 bg-light bg-opacity-25 rounded">
-        <div class="row align-items-center">
-          <div class="col-1 text-center fw-bold fs-5">A:</div>
-          <div class="col-11 fw-bold fs-5 text-uppercase">@nameA</div>
-        </div>
-        <hr class="my-2 border-dark">
-        <div class="row align-items-center">
-          <div class="col-1 text-center fw-bold fs-5">B:</div>
-          <div class="col-11 fw-bold fs-5 text-uppercase">@nameB</div>
-        </div>
-      </div>
-      
-      <table class="table table-bordered border-dark text-center align-middle mb-4 fs-6">
-        <thead>
-          <tr class="table-secondary border-dark fw-bold">
-            <th style="width: 100px;">Spieler</th>
-            @for(i <- 1 to maxSets) {
-              <th>Satz @i</th>
-            }
-            <th style="width: 100px;">Sätze</th>
-            <th style="width: 100px;">Bälle</th>
-            <th style="width: 150px;">Sieger</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="fw-bold">A</td>
-            @for(i <- 1 to maxSets) {
-              <td style="height: 45px;"></td>
-            }
-            <td rowspan="2" class="fw-bold fs-4" style="vertical-align: middle;">:</td>
-            <td class="small">:</td>
-            <td rowspan="2" class="fw-bold fs-5" style="border-left: 2px solid #000; vertical-align: middle;"></td>
-          </tr>
-          <tr>
-            <td class="fw-bold">B</td>
-            @for(i <- 1 to maxSets) {
-              <td style="height: 45px;"></td>
-            }
-            <td class="small"></td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <div class="d-flex justify-content-between pt-4 mt-5 border-top border-secondary small">
-        <div>Unterschrift Schiedsrichter: _____________________</div>
-        <div>Unterschrift Sieger: _____________________</div>
-      </div>
-    </div>
+@* Referee Single Card content (Grid elements) *@
+@refereeCardContent(m: MEntry, idx: Int, nameA: String, nameB: String, clubA: String, clubB: String, info1: String, info2: String) = {
+  <div class="RefereeTrnyName"><h6>@services.TourneyDB.tourney.name</h6></div>
+  <div class="RefereeCompName"><h6>@compName - @gM(comp.typ.msgCode)</h6></div>
+  <div class="RefereeCompInfo1 text-muted small">@info1</div>
+  <div class="RefereeCompInfo2 text-muted small">@info2</div>
+  <div class="RefereeTableInfo1 fw-bold">@{msg("tableInfo1")} @{if(m.playfield.trim.isEmpty) "-" else m.playfield}</div>
+  <div class="RefereeTableInfo2">@{msg("tableInfo2")}</div>
+  <div class="RefereeGameNo fw-bold">@m.gameNo</div>
+  <div class="RefereeLabelGameNo small text-muted">@{msg("gameNo")}</div>
+  <div class="RefereeDateTime small">@comp.startDate</div>
+  <div id="QRCode_@{stage.coId.value}_@{stage.id.value}_@idx" class="RefereeQRCode"></div>
+  <div class="RefereeLabelSet0 justify-content-end">
+    <a href="" id="QRCodeLink_@{stage.coId.value}_@{stage.id.value}_@{m.gameNo}" target="_blank">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-box-arrow-right text-primary" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+        <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+      </svg>
+    </a>
   </div>
+  <div class="RefereePlayer1 fw-bold px-1 text-wrap text-center" style="font-size: 0.85rem; line-height: 1.1;">@nameA</div>
+  <div class="RefereePlayer2 fw-bold px-1 text-wrap text-center" style="font-size: 0.85rem; line-height: 1.1;">@nameB</div>
+  <div class="RefereeLabelSet">&nbsp;</div>
+  <div class="RefereeClub1 text-muted small text-center px-1 text-truncate">@clubA</div>
+  <div class="RefereeClub2 text-muted small text-center px-1 text-truncate">@clubB</div>
+
+  <div class="RefereeLabelSet1 small">@{msg("set1")}</div>
+  <div class="RefereePlayer1Set1"></div>
+  <div class="RefereePlayer2Set1"></div>
+  
+  <div class="RefereeLabelSet2 small">@{msg("set2")}</div>
+  <div class="RefereePlayer1Set2"></div>
+  <div class="RefereePlayer2Set2"></div>
+
+  <div class="RefereeLabelSet3 small">@{msg("set3")}</div>
+  <div class="RefereePlayer1Set3"></div>
+  <div class="RefereePlayer2Set3"></div>
+
+  <div class="RefereeLabelSet4 small">@{if(stage.noWinSets>=3) msg("set4") else ""}</div>
+  <div class="RefereePlayer1Set4"></div>
+  <div class="RefereePlayer2Set4"></div>
+  
+  <div class="RefereeLabelSet5 small">@{if(stage.noWinSets>=3) msg("set5") else ""}</div>
+  <div class="RefereePlayer1Set5"></div>
+  <div class="RefereePlayer2Set5"></div>
+  
+  <div class="RefereeLabelSet6 small">@{if(stage.noWinSets>=4) msg("set6") else ""}</div>
+  <div class="RefereePlayer1Set6"></div>
+  <div class="RefereePlayer2Set6"></div>
+  
+  <div class="RefereeLabelSet7 small">@{if(stage.noWinSets>=4) msg("set7") else ""}</div>
+  <div class="RefereePlayer1Set7"></div>
+  <div class="RefereePlayer2Set7"></div>
+
+  <div class="RefereeLabelSets fw-bold">@{msg("sets")}</div>
+  <div class="RefereePlayer1Sets"></div>
+  <div class="RefereePlayer2Sets"></div>
+
+  <div class="RefereeLabelWinner fw-bold">@{msg("winner")}</div>
+  <div class="RefereePlayer1Winner"></div>
+  <div class="RefereePlayer2Winner"></div>
 }
 
 <div class="scoresheet-view">
+    <!-- Header info (Screen only) -->
     <div class="card shadow-sm mb-4 d-print-none">
         <div class="card-body">
             <h5 class="card-title text-secondary border-bottom pb-2 mb-3">
                 <i class="bi bi-printer me-2"></i>@{if(base.Global.lang == "de") "Schiedsrichterzettel drucken" else "Print Referee Scoresheets"}
             </h5>
             <p class="card-text text-muted mb-0">
-                @{if(base.Global.lang == "de") "Hier können Sie Schiedsrichterzettel für einzelne Spiele oder eine gesamte Runde ausdrucken." else "Here you can print referee scoresheets for single matches or an entire round."}
+                @{if(base.Global.lang == "de") "Schiedsrichterzettel für diesen Wettbewerb drucken (4 Zettel pro Din A4 Seite)." else "Print referee scoresheets for this competition (4 sheets per A4 page)."}
             </p>
         </div>
     </div>
 
-    @if(sections.isEmpty || matches.isEmpty) {
+    @if(sections.isEmpty || mList.isEmpty) {
         <div class="text-center py-5 text-muted italic d-print-none">
             @{if(base.Global.lang == "de") "Keine Spiele für diesen Wettbewerb vorhanden." else "No matches available for this competition."}
         </div>
@@ -139,7 +156,7 @@
 
             <!-- Tabs Content -->
             <div class="tab-content d-print-none" id="scoresheetTabsContent">
-                @sections.map { case (sectionId, sectionName, mList) =>
+                @sections.map { case (sectionId, sectionName, matches) =>
                     <div class="tab-pane fade @{if(sectionId == activeSectionId) "show active" else ""}" 
                          id="pane-@sectionId" 
                          role="tabpanel" 
@@ -148,18 +165,18 @@
                         <!-- Actions bar -->
                         <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light border rounded shadow-sm">
                             <span class="fw-semibold text-secondary">
-                                @{mList.length} @{if(base.Global.lang == "de") "Spiele in" else "matches in"} @sectionName
+                                @{matches.length} @{if(base.Global.lang == "de") "Spiele in" else "matches in"} @sectionName
                             </span>
-                            <button class="btn btn-primary px-3 fw-bold" 
+                            <button class="btn btn-primary px-3 fw-bold shadow-sm" 
                                     @id(PrintRoundBtn, "onclick", sectionId.toString) 
                                     data-round="@sectionId">
-                                <i class="bi bi-printer me-1"></i>@{if(base.Global.lang == "de") "Alle Zettel drucken" else "Print All Scoresheets"}
+                                <i class="bi bi-printer me-1"></i>@{if(base.Global.lang == "de") "Ganze Runde drucken (4 pro Seite)" else "Print Round (4 per page)"}
                             </button>
                         </div>
 
                         <!-- Matches List -->
                         <div class="list-group shadow-sm">
-                            @mList.map { case (m, nameA, nameB) =>
+                            @matches.map { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                 @defining(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN) { isByeOrNN =>
                                     <div class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center">
                                         <div class="row align-items-center flex-grow-1">
@@ -178,7 +195,7 @@
                                                 <button class="btn btn-sm btn-outline-primary fw-bold" 
                                                         @id(PrintSingleBtn, "onclick", m.gameNo.toString) 
                                                         data-game="@m.gameNo">
-                                                    <i class="bi bi-printer me-1"></i>@{if(base.Global.lang == "de") "Drucken" else "Print"}
+                                                    <i class="bi bi-printer me-1"></i>@{if(base.Global.lang == "de") "Zettel drucken" else "Print Sheet"}
                                                 </button>
                                             } else {
                                                 <span class="badge bg-light text-muted border">Freilos / TBD</span>
@@ -192,13 +209,65 @@
                 }
             </div>
 
-            <!-- Hidden templates that will be cloned/copied into print area -->
+            <!-- Hidden templates for single and group printing, cloned dynamically in JS -->
             <div id="scoresheets-hidden-templates" class="d-none">
-                @sections.map { case (sectionId, sectionName, mList) =>
-                    @mList.map { case (m, nameA, nameB) =>
-                        @if(!(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN)) {
-                            <div id="printable-card-single-@m.gameNo" class="printable-card-round-@sectionId">
-                                @scoresheetCard(m, nameA, nameB, sectionName)
+                <!-- Single printing templates -->
+                @mList.map { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                    @if(!(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN)) {
+                        <div id="printable-card-single-@m.gameNo" class="referee-single-card-container">
+                            <div class="refereeGrid mx-auto">
+                                @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                            </div>
+                        </div>
+                    }
+                }
+
+                <!-- Group/Round printing templates (organized in A4 2x2 grid pages) -->
+                @sections.map { case (sectionId, sectionName, secMatches) =>
+                    @defining(secMatches.filterNot(x => x._1.stNoA.isBye || x._1.stNoB.isBye || x._1.stNoA.isNN || x._1.stNoB.isNN)) { printableMatches =>
+                        @for(i <- 1 to (printableMatches.length + 3) / 4) {
+                            <div class="printable-card-round-@sectionId printarea-referee py-2">
+                                <div class="row justify-content-between mb-4 mx-0" style="height: 612px;">
+                                    @defining((i-1)*4 + 1) { idx =>
+                                        @if(idx <= printableMatches.length) {
+                                            @defining(printableMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                                                <div class="refereeGrid col-auto px-0">
+                                                    @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                    @defining((i-1)*4 + 2) { idx =>
+                                        @if(idx <= printableMatches.length) {
+                                            @defining(printableMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                                                <div class="refereeGrid col-auto px-0">
+                                                    @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                </div>
+                                <div class="row border-bottom-0 border-secondary mx-0" style="height: 20px;"></div>
+                                <div class="row justify-content-between mt-4 mx-0" style="height: 612px;">
+                                    @defining((i-1)*4 + 3) { idx =>
+                                        @if(idx <= printableMatches.length) {
+                                            @defining(printableMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                                                <div class="refereeGrid col-auto px-0">
+                                                    @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                    @defining((i-1)*4 + 4) { idx =>
+                                        @if(idx <= printableMatches.length) {
+                                            @defining(printableMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                                                <div class="refereeGrid col-auto px-0">
+                                                    @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                </div>
                             </div>
                         }
                     }
@@ -225,25 +294,33 @@
         
         body.print-active #scoresheet-print-area {
             display: block !important;
-            width: 100% !important;
-        }
-        
-        body.print-active .scoresheet-card-container {
-            display: block !important;
-            page-break-after: always !important;
+            width: 210mm !important;
+            height: 297mm !important;
             margin: 0 !important;
             padding: 0 !important;
         }
         
-        body.print-active .scoresheet-card-container:last-child {
-            page-break-after: avoid !important;
+        body.print-active .printarea-referee {
+            display: block !important;
+            width: 210mm !important;
+            height: 297mm !important;
+            page-break-after: always !important;
+            box-sizing: border-box !important;
+            padding: 5mm !important;
         }
         
-        body.print-active .scoresheet-card {
-            border: 2px solid #000 !important;
-            padding: 30px !important;
-            background: #fff !important;
-            color: #000 !important;
+        body.print-active .referee-single-card-container {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 100vh !important;
+            width: 100% !important;
+        }
+        
+        body.print-active .refereeGrid {
+            box-shadow: none !important;
+            border: 1px solid #000 !important;
+            margin: 0 !important;
         }
     }
 </style>

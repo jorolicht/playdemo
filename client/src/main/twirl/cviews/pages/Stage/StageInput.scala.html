@@ -124,6 +124,13 @@
                                                 @disabledRow>
                                             <i class="bi bi-check-lg"></i>
                                         </button>
+                                        @if(!(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN)) {
+                                            <button class="btn btn-outline-primary"
+                                                    @id(SchiriBtn, "onclick", m.gameNo.toString)
+                                                    title="Schiedsrichterzettel">
+                                                <i class="bi bi-file-earmark-text"></i>
+                                            </button>
+                                        }
                                         <button class="btn btn-outline-danger" 
                                                 @id(DeleteMatchBtn, "onclick", m.gameNo.toString)
                                                 @disabledTrash>

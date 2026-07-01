@@ -74,12 +74,374 @@ header {
 }
 /* Responsive Anpassung */
 @media (max-width: 768px) {
-  .wrapper {
-      flex-direction: column;
   }
   aside {
       width: 100%;
       height: auto;
       position: static;
   }
+}
+
+/* Referee Stylesheet */
+td.schiriCM {
+  text-align: center; 
+  vertical-align: middle;
+}
+
+td.boto {
+  border-top:1pt solid black;
+}
+
+tr.schiri {
+  height:34px;
+  border-right:1pt solid black;
+  border-left:1pt solid black;
+  margin-left:5px;
+  margin-right:5px;
+  padding-left:10px;
+}
+
+tr.bobo {
+  border-bottom:1pt solid black;
+}
+
+tr.bobodouble {
+  border-bottom:1pt solid black;
+  border-style:solid double ;
+}
+
+tr.bole {
+  border-left:1pt solid black;
+}
+
+td.bole {
+  border-left:1pt solid black;
+}
+
+td.bori {
+  border-right:1pt solid black;
+}
+
+td.bobo {
+  border-bottom:1pt solid black;
+}
+
+td.boto {
+  border-top:1pt solid black;
+}
+
+.refereeGrid {
+  display: grid; 
+  grid-template-rows: repeat(18, 34px);
+  grid-template-columns: repeat(10, 42px);
+  gap: 0px;
+  height: 100%;
+  border: 1px solid black;
+  box-sizing: border-box;
+  background-color: white;
+  color: black;
+  width: 420px;
+  height: 612px;
+}
+ 
+.RefereeTrnyName {
+  grid-row-start: 1; grid-column-start: 1;
+  grid-row-end:   2; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;
+  border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black;
+}
+
+.RefereeCompName {
+  grid-row-start: 2; grid-column-start: 1;
+  grid-row-end:   3; grid-column-end: 11; 
+  display: flex; align-items: center; justify-content: center;
+  border-left: 1px solid black; border-right: 1px solid black; 
+}
+
+.RefereeCompInfo1 {
+  grid-row-start: 3; grid-column-start: 1;
+  grid-row-end:   4; grid-column-end: 6; 
+  display: flex; align-items: center; justify-content: center;
+  border-left: 1px solid black;
+}
+
+.RefereeCompInfo2 {
+  grid-row-start: 3; grid-column-start: 6;
+  grid-row-end:   4; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;
+  border-right: 1px solid black; 
+}
+
+.RefereeTableInfo1 {
+  grid-row-start: 4; grid-column-start: 9;
+  grid-row-end:   5; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black; 
+}
+
+.RefereeTableInfo2{
+  grid-row-start: 5; grid-column-start: 9;
+  grid-row-end:   6; grid-column-end: 11;
+  line-height: 0.6em; color:gainsboro;
+  display: flex; align-items: center; justify-content: center;
+  border-right: 1px solid black; border-left: 1px solid black; 
+}
+
+.RefereeGameNo {
+  grid-row-start: 4; grid-column-start: 6;
+  grid-row-end:   5; grid-column-end: 7;
+  display: flex; align-items: center; justify-content: center;       
+  border: 1px solid black;    
+}
+
+.RefereeLabelGameNo {
+  grid-row-start: 4; grid-column-start: 1;
+  grid-row-end:   5; grid-column-end: 6;
+  display: flex; align-items: center; justify-content: center;
+  border-left: 1px solid black; 
+}
+
+.RefereeDateTime {
+  grid-row-start: 5; grid-column-start: 1;
+  grid-row-end:   6; grid-column-end: 9;
+  display: flex; align-items: center; justify-content: center;
+  border-left: 1px solid black;
+}
+
+.RefereeQRCode {
+  grid-row-start: 6; grid-column-start: 1;
+  grid-row-end:   8; grid-column-end: 3;
+  display: flex; align-items: center; justify-content: center;
+  border-left: 1px solid black;
+}
+
+.RefereePlayer1 {
+  grid-row-start: 6; grid-column-start: 3;
+  grid-row-end:   8; grid-column-end: 7;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black;
+}
+
+.RefereePlayer2  {
+  grid-row-start: 6; grid-column-start: 7;
+  grid-row-end:   8; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black; border-right: 1px solid black;
+}
+
+.RefereeLabelSet {
+  grid-row-start: 9; grid-column-start: 1;
+  grid-row-end:  10; grid-column-end: 3;
+  display: flex; align-items: center; justify-content: center;
+  border-left: 1px solid black;
+}
+
+.RefereeLabelSet0 {
+  grid-row-start: 8; grid-column-start: 1;
+  grid-row-end:   8; grid-column-end: 3;
+  display: flex; align-items: center; justify-content: center;
+  border-left: 1px solid black; 
+}
+
+.RefereeClub1  {
+  grid-row-start: 8; grid-column-start: 3;
+  grid-row-end:  10; grid-column-end: 7;
+  display: flex; align-items: center; justify-content: center;
+  border-left: 1px solid black; 
+}
+
+.RefereeClub2  {
+  grid-row-start: 8; grid-column-start: 7;
+  grid-row-end:  10; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;
+  border-right: 1px solid black; border-left: 1px solid black; 
+}
+
+.RefereeLabelSet1 {
+  grid-row-start: 10; grid-column-start: 1;
+  grid-row-end:   11; grid-column-end: 3;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black;
+}
+
+.RefereePlayer1Set1 {
+  grid-row-start: 10; grid-column-start: 3;
+  grid-row-end:   11; grid-column-end: 7;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black;   
+}
+
+.RefereePlayer2Set1 {
+  grid-row-start: 10; grid-column-start: 7;
+  grid-row-end:   11; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;
+}
+
+.RefereeLabelSet2 {
+  grid-row-start: 11; grid-column-start: 1;
+  grid-row-end:   12; grid-column-end: 3;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black;   
+}
+
+.RefereePlayer1Set2 {
+  grid-row-start: 11; grid-column-start: 3;
+  grid-row-end:   12; grid-column-end: 7;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black;    
+}
+
+.RefereePlayer2Set2 {
+  grid-row-start: 11; grid-column-start: 7;
+  grid-row-end:   12; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black; border-right: 1px solid black;   
+}
+
+.RefereeLabelSet3 {
+  grid-row-start: 12; grid-column-start: 1;
+  grid-row-end:   13; grid-column-end: 3;
+  display: flex; align-items: center; justify-content: center;       
+  border-top: 1px solid black; border-left: 1px solid black;   
+}
+
+.RefereePlayer1Set3 {
+  grid-row-start: 12; grid-column-start: 3;
+  grid-row-end:   13; grid-column-end: 7;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black;    
+}
+
+.RefereePlayer2Set3 {
+  grid-row-start: 12; grid-column-start: 7;
+  grid-row-end:   13; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;       
+  border-top: 1px solid black; border-left: 1px solid black; border-right: 1px solid black;   
+}
+
+.RefereeLabelSet4 {
+  grid-row-start: 13; grid-column-start: 1;
+  grid-row-end:   14; grid-column-end: 3;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black;   
+}
+
+.RefereePlayer1Set4 {
+  grid-row-start: 13; grid-column-start: 3;
+  grid-row-end: 14;  grid-column-end: 7;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black;    
+}
+
+.RefereePlayer2Set4 {
+  grid-row-start: 13; grid-column-start: 7;
+  grid-row-end:   14; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;       
+  border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;
+}
+
+.RefereeLabelSet5 {
+  grid-row-start: 14; grid-column-start: 1;
+  grid-row-end:   15; grid-column-end: 3;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black;   
+}
+
+.RefereePlayer1Set5 {
+  grid-row-start: 14; grid-column-start: 3;
+  grid-row-end:   15; grid-column-end: 7;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black;    
+}
+
+.RefereePlayer2Set5 {
+  grid-row-start: 14; grid-column-start: 7;
+  grid-row-end:   15; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;       
+  border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;
+}
+
+.RefereeLabelSet6 {
+  grid-row-start: 15; grid-column-start: 1;
+  grid-row-end:   16; grid-column-end: 3;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black;   
+}
+
+.RefereePlayer1Set6 {
+  grid-row-start: 15; grid-column-start: 3;
+  grid-row-end:   16; grid-column-end: 7;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black;    
+}
+
+.RefereePlayer2Set6 {
+  grid-row-start: 15; grid-column-start: 7;
+  grid-row-end:   16; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;       
+  border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;
+}
+
+.RefereeLabelSet7 {
+  grid-row-start: 16; grid-column-start: 1;
+  grid-row-end:   17; grid-column-end: 3;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black; border-bottom: 1px solid black; 
+}
+
+.RefereePlayer1Set7 {
+  grid-row-start: 16; grid-column-start: 3;
+  grid-row-end:   17; grid-column-end: 7;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black; border-bottom: 1px solid black;    
+}
+
+.RefereePlayer2Set7 {
+  grid-row-start: 16; grid-column-start: 7;
+  grid-row-end:   17; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;       
+  border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black; border-bottom: 1px solid black; 
+}
+
+.RefereeLabelSets {
+  grid-row-start: 17; grid-column-start: 1;
+  grid-row-end:   18; grid-column-end: 3;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black; border-bottom: 1px solid black;   
+}
+
+.RefereePlayer1Sets {
+  grid-row-start: 17; grid-column-start: 3;
+  grid-row-end:   18; grid-column-end: 7;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black; border-bottom: 1px solid black;   
+}
+
+.RefereePlayer2Sets {
+  grid-row-start: 17; grid-column-start: 7;
+  grid-row-end:   18; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;       
+  border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black; border-bottom: 1px solid black;  
+}
+
+.RefereeLabelWinner {
+  grid-row-start: 18; grid-column-start: 1;
+  grid-row-end:   19; grid-column-end: 3;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black; border-bottom: 1px solid black; 
+}
+
+.RefereePlayer1Winner {
+  grid-row-start: 18; grid-column-start: 3;
+  grid-row-end:   19; grid-column-end: 7;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid black; border-left: 1px solid black; border-bottom: 1px solid black;   
+}
+
+.RefereePlayer2Winner {
+  grid-row-start: 18; grid-column-start: 7;
+  grid-row-end:   19; grid-column-end: 11;
+  display: flex; align-items: center; justify-content: center;       
+  border-top: 1px solid black;  border-right: 1px solid black; border-left: 1px solid black; border-bottom: 1px solid black;   
 }

@@ -21,6 +21,7 @@ object StageInput extends BasePage with JsWrapper:
   val PrintSrzBtn:    HtmlId = genId(name)
   val SaveMatchBtn:   HtmlId = genId(name)
   val DeleteMatchBtn: HtmlId = genId(name)
+  val SchiriBtn:      HtmlId = genId(name)
   val BtnStartNextRound: HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
@@ -57,6 +58,9 @@ object StageInput extends BasePage with JsWrapper:
       case id if id.id.startsWith(DeleteMatchBtn.id) =>
         val gameNo = elem.id.substring(DeleteMatchBtn.id.length + 1).toInt
         deleteMatchResult(gameNo)
+      case id if id.id.startsWith(SchiriBtn.id) =>
+        val gameNo = elem.id.substring(SchiriBtn.id.length + 1).toInt
+        loadPage(PageNameTyp("StageScoreSheet"), gameNo.toString)
       case `BtnStartNextRound` =>
         startNextSwissRound()
       case _ =>
