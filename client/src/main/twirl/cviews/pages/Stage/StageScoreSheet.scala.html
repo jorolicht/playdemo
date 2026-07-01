@@ -112,19 +112,39 @@
   <div class="RefereePlayer2Winner"></div>
 }
 
+@roundTitle = @{
+  mList.headOption.map { case (m, _, _, _, _, _, _) =>
+    stage.stageConfig.format match {
+      case StageFormat.GR =>
+        val grId = m.asInstanceOf[MEntryGr].grId
+        s"Gruppe ${StageHelper.cvrt2ExcelCol(grId)}"
+      case StageFormat.RR =>
+        val round = m.asInstanceOf[MEntryGr].round
+        if (base.Global.lang == "de") s"Runde $round" else s"Round $round"
+      case StageFormat.KO =>
+        val round = m.asInstanceOf[MEntryKo].round
+        if (round > 0) gM(s"competition.koRound.$round") else s"Runde $round"
+      case StageFormat.SW =>
+        if (base.Global.lang == "de") s"Runde ${m.round}" else s"Round ${m.round}"
+      case _ =>
+        if (base.Global.lang == "de") s"Runde ${m.round}" else s"Round ${m.round}"
+    }
+  }.getOrElse("")
+}
+
 <div class="scoresheet-view">
     <!-- Header action bar (Screen only) -->
     <div class="d-print-none mb-4 p-3 bg-light border rounded shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
             <h5 class="mb-1 text-secondary fw-bold">
-                <i class="bi bi-printer me-2"></i>@{if(base.Global.lang == "de") "Schiedsrichterzettel" else "Referee Scoresheets"}
+                <i class="bi bi-printer me-2"></i>@{if(base.Global.lang == "de") s"Schiedsrichterzettel für $roundTitle" else s"Referee Scoresheets for $roundTitle"}
             </h5>
             <div class="small text-muted">
-                @{if(base.Global.lang == "de") "Vorschau und Druckoptionen für alle Schiedsrichterzettel." else "Preview and print options for all scoresheets."}
+                @{if(base.Global.lang == "de") "Vorschau und Druckoptionen für diese Runde." else "Preview and print options for this round."}
             </div>
         </div>
         <button class="btn btn-primary px-4 fw-bold shadow-sm" onclick="window.print()">
-            <i class="bi bi-printer-fill me-1"></i>@{if(base.Global.lang == "de") "Alle drucken (4 pro Seite)" else "Print All (4 per page)"}
+            <i class="bi bi-printer-fill me-1"></i>@{if(base.Global.lang == "de") "Runde drucken (4 pro Seite)" else "Print Round (4 per page)"}
         </button>
     </div>
 
@@ -141,9 +161,6 @@
                     @if(!(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN)) {
                         <div class="col d-flex justify-content-center">
                             <div class="position-relative">
-                                <!-- Card header showing round/group -->
-                                <div class="badge bg-secondary mb-1 d-block text-center font-monospace">@getSectionName(m)</div>
-                                
                                 <!-- Card itself -->
                                 <div class="refereeGrid shadow-sm border rounded">
                                     @refereeCardContent(m, idx + 1, nameA, nameB, clubA, clubB, info1, info2)
@@ -153,7 +170,7 @@
                                 <button class="btn btn-sm btn-primary position-absolute end-0 m-2 shadow-sm fw-bold" 
                                         @id(PrintSingleBtn, "onclick", m.gameNo.toString)
                                         data-game="@m.gameNo"
-                                        style="top: 25px;">
+                                        style="top: 0px;">
                                     <i class="bi bi-printer me-1"></i>@{if(base.Global.lang == "de") "Drucken" else "Print"}
                                 </button>
                             </div>
