@@ -32,13 +32,6 @@ object StageScoreSheet extends BasePage with JsWrapper:
         val comp = Global.currentSelection.competition
         val pants = comp.map(_.pants1Stage.toSeq).getOrElse(Seq.empty)
         
-        val mList = stage.matches.toSeq.map { m =>
-          val (nameA, clubA, _) = getPlayerInfo(m.stNoA, pants)
-          val (nameB, clubB, _) = getPlayerInfo(m.stNoB, pants)
-          val (info1, info2) = getInfoStrings(m, stage)
-          (m, nameA, nameB, clubA, clubB, info1, info2)
-        }
-
         var activeSecParam: Option[Int] = None
         var isPrintRound = false
         var isPrintSingle = false
@@ -63,6 +56,34 @@ object StageScoreSheet extends BasePage with JsWrapper:
               }
             } catch { case _: Exception => }
           }
+        }
+
+        // Filter matches to only generate and print the selected round or current active round
+        val filteredMatches = activeSecParam match {
+          case Some(secId) =>
+            stage.stageConfig.format match {
+              case StageFormat.GR =>
+                stage.matches.toSeq.filter(m => m.isInstanceOf[MEntryGr] && m.asInstanceOf[MEntryGr].grId == secId)
+              case _ =>
+                stage.matches.toSeq.filter(_.round == secId)
+            }
+          case None =>
+            val defaultRound = stage.matches.filterNot(_.finished).map(_.round).minOption
+              .getOrElse(stage.matches.map(_.round).maxOption.getOrElse(1))
+            
+            stage.stageConfig.format match {
+              case StageFormat.GR =>
+                stage.matches.toSeq.filter(m => m.isInstanceOf[MEntryGr] && m.asInstanceOf[MEntryGr].grId == 1)
+              case _ =>
+                stage.matches.toSeq.filter(_.round == defaultRound)
+            }
+        }
+
+        val mList = filteredMatches.map { m =>
+          val (nameA, clubA, _) = getPlayerInfo(m.stNoA, pants)
+          val (nameB, clubB, _) = getPlayerInfo(m.stNoB, pants)
+          val (info1, info2) = getInfoStrings(m, stage)
+          (m, nameA, nameB, clubA, clubB, info1, info2)
         }
 
         setMain(cviews.comps.html.StageLayout(stage, "SCH")(cviews.pages.Stage.html.StageScoreSheet(stage, mList, activeSecParam)))
