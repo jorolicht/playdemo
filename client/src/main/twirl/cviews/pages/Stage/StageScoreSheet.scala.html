@@ -165,14 +165,6 @@
                                 <div class="refereeGrid shadow-sm border rounded">
                                     @refereeCardContent(m, idx + 1, nameA, nameB, clubA, clubB, info1, info2)
                                 </div>
-                                
-                                <!-- Hover print button in top corner -->
-                                <button class="btn btn-sm btn-primary position-absolute end-0 m-2 shadow-sm fw-bold" 
-                                        @id(PrintSingleBtn, "onclick", m.gameNo.toString)
-                                        data-game="@m.gameNo"
-                                        style="top: 0px;">
-                                    <i class="bi bi-printer me-1"></i>@{if(base.Global.lang == "de") "Drucken" else "Print"}
-                                </button>
                             </div>
                         </div>
                     }
