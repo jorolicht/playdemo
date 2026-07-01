@@ -39,20 +39,42 @@ object StageScoreSheet extends BasePage with JsWrapper:
           (m, nameA, nameB, clubA, clubB, info1, info2)
         }
 
-        setMain(cviews.comps.html.StageLayout(stage, "SCH")(cviews.pages.Stage.html.StageScoreSheet(stage, mList)))
+        var activeSecParam: Option[Int] = None
+        var isPrintRound = false
+        var isPrintSingle = false
+        var targetGameNo = 0
+        var targetRoundNo = 0
+
+        if (param.nonEmpty) {
+          if (param.startsWith("round_")) {
+            try {
+              targetRoundNo = param.substring(6).toInt
+              activeSecParam = Some(targetRoundNo)
+              isPrintRound = true
+            } catch { case _: Exception => }
+          } else {
+            try {
+              targetGameNo = param.toInt
+              isPrintSingle = true
+              stage.matches.find(_.gameNo == targetGameNo).foreach { m =>
+                stage.stageConfig.format match
+                  case StageFormat.GR => activeSecParam = Some(m.asInstanceOf[MEntryGr].grId)
+                  case _ => activeSecParam = Some(m.round)
+              }
+            } catch { case _: Exception => }
+          }
+        }
+
+        setMain(cviews.comps.html.StageLayout(stage, "SCH")(cviews.pages.Stage.html.StageScoreSheet(stage, mList, activeSecParam)))
         
         // Load QRCode library and generate QRCodes
         loadQRCodeLib { () =>
           generateAllQRCodes(stage, mList)
           
-          // If a parameter is passed, print that single match immediately
-          if (param.nonEmpty) {
-            try {
-              val gameNo = param.toInt
-              dom.window.setTimeout(() => printSingle(gameNo), 300)
-            } catch {
-              case _: Exception => // ignore formatting error
-            }
+          if (isPrintRound) {
+            dom.window.setTimeout(() => printRound(targetRoundNo), 300)
+          } else if (isPrintSingle) {
+            dom.window.setTimeout(() => printSingle(targetGameNo), 300)
           }
         }
         true

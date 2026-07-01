@@ -51,7 +51,7 @@ object StageInput extends BasePage with JsWrapper:
     HtmlId(elem.id) match
       case id if id.id.startsWith(PrintSrzBtn.id) =>
         val roundNo = elem.id.substring(PrintSrzBtn.id.length + 1).toInt
-        printRound(roundNo)
+        loadPage(PageNameTyp("StageScoreSheet"), s"round_$roundNo")
       case id if id.id.startsWith(SaveMatchBtn.id) =>
         val gameNo = elem.id.substring(SaveMatchBtn.id.length + 1).toInt
         saveMatchResult(gameNo)

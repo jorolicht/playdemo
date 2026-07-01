@@ -4,7 +4,7 @@
 @import pages.Stage.StageScoreSheet.*
 @import cviews.helper.html.*
 
-@(stage: Stage, mList: Seq[(MEntry, String, String, String, String, String, String)])
+@(stage: Stage, mList: Seq[(MEntry, String, String, String, String, String, String)], activeSectionIdParam: Option[Int] = None)
 
 @compName = @{ services.TourneyDB.tourney.competitions.find(_.id == stage.coId).map(_.name).getOrElse(stage.name) }
 @comp = @{ services.TourneyDB.tourney.competitions.find(_.id == stage.coId).get }
@@ -135,7 +135,7 @@
             @{if(base.Global.lang == "de") "Keine Spiele für diesen Wettbewerb vorhanden." else "No matches available for this competition."}
         </div>
     } else {
-        @defining(sections.last._1) { activeSectionId =>
+        @defining(activeSectionIdParam.getOrElse(sections.lastOption.map(_._1).getOrElse(0))) { activeSectionId =>
             <!-- Tabs Navigation -->
             <ul class="nav nav-tabs mb-4 d-print-none" id="scoresheetTabs" role="tablist">
                 @sections.map { case (sectionId, name, _) =>
