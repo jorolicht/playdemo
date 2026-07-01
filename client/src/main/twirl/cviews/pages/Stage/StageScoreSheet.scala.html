@@ -170,6 +170,7 @@
                     }
                 }
             </div>
+        </div>
 
             <!-- Hidden template cards for round and single printing -->
             <div id="scoresheets-hidden-templates" class="d-none">
@@ -286,32 +287,34 @@
             </div>
         }
     }
-</div>
 
 <style>
     @@media print {
-        body.print-active .navbar,
-        body.print-active .sidebar,
-        body.print-active .context-header,
-        body.print-active .footer,
-        body.print-active .d-print-none,
-        body.print-active .scoresheet-view,
-        body.print-active .container {
-            display: none !important;
-        }
-        
-        /* Fallback selector for browser print */
+        /* Hide navbar, sidebar, layout headers, footers and screen-only wrappers */
         body .navbar,
         body .sidebar,
         body .context-header,
         body .footer,
         body .d-print-none,
         body .scoresheet-view,
-        body .container {
+        .container > div:not(.stage-content),
+        .container > ul.nav-tabs {
             display: none !important;
         }
         
-        body.print-active #scoresheet-print-area,
+        /* Reset container styles for proper full-page printing formatting */
+        body .container,
+        body .stage-content {
+            display: block !important;
+            width: 210mm !important;
+            max-width: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+        
         body #scoresheet-print-area {
             display: block !important;
             width: 210mm !important;
@@ -320,7 +323,6 @@
             padding: 0 !important;
         }
         
-        body.print-active .printarea-referee,
         body .printarea-referee {
             display: block !important;
             width: 210mm !important;
@@ -330,7 +332,6 @@
             padding: 5mm !important;
         }
         
-        body.print-active .referee-single-card-container,
         body .referee-single-card-container {
             display: flex !important;
             align-items: center !important;
@@ -339,7 +340,6 @@
             width: 100% !important;
         }
         
-        body.print-active .refereeGrid,
         body .refereeGrid {
             box-shadow: none !important;
             border: 1px solid #000 !important;
