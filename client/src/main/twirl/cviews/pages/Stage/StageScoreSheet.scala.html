@@ -29,28 +29,23 @@
   }
 }
 
-@* Grouping matches for tabs *@
-@sections = @{
-  if (stage.stageConfig.format == StageFormat.GR) {
-    mList.groupBy { case (m, _, _, _, _, _, _) =>
-      m match {
-        case gr: MEntryGr => gr.grId
-        case _ => 0
-      }
-    }.toSeq.sortBy(_._1).map { case (grId, list) =>
-      val name = s"Gruppe ${StageHelper.cvrt2ExcelCol(grId)}"
-      (grId, name, list)
-    }
-  } else {
-    mList.groupBy(_._1.round).toSeq.sortBy(_._1).map { case (r, list) =>
-      val name = if (stage.isKoStage) {
-        val localized = gM(s"+round.$r")
-        if (localized == s"StageInput.round.$r") gM("+round.default", r.toString) else localized
-      } else {
-        gM("StageDraw.round_tab_title", r.toString)
-      }
-      (r, name, list)
-    }
+@* Helper to get section/round name for a match *@
+@getSectionName(m: MEntry) = @{
+  stage.stageConfig.format match {
+    case StageFormat.GR =>
+      val grId = m.asInstanceOf[MEntryGr].grId
+      val round = m.asInstanceOf[MEntryGr].round
+      s"Gruppe ${StageHelper.cvrt2ExcelCol(grId)} - Runde $round"
+    case StageFormat.RR =>
+      val round = m.asInstanceOf[MEntryGr].round
+      s"Runde $round"
+    case StageFormat.KO =>
+      val round = m.asInstanceOf[MEntryKo].round
+      if (round > 0) gM(s"competition.koRound.$round") else s"Runde $round"
+    case StageFormat.SW =>
+      s"Runde ${m.round}"
+    case _ =>
+      s"Spiel ${m.gameNo}"
   }
 }
 
@@ -118,98 +113,56 @@
 }
 
 <div class="scoresheet-view">
-    <!-- Header info (Screen only) -->
-    <div class="card shadow-sm mb-4 d-print-none">
-        <div class="card-body">
-            <h5 class="card-title text-secondary border-bottom pb-2 mb-3">
-                <i class="bi bi-printer me-2"></i>@{if(base.Global.lang == "de") "Schiedsrichterzettel drucken" else "Print Referee Scoresheets"}
+    <!-- Header action bar (Screen only) -->
+    <div class="d-print-none mb-4 p-3 bg-light border rounded shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h5 class="mb-1 text-secondary fw-bold">
+                <i class="bi bi-printer me-2"></i>@{if(base.Global.lang == "de") "Schiedsrichterzettel" else "Referee Scoresheets"}
             </h5>
-            <p class="card-text text-muted mb-0">
-                @{if(base.Global.lang == "de") "Schiedsrichterzettel für diesen Wettbewerb drucken (4 Zettel pro Din A4 Seite)." else "Print referee scoresheets for this competition (4 sheets per A4 page)."}
-            </p>
+            <div class="small text-muted">
+                @{if(base.Global.lang == "de") "Vorschau und Druckoptionen für alle Schiedsrichterzettel." else "Preview and print options for all scoresheets."}
+            </div>
         </div>
+        <button class="btn btn-primary px-4 fw-bold shadow-sm" onclick="window.print()">
+            <i class="bi bi-printer-fill me-1"></i>@{if(base.Global.lang == "de") "Alle drucken (4 pro Seite)" else "Print All (4 per page)"}
+        </button>
     </div>
 
-    @if(sections.isEmpty || mList.isEmpty) {
+    @if(mList.isEmpty) {
         <div class="text-center py-5 text-muted italic d-print-none">
             @{if(base.Global.lang == "de") "Keine Spiele für diesen Wettbewerb vorhanden." else "No matches available for this competition."}
         </div>
     } else {
-        @defining(activeSectionIdParam.getOrElse(sections.lastOption.map(_._1).getOrElse(0))) { activeSectionId =>
-            <!-- Tabs Navigation -->
-            <ul class="nav nav-tabs mb-4 d-print-none" id="scoresheetTabs" role="tablist">
-                @sections.map { case (sectionId, name, _) =>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link @{if(sectionId == activeSectionId) "active" else ""} fw-bold text-primary" 
-                                id="tab-@sectionId" 
-                                data-bs-toggle="tab" 
-                                data-bs-target="#pane-@sectionId" 
-                                type="button" 
-                                role="tab" 
-                                aria-controls="pane-@sectionId" 
-                                aria-selected="@{if(sectionId == activeSectionId) "true" else "false"}">
-                            @name
-                        </button>
-                    </li>
-                }
-            </ul>
-
-            <!-- Tabs Content -->
-            <div class="tab-content d-print-none" id="scoresheetTabsContent">
-                @sections.map { case (sectionId, sectionName, matches) =>
-                    <div class="tab-pane fade @{if(sectionId == activeSectionId) "show active" else ""}" 
-                         id="pane-@sectionId" 
-                         role="tabpanel" 
-                         aria-labelledby="tab-@sectionId">
-                        
-                        <!-- Actions bar -->
-                        <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light border rounded shadow-sm">
-                            <span class="fw-semibold text-secondary">
-                                @{matches.length} @{if(base.Global.lang == "de") "Spiele in" else "matches in"} @sectionName
-                            </span>
-                            <button class="btn btn-primary px-3 fw-bold shadow-sm" 
-                                    @id(PrintRoundBtn, "onclick", sectionId.toString) 
-                                    data-round="@sectionId">
-                                <i class="bi bi-printer me-1"></i>@{if(base.Global.lang == "de") "Ganze Runde drucken (4 pro Seite)" else "Print Round (4 per page)"}
-                            </button>
+        @defining(mList.filterNot(x => x._1.stNoA.isBye || x._1.stNoB.isBye || x._1.stNoA.isNN || x._1.stNoB.isNN)) { activeMatches =>
+            
+            <!-- Cards grid preview (Screen only) -->
+            <div class="row row-cols-1 row-cols-md-2 g-4 justify-content-center d-print-none mb-5">
+                @mList.zipWithIndex.map { case ((m, nameA, nameB, clubA, clubB, info1, info2), idx) =>
+                    @if(!(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN)) {
+                        <div class="col d-flex justify-content-center">
+                            <div class="position-relative">
+                                <!-- Card header showing round/group -->
+                                <div class="badge bg-secondary mb-1 d-block text-center font-monospace">@getSectionName(m)</div>
+                                
+                                <!-- Card itself -->
+                                <div class="refereeGrid shadow-sm border rounded">
+                                    @refereeCardContent(m, idx + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                </div>
+                                
+                                <!-- Hover print button in top corner -->
+                                <button class="btn btn-sm btn-primary position-absolute end-0 m-2 shadow-sm fw-bold" 
+                                        @id(PrintSingleBtn, "onclick", m.gameNo.toString)
+                                        data-game="@m.gameNo"
+                                        style="top: 25px;">
+                                    <i class="bi bi-printer me-1"></i>@{if(base.Global.lang == "de") "Drucken" else "Print"}
+                                </button>
+                            </div>
                         </div>
-
-                        <!-- Matches List -->
-                        <div class="list-group shadow-sm">
-                            @matches.map { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
-                                @defining(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN) { isByeOrNN =>
-                                    <div class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center">
-                                        <div class="row align-items-center flex-grow-1">
-                                            <div class="col-md-1 fw-bold text-muted">Nr. @m.gameNo</div>
-                                            <div class="col-md-4 text-end fw-bold text-uppercase @{if(m.stNoA.isBye) "text-muted" else ""}">@nameA</div>
-                                            <div class="col-md-2 text-center text-secondary small font-monospace">
-                                                VS
-                                                @if(m.playfield.trim.nonEmpty) {
-                                                    <div class="badge bg-secondary mt-1">Tisch @m.playfield</div>
-                                                }
-                                            </div>
-                                            <div class="col-md-4 text-start fw-bold text-uppercase @{if(m.stNoB.isBye) "text-muted" else ""}">@nameB</div>
-                                        </div>
-                                        <div class="ms-3">
-                                            @if(!isByeOrNN) {
-                                                <button class="btn btn-sm btn-outline-primary fw-bold" 
-                                                        @id(PrintSingleBtn, "onclick", m.gameNo.toString) 
-                                                        data-game="@m.gameNo">
-                                                    <i class="bi bi-printer me-1"></i>@{if(base.Global.lang == "de") "Zettel drucken" else "Print Sheet"}
-                                                </button>
-                                            } else {
-                                                <span class="badge bg-light text-muted border">Freilos / TBD</span>
-                                            }
-                                        </div>
-                                    </div>
-                                }
-                            }
-                        </div>
-                    </div>
+                    }
                 }
             </div>
 
-            <!-- Hidden templates for single and group printing, cloned dynamically in JS -->
+            <!-- Hidden template cards for round and single printing -->
             <div id="scoresheets-hidden-templates" class="d-none">
                 <!-- Single printing templates -->
                 @mList.map { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
@@ -222,15 +175,15 @@
                     }
                 }
 
-                <!-- Group/Round printing templates (organized in A4 2x2 grid pages) -->
-                @sections.map { case (sectionId, sectionName, secMatches) =>
-                    @defining(secMatches.filterNot(x => x._1.stNoA.isBye || x._1.stNoB.isBye || x._1.stNoA.isNN || x._1.stNoB.isNN)) { printableMatches =>
-                        @for(i <- 1 to (printableMatches.length + 3) / 4) {
-                            <div class="printable-card-round-@sectionId printarea-referee py-2">
+                <!-- Round-specific printing templates (cloned in JS when printing a specific round) -->
+                @mList.groupBy(_._1.round).map { case (roundNo, roundMatches) =>
+                    @defining(roundMatches.filterNot(x => x._1.stNoA.isBye || x._1.stNoB.isBye || x._1.stNoA.isNN || x._1.stNoB.isNN)) { printableRoundMatches =>
+                        @for(i <- 1 to (printableRoundMatches.length + 3) / 4) {
+                            <div class="printable-card-round-@roundNo printarea-referee py-2">
                                 <div class="row justify-content-between mb-4 mx-0" style="height: 612px;">
                                     @defining((i-1)*4 + 1) { idx =>
-                                        @if(idx <= printableMatches.length) {
-                                            @defining(printableMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                                        @if(idx <= printableRoundMatches.length) {
+                                            @defining(printableRoundMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                                 <div class="refereeGrid col-auto px-0">
                                                     @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
                                                 </div>
@@ -238,8 +191,8 @@
                                         }
                                     }
                                     @defining((i-1)*4 + 2) { idx =>
-                                        @if(idx <= printableMatches.length) {
-                                            @defining(printableMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                                        @if(idx <= printableRoundMatches.length) {
+                                            @defining(printableRoundMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                                 <div class="refereeGrid col-auto px-0">
                                                     @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
                                                 </div>
@@ -250,8 +203,8 @@
                                 <div class="row border-bottom-0 border-secondary mx-0" style="height: 20px;"></div>
                                 <div class="row justify-content-between mt-4 mx-0" style="height: 612px;">
                                     @defining((i-1)*4 + 3) { idx =>
-                                        @if(idx <= printableMatches.length) {
-                                            @defining(printableMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                                        @if(idx <= printableRoundMatches.length) {
+                                            @defining(printableRoundMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                                 <div class="refereeGrid col-auto px-0">
                                                     @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
                                                 </div>
@@ -259,8 +212,8 @@
                                         }
                                     }
                                     @defining((i-1)*4 + 4) { idx =>
-                                        @if(idx <= printableMatches.length) {
-                                            @defining(printableMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                                        @if(idx <= printableRoundMatches.length) {
+                                            @defining(printableRoundMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                                 <div class="refereeGrid col-auto px-0">
                                                     @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
                                                 </div>
@@ -273,12 +226,58 @@
                     }
                 }
             </div>
+
+            <!-- Default Print area populated with all stage matches (printed 4 per page via browser print) -->
+            <div id="scoresheet-print-area" class="d-none">
+                @for(i <- 1 to (activeMatches.length + 3) / 4) {
+                    <div class="printarea-referee py-2">
+                        <div class="row justify-content-between mb-4 mx-0" style="height: 612px;">
+                            @defining((i-1)*4 + 1) { idx =>
+                                @if(idx <= activeMatches.length) {
+                                    @defining(activeMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                                        <div class="refereeGrid col-auto px-0">
+                                            @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                        </div>
+                                    }
+                                }
+                            }
+                            @defining((i-1)*4 + 2) { idx =>
+                                @if(idx <= activeMatches.length) {
+                                    @defining(activeMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                                        <div class="refereeGrid col-auto px-0">
+                                            @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                        </div>
+                                    }
+                                }
+                            }
+                        </div>
+                        <div class="row border-bottom-0 border-secondary mx-0" style="height: 20px;"></div>
+                        <div class="row justify-content-between mt-4 mx-0" style="height: 612px;">
+                            @defining((i-1)*4 + 3) { idx =>
+                                @if(idx <= activeMatches.length) {
+                                    @defining(activeMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                                        <div class="refereeGrid col-auto px-0">
+                                            @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                        </div>
+                                    }
+                                }
+                            }
+                            @defining((i-1)*4 + 4) { idx =>
+                                @if(idx <= activeMatches.length) {
+                                    @defining(activeMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
+                                        <div class="refereeGrid col-auto px-0">
+                                            @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                        </div>
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
         }
     }
 </div>
-
-<!-- Print target area (Only shown during printing via CSS) -->
-<div id="scoresheet-print-area" class="d-none"></div>
 
 <style>
     @@media print {
@@ -292,7 +291,19 @@
             display: none !important;
         }
         
-        body.print-active #scoresheet-print-area {
+        /* Fallback selector for browser print */
+        body .navbar,
+        body .sidebar,
+        body .context-header,
+        body .footer,
+        body .d-print-none,
+        body .scoresheet-view,
+        body .container {
+            display: none !important;
+        }
+        
+        body.print-active #scoresheet-print-area,
+        body #scoresheet-print-area {
             display: block !important;
             width: 210mm !important;
             height: 297mm !important;
@@ -300,7 +311,8 @@
             padding: 0 !important;
         }
         
-        body.print-active .printarea-referee {
+        body.print-active .printarea-referee,
+        body .printarea-referee {
             display: block !important;
             width: 210mm !important;
             height: 297mm !important;
@@ -309,7 +321,8 @@
             padding: 5mm !important;
         }
         
-        body.print-active .referee-single-card-container {
+        body.print-active .referee-single-card-container,
+        body .referee-single-card-container {
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
@@ -317,7 +330,8 @@
             width: 100% !important;
         }
         
-        body.print-active .refereeGrid {
+        body.print-active .refereeGrid,
+        body .refereeGrid {
             box-shadow: none !important;
             border: 1px solid #000 !important;
             margin: 0 !important;
