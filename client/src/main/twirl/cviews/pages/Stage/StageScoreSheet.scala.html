@@ -1,0 +1,249 @@
+@import shared.model.*
+@import shared.format.*
+@import pages.Stage.StageScoreSheet.*
+@import cviews.helper.html.*
+
+@(stage: Stage, matches: Seq[(MEntry, String, String)])
+
+@compName = @{ services.TourneyDB.tourney.competitions.find(_.id == stage.coId).map(_.name).getOrElse(stage.name) }
+@maxSets = @{ stage.noWinSets * 2 - 1 }
+
+@* General sections grouping *@
+@sections = @{
+  if (stage.stageConfig.format == StageFormat.GR) {
+    matches.groupBy { case (m, _, _) =>
+      m match {
+        case gr: MEntryGr => gr.grId
+        case _ => 0
+      }
+    }.toSeq.sortBy(_._1).map { case (grId, mList) =>
+      val name = s"Gruppe ${StageHelper.cvrt2ExcelCol(grId)}"
+      (grId, name, mList)
+    }
+  } else {
+    matches.groupBy(_._1.round).toSeq.sortBy(_._1).map { case (r, mList) =>
+      val name = if (stage.isKoStage) {
+        val localized = gM(s"+round.$r")
+        if (localized == s"StageInput.round.$r") gM("+round.default", r.toString) else localized
+      } else {
+        gM("StageDraw.round_tab_title", r.toString)
+      }
+      (r, name, mList)
+    }
+  }
+}
+
+@* Print Scoresheet Card Template *@
+@scoresheetCard(m: MEntry, nameA: String, nameB: String, sectionName: String) = {
+  <div class="scoresheet-card-container mb-5">
+    <div class="scoresheet-card p-4 border border-dark rounded bg-white text-dark mx-auto" style="max-width: 800px; font-family: 'Courier New', Courier, monospace;">
+      <div class="text-center border-bottom border-2 border-dark pb-2 mb-3">
+        <h4 class="fw-bold mb-0">SCHIEDSRICHTERZETTEL (SCORESHEET)</h4>
+        <div class="small fw-semibold text-uppercase">Playdemo Turnier-System</div>
+      </div>
+      
+      <div class="row mb-3 font-monospace fs-6">
+        <div class="col-6"><strong>Wettbewerb:</strong> @compName</div>
+        <div class="col-6 text-end"><strong>Tisch (Table):</strong> @{if(m.playfield.trim.isEmpty) "-" else m.playfield}</div>
+        <div class="col-6"><strong>Phase / Gruppe:</strong> @sectionName</div>
+        <div class="col-6 text-end"><strong>Spiel-Nr (Game):</strong> @m.gameNo</div>
+      </div>
+      
+      <div class="border border-2 border-dark p-2 mb-3 bg-light bg-opacity-25 rounded">
+        <div class="row align-items-center">
+          <div class="col-1 text-center fw-bold fs-5">A:</div>
+          <div class="col-11 fw-bold fs-5 text-uppercase">@nameA</div>
+        </div>
+        <hr class="my-2 border-dark">
+        <div class="row align-items-center">
+          <div class="col-1 text-center fw-bold fs-5">B:</div>
+          <div class="col-11 fw-bold fs-5 text-uppercase">@nameB</div>
+        </div>
+      </div>
+      
+      <table class="table table-bordered border-dark text-center align-middle mb-4 fs-6">
+        <thead>
+          <tr class="table-secondary border-dark fw-bold">
+            <th style="width: 100px;">Spieler</th>
+            @for(i <- 1 to maxSets) {
+              <th>Satz @i</th>
+            }
+            <th style="width: 100px;">Sätze</th>
+            <th style="width: 100px;">Bälle</th>
+            <th style="width: 150px;">Sieger</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="fw-bold">A</td>
+            @for(i <- 1 to maxSets) {
+              <td style="height: 45px;"></td>
+            }
+            <td rowspan="2" class="fw-bold fs-4" style="vertical-align: middle;">:</td>
+            <td class="small">:</td>
+            <td rowspan="2" class="fw-bold fs-5" style="border-left: 2px solid #000; vertical-align: middle;"></td>
+          </tr>
+          <tr>
+            <td class="fw-bold">B</td>
+            @for(i <- 1 to maxSets) {
+              <td style="height: 45px;"></td>
+            }
+            <td class="small"></td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="d-flex justify-content-between pt-4 mt-5 border-top border-secondary small">
+        <div>Unterschrift Schiedsrichter: _____________________</div>
+        <div>Unterschrift Sieger: _____________________</div>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="scoresheet-view">
+    <div class="card shadow-sm mb-4 d-print-none">
+        <div class="card-body">
+            <h5 class="card-title text-secondary border-bottom pb-2 mb-3">
+                <i class="bi bi-printer me-2"></i>@{if(base.Global.lang == "de") "Schiedsrichterzettel drucken" else "Print Referee Scoresheets"}
+            </h5>
+            <p class="card-text text-muted mb-0">
+                @{if(base.Global.lang == "de") "Hier können Sie Schiedsrichterzettel für einzelne Spiele oder eine gesamte Runde ausdrucken." else "Here you can print referee scoresheets for single matches or an entire round."}
+            </p>
+        </div>
+    </div>
+
+    @if(sections.isEmpty || matches.isEmpty) {
+        <div class="text-center py-5 text-muted italic d-print-none">
+            @{if(base.Global.lang == "de") "Keine Spiele für diesen Wettbewerb vorhanden." else "No matches available for this competition."}
+        </div>
+    } else {
+        @defining(sections.last._1) { activeSectionId =>
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs mb-4 d-print-none" id="scoresheetTabs" role="tablist">
+                @sections.map { case (sectionId, name, _) =>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link @{if(sectionId == activeSectionId) "active" else ""} fw-bold text-primary" 
+                                id="tab-@sectionId" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#pane-@sectionId" 
+                                type="button" 
+                                role="tab" 
+                                aria-controls="pane-@sectionId" 
+                                aria-selected="@{if(sectionId == activeSectionId) "true" else "false"}">
+                            @name
+                        </button>
+                    </li>
+                }
+            </ul>
+
+            <!-- Tabs Content -->
+            <div class="tab-content d-print-none" id="scoresheetTabsContent">
+                @sections.map { case (sectionId, sectionName, mList) =>
+                    <div class="tab-pane fade @{if(sectionId == activeSectionId) "show active" else ""}" 
+                         id="pane-@sectionId" 
+                         role="tabpanel" 
+                         aria-labelledby="tab-@sectionId">
+                        
+                        <!-- Actions bar -->
+                        <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light border rounded shadow-sm">
+                            <span class="fw-semibold text-secondary">
+                                @{mList.length} @{if(base.Global.lang == "de") "Spiele in" else "matches in"} @sectionName
+                            </span>
+                            <button class="btn btn-primary px-3 fw-bold" 
+                                    @id(PrintRoundBtn, "onclick", sectionId.toString) 
+                                    data-round="@sectionId">
+                                <i class="bi bi-printer me-1"></i>@{if(base.Global.lang == "de") "Alle Zettel drucken" else "Print All Scoresheets"}
+                            </button>
+                        </div>
+
+                        <!-- Matches List -->
+                        <div class="list-group shadow-sm">
+                            @mList.map { case (m, nameA, nameB) =>
+                                @defining(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN) { isByeOrNN =>
+                                    <div class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center">
+                                        <div class="row align-items-center flex-grow-1">
+                                            <div class="col-md-1 fw-bold text-muted">Nr. @m.gameNo</div>
+                                            <div class="col-md-4 text-end fw-bold text-uppercase @{if(m.stNoA.isBye) "text-muted" else ""}">@nameA</div>
+                                            <div class="col-md-2 text-center text-secondary small font-monospace">
+                                                VS
+                                                @if(m.playfield.trim.nonEmpty) {
+                                                    <div class="badge bg-secondary mt-1">Tisch @m.playfield</div>
+                                                }
+                                            </div>
+                                            <div class="col-md-4 text-start fw-bold text-uppercase @{if(m.stNoB.isBye) "text-muted" else ""}">@nameB</div>
+                                        </div>
+                                        <div class="ms-3">
+                                            @if(!isByeOrNN) {
+                                                <button class="btn btn-sm btn-outline-primary fw-bold" 
+                                                        @id(PrintSingleBtn, "onclick", m.gameNo.toString) 
+                                                        data-game="@m.gameNo">
+                                                    <i class="bi bi-printer me-1"></i>@{if(base.Global.lang == "de") "Drucken" else "Print"}
+                                                </button>
+                                            } else {
+                                                <span class="badge bg-light text-muted border">Freilos / TBD</span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Hidden templates that will be cloned/copied into print area -->
+            <div id="scoresheets-hidden-templates" class="d-none">
+                @sections.map { case (sectionId, sectionName, mList) =>
+                    @mList.map { case (m, nameA, nameB) =>
+                        @if(!(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN)) {
+                            <div id="printable-card-single-@m.gameNo" class="printable-card-round-@sectionId">
+                                @scoresheetCard(m, nameA, nameB, sectionName)
+                            </div>
+                        }
+                    }
+                }
+            </div>
+        }
+    }
+</div>
+
+<!-- Print target area (Only shown during printing via CSS) -->
+<div id="scoresheet-print-area" class="d-none"></div>
+
+<style>
+    @@media print {
+        body.print-active .navbar,
+        body.print-active .sidebar,
+        body.print-active .context-header,
+        body.print-active .footer,
+        body.print-active .d-print-none,
+        body.print-active .scoresheet-view,
+        body.print-active .container {
+            display: none !important;
+        }
+        
+        body.print-active #scoresheet-print-area {
+            display: block !important;
+            width: 100% !important;
+        }
+        
+        body.print-active .scoresheet-card-container {
+            display: block !important;
+            page-break-after: always !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        body.print-active .scoresheet-card-container:last-child {
+            page-break-after: avoid !important;
+        }
+        
+        body.print-active .scoresheet-card {
+            border: 2px solid #000 !important;
+            padding: 30px !important;
+            background: #fff !important;
+            color: #000 !important;
+        }
+    }
+</style>

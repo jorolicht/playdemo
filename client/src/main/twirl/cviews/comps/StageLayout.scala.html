@@ -47,6 +47,11 @@
                 <i class="bi bi-bar-chart-line me-1"></i>Ergebnisse
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link @{if(activeTab == "SCH") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('StageScoreSheet', '')">
+                <i class="bi bi-file-earmark-text me-1"></i>@{if(base.Global.lang == "de") "Schiri" else "Scoresheet"}
+            </a>
+        </li>
     </ul>
 
     <!-- Main Content Area -->
