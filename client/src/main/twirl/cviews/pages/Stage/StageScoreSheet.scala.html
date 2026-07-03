@@ -6,8 +6,8 @@
 
 @(stage: Stage, mList: Seq[(MEntry, String, String, String, String, String, String)], activeSectionIdParam: Option[Int] = None)
 
-@compName = @{ services.TourneyDB.tourney.competitions.find(_.id == stage.coId).map(_.name).getOrElse(stage.name) }
-@comp = @{ services.TourneyDB.tourney.competitions.find(_.id == stage.coId).get }
+@compName = @{ services.TourneyDB.tourney.competitions.filter(_ != null).find(_.id == stage.coId).map(_.name).getOrElse(stage.name) }
+@comp = @{ services.TourneyDB.tourney.competitions.filter(_ != null).find(_.id == stage.coId).get }
 
 @* Translation helper *@
 @msg(key: String) = @{

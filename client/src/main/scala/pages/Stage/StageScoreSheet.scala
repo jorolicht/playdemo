@@ -237,7 +237,7 @@ object StageScoreSheet extends BasePage with JsWrapper:
       val noSchiris = stage.matches.length
       setHtml(elem, cviews.pages.Referee.html.RefereeCard(stage, noSchiris))
       
-      val comp = services.TourneyDB.tourney.competitions.find(_.id == stage.coId).get
+      val comp = services.TourneyDB.tourney.competitions.filter(_ != null).find(_.id == stage.coId).get
       val pants = comp.pants1Stage.toSeq
       
       loadQRCodeLib { () =>

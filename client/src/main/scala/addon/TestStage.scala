@@ -128,6 +128,7 @@ object TestStage extends base.JsWrapper:
           Future(Left(AppError("stage.not.found")))
       }
     catch
-      case _: Exception =>
-        addOutput(s"Invalid Stage ID: '$param'. Please provide a valid integer Stage ID in --param.")
-        Future(Left(AppError("invalid.id")))
+      case ex: Exception =>
+        addOutput(s"Error executing referee test: ${ex.getClass.getName}: ${ex.getMessage}")
+        ex.printStackTrace()
+        Future(Left(AppError("referee.test.failed", ex.getMessage)))
