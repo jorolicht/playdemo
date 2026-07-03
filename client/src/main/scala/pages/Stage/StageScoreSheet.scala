@@ -227,3 +227,74 @@ object StageScoreSheet extends BasePage with JsWrapper:
         linkElem.href = refereeAddr
       }
     }
+
+  // set referee page for a stage (round/group)
+  def setPage(stage: Stage): Unit =
+    val elem = gE(HtmlId(s"RefereeContent_${stage.coId.value}_${stage.id.value}"))
+    if (elem != null) {
+      debug(s"Referee init: coId: ${stage.coId.value} id: ${stage.id.value}")
+      
+      val noSchiris = stage.matches.length
+      setHtml(elem, cviews.pages.Referee.html.RefereeCard(stage, noSchiris))
+      
+      val comp = services.TourneyDB.tourney.competitions.find(_.id == stage.coId).get
+      val pants = comp.pants1Stage.toSeq
+      
+      loadQRCodeLib { () =>
+        stage.matches.zipWithIndex.foreach { case (m, idx) =>
+          val (nameA, clubA, _) = getPlayerInfo(m.stNoA, pants)
+          val (nameB, clubB, _) = getPlayerInfo(m.stNoB, pants)
+          val compTypStr = if (m.coTyp != null) gM(m.coTyp.msgCode) else ""
+          
+          val (info1, info2) = stage.stageConfig.format match {
+            case StageFormat.GR =>
+              val grId = m.asInstanceOf[MEntryGr].grId
+              val round = m.asInstanceOf[MEntryGr].round
+              (s"Gruppe ${StageHelper.cvrt2ExcelCol(grId)}", s"Runde $round")
+            case StageFormat.RR =>
+              val round = m.asInstanceOf[MEntryGr].round
+              ("", s"Runde $round")
+            case StageFormat.KO =>
+              val round = m.asInstanceOf[MEntryKo].round
+              val nameStr = if (round > 0) gM(s"competition.koRound.$round") else ""
+              (nameStr, "")
+            case _ =>
+              ("", "")
+          }
+          
+          val noteElem = gE(HtmlId(s"RefereeNote_${stage.coId.value}_${stage.id.value}_${idx + 1}"))
+          if (noteElem != null) {
+            setHtml(noteElem, cviews.pages.Referee.html.RefereeCardSingle(
+              stage, m.gameNo,
+              services.TourneyDB.tourney.name,
+              comp.startDate.toString,
+              stage.name,
+              compTypStr,
+              info1, info2,
+              nameA, nameB, clubA, clubB
+            ))
+            
+            val qrElem = gE(HtmlId(s"QRCode_${stage.coId.value}_${stage.id.value}_${m.gameNo}"))
+            if (qrElem != null) {
+              qrElem.innerHTML = ""
+              val qrCodeParam = new QRCodeParam { val width = 80; val height = 80 }
+              try {
+                val qrCode = new QRCode(qrElem, qrCodeParam)
+                val nonce = s"${services.TourneyDB.tourney.wpId}-${stage.coId.value}-${stage.id.value}-${m.gameNo}"
+                val refereeAddr = s"${Global.homeUrl}/?tourney=${services.TourneyDB.tourney.wpId}&page=StageInput&gameNo=${m.gameNo}&nonce=${nonce}"
+                qrCode.makeCode(refereeAddr)
+                
+                val linkElem = gE(HtmlId(s"QRCodeLink_${stage.coId.value}_${stage.id.value}_${m.gameNo}")).asInstanceOf[dom.raw.HTMLAnchorElement]
+                if (linkElem != null) {
+                  linkElem.href = refereeAddr
+                }
+              } catch {
+                case e: Throwable =>
+                  println(s"Error generating QR Code in setPage: ${e.getMessage}")
+              }
+            }
+          }
+        }
+      }
+    }
+

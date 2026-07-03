@@ -10,15 +10,33 @@
 @for(i <- 1 to (noReferees+3)/4) {
   <div class="container-fluid printarea-referee">
     <div class="row justify-content-between mb-2">
-      <div id='RefereeNote_@{stage.coId}_@{stage.id}_@{(i-1)*4 + 1}' class="refereeGrid mb-6"></div>
-      <div id='RefereeNote_@{stage.coId}_@{stage.id}_@{(i-1)*4 + 2}' class="refereeGrid mb-6"></div>
+      <div id='RefereeNote_@{stage.coId.value}_@{stage.id.value}_@{(i-1)*4 + 1}' class="refereeGrid mb-6"></div>
+      <div id='RefereeNote_@{stage.coId.value}_@{stage.id.value}_@{(i-1)*4 + 2}' class="refereeGrid mb-6"></div>
     </div>
     <div class="row border-bottom-0 border-secondary" style="height: 20px;"></div>
     <div class="row" style="height: 20px;"></div>
     <div class="row justify-content-between mt-2">
-      <div id='RefereeNote_@{stage.coId}_@{stage.id}_@{(i-1)*4 + 3}' class="refereeGrid mt-6"></div>
-      <div id='RefereeNote_@{stage.coId}_@{stage.id}_@{(i-1)*4 + 4}' class="refereeGrid mt-6"></div>
+      <div id='RefereeNote_@{stage.coId.value}_@{stage.id.value}_@{(i-1)*4 + 3}' class="refereeGrid mt-6"></div>
+      <div id='RefereeNote_@{stage.coId.value}_@{stage.id.value}_@{(i-1)*4 + 4}' class="refereeGrid mt-6"></div>
     </div>
   </div>
   <div style="break-after:page">&nbsp;</div>
 }
+
+<style>
+  .printarea-referee {
+    page-break-after:always;
+    break-after: page;
+    display: block!important;
+  }
+
+  .refereeGrid {
+    display: grid; 
+
+    grid-template-rows:  repeat(18, 34px);
+    grid-template-columns: repeat(10, 42px);
+    
+    gap: 0px;
+    height: 100%;
+  }
+</style>

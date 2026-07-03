@@ -6,10 +6,13 @@ import services.{TourneyDB, StageDB}
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
+import org.scalajs.dom.raw.HTMLElement
+import shared.DomTypes.HtmlId
+
 /**
  * TestStage provides addon console commands to test Stage functionality.
  */
-object TestStage:
+object TestStage extends base.JsWrapper:
 
   def exec(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     number match
@@ -17,6 +20,7 @@ object TestStage:
       case 2 => testStage_delete(group, number, param)
       case 3 => testStage_list(group, number, param)
       case 4 => testStage_sync(group, number, param)
+      case 5 => testStage_referee(group, number, param)
       case _ =>
         addOutput(s"FAILED: ${group}-Test:${number} param:${param} unknown test number")
         Future(Left(AppError("unknown test number")))
@@ -87,3 +91,30 @@ object TestStage:
     addOutput(s"Syncing stages...")
     TourneyDB.tourney.syncStages()
     Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))
+
+  /**
+   * Test 5: Generate referee cards for a stage. Param: stageId
+   */
+  def testStage_referee(group: String, number: Int, param: String): Future[Either[AppError, String]] =
+    try
+      val stageId = StageId.fromInt(param.toInt)
+      val activeStages = TourneyDB.tourney.stages.filter(r => r != null)
+      activeStages.find(_.id == stageId) match {
+        case Some(stage) =>
+          val parentId = HtmlId(s"RefereeContent_${stage.coId.value}_${stage.id.value}")
+          val elem = eE[HTMLElement](parentId, "div")
+          elem.style.display = "block"
+          
+          addOutput(s"Generating referee page for Stage ${stage.name} (ID: ${stage.id.value})...")
+          pages.Stage.StageScoreSheet.setPage(stage)
+          
+          addOutput(s"SUCCESS: Generated referee cards in #${parentId.id}")
+          Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))
+        case None =>
+          addOutput(s"Stage with ID $param not found")
+          Future(Left(AppError("stage.not.found")))
+      }
+    catch
+      case _: Exception =>
+        addOutput(s"Invalid Stage ID: $param")
+        Future(Left(AppError("invalid.id")))
