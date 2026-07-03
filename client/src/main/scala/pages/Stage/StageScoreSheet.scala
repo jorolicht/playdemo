@@ -193,7 +193,7 @@ object StageScoreSheet extends BasePage with JsWrapper:
         ("", "")
 
   private def loadQRCodeLib(callback: () => Unit): Unit =
-    if (!js.isUndefined(js.Dynamic.global.QRCode)) {
+    if (!js.isUndefined(js.Dynamic.global.selectDynamic("QRCode"))) {
       callback()
     } else {
       val script = dom.document.createElement("script").asInstanceOf[dom.html.Script]
@@ -215,7 +215,7 @@ object StageScoreSheet extends BasePage with JsWrapper:
         qrElem.innerHTML = "" // Clear container
         val qrCodeParam = new QRCodeParam { val width = 80; val height = 80 }
         try {
-          if (!js.isUndefined(js.Dynamic.global.QRCode)) {
+          if (!js.isUndefined(js.Dynamic.global.selectDynamic("QRCode"))) {
             val qrCode = new QRCode(qrElem.asInstanceOf[HTMLElement], qrCodeParam)
             qrCode.makeCode(refereeAddr)
           } else {
@@ -286,7 +286,7 @@ object StageScoreSheet extends BasePage with JsWrapper:
                 val nonce = s"${services.TourneyDB.tourney.wpId}-${stage.coId.value}-${stage.id.value}-${m.gameNo}"
                 val refereeAddr = s"${Global.homeUrl}/?tourney=${services.TourneyDB.tourney.wpId}&page=StageInput&gameNo=${m.gameNo}&nonce=${nonce}"
                 
-                if (!js.isUndefined(js.Dynamic.global.QRCode)) {
+                if (!js.isUndefined(js.Dynamic.global.selectDynamic("QRCode"))) {
                   val qrCode = new QRCode(qrElem, qrCodeParam)
                   qrCode.makeCode(refereeAddr)
                 } else {
