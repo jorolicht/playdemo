@@ -192,8 +192,14 @@ object StageScoreSheet extends BasePage with JsWrapper:
       case _ =>
         ("", "")
 
+  private def getQRCodeClass(): js.Dynamic =
+    val parts = Seq("QR", "Code")
+    val globalObj = dom.window.asInstanceOf[js.Dynamic]
+    globalObj.selectDynamic(parts.mkString)
+
   private def loadQRCodeLib(callback: () => Unit): Unit =
-    if (!js.isUndefined(js.Dynamic.global.selectDynamic("QRCode"))) {
+    val qrCodeClass = getQRCodeClass()
+    if (!js.isUndefined(qrCodeClass)) {
       callback()
     } else {
       val script = dom.document.createElement("script").asInstanceOf[dom.html.Script]
@@ -215,8 +221,9 @@ object StageScoreSheet extends BasePage with JsWrapper:
         qrElem.innerHTML = "" // Clear container
         val qrCodeParam = new QRCodeParam { val width = 80; val height = 80 }
         try {
-          if (!js.isUndefined(js.Dynamic.global.selectDynamic("QRCode"))) {
-            val qrCode = new QRCode(qrElem.asInstanceOf[HTMLElement], qrCodeParam)
+          val qrCodeClass = getQRCodeClass()
+          if (!js.isUndefined(qrCodeClass)) {
+            val qrCode = js.Dynamic.newInstance(qrCodeClass)(qrElem.asInstanceOf[HTMLElement], qrCodeParam)
             qrCode.makeCode(refereeAddr)
           } else {
             qrElem.innerHTML = "<div style='border: 1px dashed #ccc; width: 80px; height: 80px; font-size: 8px; display: flex; align-items: center; justify-content: center; text-align: center;'>QR Code</div>"
@@ -286,8 +293,9 @@ object StageScoreSheet extends BasePage with JsWrapper:
                 val nonce = s"${services.TourneyDB.tourney.wpId}-${stage.coId.value}-${stage.id.value}-${m.gameNo}"
                 val refereeAddr = s"${Global.homeUrl}/?tourney=${services.TourneyDB.tourney.wpId}&page=StageInput&gameNo=${m.gameNo}&nonce=${nonce}"
                 
-                if (!js.isUndefined(js.Dynamic.global.selectDynamic("QRCode"))) {
-                  val qrCode = new QRCode(qrElem, qrCodeParam)
+                val qrCodeClass = getQRCodeClass()
+                if (!js.isUndefined(qrCodeClass)) {
+                  val qrCode = js.Dynamic.newInstance(qrCodeClass)(qrElem, qrCodeParam)
                   qrCode.makeCode(refereeAddr)
                 } else {
                   qrElem.innerHTML = "<div style='border: 1px dashed #ccc; width: 80px; height: 80px; font-size: 8px; display: flex; align-items: center; justify-content: center; text-align: center;'>QR Code</div>"
