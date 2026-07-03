@@ -215,8 +215,12 @@ object StageScoreSheet extends BasePage with JsWrapper:
         qrElem.innerHTML = "" // Clear container
         val qrCodeParam = new QRCodeParam { val width = 80; val height = 80 }
         try {
-          val qrCode = new QRCode(qrElem.asInstanceOf[HTMLElement], qrCodeParam)
-          qrCode.makeCode(refereeAddr)
+          if (!js.isUndefined(js.Dynamic.global.QRCode)) {
+            val qrCode = new QRCode(qrElem.asInstanceOf[HTMLElement], qrCodeParam)
+            qrCode.makeCode(refereeAddr)
+          } else {
+            qrElem.innerHTML = "<div style='border: 1px dashed #ccc; width: 80px; height: 80px; font-size: 8px; display: flex; align-items: center; justify-content: center; text-align: center;'>QR Code</div>"
+          }
         } catch {
           case e: Throwable =>
             println(s"Error generating QR Code: ${e.getMessage}")
@@ -279,10 +283,15 @@ object StageScoreSheet extends BasePage with JsWrapper:
               qrElem.innerHTML = ""
               val qrCodeParam = new QRCodeParam { val width = 80; val height = 80 }
               try {
-                val qrCode = new QRCode(qrElem, qrCodeParam)
                 val nonce = s"${services.TourneyDB.tourney.wpId}-${stage.coId.value}-${stage.id.value}-${m.gameNo}"
                 val refereeAddr = s"${Global.homeUrl}/?tourney=${services.TourneyDB.tourney.wpId}&page=StageInput&gameNo=${m.gameNo}&nonce=${nonce}"
-                qrCode.makeCode(refereeAddr)
+                
+                if (!js.isUndefined(js.Dynamic.global.QRCode)) {
+                  val qrCode = new QRCode(qrElem, qrCodeParam)
+                  qrCode.makeCode(refereeAddr)
+                } else {
+                  qrElem.innerHTML = "<div style='border: 1px dashed #ccc; width: 80px; height: 80px; font-size: 8px; display: flex; align-items: center; justify-content: center; text-align: center;'>QR Code</div>"
+                }
                 
                 val linkElem = gE(HtmlId(s"QRCodeLink_${stage.coId.value}_${stage.id.value}_${m.gameNo}")).asInstanceOf[dom.raw.HTMLAnchorElement]
                 if (linkElem != null) {
