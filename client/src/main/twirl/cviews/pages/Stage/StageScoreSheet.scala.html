@@ -190,7 +190,7 @@
                     @defining(roundMatches.filterNot(x => x._1.stNoA.isBye || x._1.stNoB.isBye || x._1.stNoA.isNN || x._1.stNoB.isNN)) { printableRoundMatches =>
                         @for(i <- 1 to (printableRoundMatches.length + 3) / 4) {
                             <div class="printable-card-round-@roundNo printarea-referee py-2">
-                                <div class="row justify-content-between mb-4 mx-0" style="height: 612px;">
+                                <div class="row justify-content-between mb-4 mx-0">
                                     @defining((i-1)*4 + 1) { idx =>
                                         @if(idx <= printableRoundMatches.length) {
                                             @defining(printableRoundMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
@@ -211,7 +211,7 @@
                                     }
                                 </div>
                                 <div class="row border-bottom-0 border-secondary mx-0" style="height: 20px;"></div>
-                                <div class="row justify-content-between mt-4 mx-0" style="height: 612px;">
+                                <div class="row justify-content-between mt-4 mx-0">
                                     @defining((i-1)*4 + 3) { idx =>
                                         @if(idx <= printableRoundMatches.length) {
                                             @defining(printableRoundMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
@@ -241,7 +241,7 @@
             <div id="scoresheet-print-area" class="d-none">
                 @for(i <- 1 to (activeMatches.length + 3) / 4) {
                     <div class="printarea-referee py-2">
-                        <div class="row justify-content-between mb-4 mx-0" style="height: 612px;">
+                        <div class="row justify-content-between mb-4 mx-0">
                             @defining((i-1)*4 + 1) { idx =>
                                 @if(idx <= activeMatches.length) {
                                     @defining(activeMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
@@ -262,7 +262,7 @@
                             }
                         </div>
                         <div class="row border-bottom-0 border-secondary mx-0" style="height: 20px;"></div>
-                        <div class="row justify-content-between mt-4 mx-0" style="height: 612px;">
+                        <div class="row justify-content-between mt-4 mx-0">
                             @defining((i-1)*4 + 3) { idx =>
                                 @if(idx <= activeMatches.length) {
                                     @defining(activeMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
@@ -340,9 +340,22 @@
         }
         
         body .refereeGrid {
+            zoom: 0.8 !important;
             box-shadow: none !important;
             border: 1px solid #000 !important;
             margin: 0 !important;
+        }
+    }
+
+    /* Screen-only responsive scaling to prevent cards from overflowing narrow viewports */
+    @@media screen and (max-width: 480px) {
+        .scoresheet-view .refereeGrid {
+            zoom: 0.85 !important;
+        }
+    }
+    @@media screen and (max-width: 380px) {
+        .scoresheet-view .refereeGrid {
+            zoom: 0.7 !important;
         }
     }
 </style>
