@@ -97,9 +97,22 @@ object TestStage extends base.JsWrapper:
    */
   def testStage_referee(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     try
-      val stageId = StageId.fromInt(param.toInt)
       val activeStages = TourneyDB.tourney.stages.filter(r => r != null)
-      activeStages.find(_.id == stageId) match {
+      if (activeStages.isEmpty) {
+        addOutput("No active stages found in the tournament to generate referee cards for.")
+        return Future(Left(AppError("no.stages.found")))
+      }
+      
+      val stageOpt = if (param.trim.isEmpty) {
+        val defaultStage = activeStages.head
+        addOutput(s"No Stage ID specified in --param. Using default Stage: '${defaultStage.name}' (ID: ${defaultStage.id.value}).")
+        Some(defaultStage)
+      } else {
+        val stageId = StageId.fromInt(param.trim.toInt)
+        activeStages.find(_.id == stageId)
+      }
+      
+      stageOpt match {
         case Some(stage) =>
           val parentId = HtmlId(s"RefereeContent_${stage.coId.value}_${stage.id.value}")
           val elem = eE[HTMLElement](parentId, "div")
@@ -116,5 +129,5 @@ object TestStage extends base.JsWrapper:
       }
     catch
       case _: Exception =>
-        addOutput(s"Invalid Stage ID: $param")
+        addOutput(s"Invalid Stage ID: '$param'. Please provide a valid integer Stage ID in --param.")
         Future(Left(AppError("invalid.id")))
