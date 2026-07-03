@@ -21,6 +21,7 @@ object TestCompetition:
       case 4 => testCompetition_sync(group, number, param)
       case 5 => testCompetition_addPants(group, number, param)
       case 6 => testCompetition_jsonDecode(group, number, param)
+      case 7 => testCompetition_listWithStages(group, number, param)
       case _ =>
         addOutput(s"FAILED: ${group}-Test:${number} param:${param} unknown test number")
         Future(Left(AppError("unknown test number")))
@@ -166,3 +167,22 @@ object TestCompetition:
         println(msg)
         ex.printStackTrace()
         Future(Left(AppError("decode.failed", msg)))
+
+  /**
+   * Test 7: List all competitions along with their stages.
+   */
+  def testCompetition_listWithStages(group: String, number: Int, param: String): Future[Either[AppError, String]] =
+    val activeComps = TourneyDB.tourney.competitions.filter(c => c != null)
+    addOutput(s"Competitions and their Stages in DB (${activeComps.length}):")
+    activeComps.foreach { c =>
+      addOutput(s"- [${c.id.value}] ${c.name} (Type: ${c.typ}, Date: ${c.startDate})")
+      val stages = TourneyDB.tourney.stages.filter(s => s != null && s.coId == c.id)
+      if (stages.isEmpty) {
+        addOutput("  * No stages found for this competition.")
+      } else {
+        stages.foreach { s =>
+          addOutput(s"  * Stage: ${s.name} [ID: ${s.id.value}] (Format: ${s.stageConfig.format}, Status: ${s.status}, Matches: ${s.matches.length})")
+        }
+      }
+    }
+    Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))
