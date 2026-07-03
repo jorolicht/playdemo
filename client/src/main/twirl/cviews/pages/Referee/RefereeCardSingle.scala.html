@@ -1,0 +1,73 @@
+@*
+ * Template for single referee note
+ * 
+ *@
+@import shared.model.Stage
+@import cviews.helper.html.*
+
+@(stage: Stage, gameNo: Int, trnyName: String, dateTime: String, compName: String, 
+  compTyp: String, compInfo1: String, compInfo2: String, 
+  player1: String, player2: String, club1: String, club2: String)
+
+@gM(key: String) = @{ base.Messages.getMsg(key) }
+
+
+  <div class="RefereeTrnyName"><h6>@trnyName</h6></div>
+  <div class="RefereeCompName"><h6>@compName - @compTyp</h6></div>
+  <div class="RefereeCompInfo1">@compInfo1</div>
+  <div class="RefereeCompInfo2">@compInfo2</div>
+  <div class="RefereeTableInfo1">@Html(gM("tableInfo1"))</div>
+  <div class="RefereeTableInfo2">@Html(gM("tableInfo2"))</div>
+  <div class="RefereeGameNo">@gameNo</div>
+  <div class="RefereeLabelGameNo">@gM("gameNo")</div>
+  <div class="RefereeDateTime">@dateTime</div>
+  <div id='QRCode_@{stage.coId}_@{stage.id}_@{gameNo}' class="RefereeQRCode mt-2"></div>
+  <div class="RefereeLabelSet0 justify-content-end">
+    <a href="" id='QRCodeLink_@{stage.coId}_@{stage.id}_@{gameNo}'>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+        <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+      </svg>
+    </a>
+  </div>
+  <div class="RefereePlayer1">@player1</div>
+  <div class="RefereePlayer2">@player2</div>
+  <div class="RefereeLabelSet">&nbsp;</div>
+  <div class="RefereeClub1">@club1</div>
+  <div class="RefereeClub2">@club2</div>
+
+  <div class="RefereeLabelSet1">@gM("set1")</div>
+  <div class="RefereePlayer1Set1"></div>
+  <div class="RefereePlayer2Set1"></div>
+  
+  <div class="RefereeLabelSet2">@gM("set2")</div>
+  <div class="RefereePlayer1Set2"></div>
+  <div class="RefereePlayer2Set2"></div>
+
+  <div class="RefereeLabelSet3">@gM("set3")</div>
+  <div class="RefereePlayer1Set3"></div>
+  <div class="RefereePlayer2Set3"></div>
+
+  <div class="RefereeLabelSet4">@if(stage.noWinSets==3)@{gM("set4")}</div>
+  <div class="RefereePlayer1Set4"></div>
+  <div class="RefereePlayer2Set4"></div>
+  
+  <div class="RefereeLabelSet5">@if(stage.noWinSets==3)@{gM("set5")}</div>
+  <div class="RefereePlayer1Set5"></div>
+  <div class="RefereePlayer2Set5"></div>
+  
+  <div class="RefereeLabelSet6">@if(stage.noWinSets==4)@{gM("set6")}</div>
+  <div class="RefereePlayer1Set6"></div>
+  <div class="RefereePlayer2Set6"></div>
+  
+  <div class="RefereeLabelSet7">@if(stage.noWinSets==4)@{gM("set7")}</div>
+  <div class="RefereePlayer1Set7"></div>
+  <div class="RefereePlayer2Set7"></div>
+
+  <div class="RefereeLabelSets">@gM("sets")</div>
+  <div class="RefereePlayer1Sets"></div>
+  <div class="RefereePlayer2Sets"></div>
+
+  <div class="RefereeLabelWinner">@gM("winner")</div>
+  <div class="RefereePlayer1Winner"></div>
+  <div class="RefereePlayer2Winner"></div>
