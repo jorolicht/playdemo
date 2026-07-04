@@ -20,7 +20,7 @@
   "err00005.promise.sha256": "Fehler in Routine sha256: {0}",
   "StageInput.no_matches": "Keine Spiele für diese Stage vorhanden.",
   "PlayerRegistration.snr_header": "SNr",
-  "CompetitionInfo.stage_header": "Wettbewerbsphase",
+  "CompetitionInfo.stage_header": "Name",
   "PlayerRegistration.csv_upload": "CSV Upload",
   "Sidebar.UseCase52": "UseCase52",
   "ChatExample.btn.send": "SENDEN",

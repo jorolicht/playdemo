@@ -20,7 +20,7 @@
   "err00005.promise.sha256": "Error routine sha256: {0}",
   "StageInput.no_matches": "No matches available for this stage.",
   "PlayerRegistration.snr_header": "StNo",
-  "CompetitionInfo.stage_header": "Stage",
+  "CompetitionInfo.stage_header": "Name",
   "PlayerRegistration.csv_upload": "CSV Upload",
   "Sidebar.UseCase52": "UseCase52",
   "ChatExample.btn.send": "SEND",
