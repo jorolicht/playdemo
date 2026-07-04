@@ -357,21 +357,14 @@
         }
     }
 
-    /* Prevent template cards from occupying space or being visible on-screen */
+    /* Prevent template cards from occupying space or being visible on-screen or in print */
     .print-templates-only {
-        position: absolute;
-        left: -9999px;
-        top: -9999px;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        visibility: hidden;
-    }
-
-    /* During print, hide templates so they are not printed directly */
-    @@media print {
-        .print-templates-only {
-            display: none !important;
-        }
+        position: absolute !important;
+        left: -9999px !important;
+        top: -9999px !important;
+        width: 1px !important;
+        height: 1px !important;
+        overflow: hidden !important;
+        visibility: hidden !important;
     }
 </style>

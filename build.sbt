@@ -3,7 +3,8 @@ import scala.sys.process._
 
 // Global / scalaJSStage := FullOptStage
 
-val includeAddon: Boolean  = sys.env.get("APP_INCLUDE_ADDON").contains("true")
+//val includeAddon: Boolean  = sys.env.get("APP_INCLUDE_ADDON").contains("true")
+val includeAddon: Boolean  = true // always include addon for now, can be disabled later if needed
 val appOrganization        = sys.env.getOrElse("APP_ORGANIZATION","org.jorolicht")
 val appVersion             = sys.env.getOrElse("APP_VERSION", "001")
 val appDate                = sys.env.getOrElse("APP_DATE", "1970-01-01")
