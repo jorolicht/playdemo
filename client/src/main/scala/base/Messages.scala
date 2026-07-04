@@ -24,8 +24,9 @@ object Messages extends JsWrapper with ComWrapper:
   private var messages: Map[String, String] = Map (""->"")
 
   def initMsg(version: String, dataUrl: String, lang: String): Future[Boolean] =
+    val isDebug = base.Logging.getLogLevel().contains("debug")
     messages = read[Map[String, String]](getLocalStorage("messages", "{}"))
-    if (messages.isDefinedAt("app.version") && messages("app.version") == version) then
+    if (!isDebug && messages.isDefinedAt("app.version") && messages("app.version") == version) then
       debug("Took messages from local storage")
       Future(true)
     else
