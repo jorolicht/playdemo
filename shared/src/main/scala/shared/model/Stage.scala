@@ -252,6 +252,7 @@ case class Stage(
   var nextIds:          List[StageId] = List(),
   var quali:            QualifyTyp = QualifyTyp.ALL,
   var deleted:          Boolean = false,
+  var certificate:      Boolean = false,
   var version:          Int = 0,
   val matches:          ArrayBuffer[MEntry] = ArrayBuffer.empty
 ):
