@@ -368,14 +368,10 @@
         visibility: hidden;
     }
 
-    /* During print, restore them to layout flow */
+    /* During print, hide templates so they are not printed directly */
     @@media print {
         .print-templates-only {
-            position: static;
-            width: auto;
-            height: auto;
-            overflow: visible;
-            visibility: visible;
+            display: none !important;
         }
     }
 </style>
