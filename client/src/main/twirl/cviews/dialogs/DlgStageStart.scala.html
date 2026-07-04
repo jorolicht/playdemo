@@ -8,21 +8,21 @@
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" @id(StartLabelId)>Neue Stage starten</h5>
+                <h5 class="modal-title" @id(StartLabelId)>@gM("DlgStageStart.title")</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" @id(CloseId)></button>
             </div>
             <div class="modal-body">
                 <form @id(FormId) onsubmit="return false;">
                     <div class="mb-3">
-                        <label @forAttr(InputNameId) class="form-label fw-bold">Name der Stage</label>
-                        <input type="text" class="form-control" @id(InputNameId) placeholder="z.B. Vorrunde Gruppe A" required>
+                        <label @forAttr(InputNameId) class="form-label fw-bold">@gM("DlgStageStart.name_label")</label>
+                        <input type="text" class="form-control" @id(InputNameId) placeholder="@gM("DlgStageStart.name_placeholder")" required>
                     </div>
 
                     @if(stages.nonEmpty) {
                         <div class="mb-3">
-                            <label @forAttr(InputPrefId) class="form-label fw-bold">Nachfolge-Stage von:</label>
+                            <label @forAttr(InputPrefId) class="form-label fw-bold">@gM("DlgStageStart.pref_label")</label>
                             <select class="form-select" @id(InputPrefId)>
-                                <option value="0">-- Bitte Vorgänger-Stage auswählen --</option>
+                                <option value="0">@gM("DlgStageStart.pref_placeholder")</option>
                                 @stages.map { r =>
                                     <option value="@r.id.value">@r.name (@r.status)</option>
                                 }
@@ -31,14 +31,14 @@
                     } else {
                         <input type="hidden" @id(InputPrefId) value="0">
                         <div class="alert alert-info py-2 small">
-                            <i class="bi bi-info-circle me-2"></i><strong>Hinweis: Startstage</strong> (Erste Stage für diesen Wettbewerb).
+                            <i class="bi bi-info-circle me-2"></i>@gM("DlgStageStart.start_notice")
                         </div>
                     }
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>Abbrechen</button>
-                <button type="button" class="btn btn-primary" @id(ApplyId)>Start</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>@gM("DlgStageStart.cancel")</button>
+                <button type="button" class="btn btn-primary" @id(ApplyId)>@gM("DlgStageStart.start")</button>
             </div>
         </div>
     </div>

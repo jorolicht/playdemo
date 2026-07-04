@@ -74,13 +74,13 @@ object DlgStageStart extends BaseDialog with JsWrapper:
     gE(ApplyId).onclick = { (_: MouseEvent) =>
       val rName = getInput(gE(InputNameId)).trim
       if (rName.length < 2) {
-        dom.window.alert("Bitte geben Sie einen gültigen Namen für die Stage ein.")
+        dom.window.alert(base.Messages.getMsg("DlgStageStart.err_name"))
       } else if (existingStages.exists(_.name.equalsIgnoreCase(rName))) {
-        dom.window.alert("Eine Stage mit diesem Namen existiert bereits in diesem Wettbewerb.")
+        dom.window.alert(base.Messages.getMsg("DlgStageStart.err_exists"))
       } else {
         val prefVal = getInput(gE(InputPrefId)).toInt
         if (existingStages.nonEmpty && prefVal == 0) {
-          dom.window.alert("Bitte wählen Sie eine Vorgänger-Stage aus.")
+          dom.window.alert(base.Messages.getMsg("DlgStageStart.err_pref"))
         } else {
           val prefId = if (prefVal == 0) None else Some(StageId.fromInt(prefVal))
           if (!p.isCompleted) p.success(Right(DlgStageStartResult(rName, prefId)))

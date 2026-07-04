@@ -4,3 +4,16 @@
 ###
 DlgPrompt.title            = Konsole
 DlgPrompt.plh.command      = <command> <parameter>
+
+DlgStageStart.title = Neue Wettbewerbsphase starten
+DlgStageStart.name_label = Name der Wettbewerbsphase
+DlgStageStart.name_placeholder = z.B. Vorrunde Gruppe A
+DlgStageStart.pref_label = Nachfolge-Wettbewerbsphase von:
+DlgStageStart.pref_placeholder = -- Bitte Vorgänger-Wettbewerbsphase auswählen --
+DlgStageStart.start_notice = Hinweis: Start-Wettbewerbsphase (Erste Wettbewerbsphase für diesen Wettbewerb).
+DlgStageStart.cancel = Abbrechen
+DlgStageStart.start = Start
+DlgStageStart.err_name = Bitte geben Sie einen gültigen Namen für die Wettbewerbsphase ein.
+DlgStageStart.err_exists = Eine Wettbewerbsphase mit diesem Namen existiert bereits in diesem Wettbewerb.
+DlgStageStart.err_pref = Bitte wählen Sie eine Vorgänger-Wettbewerbsphase aus.
+
