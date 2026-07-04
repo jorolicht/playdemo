@@ -282,7 +282,7 @@ case class Stage(
     case StageData.RoundRobinStage(rr) =>
       shared.utils.GroupPlan.get(rr.size).noRounds
     case StageData.SwissStage(sw) =>
-      if (sw.size > 0) shared.utils.GroupPlan.get(sw.size).noRounds else 0
+      sw.pairing.length
     case StageData.KnockoutStage(ko) =>
       ko.rnds
     case null => 0
