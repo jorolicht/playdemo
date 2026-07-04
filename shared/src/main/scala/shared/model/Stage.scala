@@ -276,6 +276,18 @@ case class Stage(
   def isGroupStage: Boolean = stageConfig.format == StageFormat.GR
   def isKoStage: Boolean    = stageConfig.format == StageFormat.KO
 
+  def getMaxRound: Int = data match {
+    case StageData.GroupsStage(groups) =>
+      groups.map(g => shared.utils.GroupPlan.get(g.size).noRounds).maxOption.getOrElse(0)
+    case StageData.RoundRobinStage(rr) =>
+      shared.utils.GroupPlan.get(rr.size).noRounds
+    case StageData.SwissStage(sw) =>
+      if (sw.size > 0) shared.utils.GroupPlan.get(sw.size).noRounds else 0
+    case StageData.KnockoutStage(ko) =>
+      ko.rnds
+    case null => 0
+  }
+
 
   /**
    * Initialisiert die Matches für diese Stage basierend auf dem Wettbewerbstyp.

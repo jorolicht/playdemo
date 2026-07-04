@@ -22,3 +22,8 @@ CompetitionInfo.club_header = Club
 CompetitionInfo.ttr_header = TTR
 CompetitionInfo.year_header = YOB
 CompetitionInfo.no_participants = No active participants.
+CompetitionInfo.rounds_header = Rounds
+CompetitionInfo.certificates_header = Certificates
+CompetitionInfo.cert_yes = YES
+CompetitionInfo.cert_no = NO
+

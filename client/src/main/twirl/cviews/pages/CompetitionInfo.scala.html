@@ -58,18 +58,21 @@
                         <tr>
                             <th class="ps-3">@gM("+stage_header")</th>
                             <th>@gM("+participants_header")</th>
+                            <th>@gM("+rounds_header")</th>
                             <th>@gM("+status_header")</th>
+                            <th>@gM("+certificates_header")</th>
                             <th class="text-end pe-3">@gM("+actions_header")</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if(stages.isEmpty) {
-                            <tr><td colspan="4" class="text-center py-4 text-muted">@gM("+no_stages")</td></tr>
+                            <tr><td colspan="6" class="text-center py-4 text-muted">@gM("+no_stages")</td></tr>
                         }
                         @stages.map { r =>
                             <tr>
                                 <td class="ps-3 fw-bold">@r.name</td>
                                 <td>@r.noPlayers</td>
+                                <td>@r.getMaxRound</td>
                                 <td>
                                     <span class="badge @{r.status match {
                                         case StageStatus.CFG => "bg-secondary"
@@ -78,6 +81,12 @@
                                         case StageStatus.FIN => "bg-success"
                                         case _ => "bg-light text-dark"
                                     }}">@r.status</span>
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm border-secondary-subtle" style="width: auto;" @id(SelectCert, "onchange", r.id.value.toString) @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN){disabled}>
+                                        <option value="true" @{if(r.certificate) "selected" else ""}>@gM("+cert_yes")</option>
+                                        <option value="false" @{if(!r.certificate) "selected" else ""}>@gM("+cert_no")</option>
+                                    </select>
                                 </td>
                                 <td class="text-end pe-3">
                                     <div class="btn-group btn-group-sm">

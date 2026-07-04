@@ -28,6 +28,8 @@ object CompetitionInfo extends BasePage with JsWrapper:
   val BtnStartStage:     HtmlId = genId(name)
   /** Button prefix to delete a specific stage. */
   val BtnDeleteStage:    HtmlId = genId(name)
+  /** Select dropdown to update stage certificate configuration. */
+  val SelectCert:        HtmlId = genId(name)
 
   // Header IDs for sorting
   val IdHeaderSno:       HtmlId = genId(name)
@@ -153,8 +155,31 @@ object CompetitionInfo extends BasePage with JsWrapper:
         val stageId = StageId(elem.id.substring(BtnDeleteStage.id.length + 1).toInt)
         handleDeleteStage(stageId)
 
+      case id if id.id.startsWith(SelectCert.id) =>
+        val stageId = StageId(elem.id.substring(SelectCert.id.length + 1).toInt)
+        val select = elem.asInstanceOf[dom.html.Select]
+        val certVal = select.value == "true"
+        handleCertificateChange(stageId, certVal)
+
       case _ => 
         debug(s"CompetitionInfo handleEvent: ${elem.id}")
+
+  private def handleCertificateChange(stageId: StageId, value: Boolean): Unit =
+    val stages = services.TourneyDB.tourney.stages
+    val rIdx = stageId.value - 1
+    if (rIdx >= 0 && rIdx < 128 && stages(rIdx) != null) {
+      val r = stages(rIdx)
+      r.certificate = value
+      services.TourneyDB.tourney.updateStage(r) match {
+        case Right(updatedStage) =>
+          if (Global.currentSelection.stage.exists(_.id == stageId)) {
+            Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+          }
+          render()
+        case Left(err) =>
+          error(s"Failed to update stage certificate: ${err.msgCode}")
+      }
+    }
 
   private def handleDeleteStage(stageId: StageId): Unit =
     import shared.BoxButton

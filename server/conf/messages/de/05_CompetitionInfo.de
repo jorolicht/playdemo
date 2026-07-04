@@ -22,3 +22,8 @@ CompetitionInfo.club_header = Verein
 CompetitionInfo.ttr_header = TTR
 CompetitionInfo.year_header = JG
 CompetitionInfo.no_participants = Keine Teilnehmer aktiv.
+CompetitionInfo.rounds_header = Runden
+CompetitionInfo.certificates_header = Urkunden
+CompetitionInfo.cert_yes = JA
+CompetitionInfo.cert_no = NEIN
+
