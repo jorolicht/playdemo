@@ -173,7 +173,7 @@
         </div>
 
             <!-- Hidden template cards for round and single printing -->
-            <div id="scoresheets-hidden-templates" class="d-none">
+            <div id="scoresheets-hidden-templates" class="print-templates-only">
                 <!-- Single printing templates -->
                 @mList.map { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                     @if(!(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN)) {
@@ -354,6 +354,28 @@
     @@media screen and (max-width: 380px) {
         .scoresheet-view .refereeGrid {
             zoom: 0.7 !important;
+        }
+    }
+
+    /* Prevent template cards from occupying space or being visible on-screen */
+    .print-templates-only {
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        visibility: hidden;
+    }
+
+    /* During print, restore them to layout flow */
+    @@media print {
+        .print-templates-only {
+            position: static;
+            width: auto;
+            height: auto;
+            overflow: visible;
+            visibility: visible;
         }
     }
 </style>
