@@ -63,6 +63,13 @@ object Messages extends JsWrapper with ComWrapper:
 
   def loadConfigMsg(jsFile: String): Future[Either[AppError, Map[String, String]]] = {
 
+    val cacheBustedFile = if (base.Logging.getLogLevel().contains("debug")) {
+      val timestamp = new scala.scalajs.js.Date().getTime().toLong
+      if (jsFile.contains("?")) s"$jsFile&t=$timestamp" else s"$jsFile?t=$timestamp"
+    } else {
+      jsFile
+    }
+
     val fetchOptions = new dom.RequestInit {
       method = dom.HttpMethod.GET
       // 'reload' zwingt den Browser, die Datei vom Server zu holen,
@@ -71,7 +78,7 @@ object Messages extends JsWrapper with ComWrapper:
     }
 
     // Die Hauptlogik muss im Future bleiben, um asynchrone Fehler zu fangen
-    dom.fetch(jsFile, fetchOptions)
+    dom.fetch(cacheBustedFile, fetchOptions)
       .toFuture
       .flatMap { response =>
         // --- 1. HTTP-Status prüfen ---
