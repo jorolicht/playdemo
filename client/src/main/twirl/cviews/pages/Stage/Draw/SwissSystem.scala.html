@@ -26,6 +26,17 @@
   if (idx != -1) idx + 1 else 0
 }
 
+@hasPlayedBefore(sno1: SNO, sno2: SNO, rnd: Int) = @{
+  if (sno1.isBye || sno2.isBye || sno1 == SNO.nn || sno2 == SNO.nn) false
+  else {
+    stage.matches.exists { m =>
+      m.round < rnd &&
+      ((m.stNoA == sno1 && m.stNoB == sno2) || (m.stNoA == sno2 && m.stNoB == sno1))
+    }
+  }
+}
+
+
 @renderMatchPairings(rMatches: Seq[MEntrySw]) = {
   <div class="row row-cols-1 g-3">
     @if(rMatches.isEmpty) {
@@ -88,16 +99,16 @@
 }
 
 
-@playerBox(p: Pant, pos: Int) = {
+@playerBox(p: Pant, pos: Int, isRed: Boolean = false) = {
   @defining(p.id.isBye || p.id.isNN) { isBye =>
     <div @id(PlayerItem, "onclick", s"1-${p.id.toString}") 
-         class="player-draw-item card p-2 h-100 border @{if (isBye) "bg-light bg-opacity-50 text-muted" else ""}" 
+         class="player-draw-item card p-2 h-100 border @{if (isBye) "bg-light bg-opacity-50 text-muted" else ""} @{if (isRed) "border-danger border-opacity-50" else ""}" 
          style="cursor: pointer; min-height: 50px;">
       <div class="d-flex justify-content-between align-items-center w-100 h-100">
         <div class="d-flex align-items-center gap-2">
           <span class="badge bg-secondary bg-opacity-25 text-dark fw-bold">@pos</span>
           <div>
-            <strong class="player-name">@{if (isBye) gM("bye") else p.name}</strong>
+            <strong class="player-name @{if (isRed) "text-danger" else ""}">@{if (isBye) gM("bye") else p.name}</strong>
             @if(!isBye && p.club.trim.nonEmpty) {
               <small class="text-muted ms-1">(@p.club)</small>
             }
@@ -161,22 +172,24 @@
                       @if(pants.isEmpty) {
                         <div class="col text-center py-5 text-muted italic">Keine Spieler vorhanden.</div>
                       }
-                      @for(i <- 0 until pants.length by 2) {
-                        @defining(if (pants(i) != null) pants(i) else Pant(SNO.nn)) { p1 =>
-                          @defining(if (pants(i+1) != null) pants(i+1) else Pant(SNO.nn)) { p2 =>
-                            <div class="col">
-                              <div class="row align-items-center">
-                                <div class="col-md-5">
-                                  @playerBox(p1, ttrRank(p1))
-                                </div>
-                                <div class="col-md-2 text-center py-2">
-                                  <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-1">VS</span>
-                                </div>
-                                <div class="col-md-5">
-                                  @playerBox(p2, ttrRank(p2))
+                      @for(pair <- g.pairing(r - 1)) {
+                        @defining(findPant(if (pair.id._1 >= 0 && pair.id._1 < g.swPants.length) g.swPants(pair.id._1).sno else SNO.nn)) { p1 =>
+                          @defining(findPant(if (pair.id._2 >= 0 && pair.id._2 < g.swPants.length) g.swPants(pair.id._2).sno else SNO.bye(g.swPants.length))) { p2 =>
+                            @defining(hasPlayedBefore(p1.id, p2.id, r)) { isRed =>
+                              <div class="col">
+                                <div class="row align-items-center">
+                                  <div class="col-md-5">
+                                    @playerBox(p1, ttrRank(p1), isRed)
+                                  </div>
+                                  <div class="col-md-2 text-center py-2">
+                                    <span class="badge @{if (isRed) "bg-danger text-white border-danger" else "bg-secondary bg-opacity-10 text-secondary border-secondary border-opacity-25"} border px-3 py-1">VS</span>
+                                  </div>
+                                  <div class="col-md-5">
+                                    @playerBox(p2, ttrRank(p2), isRed)
+                                  </div>
                                 </div>
                               </div>
-                            </div>
+                            }
                           }
                         }
                       }

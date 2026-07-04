@@ -103,7 +103,58 @@ object SwissSys:
     }
   }
 
-  // Updates the pairing for a specific round > 1in the Swiss System stage.
+  def swapPairing(stage: Stage, round: Int, sno1: SNO, sno2: SNO): Unit = {
+    stage.data match {
+      case StageData.SwissStage(state) =>
+        if (round - 1 >= 0 && round - 1 < state.pairing.length) {
+          val pairs = state.pairing(round - 1)
+          
+          val pIdx1 = state.swPants.indexWhere(p => p != null && p.sno == sno1)
+          val pIdx2 = state.swPants.indexWhere(p => p != null && p.sno == sno2)
+          
+          val searchIdx1 = if (sno1.isBye) -1 else pIdx1
+          val searchIdx2 = if (sno2.isBye) -1 else pIdx2
+          
+          var pairIdx1 = -1
+          var isPos1A = true
+          var pairIdx2 = -1
+          var isPos2A = true
+          
+          for (i <- pairs.indices) {
+            val pair = pairs(i)
+            if (pair.id._1 == searchIdx1) {
+              pairIdx1 = i
+              isPos1A = true
+            } else if (pair.id._2 == searchIdx1) {
+              pairIdx1 = i
+              isPos1A = false
+            }
+            
+            if (pair.id._1 == searchIdx2) {
+              pairIdx2 = i
+              isPos2A = true
+            } else if (pair.id._2 == searchIdx2) {
+              pairIdx2 = i
+              isPos2A = false
+            }
+          }
+          
+          if (pairIdx1 != -1 && pairIdx2 != -1) {
+            val pair1 = pairs(pairIdx1)
+            val pair2 = pairs(pairIdx2)
+            
+            val newId1 = if (isPos1A) (searchIdx2, pair1.id._2) else (pair1.id._1, searchIdx2)
+            val newId2 = if (isPos2A) (searchIdx1, pair2.id._2) else (pair2.id._1, searchIdx1)
+            
+            pairs(pairIdx1) = pair1.copy(id = newId1)
+            pairs(pairIdx2) = pair2.copy(id = newId2)
+          }
+        }
+      case _ =>
+    }
+  }
+
+  // Updates the pairing for a specific round > 1 in the Swiss System stage.
   def setParing(stage: Stage, rnd: Int, newPairing: ArrayBuffer[SwissPair]): Unit = {
     println(s"setParing: rnd=$rnd, newPairing=$newPairing")
     stage.data match {

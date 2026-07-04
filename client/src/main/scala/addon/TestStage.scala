@@ -2,6 +2,7 @@ package addon
 
 import shared.model.*
 import shared.basic.*
+import shared.format.*
 import services.{TourneyDB, StageDB}
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -21,6 +22,7 @@ object TestStage extends base.JsWrapper:
       case 3 => testStage_list(group, number, param)
       case 4 => testStage_sync(group, number, param)
       case 5 => testStage_referee(group, number, param)
+      case 6 => testStage_swapPairing(group, number, param)
       case _ =>
         addOutput(s"FAILED: ${group}-Test:${number} param:${param} unknown test number")
         Future(Left(AppError("unknown test number")))
@@ -132,3 +134,64 @@ object TestStage extends base.JsWrapper:
         addOutput(s"Error executing referee test: ${ex.getClass.getName}: ${ex.getMessage}")
         ex.printStackTrace()
         Future(Left(AppError("referee.test.failed", ex.getMessage)))
+
+  /**
+   * Test 6: Test Swiss pairing swapping. Param: stageId
+   */
+  def testStage_swapPairing(group: String, number: Int, param: String): Future[Either[AppError, String]] =
+    try
+      val stageId = StageId.fromInt(param.trim.toInt)
+      val stageOpt = TourneyDB.tourney.stages.filter(_ != null).find(_.id == stageId)
+      stageOpt match
+        case Some(stage) =>
+          stage.data match
+            case StageData.SwissStage(sw) =>
+              addOutput(s"Testing Swiss pairing swap for stage: ${stage.name}")
+              addOutput(s"Initial swPants order: ${sw.swPants.map(_.sno).mkString(", ")}")
+              
+              // 1. Test swapPlayers (Round 1 swap)
+              if (sw.swPants.length >= 2) {
+                val sno1 = sw.swPants(0).sno
+                val sno2 = sw.swPants(1).sno
+                addOutput(s"Swapping players: $sno1 and $sno2 in swPants")
+                SwissSys.swapPlayers(stage, sno1, sno2)
+                addOutput(s"New swPants order: ${sw.swPants.map(_.sno).mkString(", ")}")
+              }
+              
+              // 2. Test swapPairing (Round >= 2 swap)
+              while (sw.pairing.length < 2) {
+                sw.pairing += scala.collection.mutable.ArrayBuffer.empty[SwissPair]
+              }
+              val p1A = 0
+              val p1B = 1
+              val p2A = 2
+              val p2B = 3
+              if (sw.swPants.length >= 4) {
+                sw.pairing(1).clear()
+                sw.pairing(1) += SwissPair((p1A, p1B), (0,0), (0,0))
+                sw.pairing(1) += SwissPair((p2A, p2B), (0,0), (0,0))
+                addOutput(s"Initial Round 2 Pairings: (${sw.swPants(p1A).sno} vs ${sw.swPants(p1B).sno}), (${sw.swPants(p2A).sno} vs ${sw.swPants(p2B).sno})")
+                
+                val snoA = sw.swPants(p1A).sno
+                val snoB = sw.swPants(p2A).sno
+                addOutput(s"Swapping pairings for $snoA and $snoB in Round 2")
+                SwissSys.swapPairing(stage, 2, snoA, snoB)
+                
+                val newP1A = sw.pairing(1)(0).id._1
+                val newP1B = sw.pairing(1)(0).id._2
+                val newP2A = sw.pairing(1)(1).id._1
+                val newP2B = sw.pairing(1)(1).id._2
+                addOutput(s"New Round 2 Pairings: (${sw.swPants(newP1A).sno} vs ${sw.swPants(newP1B).sno}), (${sw.swPants(newP2A).sno} vs ${sw.swPants(newP2B).sno})")
+              }
+              
+              Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))
+            case _ =>
+              addOutput("Stage is not a Swiss stage.")
+              Future(Left(AppError("not.swiss.stage")))
+        case None =>
+          addOutput(s"Stage with ID $param not found")
+          Future(Left(AppError("stage.not.found")))
+    catch
+      case ex: Exception =>
+        addOutput(s"Error: ${ex.getMessage}")
+        Future(Left(AppError("test.failed", ex.getMessage)))

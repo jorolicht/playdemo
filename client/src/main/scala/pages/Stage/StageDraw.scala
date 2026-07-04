@@ -179,7 +179,16 @@ object StageDraw extends BasePage with JsWrapper:
                       SingleElimination.swapPlayers(stage, oldSno, sno)
                     } else if (stage.stageConfig.format == StageFormat.SW) {
                       lastSwissDrawOption = DrawOption.SwManual
-                      SwissSys.swapPlayers(stage, oldSno, sno)
+                      val maxRound = if (stage.matches.isEmpty) 0 else stage.matches.collect { case m: MEntrySw => m.round }.maxOption.getOrElse(0)
+                      val sw = stage.data.asInstanceOf[StageData.SwissStage].state
+                      val numTabs = sw.pairing.length.max(1)
+                      val activeDrawRound = if (maxRound < numTabs) maxRound + 1 else 0
+                      
+                      if (activeDrawRound > 1) {
+                        SwissSys.swapPairing(stage, activeDrawRound, oldSno, sno)
+                      } else {
+                        SwissSys.swapPlayers(stage, oldSno, sno)
+                      }
                     } else {
                       Groups.swapPlayers(stage, oldGrId, oldSno, grId, sno)
                     }
