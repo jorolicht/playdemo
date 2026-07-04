@@ -276,7 +276,7 @@ case class Stage(
   def isGroupStage: Boolean = stageConfig.format == StageFormat.GR
   def isKoStage: Boolean    = stageConfig.format == StageFormat.KO
 
-  def getMaxRound: Int = data match {
+  def getNoRounds: Int = data match {
     case StageData.GroupsStage(groups) =>
       groups.map(g => shared.utils.GroupPlan.get(g.size).noRounds).maxOption.getOrElse(0)
     case StageData.RoundRobinStage(rr) =>
