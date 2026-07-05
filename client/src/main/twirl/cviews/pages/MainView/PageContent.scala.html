@@ -1,22 +1,76 @@
 @(title: String, content: String)
 <div class="container mt-4 mb-5">
-    <nav aria-label="breadcrumb">
+    <nav aria-label="breadcrumb" class="d-print-none">
       <ol class="breadcrumb mb-4 bg-light p-2 rounded shadow-sm">
         <li class="breadcrumb-item"><a href="javascript:appLoadPage('MainView', '')" class="text-decoration-none"><i class="bi bi-house-door me-1"></i>Startseite</a></li>
         <li class="breadcrumb-item active" aria-current="page">@title</li>
       </ol>
     </nav>
-    <div class="card shadow-lg border-0 overflow-hidden">
-        <div class="card-header bg-white border-0 pt-4 px-md-5">
+    <div class="card shadow-lg border-0 overflow-hidden print-card-flat">
+        <div class="card-header bg-white border-0 pt-4 px-md-5 d-print-none">
              <h1 class="display-5 fw-bold text-primary mb-0">@title</h1>
         </div>
-        <div class="card-body p-md-5 pt-3">
-            <div class="wp-content-body lh-lg">
+        <div class="card-body p-md-5 pt-3 print-no-padding">
+            <div id="wp-content-body" class="wp-content-body lh-lg">
                 @Html(content)
             </div>
         </div>
-        <div class="card-footer bg-light border-0 py-3 px-md-5 text-end">
+        <div class="card-footer bg-light border-0 py-3 px-md-5 text-end d-print-none">
             <button class="btn btn-outline-secondary btn-sm" onclick="appLoadPage('MainView', '')">Zurück</button>
         </div>
     </div>
 </div>
+
+<style>
+    @@media print {
+        /* Hide navbar, sidebar, headers, footers and other page components */
+        body .navbar,
+        body .sidebar,
+        body .context-header,
+        body .footer,
+        body .d-print-none {
+            display: none !important;
+        }
+
+        /* Reset wrappers to let content print directly */
+        body, html {
+            background: #fff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        body .container,
+        body .stage-content,
+        body #Main_AppWrapper {
+            display: block !important;
+            width: 100% !important;
+            max-width: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: transparent !important;
+        }
+
+        /* Target card container and remove borders/shadows */
+        .print-card-flat {
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .print-no-padding {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        #wp-content-body {
+            display: block !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+    }
+</style>
