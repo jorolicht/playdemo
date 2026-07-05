@@ -41,7 +41,7 @@
             <button class="btn btn-primary" onclick="window.print()">
                 <i class="bi bi-printer me-2"></i>Drucken
             </button>
-            <button class="btn btn-outline-secondary ms-2" onclick="history.back()">
+            <button class="btn btn-outline-secondary ms-2" onclick="appLoadPage('StageCertificate', '')">
                 <i class="bi bi-arrow-left me-2"></i>Zurück
             </button>
         </div>
@@ -49,8 +49,53 @@
 </div>
 
 <style>
+    @@page {
+        size: A4 portrait;
+        margin: 0 !important;
+    }
+
     @@media print {
-        .context-header, .navbar, .footer, .d-print-none { display: none !important; }
-        .certificate-container { border: none !important; box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
+        /* Hide navbar, sidebar, layout headers, footers and screen-only wrappers */
+        body .navbar,
+        body .sidebar,
+        body .context-header,
+        body .footer,
+        body .d-print-none {
+            display: none !important;
+        }
+
+        body, html {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 210mm !important;
+            height: 297mm !important;
+            background: #fff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        body .container {
+            width: 210mm !important;
+            height: 297mm !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
+
+        body .certificate-container {
+            width: 210mm !important;
+            height: 297mm !important;
+            min-height: 297mm !important;
+            border: 5mm double #ffc107 !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 20mm !important;
+            box-sizing: border-box !important;
+            background: #fff !important;
+            page-break-inside: avoid !important;
+        }
     }
 </style>
