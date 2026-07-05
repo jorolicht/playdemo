@@ -73,16 +73,7 @@
             <!-- Rechte Seite: User / Login -->
             <ul class="navbar-nav align-items-center">
                 @if(Global.user.isDefined) {
-                    <li class="nav-item dropdown me-3">
-                        <a class="nav-link dropdown-toggle nav-link-bold" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-gear-fill me-1"></i>Administration
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="adminDropdown">
-                            <li><a class="dropdown-item" @id(AdminExportId, "onclick")><i class="bi bi-download me-2"></i>Aktuelles Turnier exportieren</a></li>
-                            <li><a class="dropdown-item" @id(AdminImportId, "onclick")><i class="bi bi-upload me-2"></i>Turnier importieren</a></li>
-                        </ul>
-                        <input type="file" id="adminImportFile" style="display: none;" accept=".json" />
-                    </li>
+                    
                 }
 
                 @if(Global.user.isDefined) {

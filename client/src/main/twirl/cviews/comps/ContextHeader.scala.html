@@ -1,6 +1,7 @@
 @import shared.model.*
 @import shared.DomTypes.HtmlId
 @import cviews.helper.html.*
+@import comps.ContextHeader.*
 
 @(selection: Selection, competitions: Seq[Competition], stages: Seq[Stage])
 
@@ -90,6 +91,18 @@
                     <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('ResultList', '')">
                         <i class="bi bi-award me-1"></i>Ergebnisse
                     </button>
+                    @if(base.Global.user.isDefined) {
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light btn-sm py-1 dropdown-toggle" type="button" id="adminDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-gear-fill me-1"></i>Administration
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="adminDropdown">
+                                <li><a class="dropdown-item" @id(AdminExportId, "onclick")><i class="bi bi-download me-2"></i>Aktuelles Turnier exportieren</a></li>
+                                <li><a class="dropdown-item" @id(AdminImportId, "onclick")><i class="bi bi-upload me-2"></i>Turnier importieren</a></li>
+                            </ul>
+                        </div>
+                        <input type="file" id="adminImportFile" style="display: none;" accept=".json" />
+                    }
                 }
             </div>
         </div>

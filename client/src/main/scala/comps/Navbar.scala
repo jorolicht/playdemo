@@ -17,49 +17,14 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
   val ShowQuickCompId: HtmlId = genId(name)
   val StartFullId: HtmlId = genId(name)
   val StartSimpleId: HtmlId = genId(name)
-  val AdminExportId: HtmlId = genId(name)
-  val AdminImportId: HtmlId = genId(name)
-
   def render(param: String = "") = 
     setHtml(gE(NavbarId), cviews.comps.html.navbar()) 
-
-    val fileInput = dom.document.getElementById("adminImportFile").asInstanceOf[dom.html.Input]
-    if (fileInput != null) {
-      fileInput.addEventListener("change", (e: dom.Event) => {
-        if (fileInput.files.length > 0) {
-          val file = fileInput.files(0)
-          val reader = new dom.FileReader()
-          reader.onload = (e: dom.Event) => {
-            val jsonString = reader.result.asInstanceOf[String]
-            services.AdminManager.importTourney(jsonString).map {
-              case Right(slug) =>
-                dom.window.alert("Import erfolgreich! Das Turnier wird nun geladen.")
-                fileInput.value = "" // reset
-                pages.loadPage(PageNameTyp("TourneyInfo"), "")
-              case Left(err) =>
-                dom.window.alert(s"Fehler beim Import: ${err.msgCode}")
-                fileInput.value = "" // reset
-            }
-          }
-          reader.readAsText(file)
-        }
-      })
-    }
     true
 
   override def handleEvent(elem: org.scalajs.dom.raw.HTMLElement, event: org.scalajs.dom.Event) =
     HtmlId(elem.id) match
       case `ToggleSidebarId` => toggleClass(gE(AsideId), "d-none")
       case `DoLogoutId`      => doLogout()
-      case `AdminExportId`   => services.AdminManager.exportCurrentTourney()
-      case `AdminImportId`   => 
-        val fileInput = dom.document.getElementById("adminImportFile").asInstanceOf[dom.html.Input]
-        if (fileInput != null) {
-          // Clear the value before opening the dialog so Safari/Chrome register a 'change' 
-          // even if the exact same file is selected again.
-          fileInput.value = ""
-          fileInput.click()
-        }
       case `ShowQuickCompId` => 
         if (base.Global.user.isDefined) doQuickStart() else services.DemoManager.promptDemoMode("template-single", () => doQuickStart(), () => ())
       case `StartFullId`     => 
