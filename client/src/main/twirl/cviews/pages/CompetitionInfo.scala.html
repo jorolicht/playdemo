@@ -83,10 +83,12 @@
                                     }}">@r.status</span>
                                 </td>
                                 <td>
-                                    <select class="form-select form-select-sm border-secondary-subtle" style="width: auto;" @id(SelectCert, "onchange", r.id.value.toString) @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN){disabled}>
-                                        <option value="true" @{if(r.certificate) "selected" else ""}>@gM("+cert_yes")</option>
-                                        <option value="false" @{if(!r.certificate) "selected" else ""}>@gM("+cert_no")</option>
-                                    </select>
+                                    <input type="radio" 
+                                           name="stage-certificate-radio" 
+                                           class="form-check-input ms-2" 
+                                           @id(pages.CompetitionInfo.RadioCert, "onclick", r.id.value.toString) 
+                                           @{if(r.certificate) "checked" else ""} 
+                                           @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN){disabled}>
                                 </td>
                                 <td class="text-end pe-3">
                                     <div class="btn-group btn-group-sm">

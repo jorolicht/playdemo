@@ -1,0 +1,47 @@
+@import shared.model.*
+@import cviews.helper.html.*
+
+@(stage: Stage, comp: Competition, players: Seq[(Pant, String)])
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">
+            <i class="bi bi-award me-2"></i>@{if(base.Global.lang == "de") "Urkundenausgabe" else "Certificate Issuance"}
+        </h5>
+
+        @if(players.isEmpty) {
+            <div class="text-center py-5 text-muted italic">
+                @{if(base.Global.lang == "de") "Keine Teilnehmer vorhanden." else "No participants found."}
+            </div>
+        } else {
+            <div class="table-responsive border rounded overflow-hidden shadow-sm">
+                <table class="table table-hover align-middle mb-0 text-nowrap">
+                    <thead class="table-light small">
+                        <tr>
+                            <th class="ps-3" style="width: 150px;">@{if(base.Global.lang == "de") "Platzierung" else "Placement"}</th>
+                            <th>@{if(base.Global.lang == "de") "Name" else "Name"}</th>
+                            <th>@{if(base.Global.lang == "de") "Verein" else "Club"}</th>
+                            <th class="text-end pe-3" style="width: 200px;">@{if(base.Global.lang == "de") "Aktion" else "Action"}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @players.map { case (p, rank) =>
+                            <tr>
+                                <td class="ps-3 fw-bold">@rank</td>
+                                <td class="fw-bold">@p.name</td>
+                                <td class="text-muted">@p.club</td>
+                                <td class="text-end pe-3">
+                                    @defining(s"${p.name}|${comp.name}|${rank.replace(".", "")}") { paramStr =>
+                                        <button class="btn btn-sm btn-primary" onclick="appLoadPage('Certificate', '@paramStr')">
+                                            <i class="bi bi-award-fill me-1"></i>@{if(base.Global.lang == "de") "Urkunde anzeigen" else "Show Certificate"}
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

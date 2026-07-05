@@ -52,6 +52,13 @@
                 <i class="bi bi-file-earmark-text me-1"></i>@{if(base.Global.lang == "de") "Schiri" else "Scoresheet"}
             </a>
         </li>
+        @if(stage.certificate) {
+            <li class="nav-item">
+                <a class="nav-link @{if(activeTab == "CERT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('StageCertificate', '')">
+                    <i class="bi bi-award me-1"></i>@{if(base.Global.lang == "de") "Urkunde" else "Certificate"}
+                </a>
+            </li>
+        }
     </ul>
 
     <!-- Main Content Area -->

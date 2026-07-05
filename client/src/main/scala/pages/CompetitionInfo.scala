@@ -28,8 +28,8 @@ object CompetitionInfo extends BasePage with JsWrapper:
   val BtnStartStage:     HtmlId = genId(name)
   /** Button prefix to delete a specific stage. */
   val BtnDeleteStage:    HtmlId = genId(name)
-  /** Select dropdown to update stage certificate configuration. */
-  val SelectCert:        HtmlId = genId(name)
+  /** Radio button to update stage certificate configuration. */
+  val RadioCert:         HtmlId = genId(name)
 
   // Header IDs for sorting
   val IdHeaderSno:       HtmlId = genId(name)
@@ -155,31 +155,36 @@ object CompetitionInfo extends BasePage with JsWrapper:
         val stageId = StageId(elem.id.substring(BtnDeleteStage.id.length + 1).toInt)
         handleDeleteStage(stageId)
 
-      case id if id.id.startsWith(SelectCert.id) =>
-        val stageId = StageId(elem.id.substring(SelectCert.id.length + 1).toInt)
-        val select = elem.asInstanceOf[dom.html.Select]
-        val certVal = select.value == "true"
-        handleCertificateChange(stageId, certVal)
+      case id if id.id.startsWith(RadioCert.id) =>
+        val stageId = StageId(elem.id.substring(RadioCert.id.length + 1).toInt)
+        val isAlreadyChecked = services.TourneyDB.tourney.stages(stageId.value - 1).certificate
+        val newCertVal = !isAlreadyChecked
+        handleCertificateChange(stageId, newCertVal)
 
       case _ => 
         debug(s"CompetitionInfo handleEvent: ${elem.id}")
 
   private def handleCertificateChange(stageId: StageId, value: Boolean): Unit =
     val stages = services.TourneyDB.tourney.stages
-    val rIdx = stageId.value - 1
-    if (rIdx >= 0 && rIdx < 128 && stages(rIdx) != null) {
-      val r = stages(rIdx)
-      r.certificate = value
-      services.TourneyDB.tourney.updateStage(r) match {
-        case Right(updatedStage) =>
-          if (Global.currentSelection.stage.exists(_.id == stageId)) {
-            Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+    Global.currentSelection.competition.foreach { comp =>
+      stages.zipWithIndex.foreach { case (s, idx) =>
+        if (s != null && s.coId == comp.id && !s.deleted) {
+          val newVal = if (s.id == stageId) value else false
+          if (s.certificate != newVal) {
+            s.certificate = newVal
+            services.TourneyDB.tourney.updateStage(s) match {
+              case Right(updatedStage) =>
+                if (Global.currentSelection.stage.exists(_.id == s.id)) {
+                  Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                }
+              case Left(err) =>
+                error(s"Failed to update stage certificate: ${err.msgCode}")
+            }
           }
-          render()
-        case Left(err) =>
-          error(s"Failed to update stage certificate: ${err.msgCode}")
+        }
       }
     }
+    render()
 
   private def handleDeleteStage(stageId: StageId): Unit =
     import shared.BoxButton
