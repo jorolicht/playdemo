@@ -9,14 +9,23 @@ import base.*
 import shared.MainIds.*
 import shared.model.*
 import dialogs.*
+import shared.basic.Pickle.*
 
-object TourneyAdmin extends BasePage with JsWrapper:
+object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   def name = PageNameTyp("TourneyAdmin")
 
   val BtnExportId:      HtmlId = genId(name)
   val BtnImportId:      HtmlId = genId(name)
   val BtnClickTTId:     HtmlId = genId(name)
   val RadioCertId:      HtmlId = genId(name)
+
+  case class WpContent(rendered: String) derives ReadWriter
+  case class WpTitle(rendered: String) derives ReadWriter
+  case class WpPage(id: Int, title: WpTitle, content: WpContent) derives ReadWriter
+
+  var templates: Seq[WpPage] = Seq.empty
+  var isLoadingTemplates = false
+  var templatesLoaded = false
 
   private var activeTab = "IMPEXP" // Tabs: "IMPEXP" (Import/Export), "CTT" (ClickTT), "CERT" (Urkunden Konfiguration)
 
@@ -26,10 +35,16 @@ object TourneyAdmin extends BasePage with JsWrapper:
         if (param.nonEmpty && List("IMPEXP", "CTT", "CERT").contains(param.toUpperCase)) {
           activeTab = param.toUpperCase
         }
+
+        // Fetch templates if we select "CERT" and haven't loaded them yet
+        if (activeTab == "CERT" && !templatesLoaded && !isLoadingTemplates) {
+          fetchTemplates()
+        }
+
         comps.ContextHeader.render()
         val compsSeq = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
         val stagesSeq = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && !s.deleted)
-        setMain(cviews.pages.html.TourneyAdmin(tourney, compsSeq, stagesSeq, activeTab))
+        setMain(cviews.pages.html.TourneyAdmin(tourney, compsSeq, stagesSeq, activeTab, templates, isLoadingTemplates))
 
         // Wire change listener for adminImportFile
         val fileInput = dom.document.getElementById("adminImportFile").asInstanceOf[dom.html.Input]
@@ -60,6 +75,44 @@ object TourneyAdmin extends BasePage with JsWrapper:
         loadPage(MainSearch.name, "")
         false
 
+  private def fetchTemplates(): Unit =
+    isLoadingTemplates = true
+    ajaxGet[Seq[WpPage]]("/wp-json/wp/v2/pages?slug=templates", List(), host = Global.homeUrl).map {
+      case Right(pages) if pages.nonEmpty =>
+        val parentId = pages.head.id
+        ajaxGet[Seq[WpPage]](s"/wp-json/wp/v2/pages?parent=$parentId&per_page=100", List(), host = Global.homeUrl).map {
+          case Right(childPages) =>
+            templates = childPages.filter(_.title.rendered.trim.toUpperCase.startsWith("TT"))
+            isLoadingTemplates = false
+            templatesLoaded = true
+            render()
+          case Left(err) =>
+            debug(s"Failed to fetch child templates: ${err.msgCode}")
+            isLoadingTemplates = false
+            templatesLoaded = true
+            render()
+        }
+      case _ =>
+        debug("Parent page 'templates' not found")
+        isLoadingTemplates = false
+        templatesLoaded = true
+        render()
+    }.recover {
+      case ex =>
+        debug(s"Failed to fetch parent page 'templates': ${ex.getMessage}")
+        isLoadingTemplates = false
+        templatesLoaded = true
+        render()
+    }
+
+  private def selectTemplate(templateName: String): Unit =
+    Global.currentSelection.tourney.foreach { t =>
+      t.certTemplate = templateName
+      services.TourneyDB.update(t)
+      dom.window.alert(s"Template '$templateName' erfolgreich gespeichert!")
+      render()
+    }
+
   override def handleEvent(elem: HTMLElement, event: Event): Unit =
     HtmlId(elem.id) match
       case `BtnExportId` =>
@@ -83,13 +136,19 @@ object TourneyAdmin extends BasePage with JsWrapper:
         }
 
       case id if id.id.startsWith(RadioCertId.id) =>
-        val stageId = StageId(elem.id.substring(RadioCertId.id.length + 1).toInt)
-        val stages = services.TourneyDB.tourney.stages
-        val targetStage = stages(stageId.value - 1)
-        if (targetStage != null) {
-          val isAlreadyChecked = targetStage.certificate
-          val newCertVal = !isAlreadyChecked
-          handleCertificateChange(stageId, newCertVal)
+        val suffix = elem.id.substring(RadioCertId.id.length + 1)
+        if (suffix.startsWith("SETTMPL-")) {
+          val templateName = suffix.substring("SETTMPL-".length)
+          selectTemplate(templateName)
+        } else {
+          val stageId = StageId(suffix.toInt)
+          val stages = services.TourneyDB.tourney.stages
+          val targetStage = stages(stageId.value - 1)
+          if (targetStage != null) {
+            val isAlreadyChecked = targetStage.certificate
+            val newCertVal = !isAlreadyChecked
+            handleCertificateChange(stageId, newCertVal)
+          }
         }
 
       case _ =>

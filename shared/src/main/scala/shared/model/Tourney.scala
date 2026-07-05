@@ -24,7 +24,8 @@ case class Tourney(
   val clubs:        ArrayBuffer[Club] = ArrayBuffer(),
   val players:      ArrayBuffer[Player] = ArrayBuffer(),
   val competitions: ArrayBuffer[Competition] = ArrayBuffer.fill(64)(null),
-  val stages:       ArrayBuffer[Stage] = ArrayBuffer.fill(128)(null)
+  val stages:       ArrayBuffer[Stage] = ArrayBuffer.fill(128)(null),
+  var certTemplate: String = ""
 ):
 
   // --- Buffers for tracking changes ---
@@ -590,7 +591,8 @@ object Tourney:
     clubs = ArrayBuffer(),
     players = ArrayBuffer(),
     competitions = ArrayBuffer.fill(64)(null),
-    stages = ArrayBuffer.fill(128)(null)
+    stages = ArrayBuffer.fill(128)(null),
+    certTemplate = ""
   )
 
   /**
