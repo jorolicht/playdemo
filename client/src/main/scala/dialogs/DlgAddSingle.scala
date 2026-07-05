@@ -51,7 +51,6 @@ object DlgAddSingle extends BaseDialog with JsWrapper:
     val currentYear = 2026 // Could be dynamic
     
     if isEmpty(eE(LoadId, "span")) then
-      println("Loading DlgAddSingle for the first time")
       setHtml(gE(LoadId), cviews.dialogs.html.DlgAddSingle(clubs, currentYear))
       modal = Modal(gE(ModalId))
     

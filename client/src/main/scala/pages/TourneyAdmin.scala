@@ -1,0 +1,119 @@
+package pages
+
+import org.scalajs.dom
+import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.Event
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import base.*
+import shared.MainIds.*
+import shared.model.*
+import dialogs.*
+
+object TourneyAdmin extends BasePage with JsWrapper:
+  def name = PageNameTyp("TourneyAdmin")
+
+  val BtnExportId:      HtmlId = genId(name)
+  val BtnImportId:      HtmlId = genId(name)
+  val BtnClickTTId:     HtmlId = genId(name)
+  val RadioCertId:      HtmlId = genId(name)
+
+  private var activeTab = "IMPEXP" // Tabs: "IMPEXP" (Import/Export), "CTT" (ClickTT), "CERT" (Urkunden Konfiguration)
+
+  def render(param: String = ""): Boolean =
+    Global.currentSelection.tourney match
+      case Some(tourney) =>
+        if (param.nonEmpty && List("IMPEXP", "CTT", "CERT").contains(param.toUpperCase)) {
+          activeTab = param.toUpperCase
+        }
+        comps.ContextHeader.render()
+        val compsSeq = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
+        val stagesSeq = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && !s.deleted)
+        setMain(cviews.pages.html.TourneyAdmin(tourney, compsSeq, stagesSeq, activeTab))
+
+        // Wire change listener for adminImportFile
+        val fileInput = dom.document.getElementById("adminImportFile").asInstanceOf[dom.html.Input]
+        if (fileInput != null) {
+          fileInput.addEventListener("change", (e: dom.Event) => {
+            if (fileInput.files.length > 0) {
+              val file = fileInput.files(0)
+              val reader = new dom.FileReader()
+              reader.onload = (e: dom.Event) => {
+                val jsonString = reader.result.asInstanceOf[String]
+                services.AdminManager.importTourney(jsonString).map {
+                  case Right(slug) =>
+                    dom.window.alert("Import erfolgreich! Das Turnier wird nun geladen.")
+                    fileInput.value = "" // reset
+                    loadPage(TourneyInfo.name, "")
+                  case Left(err) =>
+                    dom.window.alert(s"Fehler beim Import: ${err.msgCode}")
+                    fileInput.value = "" // reset
+                }
+              }
+              reader.readAsText(file)
+            }
+          })
+        }
+        true
+      case None =>
+        debug("TourneyAdmin: No tournament selected, redirecting to Main Search")
+        loadPage(MainSearch.name, "")
+        false
+
+  override def handleEvent(elem: HTMLElement, event: Event): Unit =
+    HtmlId(elem.id) match
+      case `BtnExportId` =>
+        services.AdminManager.exportCurrentTourney()
+
+      case `BtnImportId` =>
+        val fileInput = dom.document.getElementById("adminImportFile").asInstanceOf[dom.html.Input]
+        if (fileInput != null) {
+          fileInput.value = ""
+          fileInput.click()
+        }
+
+      case `BtnClickTTId` =>
+        dialogs.DlgClickTT.show().map {
+          case Right(t) =>
+            Global.currentSelection = Selection(Some(t))
+            comps.ContextHeader.render()
+            loadPage(TourneyInfo.name, "")
+          case Left(err) =>
+            debug(s"ClickTT Import cancelled or failed: ${err.msgCode}")
+        }
+
+      case id if id.id.startsWith(RadioCertId.id) =>
+        val stageId = StageId(elem.id.substring(RadioCertId.id.length + 1).toInt)
+        val stages = services.TourneyDB.tourney.stages
+        val targetStage = stages(stageId.value - 1)
+        if (targetStage != null) {
+          val isAlreadyChecked = targetStage.certificate
+          val newCertVal = !isAlreadyChecked
+          handleCertificateChange(stageId, newCertVal)
+        }
+
+      case _ =>
+        debug(s"TourneyAdmin handleEvent: ${elem.id}")
+
+  private def handleCertificateChange(stageId: StageId, value: Boolean): Unit =
+    val stages = services.TourneyDB.tourney.stages
+    val targetStage = stages(stageId.value - 1)
+    if (targetStage != null) {
+      stages.zipWithIndex.foreach { case (s, idx) =>
+        if (s != null && s.coId == targetStage.coId && !s.deleted) {
+          val newVal = if (s.id == stageId) value else false
+          if (s.certificate != newVal) {
+            s.certificate = newVal
+            services.TourneyDB.tourney.updateStage(s) match {
+              case Right(updatedStage) =>
+                if (Global.currentSelection.stage.exists(_.id == s.id)) {
+                  Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                }
+              case Left(err) =>
+                error(s"Failed to update stage certificate: ${err.msgCode}")
+            }
+          }
+        }
+      }
+      render()
+    }
