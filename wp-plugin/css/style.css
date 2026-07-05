@@ -9,24 +9,7 @@
     margin-bottom: 0 !important;
 }
 
-/* Bildschirm-Ansicht: Server-Inhalt ausblenden, App anzeigen */
-@media screen {
-    .entry-content > *:not(#Main_AppWrapper):not(#Main_ParamId):not(#Main_NavbarId):not(#Main_ContextHeaderId):not(#Main_DynContentId) {
-        display: none !important;
-    }
-}
-
-/* Druck-Ansicht: App ausblenden, Original-Server-Inhalt anzeigen */
-@media print {
-    #Main_AppWrapper,
-    #Main_NavbarId,
-    #Main_ContextHeaderId,
-    #Main_DynContentId,
-    #Footer_ConsoleClickId {
-        display: none !important;
-    }
-
-    .entry-content > *:not(#Main_AppWrapper):not(#Main_ParamId):not(#Main_NavbarId):not(#Main_ContextHeaderId):not(#Main_DynContentId) {
-        display: block !important;
-    }
+/* Server-Inhalt generell ausblenden (sowohl auf dem Bildschirm als auch beim Drucken) */
+.entry-content > *:not(#Main_AppWrapper):not(#Main_ParamId):not(#Main_NavbarId):not(#Main_ContextHeaderId):not(#Main_DynContentId) {
+    display: none !important;
 }
