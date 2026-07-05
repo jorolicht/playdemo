@@ -17,3 +17,19 @@ DlgStageStart.err_name = Bitte geben Sie einen gültigen Namen für die Wettbewe
 DlgStageStart.err_exists = Eine Wettbewerbsphase mit diesem Namen existiert bereits in diesem Wettbewerb.
 DlgStageStart.err_pref = Bitte wählen Sie eine Vorgänger-Wettbewerbsphase aus.
 
+DlgAddSingle.title = Teilnehmer hinzufügen
+DlgAddSingle.lastname = Nachname
+DlgAddSingle.firstname = Vorname
+DlgAddSingle.club = Verein
+DlgAddSingle.ttr = TTR-Wert
+DlgAddSingle.ttr_placeholder = z.B. 1450
+DlgAddSingle.year = Jahrgang
+DlgAddSingle.year_unknown = -- Unbekannt --
+DlgAddSingle.action = Aktion
+DlgAddSingle.act_reg = Nur Registrieren (Inaktiv)
+DlgAddSingle.act_play = Registrieren und Anmelden (Aktiv)
+DlgAddSingle.cancel = Abbrechen
+DlgAddSingle.save = Speichern
+DlgAddSingle.err_fill = Bitte Name, Vorname und Verein ausfüllen.
+
+

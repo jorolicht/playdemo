@@ -1,31 +1,33 @@
 @import shared.model.*
+@import dialogs.DlgAddSingle.*
+@import cviews.helper.html.*
 
 @(clubs: Seq[Club], currentYear: Int)
 
-<div class="modal fade" id="DlgAddSingle-modal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" @id(ModalId) tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title">Teilnehmer hinzufügen</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" id="DlgAddSingle-close"></button>
+                <h5 class="modal-title">@gM("DlgAddSingle.title")</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" @id(CloseId)></button>
             </div>
             <div class="modal-body">
-                <form id="DlgAddSingle-form" onsubmit="return false;">
+                <form @id(FormId) onsubmit="return false;">
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold">Nachname</label>
-                            <input type="text" class="form-control" id="DlgAddSingle-lastname" required>
+                            <label @forAttr(InputLastId) class="form-label small fw-bold">@gM("DlgAddSingle.lastname")</label>
+                            <input type="text" class="form-control" @id(InputLastId) required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold">Vorname</label>
-                            <input type="text" class="form-control" id="DlgAddSingle-firstname" required>
+                            <label @forAttr(InputFirstId) class="form-label small fw-bold">@gM("DlgAddSingle.firstname")</label>
+                            <input type="text" class="form-control" @id(InputFirstId) required>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Verein</label>
-                        <input type="text" class="form-control" id="DlgAddSingle-club" list="DlgAddSingle-clublist" required>
-                        <datalist id="DlgAddSingle-clublist">
+                        <label @forAttr(InputClubId) class="form-label small fw-bold">@gM("DlgAddSingle.club")</label>
+                        <input type="text" class="form-control" @id(InputClubId) list="@ClubListId.id" required>
+                        <datalist @id(ClubListId)>
                             @clubs.map { c =>
                                 <option value="@c.name">
                             }
@@ -34,13 +36,13 @@
 
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold">TTR-Wert</label>
-                            <input type="number" class="form-control" id="DlgAddSingle-ttr" placeholder="z.B. 1450">
+                            <label @forAttr(InputTtrId) class="form-label small fw-bold">@gM("DlgAddSingle.ttr")</label>
+                            <input type="number" class="form-control" @id(InputTtrId) placeholder="@gM("DlgAddSingle.ttr_placeholder")">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold">Jahrgang</label>
-                            <select class="form-select" id="DlgAddSingle-year">
-                                <option value="0">-- Unbekannt --</option>
+                            <label @forAttr(InputYearId) class="form-label small fw-bold">@gM("DlgAddSingle.year")</label>
+                            <select class="form-select" @id(InputYearId)>
+                                <option value="0">@gM("DlgAddSingle.year_unknown")</option>
                                 @for(y <- ((currentYear - 80) to (currentYear - 8)).reverse) {
                                     <option value="@y">@y</option>
                                 }
@@ -49,24 +51,24 @@
                     </div>
 
                     <div class="bg-light p-3 rounded border mb-3">
-                        <label class="form-label d-block small fw-bold mb-2">Aktion</label>
+                        <label class="form-label d-block small fw-bold mb-2">@gM("DlgAddSingle.action")</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="DlgAddSingle-action" id="DlgAddSingle-actReg" value="reg">
-                            <label class="form-check-label small" for="DlgAddSingle-actReg">Nur Registrieren (Inaktiv)</label>
+                            <input class="form-check-input" type="radio" name="DlgAddSingle-action" @id(RadioRegId) value="reg">
+                            <label class="form-check-label small" @forAttr(RadioRegId)>@gM("DlgAddSingle.act_reg")</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="DlgAddSingle-action" id="DlgAddSingle-actPlay" value="play" checked>
-                            <label class="form-check-label small" for="DlgAddSingle-actPlay">Registrieren und Anmelden (Aktiv)</label>
+                            <input class="form-check-input" type="radio" name="DlgAddSingle-action" @id(RadioPlayId) value="play" checked>
+                            <label class="form-check-label small" @forAttr(RadioPlayId)>@gM("DlgAddSingle.act_play")</label>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="DlgAddSingle-cancel">Abbrechen</button>
-                <button type="button" class="btn btn-primary" id="DlgAddSingle-apply">Speichern</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>@gM("DlgAddSingle.cancel")</button>
+                <button type="button" class="btn btn-primary" @id(ApplyId)>@gM("DlgAddSingle.save")</button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="DlgAddSingle-load" data-loaded="false"></div>
+<div @id(LoadId) data-loaded="false"></div>

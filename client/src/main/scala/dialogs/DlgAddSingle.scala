@@ -26,12 +26,15 @@ object DlgAddSingle extends BaseDialog with JsWrapper:
   
   val LoadId:         HtmlId = genId(name)
   val ModalId:        HtmlId = genId(name)
+  val FormId:         HtmlId = genId(name)
   val InputLastId:    HtmlId = genId(name)
   val InputFirstId:   HtmlId = genId(name)
   val InputClubId:    HtmlId = genId(name)
+  val ClubListId:     HtmlId = genId(name)
   val InputTtrId:     HtmlId = genId(name)
   val InputYearId:    HtmlId = genId(name)
   val RadioPlayId:    HtmlId = genId(name)
+  val RadioRegId:     HtmlId = genId(name)
   
   val ApplyId:        HtmlId = genId(name)
   val CancelId:       HtmlId = genId(name)
@@ -47,8 +50,10 @@ object DlgAddSingle extends BaseDialog with JsWrapper:
 
     val currentYear = 2026 // Could be dynamic
     
-    setHtml(gE(LoadId), cviews.dialogs.html.DlgAddSingle(clubs, currentYear))
-    modal = Modal(gE(ModalId))
+    if isEmpty(eE(LoadId, "span")) then
+      println("Loading DlgAddSingle for the first time")
+      setHtml(gE(LoadId), cviews.dialogs.html.DlgAddSingle(clubs, currentYear))
+      modal = Modal(gE(ModalId))
     
     modal.show()
 
@@ -62,7 +67,7 @@ object DlgAddSingle extends BaseDialog with JsWrapper:
       val enroll = gE(RadioPlayId).asInstanceOf[dom.html.Input].checked
 
       if (last.isEmpty || first.isEmpty || club.isEmpty) {
-        dom.window.alert("Bitte Name, Vorname und Verein ausfüllen.")
+        dom.window.alert(base.Messages.getMsg("DlgAddSingle.err_fill"))
       } else {
         if (!p.isCompleted) p.success(Right(DlgAddSingleResult(first, last, club, ttr, year, enroll)))
         modal.hide()
