@@ -21,7 +21,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
 
   case class WpContent(rendered: String) derives ReadWriter
   case class WpTitle(rendered: String) derives ReadWriter
-  case class WpPage(id: Int, title: WpTitle, content: WpContent) derives ReadWriter
+  case class WpPage(id: Int, parent: Int, title: WpTitle, content: WpContent) derives ReadWriter
 
   var templates: Seq[WpPage] = Seq.empty
   var isLoadingTemplates = false
@@ -75,29 +75,28 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
 
   private def fetchTemplates(): Unit =
     isLoadingTemplates = true
-    ajaxGet[Seq[WpPage]]("/wp-json/wp/v2/pages?slug=templates", List(), host = Global.homeUrl).map {
-      case Right(pages) if pages.nonEmpty =>
-        val parentId = pages.head.id
-        ajaxGet[Seq[WpPage]](s"/wp-json/wp/v2/pages?parent=$parentId&per_page=100", List(), host = Global.homeUrl).map {
-          case Right(childPages) =>
-            templates = childPages.filter(_.title.rendered.trim.toUpperCase.startsWith("TT"))
-            isLoadingTemplates = false
-            templatesLoaded = true
-            render()
-          case Left(err) =>
-            debug(s"Failed to fetch child templates: ${err.msgCode}")
-            isLoadingTemplates = false
-            templatesLoaded = true
-            render()
+    ajaxGet[Seq[WpPage]]("/wp-json/wp/v2/pages?per_page=100", List(), host = Global.homeUrl).map {
+      case Right(pages) =>
+        val parentOpt = pages.find(_.title.rendered.trim.equalsIgnoreCase("templates"))
+        parentOpt match {
+          case Some(parentPage) =>
+            templates = pages.filter(p => p.parent == parentPage.id && p.title.rendered.trim.toUpperCase.startsWith("TT"))
+          case None =>
+            debug("Parent page 'Templates' not found in pages list")
+            // Fallback: search for any page starting with "TT" if the Templates folder wasn't found
+            templates = pages.filter(_.title.rendered.trim.toUpperCase.startsWith("TT"))
         }
-      case _ =>
-        debug("Parent page 'templates' not found")
+        isLoadingTemplates = false
+        templatesLoaded = true
+        render()
+      case Left(err) =>
+        debug(s"Failed to fetch pages: ${err.msgCode}")
         isLoadingTemplates = false
         templatesLoaded = true
         render()
     }.recover {
       case ex =>
-        debug(s"Failed to fetch parent page 'templates': ${ex.getMessage}")
+        debug(s"Failed to fetch pages: ${ex.getMessage}")
         isLoadingTemplates = false
         templatesLoaded = true
         render()
