@@ -42,9 +42,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
         }
 
         comps.ContextHeader.render()
-        val compsSeq = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
-        val stagesSeq = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && !s.deleted)
-        setMain(cviews.pages.html.TourneyAdmin(tourney, compsSeq, stagesSeq, activeTab, templates, isLoadingTemplates))
+        setMain(cviews.pages.html.TourneyAdmin(tourney, activeTab, templates, isLoadingTemplates))
 
         // Wire change listener for adminImportFile
         val fileInput = dom.document.getElementById("adminImportFile").asInstanceOf[dom.html.Input]

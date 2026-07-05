@@ -2,7 +2,7 @@
 @import cviews.helper.html.*
 @import pages.TourneyAdmin.*
 
-@(tourney: Tourney, competitions: Seq[Competition], stages: Seq[Stage], activeTab: String, templates: Seq[pages.TourneyAdmin.WpPage], isLoadingTemplates: Boolean)
+@(tourney: Tourney, activeTab: String, templates: Seq[pages.TourneyAdmin.WpPage], isLoadingTemplates: Boolean)
 
 <div class="container mt-4">
     <!-- General Tournament Info Header -->
@@ -81,74 +81,6 @@
         }
 
         @if(activeTab == "CERT") {
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title text-secondary fw-bold mb-3"><i class="bi bi-award me-2 text-warning"></i>Urkundeneinstellungen je Wettbewerb</h5>
-                    <p class="text-muted small">Legen Sie fest, für welche Spielphase je Wettbewerb zukünftig Urkunden erzeugt werden können. Pro Wettbewerb kann maximal eine Phase ausgewählt werden.</p>
-
-                    @if(competitions.isEmpty) {
-                        <div class="text-center py-4 text-muted italic">Keine Wettbewerbe vorhanden.</div>
-                    } else {
-                        <div class="accordion" id="certAccordion">
-                            @competitions.map { comp =>
-                                @defining(stages.filter(_.coId == comp.id)) { compStages =>
-                                    <div class="accordion-item shadow-sm mb-2 border rounded overflow-hidden">
-                                        <h2 class="accordion-header" id="heading-@comp.id.value">
-                                            <button class="accordion-button bg-light fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@comp.id.value" aria-expanded="true" aria-controls="collapse-@comp.id.value">
-                                                <i class="bi bi-trophy me-2 text-secondary"></i>@comp.name
-                                            </button>
-                                        </h2>
-                                        <div id="collapse-@comp.id.value" class="accordion-collapse collapse show" aria-labelledby="heading-@comp.id.value">
-                                            <div class="accordion-body p-0">
-                                                @if(compStages.isEmpty) {
-                                                    <div class="p-3 text-muted italic small text-center">Keine Runden / Phasen in diesem Wettbewerb angelegt.</div>
-                                                } else {
-                                                    <table class="table table-hover align-middle mb-0 text-nowrap">
-                                                        <thead class="table-light small text-muted">
-                                                            <tr>
-                                                                <th class="ps-4">Name der Phase</th>
-                                                                <th>Runden</th>
-                                                                <th>Status</th>
-                                                                <th class="text-center" style="width: 150px;">Urkunden ausgeben</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @compStages.map { s =>
-                                                                <tr>
-                                                                    <td class="ps-4 fw-bold">@s.name</td>
-                                                                    <td>@s.getNoRounds</td>
-                                                                    <td>
-                                                                        <span class="badge @{s.status match {
-                                                                            case StageStatus.CFG => "bg-secondary"
-                                                                            case StageStatus.AUS => "bg-info text-dark"
-                                                                            case StageStatus.EIN => "bg-warning text-dark"
-                                                                            case StageStatus.FIN => "bg-success"
-                                                                            case _ => "bg-light text-dark"
-                                                                        }}">@s.status</span>
-                                                                    </td>
-                                                                    <td class="text-center">
-                                                                        <input type="radio" 
-                                                                               name="stage-cert-radio-@comp.id.value" 
-                                                                               class="form-check-input"
-                                                                               @id(RadioCertId, "onclick", s.id.value.toString)
-                                                                               @{if(s.certificate) "checked" else ""}
-                                                                               @if(comp.status == CompStatus.FIN){disabled}>
-                                                                    </td>
-                                                                </tr>
-                                                            }
-                                                        </tbody>
-                                                    </table>
-                                                }
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            }
-                        </div>
-                    }
-                </div>
-            </div>
-
             <!-- Urkunden-Templates Vorschau -->
             <div class="card shadow-sm border-start border-4 border-warning">
                 <div class="card-body">
