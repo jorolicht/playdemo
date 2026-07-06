@@ -73,48 +73,56 @@
     }
 
     @@media print {
-        /* Hide navbar, sidebar, layout headers, footers and screen-only wrappers */
+        /* Hide navbar, sidebar, layout headers, footers, scripts and screen-only wrappers */
         body .navbar,
         body .sidebar,
         body .context-header,
         body .footer,
+        #Main_NavbarId,
+        #Main_ContextHeaderId,
+        #Main_FooterId,
+        #Footer_ConsoleClickId,
         body .d-print-none {
             display: none !important;
         }
 
-        body, html {
+        html, body {
             margin: 0 !important;
             padding: 0 !important;
             width: 210mm !important;
             height: 297mm !important;
+            max-height: 297mm !important;
+            overflow: hidden !important;
             background: #fff !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
 
-        body .container {
-            width: 210mm !important;
-            height: 297mm !important;
-            max-width: none !important;
+        #Main_AppWrapper, #Main_ContentId, body .container {
             margin: 0 !important;
             padding: 0 !important;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
+            width: 210mm !important;
+            height: 297mm !important;
+            max-height: 297mm !important;
+            max-width: none !important;
+            overflow: hidden !important;
+            display: block !important;
         }
 
         body .certificate-container {
             width: 210mm !important;
-            height: 290mm !important;
-            min-height: 290mm !important;
-            max-height: 290mm !important;
+            height: 297mm !important;
+            min-height: 297mm !important;
+            max-height: 297mm !important;
             border: none !important;
             box-shadow: none !important;
             margin: 0 !important;
-            padding: 15mm !important;
+            padding: 20mm !important;
             box-sizing: border-box !important;
             background: #fff !important;
             page-break-inside: avoid !important;
+            page-break-after: avoid !important;
+            page-break-before: avoid !important;
             overflow: hidden !important;
         }
     }
