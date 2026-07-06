@@ -4,6 +4,10 @@
 
 @(tourney: Tourney, activeTab: String, templates: Seq[pages.TourneyAdmin.WpPage], isLoadingTemplates: Boolean)
 
+@unassignedPlayers = @{ pages.TourneyAdmin.unassignedPlayers }
+@xmlPersons = @{ pages.TourneyAdmin.xmlPersons }
+@playerAssignments = @{ pages.TourneyAdmin.playerAssignments }
+
 <div class="container mt-4">
     <!-- General Tournament Info Header -->
     <div class="card shadow-sm border-0 mb-4 bg-light">
@@ -27,7 +31,7 @@
         </li>
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "CTT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'CTT')">
-                <i class="bi bi-file-earmark-code me-1"></i>ClickTT
+                <i class="bi bi-file-earmark-code me-1"></i>ClickTT Update
             </a>
         </li>
         <li class="nav-item">
@@ -69,15 +73,70 @@
         }
 
         @if(activeTab == "CTT") {
-            <div class="card shadow-sm border-start border-4 border-info">
+            <div class="card shadow-sm border-start border-4 border-info mb-4 animate-fade-in">
                 <div class="card-body">
-                    <h5 class="card-title text-secondary fw-bold mb-3"><i class="bi bi-file-earmark-code me-2 text-info"></i>ClickTT XML-Datenimport</h5>
-                    <p class="text-muted small">Importieren Sie Vereins-, Spieler- und Wettbewerbsdaten direkt über eine offizielle ClickTT XML-Datei (z.B. aus nu.Liga).</p>
-                    <button class="btn btn-info text-white fw-bold" @id(BtnClickTTId, "onclick")>
-                        <i class="bi bi-file-earmark-plus me-1"></i>ClickTT-Datei hochladen...
+                    <h5 class="card-title text-secondary fw-bold mb-3">
+                        <i class="bi bi-file-earmark-code me-2 text-info"></i>ClickTT Update (Spieler-Datenabgleich)
+                    </h5>
+                    <p class="text-muted small">
+                        Laden Sie eine aktualisierte ClickTT XML-Datei hoch, um Spieler-IDs (internalNr) und Lizenznummern (licenceNr) für neu angemeldete Teilnehmer automatisch zuzuordnen und abzugleichen.
+                    </p>
+                    <button class="btn btn-info text-white fw-bold" onclick="document.getElementById('clickttUpdateFile').click()">
+                        <i class="bi bi-file-earmark-arrow-up me-1"></i>ClickTT XML-Datei auswählen...
                     </button>
+                    <input type="file" id="clickttUpdateFile" style="display: none;" accept=".xml" />
                 </div>
             </div>
+
+            @if(unassignedPlayers.nonEmpty) {
+                <div class="card shadow-sm animate-fade-in mb-4">
+                    <div class="card-header bg-light fw-bold text-secondary py-3">
+                        <i class="bi bi-person-check me-2 text-info"></i>Zuordnung der neu eingetragenen Spieler (ohne IDs)
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 text-nowrap">
+                                <thead class="table-light small text-muted">
+                                    <tr>
+                                        <th class="ps-4">Spieler im Turnier</th>
+                                        <th>Verein im Turnier</th>
+                                        <th>ClickTT XML Zuordnung (Vorschläge sortiert nach Namensähnlichkeit)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @unassignedPlayers.map { p =>
+                                        @defining(pages.TourneyAdmin.getBestCandidates(p, xmlPersons)) { candidates =>
+                                            <tr>
+                                                <td class="ps-4 fw-bold text-dark">@p.firstName @p.lastName</td>
+                                                <td class="text-muted">@{tourney.clubs.find(_.id.toInt == p.clubId).map(_.name).getOrElse("Kein Verein")}</td>
+                                                <td>
+                                                    <select class="form-select form-select-sm border-secondary-subtle" 
+                                                            id="select-assign-@p.id.value"
+                                                            style="max-width: 550px;">
+                                                        <option value="">-- Nicht zuweisen (Manuell eingetragen lassen) --</option>
+                                                        @candidates.map { case (xp, sim) =>
+                                                            @defining(playerAssignments.get(p.id.value).contains(xp.licenceNr)) { isSelected =>
+                                                                <option value="@xp.licenceNr" @{if(isSelected) "selected" else ""}>
+                                                                    @xp.firstname @xp.lastname (@xp.clubName.getOrElse("Unbekannter Verein"), Lizenz: @xp.licenceNr) - Übereinstimmung: @{(sim * 100).toInt}%
+                                                                </option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white text-end p-3">
+                        <button class="btn btn-success fw-bold px-4" id="save-assignments-btn">
+                            <i class="bi bi-check-circle me-1"></i>Zuordnungen speichern
+                        </button>
+                    </div>
+                </div>
+            }
         }
 
         @if(activeTab == "CERT") {

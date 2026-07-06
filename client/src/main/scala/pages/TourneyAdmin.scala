@@ -27,7 +27,12 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   var isLoadingTemplates = false
   var templatesLoaded = false
 
-  private var activeTab = "IMPEXP" // Tabs: "IMPEXP" (Import/Export), "CTT" (ClickTT), "CERT" (Urkunden Konfiguration)
+  // ClickTT Update State
+  var xmlPersons: Seq[CttPerson] = Seq.empty
+  var unassignedPlayers: Seq[Player] = Seq.empty
+  var playerAssignments: Map[Int, String] = Map.empty // PlayerId.value -> CttPerson.licenceNr
+
+  private var activeTab = "IMPEXP" // Tabs: "IMPEXP" (Import/Export), "CTT" (ClickTT Update), "CERT" (Urkunden Konfiguration)
 
   def render(param: String = ""): Boolean =
     Global.currentSelection.tourney match
@@ -47,7 +52,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
         // Wire change listener for adminImportFile
         val fileInput = dom.document.getElementById("adminImportFile").asInstanceOf[dom.html.Input]
         if (fileInput != null) {
-          fileInput.addEventListener("change", (e: dom.Event) => {
+          fileInput.onchange = (e: dom.Event) => {
             if (fileInput.files.length > 0) {
               val file = fileInput.files(0)
               val reader = new dom.FileReader()
@@ -65,8 +70,66 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
               }
               reader.readAsText(file)
             }
-          })
+          }
         }
+
+        // Wire ClickTT Update file input
+        val clickttInp = dom.document.getElementById("clickttUpdateFile").asInstanceOf[dom.html.Input]
+        if (clickttInp != null) {
+          clickttInp.onchange = (e: dom.Event) => {
+            if (clickttInp.files.length > 0) {
+              val file = clickttInp.files(0)
+              val reader = new dom.FileReader()
+              reader.onload = (e: dom.Event) => {
+                val xmlString = reader.result.asInstanceOf[String]
+                services.ClickTTParser.parse(xmlString) match {
+                  case Right(ctt) =>
+                    xmlPersons = ctt.competitions.flatMap(_.players).flatMap(_.persons).distinctBy(_.licenceNr)
+                    val activeTourney = services.TourneyDB.tourney
+                    unassignedPlayers = activeTourney.players.filter(p => p != null && (p.meta.licenceNr.isEmpty || p.meta.internalNr.isEmpty)).toSeq
+                    
+                    // Pre-select best match
+                    playerAssignments = unassignedPlayers.map { p =>
+                      val bestMatch = xmlPersons.map(xp => (xp, getSimilarity(p.fullName, s"${xp.firstname} ${xp.lastname}")))
+                                                 .filter(_._2 > 0.4)
+                                                 .sortBy(-_._2)
+                                                 .headOption
+                      p.id.value -> bestMatch.map(_._1.licenceNr).getOrElse("")
+                    }.toMap
+                    
+                    if (unassignedPlayers.isEmpty) {
+                      dom.window.alert("Es wurden keine Spieler ohne ID/Lizenznummer im Turnier gefunden.")
+                    } else {
+                      dom.window.alert(s"Abgleich bereit! ${unassignedPlayers.length} Spieler ohne ID/Lizenznummer gefunden.")
+                    }
+                    render()
+                  case Left(err) =>
+                    dom.window.alert(s"Fehler beim Parsen der ClickTT-Datei: $err")
+                }
+              }
+              reader.readAsText(file)
+            }
+          }
+        }
+
+        // Wire dynamic select events for assignments
+        unassignedPlayers.foreach { p =>
+          val select = dom.document.getElementById(s"select-assign-${p.id.value}").asInstanceOf[dom.html.Select]
+          if (select != null) {
+            select.onchange = (e: dom.Event) => {
+              playerAssignments = playerAssignments + (p.id.value -> select.value)
+            }
+          }
+        }
+
+        // Wire save button click
+        val saveBtn = dom.document.getElementById("save-assignments-btn").asInstanceOf[dom.html.Button]
+        if (saveBtn != null) {
+          saveBtn.onclick = (e: dom.Event) => {
+            saveAssignments()
+          }
+        }
+
         true
       case None =>
         debug("TourneyAdmin: No tournament selected, redirecting to Main Search")
@@ -83,7 +146,6 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
             templates = pages.filter(p => p.parent == parentPage.id && p.title.rendered.trim.toUpperCase.startsWith("TT"))
           case None =>
             debug("Parent page 'Templates' not found in pages list")
-            // Fallback: search for any page starting with "TT" if the Templates folder wasn't found
             templates = pages.filter(_.title.rendered.trim.toUpperCase.startsWith("TT"))
         }
         isLoadingTemplates = false
@@ -110,6 +172,99 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
       render()
     }
 
+  // --- ClickTT Update Alignment Helper Methods ---
+
+  def getBestCandidates(p: Player, persons: Seq[CttPerson]): Seq[(CttPerson, Double)] =
+    persons.map(xp => (xp, getSimilarity(p.fullName, s"${xp.firstname} ${xp.lastname}")))
+           .filter(_._2 > 0.25)
+           .sortBy(-_._2)
+           .take(5)
+
+  private def getSimilarity(s1: String, s2: String): Double =
+    val n1 = s1.trim.toLowerCase
+    val n2 = s2.trim.toLowerCase
+    if (n1 == n2) 1.0
+    else {
+      val maxLen = scala.math.max(n1.length, n2.length)
+      if (maxLen == 0) 1.0
+      else {
+        val dist = levenshteinDistance(n1, n2)
+        1.0 - (dist.toDouble / maxLen.toDouble)
+      }
+    }
+
+  private def levenshteinDistance(s1: String, s2: String): Int =
+    val memo = Array.fill(s1.length + 1, s2.length + 1)(-1)
+    def dist(i: Int, j: Int): Int =
+      if (memo(i)(j) != -1) memo(i)(j)
+      else {
+        val res = if (i == 0) j
+        else if (j == 0) i
+        else if (s1(i - 1) == s2(j - 1)) dist(i - 1, j - 1)
+        else 1 + scala.math.min(dist(i - 1, j), scala.math.min(dist(i, j - 1), dist(i - 1, j - 1)))
+        memo(i)(j) = res
+        res
+      }
+    dist(s1.length, s2.length)
+
+  private def saveAssignments(): Unit =
+    val tourney = services.TourneyDB.tourney
+    var updateCount = 0
+    
+    playerAssignments.foreach { case (playerIdVal, licenceNr) =>
+      if (licenceNr.nonEmpty) {
+        val targetPlayer = tourney.players.find(_.id.value == playerIdVal)
+        val matchedPerson = xmlPersons.find(_.licenceNr == licenceNr)
+        
+        for {
+          player <- targetPlayer
+          xp <- matchedPerson
+        } {
+          val clubName = xp.clubName.getOrElse("Unbekannter Verein")
+          val club = tourney.clubs.find(_.name == clubName).getOrElse {
+            tourney.addClub(clubName, checkSimilarity = false, doSync = false) match {
+              case Right(c) => c
+              case Left(_) => Club(ClubId(0), clubName, Club.normalize(clubName))
+            }
+          }
+
+          val updatedMeta = player.meta.copy(
+            internalNr = Some(xp.internalNr),
+            licenceNr = Some(xp.licenceNr),
+            clubNr = xp.clubNr,
+            clubFedNick = xp.clubFederationNickname,
+            ttr = xp.ttr,
+            ttrMatchCnt = xp.ttrMatchCount,
+            nationality = xp.nationality,
+            foreignerEqState = xp.foreignerEqState,
+            region = xp.region,
+            subRegion = xp.subRegion
+          )
+
+          val updatedPlayer = player.copy(
+            clubId = club.id.toInt,
+            meta = updatedMeta
+          )
+          
+          tourney.updatePlayer(updatedPlayer, doSync = false)
+          updateCount += 1
+        }
+      }
+    }
+    
+    if (updateCount > 0) {
+      services.TourneyDB.update(tourney)
+      dom.window.alert(s"Erfolgreich! $updateCount Spieler wurden mit ClickTT-Daten aktualisiert.")
+    } else {
+      dom.window.alert("Keine Spieler zuzuordnen.")
+    }
+    
+    // Reset state
+    xmlPersons = Seq.empty
+    unassignedPlayers = Seq.empty
+    playerAssignments = Map.empty
+    render()
+
   override def handleEvent(elem: HTMLElement, event: Event): Unit =
     HtmlId(elem.id) match
       case `BtnExportId` =>
@@ -122,54 +277,12 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
           fileInput.click()
         }
 
-      case `BtnClickTTId` =>
-        dialogs.DlgClickTT.show().map {
-          case Right(t) =>
-            Global.currentSelection = Selection(Some(t))
-            comps.ContextHeader.render()
-            loadPage(TourneyInfo.name, "")
-          case Left(err) =>
-            debug(s"ClickTT Import cancelled or failed: ${err.msgCode}")
-        }
-
       case id if id.id.startsWith(RadioCertId.id) =>
         val suffix = elem.id.substring(RadioCertId.id.length + 1)
         if (suffix.startsWith("SETTMPL-")) {
           val templateName = suffix.substring("SETTMPL-".length)
           selectTemplate(templateName)
-        } else {
-          val stageId = StageId(suffix.toInt)
-          val stages = services.TourneyDB.tourney.stages
-          val targetStage = stages(stageId.value - 1)
-          if (targetStage != null) {
-            val isAlreadyChecked = targetStage.certificate
-            val newCertVal = !isAlreadyChecked
-            handleCertificateChange(stageId, newCertVal)
-          }
         }
 
       case _ =>
         debug(s"TourneyAdmin handleEvent: ${elem.id}")
-
-  private def handleCertificateChange(stageId: StageId, value: Boolean): Unit =
-    val stages = services.TourneyDB.tourney.stages
-    val targetStage = stages(stageId.value - 1)
-    if (targetStage != null) {
-      stages.zipWithIndex.foreach { case (s, idx) =>
-        if (s != null && s.coId == targetStage.coId && !s.deleted) {
-          val newVal = if (s.id == stageId) value else false
-          if (s.certificate != newVal) {
-            s.certificate = newVal
-            services.TourneyDB.tourney.updateStage(s) match {
-              case Right(updatedStage) =>
-                if (Global.currentSelection.stage.exists(_.id == s.id)) {
-                  Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
-                }
-              case Left(err) =>
-                error(s"Failed to update stage certificate: ${err.msgCode}")
-            }
-          }
-        }
-      }
-      render()
-    }
