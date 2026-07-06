@@ -73,23 +73,22 @@
     }
 
     @@media print {
-        /* Hide navbar, sidebar, layout headers, footers, scripts and screen-only wrappers */
-        body .navbar,
-        body .sidebar,
-        body .context-header,
-        body .footer,
+        /* 1. Radikal ALLES ausblenden, was nicht die Urkunde selbst ist */
+        body > *,
+        .navbar,
+        .context-header,
+        .footer,
+        footer,
         #Main_NavbarId,
         #Main_ContextHeaderId,
         #Main_FooterId,
         #Footer_ConsoleClickId,
-        body .d-print-none,
-        body p:has(#Main_NavbarId),
-        body p:has(#Main_ContextHeaderId),
-        body p:has(#Main_AppWrapper),
-        body p:has(#Main_FooterId),
-        body p:has(#Footer_ConsoleClickId),
-        body p:has(#Main_DynContentId),
-        .playdemo-spa-root p {
+        .d-print-none {
+            display: none !important;
+        }
+
+        /* Umschließende leere p-Tags von WordPress verstecken, aber p-Tags INNERHALB der Urkunde erhalten */
+        body p:not(.certificate-container p) {
             display: none !important;
             margin: 0 !important;
             padding: 0 !important;
@@ -99,33 +98,27 @@
             overflow: hidden !important;
         }
 
-        html, body {
+        /* 2. Nur die absolut notwendige Struktur erzwingen, sichtbar machen und Flexbox aufheben */
+        html, body, .wp-site-blocks, .playdemo-spa-root, #Main_AppWrapper, #Main_ContentId, body .container {
+            display: block !important;
             margin: 0 !important;
             padding: 0 !important;
             width: 210mm !important;
             height: 297mm !important;
             max-height: 297mm !important;
             overflow: hidden !important;
+            float: none !important;
+            position: static !important;
             background: #fff !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
 
-        #Main_AppWrapper, #Main_ContentId, body .container {
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 210mm !important;
-            height: 297mm !important;
-            max-height: 297mm !important;
-            max-width: none !important;
-            overflow: hidden !important;
-            display: block !important;
-        }
-
+        /* 3. Den eigentlichen Urkunden-Karton passgenau auf das A4-Blatt pressen */
         body .certificate-container {
+            display: block !important;
             width: 210mm !important;
             height: 297mm !important;
-            min-height: 297mm !important;
             max-height: 297mm !important;
             border: none !important;
             box-shadow: none !important;
@@ -135,7 +128,6 @@
             background: #fff !important;
             page-break-inside: avoid !important;
             page-break-after: avoid !important;
-            page-break-before: avoid !important;
             overflow: hidden !important;
         }
     }
