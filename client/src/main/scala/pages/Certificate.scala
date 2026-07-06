@@ -19,34 +19,68 @@ object Certificate extends BasePage with JsWrapper with services.ComWrapper:
   var isLoading = false
   var currentParam = ""
 
+  // State variables for edited certificate content
+  var currentTourneyName = ""
+  var currentCompName = ""
+  var currentPlayerName = ""
+  var currentRank = ""
+
   def render(param: String = ""): Boolean = 
     comps.ContextHeader.render()
     
-    currentParam = param
     val tourneyOpt = Global.currentSelection.tourney
+
+    if (currentParam != param) {
+      currentParam = param
+      val parts = param.split("\\|")
+      currentPlayerName = if (parts.length > 0) parts(0) else "Unbekannt"
+      currentCompName   = if (parts.length > 1) parts(1) else "Wettbewerb"
+      currentRank       = if (parts.length > 2) parts(2) else "X"
+      currentTourneyName = tourneyOpt.map(_.name).getOrElse("")
+    }
 
     tourneyOpt match {
       case Some(tourney) if tourney.certTemplate.nonEmpty =>
         if ((templateHtml.isEmpty || loadedTemplateName != tourney.certTemplate) && !isLoading) {
           fetchTemplateContent(tourney.certTemplate, param)
-          setMain(cviews.pages.html.Certificate(param, None, true))
+          setMain(cviews.pages.html.Certificate(param, currentTourneyName, currentCompName, currentPlayerName, currentRank, None, true))
         } else {
           // Perform replacements on the templateHtml if defined
           val substitutedHtml = templateHtml.map { rawHtml =>
-            val parts = param.split("\\|")
-            val playerName = if (parts.length > 0) parts(0) else "Unbekannt"
-            val compName   = if (parts.length > 1) parts(1) else "Wettbewerb"
-            val rank       = if (parts.length > 2) parts(2) else "X"
-            
-            replaceKeywords(rawHtml, tourney.name, compName, playerName, rank)
+            replaceKeywords(rawHtml, currentTourneyName, currentCompName, currentPlayerName, currentRank)
           }
-          setMain(cviews.pages.html.Certificate(param, substitutedHtml, false))
+          setMain(cviews.pages.html.Certificate(param, currentTourneyName, currentCompName, currentPlayerName, currentRank, substitutedHtml, false))
+          wireInputEvents()
         }
       case _ =>
         // Fallback: no template configured
-        setMain(cviews.pages.html.Certificate(param, None, false))
+        setMain(cviews.pages.html.Certificate(param, currentTourneyName, currentCompName, currentPlayerName, currentRank, None, false))
+        wireInputEvents()
     }
     true
+
+  private def wireInputEvents(): Unit =
+    wireInput("CertEdit_Tourney", (v) => { currentTourneyName = v; updatePreview() })
+    wireInput("CertEdit_Comp", (v) => { currentCompName = v; updatePreview() })
+    wireInput("CertEdit_Name", (v) => { currentPlayerName = v; updatePreview() })
+    wireInput("CertEdit_Rank", (v) => { currentRank = v; updatePreview() })
+
+  private def wireInput(elementId: String, onChange: String => Unit): Unit =
+    val inputElem = dom.document.getElementById(elementId).asInstanceOf[dom.html.Input]
+    if (inputElem != null) {
+      inputElem.oninput = (e: dom.Event) => {
+        onChange(inputElem.value)
+      }
+    }
+
+  private def updatePreview(): Unit =
+    val previewWrapper = dom.document.getElementById("CertificatePreviewWrapper").asInstanceOf[dom.raw.HTMLElement]
+    if (previewWrapper != null) {
+      val substitutedHtml = templateHtml.map { rawHtml =>
+        replaceKeywords(rawHtml, currentTourneyName, currentCompName, currentPlayerName, currentRank)
+      }
+      setHtml(previewWrapper, cviews.pages.html.CertificatePreview(currentParam, currentPlayerName, currentCompName, currentRank, substitutedHtml, false).toString)
+    }
 
   private def replaceKeywords(rawHtml: String, tourneyName: String, compName: String, playerName: String, rank: String): String =
     val tNameRepl = scala.util.matching.Regex.quoteReplacement(tourneyName)
