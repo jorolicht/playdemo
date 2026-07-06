@@ -102,7 +102,8 @@ function playdemo_render($atts) {
     $logLevel  = isset($_GET['logLevel']) ? $_GET['logLevel'] : 'debug';
     $tourney = isset($_GET['tourney']) ? $_GET['tourney'] : '';
 
-    $output = '<span id="Main_ParamId" 
+    $output = '<div class="playdemo-spa-root">';
+    $output .= '<span id="Main_ParamId" 
         data-page="' . esc_attr($atts['page']) . '" 
         data-slug="' . esc_attr($slug) . '"
         data-posttype="' . esc_attr($post->post_type) . '"
@@ -129,6 +130,7 @@ function playdemo_render($atts) {
     $output .= 'import { startApp } from "' . esc_url($jsUrl) . '";';
     $output .= 'startApp("001DE1970-01", "' . esc_attr($atts['mode']) . '", "' . esc_attr($logLevel) . '", "' . esc_attr($tourney) . '");';
     $output .= '</script>';
+    $output .= '</div>';
 
     return $output;
 }
@@ -140,11 +142,11 @@ add_shortcode('playdemo', 'playdemo_render');
  * Dieser Filter läuft bei Priorität 12 (nach do_shortcode), um die generierten Container sauber zu säubern.
  */
 function playdemo_unautop_shortcode($content) {
-    if (false === strpos($content, 'Main_AppWrapper')) {
+    if (false === strpos($content, 'playdemo-spa-root')) {
         return $content;
     }
-    // Entfernt umgebende <p>-Tags um die generierten playdemo-Strukturen
-    $content = preg_replace('/<p>\s*(<span id="Main_ParamId".*?<\/div>)\s*<\/p>/is', '$1', $content);
+    // Entfernt umgebende <p>-Tags um die playdemo-spa-root Division
+    $content = preg_replace('/<p>\s*(<div class="playdemo-spa-root".*?<\/div>)\s*<\/p>/is', '$1', $content);
     return $content;
 }
 add_filter('the_content', 'playdemo_unautop_shortcode', 12);

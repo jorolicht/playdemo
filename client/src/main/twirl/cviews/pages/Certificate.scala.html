@@ -82,8 +82,21 @@
         #Main_ContextHeaderId,
         #Main_FooterId,
         #Footer_ConsoleClickId,
-        body .d-print-none {
+        body .d-print-none,
+        body p:has(#Main_NavbarId),
+        body p:has(#Main_ContextHeaderId),
+        body p:has(#Main_AppWrapper),
+        body p:has(#Main_FooterId),
+        body p:has(#Footer_ConsoleClickId),
+        body p:has(#Main_DynContentId),
+        .playdemo-spa-root p {
             display: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            max-height: 0 !important;
+            overflow: hidden !important;
         }
 
         html, body {
