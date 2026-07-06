@@ -49,11 +49,15 @@ object Certificate extends BasePage with JsWrapper with services.ComWrapper:
     true
 
   private def replaceKeywords(rawHtml: String, tourneyName: String, compName: String, playerName: String, rank: String): String =
-    rawHtml
-      .replace("#Turnier", tourneyName)
-      .replace("#Wettbewerb", compName)
-      .replace("#Name", playerName)
-      .replace("#Platz", rank)
+    val tNameRepl = scala.util.matching.Regex.quoteReplacement(tourneyName)
+    val cNameRepl = scala.util.matching.Regex.quoteReplacement(compName)
+    val pNameRepl = scala.util.matching.Regex.quoteReplacement(playerName)
+    val rNameRepl = scala.util.matching.Regex.quoteReplacement(rank)
+
+    val html1 = "(?i)#(Turnier|Tourney)".r.replaceAllIn(rawHtml, tNameRepl)
+    val html2 = "(?i)#(Wettbewerb|Competition)".r.replaceAllIn(html1, cNameRepl)
+    val html3 = "(?i)#Name".r.replaceAllIn(html2, pNameRepl)
+    "(?i)#(Platz|Place)".r.replaceAllIn(html3, rNameRepl)
 
   private def fetchTemplateContent(templateName: String, param: String): Unit =
     isLoading = true
