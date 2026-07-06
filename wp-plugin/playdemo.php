@@ -134,6 +134,20 @@ function playdemo_render($atts) {
 }
 add_shortcode('playdemo', 'playdemo_render');
 
+/**
+ * Verhindert, dass WordPress den [playdemo] Shortcode in <p>-Tags einschließt,
+ * da dieser Block-Elemente (div) generiert, was zu invalidem HTML (stray </p>) führt.
+ */
+function playdemo_unautop_shortcode($content) {
+    if (false === strpos($content, '[playdemo')) {
+        return $content;
+    }
+    // Entfernt umgebende <p>-Tags um den [playdemo] Shortcode
+    $content = preg_replace('/<p>\s*(\[playdemo[^\]]*\])\s*<\/p>/i', '$1', $content);
+    return $content;
+}
+add_filter('the_content', 'playdemo_unautop_shortcode', 10.5);
+
 
 /**
  * 2. Das leere Template erzwingen
