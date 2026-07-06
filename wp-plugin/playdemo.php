@@ -137,16 +137,17 @@ add_shortcode('playdemo', 'playdemo_render');
 /**
  * Verhindert, dass WordPress den [playdemo] Shortcode in <p>-Tags einschließt,
  * da dieser Block-Elemente (div) generiert, was zu invalidem HTML (stray </p>) führt.
+ * Dieser Filter läuft bei Priorität 12 (nach do_shortcode), um die generierten Container sauber zu säubern.
  */
 function playdemo_unautop_shortcode($content) {
-    if (false === strpos($content, '[playdemo')) {
+    if (false === strpos($content, 'Main_AppWrapper')) {
         return $content;
     }
-    // Entfernt umgebende <p>-Tags um den [playdemo] Shortcode
-    $content = preg_replace('/<p>\s*(\[playdemo[^\]]*\])\s*<\/p>/i', '$1', $content);
+    // Entfernt umgebende <p>-Tags um die generierten playdemo-Strukturen
+    $content = preg_replace('/<p>\s*(<span id="Main_ParamId".*?<\/div>)\s*<\/p>/is', '$1', $content);
     return $content;
 }
-add_filter('the_content', 'playdemo_unautop_shortcode', 10.5);
+add_filter('the_content', 'playdemo_unautop_shortcode', 12);
 
 
 /**
