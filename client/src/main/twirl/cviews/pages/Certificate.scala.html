@@ -8,7 +8,7 @@
 @place = @{ if(parts.length > 2) parts(2) else "X" }
 
 <div class="container mt-5 mb-5 d-flex justify-content-center">
-    <div class="certificate-container p-5 border border-5 border-warning shadow-lg bg-white text-center" style="max-width: 800px; min-height: 1000px; border-style: double !important;">
+    <div class="certificate-container p-5 border-0 shadow-lg bg-white text-center" style="max-width: 800px; min-height: 1000px;">
         
         @if(isLoading) {
             <div class="text-center py-5 my-5">
@@ -108,7 +108,7 @@
             height: 290mm !important;
             min-height: 290mm !important;
             max-height: 290mm !important;
-            border: 5mm double #ffc107 !important;
+            border: none !important;
             box-shadow: none !important;
             margin: 0 !important;
             padding: 15mm !important;
