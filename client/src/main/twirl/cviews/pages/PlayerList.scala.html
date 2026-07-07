@@ -27,10 +27,7 @@
                         </h2>
                         <div id="collapsePlayer@c.id.value" class="accordion-collapse collapse @if(expandedCompId.contains(c.id.value)){show}" data-bs-parent="#playerAccordion">
                             <div class="accordion-body p-0">
-                                <div class="bg-light p-2 d-flex justify-content-end gap-2 border-bottom">
-                                    <button class="btn btn-outline-primary btn-sm" @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || services.TourneyDB.tourney.isRegLocked(c)){disabled}><i class="bi bi-person-plus me-1"></i>@gM("+add")</button>
-                                    <button class="btn btn-outline-secondary btn-sm" @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || services.TourneyDB.tourney.isRegLocked(c)){disabled}><i class="bi bi-file-earmark-spreadsheet me-1"></i>@gM("+csv_upload")</button>
-                                </div>
+
                                 <table class="table table-sm table-hover mb-0">
                                     <thead class="table-light small">
                                         <tr>
