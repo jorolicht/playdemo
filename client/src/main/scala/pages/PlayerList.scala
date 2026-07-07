@@ -56,27 +56,7 @@ object PlayerList extends BasePage with JsWrapper:
             case Right(updatedPlayer) =>
               tourney.updatePlayer(updatedPlayer)
               
-              val clubName = tourney.clubs.find(_.id.toInt == updatedPlayer.clubId).map(_.name).getOrElse("")
-              
-              tourney.competitions.filter(_ != null).foreach { comp =>
-                var changed = false
-                for (j <- 0 until comp.pants1Stage.length) {
-                  val pant = comp.pants1Stage(j)
-                  if (pant.id.isSingle && pant.id.singleId == updatedPlayer.id) {
-                    val updatedPant = pant.copy(
-                      name = updatedPlayer.displayName,
-                      club = clubName,
-                      rating = updatedPlayer.meta.ttr.getOrElse(0),
-                      birthYear = updatedPlayer.birthYear.map(_.toString).getOrElse("")
-                    )
-                    comp.pants1Stage.update(j, updatedPant)
-                    changed = true
-                  }
-                }
-                if (changed) {
-                  tourney.updateCompetition(comp)
-                }
-              }
+
               
               saveExpandedState()
               render()

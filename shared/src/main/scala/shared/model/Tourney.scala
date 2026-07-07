@@ -380,6 +380,230 @@ case class Tourney(
     players.find(_.id == p.id) match
       case Some(_) => 
         addPlayerObj(p, doSync)
+
+        // Propagate changes to all competitions and stages
+        val clubName = clubs.find(_.id.toInt == p.clubId).map(_.name).getOrElse("")
+
+        // 1. Update competition participants (pants1Stage)
+        competitions.filter(_ != null).foreach { comp =>
+          var compChanged = false
+          for (j <- 0 until comp.pants1Stage.length) {
+            val pant = comp.pants1Stage(j)
+            if (pant.id.isSingle && pant.id.singleId == p.id) {
+              val updatedPant = pant.copy(
+                name = p.displayName,
+                club = clubName,
+                rating = p.meta.ttr.getOrElse(0),
+                birthYear = p.birthYear.map(_.toString).getOrElse("")
+              )
+              comp.pants1Stage.update(j, updatedPant)
+              compChanged = true
+            } else if (pant.id.isDouble) {
+              val (p1, p2) = pant.id.doubleId
+              if (p1 == p.id || p2 == p.id) {
+                val p1Opt = players.find(_.id == p1)
+                val p2Opt = players.find(_.id == p2)
+                for {
+                  pl1 <- p1Opt
+                  pl2 <- p2Opt
+                } {
+                  val c1 = clubs.find(_.id.toInt == pl1.clubId).map(_.name).getOrElse("")
+                  val c2 = clubs.find(_.id.toInt == pl2.clubId).map(_.name).getOrElse("")
+                  val dClub = if (pl1.clubId == pl2.clubId) c1 else s"$c1, $c2"
+                  val dRating = (pl1.meta.ttr.getOrElse(0) + pl2.meta.ttr.getOrElse(0)) / 2
+                  val dName = s"${pl1.lastName} / ${pl2.lastName}"
+                  
+                  val updatedPant = pant.copy(
+                    name = dName,
+                    club = dClub,
+                    rating = dRating
+                  )
+                  comp.pants1Stage.update(j, updatedPant)
+                  compChanged = true
+                }
+              }
+            }
+          }
+          if (compChanged) {
+            updateCompetition(comp, doSync)
+          }
+        }
+
+        // 2. Update stages candidates and stage format data
+        stages.filter(_ != null).foreach { stage =>
+          var stageChanged = false
+
+          // 2a. Update candidates
+          for (idx <- 0 until stage.candidates.length) {
+            val (pant, active) = stage.candidates(idx)
+            if (pant.id.isSingle && pant.id.singleId == p.id) {
+              val updatedPant = pant.copy(
+                name = p.displayName,
+                club = clubName,
+                rating = p.meta.ttr.getOrElse(0),
+                birthYear = p.birthYear.map(_.toString).getOrElse("")
+              )
+              stage.candidates.update(idx, (updatedPant, active))
+              stageChanged = true
+            } else if (pant.id.isDouble) {
+              val (p1, p2) = pant.id.doubleId
+              if (p1 == p.id || p2 == p.id) {
+                val p1Opt = players.find(_.id == p1)
+                val p2Opt = players.find(_.id == p2)
+                for {
+                  pl1 <- p1Opt
+                  pl2 <- p2Opt
+                } {
+                  val c1 = clubs.find(_.id.toInt == pl1.clubId).map(_.name).getOrElse("")
+                  val c2 = clubs.find(_.id.toInt == pl2.clubId).map(_.name).getOrElse("")
+                  val dClub = if (pl1.clubId == pl2.clubId) c1 else s"$c1, $c2"
+                  val dRating = (pl1.meta.ttr.getOrElse(0) + pl2.meta.ttr.getOrElse(0)) / 2
+                  val dName = s"${pl1.lastName} / ${pl2.lastName}"
+                  
+                  val updatedPant = pant.copy(
+                    name = dName,
+                    club = dClub,
+                    rating = dRating
+                  )
+                  stage.candidates.update(idx, (updatedPant, active))
+                  stageChanged = true
+                }
+              }
+            }
+          }
+
+          // 2b. Update stage format data
+          stage.data match {
+            case StageData.GroupsStage(groups) =>
+              groups.foreach { group =>
+                for (idx <- 0 until group.pants.length) {
+                  val pant = group.pants(idx)
+                  if (pant != null) {
+                    if (pant.id.isSingle && pant.id.singleId == p.id) {
+                      val updatedPant = pant.copy(
+                        name = p.displayName,
+                        club = clubName,
+                        rating = p.meta.ttr.getOrElse(0),
+                        birthYear = p.birthYear.map(_.toString).getOrElse("")
+                      )
+                      group.pants(idx) = updatedPant
+                      stageChanged = true
+                    } else if (pant.id.isDouble) {
+                      val (p1, p2) = pant.id.doubleId
+                      if (p1 == p.id || p2 == p.id) {
+                        val p1Opt = players.find(_.id == p1)
+                        val p2Opt = players.find(_.id == p2)
+                        for {
+                          pl1 <- p1Opt
+                          pl2 <- p2Opt
+                        } {
+                          val c1 = clubs.find(_.id.toInt == pl1.clubId).map(_.name).getOrElse("")
+                          val c2 = clubs.find(_.id.toInt == pl2.clubId).map(_.name).getOrElse("")
+                          val dClub = if (pl1.clubId == pl2.clubId) c1 else s"$c1, $c2"
+                          val dRating = (pl1.meta.ttr.getOrElse(0) + pl2.meta.ttr.getOrElse(0)) / 2
+                          val dName = s"${pl1.lastName} / ${pl2.lastName}"
+                          
+                          val updatedPant = pant.copy(
+                            name = dName,
+                            club = dClub,
+                            rating = dRating
+                          )
+                          group.pants(idx) = updatedPant
+                          stageChanged = true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            case StageData.KnockoutStage(koStage) =>
+              for (idx <- 0 until koStage.pants.length) {
+                val pant = koStage.pants(idx)
+                if (pant != null) {
+                  if (pant.id.isSingle && pant.id.singleId == p.id) {
+                    val updatedPant = pant.copy(
+                      name = p.displayName,
+                      club = clubName,
+                      rating = p.meta.ttr.getOrElse(0),
+                      birthYear = p.birthYear.map(_.toString).getOrElse("")
+                    )
+                    koStage.pants.update(idx, updatedPant)
+                    stageChanged = true
+                  } else if (pant.id.isDouble) {
+                    val (p1, p2) = pant.id.doubleId
+                    if (p1 == p.id || p2 == p.id) {
+                      val p1Opt = players.find(_.id == p1)
+                      val p2Opt = players.find(_.id == p2)
+                      for {
+                        pl1 <- p1Opt
+                        pl2 <- p2Opt
+                      } {
+                        val c1 = clubs.find(_.id.toInt == pl1.clubId).map(_.name).getOrElse("")
+                        val c2 = clubs.find(_.id.toInt == pl2.clubId).map(_.name).getOrElse("")
+                        val dClub = if (pl1.clubId == pl2.clubId) c1 else s"$c1, $c2"
+                        val dRating = (pl1.meta.ttr.getOrElse(0) + pl2.meta.ttr.getOrElse(0)) / 2
+                        val dName = s"${pl1.lastName} / ${pl2.lastName}"
+                        
+                        val updatedPant = pant.copy(
+                          name = dName,
+                          club = dClub,
+                          rating = dRating
+                        )
+                        koStage.pants.update(idx, updatedPant)
+                        stageChanged = true
+                      }
+                    }
+                  }
+                }
+              }
+            case StageData.RoundRobinStage(rrGroup) =>
+              for (idx <- 0 until rrGroup.pants.length) {
+                val pant = rrGroup.pants(idx)
+                if (pant != null) {
+                  if (pant.id.isSingle && pant.id.singleId == p.id) {
+                    val updatedPant = pant.copy(
+                      name = p.displayName,
+                      club = clubName,
+                      rating = p.meta.ttr.getOrElse(0),
+                      birthYear = p.birthYear.map(_.toString).getOrElse("")
+                    )
+                    rrGroup.pants(idx) = updatedPant
+                    stageChanged = true
+                  } else if (pant.id.isDouble) {
+                    val (p1, p2) = pant.id.doubleId
+                    if (p1 == p.id || p2 == p.id) {
+                      val p1Opt = players.find(_.id == p1)
+                      val p2Opt = players.find(_.id == p2)
+                      for {
+                        pl1 <- p1Opt
+                        pl2 <- p2Opt
+                      } {
+                        val c1 = clubs.find(_.id.toInt == pl1.clubId).map(_.name).getOrElse("")
+                        val c2 = clubs.find(_.id.toInt == pl2.clubId).map(_.name).getOrElse("")
+                        val dClub = if (pl1.clubId == pl2.clubId) c1 else s"$c1, $c2"
+                        val dRating = (pl1.meta.ttr.getOrElse(0) + pl2.meta.ttr.getOrElse(0)) / 2
+                        val dName = s"${pl1.lastName} / ${pl2.lastName}"
+                        
+                        val updatedPant = pant.copy(
+                          name = dName,
+                          club = dClub,
+                          rating = dRating
+                        )
+                        rrGroup.pants(idx) = updatedPant
+                        stageChanged = true
+                      }
+                    }
+                  }
+                }
+              }
+            case _ =>
+          }
+
+          if (stageChanged) {
+            updateStage(stage, doSync)
+          }
+        }
+
         Right(p)
       case None => 
         Left(AppError("player.notFound"))
