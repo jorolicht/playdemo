@@ -1,0 +1,129 @@
+@import shared.model.*
+@import dialogs.DlgEditPlayer.*
+@import cviews.helper.html.*
+
+@(player: Player, clubs: Seq[Club], currentYear: Int)
+
+<div class="modal fade" @id(ModalId) tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header bg-dark text-white py-3 border-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-person-gear me-2"></i>Spieler bearbeiten</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" @id(CloseId)></button>
+            </div>
+            <div class="modal-body p-4 bg-light-subtle">
+                <ul class="nav nav-pills mb-4 gap-2" id="editPlayerTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold py-2 px-3 border" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-pane" type="button" role="tab" aria-controls="general-pane" aria-selected="true">
+                            <i class="bi bi-person me-1"></i>Allgemeine Daten
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold py-2 px-3 border" id="meta-tab" data-bs-toggle="tab" data-bs-target="#meta-pane" type="button" role="tab" aria-controls="meta-pane" aria-selected="false">
+                            <i class="bi bi-card-list me-1"></i>ClickTT / Meta-Daten
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="editPlayerTabContent">
+                    <div class="tab-pane fade show active" id="general-pane" role="tabpanel" aria-labelledby="general-tab" tabindex="0">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label @forAttr(InputLastId) class="form-label small fw-bold text-secondary">Nachname</label>
+                                <input type="text" class="form-control" @id(InputLastId) required>
+                            </div>
+                            <div class="col-md-6">
+                                <label @forAttr(InputFirstId) class="form-label small fw-bold text-secondary">Vorname</label>
+                                <input type="text" class="form-control" @id(InputFirstId) required>
+                            </div>
+                            <div class="col-md-6">
+                                <label @forAttr(InputClubId) class="form-label small fw-bold text-secondary">Verein</label>
+                                <select class="form-select" @id(InputClubId)>
+                                    <option value="0">Kein Verein</option>
+                                    @clubs.map { c =>
+                                        <option value="@c.id">@c.name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label @forAttr(InputYearId) class="form-label small fw-bold text-secondary">Jahrgang</label>
+                                <select class="form-select" @id(InputYearId)>
+                                    <option value="0">-- Unbekannt --</option>
+                                    @for(y <- ((currentYear - 80) to (currentYear - 8)).reverse) {
+                                        <option value="@y">@y</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label @forAttr(InputEmailId) class="form-label small fw-bold text-secondary">E-Mail</label>
+                                <input type="email" class="form-control" @id(InputEmailId) placeholder="beispiel@@domain.de">
+                            </div>
+                            <div class="col-md-6">
+                                <label @forAttr(InputSexId) class="form-label small fw-bold text-secondary">Geschlecht</label>
+                                <select class="form-select" @id(InputSexId)>
+                                    <option value="0">Unbekannt</option>
+                                    <option value="1">Weiblich</option>
+                                    <option value="2">Männlich</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="meta-pane" role="tabpanel" aria-labelledby="meta-tab" tabindex="0">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label @forAttr(InputTtrId) class="form-label small fw-bold text-secondary">TTR-Wert</label>
+                                <input type="number" class="form-control" @id(InputTtrId)>
+                            </div>
+                            <div class="col-md-4">
+                                <label @forAttr(InputLicenceNrId) class="form-label small fw-bold text-secondary">Lizenz-Nr. (licenceId)</label>
+                                <input type="text" class="form-control" @id(InputLicenceNrId)>
+                            </div>
+                            <div class="col-md-4">
+                                <label @forAttr(InputInternalNrId) class="form-label small fw-bold text-secondary">Interne Nr. (internalId)</label>
+                                <input type="text" class="form-control" @id(InputInternalNrId)>
+                            </div>
+                            <div class="col-md-4">
+                                <label @forAttr(InputClubNrId) class="form-label small fw-bold text-secondary">Vereinsnummer</label>
+                                <input type="text" class="form-control" @id(InputClubNrId)>
+                            </div>
+                            <div class="col-md-4">
+                                <label @forAttr(InputClubFedId) class="form-label small fw-bold text-secondary">Verbandskürzel</label>
+                                <input type="text" class="form-control" @id(InputClubFedId)>
+                            </div>
+                            <div class="col-md-4">
+                                <label @forAttr(InputNatId) class="form-label small fw-bold text-secondary">Nationalität</label>
+                                <input type="text" class="form-control" @id(InputNatId)>
+                            </div>
+                            <div class="col-md-4">
+                                <label @forAttr(InputForeignerId) class="form-label small fw-bold text-secondary">Gleichstellungsstatus</label>
+                                <input type="text" class="form-control" @id(InputForeignerId)>
+                            </div>
+                            <div class="col-md-4">
+                                <label @forAttr(InputRegionId) class="form-label small fw-bold text-secondary">Region (Verband)</label>
+                                <input type="text" class="form-control" @id(InputRegionId)>
+                            </div>
+                            <div class="col-md-4">
+                                <label @forAttr(InputSubRegionId) class="form-label small fw-bold text-secondary">Sub-Region (Bezirk/Kreis)</label>
+                                <input type="text" class="form-control" @id(InputSubRegionId)>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
+                            <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>ClickTT-Zuordnungen sperren manuelle Änderungen.</span>
+                            <button class="btn btn-outline-danger btn-sm fw-bold px-3" @id(BtnDeleteCttId) type="button">
+                                <i class="bi bi-trash me-1"></i>ClickTT-Zuordnung löschen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light p-3 border-0 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal" @id(CancelId)>Abbrechen</button>
+                <button type="button" class="btn btn-primary fw-bold px-4" @id(ApplyId)>Speichern</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div @id(LoadId) data-loaded="false"></div>

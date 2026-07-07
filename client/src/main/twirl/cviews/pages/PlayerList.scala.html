@@ -54,8 +54,21 @@
                                                 <td>@p.club</td>
                                                 <td class="text-center">@p.rating</td>
                                                 <td class="text-center">
-                                                    <div class="form-check d-flex justify-content-center">
+                                                    <div class="form-check d-flex justify-content-center align-items-center gap-2">
                                                         <input @id(IdCheckActive, "onchange", s"${c.id.value}-${p.id.idSaveSuffix}") class="form-check-input" type="checkbox" data-comp-id="@c.id.value" data-sno="@p.id" @if(p.active){checked} @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || services.TourneyDB.tourney.isRegLocked(c)){disabled}>
+                                                        @if(p.id.isSingle) {
+                                                            @defining(services.TourneyDB.tourney.players.find(_.id == p.id.singleId)) { playerOpt =>
+                                                                @playerOpt.map { player =>
+                                                                    <button class="btn btn-sm btn-link p-0 text-primary edit-player-btn" 
+                                                                            type="button"
+                                                                            data-player-id="@player.id.value" 
+                                                                            data-comp-id="@c.id.value" 
+                                                                            title="Spieler editieren">
+                                                                        <i class="bi bi-pencil-square"></i>
+                                                                    </button>
+                                                                }
+                                                            }
+                                                        }
                                                     </div>
                                                 </td>
                                             </tr>

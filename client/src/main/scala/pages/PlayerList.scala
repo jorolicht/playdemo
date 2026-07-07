@@ -5,6 +5,8 @@ import org.scalajs.dom.Event
 import org.scalajs.dom.raw.HTMLElement
 import base.*
 import shared.model.*
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 /**
  * Page listing participants for all competitions.
@@ -41,6 +43,51 @@ object PlayerList extends BasePage with JsWrapper:
     comps.ContextHeader.render()
     val competitions = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
     setMain(cviews.pages.html.PlayerList(competitions, expandedCompId))
+
+    // Attach click listeners to edit buttons
+    val buttons = dom.document.querySelectorAll(".edit-player-btn")
+    for (i <- 0 until buttons.length) {
+      val btn = buttons.item(i).asInstanceOf[dom.html.Button]
+      val pIdVal = btn.getAttribute("data-player-id").toInt
+      btn.onclick = (e: dom.Event) => {
+        val tourney = services.TourneyDB.tourney
+        tourney.players.find(_.id == PlayerId(pIdVal)).foreach { player =>
+          dialogs.DlgEditPlayer.show(player).map {
+            case Right(updatedPlayer) =>
+              tourney.updatePlayer(updatedPlayer)
+              
+              val clubName = tourney.clubs.find(_.id.toInt == updatedPlayer.clubId).map(_.name).getOrElse("")
+              
+              tourney.competitions.filter(_ != null).foreach { comp =>
+                var changed = false
+                for (j <- 0 until comp.pants1Stage.length) {
+                  val pant = comp.pants1Stage(j)
+                  if (pant.id.isSingle && pant.id.singleId == updatedPlayer.id) {
+                    val updatedPant = pant.copy(
+                      name = updatedPlayer.displayName,
+                      club = clubName,
+                      rating = updatedPlayer.meta.ttr.getOrElse(0),
+                      birthYear = updatedPlayer.birthYear.map(_.toString).getOrElse("")
+                    )
+                    comp.pants1Stage.update(j, updatedPant)
+                    changed = true
+                  }
+                }
+                if (changed) {
+                  tourney.updateCompetition(comp)
+                }
+              }
+              
+              saveExpandedState()
+              render()
+              
+            case Left(err) =>
+              debug(s"Player edit cancelled or failed: $err")
+          }
+        }
+      }
+    }
+
     true
 
   /**
