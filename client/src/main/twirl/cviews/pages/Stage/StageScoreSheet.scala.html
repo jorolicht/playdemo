@@ -110,8 +110,13 @@
   mList.headOption.map { case (m, _, _, _, _, _, _) =>
     stage.stageConfig.format match {
       case StageFormat.GR =>
-        val grId = m.asInstanceOf[MEntryGr].grId
-        s"Gruppe ${StageHelper.cvrt2ExcelCol(grId)}"
+        val hasMultipleGroups = mList.map { case (mt, _, _, _, _, _, _) => mt.asInstanceOf[MEntryGr].grId }.distinct.length > 1
+        if (hasMultipleGroups) {
+          if (base.Global.lang == "de") s"Runde ${m.asInstanceOf[MEntryGr].round}" else s"Round ${m.asInstanceOf[MEntryGr].round}"
+        } else {
+          val grId = m.asInstanceOf[MEntryGr].grId
+          s"Gruppe ${StageHelper.cvrt2ExcelCol(grId)}"
+        }
       case StageFormat.RR =>
         val round = m.asInstanceOf[MEntryGr].round
         if (base.Global.lang == "de") s"Runde $round" else s"Round $round"

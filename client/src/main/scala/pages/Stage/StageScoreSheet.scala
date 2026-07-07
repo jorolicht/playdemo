@@ -59,24 +59,28 @@ object StageScoreSheet extends BasePage with JsWrapper:
         }
 
         // Filter matches to only generate and print the selected round or current active round
-        val filteredMatches = activeSecParam match {
-          case Some(secId) =>
-            stage.stageConfig.format match {
-              case StageFormat.GR =>
-                stage.matches.toSeq.filter(m => m.isInstanceOf[MEntryGr] && m.asInstanceOf[MEntryGr].grId == secId)
-              case _ =>
-                stage.matches.toSeq.filter(_.round == secId)
-            }
-          case None =>
-            val defaultRound = stage.matches.filterNot(_.finished).map(_.round).minOption
-              .getOrElse(stage.matches.map(_.round).maxOption.getOrElse(1))
-            
-            stage.stageConfig.format match {
-              case StageFormat.GR =>
-                stage.matches.toSeq.filter(m => m.isInstanceOf[MEntryGr] && m.asInstanceOf[MEntryGr].grId == 1)
-              case _ =>
-                stage.matches.toSeq.filter(_.round == defaultRound)
-            }
+        val filteredMatches = if (isPrintRound) {
+          stage.matches.toSeq.filter(_.round == targetRoundNo)
+        } else {
+          activeSecParam match {
+            case Some(secId) =>
+              stage.stageConfig.format match {
+                case StageFormat.GR =>
+                  stage.matches.toSeq.filter(m => m.isInstanceOf[MEntryGr] && m.asInstanceOf[MEntryGr].grId == secId)
+                case _ =>
+                  stage.matches.toSeq.filter(_.round == secId)
+              }
+            case None =>
+              val defaultRound = stage.matches.filterNot(_.finished).map(_.round).minOption
+                .getOrElse(stage.matches.map(_.round).maxOption.getOrElse(1))
+              
+              stage.stageConfig.format match {
+                case StageFormat.GR =>
+                  stage.matches.toSeq.filter(m => m.isInstanceOf[MEntryGr] && m.asInstanceOf[MEntryGr].grId == 1)
+                case _ =>
+                  stage.matches.toSeq.filter(_.round == defaultRound)
+              }
+          }
         }
 
         val mList = filteredMatches.map { m =>
