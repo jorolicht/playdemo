@@ -69,36 +69,79 @@ object DrawRules:
    * Calculates the group distribution for a given mode and player count.
    * Returns a list of group sizes.
    */
-  def calculateDistribution(stageConfig: StageConfig, count: Int): Seq[Int] =
+  def calculateDistribution(stageConfig: StageConfig, count: Int, customGroupCount: Option[Int] = None): Seq[Int] =
     stageConfig match
       case StageConfig.RR => Seq(count)
       
       case StageConfig.GRPS3 => Seq.fill(count / 3)(3)
       
       case StageConfig.GRPS34 =>
-        val mod = count % 3
-        val no4er = mod
-        val no3er = (count - (no4er * 4)) / 3
-        Seq.fill(no4er)(4) ++ Seq.fill(no3er)(3)
+        customGroupCount match {
+          case Some(gCount) =>
+            val no4er = count - (3 * gCount)
+            val no3er = gCount - no4er
+            if (no4er >= 0 && no3er >= 0) {
+              Seq.fill(no4er)(4) ++ Seq.fill(no3er)(3)
+            } else {
+              val mod = count % 3
+              val f4er = mod
+              val f3er = (count - (f4er * 4)) / 3
+              Seq.fill(f4er)(4) ++ Seq.fill(f3er)(3)
+            }
+          case None =>
+            val mod = count % 3
+            val no4er = mod
+            val no3er = (count - (no4er * 4)) / 3
+            Seq.fill(no4er)(4) ++ Seq.fill(no3er)(3)
+        }
         
       case StageConfig.GRPS4 => Seq.fill(count / 4)(4)
       
       case StageConfig.GRPS45 =>
-        val mod = count % 4
-        val no5er = mod
-        val no4er = (count - (no5er * 5)) / 4
-        Seq.fill(no5er)(5) ++ Seq.fill(no4er)(4)
+        customGroupCount match {
+          case Some(gCount) =>
+            val no5er = count - (4 * gCount)
+            val no4er = gCount - no5er
+            if (no5er >= 0 && no4er >= 0) {
+              Seq.fill(no5er)(5) ++ Seq.fill(no4er)(4)
+            } else {
+              val mod = count % 4
+              val f5er = mod
+              val f4er = (count - (f5er * 5)) / 4
+              Seq.fill(f5er)(5) ++ Seq.fill(f4er)(4)
+            }
+          case None =>
+            val mod = count % 4
+            val no5er = mod
+            val no4er = (count - (no5er * 5)) / 4
+            Seq.fill(no5er)(5) ++ Seq.fill(no4er)(4)
+        }
         
       case StageConfig.GRPS5 => Seq.fill(count / 5)(5)
       
       case StageConfig.GRPS56 =>
-        val mod = count % 5
-        val no6er = mod
-        val no5er = (count - (no6er * 6)) / 5
-        Seq.fill(no6er)(6) ++ Seq.fill(no5er)(5)
+        customGroupCount match {
+          case Some(gCount) =>
+            val no6er = count - (5 * gCount)
+            val no5er = gCount - no6er
+            if (no6er >= 0 && no5er >= 0) {
+              Seq.fill(no6er)(6) ++ Seq.fill(no5er)(5)
+            } else {
+              val mod = count % 5
+              val f6er = mod
+              val f5er = (count - (f6er * 6)) / 5
+              Seq.fill(f6er)(6) ++ Seq.fill(f5er)(5)
+            }
+          case None =>
+            val mod = count % 5
+            val no6er = mod
+            val no5er = (count - (no6er * 6)) / 5
+            Seq.fill(no6er)(6) ++ Seq.fill(no5er)(5)
+        }
         
       case StageConfig.GRPS6 => Seq.fill(count / 6)(6)
       case StageConfig.GRPS7 => Seq.fill(count / 7)(7)
       case StageConfig.GRPS8 => Seq.fill(count / 8)(8)
       
       case _ => Nil
+

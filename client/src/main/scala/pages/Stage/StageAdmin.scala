@@ -51,6 +51,7 @@ object StageAdmin extends BasePage with JsWrapper:
 
   var currentFilterOption: String = "ALL"
   var sortBySelected: Boolean = false
+  var activeCustomGroupCount: Option[Int] = None
   private var lastStageId: Option[StageId] = None
 
   def render(param: String = ""): Boolean = 
@@ -196,6 +197,7 @@ object StageAdmin extends BasePage with JsWrapper:
         Global.currentSelection.stage.foreach { stage =>
           DlgMsgbox.show("Möchten Sie wirklich die gesamte Auslosung löschen? Alle Ergebnisse werden gelöscht!", "Auslosung löschen", List(BoxButton.Yes, BoxButton.No)).map {
             case BoxButton.Yes =>
+              activeCustomGroupCount = None
               stage.matches.clear()
               stage.status = StageStatus.CFG
               services.TourneyDB.tourney.updateStage(stage) match {
@@ -216,6 +218,7 @@ object StageAdmin extends BasePage with JsWrapper:
         Global.currentSelection.stage.foreach { stage =>
           DlgMsgbox.show("Möchten Sie wirklich die gesamte Konfiguration dieser Stage löschen und zurücksetzen?", "Konfiguration löschen", List(BoxButton.Yes, BoxButton.No)).map {
             case BoxButton.Yes =>
+              activeCustomGroupCount = None
               stage.stageConfig = StageConfig.CFG
               stage.status = StageStatus.CFG
               stage.size = 0
@@ -395,7 +398,18 @@ object StageAdmin extends BasePage with JsWrapper:
         render()
 
       case `SelectDrawMode` =>
-        updateButtonState()
+        val select = gE(SelectDrawMode).asInstanceOf[dom.html.Select]
+        if (select != null) {
+          val modeStr = select.value
+          if (List("GRPS34", "GRPS45", "GRPS56").contains(modeStr)) {
+            showGroupCountDialog(modeStr)
+          } else {
+            activeCustomGroupCount = None
+            updateButtonState()
+          }
+        } else {
+          updateButtonState()
+        }
 
       case _ => 
         debug(s"StageAdmin handleEvent: ${elem.id}")
@@ -533,7 +547,7 @@ object StageAdmin extends BasePage with JsWrapper:
               }.exists(_.stageConfig.format == StageFormat.GR)
               
               val drawOption = if (hasPrevGrStage) DrawOption.GrpAfterGrp else DrawOption.GrpStart
-              r.data = Groups.draw(r, comp.typ, cfg, selectedPants, drawOption)
+              r.data = Groups.draw(r, comp.typ, cfg, selectedPants, drawOption, activeCustomGroupCount)
         
             case _ => debug(s"Unsupported generation for mode $cfg")
 
@@ -588,3 +602,119 @@ object StageAdmin extends BasePage with JsWrapper:
         case _ => "-"
       }
     }.getOrElse("-")
+
+  private def getSelectedPlayersCount(): Int =
+    val checks = dom.document.querySelectorAll(".player-draw-check")
+    var count = 0
+    for (i <- 0 until checks.length) {
+      if (checks.item(i).asInstanceOf[dom.html.Input].checked) count += 1
+    }
+    count
+
+  private def showGroupCountDialog(modeStr: String): Unit =
+    val count = getSelectedPlayersCount()
+    val cfg = StageConfig.valueOf(modeStr)
+    val defCount = DrawRules.calculateDistribution(cfg, count).length
+    
+    val (sLow, sHigh) = modeStr match
+      case "GRPS34" => (3, 4)
+      case "GRPS45" => (4, 5)
+      case "GRPS56" => (5, 6)
+      case _ => (3, 4)
+    
+    val minG = scala.math.ceil(count.toDouble / sHigh).toInt
+    val maxG = scala.math.floor(count.toDouble / sLow).toInt
+
+    val modalId = "customGroupCountModal"
+    val existing = dom.document.getElementById(modalId)
+    if (existing != null) existing.parentNode.removeChild(existing)
+
+    val modalDiv = dom.document.createElement("div").asInstanceOf[dom.html.Div]
+    modalDiv.id = modalId
+    modalDiv.className = "modal fade show d-block animate-fade-in"
+    modalDiv.setAttribute("style", "background: rgba(0,0,0,0.5); z-index: 1050;")
+    
+    val validRangeStr = if (minG == maxG) s"exakt $minG" else s"zwischen $minG und $maxG"
+
+    modalDiv.innerHTML = s"""
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+          <div class="modal-header bg-primary text-white py-3 border-0">
+            <h5 class="modal-title fw-bold"><i class="bi bi-grid-3x3-gap me-2"></i>Anzahl der Gruppen festlegen</h5>
+          </div>
+          <div class="modal-body p-4 bg-light-subtle">
+            <p class="mb-3 text-muted small">
+              Bei <strong>$count Teilnehmern</strong> und <strong>${sLow}er und ${sHigh}er Gruppen</strong> muss die Anzahl der Gruppen <strong>$validRangeStr</strong> sein.
+            </p>
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-secondary mb-2">Anzahl Gruppen:</label>
+              <input type="number" id="customGroupInputVal" class="form-control form-control-lg border-2 text-center fw-bold" 
+                     value="$defCount" min="$minG" max="$maxG" style="font-size: 1.5rem; color: #0d6efd;" />
+              <div id="customGroupFeedback" class="form-text mt-2 text-center text-success small fw-bold"></div>
+            </div>
+            
+            <div class="p-3 bg-white rounded border border-light-subtle text-muted small mb-1" id="customGroupDistributionInfo">
+            </div>
+          </div>
+          <div class="modal-footer bg-light p-3 border-0 d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-secondary fw-bold" id="customGroupCancelBtn">Abbrechen</button>
+            <button class="btn btn-primary fw-bold px-4" id="customGroupOkBtn">OK</button>
+          </div>
+        </div>
+      </div>
+    """
+    
+    dom.document.body.appendChild(modalDiv)
+
+    val input = dom.document.getElementById("customGroupInputVal").asInstanceOf[dom.html.Input]
+    val okBtn = dom.document.getElementById("customGroupOkBtn").asInstanceOf[dom.html.Button]
+    val cancelBtn = dom.document.getElementById("customGroupCancelBtn").asInstanceOf[dom.html.Button]
+    val feedback = dom.document.getElementById("customGroupFeedback").asInstanceOf[dom.html.Div]
+    val distInfo = dom.document.getElementById("customGroupDistributionInfo").asInstanceOf[dom.html.Div]
+
+    def updateValidity(): Unit =
+      val gVal = input.value.toIntOption.getOrElse(0)
+      val isValid = gVal >= minG && gVal <= maxG
+      
+      okBtn.disabled = !isValid
+      if (isValid) {
+        okBtn.classList.remove("opacity-50")
+        input.classList.remove("border-danger")
+        input.classList.add("border-success")
+        
+        val noHigh = count - (sLow * gVal)
+        val noLow = gVal - noHigh
+        
+        val descHigh = if (noHigh > 0) s"$noHigh Gruppe(n) mit $sHigh Spielern" else ""
+        val descLow = if (noLow > 0) s"$noLow Gruppe(n) mit $sLow Spielern" else ""
+        val combined = Seq(descHigh, descLow).filter(_.nonEmpty).mkString(" und ")
+        
+        feedback.innerHTML = "<i class='bi bi-check-circle-fill me-1'></i>Gültige Gruppenanzahl!"
+        feedback.className = "form-text mt-2 text-center text-success small fw-bold"
+        distInfo.innerHTML = s"<strong>Aufteilung:</strong> $combined"
+        distInfo.classList.remove("d-none")
+      } else {
+        okBtn.classList.add("opacity-50")
+        input.classList.remove("border-success")
+        input.classList.add("border-danger")
+        feedback.innerHTML = s"<i class='bi bi-x-circle-fill me-1'></i>Ungültig! Muss $validRangeStr sein."
+        feedback.className = "form-text mt-2 text-center text-danger small fw-bold"
+        distInfo.classList.add("d-none")
+      }
+
+    input.oninput = (e: dom.Event) => updateValidity()
+    
+    cancelBtn.onclick = (e: dom.Event) =>
+      val select = gE(SelectDrawMode).asInstanceOf[dom.html.Select]
+      if (select != null) select.value = "UNKN"
+      activeCustomGroupCount = None
+      dom.document.body.removeChild(modalDiv)
+      updateButtonState()
+
+    okBtn.onclick = (e: dom.Event) =>
+      val gVal = input.value.toIntOption
+      activeCustomGroupCount = gVal
+      dom.document.body.removeChild(modalDiv)
+      updateButtonState()
+
+    updateValidity()

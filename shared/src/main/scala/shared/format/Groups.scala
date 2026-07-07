@@ -237,10 +237,10 @@ object Group {
  * Companion object for Groups format providing initialization logic.
  */
 object Groups:
-  def draw(stage: Stage, coTyp: CompTyp, cfg: StageConfig, selectedPants: Seq[Pant], drawOption: DrawOption = DrawOption.Unknown): StageData.GroupsStage = {
+  def draw(stage: Stage, coTyp: CompTyp, cfg: StageConfig, selectedPants: Seq[Pant], drawOption: DrawOption = DrawOption.Unknown, customGroupCount: Option[Int] = None): StageData.GroupsStage = {
     drawOption match {
-      case DrawOption.GrpStart    => draw_GrpStart(cfg, selectedPants, stage.noWinSets)
-      case DrawOption.GrpAfterGrp => draw_GrpAfterGrp(cfg, selectedPants, stage.noWinSets)
+      case DrawOption.GrpStart    => draw_GrpStart(cfg, selectedPants, stage.noWinSets, customGroupCount)
+      case DrawOption.GrpAfterGrp => draw_GrpAfterGrp(cfg, selectedPants, stage.noWinSets, customGroupCount)
       case _                      => StageData.GroupsStage(ArrayBuffer.empty[Group])
     }
   }
@@ -322,8 +322,8 @@ object Groups:
     g.occu = newOccu
 
 
-  def draw_GrpAfterGrp(cfg: StageConfig, selectedPants: Seq[Pant], noWinSets: Int): StageData.GroupsStage = {
-    val dist = shared.utils.DrawRules.calculateDistribution(cfg, selectedPants.length)
+  def draw_GrpAfterGrp(cfg: StageConfig, selectedPants: Seq[Pant], noWinSets: Int, customGroupCount: Option[Int] = None): StageData.GroupsStage = {
+    val dist = shared.utils.DrawRules.calculateDistribution(cfg, selectedPants.length, customGroupCount)
     var currentPants = selectedPants
     val buf = ArrayBuffer.empty[Group]
     dist.zipWithIndex.foreach { case (size, i) =>
@@ -337,8 +337,8 @@ object Groups:
   }
 
 
-  def draw_GrpStart(cfg: StageConfig, selectedPants: Seq[Pant], noWinSets: Int): StageData.GroupsStage = {
-    val dist = shared.utils.DrawRules.calculateDistribution(cfg, selectedPants.length)
+  def draw_GrpStart(cfg: StageConfig, selectedPants: Seq[Pant], noWinSets: Int, customGroupCount: Option[Int] = None): StageData.GroupsStage = {
+    val dist = shared.utils.DrawRules.calculateDistribution(cfg, selectedPants.length, customGroupCount)
     var currentPants = selectedPants
     val groups = ArrayBuffer.empty[Group]
     dist.zipWithIndex.foreach { case (size, i) =>
