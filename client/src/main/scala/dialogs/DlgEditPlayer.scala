@@ -160,7 +160,7 @@ object DlgEditPlayer extends BaseDialog with JsWrapper:
     setElementEnabled(InputFirstId, editablePlayer)
     setElementEnabled(InputClubId, editablePlayer)
     setElementEnabled(InputYearId, editablePlayer)
-    setElementEnabled(InputEmailId, editablePlayer)
+    setElementEnabled(InputEmailId, true)
     setElementEnabled(InputSexId, editablePlayer)
 
     setElementEnabled(InputTtrId, editableMeta)
