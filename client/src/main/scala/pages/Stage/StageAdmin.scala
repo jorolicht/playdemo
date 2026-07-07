@@ -484,6 +484,10 @@ object StageAdmin extends BasePage with JsWrapper:
           // Generation Logic
           r.stageConfig = cfg
           r.noPlayers = selectedPants.length
+          r.size = cfg.format match {
+            case StageFormat.KO => shared.format.KoRound.getSize(selectedPants.length)
+            case _ => selectedPants.length
+          }
           
           cfg.format match
             case StageFormat.RR => // Round Robin
