@@ -23,6 +23,7 @@ object TestStage extends base.JsWrapper:
       case 4 => testStage_sync(group, number, param)
       case 5 => testStage_referee(group, number, param)
       case 6 => testStage_swapPairing(group, number, param)
+      case 7 => testStage_randomResult(group, number, param)
       case _ =>
         addOutput(s"FAILED: ${group}-Test:${number} param:${param} unknown test number")
         Future(Left(AppError("unknown test number")))
@@ -195,3 +196,92 @@ object TestStage extends base.JsWrapper:
       case ex: Exception =>
         addOutput(s"Error: ${ex.getMessage}")
         Future(Left(AppError("test.failed", ex.getMessage)))
+
+  /**
+   * Test 7: Generate random results for a round. Param: "roundNo" or "stageId,roundNo"
+   */
+  def testStage_randomResult(group: String, number: Int, param: String): Future[Either[AppError, String]] =
+    try
+      val parts = param.split(",")
+      val (stageOpt, roundNo) = if (parts.length >= 2) {
+        val stageId = StageId.fromInt(parts(0).trim.toInt)
+        val rNo = parts(1).trim.toInt
+        (TourneyDB.tourney.stages.filter(_ != null).find(_.id == stageId), rNo)
+      } else if (param.trim.nonEmpty) {
+        val rNo = param.trim.toInt
+        (base.Global.currentSelection.stage, rNo)
+      } else {
+        addOutput("Param must be 'roundNo' or 'stageId,roundNo'")
+        return Future(Left(AppError("invalid.param")))
+      }
+
+      stageOpt match
+        case Some(stage) =>
+          val winSets = if (stage.noWinSets > 0) stage.noWinSets else 3
+          val unplayed = stage.matches.filter(m => m != null && m.round == roundNo && !m.finished && !m.stNoA.isBye && !m.stNoB.isBye && !m.stNoA.isNN && !m.stNoB.isNN)
+          
+          if (unplayed.isEmpty) {
+            addOutput(s"No unplayed matches found in Stage '${stage.name}' (ID: ${stage.id.value}) for Round $roundNo.")
+            Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))
+          } else {
+            addOutput(s"Generating random results for ${unplayed.length} matches in Stage '${stage.name}' for Round $roundNo...")
+            
+            unplayed.foreach { m =>
+              val ((aWins, bWins), resultStr) = generateRandomMatchResult(winSets)
+              stage.inputMatch(m.gameNo, (aWins, bWins), resultStr, "", m.playfield) match {
+                case Left(err) =>
+                  addOutput(s"Failed to set match result for gameNo ${m.gameNo}: ${err.msg}")
+                case Right(_) =>
+                  addOutput(s"Set gameNo ${m.gameNo} result to $aWins:$bWins ($resultStr)")
+              }
+            }
+            
+            TourneyDB.tourney.updateStage(stage) match {
+              case Left(err) =>
+                addOutput(s"Failed to update stage in database: ${err.msg}")
+                Future(Left(err))
+              case Right(updatedStage) =>
+                base.Global.currentSelection = base.Global.currentSelection.copy(stage = Some(updatedStage))
+                addOutput(s"Successfully saved results and updated Stage '${updatedStage.name}'. Status: ${updatedStage.status}")
+                Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))
+            }
+          }
+        case None =>
+          addOutput("No active stage found or specified stage not found.")
+          Future(Left(AppError("stage.not.found")))
+    catch
+      case ex: Exception =>
+        addOutput(s"Error generating random results: ${ex.getMessage}")
+        Future(Left(AppError("test.failed", ex.getMessage)))
+
+  private def generateRandomMatchResult(winSets: Int): ((Int, Int), String) =
+    val setInputs = scala.collection.mutable.ArrayBuffer[String]()
+    var aWins = 0
+    var bWins = 0
+    while (aWins < winSets && bWins < winSets) {
+      val aWinsSet = scala.util.Random.nextBoolean()
+      if (aWinsSet) aWins += 1 else bWins += 1
+      setInputs += randomSetInput(aWinsSet)
+    }
+    ((aWins, bWins), setInputs.mkString("·"))
+
+  private def randomSetInput(aWinsSet: Boolean): String =
+    val isOvertime = scala.util.Random.nextDouble() < 0.15
+    if (aWinsSet) {
+      if (isOvertime) {
+        val bScore = 9 + scala.util.Random.nextInt(4)
+        s"$bScore"
+      } else {
+        val bScore = scala.util.Random.nextInt(10)
+        s"$bScore"
+      }
+    } else {
+      if (isOvertime) {
+        val aScore = 9 + scala.util.Random.nextInt(4)
+        s"-$aScore"
+      } else {
+        val aScore = scala.util.Random.nextInt(10)
+        s"-$aScore"
+      }
+    }
+
