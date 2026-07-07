@@ -82,6 +82,14 @@ object DlgEditPlayer extends BaseDialog with JsWrapper:
 
     gE(BtnDeleteCttId).onclick = { (_: MouseEvent) =>
       isCttDeleted = true
+      setInputValue(InputInternalNrId, "")
+      setInputValue(InputLicenceNrId, "")
+      setInputValue(InputClubNrId, "")
+      setInputValue(InputClubFedId, "")
+      setInputValue(InputNatId, "")
+      setInputValue(InputForeignerId, "")
+      setInputValue(InputRegionId, "")
+      setInputValue(InputSubRegionId, "")
       updateFieldStates(hasCtt = false)
     }
 
@@ -99,7 +107,8 @@ object DlgEditPlayer extends BaseDialog with JsWrapper:
         dom.window.alert("Bitte Vorname und Nachname ausfüllen.")
       } else {
         val updatedMeta = if (isCttDeleted) {
-          PlayerMeta()
+          val ttrVal = try Some(getInput(gE(InputTtrId)).toInt) catch { case _: Exception => None }
+          PlayerMeta(ttr = ttrVal)
         } else if (hasCtt) {
           player.meta
         } else {
