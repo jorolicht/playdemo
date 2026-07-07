@@ -107,17 +107,17 @@
                                     @unassignedPlayers.map { p =>
                                         @defining(pages.TourneyAdmin.getBestCandidates(p, xmlPersons)) { candidates =>
                                             <tr>
-                                                <td class="ps-4 fw-bold text-dark">@p.firstName @p.lastName</td>
+                                                <td class="ps-4 fw-bold text-dark">@p.firstName @p.lastName @p.birthYear.map(by => s"($by)").getOrElse("")</td>
                                                 <td class="text-muted">@{tourney.clubs.find(_.id.toInt == p.clubId).map(_.name).getOrElse("Kein Verein")}</td>
                                                 <td>
                                                     <select class="form-select form-select-sm border-secondary-subtle" 
                                                             id="select-assign-@p.id.value"
-                                                            style="max-width: 550px;">
+                                                            style="max-width: 555px;">
                                                         <option value="">-- Nicht zuweisen (Manuell eingetragen lassen) --</option>
                                                         @candidates.map { case (xp, sim) =>
                                                             @defining(playerAssignments.get(p.id.value).contains(xp.licenceNr)) { isSelected =>
                                                                 <option value="@xp.licenceNr" @{if(isSelected) "selected" else ""}>
-                                                                    @xp.firstname @xp.lastname (@xp.clubName.getOrElse("Unbekannter Verein"), Lizenz: @xp.licenceNr) - Übereinstimmung: @{(sim * 100).toInt}%
+                                                                    @xp.firstname @xp.lastname @if(xp.birthyear.trim.nonEmpty && xp.birthyear.trim != "0"){(@xp.birthyear.trim)} (@xp.clubName.getOrElse("Unbekannter Verein"), Lizenz: @xp.licenceNr) - Übereinstimmung: @{(sim * 100).toInt}%
                                                                 </option>
                                                             }
                                                         }
