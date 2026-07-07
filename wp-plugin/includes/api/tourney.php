@@ -525,6 +525,11 @@ function tourney_api_search(WP_REST_Request $request) {
 
     $results = [];
     foreach ($posts as $post) {
+        // Filter out templates
+        if (stripos(trim($post->post_title), 'template') === 0 || stripos(trim($post->post_name), 'template') === 0) {
+            continue;
+        }
+
         $start_date = get_post_meta($post->ID, 'startDate', true);
         $org_meta   = tourney_get_organizer_fallback($post->ID);
         
