@@ -267,6 +267,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
     }
     
     if (updateCount > 0) {
+      tourney.triggerAllSyncs()
       services.TourneyDB.update(tourney)
       dom.window.alert(s"Erfolgreich! $updateCount Spieler wurden mit ClickTT-Daten aktualisiert.")
     } else {

@@ -34,6 +34,22 @@ case class Tourney(
   val dirtyCompetition: ArrayBuffer[Competition] = ArrayBuffer()
   val dirtyStage: ArrayBuffer[Stage] = ArrayBuffer()
 
+  private def addDirtyClub(c: Club): Unit =
+    val idx = dirtyClubs.indexWhere(_.id == c.id)
+    if (idx == -1) dirtyClubs += c else dirtyClubs.update(idx, c)
+
+  private def addDirtyPlayer(p: Player): Unit =
+    val idx = dirtyPlayer.indexWhere(_.id == p.id)
+    if (idx == -1) dirtyPlayer += p else dirtyPlayer.update(idx, p)
+
+  private def addDirtyCompetition(c: Competition): Unit =
+    val idx = dirtyCompetition.indexWhere(_.id == c.id)
+    if (idx == -1) dirtyCompetition += c else dirtyCompetition.update(idx, c)
+
+  private def addDirtyStage(s: Stage): Unit =
+    val idx = dirtyStage.indexWhere(_.id == s.id)
+    if (idx == -1) dirtyStage += s else dirtyStage.update(idx, s)
+
   // --- Callbacks for client-side synchronization ---
   private var onSyncClubs: Option[Seq[Club] => Unit] = None
   def setSyncHandler(handler: Seq[Club] => Unit): Unit = onSyncClubs = Some(handler)
@@ -79,7 +95,7 @@ case class Tourney(
         version = 1
       )
       competitions(index) = c
-      if (!dirtyCompetition.exists(_.id == c.id)) dirtyCompetition += c
+      addDirtyCompetition(c)
       if (doSync) triggerCompSync()
       Right(c)
     } else {
@@ -119,7 +135,7 @@ case class Tourney(
         }
         val updatedComp = finalComp.copy(version = finalComp.version + 1)
         competitions(i) = updatedComp
-        if (!dirtyCompetition.exists(_.id == updatedComp.id)) dirtyCompetition += updatedComp
+        addDirtyCompetition(updatedComp)
         if (doSync) triggerCompSync()
         Right(updatedComp)
       }
@@ -137,7 +153,7 @@ case class Tourney(
       } else {
         val c = oldComp.copy(deleted = true, version = oldComp.version + 1)
         competitions(i) = c
-        if (!dirtyCompetition.exists(_.id == c.id)) dirtyCompetition += c
+        addDirtyCompetition(c)
         if (doSync) triggerCompSync()
         Right(())
       }
@@ -150,7 +166,7 @@ case class Tourney(
         val i = c.id.value - 1
         if (i >= 0 && i < 64) {
            competitions(i) = c
-           if (!dirtyCompetition.exists(_.id == c.id)) dirtyCompetition += c
+           addDirtyCompetition(c)
         }
       }
     }
@@ -206,7 +222,7 @@ case class Tourney(
           version = 1
         )
         stages(index) = r
-        if (!dirtyStage.exists(_.id == r.id)) dirtyStage += r
+        addDirtyStage(r)
 
         // Update predecessor
         prefId.foreach { pid =>
@@ -215,7 +231,7 @@ case class Tourney(
             val pref = stages(pIdx)
             val updatedPref = pref.copy(nextIds = pref.nextIds :+ id, version = pref.version + 1)
             stages(pIdx) = updatedPref
-            if (!dirtyStage.exists(_.id == updatedPref.id)) dirtyStage += updatedPref
+            addDirtyStage(updatedPref)
           }
         }
 
@@ -227,7 +243,7 @@ case class Tourney(
             if (comp.startStage.isEmpty) {
               val updatedComp = comp.copy(startStage = Some(id), status = CompStatus.RUN, version = comp.version + 1)
               competitions(cIdx) = updatedComp
-              if (!dirtyCompetition.exists(_.id == updatedComp.id)) dirtyCompetition += updatedComp
+              addDirtyCompetition(updatedComp)
               if (doSync) triggerCompSync()
             }
           }
@@ -258,7 +274,7 @@ case class Tourney(
         // Soft delete current stage
         val updatedR = r.copy(deleted = true, version = r.version + 1)
         stages(i) = updatedR
-        if (!dirtyStage.exists(_.id == updatedR.id)) dirtyStage += updatedR
+        addDirtyStage(updatedR)
 
         // Remove from predecessor's nextIds
         r.prefId.foreach { pid =>
@@ -267,7 +283,7 @@ case class Tourney(
             val pref = stages(pIdx)
             val updatedPref = pref.copy(nextIds = pref.nextIds.filterNot(_ == id), version = pref.version + 1)
             stages(pIdx) = updatedPref
-            if (!dirtyStage.exists(_.id == updatedPref.id)) dirtyStage += updatedPref
+            addDirtyStage(updatedPref)
           }
         }
 
@@ -279,7 +295,7 @@ case class Tourney(
           if (activeStages.isEmpty || comp.startStage.contains(id)) {
             val updatedComp = comp.copy(startStage = None, status = CompStatus.CFG, version = comp.version + 1)
             competitions(compCIdx) = updatedComp
-            if (!dirtyCompetition.exists(_.id == updatedComp.id)) dirtyCompetition += updatedComp
+            addDirtyCompetition(updatedComp)
             if (doSync) triggerCompSync()
           }
         }
@@ -302,7 +318,7 @@ case class Tourney(
       } else {
         val updatedR = stage.copy(version = stage.version + 1)
         stages(i) = updatedR
-        if (!dirtyStage.exists(_.id == updatedR.id)) dirtyStage += updatedR
+        addDirtyStage(updatedR)
         if (doSync) triggerStageSync()
         Right(updatedR)
       }
@@ -315,7 +331,7 @@ case class Tourney(
         val i = r.id.value - 1
         if (i >= 0 && i < 128) {
            stages(i) = r
-           if (!dirtyStage.exists(_.id == r.id)) dirtyStage += r
+           addDirtyStage(r)
         }
       }
     }
@@ -616,7 +632,7 @@ case class Tourney(
           val updated = p.copy(active = false)
           val idx = players.indexOf(p)
           players.update(idx, updated)
-          if (!dirtyPlayer.exists(_.id == updated.id)) dirtyPlayer += updated
+          addDirtyPlayer(updated)
           if (doSync) triggerPlayerSync()
         }
         Right(())
@@ -633,7 +649,7 @@ case class Tourney(
         val updatedMerged = merged.copy(active = false, merge = Some(mainId))
         val idx = players.indexOf(merged)
         players.update(idx, updatedMerged)
-        if (!dirtyPlayer.exists(_.id == updatedMerged.id)) dirtyPlayer += updatedMerged
+        addDirtyPlayer(updatedMerged)
         if (doSync) triggerPlayerSync()
         Right(())
       case _ => 
@@ -642,7 +658,7 @@ case class Tourney(
   /** Bulk synchronizes players from external data. */
   def syncPlayers(newPlayers: Seq[Player] = Nil): Unit = 
     if (newPlayers.nonEmpty) {
-      newPlayers.foreach(p => if (!dirtyPlayer.exists(_.id == p.id)) dirtyPlayer += p)
+      newPlayers.foreach(addDirtyPlayer)
     }
     triggerPlayerSync()
 
@@ -665,12 +681,12 @@ case class Tourney(
           val updated = existing.copy(active = true)
           val idx = clubs.indexOf(existing)
           clubs.update(idx, updated)
-          if (!dirtyClubs.exists(_.id == updated.id)) dirtyClubs += updated
+          addDirtyClub(updated)
           if (doSync) triggerSync()
         }
       case None =>
         clubs += club
-        if (!dirtyClubs.exists(_.id == club.id)) dirtyClubs += club
+        addDirtyClub(club)
         if (doSync) triggerSync()
 
   /** Adds a club by name with similarity and normalization checks. */
@@ -702,7 +718,7 @@ case class Tourney(
           val updated = c.copy(active = false)
           val idx = clubs.indexOf(c)
           clubs.update(idx, updated)
-          if (!dirtyClubs.exists(_.id == updated.id)) dirtyClubs += updated
+          addDirtyClub(updated)
           if (doSync) triggerSync()
         }
         Right(())
@@ -725,7 +741,7 @@ case class Tourney(
           if (players(i).clubId == sourceId.toInt) {
             val updatedPlayer = players(i).copy(clubId = targetId.toInt)
             players.update(i, updatedPlayer)
-            if (!dirtyPlayer.exists(_.id == updatedPlayer.id)) dirtyPlayer += updatedPlayer
+            addDirtyPlayer(updatedPlayer)
           }
         }
         triggerPlayerSync()
@@ -734,12 +750,12 @@ case class Tourney(
         val mergedCtt = target.ctt.orElse(source.ctt)
         val updatedTarget = target.copy(ctt = mergedCtt)
         clubs.update(clubs.indexOf(target), updatedTarget)
-        if (!dirtyClubs.exists(_.id == updatedTarget.id)) dirtyClubs += updatedTarget
+        addDirtyClub(updatedTarget)
 
         // 3. Deactivate source
         val deactivatedSource = source.copy(active = false)
         clubs.update(clubs.indexOf(source), deactivatedSource)
-        if (!dirtyClubs.exists(_.id == deactivatedSource.id)) dirtyClubs += deactivatedSource
+        addDirtyClub(deactivatedSource)
 
         if (doSync) triggerSync()
         Right(())
@@ -747,7 +763,7 @@ case class Tourney(
 
   def syncClubs(newClubs: Seq[Club] = Nil): Unit = 
     if (newClubs.nonEmpty) {
-      newClubs.foreach(c => if (!dirtyClubs.exists(_.id == c.id)) dirtyClubs += c)
+      newClubs.foreach(addDirtyClub)
     }
     triggerSync()
 
@@ -757,6 +773,13 @@ case class Tourney(
       dirtyClubs.clear()
       onSyncClubs.foreach(_(clubs.toSeq))
     }
+
+  /** Triggers all client-side entity synchronizations in batch. */
+  def triggerAllSyncs(): Unit = 
+    triggerSync()       // Club sync
+    triggerPlayerSync()  // Player sync
+    triggerCompSync()    // Competition sync
+    triggerStageSync()    // Stage sync
 
   /**
    * Validates tournament data.
