@@ -56,7 +56,8 @@ object CompetitionDB extends ComWrapper with Debouncer:
       ajaxPost[CompetitionSyncRequest, CompetitionSyncResponse](
         route,
         params,
-        req
+        req,
+        host = Global.homeUrl
       ).flatMap {
         case Right(res) =>
           Future.successful(Right(()))
@@ -96,7 +97,7 @@ object CompetitionDB extends ComWrapper with Debouncer:
     }
 
     val params = List("postId" -> TourneyDB.tourney.wpId.toString)
-    ajaxGet[CompetitionsResponse]("/wp-json/tourney/v1/competitions", params).map {
+    ajaxGet[CompetitionsResponse]("/wp-json/tourney/v1/competitions", params, host = Global.homeUrl).map {
       case Right(res) =>
         if (TourneyDB.tourney.wpId != 0) {
           val t = TourneyDB.tourney

@@ -92,7 +92,7 @@ object TourneyDB extends ComWrapper with Debouncer:
       org.scalajs.dom.window.localStorage.setItem("App.demo_tourney", write(req))
       Future.successful(Right("demo-slug"))
     else
-      ajaxPost[Tourney, TourneyCreateResponse](routeCreate, List(), t).map {
+      ajaxPost[Tourney, TourneyCreateResponse](routeCreate, List(), t, host = Global.homeUrl).map {
         case Right(res) =>
           t.wpId = res.pageId
           t.version = res.version
@@ -120,7 +120,8 @@ object TourneyDB extends ComWrapper with Debouncer:
       ajaxPost[TourneySyncRequest, TourneySyncResponse](
         routeSync,
         params,
-        req
+        req,
+        host = Global.homeUrl
       ).flatMap {
         case Right(res) =>
           version = res.version
@@ -164,7 +165,7 @@ object TourneyDB extends ComWrapper with Debouncer:
 
       paramsOpt match {
         case Some(params) =>
-          ajaxGet[TourneyResponse](routeGet, params).map {
+          ajaxGet[TourneyResponse](routeGet, params, host = Global.homeUrl).map {
             case Right(res) =>
               tourney = res.tourney
               version = res.version

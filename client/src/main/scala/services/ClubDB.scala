@@ -51,7 +51,8 @@ object ClubDB extends ComWrapper with Debouncer:
       ajaxPost[ClubSyncRequest, ClubSyncResponse](
         route,
         params,
-        req
+        req,
+        host = Global.homeUrl
       ).flatMap {
         case Right(res) =>
           version = res.version
@@ -84,7 +85,7 @@ object ClubDB extends ComWrapper with Debouncer:
     }
 
     val params = List("postId" -> TourneyDB.tourney.wpId.toString)
-    ajaxGet[ClubsResponse](s"/wp-json/tourney/v1/clubs", params).map {
+    ajaxGet[ClubsResponse](s"/wp-json/tourney/v1/clubs", params, host = Global.homeUrl).map {
       case Right(res) =>
         if (TourneyDB.tourney.wpId != 0) {
           TourneyDB.tourney.clubs.clear()

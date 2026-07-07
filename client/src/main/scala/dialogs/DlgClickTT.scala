@@ -105,9 +105,9 @@ object DlgClickTT extends BaseDialog with JsWrapper:
                   Global.pageId = t.wpId
                   
                   // 3. Bulk Sync the rest
-                  t.syncClubs()
-                  t.syncPlayers()
-                  t.syncCompetitions() // This will sync the mapped competitions
+                  t.syncClubs(t.clubs.toSeq)
+                  t.syncPlayers(t.players.toSeq)
+                  t.syncCompetitions(t.competitions.filter(_ != null).toSeq) // This will sync the mapped competitions
                   
                   if (!p.isCompleted) p.success(Right(t))
                   modal.hide()

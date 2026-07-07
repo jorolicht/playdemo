@@ -56,7 +56,8 @@ object StageDB extends ComWrapper with Debouncer:
       ajaxPost[StageSyncRequest, StageSyncResponse](
         route,
         params,
-        req
+        req,
+        host = Global.homeUrl
       ).flatMap {
         case Right(res) =>
           Future.successful(Right(()))
@@ -96,7 +97,7 @@ object StageDB extends ComWrapper with Debouncer:
     }
 
     val params = List("postId" -> TourneyDB.tourney.wpId.toString)
-    ajaxGet[StagesResponse]("/wp-json/tourney/v1/stages", params).map {
+    ajaxGet[StagesResponse]("/wp-json/tourney/v1/stages", params, host = Global.homeUrl).map {
       case Right(res) =>
         if (TourneyDB.tourney.wpId != 0) {
           val t = TourneyDB.tourney
