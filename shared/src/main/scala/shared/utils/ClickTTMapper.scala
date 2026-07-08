@@ -81,7 +81,6 @@ object ClickTTMapper:
         cttComp.players.foreach { cttPlayer =>
           val mappedPant = mapPlayerToPant(cttPlayer, personMap, target)
           mappedPant.foreach { p =>
-            p.ident = cttPlayer.id
             comp.pants1Stage += p
             
             // Populate pantIdent2SNO mapping

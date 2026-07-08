@@ -213,15 +213,28 @@ object TestStage extends base.JsWrapper:
 
       stageOpt match {
         case Some(stage) =>
+          val compOpt = TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId)
           val pantsInfo: Seq[(SNO, String)] = stage.data match {
             case StageData.GroupsStage(groups) =>
-              groups.flatMap(_.pants).filter(_ != null).map(p => (p.id, p.ident)).toSeq
+              groups.flatMap(_.pants).filter(_ != null).map { p =>
+                val ident = compOpt.flatMap(_.pantIdent2SNO.find(_._2 == p.id).map(_._1)).getOrElse("")
+                (p.id, ident)
+              }.toSeq
             case StageData.RoundRobinStage(rr) =>
-              rr.pants.filter(_ != null).map(p => (p.id, p.ident)).toSeq
+              rr.pants.filter(_ != null).map { p =>
+                val ident = compOpt.flatMap(_.pantIdent2SNO.find(_._2 == p.id).map(_._1)).getOrElse("")
+                (p.id, ident)
+              }.toSeq
             case StageData.SwissStage(sw) =>
-              sw.swPants.map(p => (p.sno, p.ident)).toSeq
+              sw.swPants.map { p =>
+                val ident = compOpt.flatMap(_.pantIdent2SNO.find(_._2 == p.sno).map(_._1)).getOrElse("")
+                (p.sno, ident)
+              }.toSeq
             case StageData.KnockoutStage(ko) =>
-              ko.pants.filter(_ != null).map(p => (p.id, p.ident)).toSeq
+              ko.pants.filter(_ != null).map { p =>
+                val ident = compOpt.flatMap(_.pantIdent2SNO.find(_._2 == p.id).map(_._1)).getOrElse("")
+                (p.id, ident)
+              }.toSeq
             case null =>
               Nil
           }

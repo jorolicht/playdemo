@@ -160,8 +160,7 @@ object PlayerRegistration extends BasePage with JsWrapper:
               rating = (res.player1.meta.ttr.getOrElse(0) + res.player2.meta.ttr.getOrElse(0)) / 2,
               birthYear = "", // No combined birthyear for doubles
               active = res.enroll,
-              status = if (res.enroll) PantStatus.PLAY else PantStatus.REGI,
-              ident = c.pantIdent2SNO.find(_._2 == doubleSno).map(_._1).getOrElse("")
+              status = if (res.enroll) PantStatus.PLAY else PantStatus.REGI
             )
             c.pants1Stage += p
             tourney.updateCompetition(c)
@@ -202,8 +201,7 @@ object PlayerRegistration extends BasePage with JsWrapper:
                   rating = res.ttr.getOrElse(0),
                   birthYear = res.year.map(_.toString).getOrElse(""),
                   active = res.enroll,
-                  status = if (res.enroll) PantStatus.PLAY else PantStatus.REGI,
-                  ident = c.pantIdent2SNO.find(_._2 == singleSno).map(_._1).getOrElse("")
+                  status = if (res.enroll) PantStatus.PLAY else PantStatus.REGI
                 )
                 c.pants1Stage += p
                 tourney.updateCompetition(c)

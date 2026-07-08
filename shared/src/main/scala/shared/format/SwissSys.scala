@@ -6,8 +6,8 @@ import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
 import shared.basic.Log
 import shared.model.*
 
-case class SwissPlayer(id: Int, club: Int, rating: Int, scoreGroup: Int, sno: SNO, ident: String = "") {
-  override def toString: String = s"SwissPlayer(id=$id, club=$club, rating=$rating, scoreGroup=$scoreGroup, sno=$sno, ident=$ident)"
+case class SwissPlayer(id: Int, club: Int, rating: Int, scoreGroup: Int, sno: SNO) {
+  override def toString: String = s"SwissPlayer(id=$id, club=$club, rating=$rating, scoreGroup=$scoreGroup, sno=$sno)"
 }
 
 case class SwissPair(id : (Int, Int), sets: (Int,Int), points: (Int,Int))
@@ -61,9 +61,9 @@ object SwissSys:
     state.swPants = ArrayBuffer.tabulate(sortedActivePants.length)(i => {
       val p = sortedActivePants(i)
       if (p.id.isBye || p.id.isNN) {
-        SwissPlayer(i, 0, 0, 0, p.id, p.ident)
+        SwissPlayer(i, 0, 0, 0, p.id)
       } else {
-        SwissPlayer(i, p.clubId, p.rating, 0, p.id, p.ident)
+        SwissPlayer(i, p.clubId, p.rating, 0, p.id)
       }
     })
     for (i <- 0 until sortedActivePants.size) state.sno2pos += (state.swPants(i).sno -> i) 

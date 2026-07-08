@@ -155,18 +155,10 @@ case class Competition(
   var cttInfo:          Option[CompCTT] = None,
   val pants1Stage:      ArrayBuffer[Pant] = ArrayBuffer(),
   var deleted:          Boolean = false,
-  var version:          Int = 0
+  var version:          Int = 0,
+  val pantIdent2SNO:    Map[String, SNO] = Map.empty
 ):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
-  val pantIdent2SNO: Map[String, SNO] = Map.empty
-
-  def rebuildPantIdent2SNO(): Unit =
-    pantIdent2SNO.clear()
-    pants1Stage.foreach { p =>
-      if (p.ident != null && p.ident.nonEmpty) {
-        pantIdent2SNO(p.ident) = p.id
-      }
-    }
 
   def hash: Int = s"$name${typ.id}$startDate${getFromTTR}${getToTTR}".hashCode
   def equal(co: Competition): Boolean = hash == co.hash
@@ -184,14 +176,7 @@ case class Competition(
 
 
 object Competition:
-  given rw: ReadWriter[Competition] =
-    ReadWriter.join(
-      macroRW[Competition].map { comp =>
-        comp.rebuildPantIdent2SNO()
-        comp
-      },
-      macroRW[Competition]
-    )
+  given rw: ReadWriter[Competition] = macroRW
   def dummy: Competition = Competition(CompId(0), "", CompTyp.UNKN, CompCategory.UNKNOWN, "", CompStatus.UNKN)
 
 

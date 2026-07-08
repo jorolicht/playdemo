@@ -268,13 +268,12 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
       }
     }
     
-    // Step 2: Update Competition.pantIdent2SNO and Pant.ident
+    // Step 2: Update Competition.pantIdent2SNO
     parsedCtt.foreach { ctt =>
       tourney.competitions.filter(_ != null).foreach { comp =>
         ctt.competitions.lift(comp.id.value - 1).foreach { cttComp =>
           // Clear existing mappings to completely rebuild them
           comp.pantIdent2SNO.clear()
-          comp.pants1Stage.foreach(_.ident = "")
           
           cttComp.players.foreach { cttPlayer =>
             val licenceNrs = cttPlayer.persons.map(_.licenceNr).filter(_.nonEmpty)
@@ -293,11 +292,6 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
             targetSnoOpt.foreach { sno =>
               // Map the ClickTT player ID to the SNO
               comp.pantIdent2SNO(cttPlayer.id) = sno
-
-              // Find the corresponding Pant and populate its ident field
-              comp.pants1Stage.find(_.id == sno).foreach { p =>
-                p.ident = cttPlayer.id
-              }
             }
           }
           
