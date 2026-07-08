@@ -31,6 +31,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   var xmlPersons: Seq[CttPerson] = Seq.empty
   var unassignedPlayers: Seq[Player] = Seq.empty
   var playerAssignments: Map[Int, String] = Map.empty // PlayerId.value -> CttPerson.licenceNr
+  var parsedCtt: Option[CttTournament] = None
 
   private var activeTab = "IMPEXP" // Tabs: "IMPEXP" (Import/Export), "CTT" (ClickTT Update), "CERT" (Urkunden Konfiguration)
 
@@ -84,6 +85,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
                 val xmlString = reader.result.asInstanceOf[String]
                 services.ClickTTParser.parse(xmlString) match {
                   case Right(ctt) =>
+                    parsedCtt = Some(ctt)
                     xmlPersons = ctt.competitions.flatMap(_.players).flatMap(_.persons).distinctBy(_.licenceNr)
                     val activeTourney = services.TourneyDB.tourney
                     unassignedPlayers = activeTourney.players.filter(p => p != null && (p.meta.licenceNr.isEmpty || p.meta.internalNr.isEmpty)).toSeq
@@ -266,10 +268,60 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
       }
     }
     
+    // Step 2: Update Competition.playerIdent2SNO and Pant.ident
+    parsedCtt.foreach { ctt =>
+      tourney.competitions.filter(_ != null).foreach { comp =>
+        ctt.competitions.lift(comp.id.value - 1).foreach { cttComp =>
+          var compChanged = false
+          cttComp.players.foreach { cttPlayer =>
+            val licenceNrs = cttPlayer.persons.map(_.licenceNr).filter(_.nonEmpty)
+            val matchedPlayerIds = licenceNrs.flatMap { lic =>
+              tourney.players.find(_.meta.licenceNr.contains(lic)).map(_.id)
+            }
+
+            val targetSnoOpt = if (cttPlayer.persons.length == 1) {
+              matchedPlayerIds.headOption.map(SNO.single)
+            } else if (cttPlayer.persons.length == 2 && matchedPlayerIds.length == 2) {
+              Some(SNO.double(matchedPlayerIds(0), matchedPlayerIds(1)))
+            } else {
+              None
+            }
+
+            targetSnoOpt.foreach { sno =>
+              // Map the ClickTT player ID to the SNO
+              if (!comp.playerIdent2SNO.get(cttPlayer.id).contains(sno)) {
+                comp.playerIdent2SNO(cttPlayer.id) = sno
+                compChanged = true
+              }
+
+              // Find the corresponding Pant and populate its ident field
+              comp.pants1Stage.find(_.id == sno).foreach { p =>
+                if (p.ident != cttPlayer.id) {
+                  p.ident = cttPlayer.id
+                  compChanged = true
+                }
+              }
+            }
+          }
+          
+          if (compChanged) {
+            updateCount += 1
+            tourney.updateCompetition(comp, doSync = false)
+          }
+
+          // Testwise Ausgabe aller playerIdent2SNO mappings
+          dom.console.log(s"Wettbewerb: ${comp.name} - playerIdent2SNO Mappings:")
+          comp.playerIdent2SNO.foreach { case (xmlId, sno) =>
+            dom.console.log(s"  $xmlId -> $sno")
+          }
+        }
+      }
+    }
+    
     if (updateCount > 0) {
       tourney.triggerAllSyncs()
       services.TourneyDB.update(tourney)
-      dom.window.alert(s"Erfolgreich! $updateCount Spieler wurden mit ClickTT-Daten aktualisiert.")
+      dom.window.alert(s"Erfolgreich! $updateCount Änderungen durchgeführt.")
     } else {
       dom.window.alert("Keine Spieler zuzuordnen.")
     }
@@ -278,6 +330,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
     xmlPersons = Seq.empty
     unassignedPlayers = Seq.empty
     playerAssignments = Map.empty
+    parsedCtt = None
     render()
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit =
