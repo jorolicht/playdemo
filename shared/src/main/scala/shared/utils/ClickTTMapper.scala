@@ -86,14 +86,6 @@ object ClickTTMapper:
             
             // Populate playerIdent2SNO mapping
             comp.playerIdent2SNO(cttPlayer.id) = p.id
-            
-            // Populate playerIdent mapping
-            val playerIdentVal = if (cttPlayer.persons.length == 1) {
-              PlayerIdent.Single(cttPlayer.persons.head.licenceNr)
-            } else {
-              PlayerIdent.Multi(cttPlayer.persons.map(_.licenceNr).toList)
-            }
-            comp.playerIdent(cttPlayer.id) = playerIdentVal
           }
         }
 

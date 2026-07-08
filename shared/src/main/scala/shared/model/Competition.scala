@@ -140,25 +140,6 @@ object CompId:
     )
 
 
-enum PlayerIdent:
-  case Single(id: String)
-  case Multi(ids: List[String])
-
-object PlayerIdent:
-  given rw: ReadWriter[PlayerIdent] =
-    readwriter[ujson.Value].bimap[PlayerIdent](
-      {
-        case Single(id) => ujson.Str(id)
-        case Multi(ids) => ujson.Arr(scala.collection.mutable.ArrayBuffer.from(ids.map(ujson.Str(_))))
-      },
-      {
-        case ujson.Str(s) => Single(s)
-        case ujson.Arr(arr) => Multi(arr.map(_.str).toList)
-        case other => throw new Exception(s"Invalid PlayerIdent JSON: $other")
-      }
-    )
-
-
 case class Competition(
   id:                   CompId,
   var name:             String,
@@ -174,8 +155,7 @@ case class Competition(
   var cttInfo:          Option[CompCTT] = None,
   val pants1Stage:      ArrayBuffer[Pant] = ArrayBuffer(),
   var deleted:          Boolean = false,
-  var version:          Int = 0,
-  val playerIdent:      Map[String, PlayerIdent] = Map.empty
+  var version:          Int = 0
 ):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
   val playerIdent2SNO: Map[String, SNO] = Map.empty
