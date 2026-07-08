@@ -3,6 +3,8 @@ package shared.model
 import shared.basic.Pickle.*
 import shared.basic.AppError
 import scala.collection.mutable. { ArrayBuffer, Map, Stack }
+import ujson.*
+
 
 
 enum CompCategory:
@@ -23,7 +25,10 @@ enum CompTyp(val id: Int):
   case SINGLE extends CompTyp(1)
   case DOUBLE extends CompTyp(2)
   case MIXED  extends CompTyp(3)
-  case TEAM   extends CompTyp(4)
+  case TEAM2  extends CompTyp(4)
+  case TEAM3  extends CompTyp(5)
+  case TEAM4  extends CompTyp(6)
+  case TEAM6  extends CompTyp(7)
   case Typ    extends CompTyp(99)
 
   def msgCode: String = s"CompTyp.${this.toString}"
@@ -51,7 +56,10 @@ object CompTyp:
       case "einzel" | "single" => CompTyp.SINGLE
       case "doppel" | "double" => CompTyp.DOUBLE
       case "mixed"             => CompTyp.MIXED
-      case "team"              => CompTyp.TEAM
+      case "team" | "team2"    => CompTyp.TEAM2
+      case "team3"             => CompTyp.TEAM3
+      case "team4"             => CompTyp.TEAM4
+      case "team6"             => CompTyp.TEAM6
       case _                   => CompTyp.Typ
 
   def fromId(id: Int): CompTyp =
@@ -132,6 +140,25 @@ object CompId:
     )
 
 
+enum PlayerIdent:
+  case Single(id: String)
+  case Multi(ids: List[String])
+
+object PlayerIdent:
+  given rw: ReadWriter[PlayerIdent] =
+    readwriter[ujson.Value].bimap[PlayerIdent](
+      {
+        case Single(id) => ujson.Str(id)
+        case Multi(ids) => ujson.Arr(scala.collection.mutable.ArrayBuffer.from(ids.map(ujson.Str(_))))
+      },
+      {
+        case ujson.Str(s) => Single(s)
+        case ujson.Arr(arr) => Multi(arr.map(_.str).toList)
+        case other => throw new Exception(s"Invalid PlayerIdent JSON: $other")
+      }
+    )
+
+
 case class Competition(
   id:                   CompId,
   var name:             String,
@@ -147,7 +174,8 @@ case class Competition(
   var cttInfo:          Option[CompCTT] = None,
   val pants1Stage:      ArrayBuffer[Pant] = ArrayBuffer(),
   var deleted:          Boolean = false,
-  var version:          Int = 0
+  var version:          Int = 0,
+  val playerIdent:      Map[String, PlayerIdent] = Map.empty
 ):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
 
