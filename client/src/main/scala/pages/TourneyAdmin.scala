@@ -268,12 +268,12 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
       }
     }
     
-    // Step 2: Update Competition.pantIdent2SNO
+    // Step 2: Update Competition.cttIdent2SNO
     parsedCtt.foreach { ctt =>
       tourney.competitions.filter(_ != null).foreach { comp =>
         ctt.competitions.lift(comp.id.value - 1).foreach { cttComp =>
           // Clear existing mappings to completely rebuild them
-          comp.pantIdent2SNO.clear()
+          comp.cttIdent2SNO.clear()
           
           cttComp.players.foreach { cttPlayer =>
             val licenceNrs = cttPlayer.persons.map(_.licenceNr).filter(_.nonEmpty)
@@ -291,16 +291,16 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
 
             targetSnoOpt.foreach { sno =>
               // Map the ClickTT player ID to the SNO
-              comp.pantIdent2SNO(cttPlayer.id) = sno
+              comp.cttIdent2SNO(cttPlayer.id) = sno
             }
           }
           
           // Re-save the competition
           tourney.updateCompetition(comp, doSync = false)
 
-          // Testwise Ausgabe aller pantIdent2SNO mappings
-          dom.console.log(s"Wettbewerb: ${comp.name} - pantIdent2SNO Mappings:")
-          comp.pantIdent2SNO.foreach { case (xmlId, sno) =>
+          // Testwise Ausgabe aller cttIdent2SNO mappings
+          dom.console.log(s"Wettbewerb: ${comp.name} - cttIdent2SNO Mappings:")
+          comp.cttIdent2SNO.foreach { case (xmlId, sno) =>
             dom.console.log(s"  $xmlId -> $sno")
           }
         }

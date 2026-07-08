@@ -83,8 +83,8 @@ object ClickTTMapper:
           mappedPant.foreach { p =>
             comp.pants1Stage += p
             
-            // Populate pantIdent2SNO mapping
-            comp.pantIdent2SNO(cttPlayer.id) = p.id
+            // Populate cttIdent2SNO mapping
+            comp.cttIdent2SNO(cttPlayer.id) = p.id
           }
         }
 
