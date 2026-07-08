@@ -146,8 +146,9 @@ object PlayerRegistration extends BasePage with JsWrapper:
         dialogs.DlgAddDouble.show(players, clubs).map {
           case Right(res) =>
             // Create Pant for double
+            val doubleSno = SNO.double(res.player1.id, res.player2.id)
             val p = Pant(
-              id = SNO.double(res.player1.id, res.player2.id),
+              id = doubleSno,
               name = s"${res.player1.lastName} / ${res.player2.lastName}",
               club = if (res.player1.clubId == res.player2.clubId) {
                 tourney.clubs.find(_.id.toInt == res.player1.clubId).map(_.name).getOrElse("")
@@ -159,7 +160,8 @@ object PlayerRegistration extends BasePage with JsWrapper:
               rating = (res.player1.meta.ttr.getOrElse(0) + res.player2.meta.ttr.getOrElse(0)) / 2,
               birthYear = "", // No combined birthyear for doubles
               active = res.enroll,
-              status = if (res.enroll) PantStatus.PLAY else PantStatus.REGI
+              status = if (res.enroll) PantStatus.PLAY else PantStatus.REGI,
+              ident = c.pantIdent2SNO.find(_._2 == doubleSno).map(_._1).getOrElse("")
             )
             c.pants1Stage += p
             tourney.updateCompetition(c)
@@ -192,14 +194,16 @@ object PlayerRegistration extends BasePage with JsWrapper:
                 tourney.updatePlayer(updatedPlayer)
 
                 // 3. Create Pant and add to competition
+                val singleSno = SNO.single(updatedPlayer.id)
                 val p = Pant(
-                  id = SNO.single(updatedPlayer.id),
+                  id = singleSno,
                   name = updatedPlayer.displayName,
                   club = club.name,
                   rating = res.ttr.getOrElse(0),
                   birthYear = res.year.map(_.toString).getOrElse(""),
                   active = res.enroll,
-                  status = if (res.enroll) PantStatus.PLAY else PantStatus.REGI
+                  status = if (res.enroll) PantStatus.PLAY else PantStatus.REGI,
+                  ident = c.pantIdent2SNO.find(_._2 == singleSno).map(_._1).getOrElse("")
                 )
                 c.pants1Stage += p
                 tourney.updateCompetition(c)

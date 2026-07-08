@@ -358,6 +358,9 @@ object StageAdmin extends BasePage with JsWrapper:
                 case Some(existing) =>
                   existing.active = true
                   existing.status = PantStatus.PLAY
+                  if (existing.ident == null || existing.ident.isEmpty) {
+                    existing.ident = comp.pantIdent2SNO.find(_._2 == sno).map(_._1).getOrElse("")
+                  }
                 case None =>
                   val newPant = Pant(
                     id = sno,
@@ -367,6 +370,7 @@ object StageAdmin extends BasePage with JsWrapper:
                     birthYear = selectedPlayer.birthYear.map(_.toString).getOrElse(""),
                     active = true,
                     status = PantStatus.PLAY,
+                    ident = comp.pantIdent2SNO.find(_._2 == sno).map(_._1).getOrElse(""),
                     clubId = selectedPlayer.clubId
                   )
                   comp.pants1Stage += newPant
