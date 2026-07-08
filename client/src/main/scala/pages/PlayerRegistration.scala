@@ -176,7 +176,15 @@ object PlayerRegistration extends BasePage with JsWrapper:
             }
             
             // 2. Add player to tourney
-            tourney.addPlayer(res.firstName, res.lastName, club.id.toInt, res.year, doSync = true) match {
+            tourney.addPlayer(
+              firstName = res.firstName, 
+              lastName = res.lastName, 
+              clubId = club.id.toInt, 
+              birthYear = res.year, 
+              email = res.email,
+              whatsApp = res.whatsApp,
+              doSync = true
+            ) match {
               case Right(player) =>
                 val updatedPlayer = player.copy(
                   meta = player.meta.copy(ttr = res.ttr)

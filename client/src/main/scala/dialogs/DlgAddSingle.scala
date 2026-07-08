@@ -18,6 +18,8 @@ case class DlgAddSingleResult(
   clubName:  String,
   ttr:       Option[Int],
   year:      Option[Int],
+  email:     Option[String],
+  whatsApp:  Option[String],
   enroll:    Boolean
 )
 
@@ -33,6 +35,8 @@ object DlgAddSingle extends BaseDialog with JsWrapper:
   val ClubListId:     HtmlId = genId(name)
   val InputTtrId:     HtmlId = genId(name)
   val InputYearId:    HtmlId = genId(name)
+  val InputEmailId:   HtmlId = genId(name)
+  val InputWhatsappId: HtmlId = genId(name)
   val RadioPlayId:    HtmlId = genId(name)
   val RadioRegId:     HtmlId = genId(name)
   
@@ -63,12 +67,16 @@ object DlgAddSingle extends BaseDialog with JsWrapper:
       val ttr   = try Some(getInput(gE(InputTtrId)).toInt) catch { case _: Exception => None }
       val yearVal = try getInput(gE(InputYearId)).toInt catch { case _: Exception => 0 }
       val year  = if (yearVal == 0) None else Some(yearVal)
+      val emailVal = getInput(gE(InputEmailId)).trim
+      val email = if (emailVal.isEmpty) None else Some(emailVal)
+      val whatsappVal = getInput(gE(InputWhatsappId)).trim
+      val whatsApp = if (whatsappVal.isEmpty) None else Some(whatsappVal)
       val enroll = gE(RadioPlayId).asInstanceOf[dom.html.Input].checked
 
       if (last.isEmpty || first.isEmpty || club.isEmpty) {
         dom.window.alert(base.Messages.getMsg("DlgAddSingle.err_fill"))
       } else {
-        if (!p.isCompleted) p.success(Right(DlgAddSingleResult(first, last, club, ttr, year, enroll)))
+        if (!p.isCompleted) p.success(Right(DlgAddSingleResult(first, last, club, ttr, year, email, whatsApp, enroll)))
         modal.hide()
       }
     }

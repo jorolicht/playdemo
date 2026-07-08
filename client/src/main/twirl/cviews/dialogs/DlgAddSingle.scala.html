@@ -50,6 +50,17 @@
                         </div>
                     </div>
 
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label @forAttr(InputEmailId) class="form-label small fw-bold">@gM("DlgAddSingle.email")</label>
+                            <input type="email" class="form-control" @id(InputEmailId) placeholder="email@@example.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label @forAttr(InputWhatsappId) class="form-label small fw-bold">@gM("DlgAddSingle.whatsapp")</label>
+                            <input type="text" class="form-control" @id(InputWhatsappId) placeholder="+49...">
+                        </div>
+                    </div>
+
                     <div class="bg-light p-3 rounded border mb-3">
                         <label class="form-label d-block small fw-bold mb-2">@gM("DlgAddSingle.action")</label>
                         <div class="form-check">

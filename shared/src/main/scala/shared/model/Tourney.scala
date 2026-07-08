@@ -368,6 +368,8 @@ case class Tourney(
     lastName: String, 
     clubId: Int, 
     birthYear: Option[Int] = None,
+    email: Option[String] = None,
+    whatsApp: Option[String] = None,
     doSync: Boolean = true
   ): Either[AppError, Player] =
     val exists = players.exists(p =>
@@ -385,6 +387,8 @@ case class Tourney(
         lastName = lastName,
         clubId = clubId,
         birthYear = birthYear,
+        email = email,
+        whatsApp = whatsApp,
         active = true
       )
       addPlayerObj(player, doSync)

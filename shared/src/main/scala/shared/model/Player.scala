@@ -89,6 +89,7 @@ case class Player(
   clubId: Int = 0,
   birthYear: Option[Int] = None,
   email: Option[String] = None,
+  whatsApp: Option[String] = None,
   sex: Sex = Sex.Unknown,
   var active: Boolean = true,
   var merge: Option[PlayerId] = None,

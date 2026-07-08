@@ -31,5 +31,7 @@ DlgAddSingle.act_play = Register and Enroll (Active)
 DlgAddSingle.cancel = Cancel
 DlgAddSingle.save = Save
 DlgAddSingle.err_fill = Please fill in Last Name, First Name and Club.
+DlgAddSingle.email = Email
+DlgAddSingle.whatsapp = WhatsApp Number
 
 
