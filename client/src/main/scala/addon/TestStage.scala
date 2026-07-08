@@ -23,7 +23,8 @@ object TestStage extends base.JsWrapper:
       case 4 => testStage_sync(group, number, param)
       case 5 => testStage_referee(group, number, param)
       case 6 => testStage_swapPairing(group, number, param)
-      case 7 => testStage_randomResult(group, number, param)
+      case 7 => testStage_viewPant(group, number, param)
+      case 8 => testStage_randomResult(group, number, param)
       case _ =>
         addOutput(s"FAILED: ${group}-Test:${number} param:${param} unknown test number")
         Future(Left(AppError("unknown test number")))
@@ -198,7 +199,51 @@ object TestStage extends base.JsWrapper:
         Future(Left(AppError("test.failed", ex.getMessage)))
 
   /**
-   * Test 7: Generate random results for a round. Param: "roundNo" or "stageId,roundNo"
+   * Test 7: View all pants of a stage with their ident and SNO. Param: [stageId]
+   */
+  def testStage_viewPant(group: String, number: Int, param: String): Future[Either[AppError, String]] =
+    try
+      val activeStages = TourneyDB.tourney.stages.filter(_ != null)
+      val stageOpt = if (param.trim.nonEmpty) {
+        val stageId = StageId.fromInt(param.trim.toInt)
+        activeStages.find(_.id == stageId)
+      } else {
+        base.Global.currentSelection.stage
+      }
+
+      stageOpt match {
+        case Some(stage) =>
+          val pantsInfo: Seq[(SNO, String)] = stage.data match {
+            case StageData.GroupsStage(groups) =>
+              groups.flatMap(_.pants).filter(_ != null).map(p => (p.id, p.ident)).toSeq
+            case StageData.RoundRobinStage(rr) =>
+              rr.pants.filter(_ != null).map(p => (p.id, p.ident)).toSeq
+            case StageData.SwissStage(sw) =>
+              sw.swPants.map(p => (p.sno, p.ident)).toSeq
+            case StageData.KnockoutStage(ko) =>
+              ko.pants.filter(_ != null).map(p => (p.id, p.ident)).toSeq
+            case null =>
+              Nil
+          }
+
+          addOutput(s"Pants for Stage '${stage.name}' (ID: ${stage.id.value}):")
+          pantsInfo.foreach { case (sno, ident) =>
+            addOutput(s"- SNO: '$sno', ident: '$ident'")
+          }
+          Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))
+
+        case None =>
+          addOutput("No active stage found or specified stage not found.")
+          Future(Left(AppError("stage.not.found")))
+      }
+    catch
+      case ex: Exception =>
+        addOutput(s"Error executing viewPant: ${ex.getMessage}")
+        Future(Left(AppError("test.failed", ex.getMessage)))
+
+
+  /**
+   * Test 8: Generate random results for a round. Param: "roundNo" or "stageId,roundNo"
    */
   def testStage_randomResult(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     try
