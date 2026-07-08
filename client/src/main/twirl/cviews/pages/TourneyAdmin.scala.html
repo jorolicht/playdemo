@@ -130,9 +130,17 @@
                             </table>
                         </div>
                     </div>
-                    <div class="card-footer bg-white text-end p-3">
+                </div>
+            }
+
+            @if(xmlPersons.nonEmpty) {
+                <div class="card shadow-sm animate-fade-in mb-4">
+                    <div class="card-body text-end p-3">
+                        @if(unassignedPlayers.isEmpty) {
+                            <span class="text-muted small me-3">Alle Spieler sind bereits zugeordnet. Sie können die Mappings und Zuordnungen aktualisieren.</span>
+                        }
                         <button class="btn btn-success fw-bold px-4" id="save-assignments-btn">
-                            <i class="bi bi-check-circle me-1"></i>Zuordnungen speichern
+                            <i class="bi bi-check-circle me-1"></i>Zuordnungen & Mappings aktualisieren
                         </button>
                     </div>
                 </div>

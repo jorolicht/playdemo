@@ -272,7 +272,10 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
     parsedCtt.foreach { ctt =>
       tourney.competitions.filter(_ != null).foreach { comp =>
         ctt.competitions.lift(comp.id.value - 1).foreach { cttComp =>
-          var compChanged = false
+          // Clear existing mappings to completely rebuild them
+          comp.pantIdent2SNO.clear()
+          comp.pants1Stage.foreach(_.ident = "")
+          
           cttComp.players.foreach { cttPlayer =>
             val licenceNrs = cttPlayer.persons.map(_.licenceNr).filter(_.nonEmpty)
             val matchedPlayerIds = licenceNrs.flatMap { lic =>
@@ -289,25 +292,17 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
 
             targetSnoOpt.foreach { sno =>
               // Map the ClickTT player ID to the SNO
-              if (!comp.pantIdent2SNO.get(cttPlayer.id).contains(sno)) {
-                comp.pantIdent2SNO(cttPlayer.id) = sno
-                compChanged = true
-              }
+              comp.pantIdent2SNO(cttPlayer.id) = sno
 
               // Find the corresponding Pant and populate its ident field
               comp.pants1Stage.find(_.id == sno).foreach { p =>
-                if (p.ident != cttPlayer.id) {
-                  p.ident = cttPlayer.id
-                  compChanged = true
-                }
+                p.ident = cttPlayer.id
               }
             }
           }
           
-          if (compChanged) {
-            updateCount += 1
-            tourney.updateCompetition(comp, doSync = false)
-          }
+          // Re-save the competition
+          tourney.updateCompetition(comp, doSync = false)
 
           // Testwise Ausgabe aller pantIdent2SNO mappings
           dom.console.log(s"Wettbewerb: ${comp.name} - pantIdent2SNO Mappings:")
@@ -318,13 +313,10 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
       }
     }
     
-    if (updateCount > 0) {
-      tourney.triggerAllSyncs()
-      services.TourneyDB.update(tourney)
-      dom.window.alert(s"Erfolgreich! $updateCount Änderungen durchgeführt.")
-    } else {
-      dom.window.alert("Keine Spieler zuzuordnen.")
-    }
+    // Always trigger syncs and update tournament on save click
+    tourney.triggerAllSyncs()
+    services.TourneyDB.update(tourney)
+    dom.window.alert("Erfolgreich! Die ClickTT-Zuordnung und alle Mappings wurden aktualisiert.")
     
     // Reset state
     xmlPersons = Seq.empty
