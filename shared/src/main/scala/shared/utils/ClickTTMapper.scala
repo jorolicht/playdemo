@@ -84,8 +84,8 @@ object ClickTTMapper:
             p.ident = cttPlayer.id
             comp.pants1Stage += p
             
-            // Populate playerIdent2SNO mapping
-            comp.playerIdent2SNO(cttPlayer.id) = p.id
+            // Populate pantIdent2SNO mapping
+            comp.pantIdent2SNO(cttPlayer.id) = p.id
           }
         }
 

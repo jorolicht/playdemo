@@ -268,7 +268,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
       }
     }
     
-    // Step 2: Update Competition.playerIdent2SNO and Pant.ident
+    // Step 2: Update Competition.pantIdent2SNO and Pant.ident
     parsedCtt.foreach { ctt =>
       tourney.competitions.filter(_ != null).foreach { comp =>
         ctt.competitions.lift(comp.id.value - 1).foreach { cttComp =>
@@ -289,8 +289,8 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
 
             targetSnoOpt.foreach { sno =>
               // Map the ClickTT player ID to the SNO
-              if (!comp.playerIdent2SNO.get(cttPlayer.id).contains(sno)) {
-                comp.playerIdent2SNO(cttPlayer.id) = sno
+              if (!comp.pantIdent2SNO.get(cttPlayer.id).contains(sno)) {
+                comp.pantIdent2SNO(cttPlayer.id) = sno
                 compChanged = true
               }
 
@@ -309,9 +309,9 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
             tourney.updateCompetition(comp, doSync = false)
           }
 
-          // Testwise Ausgabe aller playerIdent2SNO mappings
-          dom.console.log(s"Wettbewerb: ${comp.name} - playerIdent2SNO Mappings:")
-          comp.playerIdent2SNO.foreach { case (xmlId, sno) =>
+          // Testwise Ausgabe aller pantIdent2SNO mappings
+          dom.console.log(s"Wettbewerb: ${comp.name} - pantIdent2SNO Mappings:")
+          comp.pantIdent2SNO.foreach { case (xmlId, sno) =>
             dom.console.log(s"  $xmlId -> $sno")
           }
         }
