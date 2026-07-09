@@ -145,6 +145,31 @@
                     </div>
                 </div>
             }
+
+            <!-- Section: Spielergebnisse im ClickTT Format erzeugen für Import -->
+            <div class="card shadow-sm border-start border-4 border-success mb-4 animate-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary fw-bold mb-3">
+                        <i class="bi bi-file-earmark-diff me-2 text-success"></i>Spielergebnisse im ClickTT Format erzeugen für Import
+                    </h5>
+                    <p class="text-muted small">
+                        Erzeugen Sie eine ClickTT XML-Ergebnisdatei für den Import, indem Sie die Wettbewerbe und die Phasen (Stages) auswählen, deren Ergebnisse exportiert werden sollen.
+                    </p>
+                    <button class="btn btn-success fw-bold" id="generate-ctt-results-btn">
+                        <i class="bi bi-file-earmark-arrow-down me-1"></i>ClickTT XML Ergebnis Datei erzeugen
+                    </button>
+                    
+                    <div id="ctt-export-selection" style="display: none;" class="mt-4 animate-fade-in">
+                        <h6 class="fw-bold text-secondary mb-3">Wählen Sie die Wettbewerbe und Phasen aus:</h6>
+                        <div id="ctt-export-competitions-list" class="border rounded p-3 bg-light-subtle"></div>
+                        <div class="text-end mt-3">
+                            <button class="btn btn-primary fw-bold" id="download-ctt-results-btn">
+                                <i class="bi bi-download me-1"></i>Ergebnis XML herunterladen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         }
 
         @if(activeTab == "CERT") {

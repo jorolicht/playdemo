@@ -134,6 +134,67 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
           }
         }
 
+        // Wire ClickTT Results Generator Button
+        val generateBtn = dom.document.getElementById("generate-ctt-results-btn").asInstanceOf[dom.html.Button]
+        if (generateBtn != null) {
+          generateBtn.onclick = (e: dom.Event) => {
+            if (tourney.clicktt == null || tourney.clicktt.trim.isEmpty) {
+              dom.window.alert("Keine ClickTT XML-Datei im Turnier vorhanden. Bitte laden Sie zuerst eine ClickTT XML-Datei unter 'ClickTT Update' hoch.")
+            } else {
+              // Check if all players in all competitions have mapped ident
+              val incompleteComps = tourney.competitions.filter(_ != null).filter { comp =>
+                comp.pants1Stage.exists(p => !comp.cttSNO2Ident.contains(p.id) || comp.cttSNO2Ident(p.id).trim.isEmpty)
+              }
+              if (incompleteComps.nonEmpty) {
+                val names = incompleteComps.map(_.name).mkString(", ")
+                dom.window.alert(s"Fehler: Nicht allen Teilnehmern der folgenden Wettbewerbe ist eine ClickTT-ID zugewiesen: $names\nBitte führen Sie zuerst den ClickTT-Update (Spieler-Datenabgleich) aus.")
+              } else {
+                // Check passed! Show dynamic list of competitions and stages
+                val selectionContainer = dom.document.getElementById("ctt-export-selection").asInstanceOf[dom.html.Div]
+                val listContainer = dom.document.getElementById("ctt-export-competitions-list").asInstanceOf[dom.html.Div]
+                if (selectionContainer != null && listContainer != null) {
+                  selectionContainer.style.display = "block"
+                  
+                  // Construct HTML list of competitions and checkboxes for stages
+                  val listHtml = new StringBuilder()
+                  tourney.competitions.filter(_ != null).foreach { comp =>
+                    val compStages = tourney.stages.filter(s => s != null && s.coId == comp.id)
+                    if (compStages.nonEmpty) {
+                      listHtml.append(s"""<div class="mb-3 border-bottom pb-2">""")
+                      listHtml.append(s"""  <div class="fw-bold text-dark mb-2">${comp.name}</div>""")
+                      listHtml.append(s"""  <div class="ms-3 d-flex flex-wrap gap-3">""")
+                      compStages.foreach { stage =>
+                        listHtml.append(s"""
+                          <div class="form-check">
+                            <input class="form-check-input ctt-stage-checkbox" type="checkbox" id="chk-stage-${stage.id.value}" data-comp-id="${comp.id.value}" data-stage-id="${stage.id.value}" checked>
+                            <label class="form-check-label text-muted small fw-semibold" for="chk-stage-${stage.id.value}">${stage.name}</label>
+                          </div>
+                        """)
+                      }
+                      listHtml.append(s"""  </div>""")
+                      listHtml.append(s"""</div>""")
+                    }
+                  }
+                  
+                  if (listHtml.isEmpty) {
+                    listContainer.innerHTML = "<div class='text-muted small'>Keine aktiven Wettbewerbsphasen (Stages) gefunden.</div>"
+                  } else {
+                    listContainer.innerHTML = listHtml.toString()
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // Wire ClickTT Download XML button
+        val downloadBtn = dom.document.getElementById("download-ctt-results-btn").asInstanceOf[dom.html.Button]
+        if (downloadBtn != null) {
+          downloadBtn.onclick = (e: dom.Event) => {
+            generateCttResultsXml(tourney)
+          }
+        }
+
         true
       case None =>
         debug("TourneyAdmin: No tournament selected, redirecting to Main Search")
@@ -326,6 +387,146 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
     parsedCtt = None
     lastCttXmlString = ""
     render()
+
+  private def generateCttResultsXml(tourney: Tourney): Unit = {
+    if (tourney.clicktt == null || tourney.clicktt.trim.isEmpty) {
+      dom.window.alert("Fehler: Keine ClickTT XML-Datei vorhanden.")
+      return
+    }
+
+    try {
+      // 1. Parse XML String using DOMParser
+      val parser = new dom.DOMParser()
+      val doc = parser.parseFromString(tourney.clicktt, dom.MIMEType.`application/xml`)
+      val xmlComps = doc.getElementsByTagName("competition")
+
+      // 2. Read selected stage checkboxes
+      val checkboxes = dom.document.querySelectorAll(".ctt-stage-checkbox")
+      val selectedStages = scala.collection.mutable.Map[Int, scala.collection.mutable.ListBuffer[Int]]()
+      
+      for (i <- 0 until checkboxes.length) {
+        val cb = checkboxes.item(i).asInstanceOf[dom.html.Input]
+        if (cb.checked) {
+          val compId = cb.getAttribute("data-comp-id").toInt
+          val stageId = cb.getAttribute("data-stage-id").toInt
+          selectedStages.getOrElseUpdate(compId, scala.collection.mutable.ListBuffer()).append(stageId)
+        }
+      }
+
+      // 3. Populate matches in each competition
+      tourney.competitions.filter(_ != null).foreach { comp =>
+        val selectedStageIds = selectedStages.get(comp.id.value).map(_.toSeq).getOrElse(Seq.empty)
+        if (selectedStageIds.nonEmpty) {
+          val xmlComp = xmlComps.item(comp.id.value - 1).asInstanceOf[dom.Element]
+          if (xmlComp != null) {
+            // Remove existing <matches> element direct children to avoid duplicates
+            val childNodes = xmlComp.childNodes
+            var i = 0
+            while (i < childNodes.length) {
+              val node = childNodes.item(i)
+              if (node.nodeName == "matches") {
+                xmlComp.removeChild(node)
+              } else {
+                i += 1
+              }
+            }
+
+            // Create new <matches> element
+            val xmlMatches = doc.createElement("matches")
+            var matchCounter = 0
+
+            selectedStageIds.foreach { stageId =>
+              val stageOpt = tourney.stages.find(s => s != null && s.id.value == stageId)
+              stageOpt.foreach { stage =>
+                val playedMatches = stage.matches.filter(m => m.finished && !m.stNoA.isBye && !m.stNoB.isBye && !m.stNoA.isNN && !m.stNoB.isNN)
+                playedMatches.foreach { m =>
+                  val xmlMatch = doc.createElement("match")
+                  xmlMatch.setAttribute("nr", matchCounter.toString)
+                  
+                  val groupVal = if (m.stageFormat == StageFormat.GR) {
+                    m match {
+                      case gr: MEntryGr => "Gruppe " + ('A'.toInt + gr.grId - 1).toChar.toString
+                      case _ => ""
+                    }
+                  } else {
+                    ""
+                  }
+                  xmlMatch.setAttribute("group", groupVal)
+                  xmlMatch.setAttribute("scheduled", "")
+
+                  val playerAId = comp.cttSNO2Ident.get(m.stNoA).getOrElse("")
+                  val playerBId = comp.cttSNO2Ident.get(m.stNoB).getOrElse("")
+                  xmlMatch.setAttribute("player-a", playerAId)
+                  xmlMatch.setAttribute("player-b", playerBId)
+
+                  val balls = m.getBalls
+                  for (setIdx <- 1 to 7) {
+                    if (setIdx <= balls.length) {
+                      val b = balls(setIdx - 1)
+                      xmlMatch.setAttribute(s"set-a-$setIdx", b._1.toString)
+                      xmlMatch.setAttribute(s"set-b-$setIdx", b._2.toString)
+                    } else {
+                      xmlMatch.setAttribute(s"set-a-$setIdx", "0")
+                      xmlMatch.setAttribute(s"set-b-$setIdx", "0")
+                    }
+                  }
+
+                  xmlMatch.setAttribute("sets-a", m.sets._1.toString)
+                  xmlMatch.setAttribute("sets-b", m.sets._2.toString)
+
+                  val matchesA = if (m.sets._1 > m.sets._2) "1" else "0"
+                  val matchesB = if (m.sets._2 > m.sets._1) "1" else "0"
+                  xmlMatch.setAttribute("matches-a", matchesA)
+                  xmlMatch.setAttribute("matches-b", matchesB)
+
+                  val gamesA = balls.map(_._1).filter(_ > 0).sum
+                  val gamesB = balls.map(_._2).filter(_ > 0).sum
+                  xmlMatch.setAttribute("games-a", gamesA.toString)
+                  xmlMatch.setAttribute("games-b", gamesB.toString)
+
+                  xmlMatches.appendChild(xmlMatch)
+                  matchCounter += 1
+                }
+              }
+            }
+
+            // Insert <matches> element after <players>
+            val playersElems = xmlComp.getElementsByTagName("players")
+            if (playersElems.length > 0) {
+              val playersElem = playersElems.item(0)
+              val nextSibling = playersElem.nextSibling
+              if (nextSibling != null) {
+                xmlComp.insertBefore(xmlMatches, nextSibling)
+              } else {
+                xmlComp.appendChild(xmlMatches)
+              }
+            } else {
+              xmlComp.appendChild(xmlMatches)
+            }
+          }
+        }
+      }
+
+      // 4. Serialize back to XML String
+      val serializer = new dom.XMLSerializer()
+      val xmlResult = serializer.serializeToString(doc)
+
+      // 5. Trigger download
+      val blob = new dom.Blob(scala.scalajs.js.Array(xmlResult), dom.BlobPropertyBag(`type` = "application/xml"))
+      val url = dom.URL.createObjectURL(blob)
+      val a = dom.document.createElement("a").asInstanceOf[dom.html.Anchor]
+      a.href = url
+      a.download = s"clicktt_export_ergebnisse_${tourney.wpId}.xml"
+      dom.document.body.appendChild(a)
+      a.click()
+      dom.document.body.removeChild(a)
+      dom.URL.revokeObjectURL(url)
+
+    } catch {
+      case ex: Throwable =>
+        dom.window.alert(s"Fehler beim Erzeugen der ClickTT XML-Ergebnisdatei: ${ex.getMessage}")
+    }
+  }
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit =
     HtmlId(elem.id) match
