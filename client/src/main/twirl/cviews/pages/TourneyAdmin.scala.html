@@ -133,7 +133,7 @@
                 </div>
             }
 
-            @if(xmlPersons.nonEmpty) {
+            @if(xmlPersons.nonEmpty && unassignedPlayers.nonEmpty) {
                 <div class="card shadow-sm animate-fade-in mb-4">
                     <div class="card-body text-end p-3">
                         @if(unassignedPlayers.isEmpty) {
