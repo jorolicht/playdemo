@@ -357,6 +357,16 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
     // Step 2: Update Competition.cttSNO2Ident
     parsedCtt.foreach { ctt =>
       tourney.competitions.filter(_ != null).foreach { comp =>
+        val cttCompOpt = comp.cttInfo.flatMap { info =>
+          ctt.competitions.find { cc =>
+            cc.ageGroup == info.ageGroup &&
+            cc.ttrRemarks.getOrElse("") == info.ratingRemark &&
+            cc.ttrFrom.getOrElse(0) == info.ratingLowLevel &&
+            cc.ttrTo.getOrElse(0) == info.ratingUpperLevel &&
+            cc.sex.getOrElse(0) == info.sex
+          }
+        }.orElse(ctt.competitions.lift(comp.id.value - 1))
+
         // Clear existing mappings to completely rebuild them
         comp.cttSNO2Ident.clear()
         
@@ -377,18 +387,35 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
           }
 
           licenceNrsOpt.foreach { licenceNrs =>
-            val matchedCttPlayerOpt = if (licenceNrs.length == 1) {
-              val lic = licenceNrs.head
-              ctt.competitions.flatMap(_.players)
-                .find(cp => cp.typ == "single" && cp.persons.length == 1 && cp.persons.head.licenceNr == lic)
-            } else if (licenceNrs.length == 2) {
-              val lic1 = licenceNrs(0)
-              val lic2 = licenceNrs(1)
-              ctt.competitions.flatMap(_.players)
-                .find(cp => cp.typ == "double" && cp.persons.length == 2 && 
-                            cp.persons.exists(_.licenceNr == lic1) && cp.persons.exists(_.licenceNr == lic2))
-            } else {
-              None
+            val matchedCttPlayerOpt = cttCompOpt.flatMap { cttComp =>
+              if (licenceNrs.length == 1) {
+                val lic = licenceNrs.head
+                cttComp.players.find(cp => cp.persons.length == 1 && cp.persons.head.licenceNr == lic)
+              } else if (licenceNrs.length == 2) {
+                val lic1 = licenceNrs(0)
+                val lic2 = licenceNrs(1)
+                cttComp.players.find(cp => cp.persons.length == 2 && 
+                                           cp.persons.exists(_.licenceNr == lic1) && 
+                                           cp.persons.exists(_.licenceNr == lic2))
+              } else {
+                None
+              }
+            }.orElse {
+              // Global fallback
+              if (licenceNrs.length == 1) {
+                val lic = licenceNrs.head
+                ctt.competitions.flatMap(_.players)
+                  .find(cp => cp.persons.length == 1 && cp.persons.head.licenceNr == lic)
+              } else if (licenceNrs.length == 2) {
+                val lic1 = licenceNrs(0)
+                val lic2 = licenceNrs(1)
+                ctt.competitions.flatMap(_.players)
+                  .find(cp => cp.persons.length == 2 && 
+                              cp.persons.exists(_.licenceNr == lic1) && 
+                              cp.persons.exists(_.licenceNr == lic2))
+              } else {
+                None
+              }
             }
 
             matchedCttPlayerOpt.foreach { cttPlayer =>
