@@ -238,6 +238,10 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
         if (downloadBtn != null) {
           downloadBtn.onclick = (e: dom.Event) => {
             generateCttResultsXml(tourney)
+            val exportDiv = dom.document.getElementById("ctt-export-selection").asInstanceOf[dom.html.Div]
+            if (exportDiv != null) {
+              exportDiv.style.display = "none"
+            }
           }
         }
 
