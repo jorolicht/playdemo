@@ -325,6 +325,12 @@ function tourney_sync_tourney(WP_REST_Request $request)
 
     // 💾 Speichern
     if ($new_tourney) {
+        if ($meta === 'basic') {
+            if (isset($new_tourney['clicktt'])) {
+                update_post_meta($post_id, 'clicktt', wp_slash($new_tourney['clicktt']));
+                $new_tourney['clicktt'] = '';
+            }
+        }
         update_post_meta($post_id, $meta, wp_slash(wp_json_encode($new_tourney, JSON_UNESCAPED_UNICODE)));
         
         // Index meta fields for searching if this is the basic meta
