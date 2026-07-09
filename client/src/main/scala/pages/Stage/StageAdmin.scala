@@ -625,6 +625,12 @@ object StageAdmin extends BasePage with JsWrapper:
     val minG = scala.math.ceil(count.toDouble / sHigh).toInt
     val maxG = scala.math.floor(count.toDouble / sLow).toInt
 
+    if (minG >= maxG) {
+      activeCustomGroupCount = Some(minG)
+      updateButtonState()
+      return
+    }
+
     val modalId = "customGroupCountModal"
     val existing = dom.document.getElementById(modalId)
     if (existing != null) existing.parentNode.removeChild(existing)
