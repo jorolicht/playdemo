@@ -156,7 +156,7 @@ case class Competition(
   val pants1Stage:      ArrayBuffer[Pant] = ArrayBuffer(),
   var deleted:          Boolean = false,
   var version:          Int = 0,
-  val cttSNO2Ident:     Map[SNO, String] = Map.empty
+  var cttSNO2Ident:     Map[SNO, String] = Map.empty
 ):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
 
@@ -176,7 +176,23 @@ case class Competition(
 
 
 object Competition:
-  given rw: ReadWriter[Competition] = macroRW
+  given mapRW: ReadWriter[Map[SNO, String]] =
+    summon[ReadWriter[scala.collection.mutable.Map[String, String]]].bimap[Map[SNO, String]](
+      _.map { case (sno, id) => (sno.asInstanceOf[String], id) },
+      _.map { case (sStr, id) => (SNO.fromString(sStr), id) }
+    )
+
+  given rw: ReadWriter[Competition] =
+    ReadWriter.join(
+      macroRW[Competition].map { comp =>
+        if (comp.cttSNO2Ident == null) {
+          comp.cttSNO2Ident = Map.empty
+        }
+        comp
+      },
+      macroRW[Competition]
+    )
+
   def dummy: Competition = Competition(CompId(0), "", CompTyp.UNKN, CompCategory.UNKNOWN, "", CompStatus.UNKN)
 
 
