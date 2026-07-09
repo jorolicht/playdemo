@@ -33,6 +33,24 @@ object Pickle extends upickle.AttributeTagged:
       case x => Some(read[T](x))
     }
 
+  given mapRW: ReadWriter[scala.collection.mutable.Map[shared.model.SNO, String]] =
+    summon[ReadWriter[scala.collection.mutable.Map[String, String]]].bimap[scala.collection.mutable.Map[shared.model.SNO, String]](
+      m => {
+        val res = scala.collection.mutable.Map[String, String]()
+        if (m != null) {
+          m.foreach { case (sno, id) => res(sno.asInstanceOf[String]) = id }
+        }
+        res
+      },
+      m => {
+        val res = scala.collection.mutable.Map[shared.model.SNO, String]()
+        if (m != null) {
+          m.foreach { case (sStr, id) => res(shared.model.SNO.fromString(sStr)) = id }
+        }
+        res
+      }
+    )
+
 type EiErr[T] = Either[Error, T]
 type FuEiErr[T] = Future[Either[AppError, T]]
 

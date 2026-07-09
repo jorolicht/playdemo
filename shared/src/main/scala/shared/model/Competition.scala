@@ -176,24 +176,6 @@ case class Competition(
 
 
 object Competition:
-  given mapRW: ReadWriter[Map[SNO, String]] =
-    summon[ReadWriter[scala.collection.mutable.Map[String, String]]].bimap[Map[SNO, String]](
-      m => {
-        val res = scala.collection.mutable.Map[String, String]()
-        if (m != null) {
-          m.foreach { case (sno, id) => res(sno.asInstanceOf[String]) = id }
-        }
-        res
-      },
-      m => {
-        val res = scala.collection.mutable.Map[SNO, String]()
-        if (m != null) {
-          m.foreach { case (sStr, id) => res(SNO.fromString(sStr)) = id }
-        }
-        res
-      }
-    )
-
   given rw: ReadWriter[Competition] =
     ReadWriter.join(
       macroRW[Competition].map { comp =>
