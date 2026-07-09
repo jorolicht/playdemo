@@ -29,6 +29,7 @@ object DlgClickTT extends BaseDialog with JsWrapper:
 
   private var modal: Modal = null
   private var parsedTournament: Option[CttTournament] = None
+  private var lastXmlString: String = ""
 
   def render(param: String = ""): Boolean = true
 
@@ -47,6 +48,7 @@ object DlgClickTT extends BaseDialog with JsWrapper:
     
     // Reset state
     parsedTournament = None
+    lastXmlString = ""
     gE(ApplyId).classList.add("d-none")
     setHtml(gE(ResultId), "")
     val input = gE(FileInputId).asInstanceOf[org.scalajs.dom.html.Input]
@@ -62,6 +64,7 @@ object DlgClickTT extends BaseDialog with JsWrapper:
 
         reader.onload = { (_: Event) =>
           val xmlString = reader.result.asInstanceOf[String]
+          lastXmlString = xmlString
           ClickTTParser.parse(xmlString) match {
             case Right(tournament) =>
               parsedTournament = Some(tournament)
@@ -91,6 +94,7 @@ object DlgClickTT extends BaseDialog with JsWrapper:
       parsedTournament match
         case Some(ctt) => 
           val t = Tourney.default
+          t.clicktt = lastXmlString
           shared.utils.ClickTTMapper.mapToTourney(ctt, t) match {
             case Right(_) => 
               // 1. Set as current tournament (without immediate sync)

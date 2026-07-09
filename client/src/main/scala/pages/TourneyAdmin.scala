@@ -32,6 +32,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   var unassignedPlayers: Seq[Player] = Seq.empty
   var playerAssignments: Map[Int, String] = Map.empty // PlayerId.value -> CttPerson.licenceNr
   var parsedCtt: Option[CttTournament] = None
+  private var lastCttXmlString: String = ""
 
   private var activeTab = "IMPEXP" // Tabs: "IMPEXP" (Import/Export), "CTT" (ClickTT Update), "CERT" (Urkunden Konfiguration)
 
@@ -83,6 +84,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
               val reader = new dom.FileReader()
               reader.onload = (e: dom.Event) => {
                 val xmlString = reader.result.asInstanceOf[String]
+                lastCttXmlString = xmlString
                 services.ClickTTParser.parse(xmlString) match {
                   case Right(ctt) =>
                     parsedCtt = Some(ctt)
@@ -307,6 +309,11 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
       }
     }
     
+    // Store the loaded XML string in the tourney clicktt metadata field
+    if (lastCttXmlString.nonEmpty) {
+      tourney.clicktt = lastCttXmlString
+    }
+    
     // Always trigger syncs and update tournament on save click
     tourney.triggerAllSyncs()
     services.TourneyDB.update(tourney)
@@ -317,6 +324,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
     unassignedPlayers = Seq.empty
     playerAssignments = Map.empty
     parsedCtt = None
+    lastCttXmlString = ""
     render()
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit =

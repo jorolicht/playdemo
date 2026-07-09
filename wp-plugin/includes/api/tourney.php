@@ -172,6 +172,7 @@ function tourney_get_meta_data(WP_REST_Request $request) {
         'ident'     => get_post_meta($post_id, 'ident', true),
         'category'  => get_post_meta($post_id, 'category', true),
         'organizer' => tourney_get_organizer_fallback($post_id),
+        'clicktt'   => get_post_meta($post_id, 'clicktt', true),
     ];
 }
 
@@ -186,11 +187,12 @@ function tourney_update_meta_data(WP_REST_Request $request) {
 
     $params = $request->get_json_params();
     
-    if (isset($params['startDate'])) update_post_meta($post_id, 'startDate', sanitize_text_field($params['startDate']));
-    if (isset($params['endDate']))   update_post_meta($post_id, 'endDate',   sanitize_text_field($params['endDate']));
+    if (isset($params['startDate'])) update_post_meta($post_id, 'startDate', intval($params['startDate']));
+    if (isset($params['endDate']))   update_post_meta($post_id, 'endDate',   intval($params['endDate']));
     if (isset($params['ident']))     update_post_meta($post_id, 'ident',     sanitize_text_field($params['ident']));
     if (isset($params['category']))  update_post_meta($post_id, 'category',  sanitize_text_field($params['category']));
     if (isset($params['organizer'])) update_post_meta($post_id, 'organizer', sanitize_text_field($params['organizer']));
+    if (isset($params['clicktt']))   update_post_meta($post_id, 'clicktt',   $params['clicktt']);
     
     return ['success' => true];
 }
@@ -256,6 +258,9 @@ function tourney_get_read(WP_REST_Request $request)
         if (empty($tourney['organizer'])) {
             $tourney['organizer'] = tourney_get_organizer_fallback($post_id);
         }
+        
+        $clicktt_val = get_post_meta($post_id, 'clicktt', true);
+        $tourney['clicktt'] = !empty($clicktt_val) ? $clicktt_val : ($tourney['clicktt'] ?? '');
         
         $post = get_post($post_id);
         if ($post) {
@@ -344,6 +349,9 @@ function tourney_sync_tourney(WP_REST_Request $request)
             }
             if (isset($new_tourney['category'])) {
                 update_post_meta($post_id, 'category', sanitize_text_field($new_tourney['category']));
+            }
+            if (isset($new_tourney['clicktt'])) {
+                update_post_meta($post_id, 'clicktt', $new_tourney['clicktt']);
             }
 
             // Organizer Logik
@@ -481,6 +489,11 @@ function tourney_api_create(WP_REST_Request $request) {
     // Setze ident Metafield
     if (!empty($ident)) {
         update_post_meta($result_id, 'ident', $ident);
+    }
+
+    // Setze clicktt Metafield
+    if (isset($body['clicktt'])) {
+        update_post_meta($result_id, 'clicktt', $body['clicktt']);
     }
 
     // Full hierarchical slug for the response
