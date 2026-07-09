@@ -74,7 +74,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
           val alert = dom.document.getElementById("LoginSuccessAlert")
           if (alert != null) alert.classList.remove("d-none")
           dom.window.setTimeout(() => {
-            loadPage(MainView.name, "")
+            dom.window.location.href = Global.homeUrl
           }, 2500)
         }
       case Left(err) =>
@@ -122,7 +122,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
           val alert = dom.document.getElementById("LoginSuccessAlert")
           if (alert != null) alert.classList.remove("d-none")
           dom.window.setTimeout(() => {
-            loadPage(MainView.name, "")
+            dom.window.location.href = Global.homeUrl
           }, 2500)
         }
       case Left(err) => 
