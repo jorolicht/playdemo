@@ -156,7 +156,7 @@ case class Competition(
   val pants1Stage:      ArrayBuffer[Pant] = ArrayBuffer(),
   var deleted:          Boolean = false,
   var version:          Int = 0,
-  val cttIdent2SNO:     Map[String, SNO] = Map.empty
+  val cttSNO2Ident:     Map[SNO, String] = Map.empty
 ):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
 

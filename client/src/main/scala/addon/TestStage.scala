@@ -217,22 +217,22 @@ object TestStage extends base.JsWrapper:
           val pantsInfo: Seq[(SNO, String)] = stage.data match {
             case StageData.GroupsStage(groups) =>
               groups.flatMap(_.pants).filter(_ != null).map { p =>
-                val ident = compOpt.flatMap(_.cttIdent2SNO.find(_._2 == p.id).map(_._1)).getOrElse("")
+                val ident = compOpt.flatMap(_.cttSNO2Ident.get(p.id)).getOrElse("")
                 (p.id, ident)
               }.toSeq
             case StageData.RoundRobinStage(rr) =>
               rr.pants.filter(_ != null).map { p =>
-                val ident = compOpt.flatMap(_.cttIdent2SNO.find(_._2 == p.id).map(_._1)).getOrElse("")
+                val ident = compOpt.flatMap(_.cttSNO2Ident.get(p.id)).getOrElse("")
                 (p.id, ident)
               }.toSeq
             case StageData.SwissStage(sw) =>
               sw.swPants.map { p =>
-                val ident = compOpt.flatMap(_.cttIdent2SNO.find(_._2 == p.sno).map(_._1)).getOrElse("")
+                val ident = compOpt.flatMap(_.cttSNO2Ident.get(p.sno)).getOrElse("")
                 (p.sno, ident)
               }.toSeq
             case StageData.KnockoutStage(ko) =>
               ko.pants.filter(_ != null).map { p =>
-                val ident = compOpt.flatMap(_.cttIdent2SNO.find(_._2 == p.id).map(_._1)).getOrElse("")
+                val ident = compOpt.flatMap(_.cttSNO2Ident.get(p.id)).getOrElse("")
                 (p.id, ident)
               }.toSeq
             case null =>
