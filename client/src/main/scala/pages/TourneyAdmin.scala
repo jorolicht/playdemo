@@ -33,6 +33,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   var playerAssignments: Map[Int, String] = Map.empty // PlayerId.value -> CttPerson.licenceNr
   var parsedCtt: Option[CttTournament] = None
   private var lastCttXmlString: String = ""
+  var assignmentsSaved = false
 
   private var activeTab = "IMPEXP" // Tabs: "IMPEXP" (Import/Export), "CTT" (ClickTT Update), "CERT" (Urkunden Konfiguration)
 
@@ -44,7 +45,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
         }
 
         // Fetch templates if we select "CERT" and haven't loaded them yet
-        if (parsedCtt.isEmpty && tourney.clicktt != null && tourney.clicktt.trim.nonEmpty) {
+        if (!assignmentsSaved && parsedCtt.isEmpty && tourney.clicktt != null && tourney.clicktt.trim.nonEmpty) {
           services.ClickTTParser.parse(tourney.clicktt) match {
             case Right(ctt) =>
               parsedCtt = Some(ctt)
@@ -105,6 +106,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
         if (clickttInp != null) {
           clickttInp.onchange = (e: dom.Event) => {
             if (clickttInp.files.length > 0) {
+              assignmentsSaved = false
               val file = clickttInp.files(0)
               val reader = new dom.FileReader()
               reader.onload = (e: dom.Event) => {
@@ -483,6 +485,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
     playerAssignments = Map.empty
     parsedCtt = None
     lastCttXmlString = ""
+    assignmentsSaved = true
     render()
 
   private def generateCttResultsXml(tourney: Tourney): Unit = {
