@@ -143,7 +143,9 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
             } else {
               // Check if all players in all competitions have mapped ident
               val incompleteComps = tourney.competitions.filter(_ != null).filter { comp =>
-                comp.pants1Stage.exists(p => !comp.cttSNO2Ident.contains(p.id) || comp.cttSNO2Ident(p.id).trim.isEmpty)
+                comp.pants1Stage
+                  .filter(p => p != null && !p.id.isBye && !p.id.isNN)
+                  .exists(p => !comp.cttSNO2Ident.contains(p.id) || comp.cttSNO2Ident(p.id).trim.isEmpty)
               }
               if (incompleteComps.nonEmpty) {
                 val names = incompleteComps.map(_.name).mkString(", ")
