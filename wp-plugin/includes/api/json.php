@@ -249,7 +249,7 @@ function update_tourney_meta(WP_REST_Request $request)
     }
 
     // Update meta with full JSON payload
-    update_post_meta($postId, $metaName, wp_json_encode($data));
+    update_post_meta($postId, $metaName, wp_slash(wp_json_encode($data)));
 
     // Update shadow timestamp to current time
     $newTimestamp = time();

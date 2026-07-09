@@ -109,7 +109,7 @@ function tourney_sync_competitions(WP_REST_Request $request)
         $client_ver = intval($comp["version"]);
         
         // Speichern des Wettbewerbs als JSON
-        update_post_meta($post_id, $key, wp_json_encode($comp, JSON_UNESCAPED_UNICODE));
+        update_post_meta($post_id, $key, wp_slash(wp_json_encode($comp, JSON_UNESCAPED_UNICODE)));
         update_post_meta($post_id, $meta_ver, $client_ver);
     }
 

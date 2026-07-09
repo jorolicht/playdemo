@@ -137,6 +137,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Loads basic tournament data from the WordPress server.
    */
   def load(idOrSlug: Int | String): Future[Either[AppError, Long]] =
+    println("Lade Turnierdaten von Server...")
     if (base.Global.isDemoMode) then
       val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_tourney")
       if (jsStr != null && jsStr.nonEmpty) {
@@ -152,6 +153,7 @@ object TourneyDB extends ComWrapper with Debouncer:
         Future.successful(Right(0L))
       }
     else {
+      println(s"Loading tournament data for idOrSlug: $idOrSlug")
       val paramsOpt = idOrSlug match {
         case id: Int if id == 0 => 
            Logging.debug("TourneyDB.load: trnyId is 0, skipping load")
@@ -165,10 +167,14 @@ object TourneyDB extends ComWrapper with Debouncer:
 
       paramsOpt match {
         case Some(params) =>
+          println(s"Loading tournament data with params: $params")
           ajaxGet[TourneyResponse](routeGet, params, host = Global.homeUrl).map {
             case Right(res) =>
+              println(s"Successfully loaded tournament data: ${res.tourney}")
               tourney = res.tourney
+              println(s"Loaded tournament: ${tourney.name}, version: ${res.version}")
               version = res.version
+              println(s"Initializing dependent databases...")
               ClubDB.initHandler() 
               PlayerDB.initHandler()
               CompetitionDB.initHandler()

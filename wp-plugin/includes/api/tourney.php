@@ -325,7 +325,7 @@ function tourney_sync_tourney(WP_REST_Request $request)
 
     // 💾 Speichern
     if ($new_tourney) {
-        update_post_meta($post_id, $meta, wp_json_encode($new_tourney, JSON_UNESCAPED_UNICODE));
+        update_post_meta($post_id, $meta, wp_slash(wp_json_encode($new_tourney, JSON_UNESCAPED_UNICODE)));
         
         // Index meta fields for searching if this is the basic meta
         if ($meta === 'basic') {
@@ -469,7 +469,7 @@ function tourney_api_create(WP_REST_Request $request) {
     $body['wpId'] = $result_id;
 
     // Speichere den gesamten Payload als initialen Stand in 'basic'
-    update_post_meta($result_id, 'basic', wp_json_encode($body, JSON_UNESCAPED_UNICODE));
+    update_post_meta($result_id, 'basic', wp_slash(wp_json_encode($body, JSON_UNESCAPED_UNICODE)));
     
     // Index meta fields for searching
     update_post_meta($result_id, 'startDate', intval($start_date));
