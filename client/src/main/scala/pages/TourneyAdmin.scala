@@ -554,6 +554,28 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
                       case gr: MEntryGr => "Gruppe " + ('A'.toInt + gr.grId - 1).toChar.toString
                       case _ => ""
                     }
+                  } else if (m.stageFormat == StageFormat.KO) {
+                    m match {
+                      case ko: MEntryKo =>
+                        val r = ko.round
+                        val localized = gM(s"StageInput.round.$r")
+                        if (localized == s"StageInput.round.$r") {
+                          r match {
+                            case 0 => "Spiel um Platz 3"
+                            case 1 => "Finale"
+                            case 2 => "Halbfinale"
+                            case 3 => "Viertelfinale"
+                            case 4 => "Achtelfinale"
+                            case 5 => "Runde der letzten 32"
+                            case 6 => "Runde der letzten 64"
+                            case 7 => "Runde der letzten 128"
+                            case _ => s"Runde $r"
+                          }
+                        } else {
+                          localized
+                        }
+                      case _ => ""
+                    }
                   } else {
                     ""
                   }
