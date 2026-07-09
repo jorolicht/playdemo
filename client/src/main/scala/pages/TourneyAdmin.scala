@@ -141,48 +141,59 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
             if (tourney.clicktt == null || tourney.clicktt.trim.isEmpty) {
               dom.window.alert("Keine ClickTT XML-Datei im Turnier vorhanden. Bitte laden Sie zuerst eine ClickTT XML-Datei unter 'ClickTT Update' hoch.")
             } else {
-              // Check if all players in all competitions have mapped ident
-              val incompleteComps = tourney.competitions.filter(_ != null).filter { comp =>
+              // Find all players missing a ClickTT ID mapping
+              val missingPlayers = tourney.competitions.filter(_ != null).flatMap { comp =>
                 comp.pants1Stage
                   .filter(p => p != null && !p.id.isBye && !p.id.isNN)
-                  .exists(p => !comp.cttSNO2Ident.contains(p.id) || comp.cttSNO2Ident(p.id).trim.isEmpty)
+                  .filter(p => !comp.cttSNO2Ident.contains(p.id) || comp.cttSNO2Ident(p.id).trim.isEmpty)
+                  .map(p => (comp.name, p.name))
+              }.distinct
+
+              val warningBox = dom.document.getElementById("ctt-export-warning-box").asInstanceOf[dom.html.Div]
+              val warningList = dom.document.getElementById("ctt-export-warning-players-list").asInstanceOf[dom.html.UList]
+              if (warningBox != null && warningList != null) {
+                if (missingPlayers.nonEmpty) {
+                  warningBox.style.display = "block"
+                  val listItems = missingPlayers.map { case (compName, pName) =>
+                    s"<li>$pName ($compName)</li>"
+                  }.mkString("\n")
+                  warningList.innerHTML = listItems
+                } else {
+                  warningBox.style.display = "none"
+                }
               }
-              if (incompleteComps.nonEmpty) {
-                val names = incompleteComps.map(_.name).mkString(", ")
-                dom.window.alert(s"Fehler: Nicht allen Teilnehmern der folgenden Wettbewerbe ist eine ClickTT-ID zugewiesen: $names\nBitte führen Sie zuerst den ClickTT-Update (Spieler-Datenabgleich) aus.")
-              } else {
-                // Check passed! Show dynamic list of competitions and stages
-                val selectionContainer = dom.document.getElementById("ctt-export-selection").asInstanceOf[dom.html.Div]
-                val listContainer = dom.document.getElementById("ctt-export-competitions-list").asInstanceOf[dom.html.Div]
-                if (selectionContainer != null && listContainer != null) {
-                  selectionContainer.style.display = "block"
-                  
-                  // Construct HTML list of competitions and checkboxes for stages
-                  val listHtml = new StringBuilder()
-                  tourney.competitions.filter(_ != null).foreach { comp =>
-                    val compStages = tourney.stages.filter(s => s != null && s.coId == comp.id)
-                    if (compStages.nonEmpty) {
-                      listHtml.append(s"""<div class="mb-3 border-bottom pb-2">""")
-                      listHtml.append(s"""  <div class="fw-bold text-dark mb-2">${comp.name}</div>""")
-                      listHtml.append(s"""  <div class="ms-3 d-flex flex-wrap gap-3">""")
-                      compStages.foreach { stage =>
-                        listHtml.append(s"""
-                          <div class="form-check">
-                            <input class="form-check-input ctt-stage-checkbox" type="checkbox" id="chk-stage-${stage.id.value}" data-comp-id="${comp.id.value}" data-stage-id="${stage.id.value}" checked>
-                            <label class="form-check-label text-muted small fw-semibold" for="chk-stage-${stage.id.value}">${stage.name}</label>
-                          </div>
-                        """)
-                      }
-                      listHtml.append(s"""  </div>""")
-                      listHtml.append(s"""</div>""")
+
+              // Show dynamic list of competitions and stages
+              val selectionContainer = dom.document.getElementById("ctt-export-selection").asInstanceOf[dom.html.Div]
+              val listContainer = dom.document.getElementById("ctt-export-competitions-list").asInstanceOf[dom.html.Div]
+              if (selectionContainer != null && listContainer != null) {
+                selectionContainer.style.display = "block"
+                
+                // Construct HTML list of competitions and checkboxes for stages
+                val listHtml = new StringBuilder()
+                tourney.competitions.filter(_ != null).foreach { comp =>
+                  val compStages = tourney.stages.filter(s => s != null && s.coId == comp.id)
+                  if (compStages.nonEmpty) {
+                    listHtml.append(s"""<div class="mb-3 border-bottom pb-2">""")
+                    listHtml.append(s"""  <div class="fw-bold text-dark mb-2">${comp.name}</div>""")
+                    listHtml.append(s"""  <div class="ms-3 d-flex flex-wrap gap-3">""")
+                    compStages.foreach { stage =>
+                      listHtml.append(s"""
+                        <div class="form-check">
+                          <input class="form-check-input ctt-stage-checkbox" type="checkbox" id="chk-stage-${stage.id.value}" data-comp-id="${comp.id.value}" data-stage-id="${stage.id.value}" checked>
+                          <label class="form-check-label text-muted small fw-semibold" for="chk-stage-${stage.id.value}">${stage.name}</label>
+                        </div>
+                      """)
                     }
+                    listHtml.append(s"""  </div>""")
+                    listHtml.append(s"""</div>""")
                   }
-                  
-                  if (listHtml.isEmpty) {
-                    listContainer.innerHTML = "<div class='text-muted small'>Keine aktiven Wettbewerbsphasen (Stages) gefunden.</div>"
-                  } else {
-                    listContainer.innerHTML = listHtml.toString()
-                  }
+                }
+                
+                if (listHtml.isEmpty) {
+                  listContainer.innerHTML = "<div class='text-muted small'>Keine aktiven Wettbewerbsphasen (Stages) gefunden.</div>"
+                } else {
+                  listContainer.innerHTML = listHtml.toString()
                 }
               }
             }

@@ -160,6 +160,12 @@
                     </button>
                     
                     <div id="ctt-export-selection" style="display: none;" class="mt-4 animate-fade-in">
+                        <div id="ctt-export-warning-box" class="alert alert-warning mb-3 text-dark small" style="display: none;">
+                            <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
+                            <strong>Hinweis:</strong> Die folgenden Spieler haben keine zugewiesene ClickTT-ID. Die Spielergebnisse dieser Teilnehmer werden beim Export nicht berücksichtigt:
+                            <ul id="ctt-export-warning-players-list" class="mb-0 mt-2 ps-3 fw-semibold"></ul>
+                        </div>
+
                         <h6 class="fw-bold text-secondary mb-3">Wählen Sie die Wettbewerbe und Phasen aus:</h6>
                         <div id="ctt-export-competitions-list" class="border rounded p-3 bg-light-subtle"></div>
                         <div class="text-end mt-3">
