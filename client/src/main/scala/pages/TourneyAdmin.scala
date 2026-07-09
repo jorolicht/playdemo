@@ -50,6 +50,21 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
               parsedCtt = Some(ctt)
               xmlPersons = ctt.competitions.flatMap(_.players).flatMap(_.persons).distinctBy(_.licenceNr)
               unassignedPlayers = tourney.players.filter(p => p != null && (p.meta.licenceNr.isEmpty || p.meta.internalNr.isEmpty)).toSeq
+              
+              // Pre-select best match
+              playerAssignments = unassignedPlayers.map { p =>
+                val existingLicence = p.meta.licenceNr.getOrElse("").trim
+                val bestLicence = if (existingLicence.nonEmpty) {
+                  existingLicence
+                } else {
+                  val bestMatch = xmlPersons.map(xp => (xp, getSimilarity(p.fullName, s"${xp.firstname} ${xp.lastname}")))
+                                             .filter(_._2 > 0.4)
+                                             .sortBy(-_._2)
+                                             .headOption
+                  bestMatch.map(_._1.licenceNr).getOrElse("")
+                }
+                p.id.value -> bestLicence
+              }.toMap
             case Left(_) =>
           }
         }
@@ -104,11 +119,17 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
                     
                     // Pre-select best match
                     playerAssignments = unassignedPlayers.map { p =>
-                      val bestMatch = xmlPersons.map(xp => (xp, getSimilarity(p.fullName, s"${xp.firstname} ${xp.lastname}")))
-                                                 .filter(_._2 > 0.4)
-                                                 .sortBy(-_._2)
-                                                 .headOption
-                      p.id.value -> bestMatch.map(_._1.licenceNr).getOrElse("")
+                      val existingLicence = p.meta.licenceNr.getOrElse("").trim
+                      val bestLicence = if (existingLicence.nonEmpty) {
+                        existingLicence
+                      } else {
+                        val bestMatch = xmlPersons.map(xp => (xp, getSimilarity(p.fullName, s"${xp.firstname} ${xp.lastname}")))
+                                                   .filter(_._2 > 0.4)
+                                                   .sortBy(-_._2)
+                                                   .headOption
+                        bestMatch.map(_._1.licenceNr).getOrElse("")
+                      }
+                      p.id.value -> bestLicence
                     }.toMap
                     
                     if (unassignedPlayers.isEmpty) {
@@ -263,10 +284,21 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   // --- ClickTT Update Alignment Helper Methods ---
 
   def getBestCandidates(p: Player, persons: Seq[CttPerson]): Seq[(CttPerson, Double)] =
-    persons.map(xp => (xp, getSimilarity(p.fullName, s"${xp.firstname} ${xp.lastname}")))
-           .filter(_._2 > 0.25)
-           .sortBy(-_._2)
-           .take(5)
+    val existingLicence = p.meta.licenceNr.getOrElse("").trim
+    val matchedPersonOpt = if (existingLicence.nonEmpty) persons.find(_.licenceNr == existingLicence) else None
+    
+    val baseCandidates = persons.map(xp => (xp, getSimilarity(p.fullName, s"${xp.firstname} ${xp.lastname}")))
+                                .filter(_._2 > 0.25)
+                                .sortBy(-_._2)
+                                .take(5)
+                                
+    matchedPersonOpt match {
+      case Some(mp) =>
+        val filtered = baseCandidates.filterNot(_._1.licenceNr == mp.licenceNr)
+        (mp, 1.0) +: filtered
+      case None =>
+        baseCandidates
+    }
 
   private def getSimilarity(s1: String, s2: String): Double =
     val n1 = s1.trim.toLowerCase
