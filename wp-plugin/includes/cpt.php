@@ -34,7 +34,8 @@ function register_trny_custom_meta_fields() {
         'startdate'     => 'StartDatum',
         'enddate'       => 'EndDatum',
         'ident'         => 'Identifikationsnummer',
-        'organizer'     => 'Organisator'
+        'organizer'     => 'Organisator',
+        'clicktt'       => 'ClickTT XML Datei'
     ];
 
     // Stages 001–128 hinzufügen
