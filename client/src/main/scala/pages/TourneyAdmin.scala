@@ -470,9 +470,11 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
     }
     
     // Store the loaded XML string in the tourney clicktt metadata field
+    dom.console.log(s"saveAssignments: lastCttXmlString length = ${lastCttXmlString.length}")
     if (lastCttXmlString.nonEmpty) {
       tourney.clicktt = lastCttXmlString
     }
+    dom.console.log(s"saveAssignments: tourney.clicktt length = ${tourney.clicktt.length}")
     
     // Always trigger syncs and update tournament on save click
     tourney.triggerAllSyncs()

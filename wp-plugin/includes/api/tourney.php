@@ -325,7 +325,9 @@ function tourney_sync_tourney(WP_REST_Request $request)
 
     // 💾 Speichern
     if ($new_tourney) {
+        error_log("TOURNEY SYNC: Meta: " . $meta . ", Keys: " . implode(",", array_keys($new_tourney)));
         if ($meta === 'basic') {
+            error_log("TOURNEY SYNC: clicktt is set? " . (isset($new_tourney['clicktt']) ? 'YES' : 'NO') . ", size: " . (isset($new_tourney['clicktt']) ? strlen($new_tourney['clicktt']) : 0));
             if (isset($new_tourney['clicktt'])) {
                 update_post_meta($post_id, 'clicktt', wp_slash($new_tourney['clicktt']));
                 $new_tourney['clicktt'] = '';
