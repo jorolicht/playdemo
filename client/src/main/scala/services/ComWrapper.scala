@@ -122,7 +122,13 @@ trait ComWrapper:
     val name = route.split("/").lastOption.getOrElse("ajaxGet")
     debug(s"ajaxGet -> route:${route} params:${params.mkString("=")} hdrs: ${hdrs.mkString("=")}")
     Ajax.get(genPath(host, route, params), headers = hdrs).map(_.responseText)
-      .map(content => parseJson[T](content) )  
+      .map(content => parseJson[T](content).flatMap(res =>
+        if (res == null || res.asInstanceOf[AnyRef] == null) {
+          Left(AppError("err00009.ajax.get", s"${route}/${params.mkString(":")}", "response is null", name))
+        } else {
+          Right(res)
+        }
+      ))  
       .recover({
         case dom.ext.AjaxException(req) => Left(parseError(req.responseText, name)) 
         case _: Throwable               => Left(AppError("err00009.ajax.get", s"${route}/${params.mkString(":")}", "request status unknown", name))   
