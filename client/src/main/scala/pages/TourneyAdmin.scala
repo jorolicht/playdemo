@@ -44,6 +44,16 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
         }
 
         // Fetch templates if we select "CERT" and haven't loaded them yet
+        if (parsedCtt.isEmpty && tourney.clicktt != null && tourney.clicktt.trim.nonEmpty) {
+          services.ClickTTParser.parse(tourney.clicktt) match {
+            case Right(ctt) =>
+              parsedCtt = Some(ctt)
+              xmlPersons = ctt.competitions.flatMap(_.players).flatMap(_.persons).distinctBy(_.licenceNr)
+              unassignedPlayers = tourney.players.filter(p => p != null && (p.meta.licenceNr.isEmpty || p.meta.internalNr.isEmpty)).toSeq
+            case Left(_) =>
+          }
+        }
+
         if (activeTab == "CERT" && !templatesLoaded && !isLoadingTemplates) {
           fetchTemplates()
         }
@@ -347,38 +357,53 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
     // Step 2: Update Competition.cttSNO2Ident
     parsedCtt.foreach { ctt =>
       tourney.competitions.filter(_ != null).foreach { comp =>
-        ctt.competitions.lift(comp.id.value - 1).foreach { cttComp =>
-          // Clear existing mappings to completely rebuild them
-          comp.cttSNO2Ident.clear()
-          
-          cttComp.players.foreach { cttPlayer =>
-            val licenceNrs = cttPlayer.persons.map(_.licenceNr).filter(_.nonEmpty)
-            val matchedPlayerIds = licenceNrs.flatMap { lic =>
-              tourney.players.find(_.meta.licenceNr.contains(lic)).map(_.id)
+        // Clear existing mappings to completely rebuild them
+        comp.cttSNO2Ident.clear()
+        
+        comp.pants1Stage.filter(p => p != null && !p.id.isBye && !p.id.isNN).foreach { p =>
+          val licenceNrsOpt = if (p.id.isSingle) {
+            p.id.singleIdOpt.flatMap(pid => tourney.players.find(_.id == pid)).flatMap(_.meta.licenceNr).map(lic => Seq(lic))
+          } else if (p.id.isDouble) {
+            p.id.doubleIdsOpt.flatMap { case (pid1, pid2) =>
+              for {
+                pl1 <- tourney.players.find(_.id == pid1)
+                pl2 <- tourney.players.find(_.id == pid2)
+                lic1 <- pl1.meta.licenceNr
+                lic2 <- pl2.meta.licenceNr
+              } yield Seq(lic1, lic2)
             }
+          } else {
+            None
+          }
 
-            val targetSnoOpt = if (cttPlayer.persons.length == 1) {
-              matchedPlayerIds.headOption.map(SNO.single)
-            } else if (cttPlayer.persons.length == 2 && matchedPlayerIds.length == 2) {
-              Some(SNO.double(matchedPlayerIds(0), matchedPlayerIds(1)))
+          licenceNrsOpt.foreach { licenceNrs =>
+            val matchedCttPlayerOpt = if (licenceNrs.length == 1) {
+              val lic = licenceNrs.head
+              ctt.competitions.flatMap(_.players)
+                .find(cp => cp.typ == "single" && cp.persons.length == 1 && cp.persons.head.licenceNr == lic)
+            } else if (licenceNrs.length == 2) {
+              val lic1 = licenceNrs(0)
+              val lic2 = licenceNrs(1)
+              ctt.competitions.flatMap(_.players)
+                .find(cp => cp.typ == "double" && cp.persons.length == 2 && 
+                            cp.persons.exists(_.licenceNr == lic1) && cp.persons.exists(_.licenceNr == lic2))
             } else {
               None
             }
 
-            targetSnoOpt.foreach { sno =>
-              // Map the SNO to the ClickTT player ID
-              comp.cttSNO2Ident(sno) = cttPlayer.id
+            matchedCttPlayerOpt.foreach { cttPlayer =>
+              comp.cttSNO2Ident(p.id) = cttPlayer.id
             }
           }
-          
-          // Re-save the competition
-          tourney.updateCompetition(comp, doSync = false)
+        }
+        
+        // Re-save the competition
+        tourney.updateCompetition(comp, doSync = false)
 
-          // Testwise Ausgabe aller cttSNO2Ident mappings
-          dom.console.log(s"Wettbewerb: ${comp.name} - cttSNO2Ident Mappings:")
-          comp.cttSNO2Ident.foreach { case (sno, xmlId) =>
-            dom.console.log(s"  $sno -> $xmlId")
-          }
+        // Testwise Ausgabe aller cttSNO2Ident mappings
+        dom.console.log(s"Wettbewerb: ${comp.name} - cttSNO2Ident Mappings:")
+        comp.cttSNO2Ident.foreach { case (sno, xmlId) =>
+          dom.console.log(s"  $sno -> $xmlId")
         }
       }
     }
