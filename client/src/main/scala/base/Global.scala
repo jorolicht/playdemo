@@ -58,6 +58,7 @@ object Global:
     } catch {
       case _: Exception => // ignore during testing or if storage is not available
     }
+    services.WebSocketService.init()
   }
   var lang    = ""
   var version = ""

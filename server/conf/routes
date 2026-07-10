@@ -23,6 +23,10 @@ POST       /helper/clicktt-to-json       controllers.Helper.convertClickTT()
 
 GET        /helper/send2sse              controllers.Helper.send2sse(id: String, msg: String)
 
+# WebSocket endpoints
+GET        /ws/:slug                     controllers.WebSocketController.socket(slug: String)
+GET        /sendmsg                      controllers.WebSocketController.sendmsg(slug: String, msg: String)
+
 # Endpoints managing wordpress custom post types
 GET          /wp/post                    controllers.Wordpress.getPost(slug: String ?="", id: Int ?=0, field: String ?="", status: String ?="private")
 PUT          /wp/post                    controllers.Wordpress.putPost(slug: String ?="", id: Int ?=0, field: String ?="", status: String ?="private")

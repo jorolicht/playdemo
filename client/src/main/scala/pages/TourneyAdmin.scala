@@ -34,13 +34,37 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   var parsedCtt: Option[CttTournament] = None
   private var lastCttXmlString: String = ""
   var assignmentsSaved = false
+  var socketMessages: List[String] = List.empty
 
-  private var activeTab = "IMPEXP" // Tabs: "IMPEXP" (Import/Export), "CTT" (ClickTT Update), "CERT" (Urkunden Konfiguration)
+  def addMessage(msg: String): Unit = {
+    socketMessages = socketMessages :+ msg
+    val container = dom.document.getElementById("ws-message-log")
+    if (container != null) {
+      val item = dom.document.createElement("div").asInstanceOf[dom.html.Div]
+      val isSent = msg.startsWith("[Gesendet]")
+      item.className = if (isSent) "mb-2 text-end" else "mb-2 text-start"
+      
+      val badgeClass = if (isSent) "badge bg-primary text-white" else "badge bg-success text-white"
+      val textContent = msg.substring(msg.indexOf(" ") + 1)
+      val prefix = if (isSent) "Gesendet" else "Empfangen"
+      
+      item.innerHTML = s"""
+        <span class="$badgeClass">$prefix</span>
+        <div class="d-inline-block bg-white border rounded p-2 ms-2 me-2" style="max-width: 75%; text-align: left; word-break: break-all;">
+          $textContent
+        </div>
+      """
+      container.appendChild(item)
+      container.scrollTop = container.scrollHeight
+    }
+  }
+
+  private var activeTab = "IMPEXP" // Tabs: "IMPEXP" (Import/Export), "CTT" (ClickTT Update), "CERT" (Urkunden Konfiguration), "MESSAGES"
 
   def render(param: String = ""): Boolean =
     Global.currentSelection.tourney match
       case Some(tourney) =>
-        if (param.nonEmpty && List("IMPEXP", "CTT", "CERT").contains(param.toUpperCase)) {
+        if (param.nonEmpty && List("IMPEXP", "CTT", "CERT", "MESSAGES").contains(param.toUpperCase)) {
           activeTab = param.toUpperCase
         }
 
@@ -243,6 +267,39 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
               exportDiv.style.display = "none"
             }
           }
+        }
+
+        // Wire WebSocket messaging in TourneyAdmin
+        services.WebSocketService.setListener { msg =>
+          addMessage(s"[Empfangen] $msg")
+        }
+
+        if (activeTab == "MESSAGES") {
+          val sendBtn = dom.document.getElementById("ws-send-btn").asInstanceOf[dom.html.Button]
+          val inputEl = dom.document.getElementById("ws-message-input").asInstanceOf[dom.html.Input]
+          if (sendBtn != null && inputEl != null) {
+            sendBtn.onclick = (e: dom.Event) => {
+              val text = inputEl.value.trim
+              if (text.nonEmpty) {
+                services.WebSocketService.send(text)
+                addMessage(s"[Gesendet] $text")
+                inputEl.value = ""
+              }
+            }
+            inputEl.onkeypress = (e: dom.KeyboardEvent) => {
+              if (e.key == "Enter") {
+                sendBtn.click()
+              }
+            }
+          }
+
+          // Scroll message log to bottom after rendering
+          dom.window.setTimeout(() => {
+            val container = dom.document.getElementById("ws-message-log")
+            if (container != null) {
+              container.scrollTop = container.scrollHeight
+            }
+          }, 50)
         }
 
         true

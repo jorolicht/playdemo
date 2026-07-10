@@ -7,6 +7,7 @@
 @unassignedPlayers = @{ pages.TourneyAdmin.unassignedPlayers }
 @xmlPersons = @{ pages.TourneyAdmin.xmlPersons }
 @playerAssignments = @{ pages.TourneyAdmin.playerAssignments }
+@socketMessages = @{ pages.TourneyAdmin.socketMessages }
 
 <div class="container mt-4">
     <!-- General Tournament Info Header -->
@@ -37,6 +38,11 @@
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "CERT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'CERT')">
                 <i class="bi bi-award me-1"></i>Urkunden Konfiguration
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @{if(activeTab == "MESSAGES") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'MESSAGES')">
+                <i class="bi bi-chat-dots me-1"></i>Messages
             </a>
         </li>
     </ul>
@@ -234,6 +240,40 @@
                             </div>
                         }
                     }
+                </div>
+            </div>
+        }
+        @if(activeTab == "MESSAGES") {
+            <div class="card shadow-sm border-start border-4 border-info mb-4 animate-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary fw-bold mb-3">
+                        <i class="bi bi-chat-dots me-2 text-info"></i>WebSocket Live Messages
+                    </h5>
+                    <p class="text-muted small">
+                        Hier können Sie in Echtzeit Nachrichten mit dem Server austauschen. Der Server loggt empfangene Nachrichten auf seiner Konsole.
+                    </p>
+                    
+                    <div id="ws-message-log" class="bg-light rounded p-3 mb-3 border" style="height: 300px; overflow-y: auto;">
+                        @socketMessages.map { msg =>
+                            @defining(msg.startsWith("[Gesendet]")) { isSent =>
+                                <div class="mb-2 @{if(isSent) "text-end" else "text-start"}">
+                                    <span class="badge @{if(isSent) "bg-primary text-white" else "bg-success text-white"}">
+                                        @{if(isSent) "Gesendet" else "Empfangen"}
+                                    </span>
+                                    <div class="d-inline-block bg-white border rounded p-2 ms-2 me-2" style="max-width: 75%; text-align: left; word-break: break-all;">
+                                        @msg.substring(msg.indexOf(" ") + 1)
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="text" id="ws-message-input" class="form-control" placeholder="Nachricht an den Server..." autocomplete="off" />
+                        <button class="btn btn-primary fw-bold" id="ws-send-btn">
+                            <i class="bi bi-send me-1"></i>Senden
+                        </button>
+                    </div>
                 </div>
             </div>
         }
