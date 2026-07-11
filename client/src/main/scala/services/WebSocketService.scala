@@ -27,7 +27,7 @@ object WebSocketService:
         // Extracts the slug name after any slash prefix if it contains one
         val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
         if (slugName.trim.nonEmpty) {
-          connect(slugName.trim)
+          connect(s"${slugName.trim}-${t.wpId}")
         } else {
           disconnect()
         }
