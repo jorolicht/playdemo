@@ -126,7 +126,9 @@ object StageScoreSheet extends BasePage with JsWrapper:
     if (printArea != null && cards.length > 0) {
       printArea.innerHTML = ""
       for (i <- 0 until cards.length) {
-        val clone = cards.item(i).cloneNode(true).asInstanceOf[HTMLElement]
+        val original = cards.item(i).asInstanceOf[HTMLElement]
+        val clone = original.cloneNode(true).asInstanceOf[HTMLElement]
+        copyCanvasContents(original, clone)
         printArea.appendChild(clone)
       }
       
@@ -145,7 +147,9 @@ object StageScoreSheet extends BasePage with JsWrapper:
     
     if (printArea != null && card != null) {
       printArea.innerHTML = ""
-      val clone = card.cloneNode(true).asInstanceOf[HTMLElement]
+      val original = card.asInstanceOf[HTMLElement]
+      val clone = original.cloneNode(true).asInstanceOf[HTMLElement]
+      copyCanvasContents(original, clone)
       printArea.appendChild(clone)
       
       body.classList.add("print-active")
@@ -154,6 +158,22 @@ object StageScoreSheet extends BasePage with JsWrapper:
         body.classList.remove("print-active")
         printArea.innerHTML = ""
       }, 500)
+    }
+
+  private def copyCanvasContents(original: HTMLElement, clone: HTMLElement): Unit =
+    val origCanvases = original.querySelectorAll("canvas")
+    val cloneCanvases = clone.querySelectorAll("canvas")
+    for (i <- 0 until origCanvases.length) {
+      if (i < cloneCanvases.length) {
+        val origCanvas = origCanvases.item(i).asInstanceOf[dom.raw.HTMLCanvasElement]
+        val cloneCanvas = cloneCanvases.item(i).asInstanceOf[dom.raw.HTMLCanvasElement]
+        cloneCanvas.width = origCanvas.width
+        cloneCanvas.height = origCanvas.height
+        val ctx = cloneCanvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
+        if (ctx != null) {
+          ctx.drawImage(origCanvas, 0, 0)
+        }
+      }
     }
 
   def getPlayerInfo(sno: SNO, pants: Seq[Pant]): (String, String, String) =
