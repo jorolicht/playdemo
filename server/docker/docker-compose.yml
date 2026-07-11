@@ -54,8 +54,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wordpress.entrypoints=websecure"
-      # Reagiert auf localhost (Standard-Pfad /)
-      - "traefik.http.routers.wordpress.rule=Host(`localhost`)"
+      # Reagiert auf alle Hosts (Standard-Pfad /)
+      - "traefik.http.routers.wordpress.rule=PathPrefix(`/`)"
       - "traefik.http.routers.wordpress.tls=true"
       - "traefik.http.services.wordpress.loadbalancer.server.port=80"
       # KORREKTUR: Netzwerk-Name korrigiert von 'web' zu 'proxy'
@@ -110,8 +110,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.playsrv.entrypoints=websecure"
-      # KORREKTUR: Pfadbasiertes Routing auf derselben Domain
-      - "traefik.http.routers.playsrv.rule=Host(`localhost`) && PathPrefix(`/srv`)"
+      # Pfadbasiertes Routing für alle Hosts
+      - "traefik.http.routers.playsrv.rule=PathPrefix(`/srv`)"
       - "traefik.http.routers.playsrv.tls=true"
       - "traefik.http.services.playsrv.loadbalancer.server.port=${PLAY_HTTP_PORT}"
       # KORREKTUR: Netzwerk-Name korrigiert von 'web' zu 'proxy'
