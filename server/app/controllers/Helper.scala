@@ -139,5 +139,10 @@ class Helper @Inject()(system: ActorSystem, cc: ControllerComponents, userRepo: 
     Ok.chunked(source via EventSource.flow).as(ContentTypes.EVENT_STREAM)
   } 
 
+  def hello(msg: String): Action[AnyContent] = Action { implicit request =>
+    logger.info(s"Hello Action invoked with msg: $msg")
+    println(s"[Server Hello Action] msg: $msg")
+    Ok(s"Hello: $msg")
+  }
 
 }

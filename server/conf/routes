@@ -23,6 +23,9 @@ POST       /helper/clicktt-to-json       controllers.Helper.convertClickTT()
 
 GET        /helper/send2sse              controllers.Helper.send2sse(id: String, msg: String)
 
+# Hello endpoint
+GET        /hello                        controllers.Helper.hello(msg: String)
+
 # WebSocket endpoints
 GET        /ws/:slug                     controllers.WebSocketController.socket(slug: String)
 GET        /sendmsg                      controllers.WebSocketController.sendmsg(slug: String, msg: String)
