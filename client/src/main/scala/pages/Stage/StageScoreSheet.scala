@@ -217,7 +217,14 @@ object StageScoreSheet extends BasePage with JsWrapper:
     val comp = t.competitions.filter(_ != null).find(_.id == stage.coId).get
     val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
     val slugParam = s"${slugName.trim}-${t.wpId}"
-    val playBase = if (Global.playUrl.nonEmpty) Global.playUrl else s"${dom.window.location.protocol}//${dom.window.location.host}/srv"
+    val playUrl = Global.playUrl.trim
+    val playBase = if (playUrl.startsWith("http://") || playUrl.startsWith("https://")) {
+      playUrl
+    } else {
+      val relativePath = if (playUrl.startsWith("/")) playUrl else s"/$playUrl"
+      val cleanPath = if (relativePath == "/") "/srv" else relativePath
+      s"${dom.window.location.protocol}//${dom.window.location.host}$cleanPath"
+    }
 
     mList.zipWithIndex.foreach { case ((m, nameA, nameB, clubA, clubB, info1, info2), idx) =>
       val gameNo = m.gameNo
@@ -311,7 +318,14 @@ object StageScoreSheet extends BasePage with JsWrapper:
                 val t = services.TourneyDB.tourney
                 val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
                 val slugParam = s"${slugName.trim}-${t.wpId}"
-                val playBase = if (Global.playUrl.nonEmpty) Global.playUrl else s"${dom.window.location.protocol}//${dom.window.location.host}/srv"
+                val playUrl = Global.playUrl.trim
+                val playBase = if (playUrl.startsWith("http://") || playUrl.startsWith("https://")) {
+                  playUrl
+                } else {
+                  val relativePath = if (playUrl.startsWith("/")) playUrl else s"/$playUrl"
+                  val cleanPath = if (relativePath == "/") "/srv" else relativePath
+                  s"${dom.window.location.protocol}//${dom.window.location.host}$cleanPath"
+                }
                 
                 val roundInfo = s"${Seq(info1, info2).filter(_.nonEmpty).mkString(" / ")} (Spiel ${m.gameNo})"
                 val players = s"$nameA - $nameB"
