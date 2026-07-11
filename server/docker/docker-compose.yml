@@ -111,16 +111,16 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.playsrv.entrypoints=websecure"
       # KORREKTUR: Pfadbasiertes Routing auf derselben Domain
-      - "traefik.http.routers.playsrv.rule=Host(`localhost`) && PathPrefix(`/playsrv`)"
+      - "traefik.http.routers.playsrv.rule=Host(`localhost`) && PathPrefix(`/srv`)"
       - "traefik.http.routers.playsrv.tls=true"
       - "traefik.http.services.playsrv.loadbalancer.server.port=${PLAY_HTTP_PORT}"
       # KORREKTUR: Netzwerk-Name korrigiert von 'web' zu 'proxy'
       - "traefik.docker.network=proxy"
       
-      # OPTIONAL: Falls die Play-App den Präfix "/playsrv" nicht kennt, 
+      # OPTIONAL: Falls die Play-App den Präfix "/srv" nicht kennt, 
       # schneidet diese Middleware ihn ab, bevor die Anfrage die App erreicht:
       - "traefik.http.routers.playsrv.middlewares=playsrv-strip"
-      - "traefik.http.middlewares.playsrv-strip.stripprefix.prefixes=/playsrv"
+      - "traefik.http.middlewares.playsrv-strip.stripprefix.prefixes=/srv"
 
       # KORREKTUR: YAML-Syntax für die restlichen Labels repariert
       - "MAINTAINER=${APP_MAINTAINER}"

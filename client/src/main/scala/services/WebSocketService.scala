@@ -45,9 +45,15 @@ object WebSocketService:
     disconnect()
     currentSlug = Some(slug)
 
-    val protocol = if (dom.window.location.protocol == "https:") "wss:" else "ws:"
-    val host = dom.window.location.host
-    val wsUrl = s"$protocol//$host/ws/$slug"
+    val wsUrl = if (Global.playUrl.nonEmpty) {
+      val wsProtocol = if (Global.playUrl.startsWith("https:")) "wss:" else "ws:"
+      val cleanPlayUrl = Global.playUrl.replace("https://", "").replace("http://", "")
+      s"$wsProtocol//$cleanPlayUrl/ws/$slug"
+    } else {
+      val protocol = if (dom.window.location.protocol == "https:") "wss:" else "ws:"
+      val host = dom.window.location.host
+      s"$protocol//$host/srv/ws/$slug"
+    }
     
     debug(s"[WebSocket] Connecting to $wsUrl ...")
     
