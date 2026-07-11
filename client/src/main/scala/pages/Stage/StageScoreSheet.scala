@@ -94,7 +94,7 @@ object StageScoreSheet extends BasePage with JsWrapper:
         
         // Load QRCode library and generate QRCodes
         loadQRCodeLib { () =>
-          generateAllQRCodes(stage, mList)
+          generateAllQRCodes(stage)
           
           if (isPrintRound) {
             dom.window.setTimeout(() => printRound(targetRoundNo), 300)
@@ -236,7 +236,7 @@ object StageScoreSheet extends BasePage with JsWrapper:
       dom.document.head.appendChild(script)
     }
 
-  private def generateAllQRCodes(stage: Stage, mList: Seq[(MEntry, String, String, String, String, String, String)]): Unit =
+  private def generateAllQRCodes(stage: Stage): Unit =
     val t = services.TourneyDB.tourney
     val comp = t.competitions.filter(_ != null).find(_.id == stage.coId).get
     val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
@@ -250,41 +250,48 @@ object StageScoreSheet extends BasePage with JsWrapper:
       s"${dom.window.location.protocol}//${dom.window.location.host}$cleanPath"
     }
 
-    mList.zipWithIndex.foreach { case ((m, nameA, nameB, clubA, clubB, info1, info2), idx) =>
-      val gameNo = m.gameNo
-      val qrElem = dom.document.getElementById(s"QRCode_${stage.coId.value}_${stage.id.value}_${idx + 1}")
-      val linkElem = dom.document.getElementById(s"QRCodeLink_${stage.coId.value}_${stage.id.value}_${gameNo}").asInstanceOf[dom.raw.HTMLAnchorElement]
-      
-      val roundInfo = s"${Seq(info1, info2).filter(_.nonEmpty).mkString(" / ")} (Spiel $gameNo)"
-      val players = s"$nameA - $nameB"
-      
-      val refereeAddr = s"$playBase/referee?" +
-        s"slug=${js.URIUtils.encodeURIComponent(slugParam)}&" +
-        s"tourneyName=${js.URIUtils.encodeURIComponent(t.name)}&" +
-        s"competition=${js.URIUtils.encodeURIComponent(comp.name)}&" +
-        s"stage=${js.URIUtils.encodeURIComponent(stage.name)}&" +
-        s"roundInfo=${js.URIUtils.encodeURIComponent(roundInfo)}&" +
-        s"players=${js.URIUtils.encodeURIComponent(players)}"
-      
-      if (qrElem != null) {
-        qrElem.innerHTML = "" // Clear container
+    val qrCodeClass = getQRCodeClass()
+    if (js.isUndefined(qrCodeClass)) {
+      debug("QR Code library not loaded yet.")
+      return
+    }
+
+    val grids = dom.document.querySelectorAll(".refereeGrid")
+    for (i <- 0 until grids.length) {
+      val grid = grids.item(i).asInstanceOf[HTMLElement]
+      val qrElem = grid.querySelector(".RefereeQRCode").asInstanceOf[HTMLElement]
+      val linkElem = grid.querySelector(".referee-qr-link").asInstanceOf[dom.raw.HTMLAnchorElement]
+
+      if (qrElem != null && qrElem.innerHTML.trim.isEmpty) {
+        val gameNo = qrElem.getAttribute("data-game-no")
+        val nameA = qrElem.getAttribute("data-name-a")
+        val nameB = qrElem.getAttribute("data-name-b")
+        val info1 = qrElem.getAttribute("data-info-1")
+        val info2 = qrElem.getAttribute("data-info-2")
+
+        val roundInfo = s"${Seq(info1, info2).filter(s => s != null && s.nonEmpty).mkString(" / ")} (Spiel $gameNo)"
+        val players = s"$nameA - $nameB"
+
+        val refereeAddr = s"$playBase/referee?" +
+          s"slug=${js.URIUtils.encodeURIComponent(slugParam)}&" +
+          s"tourneyName=${js.URIUtils.encodeURIComponent(t.name)}&" +
+          s"competition=${js.URIUtils.encodeURIComponent(comp.name)}&" +
+          s"stage=${js.URIUtils.encodeURIComponent(stage.name)}&" +
+          s"roundInfo=${js.URIUtils.encodeURIComponent(roundInfo)}&" +
+          s"players=${js.URIUtils.encodeURIComponent(players)}"
+
         val qrCodeParam = new QRCodeParam { val width = 80; val height = 80 }
         try {
-          val qrCodeClass = getQRCodeClass()
-          if (!js.isUndefined(qrCodeClass)) {
-            val qrCode = js.Dynamic.newInstance(qrCodeClass)(qrElem.asInstanceOf[HTMLElement], qrCodeParam)
-            qrCode.makeCode(refereeAddr)
-          } else {
-            qrElem.innerHTML = "<div style='border: 1px dashed #ccc; width: 80px; height: 80px; font-size: 8px; display: flex; align-items: center; justify-content: center; text-align: center;'>QR Code</div>"
-          }
+          val qrCode = js.Dynamic.newInstance(qrCodeClass)(qrElem, qrCodeParam)
+          qrCode.makeCode(refereeAddr)
         } catch {
           case e: Throwable =>
             println(s"Error generating QR Code: ${e.getMessage}")
         }
-      }
-      
-      if (linkElem != null) {
-        linkElem.href = refereeAddr
+
+        if (linkElem != null) {
+          linkElem.href = refereeAddr
+        }
       }
     }
 
@@ -333,54 +340,10 @@ object StageScoreSheet extends BasePage with JsWrapper:
               info1, info2,
               nameA, nameB, clubA, clubB
             ))
-            
-            val qrElem = gE(HtmlId(s"QRCode_${stage.coId.value}_${stage.id.value}_${m.gameNo}"))
-            if (qrElem != null) {
-              qrElem.innerHTML = ""
-              val qrCodeParam = new QRCodeParam { val width = 80; val height = 80 }
-              try {
-                val t = services.TourneyDB.tourney
-                val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
-                val slugParam = s"${slugName.trim}-${t.wpId}"
-                val playUrl = Global.playUrl.trim
-                val playBase = if (playUrl.startsWith("http://") || playUrl.startsWith("https://")) {
-                  playUrl
-                } else {
-                  val relativePath = if (playUrl.startsWith("/")) playUrl else s"/$playUrl"
-                  val cleanPath = if (relativePath == "/") "/srv" else relativePath
-                  s"${dom.window.location.protocol}//${dom.window.location.host}$cleanPath"
-                }
-                
-                val roundInfo = s"${Seq(info1, info2).filter(_.nonEmpty).mkString(" / ")} (Spiel ${m.gameNo})"
-                val players = s"$nameA - $nameB"
-                
-                val refereeAddr = s"$playBase/referee?" +
-                  s"slug=${js.URIUtils.encodeURIComponent(slugParam)}&" +
-                  s"tourneyName=${js.URIUtils.encodeURIComponent(t.name)}&" +
-                  s"competition=${js.URIUtils.encodeURIComponent(comp.name)}&" +
-                  s"stage=${js.URIUtils.encodeURIComponent(stage.name)}&" +
-                  s"roundInfo=${js.URIUtils.encodeURIComponent(roundInfo)}&" +
-                  s"players=${js.URIUtils.encodeURIComponent(players)}"
-                
-                val qrCodeClass = getQRCodeClass()
-                if (!js.isUndefined(qrCodeClass)) {
-                  val qrCode = js.Dynamic.newInstance(qrCodeClass)(qrElem, qrCodeParam)
-                  qrCode.makeCode(refereeAddr)
-                } else {
-                  qrElem.innerHTML = "<div style='border: 1px dashed #ccc; width: 80px; height: 80px; font-size: 8px; display: flex; align-items: center; justify-content: center; text-align: center;'>QR Code</div>"
-                }
-                
-                val linkElem = gE(HtmlId(s"QRCodeLink_${stage.coId.value}_${stage.id.value}_${m.gameNo}")).asInstanceOf[dom.raw.HTMLAnchorElement]
-                if (linkElem != null) {
-                  linkElem.href = refereeAddr
-                }
-              } catch {
-                case e: Throwable =>
-                  println(s"Error generating QR Code in setPage: ${e.getMessage}")
-              }
-            }
           }
         }
+        
+        generateAllQRCodes(stage)
       }
     }
 
