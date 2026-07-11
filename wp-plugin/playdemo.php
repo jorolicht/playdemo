@@ -89,7 +89,7 @@ function playdemo_render($atts) {
     $jsUrl   = plugins_url('js/main.js', __FILE__) . '?v=' . filemtime($jsPath);
     $dataUrl = plugins_url('data/', __FILE__);
     $imgUrl  = plugins_url('img/', __FILE__);
-    $playUrl = get_option('playdemo_url', '');
+    $playUrl = get_option('tourney_server_url', get_option('playdemo_url', ''));
     $pageId  = get_the_ID();
     $homeUrl = home_url();
     $nonce   = wp_create_nonce('wp_rest');
@@ -273,7 +273,7 @@ function js_enqueue_scripts_styles() {
             'mode'     => 'tourney',
             'dataUrl'  => plugins_url('data/', __FILE__),
             'imgUrl'   => plugins_url('img/', __FILE__),
-            'playUrl'  => get_option('playdemo_url', ''),
+            'playUrl'  => get_option('tourney_server_url', get_option('playdemo_url', '')),
             'homeUrl'  => home_url(),
             'nonce'    => wp_create_nonce('wp_rest'),
             'pageId'   => strval(get_the_ID()),
