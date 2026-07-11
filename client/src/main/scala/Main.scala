@@ -159,7 +159,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
               TourneyDB.init(t.wpId).map {
                 case Right(ts) =>
                   debug(s"initApp -> Tourney initialized during state restoration, timestamp: $ts")
-                  Global.currentSelection = restoredSelection
+                  Global.currentSelection = restoredSelection.copy(tourney = Some(TourneyDB.tourney))
                   pages.loadPage(PageNameTyp(lastPage), lastParam)
                 case Left(err) =>
                   error(s"initApp -> Error initializing tournament: $err")
