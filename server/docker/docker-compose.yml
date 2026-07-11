@@ -149,6 +149,8 @@ services:
       PLAY_MAILER_PASSWORD: ${PLAY_MAILER_PASSWORD}
       PLAY_MAILER_DEBUG: ${PLAY_MAILER_DEBUG}
       PLAY_MAILER_MOCK: ${PLAY_MAILER_MOCK}
+    ports:
+      - "9000:${PLAY_HTTP_PORT}"
     expose:
      - "${PLAY_HTTP_PORT}"
     volumes:
