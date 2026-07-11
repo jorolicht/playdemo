@@ -7,6 +7,7 @@ import base.Logging.*
 object WebSocketService:
   private var ws: Option[dom.WebSocket] = None
   private var currentSlug: Option[String] = None
+  private var heartbeatInterval: Option[Int] = None
   
   // Callback when a message is received
   private var messageListener: Option[String => Unit] = None
@@ -36,6 +37,22 @@ object WebSocketService:
     }
   }
 
+  private def startHeartbeat(): Unit = {
+    stopHeartbeat()
+    heartbeatInterval = Some(dom.window.setInterval(() => {
+      ws.foreach { socket =>
+        if (socket.readyState == dom.WebSocket.OPEN) {
+          socket.send("ping")
+        }
+      }
+    }, 30000))
+  }
+
+  private def stopHeartbeat(): Unit = {
+    heartbeatInterval.foreach(dom.window.clearInterval)
+    heartbeatInterval = None
+  }
+
   def connect(slug: String): Unit = {
     if (currentSlug.contains(slug) && ws.exists(_.readyState == dom.WebSocket.OPEN)) {
       // Already connected to this slug
@@ -63,6 +80,7 @@ object WebSocketService:
 
       webSocket.onopen = (e: dom.Event) => {
         debug(s"[WebSocket] Connected to server for slug '$slug'")
+        startHeartbeat()
       }
 
       webSocket.onmessage = (e: dom.MessageEvent) => {
@@ -73,6 +91,7 @@ object WebSocketService:
 
       webSocket.onclose = (e: dom.CloseEvent) => {
         debug(s"[WebSocket] Connection closed for slug '$slug': ${e.reason}")
+        stopHeartbeat()
         if (currentSlug.contains(slug)) {
           // Retry connection after 5 seconds
           dom.window.setTimeout(() => {
@@ -91,6 +110,7 @@ object WebSocketService:
   }
 
   def disconnect(): Unit = {
+    stopHeartbeat()
     ws.foreach { socket =>
       if (socket.readyState == dom.WebSocket.OPEN || socket.readyState == dom.WebSocket.CONNECTING) {
         socket.close()

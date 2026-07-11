@@ -72,6 +72,9 @@ class WebSocketClientActor(out: ActorRef, manager: ActorRef, slug: String) exten
   }
 
   def receive: Receive = {
+    case "ping" =>
+      // Keep-alive message, do not log to prevent cluttering
+
     case msg: String =>
       // Console logging requirement:
       logger.info(s"[Server WebSocket] message from client ($slug): $msg")
