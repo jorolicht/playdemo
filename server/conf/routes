@@ -26,6 +26,10 @@ GET        /helper/send2sse              controllers.Helper.send2sse(id: String,
 # Hello endpoint
 GET        /hello                        controllers.Helper.hello(msg: String)
 
+# Referee endpoints
+GET        /referee                      controllers.RefereeController.input(slug: String, tourneyName: String, competition: String, stage: String, roundInfo: String, players: String)
+POST       /referee/submit               controllers.RefereeController.submit()
+
 # WebSocket endpoints
 GET        /ws/:slug                     controllers.WebSocketController.socket(slug: String)
 GET        /sendmsg                      controllers.WebSocketController.sendmsg(slug: String, msg: String)

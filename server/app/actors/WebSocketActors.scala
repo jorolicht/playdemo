@@ -27,11 +27,27 @@ class WebSocketManagerActor extends Actor with Logging {
 
     case SendToSlug(slug, msg) =>
       logger.info(s"Broadcasting message to slug '$slug': $msg")
-      clients.get(slug).foreach { set =>
-        set.foreach { clientRef =>
-          clientRef ! WebSocketClientActor.SendToClient(msg)
-        }
+      clients.get(slug) match {
+        case Some(set) if set.nonEmpty =>
+          set.foreach { clientRef =>
+            clientRef ! WebSocketClientActor.SendToClient(msg)
+          }
+          sender() ! true
+        case _ =>
+          sender() ! false
       }
+  }
+}
+
+object WebSocketManager {
+  private var _manager: Option[ActorRef] = None
+
+  def get(implicit system: ActorSystem): ActorRef = synchronized {
+    _manager.getOrElse {
+      val ref = system.actorOf(WebSocketManagerActor.props, "WebSocketManagerActor")
+      _manager = Some(ref)
+      ref
+    }
   }
 }
 

@@ -12,7 +12,7 @@ class WebSocketController @Inject()(
   cc: ControllerComponents
 )(implicit system: ActorSystem, mat: Materializer) extends AbstractController(cc) with Logging {
 
-  private val manager = system.actorOf(actors.WebSocketManagerActor.props, "WebSocketManagerActor")
+  private val manager = actors.WebSocketManager.get
 
   def socket(slug: String): WebSocket = WebSocket.accept[String, String] { request =>
     logger.info(s"WebSocket connection request for slug: $slug")

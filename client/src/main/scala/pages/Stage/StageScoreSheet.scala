@@ -213,13 +213,27 @@ object StageScoreSheet extends BasePage with JsWrapper:
     }
 
   private def generateAllQRCodes(stage: Stage, mList: Seq[(MEntry, String, String, String, String, String, String)]): Unit =
-    mList.zipWithIndex.foreach { case ((m, _, _, _, _, _, _), idx) =>
+    val t = services.TourneyDB.tourney
+    val comp = t.competitions.filter(_ != null).find(_.id == stage.coId).get
+    val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
+    val slugParam = s"${slugName.trim}-${t.wpId}"
+    val playBase = if (Global.playUrl.nonEmpty) Global.playUrl else s"${dom.window.location.protocol}//${dom.window.location.host}/srv"
+
+    mList.zipWithIndex.foreach { case ((m, nameA, nameB, clubA, clubB, info1, info2), idx) =>
       val gameNo = m.gameNo
       val qrElem = dom.document.getElementById(s"QRCode_${stage.coId.value}_${stage.id.value}_${idx + 1}")
       val linkElem = dom.document.getElementById(s"QRCodeLink_${stage.coId.value}_${stage.id.value}_${gameNo}").asInstanceOf[dom.raw.HTMLAnchorElement]
       
-      val nonce = s"${services.TourneyDB.tourney.wpId}-${stage.coId.value}-${stage.id.value}-${gameNo}"
-      val refereeAddr = s"${Global.homeUrl}/?tourney=${services.TourneyDB.tourney.wpId}&page=StageInput&gameNo=${gameNo}&nonce=${nonce}"
+      val roundInfo = s"${Seq(info1, info2).filter(_.nonEmpty).mkString(" / ")} (Spiel $gameNo)"
+      val players = s"$nameA - $nameB"
+      
+      val refereeAddr = s"$playBase/referee?" +
+        s"slug=${js.URIUtils.encodeURIComponent(slugParam)}&" +
+        s"tourneyName=${js.URIUtils.encodeURIComponent(t.name)}&" +
+        s"competition=${js.URIUtils.encodeURIComponent(comp.name)}&" +
+        s"stage=${js.URIUtils.encodeURIComponent(stage.name)}&" +
+        s"roundInfo=${js.URIUtils.encodeURIComponent(roundInfo)}&" +
+        s"players=${js.URIUtils.encodeURIComponent(players)}"
       
       if (qrElem != null) {
         qrElem.innerHTML = "" // Clear container
@@ -294,8 +308,21 @@ object StageScoreSheet extends BasePage with JsWrapper:
               qrElem.innerHTML = ""
               val qrCodeParam = new QRCodeParam { val width = 80; val height = 80 }
               try {
-                val nonce = s"${services.TourneyDB.tourney.wpId}-${stage.coId.value}-${stage.id.value}-${m.gameNo}"
-                val refereeAddr = s"${Global.homeUrl}/?tourney=${services.TourneyDB.tourney.wpId}&page=StageInput&gameNo=${m.gameNo}&nonce=${nonce}"
+                val t = services.TourneyDB.tourney
+                val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
+                val slugParam = s"${slugName.trim}-${t.wpId}"
+                val playBase = if (Global.playUrl.nonEmpty) Global.playUrl else s"${dom.window.location.protocol}//${dom.window.location.host}/srv"
+                
+                val roundInfo = s"${Seq(info1, info2).filter(_.nonEmpty).mkString(" / ")} (Spiel ${m.gameNo})"
+                val players = s"$nameA - $nameB"
+                
+                val refereeAddr = s"$playBase/referee?" +
+                  s"slug=${js.URIUtils.encodeURIComponent(slugParam)}&" +
+                  s"tourneyName=${js.URIUtils.encodeURIComponent(t.name)}&" +
+                  s"competition=${js.URIUtils.encodeURIComponent(comp.name)}&" +
+                  s"stage=${js.URIUtils.encodeURIComponent(stage.name)}&" +
+                  s"roundInfo=${js.URIUtils.encodeURIComponent(roundInfo)}&" +
+                  s"players=${js.URIUtils.encodeURIComponent(players)}"
                 
                 val qrCodeClass = getQRCodeClass()
                 if (!js.isUndefined(qrCodeClass)) {

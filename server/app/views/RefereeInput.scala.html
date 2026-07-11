@@ -1,0 +1,339 @@
+@(slug: String, tourneyName: String, competition: String, stage: String, roundInfo: String, players: String)
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schiri-Ergebniseingabe - @tourneyName</title>
+    <link href='@("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap")' rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .details-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+        }
+
+        .detail-value {
+            text-align: right;
+        }
+
+        .players-title {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #e2e8f0;
+        }
+
+        .sets-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .set-row {
+            display: grid;
+            grid-template-columns: 80px 1fr auto 1fr;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+        }
+
+        .set-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .score-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .score-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .score-divider {
+            color: var(--text-secondary);
+            font-weight: bold;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        .alert {
+            display: none;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--success);
+            color: #34d399;
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--danger);
+            color: #f87171;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app-container">
+        <div class="header">
+            <h1>Ergebniseingabe</h1>
+            <p>@tourneyName</p>
+        </div>
+
+        <div class="details-card">
+            <div class="detail-row">
+                <span class="detail-label">Wettbewerb</span>
+                <span class="detail-value">@competition</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Phase</span>
+                <span class="detail-value">@stage</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Runde</span>
+                <span class="detail-value">@roundInfo</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Begegnung</span>
+                <span class="detail-value">@players</span>
+            </div>
+        </div>
+
+        <div id="alert-box" class="alert"></div>
+
+        <form id="result-form">
+            <input type="hidden" name="slug" value="@slug">
+            <input type="hidden" name="players" value="@players">
+            <input type="hidden" name="roundInfo" value="@roundInfo">
+
+            <div class="players-title">
+                Ergebnis eintragen
+            </div>
+
+            <div class="sets-container">
+                @for(i <- 1 to 7) {
+                    <div class="set-row">
+                        <span class="set-label">Satz @i</span>
+                        <input type="number" min="0" id="set_@{i}_a" class="score-input" placeholder="A">
+                        <span class="score-divider">:</span>
+                        <input type="number" min="0" id="set_@{i}_b" class="score-input" placeholder="B">
+                    </div>
+                }
+            </div>
+
+            <button type="submit" class="btn-submit" id="submit-btn">Ergebnis absenden</button>
+        </form>
+    </div>
+
+    <script>
+        const alertBox = document.getElementById('alert-box');
+        const form = document.getElementById('result-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        function showAlert(msg, type) {
+            alertBox.textContent = msg;
+            alertBox.className = 'alert alert-' + type;
+            alertBox.style.display = 'block';
+            alertBox.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Collect and validate sets
+            const sets = [];
+            let isValid = true;
+            let hasAtLeastOneSet = false;
+
+            for (let i = 1; i <= 7; i++) {
+                const valA = document.getElementById('set_' + i + '_a').value.trim();
+                const valB = document.getElementById('set_' + i + '_b').value.trim();
+
+                if (valA !== '' || valB !== '') {
+                    if (valA === '' || valB === '') {
+                        showAlert('Bitte beide Punktwerte für Satz ' + i + ' eintragen.', 'danger');
+                        isValid = false;
+                        break;
+                    }
+                    sets.push(valA + ':' + valB);
+                    hasAtLeastOneSet = true;
+                }
+            }
+
+            if (!isValid) return;
+
+            if (!hasAtLeastOneSet) {
+                showAlert('Bitte mindestens ein Spielergebnis eintragen.', 'danger');
+                return;
+            }
+
+            // Disable submit button during fetch
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Wird gesendet...';
+
+            const payload = {
+                slug: form.elements['slug'].value,
+                players: form.elements['players'].value,
+                roundInfo: form.elements['roundInfo'].value,
+                sets: sets.join(', ')
+            };
+
+            fetch('/srv/referee/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if (res.ok) {
+                    showAlert('Ergebnis erfolgreich an die Turnierleitung übermittelt!', 'success');
+                    form.style.display = 'none';
+                } else {
+                    showAlert('Turnierleitung z.Z. nicht aktiv', 'danger');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Ergebnis absenden';
+                }
+            })
+            .catch(err => {
+                showAlert('Turnierleitung z.Z. nicht aktiv', 'danger');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Ergebnis absenden';
+            });
+        });
+    </script>
+</body>
+</html>
