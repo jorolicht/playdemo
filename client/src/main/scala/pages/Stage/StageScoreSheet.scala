@@ -133,11 +133,13 @@ object StageScoreSheet extends BasePage with JsWrapper:
       }
       
       body.classList.add("print-active")
-      dom.window.print()
       dom.window.setTimeout(() => {
-        body.classList.remove("print-active")
-        printArea.innerHTML = ""
-      }, 500)
+        dom.window.print()
+        dom.window.setTimeout(() => {
+          body.classList.remove("print-active")
+          printArea.innerHTML = ""
+        }, 500)
+      }, 150)
     }
 
   private def printSingle(gameNo: Int): Unit =
@@ -153,11 +155,13 @@ object StageScoreSheet extends BasePage with JsWrapper:
       printArea.appendChild(clone)
       
       body.classList.add("print-active")
-      dom.window.print()
       dom.window.setTimeout(() => {
-        body.classList.remove("print-active")
-        printArea.innerHTML = ""
-      }, 500)
+        dom.window.print()
+        dom.window.setTimeout(() => {
+          body.classList.remove("print-active")
+          printArea.innerHTML = ""
+        }, 500)
+      }, 150)
     }
 
   private def copyCanvasContents(original: HTMLElement, clone: HTMLElement): Unit =
