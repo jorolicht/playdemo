@@ -58,8 +58,7 @@ class WebSocketClientActor(out: ActorRef, manager: ActorRef, slug: String) exten
   def receive: Receive = {
     case msg: String =>
       // Console logging requirement:
-      println(s"[Server WebSocket] Message from client ($slug): $msg")
-      logger.info(s"WebSocket message from client ($slug): $msg")
+      logger.info(s"[Server WebSocket] message from client ($slug): $msg")
 
     case SendToClient(msg) =>
       out ! msg
