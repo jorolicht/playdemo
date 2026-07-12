@@ -3,14 +3,14 @@
 /**
  * Registriert die Einstellungen, Abschnitte und Felder für das Plugin.
  */
-function playdemo_register_settings() {
+function tourney_register_settings() {
     // Fügt eine neue Seite unter "Einstellungen" im Admin-Menü hinzu.
     add_options_page(
-        'Playdemo-Einstellungen',         // Titel der HTML-Seite
-        'Playdemo-Konfigurator',          // Titel im Admin-Menü
+        'Tourney-Einstellungen',         // Titel der HTML-Seite
+        'Tourney-Konfigurator',          // Titel im Admin-Menü
         'manage_options',                 // Erforderliche Benutzerrolle ('Administrator')
-        'playdemo_configurator',          // Slug (URL-Identifikator) der Einstellungsseite
-        'playdemo_settings_page_callback' // Funktion, die das HTML der Seite rendert
+        'tourney_configurator',          // Slug (URL-Identifikator) der Einstellungsseite
+        'tourney_settings_page_callback' // Funktion, die das HTML der Seite rendert
     );
 
     // Registriert die Einstellungen in der WordPress-Datenbank.
@@ -59,10 +59,10 @@ function playdemo_register_settings() {
 
     // Fügt einen Einstellungsabschnitt zur Einstellungsseite hinzu.
     add_settings_section(
-        'playdemo_main_section',        // ID des Abschnitts
+        'tourney_main_section',        // ID des Abschnitts
         'Allgemeine App-Einstellungen', // Titel des Abschnitts
         'mac_section_callback',         // Callback-Funktion für den Beschreibungstext des Abschnitts
-        'playdemo_configurator'         // Slug der Seite, zu der der Abschnitt gehört
+        'tourney_configurator'         // Slug der Seite, zu der der Abschnitt gehört
     );
 
     // Fügt das Eingabefeld für den WP-Username hinzu.
@@ -70,8 +70,8 @@ function playdemo_register_settings() {
         'mac_field_wordpress_user',
         'Username',
         'mac_field_wordpress_user_callback',
-        'playdemo_configurator',
-        'playdemo_main_section'
+        'tourney_configurator',
+        'tourney_main_section'
     );
 
     // Fügt das Eingabefeld für das API-Passwort hinzu.
@@ -79,8 +79,8 @@ function playdemo_register_settings() {
         'mac_field_api_password',
         'API-Password',
         'mac_field_api_password_callback',
-        'playdemo_configurator',
-        'playdemo_main_section'
+        'tourney_configurator',
+        'tourney_main_section'
     );
 
     // Fügt das Eingabefeld für die Turnierserver-URL hinzu.
@@ -88,24 +88,24 @@ function playdemo_register_settings() {
         'mac_field_tourney_server_url',
         'Turnierserver-URL',
         'mac_field_tourney_server_url_callback',
-        'playdemo_configurator',
-        'playdemo_main_section'
+        'tourney_configurator',
+        'tourney_main_section'
     );
 }
 
 /**
  * Rendert die Haupt-Einstellungsseite des Plugins.
  */
-function playdemo_settings_page_callback() {
+function tourney_settings_page_callback() {
     ?>
     <div class="wrap">
-        <h1>Playdemo-Konfigurator Einstellungen</h1>
+        <h1>Tourney-Konfigurator Einstellungen</h1>
         <form method="post" action="options.php">
             <?php
             // Fügt die notwendigen Sicherheitsfelder für die Optionsgruppe hinzu.
             settings_fields('mac_settings_group');
             // Rendert alle registrierten Abschnitte und Felder für diese Seite.
-            do_settings_sections('playdemo_configurator');
+            do_settings_sections('tourney_configurator');
             // Zeigt den Speichern-Button an.
             submit_button();
             ?>
@@ -139,7 +139,7 @@ function mac_field_api_password_callback() {
     $has_password = ! empty( get_option( 'api_password', '' ) );
     ?>
     <input type="password" id="api_password" name="api_password" value="" class="regular-text"
-           placeholder="<?php echo $has_password ? esc_attr__('Passwort gesetzt (neu eingeben zum Ändern)', 'playdemo_configurator') : ''; ?>">
+           placeholder="<?php echo $has_password ? esc_attr__('Passwort gesetzt (neu eingeben zum Ändern)', 'tourney_configurator') : ''; ?>">
     <p class="description">Geben Sie hier das API-Passwort ein. Es wird aus Sicherheitsgründen nicht angezeigt.</p>
     <?php
     if ( $has_password ) {
@@ -169,4 +169,4 @@ function mac_sanitize_api_password( $new_value ) {
     return sanitize_text_field( $new_value );
 }
 
-add_action('admin_menu', 'playdemo_register_settings');
+add_action('admin_menu', 'tourney_register_settings');

@@ -23,7 +23,7 @@ object WebAuthnService extends JsWrapper with ComWrapper:
    */
   def registerPasskey(): Future[Either[shared.basic.AppError, String]] =
     // 1. Get arguments from server as String
-    ajaxGet[String]("/wp-json/playdemo/v1/auth/webauthn/register-args", host = Global.homeUrl).flatMap {
+    ajaxGet[String]("/wp-json/tourney/v1/auth/webauthn/register-args", host = Global.homeUrl).flatMap {
       case Right(argsStr) =>
         try {
           val args = js.JSON.parse(argsStr).asInstanceOf[js.Dynamic]
@@ -41,7 +41,7 @@ object WebAuthnService extends JsWrapper with ComWrapper:
             
             // 5. Send to server
             ajaxPost[Map[String, String], Map[String, String]](
-              "/wp-json/playdemo/v1/auth/webauthn/register", 
+              "/wp-json/tourney/v1/auth/webauthn/register", 
               List(), 
               data, 
               host = Global.homeUrl
@@ -61,7 +61,7 @@ object WebAuthnService extends JsWrapper with ComWrapper:
    */
   def loginPasskey(): Future[Either[shared.basic.AppError, String]] =
     // 1. Get login arguments
-    ajaxGet[String]("/wp-json/playdemo/v1/auth/webauthn/login-args", host = Global.homeUrl).flatMap {
+    ajaxGet[String]("/wp-json/tourney/v1/auth/webauthn/login-args", host = Global.homeUrl).flatMap {
       case Right(resStr) =>
         try {
             val resJson = js.JSON.parse(resStr).asInstanceOf[js.Dynamic]
@@ -81,7 +81,7 @@ object WebAuthnService extends JsWrapper with ComWrapper:
                 
                 // 5. Verify with server
                 ajaxPost[Map[String, String], Map[String, String]](
-                    "/wp-json/playdemo/v1/auth/webauthn/login", 
+                    "/wp-json/tourney/v1/auth/webauthn/login", 
                     List(), 
                     data, 
                     host = Global.homeUrl

@@ -30,7 +30,7 @@ object TestResult extends JsWrapper:
    */
   def testResult_genDemoResults(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     // Verify we are in the StageInput page
-    val lastPage = dom.window.sessionStorage.getItem("playdemo_last_page")
+    val lastPage = dom.window.sessionStorage.getItem("tourney_last_page")
     if (lastPage != "StageInput") {
       val errMsg = "Fehler: Sie müssen sich im UseCase StageInput befinden!"
       addOutput(errMsg)

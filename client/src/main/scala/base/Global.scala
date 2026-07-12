@@ -53,7 +53,7 @@ object Global:
       val storage = org.scalajs.dom.window.sessionStorage
       if (storage != null) {
         val selectionJson = shared.basic.Pickle.write(value)
-        storage.setItem("playdemo_last_selection", selectionJson)
+        storage.setItem("tourney_last_selection", selectionJson)
       }
     } catch {
       case _: Exception => // ignore during testing or if storage is not available

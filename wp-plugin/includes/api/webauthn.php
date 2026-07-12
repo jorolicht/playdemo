@@ -1,6 +1,6 @@
 <?php
 /**
- * WebAuthn (Passkeys) API for Playdemo
+ * WebAuthn (Passkeys) API for Tourney
  * Library: lbuchs/WebAuthn
  */
 
@@ -18,28 +18,28 @@ function pd_get_webauthn() {
 
 add_action('rest_api_init', function () {
     // REGISTRATION: Get Args
-    register_rest_route('playdemo/v1', '/auth/webauthn/register-args', [
+    register_rest_route('tourney/v1', '/auth/webauthn/register-args', [
         'methods' => 'GET',
         'callback' => 'pd_webauthn_register_args',
         'permission_callback' => function() { return is_user_logged_in(); }
     ]);
 
     // REGISTRATION: Process
-    register_rest_route('playdemo/v1', '/auth/webauthn/register', [
+    register_rest_route('tourney/v1', '/auth/webauthn/register', [
         'methods' => 'POST',
         'callback' => 'pd_webauthn_register_process',
         'permission_callback' => function() { return is_user_logged_in(); }
     ]);
 
     // LOGIN: Get Args
-    register_rest_route('playdemo/v1', '/auth/webauthn/login-args', [
+    register_rest_route('tourney/v1', '/auth/webauthn/login-args', [
         'methods' => 'GET',
         'callback' => 'pd_webauthn_login_args',
         'permission_callback' => '__return_true'
     ]);
 
     // LOGIN: Process
-    register_rest_route('playdemo/v1', '/auth/webauthn/login', [
+    register_rest_route('tourney/v1', '/auth/webauthn/login', [
         'methods' => 'POST',
         'callback' => 'pd_webauthn_login_process',
         'permission_callback' => '__return_true'

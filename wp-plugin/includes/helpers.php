@@ -18,7 +18,7 @@ if (!class_exists('ApiHelper')) {
                 if ($slug) {
                     $posts = get_posts([
                         'name'           => $slug,
-                        'post_type'      => ['tourney', 'page', 'post', 'playdemo'],
+                        'post_type'      => ['tourney', 'page', 'post'],
                         'post_status'    => 'any',
                         'numberposts'    => 1,
                         'fields'         => 'ids'

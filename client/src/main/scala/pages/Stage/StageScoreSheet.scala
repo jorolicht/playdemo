@@ -242,17 +242,9 @@ object StageScoreSheet extends BasePage with JsWrapper:
     val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
     val slugParam = s"${slugName.trim}-${t.wpId}"
     val playBase = {
-      val playUrl = Global.playUrl.trim
-      if (playUrl.nonEmpty && (playUrl.startsWith("http://") || playUrl.startsWith("https://"))) {
-        val urlHost = if (playUrl.contains("://")) {
-          playUrl.split("://")(1).split("/")(0).split(":")(0)
-        } else {
-          playUrl.split("/")(0).split(":")(0)
-        }
-        s"http://$urlHost:9000"
-      } else {
-        s"http://${dom.window.location.hostname}:9000"
-      }
+      val home = if (Global.homeUrl.nonEmpty) Global.homeUrl.trim else dom.window.location.origin
+      val base = if (home.endsWith("/")) home.dropRight(1) else home
+      s"$base/srv"
     }
 
     val qrCodeClass = getQRCodeClass()

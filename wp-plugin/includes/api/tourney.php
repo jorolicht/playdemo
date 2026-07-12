@@ -451,7 +451,7 @@ function tourney_api_create(WP_REST_Request $request) {
         'post_title'   => $tourney_name,
         'post_name'    => $turnier_slug,
         'post_parent'  => $parent_id,
-        'post_content' => '[playdemo mode="multi"]',
+        'post_content' => '[tourney mode="multi"]',
         'post_type'    => 'tourney',
         'post_status'  => 'publish',
     ];

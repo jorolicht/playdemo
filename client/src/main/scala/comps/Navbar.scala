@@ -96,7 +96,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     import services.*
     import base.Global
 
-    ajaxPost[String, String]("/wp-json/playdemo/v1/auth/logout", List(), "", host = Global.homeUrl).map { _ =>
+    ajaxPost[String, String]("/wp-json/tourney/v1/auth/logout", List(), "", host = Global.homeUrl).map { _ =>
       Global.resetUser
       dom.window.location.href = Global.homeUrl
     }

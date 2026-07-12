@@ -7,35 +7,35 @@ use Firebase\JWT\JWT;
 // Registrierung des API-Endpunkts
 // Permalink Einstellungen auf Beiträge setzen, damit die REST API funktioniert
 add_action('rest_api_init', function () {
-    register_rest_route('playdemo/v1', '/user/', [
+    register_rest_route('tourney/v1', '/user/', [
         'methods'  => 'GET',
-        'callback' => 'playdemo_api_callback_user',
-        'permission_callback' => 'playdemo_api_create_get_permissions_check' 
+        'callback' => 'tourney_api_callback_user',
+        'permission_callback' => 'tourney_api_create_get_permissions_check' 
     ]);
 
     // Endpunkt: LOGIN
-    register_rest_route('playdemo/v1', '/auth/login', array(
+    register_rest_route('tourney/v1', '/auth/login', array(
         'methods' => 'POST',
         'callback' => 'pd_api_login_handler',
         'permission_callback' => '__return_true',
     ));
 
     // Endpunkt: LOGOUT
-    register_rest_route('playdemo/v1', '/auth/logout', array(
+    register_rest_route('tourney/v1', '/auth/logout', array(
         'methods' => 'POST',
         'callback' => 'pd_api_logout_handler',
         'permission_callback' => '__return_true',
     ));
 
     // Endpunkt: REGISTER
-    register_rest_route('playdemo/v1', '/auth/register', array(
+    register_rest_route('tourney/v1', '/auth/register', array(
         'methods' => 'POST',
         'callback' => 'pd_api_register_user',
         'permission_callback' => '__return_true',
     ));
     
     // Endpunkt: VERIFY
-    register_rest_route('playdemo/v1', '/auth/verify', array(
+    register_rest_route('tourney/v1', '/auth/verify', array(
         'methods' => 'POST',
         'callback' => 'pd_api_verify_handler',
         'permission_callback' => '__return_true',
@@ -140,7 +140,7 @@ function pd_api_register_user($request) {
 
     $verify_page_url = home_url("/verifikation/?uid=$user_id&hash=$hash");
     
-    $subject = "Willkommen bei Playdemo - Bitte E-Mail bestätigen";
+    $subject = "Willkommen bei Tourney - Bitte E-Mail bestätigen";
     $message = "Hallo " . $params['name'] . ",\n\nbitte klicke auf den Link, um deinen Account zu aktivieren:\n$verify_page_url";
     
     wp_mail($params['email'], $subject, $message);
@@ -170,7 +170,7 @@ function pd_api_verify_handler($request) {
 }
 
 
-function playdemo_api_create_get_permissions_check( WP_REST_Request $request ) {
+function tourney_api_create_get_permissions_check( WP_REST_Request $request ) {
     // Prüfen, ob der aktuelle Benutzer die Fähigkeit 'edit_posts' hat
     // Für Administratoren: current_user_can( 'manage_options' )
     // Für Redakteure: current_user_can( 'edit_others_posts' )
@@ -182,7 +182,7 @@ function playdemo_api_create_get_permissions_check( WP_REST_Request $request ) {
 
 
 // Die Callback-Funktion für den Endpunkt
-function playdemo_api_callback_user($request) {
+function tourney_api_callback_user($request) {
     $user_id        = 0;
     $username       = '';
     $email          = '';

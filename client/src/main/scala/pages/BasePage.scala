@@ -72,11 +72,11 @@ def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, asy
 private def savePageState(pageName: PageName, param: String): Unit =
   try
     val storage = org.scalajs.dom.window.sessionStorage
-    storage.setItem("playdemo_last_page", pageName.value)
-    storage.setItem("playdemo_last_param", param)
-    storage.setItem("playdemo_last_wp_page_id", base.Global.hostPageId.toString)
+    storage.setItem("tourney_last_page", pageName.value)
+    storage.setItem("tourney_last_param", param)
+    storage.setItem("tourney_last_wp_page_id", base.Global.hostPageId.toString)
     val selectionJson = shared.basic.Pickle.write(base.Global.currentSelection)
-    storage.setItem("playdemo_last_selection", selectionJson)
+    storage.setItem("tourney_last_selection", selectionJson)
   catch
     case e: Exception => error(s"Failed to save page state to sessionStorage: ${e.getMessage}")
 

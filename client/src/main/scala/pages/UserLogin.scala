@@ -45,7 +45,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
     }
 
   private def doLogout(): Unit =
-    ajaxPost[String, String]("/wp-json/playdemo/v1/auth/logout", List(), "", host = Global.homeUrl).map { _ =>
+    ajaxPost[String, String]("/wp-json/tourney/v1/auth/logout", List(), "", host = Global.homeUrl).map { _ =>
       Global.resetUser
       dom.window.location.href = Global.homeUrl
     }
@@ -54,7 +54,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
     services.WebAuthnService.loginPasskey().flatMap {
       case Right(msg) => 
         debug(s"Passkey Login successful: $msg")
-        ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE" -> Global.wpNonce), Global.homeUrl).map {
+        ajaxGet[UserInfo]("/wp-json/tourney/v1/user", List(), Map("X-WP-NONCE" -> Global.wpNonce), Global.homeUrl).map {
           case Right(ui) if ui.user_id > 0 =>
             Global.user = Some(User(
               id = ("", ui.user_id),
@@ -99,10 +99,10 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
       "password" -> password
     )
 
-    ajaxPost[Map[String, String], Map[String, String]]("/wp-json/playdemo/v1/auth/login", List(), data, host = Global.homeUrl).flatMap {
+    ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/login", List(), data, host = Global.homeUrl).flatMap {
       case Right(res) => 
         debug(s"Login successful: $res")
-        ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE" -> Global.wpNonce), Global.homeUrl).map {
+        ajaxGet[UserInfo]("/wp-json/tourney/v1/user", List(), Map("X-WP-NONCE" -> Global.wpNonce), Global.homeUrl).map {
           case Right(ui) if ui.user_id > 0 =>
             Global.user = Some(User(
               id = ("", ui.user_id),

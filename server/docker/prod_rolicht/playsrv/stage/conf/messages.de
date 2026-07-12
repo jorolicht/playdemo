@@ -1,0 +1,339 @@
+
+app.version = 001DE1970-01
+app.date    = 1970-01-01
+app.lang    = DE
+
+
+###
+# Message Entries
+###
+app.greeting                                        = Herzlich Willkommen!
+app.title                                           = Playframework Beispiel Programm
+app.lang                                            = de
+app.javascript                                      = Javascript wird benötigt, ist jedoch deaktiviert.  
+main.author                                         = Robert Lichtenegger
+main.copyright                                      = Copyright
+main.website                                        = Your Website 2024
+app.test                                            = Test @$§%&/()öäü€ {0} {1}
+app.noAccount                                       = Bisher keine Kennung?
+app.createOne                                       = Kennung neu anlegen
+app.forgotPassword                                  = Passwort vergessen?
+app.password                                        = Passwort
+app.emailAddress                                    = E-Mail Adresse
+app.invalid.password                                = Passwort ungültig / erforderlich
+app.invalid.email                                   = E-Mail-Format ungültig
+app.btn.login                                       = LOGIN
+app.btn.logout                                      = LOGOUT
+app.btn.console                                     = CONSOLE
+
+###
+# Sidebar/Sidenav
+###
+Sidebar.ChatExample                                 = Chat Beispiel
+Sidebar.loggedInAs                                  = Angemeldet als: 
+Sidebar.UseCase2                                    = UseCase2
+Sidebar.UseCase3                                    = UseCase3
+Sidebar.UseCase31                                   = UseCase31
+Sidebar.UseCase32                                   = UseCase32
+Sidebar.UseCase4                                    = UseCase4
+Sidebar.UseCase41                                   = UseCase41
+Sidebar.UseCase42                                   = UseCase42
+Sidebar.UseCase5                                    = UseCase5
+Sidebar.UseCase51                                   = UseCase51
+Sidebar.UseCase511                                  = UseCase511
+Sidebar.UseCase512                                  = UseCase512
+Sidebar.UseCase52                                   = UseCase52
+Sidebar.UseCase53                                   = UseCase53
+
+###
+# Usecase Register
+###
+Register.header                                     = Registrierung
+
+
+###
+# Usecase ChatExample
+###
+ChatExample.title.UserId                            = Benutzer Identifikation: {0}
+ChatExample.title.SendMsg                           = Nachricht Senden
+ChatExample.title.RcvMsgs                           = Erhaltene Nachrichten
+ChatExample.lbl.Rcv                                 = Empfänger
+ChatExample.lbl.Msg                                 = Nachricht
+ChatExample.plh.RcvIdExample                        = z.B. iK78T45b 
+ChatExample.plh.sendMsgExample                      = Hella Max Mustermann!
+ChatExample.btn.send                                = SENDEN
+
+bye = Freilos
+table.pos = Pos.
+table.name = Name
+table.dbl.name = Name (Doppel)
+table.club = Verein
+table.ttr = TTR
+###
+# Buttons
+###
+btn.register  = REGISTER
+btn.login     = ANMELDEN
+
+btn.cancel    = ABBRUCH
+btn.ok        = OK
+btn.abort     = ABBRUCH
+btn.retry     = WIEDERHOLEN
+btn.ignore    = IGNORIEREN
+btn.yes       = JA
+btn.no        = NEIN
+
+###
+# Dialog
+###
+DlgPrompt.title            = Konsole
+DlgPrompt.plh.command      = <command> <parameter>
+
+DlgStageStart.title = Neue Wettbewerbsphase starten
+DlgStageStart.name_label = Name der Wettbewerbsphase
+DlgStageStart.name_placeholder = z.B. Vorrunde Gruppe A
+DlgStageStart.pref_label = Nachfolge-Wettbewerbsphase von:
+DlgStageStart.pref_placeholder = -- Bitte Vorgänger-Wettbewerbsphase auswählen --
+DlgStageStart.start_notice = Hinweis: Start-Wettbewerbsphase (Erste Wettbewerbsphase für diesen Wettbewerb).
+DlgStageStart.cancel = Abbrechen
+DlgStageStart.start = Start
+DlgStageStart.err_name = Bitte geben Sie einen gültigen Namen für die Wettbewerbsphase ein.
+DlgStageStart.err_exists = Eine Wettbewerbsphase mit diesem Namen existiert bereits in diesem Wettbewerb.
+DlgStageStart.err_pref = Bitte wählen Sie eine Vorgänger-Wettbewerbsphase aus.
+
+DlgAddSingle.title = Teilnehmer hinzufügen
+DlgAddSingle.lastname = Nachname
+DlgAddSingle.firstname = Vorname
+DlgAddSingle.club = Verein
+DlgAddSingle.ttr = TTR-Wert
+DlgAddSingle.ttr_placeholder = z.B. 1450
+DlgAddSingle.year = Jahrgang
+DlgAddSingle.year_unknown = -- Unbekannt --
+DlgAddSingle.action = Aktion
+DlgAddSingle.act_reg = Nur Registrieren (Inaktiv)
+DlgAddSingle.act_play = Registrieren und Anmelden (Aktiv)
+DlgAddSingle.cancel = Abbrechen
+DlgAddSingle.save = Speichern
+DlgAddSingle.err_fill = Bitte Name, Vorname und Verein ausfüllen.
+DlgAddSingle.email = E-Mail
+DlgAddSingle.whatsapp = WhatsApp-Nummer
+
+
+
+###
+# Email Entries
+###
+email.register.app              = XXX App 
+email.register.link             = <a href="http://localhost:9000/auth/verifyUser/{0}">VERIFICATION LINK</a>
+
+email.register.closing          = Danke </br> Ihr XXX Team
+email.register.expire           = Dieser Link wird in einer Stunde ablaufen. Wenn Sie Ihre E-Mail nicht innerhalb dieser Zeit verifizieren, müssen Sie einen neuen Verifizierungslink anfordern.
+email.register.help             = Wenn Sie Probleme mit der Verifizierung Ihrer E-Mail haben, zögern Sie bitte nicht, uns unter <a href="mailto:XXX@example.com">XXX@example.com</a> zu kontaktieren.
+email.register.title            = Bestätigungslink für {0} 
+email.register.salutation       = Hallo {0} {1}!
+email.register.subject          = Bestätigungslink zur Registrierung
+email.register.from             = XXX@example.com 
+email.register.complete         = Um die Einrichtung Ihres Kontos abzuschließen und alle Funktionen von {0} freizuschalten, verifizieren Sie bitte Ihre E-Mail-Adresse.
+email.register.click            = Klicken Sie auf den unten stehenden Link, um Ihre E-Mail zu bestätigen:
+CompetitionInfo.title = Wettbewerb: {0}
+CompetitionInfo.edit = Edit
+CompetitionInfo.reactivate = Reaktivieren
+CompetitionInfo.finish = Beenden
+CompetitionInfo.delete = Löschen
+CompetitionInfo.type = Typ:
+CompetitionInfo.start = Start:
+CompetitionInfo.ttr = TTR:
+CompetitionInfo.status = Status:
+CompetitionInfo.stages_title = Wettbewerbsphasen
+CompetitionInfo.start_stage = Wettbewerbsphase starten
+CompetitionInfo.stage_header = Name
+CompetitionInfo.participants_header = Teilnehmer
+CompetitionInfo.status_header = Status
+CompetitionInfo.actions_header = Aktionen
+CompetitionInfo.no_stages = Keine Wettbewerbsphasen angelegt.
+CompetitionInfo.show_action = Anzeigen
+CompetitionInfo.participants_list = Teilnehmerliste ({0})
+CompetitionInfo.snr_header = SNr
+CompetitionInfo.name_header = Name, Vorname
+CompetitionInfo.club_header = Verein
+CompetitionInfo.ttr_header = TTR
+CompetitionInfo.year_header = JG
+CompetitionInfo.no_participants = Keine Teilnehmer aktiv.
+CompetitionInfo.rounds_header = Runden
+CompetitionInfo.certificates_header = Urkunden
+CompetitionInfo.cert_yes = JA
+CompetitionInfo.cert_no = NEIN
+
+PlayerRegistration.title = Turnier-Anmeldung
+PlayerRegistration.csv_upload = CSV Upload
+PlayerRegistration.add_double = Doppel hinzufügen
+PlayerRegistration.add_single = Teilnehmer hinzufügen
+PlayerRegistration.select_comp = Wettbewerb auswählen
+PlayerRegistration.please_select = -- Bitte Wettbewerb wählen --
+PlayerRegistration.status = Status:
+PlayerRegistration.participants = Teilnehmer:
+PlayerRegistration.no_comp_selected = Kein Wettbewerb gewählt
+PlayerRegistration.no_players = Noch keine Teilnehmer für diesen Wettbewerb registriert.
+PlayerRegistration.remove = Entfernen
+PlayerRegistration.footer_info = Klicken Sie auf die Spaltenköpfe zum Sortieren. Startnummern werden automatisch vergeben.
+PlayerRegistration.select_comp_prompt = Wettbewerb auswählen
+PlayerRegistration.select_comp_prompt_desc = Bitte wählen Sie oben einen Wettbewerb aus, um die Anmeldungen zu verwalten.
+PlayerRegistration.snr_header = SNr
+PlayerRegistration.name_header = Name, Vorname
+PlayerRegistration.club_header = Verein
+PlayerRegistration.ttr_header = TTR
+PlayerRegistration.year_header = JG
+PlayerRegistration.active_header = Teilnahme
+PlayerList.title = Teilnehmer-Übersicht
+PlayerList.no_competitions = Keine Wettbewerbe angelegt.
+PlayerList.comp_label = Wettbewerb:
+PlayerList.players_suffix = Spieler
+PlayerList.add = Hinzufügen
+PlayerList.csv_upload = CSV Upload
+PlayerList.player_id = Spieler ID
+PlayerList.name_header = Name, Vorname
+PlayerList.club_header = Verein
+PlayerList.ttr_header = TTR
+PlayerList.active_header = Aktiv
+PlayerList.no_players = Keine Teilnehmer angemeldet.
+StageAdmin.title = Steuerung
+StageAdmin.btn_draw = AUSLOSUNG GENERIEREN
+StageAdmin.selected_players = {0} Teilnehmer ausgewählt
+StageAdmin.btn_reset_results = Ergebnisse löschen
+StageAdmin.btn_reset_draw = Auslosung löschen
+StageAdmin.btn_reset_cfg = Konfiguration löschen
+StageAdmin.btn_delete_stage = Wettbewerbsphase löschen
+StageAdmin.delete_warning = Achtung: {0} nachfolgende Wettbewerbsphasen (1) werden ebenfalls gelöscht!
+StageAdmin.config_title = Konfiguration
+StageAdmin.game_mode = Spielmodus
+StageAdmin.select_mode = -- Spielmodus auswählen --
+StageAdmin.sets_label = Gewinnsätze
+StageAdmin.best_of_3 = Best-of-3 (2 Gewinnsätze)
+StageAdmin.best_of_5 = Best-of-5 (3 Gewinnsätze)
+StageAdmin.best_of_7 = Best-of-7 (4 Gewinnsätze)
+StageAdmin.players_title = Spieler
+StageAdmin.btn_add_dummy = + DUMMY HINZUFÜGEN
+StageAdmin.btn_select_all = ALLE AUSWÄHLEN
+StageAdmin.name_header = Name, Vorname
+StageAdmin.club_header = Verein
+StageAdmin.ttr_header = TTR
+StageAdmin.no_players = Keine Teilnehmer im Wettbewerb gefunden.
+StageAdmin.footer_info = {0} Spieler verfügbar. Nur aktivierte Spieler nehmen an der Auslosung teil.
+StageAdmin.err_min_players = Bitte wählen Sie mindestens drei Teilnehmer aus.
+StageAdmin.not_possible = nicht mgl.
+StageInput.title = Ergebniseingabe: {0}
+StageInput.game_no = Nr.
+StageInput.match_label = Begegnung
+StageInput.result_label = Ergebnis (Sätze)
+StageInput.status_label = Status
+StageInput.no_matches = Keine Spiele für diese Stage vorhanden.
+StageInput.finished = Fertig
+StageInput.open = Offen
+StageInput.btn_finalize = ERGEBNISSE FINALISIEREN
+StageInput.round.7 = Runde der letzten 128 (128er-Runde)
+StageInput.round.6 = Runde der letzten 64 (64er-Runde)
+StageInput.round.5 = Runde der letzten 32
+StageInput.round.4 = Achtelfinale
+StageInput.round.3 = Viertelfinale
+StageInput.round.2 = Halbfinale
+StageInput.round.1 = Finale
+StageInput.round.0 = Spiel um Platz 3
+StageInput.round.final_combo = Finale / Spiel um Platz 3
+StageInput.round.default = Runde {0}
+StageInput.not_determined = NOCH OFFEN
+StageInput.btn_start_next_round = Starte nachfolgende Runde
+StageInput.bye = Freilos
+StageDraw.title = Auslosung & Setzung: {0}
+StageDraw.draw_help = Überprüfen Sie die Gruppenzuordnung für {0}. Sie können zwei Spieler anklicken, um sie zu vertauschen.
+StageDraw.draw_help_rr = Überprüfen Sie die Gruppenzuordnung für {0}. Sie können zwei Spieler anklicken, um sie zu vertauschen. Am Rand werden die Paarungen der ersten Runde angezeigt.
+StageDraw.group_rr_name = Gruppe Jeder-gegen-Jeden
+StageDraw.group_suffix = Gruppe
+StageDraw.groups_suffix = Gruppen/Paarungen
+StageDraw.no_groups = Keine Gruppen für diese Stage generiert.
+StageDraw.btn_back = ZURÜCK ZUR KONFIGURATION
+StageDraw.btn_start = START SPIELSTAGE
+StageDraw.dummy_rr = Dummy-Vorlage für Jeder-gegen-Jeden.
+StageDraw.dummy_se = Sie können zwei Positionen anklicken, um sie zu vertauschen. Alternativ können Sie neue Setzpositionen eingeben und diese mit dem Button "SETZEN" übernehmen. Spieler vom gleichen Verein, die in der ersten Runde gegeneinander spielen, werden rot markiert.
+StageDraw.dummy_swiss = Sie können zwei Spieler anklicken, um sie zu vertauschen.
+StageDraw.btn_back_overview = Zurück zur Übersicht
+StageDraw.no_draw = Keine Auslosung vorhanden.
+StageDraw.draw_option_label = Paarungs-Modus
+StageDraw.draw_opt_upper_lower = Obere Hälfte gegen untere Hälfte
+StageDraw.draw_opt_accel2 = Beschleunigtes Schweizer System (zwei Gruppen)
+StageDraw.draw_opt_accel3 = Beschleunigtes Schweizer System (drei Gruppen)
+StageDraw.draw_opt_top_bottom = Top gegen Bottom (extremes Seeding)
+StageDraw.draw_opt_random = Zufällige Auslosung der Paarungen
+StageDraw.draw_opt_manual = Manuelle Auslosung / Zuordnung
+StageDraw.round_tab_title = Runde {0}
+StageDraw.round_locked_message = Die Paarungen für Runde {0} werden nach Abschluss der vorherigen Runde berechnet.
+StageDraw.btn_start_round = Start Runde {0}
+
+
+
+StageResult.title = Ergebnisse der Wettbewerbsphase / Tabellen: {0}
+StageResult.title_rr = Ergebnisse der Wettbewerbsphase / Tabelle: {0}
+StageResult.no_results = Keine Ergebnisse für diese Wettbewerbsphase verfügbar.
+StageResult.table_title = Tabelle {0}
+StageResult.rank_header = Platz
+StageResult.name_header = Name
+StageResult.matches_header = Spiele
+StageResult.sets_header = Sätze
+StageResult.btn_print = Tabelle drucken
+StageResult.btn_next = Nächste Wettbewerbsphase vorbereiten
+StageResult.tbd = NOCH OFFEN
+StageResult.bye = Freilos
+StageResult.round_3rd = Spiel um Platz 3
+StageResult.round_final = Finale
+StageResult.round_semi = Halbfinale
+StageResult.round_quarter = Viertelfinale
+StageResult.round_last16 = Achtelfinale
+StageResult.round_last32 = Sechzehntelfinale
+StageResult.round_last64 = 32stel-Finale
+StageResult.round_last128 = 64stel-Finale
+StageResult.round_n = Runde {0}
+StageResult.status_finished = Beendet
+StageResult.status_running = Läuft
+StageResult.status_ready = Bereit
+StageResult.group_rr_name = Gruppe Jeder-gegen-Jeden
+StageResult.status_open = Offen
+CompTyp.SINGLE = Einzel
+CompTyp.Single = Einzel
+CompTyp.DOUBLE = Doppel
+CompTyp.Double = Doppel
+CompTyp.MIXED = Mixed
+CompTyp.Mixed = Mixed
+CompTyp.TEAM = Team
+CompTyp.Team = Team
+
+###
+# Errors
+###
+err00001.ajax.post                                  = Kommunikationsfehler in Routine post: {0} {1}
+err00002.ajax.decode                                = Fehler beim Dekodieren eines Rückgabewertes: {0} {1}
+err00003.ajax.login                                 = Fehler beim Dekodieren eines Rückgabewertes: {0} {1}
+err00004.ajax.user.login                            = Fehler in Routine login, User-Daten nicht dekodierbar
+err00005.promise.sha256                             = Fehler in Routine sha256: {0}
+err00006.parseJson                                  = Fehler beim Dekodieren von JSON-String: {0} {1}
+err00007.db.user.update                             = Fehler beim Aktualisieren der user Datenbank {0}
+err00008.db.user.insert                             = Fehler beim Einfügen von Daten in die user Datenbank {0}
+err00009.ajax.get                                   = Kommunikationsfehler in Routine get: {0} {1}
+err00010.db.user.read                               = User nicht in Datenbank vorhanden {0}
+err00011.db.user.select                             = Fehler beim Lesen der user Datenbank {0}
+err00013.auth.google                                = Fehler bei Google-Authentisierung unterschiedliche Namen: {0} {1}
+err00014.auth.token.invalid                         = Fehler Google-Token ungültig
+err00015.login.invalid                              = E-Mail / Passwort ungültig
+
+err00050.wordpress.notfound.parse                   = No post found for slug {0} or ID could not be parsed
+err00051.wordpress.api.non.ok                       = WordPress API returned status {0} for slug {1}
+err00052.wordpress.network.unexpected               = Network or unexpected error: {0}
+err00053.wordpress.response.invalid                 = WordPress API return invalid, JSON format expected {0} {1}
+err00054.wordpress.data.notfound                    = WordPress API return no post data: {0} {1}
+err00055.wordpress.notallowed                       = WordPress API call not allowed, missing/wrong authentication/autorization
+err00056.wordpress.error                            = WordPress error status: {0} response: {1}
+
+
+###
+# Addon
+###
+addon.version       = Demo Play Application Version 1.0 / Robert Lichtenegger
+addon.footer        = For all other tricks, consult the source code!

@@ -1,0 +1,14 @@
+
+###
+# Buttons
+###
+btn.register  = REGISTER
+btn.login     = ANMELDEN
+
+btn.cancel    = ABBRUCH
+btn.ok        = OK
+btn.abort     = ABBRUCH
+btn.retry     = WIEDERHOLEN
+btn.ignore    = IGNORIEREN
+btn.yes       = JA
+btn.no        = NEIN

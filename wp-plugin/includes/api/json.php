@@ -54,10 +54,10 @@ add_action('rest_api_init', function () {
 function handle_get_json_by_slug($request) {
     $slug = $request['slug'];
 
-    // Suche nach dem Post im Custom Post Type 'playdemo'
+    // Suche nach dem Post im Custom Post Type 'tourney'
     $posts = get_posts(array(
         'name'           => $slug,
-        'post_type'      => 'playdemo',
+        'post_type'      => 'tourney',
         'post_status'    => 'any', // Damit auch 'private' gefunden wird
         'posts_per_page' => 1,
     ));
@@ -102,11 +102,11 @@ function handle_generic_json_post($request) {
         'post_name'    => $slug,
         'post_content' => json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), // Nur das JSON
         'post_status'  => 'private',
-        'post_type'    => 'playdemo',
+        'post_type'    => 'tourney',
     );
 
     $existing = get_posts(array(
-        'name' => $slug, 'post_type' => 'playdemo', 'post_status' => 'any', 'numberposts' => 1
+        'name' => $slug, 'post_type' => 'tourney', 'post_status' => 'any', 'numberposts' => 1
     ));
 
     if (!empty($existing)) {
@@ -154,7 +154,7 @@ function handle_hierarchical_json_by_path($request) {
     foreach ($path_parts as $segment) {
         $existing = get_posts(array(
             'name'        => $segment,
-            'post_type'   => 'playdemo',
+            'post_type'   => 'tourney',
             'post_parent' => $parent_id,
             'post_status' => 'any',
             'numberposts' => 1
@@ -167,7 +167,7 @@ function handle_hierarchical_json_by_path($request) {
                 'post_title'  => ucfirst(str_replace('_', ' ', $segment)),
                 'post_name'   => $segment,
                 'post_parent' => $parent_id,
-                'post_type'   => 'playdemo',
+                'post_type'   => 'tourney',
                 'post_status' => 'publish'
             ));
         }

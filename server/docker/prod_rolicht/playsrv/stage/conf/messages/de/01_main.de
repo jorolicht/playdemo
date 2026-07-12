@@ -1,0 +1,66 @@
+
+###
+# Message Entries
+###
+app.greeting                                        = Herzlich Willkommen!
+app.title                                           = Playframework Beispiel Programm
+app.lang                                            = de
+app.javascript                                      = Javascript wird benötigt, ist jedoch deaktiviert.  
+main.author                                         = Robert Lichtenegger
+main.copyright                                      = Copyright
+main.website                                        = Your Website 2024
+app.test                                            = Test @$§%&/()öäü€ {0} {1}
+app.noAccount                                       = Bisher keine Kennung?
+app.createOne                                       = Kennung neu anlegen
+app.forgotPassword                                  = Passwort vergessen?
+app.password                                        = Passwort
+app.emailAddress                                    = E-Mail Adresse
+app.invalid.password                                = Passwort ungültig / erforderlich
+app.invalid.email                                   = E-Mail-Format ungültig
+app.btn.login                                       = LOGIN
+app.btn.logout                                      = LOGOUT
+app.btn.console                                     = CONSOLE
+
+###
+# Sidebar/Sidenav
+###
+Sidebar.ChatExample                                 = Chat Beispiel
+Sidebar.loggedInAs                                  = Angemeldet als: 
+Sidebar.UseCase2                                    = UseCase2
+Sidebar.UseCase3                                    = UseCase3
+Sidebar.UseCase31                                   = UseCase31
+Sidebar.UseCase32                                   = UseCase32
+Sidebar.UseCase4                                    = UseCase4
+Sidebar.UseCase41                                   = UseCase41
+Sidebar.UseCase42                                   = UseCase42
+Sidebar.UseCase5                                    = UseCase5
+Sidebar.UseCase51                                   = UseCase51
+Sidebar.UseCase511                                  = UseCase511
+Sidebar.UseCase512                                  = UseCase512
+Sidebar.UseCase52                                   = UseCase52
+Sidebar.UseCase53                                   = UseCase53
+
+###
+# Usecase Register
+###
+Register.header                                     = Registrierung
+
+
+###
+# Usecase ChatExample
+###
+ChatExample.title.UserId                            = Benutzer Identifikation: {0}
+ChatExample.title.SendMsg                           = Nachricht Senden
+ChatExample.title.RcvMsgs                           = Erhaltene Nachrichten
+ChatExample.lbl.Rcv                                 = Empfänger
+ChatExample.lbl.Msg                                 = Nachricht
+ChatExample.plh.RcvIdExample                        = z.B. iK78T45b 
+ChatExample.plh.sendMsgExample                      = Hella Max Mustermann!
+ChatExample.btn.send                                = SENDEN
+
+bye = Freilos
+table.pos = Pos.
+table.name = Name
+table.dbl.name = Name (Doppel)
+table.club = Verein
+table.ttr = TTR

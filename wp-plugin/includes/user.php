@@ -6,7 +6,7 @@
  *
  * @param WP_User $user The WP_User object.
  */
-function playdemo_add_custom_user_profile_fields( $user ) {
+function tourney_add_custom_user_profile_fields( $user ) {
     ?>
     <h3><?php esc_html_e( 'Additional Profile Information', 'user-custom-fields-organizer' ); ?></h3>
 
@@ -22,9 +22,9 @@ function playdemo_add_custom_user_profile_fields( $user ) {
     <?php
 }
 // For displaying fields on the 'Edit User' screen for administrators
-add_action( 'show_user_profile', 'playdemo_add_custom_user_profile_fields' );
+add_action( 'show_user_profile', 'tourney_add_custom_user_profile_fields' );
 // For displaying fields on the 'Your Profile' screen (user's own profile)
-add_action( 'edit_user_profile', 'playdemo_add_custom_user_profile_fields' );
+add_action( 'edit_user_profile', 'tourney_add_custom_user_profile_fields' );
 
 /**
  * Saves the custom user profile fields.

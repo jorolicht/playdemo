@@ -201,19 +201,19 @@ libraryDependencies += "org.typelevel" %%% "cats-core" % "2.13.0"  //shared
 
 ## Test Environment
 
-Set environment and start application in `server/docker` directory using the provided shell scripts:
+Set environment and start application in `server/docker/dev` directory using the provided shell scripts:
 ```
-<projectbase>/server/docker> ./start.sh
+<projectbase>/server/docker/dev> ./start.sh
 ```
 
-Or run docker compose manually from `server/docker`:
+Or run docker compose manually from `server/docker/dev`:
 ```
-<projectbase>/server/docker> docker compose -f docker-compose.yml --env-file ../env/docker.env up -d
+<projectbase>/server/docker/dev> docker compose -f docker-compose.yml --env-file ../../env/docker.env up -d
 ```
 
 Check running containers:
 ```
-<projectbase>/server/docker> docker ps
+<projectbase>/server/docker/dev> docker ps
 CONTAINER ID   IMAGE       COMMAND                  CREATED       STATUS         PORTS                    NAMES
 c133fed8b580   wordpress   "docker-entrypoint.s…"   5 weeks ago   Up 6 minutes   0.0.0.0:8080->80/tcp     playdemoapp-wordpress-1
 71b8158f51cc   playsrv     "./bin/server -Dappl…"   5 weeks ago   Up 5 minutes   0.0.0.0:9500->9500/tcp   playdemoapp-playsrv-1

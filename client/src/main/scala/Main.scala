@@ -22,7 +22,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
   // Direct Start without Shortcode
   @JSExportTopLevel("appMain")
   def appMain(): Unit = 
-    val config = dom.window.asInstanceOf[js.Dynamic].playdemoConfig
+    val config = dom.window.asInstanceOf[js.Dynamic].tourneyConfig
 
     val version = "001DE1970-01"
     val mode        = config.mode.asInstanceOf[String]
@@ -108,7 +108,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     import shared.model.UserInfo
     import shared.model.User
 
-    ajaxGet[UserInfo]("/wp-json/playdemo/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl).map {
+    ajaxGet[UserInfo]("/wp-json/tourney/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl).map {
       case Right(ui) => 
         if (ui.user_id > 0) {
             Global.user = Some(User(
@@ -130,10 +130,10 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
         
         // Attempt to restore page state from sessionStorage
         val storage = org.scalajs.dom.window.sessionStorage
-        val lastWpPageId = storage.getItem("playdemo_last_wp_page_id")
-        val lastPage = storage.getItem("playdemo_last_page")
-        val lastParam = Option(storage.getItem("playdemo_last_param")).getOrElse("")
-        val selectionJson = storage.getItem("playdemo_last_selection")
+        val lastWpPageId = storage.getItem("tourney_last_wp_page_id")
+        val lastPage = storage.getItem("tourney_last_page")
+        val lastParam = Option(storage.getItem("tourney_last_param")).getOrElse("")
+        val selectionJson = storage.getItem("tourney_last_selection")
 
         val canRestore = lastWpPageId != null && 
                          lastWpPageId == Global.pageId.toString && 

@@ -1,0 +1,37 @@
+
+###
+# Dialog
+###
+DlgPrompt.title            = Console
+DlgPrompt.plh.command      = <command> <parameter>
+
+DlgStageStart.title = Start New Stage
+DlgStageStart.name_label = Name of the Stage
+DlgStageStart.name_placeholder = e.g. Round 1 Group A
+DlgStageStart.pref_label = Predecessor Stage:
+DlgStageStart.pref_placeholder = -- Please select predecessor stage --
+DlgStageStart.start_notice = Notice: Start stage (First stage for this competition).
+DlgStageStart.cancel = Cancel
+DlgStageStart.start = Start
+DlgStageStart.err_name = Please enter a valid name for the stage.
+DlgStageStart.err_exists = A stage with this name already exists in this competition.
+DlgStageStart.err_pref = Please select a predecessor stage.
+
+DlgAddSingle.title = Add Participant
+DlgAddSingle.lastname = Last Name
+DlgAddSingle.firstname = First Name
+DlgAddSingle.club = Club
+DlgAddSingle.ttr = TTR Value
+DlgAddSingle.ttr_placeholder = e.g. 1450
+DlgAddSingle.year = Year of Birth
+DlgAddSingle.year_unknown = -- Unknown --
+DlgAddSingle.action = Action
+DlgAddSingle.act_reg = Register only (Inactive)
+DlgAddSingle.act_play = Register and Enroll (Active)
+DlgAddSingle.cancel = Cancel
+DlgAddSingle.save = Save
+DlgAddSingle.err_fill = Please fill in Last Name, First Name and Club.
+DlgAddSingle.email = Email
+DlgAddSingle.whatsapp = WhatsApp Number
+
+

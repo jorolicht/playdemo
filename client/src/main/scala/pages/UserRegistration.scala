@@ -65,7 +65,7 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
       "turnstileToken" -> turnstileToken
     )
 
-    ajaxPost[Map[String, String], Map[String, String]]("/wp-json/playdemo/v1/auth/register", List(), data).map {
+    ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/register", List(), data).map {
       case Right(_) => 
         dom.window.alert("Registrierung fast abgeschlossen! Bitte prüfen Sie Ihre E-Mails zur Verifizierung.")
         loadPage(Auth.name, "") // Zurück zum Login

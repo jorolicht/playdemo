@@ -31,7 +31,7 @@ lazy val server = project
       val stageDir = (Universal / stage).value   // erzeugt target/universal/stage
 
       val log = streams.value.log
-      val targetDir = baseDirectory.value / "docker" / "playdemo" / "stage"
+      val targetDir = baseDirectory.value / "docker" / "dev" / "playdemo" / "stage"
       // Zielverzeichnis sauber neu anlegen
       IO.delete(targetDir)
       IO.createDirectory(targetDir)
@@ -42,7 +42,7 @@ lazy val server = project
       log.info(s"Copied staged distribution to ${targetDir.getAbsolutePath}")
 
       // Start docker build
-      val dockerDir = baseDirectory.value / "docker"
+      val dockerDir = baseDirectory.value / "docker" / "dev"
       log.info(s"Starting docker build in ${dockerDir.getAbsolutePath}...")
       val exitCode = Process("./build.sh", dockerDir).!
       if (exitCode != 0) sys.error(s"Docker build failed with exit code $exitCode")
@@ -119,7 +119,7 @@ lazy val server = project
         val lang = msgFile.name.split('.').last
         val targetFileSrv  = baseDirectory.value / ".." / "server" / "public" / "data" / ("msgs_" + lang + ".json")
         val targetFileWp   = baseDirectory.value / ".." / "wp-plugin" / "data" / ("msgs_" + lang + ".json")
-        val targetFileDk   = baseDirectory.value / "docker" / "wp_data" / "wp-content" / "plugins" / "playdemo" / "data" / ("msgs_" + lang + ".json")
+        val targetFileDk   = baseDirectory.value / "docker" / "dev" / "wp_data" / "wp-content" / "plugins" / "tourney" / "data" / ("msgs_" + lang + ".json")
 
         IO.createDirectory(targetFileWp.getParentFile)
         IO.createDirectory(targetFileSrv.getParentFile)
@@ -172,21 +172,27 @@ lazy val server = project
       val wpJsDestination = file("wp-plugin/js")
       val wpCssDestination = file("wp-plugin/css")
       // 2. Zielverzeichnisse definieren
-      val wpJsDestination2 = file("server/docker/wp_data/wp-content/plugins/playdemo/js")
-      val wpCssDestination2 = file("server/docker/wp_data/wp-content/plugins/playdemo/css")
+      val wpJsDestination2 = file("server/docker/dev/wp_data/wp-content/plugins/tourney/js")
+      val wpCssDestination2 = file("server/docker/dev/wp_data/wp-content/plugins/tourney/css")
 
       val wpPluginDir = baseDirectory.value / ".." / "wp-plugin"
-      val dockerWpPluginDir = baseDirectory.value / "docker" / "wp_data" / "wp-content" / "plugins" / "playdemo"
+      val dockerWpPluginDir = baseDirectory.value / "docker" / "dev" / "wp_data" / "wp-content" / "plugins" / "tourney"
 
       IO.copyDirectory(clientTargetDir, wpJsDestination)
       IO.copyDirectory(clientCssSource, wpCssDestination)
       IO.copyDirectory(clientTargetDir, wpJsDestination2)
       IO.copyDirectory(wpCssDestination, wpCssDestination2)
 
-      // Copy playdemo.php and includes to docker
-      IO.copyFile(wpPluginDir / "playdemo.php", dockerWpPluginDir / "playdemo.php")
+      // Copy tourney.php and includes to docker
+      IO.copyFile(wpPluginDir / "tourney.php", dockerWpPluginDir / "tourney.php")
       IO.copyDirectory(wpPluginDir / "includes", dockerWpPluginDir / "includes")
       IO.copyDirectory(wpPluginDir / "pages", dockerWpPluginDir / "pages")
+      if ((wpPluginDir / "composer.json").exists()) {
+        IO.copyFile(wpPluginDir / "composer.json", dockerWpPluginDir / "composer.json")
+      }
+      if ((wpPluginDir / "composer.lock").exists()) {
+        IO.copyFile(wpPluginDir / "composer.lock", dockerWpPluginDir / "composer.lock")
+      }
 
       log.info(s"Copied files to wordpress (including php, includes, and pages)")
     },
@@ -195,7 +201,7 @@ lazy val server = project
       val zipFile = (Universal / packageBin).value
 
       val log = streams.value.log
-      val targetDir = baseDirectory.value / "docker" / "playdemo" 
+      val targetDir = baseDirectory.value / "docker" / "dev" / "playdemo" 
       IO.createDirectory(targetDir)
 
       val targetFile = targetDir / zipFile.getName

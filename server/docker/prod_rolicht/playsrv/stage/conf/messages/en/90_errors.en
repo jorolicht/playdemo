@@ -1,0 +1,20 @@
+
+###
+# Errors
+###
+err00001.ajax.post                                  = Communication error in routine post: {0} {1}
+err00002.ajax.decode                                = Error decoding return value: {0} {1}
+err00003.ajax.login                                 = Error routine login: {0} {1}
+err00004.ajax.user.login                            = Error routine login, can't decode user data
+err00005.promise.sha256                             = Error routine sha256: {0}
+err00006.parseJson                                  = Error decoding JSON-String: {0} {1}
+err00007.db.user.update                             = Error update user database {0}
+err00008.db.user.insert                             = Error insert data in user database {0}
+err00009.ajax.get                                   = Communication error in routine get: {0} {1}
+err00010.db.user.read                               = User not in database {0}
+err00011.db.user.select                             = Error reading user database {0}
+
+err00013.auth.google                                = Error google authentication different names: {0} {1}
+err00014.auth.token.invalid                         = Error google token invalid
+err00015.login.invalid                              = Email / password invalid
+
