@@ -18,7 +18,8 @@ docker exec wp-cli-instance wp db export /var/www/html/dev_dump.sql --allow-root
 
 echo "🔄 Synchronisiere WordPress-Dateien (ohne wp-config.php)..."
 mkdir -p "$PROD_DIR/wp_data"
-rsync -av --exclude="wp-config.php" "$DEV_DIR/wp_data/" "$PROD_DIR/wp_data/"
+sudo rsync -av --exclude="wp-config.php" "$DEV_DIR/wp_data/" "$PROD_DIR/wp_data/"
+sudo chown -R 33:33 "$PROD_DIR/wp_data"
 
 echo "✅ WordPress-Dateien und Datenbank-Dump erfolgreich nach $PROD_DIR/wp_data übertragen."
 echo ""
