@@ -79,7 +79,12 @@ services:
       - db
     networks:
       - backend
-    command: tail -f /dev/null
+    command: |
+      bash -c '
+      # Deaktiviert erzwungenes SSL im MariaDB-Client (ab Version 11.4 Standard)
+      echo -e "[client]\nskip-ssl = true" > /root/.my.cnf
+      tail -f /dev/null
+      '
 
   db:
     image: mariadb:10.11

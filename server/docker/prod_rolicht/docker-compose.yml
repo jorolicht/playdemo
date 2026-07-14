@@ -86,6 +86,9 @@ services:
       - backend
     command: |
       bash -c '
+      # Deaktiviert erzwungenes SSL im MariaDB-Client (ab Version 11.4 Standard)
+      echo -e "[client]\nskip-ssl = true" > /root/.my.cnf
+
       echo "Warte auf WordPress-Dateien..."
       until [ -f /var/www/html/wp-config.php ]; do
         echo "Warte auf wp-config.php..."
@@ -94,7 +97,7 @@ services:
       echo "WordPress-Dateien gefunden."
 
       echo "Warte auf Datenbank-Verbindung..."
-      until wp db check --path=/var/www/html --allow-root > /dev/null 2>&1; do
+      until wp db check --path=/var/www/html --allow-root; do
         echo "Datenbank noch nicht erreichbar. Warte..."
         sleep 2
       done

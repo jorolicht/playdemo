@@ -59,11 +59,6 @@ lazy val server = project
 
       log.info(s"Copied staged distribution to ${targetDir.getAbsolutePath}")
 
-      // Start docker build
-      log.info(s"Starting docker build in ${dockerDir.getAbsolutePath}...")
-      val exitCode = Process("./build.sh", dockerDir).!
-      if (exitCode != 0) sys.error(s"Docker build failed with exit code $exitCode")
-
       stageDir
     },
     commands ++= Seq(hello, buildMsg),
