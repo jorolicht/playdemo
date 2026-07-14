@@ -24,14 +24,14 @@ WORKDIR ${APP_HOME}
 
 
 # 1. Skript kopieren und ausführbar machen
-COPY ./playdemo/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY ./playsrv/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # 👉 ungezippte Play stage kopieren
-COPY ./playdemo/stage/bin ./bin
-COPY ./playdemo/stage/conf ./conf
-COPY ./playdemo/stage/lib ./lib
-COPY ./playdemo/stage/share ./share
+COPY ./playsrv/stage/bin ./bin
+COPY ./playsrv/stage/conf ./conf
+COPY ./playsrv/stage/lib ./lib
+COPY ./playsrv/stage/share ./share
 
 RUN rm -rf conf/messages || true
 

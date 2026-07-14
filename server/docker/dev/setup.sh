@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Pfad zur Environment-Datei
-ENV_FILE="../../env/docker.env"
+ENV_FILE="../../env/dev.env"
 COMPOSE_FILE="docker-compose.yml"
 
 # Liste der zu installierenden Plugins
@@ -23,6 +23,7 @@ wp_cmd() {
 
 # 1. Docker Compose hochfahren
 echo "🐳 Starte Docker Container..."
+mkdir -p logs
 # --wait sorgt dafür, dass das Skript wartet, bis die Container "healthy" sind
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --wait
 

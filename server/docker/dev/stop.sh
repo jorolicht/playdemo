@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Pfad zur Environment-Datei
-ENV_FILE="../../env/docker.env"
+ENV_FILE="../../env/dev.env"
 COMPOSE_FILE="docker-compose.yml"
 
 set -euo pipefail

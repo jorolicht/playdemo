@@ -11,7 +11,7 @@ DB_CONTAINER="wp-db-instance"
 WP_DATA_DIR="./wp_data"
 
 # Attempt to find and load environment variables
-ENV_FILES=("../../env/.env" "../../env/docker.env" ".env")
+ENV_FILES=("../../env/.env" "../../env/dev.env" ".env")
 for ENV_FILE in "${ENV_FILES[@]}"; do
     if [ -f "$ENV_FILE" ]; then
         echo "Loading environment from $ENV_FILE..."

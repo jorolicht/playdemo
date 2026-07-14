@@ -9,6 +9,7 @@ set -a                       # Schaltet "Auto-Export" ein
 source $ENV_FILE             # Liest die Datei ein und exportiert jede Zeile automatisch
 set +a                       # Schaltet "Auto-Export" wieder aus
 
+mkdir -p logs
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d 
 
 echo "✅ Docker Container gestartet."

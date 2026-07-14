@@ -1,0 +1,7 @@
+db_data/
+wp_data/
+db_init/
+backups/
+logs/
+certs/
+registry/

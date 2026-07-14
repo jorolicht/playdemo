@@ -15,6 +15,19 @@ ThisBuild / organization := appOrganization
 ThisBuild / version      := appVersion
 server / maintainer      := appMaintainer
 
+def getAppEnv: String = {
+  sys.props.get("app.env").orElse(sys.env.get("APP_ENV")).getOrElse("dev")
+}
+
+def getDockerDir(base: File, env: String): File = {
+  if (env == "prod_rolicht") base / "docker" / "prod_rolicht"
+  else base / "docker" / "dev"
+}
+
+def getDockerWpPluginDir(base: File, env: String): File = {
+  getDockerDir(base, env) / "wp_data" / "wp-content" / "plugins" / "tourney"
+}
+
 //ThisBuild / scalacOptions ++=Seq("-explain")
 
 lazy val root = (project in file("."))
@@ -31,7 +44,12 @@ lazy val server = project
       val stageDir = (Universal / stage).value   // erzeugt target/universal/stage
 
       val log = streams.value.log
-      val targetDir = baseDirectory.value / "docker" / "dev" / "playdemo" / "stage"
+      val env = getAppEnv
+      log.info(s"Staging for environment: $env")
+
+      val dockerDir = getDockerDir(baseDirectory.value, env)
+      val targetDir = dockerDir / "playsrv" / "stage"
+
       // Zielverzeichnis sauber neu anlegen
       IO.delete(targetDir)
       IO.createDirectory(targetDir)
@@ -42,7 +60,6 @@ lazy val server = project
       log.info(s"Copied staged distribution to ${targetDir.getAbsolutePath}")
 
       // Start docker build
-      val dockerDir = baseDirectory.value / "docker" / "dev"
       log.info(s"Starting docker build in ${dockerDir.getAbsolutePath}...")
       val exitCode = Process("./build.sh", dockerDir).!
       if (exitCode != 0) sys.error(s"Docker build failed with exit code $exitCode")
@@ -119,7 +136,8 @@ lazy val server = project
         val lang = msgFile.name.split('.').last
         val targetFileSrv  = baseDirectory.value / ".." / "server" / "public" / "data" / ("msgs_" + lang + ".json")
         val targetFileWp   = baseDirectory.value / ".." / "wp-plugin" / "data" / ("msgs_" + lang + ".json")
-        val targetFileDk   = baseDirectory.value / "docker" / "dev" / "wp_data" / "wp-content" / "plugins" / "tourney" / "data" / ("msgs_" + lang + ".json")
+        val env            = getAppEnv
+        val targetFileDk   = getDockerWpPluginDir(baseDirectory.value, env) / "data" / ("msgs_" + lang + ".json")
 
         IO.createDirectory(targetFileWp.getParentFile)
         IO.createDirectory(targetFileSrv.getParentFile)
@@ -171,12 +189,14 @@ lazy val server = project
 
       val wpJsDestination = file("wp-plugin/js")
       val wpCssDestination = file("wp-plugin/css")
+      val env = getAppEnv
+      val dockerWpPluginDir = getDockerWpPluginDir(baseDirectory.value, env)
+
       // 2. Zielverzeichnisse definieren
-      val wpJsDestination2 = file("server/docker/dev/wp_data/wp-content/plugins/tourney/js")
-      val wpCssDestination2 = file("server/docker/dev/wp_data/wp-content/plugins/tourney/css")
+      val wpJsDestination2 = dockerWpPluginDir / "js"
+      val wpCssDestination2 = dockerWpPluginDir / "css"
 
       val wpPluginDir = baseDirectory.value / ".." / "wp-plugin"
-      val dockerWpPluginDir = baseDirectory.value / "docker" / "dev" / "wp_data" / "wp-content" / "plugins" / "tourney"
 
       IO.copyDirectory(clientTargetDir, wpJsDestination)
       IO.copyDirectory(clientCssSource, wpCssDestination)
@@ -201,7 +221,8 @@ lazy val server = project
       val zipFile = (Universal / packageBin).value
 
       val log = streams.value.log
-      val targetDir = baseDirectory.value / "docker" / "dev" / "playdemo" 
+      val env = getAppEnv
+      val targetDir = getDockerDir(baseDirectory.value, env) / "playsrv"
       IO.createDirectory(targetDir)
 
       val targetFile = targetDir / zipFile.getName
