@@ -83,6 +83,13 @@ services:
       bash -c '
       # Deaktiviert erzwungenes SSL im MariaDB-Client (ab Version 11.4 Standard)
       echo -e "\n[client]\nskip-ssl = true" >> /etc/my.cnf
+
+      # Erstelle Wrapper-Skripte für alle MariaDB-Befehle, um --skip-ssl zu erzwingen (da wp-cli --no-defaults nutzt)
+      for cmd in mariadb mysql mariadb-check mysqlcheck mariadb-dump mysqldump; do
+        echo -e "#!/bin/sh\nexec /usr/bin/$$cmd \"\$$@\" --skip-ssl" > /usr/local/bin/$$cmd
+        chmod +x /usr/local/bin/$$cmd
+      done
+
       tail -f /dev/null
       '
 
