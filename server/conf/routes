@@ -27,7 +27,7 @@ GET        /helper/send2sse              controllers.Helper.send2sse(id: String,
 GET        /hello                        controllers.Helper.hello(msg: String)
 
 # Referee endpoints
-GET        /referee                      controllers.RefereeController.input(slug: String, tourneyName: String, competition: String, stage: String, roundInfo: String, players: String)
+GET        /referee                      controllers.RefereeController.input(slug: String, tourneyName: String, competition: String, stage: String, roundInfo: String, players: String, winSets: Int ?= 3)
 POST       /referee/submit               controllers.RefereeController.submit()
 
 # WebSocket endpoints

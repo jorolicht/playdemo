@@ -24,9 +24,10 @@ class RefereeController @Inject()(
     competition: String,
     stage: String,
     roundInfo: String,
-    players: String
+    players: String,
+    winSets: Int
   ): Action[AnyContent] = Action { implicit request =>
-    Ok(views.html.RefereeInput(slug, tourneyName, competition, stage, roundInfo, players))
+    Ok(views.html.RefereeInput(slug, tourneyName, competition, stage, roundInfo, players, winSets))
   }
 
   case class SubmitPayload(slug: String, players: String, roundInfo: String, sets: String)

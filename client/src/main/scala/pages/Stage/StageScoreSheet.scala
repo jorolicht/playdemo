@@ -275,7 +275,8 @@ object StageScoreSheet extends BasePage with JsWrapper:
           s"competition=${js.URIUtils.encodeURIComponent(comp.name)}&" +
           s"stage=${js.URIUtils.encodeURIComponent(stage.name)}&" +
           s"roundInfo=${js.URIUtils.encodeURIComponent(roundInfo)}&" +
-          s"players=${js.URIUtils.encodeURIComponent(players)}"
+          s"players=${js.URIUtils.encodeURIComponent(players)}&" +
+          s"winSets=${stage.noWinSets}"
 
         val qrCodeParam = new QRCodeParam { val width = 80; val height = 80 }
         try {

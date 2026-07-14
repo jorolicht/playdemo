@@ -1,4 +1,4 @@
-@(slug: String, tourneyName: String, competition: String, stage: String, roundInfo: String, players: String)
+@(slug: String, tourneyName: String, competition: String, stage: String, roundInfo: String, players: String, winSets: Int)
 
 <!DOCTYPE html>
 <html lang="de">
@@ -244,7 +244,7 @@
             </div>
 
             <div class="sets-container">
-                @for(i <- 1 to 7) {
+                @for(i <- 1 to (if (winSets > 0) 2 * winSets - 1 else 7)) {
                     <div class="set-row">
                         <span class="set-label">Satz @i</span>
                         <input type="number" min="0" id="set_@{i}_a" class="score-input" placeholder="A">
@@ -262,6 +262,7 @@
         const alertBox = document.getElementById('alert-box');
         const form = document.getElementById('result-form');
         const submitBtn = document.getElementById('submit-btn');
+        const maxSets = @(if (winSets > 0) 2 * winSets - 1 else 7);
 
         function showAlert(msg, type) {
             alertBox.textContent = msg;
@@ -278,7 +279,7 @@
             let isValid = true;
             let hasAtLeastOneSet = false;
 
-            for (let i = 1; i <= 7; i++) {
+            for (let i = 1; i <= maxSets; i++) {
                 const valA = document.getElementById('set_' + i + '_a').value.trim();
                 const valB = document.getElementById('set_' + i + '_b').value.trim();
 
