@@ -82,7 +82,7 @@ services:
     command: |
       bash -c '
       # Deaktiviert erzwungenes SSL im MariaDB-Client (ab Version 11.4 Standard)
-      echo -e "[client]\nskip-ssl = true" > /root/.my.cnf
+      echo -e "\n[client]\nskip-ssl = true" >> /etc/my.cnf
       tail -f /dev/null
       '
 
