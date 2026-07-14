@@ -6,15 +6,12 @@ ARG DEMON_USERID
 ARG APP_ENVIRONMENT
 ARG APP_VERSION
 ARG APP_HOME=/app
-ARG PLAY_WP_URL
-ARG PLAY_WP_CPT
+
 
 ENV APP_ENVIRONMENT=${APP_ENVIRONMENT}
 ENV APP_VERSION=${APP_VERSION}
 ENV PLAY_LOGFILE_PATH=${APP_HOME}/logs
-ENV PLAY_PIDFILE_PATH=${APP_HOME}/run/server.pid
-ENV PLAY_WP_URL=${PLAY_WP_URL}
-ENV PLAY_WP_CPT=${PLAY_WP_CPT}  
+ENV PLAY_PIDFILE_PATH=${APP_HOME}/run/server.pid 
 
 USER root
 
@@ -24,14 +21,14 @@ WORKDIR ${APP_HOME}
 
 
 # 1. Skript kopieren und ausführbar machen
-COPY ./playdemo/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY ./playsrv/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # 👉 ungezippte Play stage kopieren
-COPY ./playdemo/stage/bin ./bin
-COPY ./playdemo/stage/conf ./conf
-COPY ./playdemo/stage/lib ./lib
-COPY ./playdemo/stage/share ./share
+COPY ./playsrv/stage/bin ./bin
+COPY ./playsrv/stage/conf ./conf
+COPY ./playsrv/stage/lib ./lib
+COPY ./playsrv/stage/share ./share
 
 RUN rm -rf conf/messages || true
 

@@ -4,25 +4,22 @@ services:
   # Reverse Proxy (Traefik), der den HTTPS-Traffic (Port 443) verwaltet
   reverse-proxy:
     image: traefik:v3.6.2
+    restart: unless-stopped
     command:
-      - "--log.level=DEBUG"
+      - "--log.level=INFO"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.endpoint=unix:///var/run/docker.sock"
-    
-      # Entrypoints definieren
+
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-    
-      # HTTP → HTTPS Umleitung
+
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
 
-      # Let's Encrypt ACME
       - "--certificatesresolvers.myresolver.acme.email=robert.lichenegger@gmail.com"
       - "--certificatesresolvers.myresolver.acme.storage=/acme.json"
       - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
-      # FEHLER KORRIGIERT: Muss auf den HTTP-Entrypoint 'web' verweisen
       - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
     ports:
       - "80:80"
@@ -39,8 +36,10 @@ services:
       context: .
       dockerfile: wordpress/Dockerfile
     container_name: wp-gmp-instance
+    restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: ${DB_USER}
@@ -59,7 +58,9 @@ services:
       - "traefik.http.routers.wordpress.entrypoints=websecure"
       # HINWEIS: Let's Encrypt Resolver zugewiesen
       - "traefik.http.routers.wordpress.tls.certresolver=myresolver"
-      - "traefik.http.routers.wordpress.rule=PathPrefix(`/`)"
+      # ALT: - "traefik.http.routers.wordpress.rule=PathPrefix(`/`)"
+      # NEU:
+      - "traefik.http.routers.wordpress.rule=Host(`rolicht.de`) && PathPrefix(`/`)"
       - "traefik.http.routers.wordpress.tls=true"
       - "traefik.http.services.wordpress.loadbalancer.server.port=80"
       - "traefik.docker.network=proxy"
@@ -79,13 +80,49 @@ services:
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
       WORDPRESS_DB_NAME: ${DB_NAME}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - backend
-    command: tail -f /dev/null
+    command: |
+      bash -c '
+      echo "Warte auf WordPress-Dateien..."
+      until [ -f /var/www/html/wp-config.php ]; do
+        echo "Warte auf wp-config.php..."
+        sleep 2
+      done
+      echo "WordPress-Dateien gefunden."
+
+      echo "Warte auf Datenbank-Verbindung..."
+      until wp db check --path=/var/www/html --allow-root > /dev/null 2>&1; do
+        echo "Datenbank noch nicht erreichbar. Warte..."
+        sleep 2
+      done
+      echo "Datenbank-Verbindung erfolgreich hergestellt!"
+
+      # Explizite Prüfung, ob die Tabellen in der DB existieren
+      if ! wp core is-installed --path=/var/www/html --allow-root; then
+          echo "Installiere WordPress..."
+          wp core install \
+              --path=/var/www/html \
+              --url="${WP_URL}" \
+              --title="${WP_TITLE}" \
+              --admin_user="${WP_ADMIN_USER}" \
+              --admin_password="${WP_ADMIN_PASSWORD}" \
+              --admin_email="${WP_ADMIN_EMAIL}" \
+              --skip-email \
+              --allow-root
+          echo "Installation abgeschlossen."
+      else
+          echo "WordPress ist bereits installiert."
+      fi
+
+      tail -f /dev/null
+      '
 
   db:
     image: mariadb:10.11
+    restart: unless-stopped
     container_name: wp-db-instance
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
@@ -94,19 +131,24 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ./db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s      
     networks:
       - backend
 
   playsrv:
     image: playsrv-image
     container_name: playsrv-instance
+    restart: unless-stopped
     build:
       context: .
       dockerfile: playsrv/Dockerfile
       args:
         - APP_HOME=${APP_HOME}
-        - PLAY_WP_URL=${PLAY_WP_URL}
-        - PLAY_WP_CPT=${PLAY_WP_CPT}
         - APP_VERSION=${APP_VERSION}
         - DEMON_USER=${DEMON_USER}
         - DEMON_USERID=${DEMON_USERID}
@@ -115,7 +157,7 @@ services:
       - "traefik.http.routers.playsrv.entrypoints=websecure"
       # HINWEIS: Let's Encrypt Resolver zugewiesen
       - "traefik.http.routers.playsrv.tls.certresolver=myresolver"
-      - "traefik.http.routers.playsrv.rule=PathPrefix(`/srv`)"
+      - "traefik.http.routers.playsrv.rule=Host(`rolicht.de`) && PathPrefix(`/srv`)"
       - "traefik.http.routers.playsrv.tls=true"
       - "traefik.http.services.playsrv.loadbalancer.server.port=${PLAY_HTTP_PORT}"
       - "traefik.docker.network=proxy"
@@ -134,8 +176,6 @@ services:
       DB_DEFAULT_DRIVER: ${DB_DEFAULT_DRIVER}
       DB_DEFAULT_USERNAME: ${DB_DEFAULT_USERNAME}
       DB_DEFAULT_PASSWORD: ${DB_DEFAULT_PASSWORD}
-      PLAY_WP_URL: ${PLAY_WP_URL}
-      PLAY_WP_CPT: ${PLAY_WP_CPT}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       PLAY_HTTP_PORT: ${PLAY_HTTP_PORT}
       PLAY_HTTP_HOST: ${PLAY_HTTP_HOST}
