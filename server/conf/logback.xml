@@ -28,6 +28,7 @@
   <logger name="controllers.Auth" level="DEBUG" />
   <logger name="controllers.Helper" level="TRACE" />
   <logger name="controllers.WebSocketController" level="DEBUG" />
+  <logger name="controllers.MatchboardController" level="DEBUG" />
   <logger name="actors.WebSocketClientActor" level="DEBUG" />
   <logger name="actors.SSEMgmtActor" level="DEBUG" />
   <logger name="play" level="INFO" />

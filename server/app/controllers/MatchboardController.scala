@@ -47,6 +47,7 @@ class MatchboardController @Inject()(
    * and broadcasts the updated state to all connected websocket clients.
    */
   def set(slug: String): Action[JsValue] = Action(parse.json) { request =>
+    logger.debug(s"matchboard/set Action invoked with: ${request.body}")
     request.body.validate[MatchboardSetRequest] match {
       case JsSuccess(payload, _) =>
         val data = MatchboardStore.getOrCreate(slug)

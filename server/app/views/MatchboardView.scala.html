@@ -9,17 +9,17 @@
     <link href='@("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap")' rel="stylesheet">
     <style>
         :root {
-            --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 100%);
-            --card-bg: rgba(30, 41, 59, 0.45);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-glow: rgba(99, 102, 241, 0.15);
-            --accent: #6366f1;
-            --accent-glow-green: rgba(16, 185, 129, 0.2);
+            --bg-gradient: radial-gradient(circle at top, #f8fafc 0%, #e2e8f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --border-color: rgba(148, 163, 184, 0.15);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent-glow: rgba(79, 70, 229, 0.08);
+            --accent: #4f46e5;
+            --accent-glow-green: rgba(16, 185, 129, 0.1);
             --success: #10b981;
-            --info-bg: rgba(99, 102, 241, 0.1);
-            --info-border: rgba(99, 102, 241, 0.3);
+            --info-bg: rgba(79, 70, 229, 0.05);
+            --info-border: rgba(79, 70, 229, 0.18);
         }
 
         * {
@@ -42,17 +42,20 @@
         /* Header Styles */
         .header {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
             padding-bottom: 1.5rem;
             border-bottom: 1px solid var(--border-color);
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
+            text-align: center;
         }
 
         .header-title {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 800;
-            background: linear-gradient(to right, #818cf8, #c084fc);
+            background: linear-gradient(to right, #4f46e5, #9333ea);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -61,7 +64,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(30, 41, 59, 0.6);
+            background: rgba(255, 255, 255, 0.85);
             border: 1px solid var(--border-color);
             padding: 6px 14px;
             border-radius: 20px;
@@ -69,6 +72,8 @@
             font-size: 0.85rem;
             letter-spacing: 0.05em;
             text-transform: uppercase;
+            color: var(--text-secondary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         .live-dot {
@@ -103,20 +108,24 @@
             background: var(--info-bg);
             border: 1px solid var(--info-border);
             border-radius: 16px;
-            padding: 1.25rem 1.75rem;
-            font-size: 1.15rem;
-            font-weight: 500;
+            padding: 1.25rem 2rem;
+            font-size: 1.2rem;
+            font-weight: 600;
             line-height: 1.5;
-            color: #e2e8f0;
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.05);
+            color: #3730a3;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.04);
             animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+            text-align: center;
         }
 
-        /* Match Grid Styles */
+        /* Match Grid Styles (List Row Layout) */
         .match-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .match-card {
@@ -124,77 +133,95 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 1.5rem;
+            border-radius: 16px;
+            padding: 1.25rem 2.5rem;
             display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
             transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
             animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
         .match-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(99, 102, 241, 0.3);
-            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+            border-color: rgba(79, 70, 229, 0.25);
+            box-shadow: 0 12px 35px rgba(79, 70, 229, 0.08);
         }
 
-        .match-header {
+        .match-left {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            width: 150px;
+            flex-shrink: 0;
         }
 
         .court-badge {
-            background: rgba(99, 102, 241, 0.15);
-            color: #a5b4fc;
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            padding: 4px 12px;
+            background: rgba(79, 70, 229, 0.08);
+            color: #4f46e5;
+            border: 1px solid rgba(79, 70, 229, 0.2);
+            padding: 6px 16px;
             border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.9rem;
+            font-weight: 800;
+            font-size: 1.15rem;
             letter-spacing: 0.02em;
+            text-align: center;
+            display: inline-block;
+            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.04);
         }
 
-        .comp-badge {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-secondary);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.75rem;
-            max-width: 150px;
+        .match-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            flex-grow: 1;
+        }
+
+        .player-name {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #0f172a;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            max-width: 320px;
         }
 
-        .players-container {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            padding: 0.5rem 0;
+        .vs-badge {
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: #a21caf;
+            background: rgba(240, 73, 214, 0.08);
+            border: 1px solid rgba(240, 73, 214, 0.2);
+            padding: 4px 10px;
+            border-radius: 8px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
         }
 
-        .player-row {
+        .match-right {
             display: flex;
             align-items: center;
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #f8fafc;
+            justify-content: flex-end;
+            width: 250px;
+            flex-shrink: 0;
         }
 
-        .vs-divider {
-            align-self: center;
-            font-size: 0.8rem;
-            font-weight: 800;
-            color: var(--text-secondary);
-            opacity: 0.5;
-            letter-spacing: 0.1em;
-            margin: 0.25rem 0;
-            text-transform: uppercase;
+        .comp-badge {
+            background: rgba(71, 85, 105, 0.05);
+            color: #475569;
+            border: 1px solid rgba(71, 85, 105, 0.15);
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            max-width: 230px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: right;
         }
 
         /* Animations */
@@ -215,28 +242,42 @@
 
         /* Empty State */
         .empty-state {
-            grid-column: 1 / -1;
             text-align: center;
             padding: 4rem 2rem;
             color: var(--text-secondary);
-            font-size: 1.2rem;
-            background: rgba(255, 255, 255, 0.02);
+            font-size: 1.3rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.4);
             border: 1px dashed var(--border-color);
             border-radius: 20px;
+            width: 100%;
         }
 
         /* Responsive Layout */
-        @@media (max-width: 640px) {
+        @@media (max-width: 768px) {
             body {
                 padding: 1rem;
             }
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
             .header-title {
-                font-size: 1.5rem;
+                font-size: 1.8rem;
+            }
+            .match-card {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1.5rem;
+                align-items: stretch;
+                text-align: center;
+            }
+            .match-left, .match-right {
+                width: 100%;
+                justify-content: center;
+            }
+            .match-center {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .comp-badge {
+                text-align: center;
             }
         }
     </style>
@@ -301,14 +342,16 @@
                     const card = document.createElement('div');
                     card.className = 'match-card';
                     card.innerHTML = `
-                        <div class="match-header">
+                        <div class="match-left">
                             <span class="court-badge">${match.court || ''}</span>
-                            <span class="comp-badge" title="${match.compName || ''}">${match.compName || ''}</span>
                         </div>
-                        <div class="players-container">
-                            <div class="player-row">${match.nameA || ''}</div>
-                            <div class="vs-divider">vs</div>
-                            <div class="player-row">${match.nameB || ''}</div>
+                        <div class="match-center">
+                            <div class="player-name">${match.nameA || ''}</div>
+                            <div class="vs-badge">VS</div>
+                            <div class="player-name">${match.nameB || ''}</div>
+                        </div>
+                        <div class="match-right">
+                            <span class="comp-badge" title="${match.compName || ''}">${match.compName || ''}</span>
                         </div>
                     `;
                     matchGrid.appendChild(card);
