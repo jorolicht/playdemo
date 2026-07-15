@@ -4,6 +4,8 @@ package Stage
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.Event
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import base.*
 import shared.model.*
 import shared.format.*
@@ -14,7 +16,7 @@ import scala.collection.mutable.ArrayBuffer
  * Organizes matches by round, validates short-entry set results,
  * updates match statuses according to dependencies, and manages printing.
  */
-object StageInput extends BasePage with JsWrapper:
+object StageInput extends BasePage with JsWrapper with services.ComWrapper:
   def name = PageNameTyp("StageInput")
 
   // HtmlId definitions for Twirl-bindable actions
@@ -142,6 +144,11 @@ object StageInput extends BasePage with JsWrapper:
         stage.inputMatch(gameNo, (aWins, bWins), parsedBalls.mkString("·"), "", playfieldVal) match {
           case Left(err) => error(s"StageInput: inputMatch failed: ${err.msgCode}")
           case Right(triggered) =>
+            if (playfieldVal.nonEmpty) {
+              stage.matches.find(_.gameNo == gameNo).foreach { m =>
+                sendMatchboardUpdate("ended", playfieldVal, m, stage)
+              }
+            }
             services.TourneyDB.tourney.updateStage(stage) match {
               case Right(updatedStage) =>
                 Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
@@ -593,6 +600,7 @@ object StageInput extends BasePage with JsWrapper:
     } else {
       stage.matches.find(_.gameNo == gameNo) match
         case Some(m) =>
+          val oldCourtVal = m.playfield
           m.setPlayfield(tableVal)
           
           if (!m.finished) {
@@ -603,10 +611,12 @@ object StageInput extends BasePage with JsWrapper:
                   m.startTime = nowTimestamp()
                 }
               }
+              sendMatchboardUpdate("set", tableVal, m, stage)
             } else {
               m.setStatus(MEntry.MS_READY)
               m.startTime = ""
               updateStageMatchStatuses(stage)
+              sendMatchboardUpdate("ended", oldCourtVal, m, stage)
             }
           }
           
@@ -628,5 +638,45 @@ object StageInput extends BasePage with JsWrapper:
             case Left(err) =>
               error(s"StageInput: Failed to update table number: ${err.msgCode}")
         case _ =>
+    }
+
+  private def sendMatchboardUpdate(action: String, courtVal: String, m: MEntry, stage: Stage): Unit =
+    if (courtVal.trim.nonEmpty) {
+      val t = services.TourneyDB.tourney
+      val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
+      val slugParam = s"${slugName.trim}-${t.wpId}"
+      
+      val comp = t.competitions.filter(_ != null).find(_.id == stage.coId).get
+      
+      // Look up player names
+      val pants = comp.pants1Stage.toSeq
+      val nameA = formatSnoName(m.stNoA, pants)
+      val nameB = formatSnoName(m.stNoB, pants)
+      
+      val entry = shared.model.MatchboardEntry(
+        id = s"match_${stage.id.value}_${m.gameNo}",
+        entryType = "match",
+        court = Some(courtVal.trim),
+        nameA = Some(nameA),
+        nameB = Some(nameB),
+        compName = Some(comp.name),
+        stageId = Some(stage.id.value.toString),
+        compId = Some(comp.id.value.toString)
+      )
+      
+      val request = shared.model.MatchboardSetRequest(
+        action = action,
+        tourneyName = Some(t.name),
+        entry = Some(entry)
+      )
+      
+      ajaxPost[shared.model.MatchboardSetRequest, shared.model.MatchboardSetResponse]("/matchboard/set", List("slug" -> slugParam), request).map {
+        case Right(res) if res.success =>
+          debug(s"Matchboard update successfully sent: action=$action, court=$courtVal")
+        case Right(_) =>
+          debug(s"Matchboard update returned success=false: action=$action, court=$courtVal")
+        case Left(err) =>
+          debug(s"Failed to send matchboard update: ${err.msgCode}")
+      }
     }
 
