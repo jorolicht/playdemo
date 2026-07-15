@@ -269,6 +269,11 @@ object StageScoreSheet extends BasePage with JsWrapper:
         val roundInfo = s"${Seq(info1, info2).filter(s => s != null && s.nonEmpty).mkString(" / ")} (Spiel $gameNo)"
         val players = s"$nameA - $nameB"
 
+        val gNo = scala.util.Try(gameNo.toInt).getOrElse(0)
+        val matchEntryOpt = stage.matches.find(_.gameNo == gNo)
+        val ratingA = matchEntryOpt.flatMap(m => comp.pants1Stage.find(_.id == m.stNoA)).map(_.rating).getOrElse(0)
+        val ratingB = matchEntryOpt.flatMap(m => comp.pants1Stage.find(_.id == m.stNoB)).map(_.rating).getOrElse(0)
+
         val refereeAddr = s"$playBase/referee?" +
           s"slug=${js.URIUtils.encodeURIComponent(slugParam)}&" +
           s"tourneyName=${js.URIUtils.encodeURIComponent(t.name)}&" +
@@ -276,7 +281,11 @@ object StageScoreSheet extends BasePage with JsWrapper:
           s"stage=${js.URIUtils.encodeURIComponent(stage.name)}&" +
           s"roundInfo=${js.URIUtils.encodeURIComponent(roundInfo)}&" +
           s"players=${js.URIUtils.encodeURIComponent(players)}&" +
-          s"winSets=${stage.noWinSets}"
+          s"winSets=${stage.noWinSets}&" +
+          s"stageId=${stage.id.value}&" +
+          s"gameNo=$gNo&" +
+          s"ttrA=$ratingA&" +
+          s"ttrB=$ratingB"
 
         val qrCodeParam = new QRCodeParam { val width = 80; val height = 80 }
         try {

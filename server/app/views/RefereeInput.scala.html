@@ -187,9 +187,11 @@
         .alert {
             display: none;
             border-radius: 12px;
-            padding: 1rem;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
             font-weight: 500;
+            line-height: 1.6;
+            white-space: pre-wrap;
             animation: fadeIn 0.3s ease;
         }
 
@@ -305,11 +307,21 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Wird gesendet...';
 
+            const urlParams = new URLSearchParams(window.location.search);
+            const stageId = parseInt(urlParams.get('stageId'), 10) || null;
+            const gameNo = parseInt(urlParams.get('gameNo'), 10) || null;
+            const ttrA = parseInt(urlParams.get('ttrA'), 10) || null;
+            const ttrB = parseInt(urlParams.get('ttrB'), 10) || null;
+
             const payload = {
                 slug: form.elements['slug'].value,
                 players: form.elements['players'].value,
                 roundInfo: form.elements['roundInfo'].value,
-                sets: sets.join(', ')
+                sets: sets.join(', '),
+                stageId: stageId,
+                gameNo: gameNo,
+                ttrA: ttrA,
+                ttrB: ttrB
             };
 
             fetch('/srv/referee/submit', {
@@ -323,7 +335,21 @@
             })
             .then(res => {
                 if (res.ok) {
-                    showAlert('Ergebnis erfolgreich an die Turnierleitung übermittelt!', 'success');
+                    return res.json();
+                } else {
+                    throw new Error('Server error');
+                }
+            })
+            .then(data => {
+                if (data && data.success) {
+                    let msg = "Vielen Dank für die Ergebniseingabe, diese wird der Turnierleitung mitgeteilt.\n" +
+                              "Bitte bringen Sie trotzdem den ausgefüllten Schiedsrichterzettel zur Turnierleitung.";
+                    if (data.ttrCalculated) {
+                        msg += "\n\nUngefähre TTR-Werteveränderung bei Standard Entwicklungskoeffizient:\n" +
+                               "   Spieler A:  " + data.deltaA + "\n" +
+                               "   Spieler B:  " + data.deltaB;
+                    }
+                    showAlert(msg, 'success');
                     form.style.display = 'none';
                 } else {
                     showAlert('Turnierleitung z.Z. nicht aktiv', 'danger');
