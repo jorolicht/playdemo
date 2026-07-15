@@ -88,12 +88,7 @@ trait ComWrapper:
     params: List[(String,String)],
     data: IN,
     hdrs: Map[String,String] =
-      Map(
-        "Content-Type" -> "application/json",
-        "X-WP-Nonce" -> Global.wpNonce,
-        "Csrf-Token" -> "nocheck",
-        "X-Requested-With" -> "XMLHttpRequest"
-      ),
+      Map("Content-Type" -> "application/json", "X-WP-Nonce" -> Global.wpNonce),
     host: String = Global.playUrl,
     cred: Boolean = true
   )(
@@ -105,13 +100,17 @@ trait ComWrapper:
       val name = route.split("/").lastOption.getOrElse("ajaxPost")
       val jsonData = write(data)
       val dataStr = if (jsonData.length > 40) s"${jsonData.take(25)} ... ${jsonData.takeRight(10)}" else jsonData
+      val finalHdrs = hdrs ++ Map(
+        "Csrf-Token" -> "nocheck",
+        "X-Requested-With" -> "XMLHttpRequest"
+      )
       debug(
         s"ajaxPost -> route:$route " +
         s"params:${params.mkString(", ")} " +
         s"data:$dataStr " +
-        s"hdrs:${hdrs.mkString(", ")}"
+        s"hdrs:${finalHdrs.mkString(", ")}"
       )
-      Ajax.post(genPath(host, route, params), jsonData, headers = hdrs, withCredentials = cred)
+      Ajax.post(genPath(host, route, params), jsonData, headers = finalHdrs, withCredentials = cred)
         .map(_.responseText).map(content => Return.decode[OUT](content) )
         .recover({
           // Recover from a failed error code into a successful future
