@@ -159,5 +159,6 @@ trait ComWrapper:
 
   // genPath - encodes params to URL encoded 
   def genPath(host: String, route: String, params: List[(String,String)]): String = 
+    val activeHost = if (host.trim.nonEmpty) host else "/srv"
     val urlParams = params.map(x => s"${x._1}=${x._2}").mkString("&") 
-    if (params.isEmpty) s"${host}${route}" else s"${host}${route}?${urlParams}"
+    if (params.isEmpty) s"${activeHost}${route}" else s"${activeHost}${route}?${urlParams}"
