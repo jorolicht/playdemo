@@ -67,9 +67,14 @@ object WebSocketService:
       val cleanPlayUrl = Global.playUrl.replace("https://", "").replace("http://", "")
       s"$wsProtocol//$cleanPlayUrl/ws/$slug"
     } else {
-      val protocol = if (dom.window.location.protocol == "https:") "wss:" else "ws:"
-      val host = dom.window.location.host
-      s"$protocol//$host/srv/ws/$slug"
+      val isLocalhost = dom.window.location.hostname == "localhost" || dom.window.location.hostname == "127.0.0.1"
+      if (isLocalhost) {
+        val protocol = if (dom.window.location.protocol == "https:") "wss:" else "ws:"
+        val host = dom.window.location.host
+        s"$protocol//$host/srv/ws/$slug"
+      } else {
+        s"ws://backend:9500/ws/$slug"
+      }
     }
     
     debug(s"[WebSocket] Connecting to $wsUrl ...")

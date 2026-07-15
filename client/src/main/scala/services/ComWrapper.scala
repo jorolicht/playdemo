@@ -88,7 +88,12 @@ trait ComWrapper:
     params: List[(String,String)],
     data: IN,
     hdrs: Map[String,String] =
-      Map("Content-Type" -> "application/json", "X-WP-Nonce" -> Global.wpNonce),
+      Map(
+        "Content-Type" -> "application/json",
+        "X-WP-Nonce" -> Global.wpNonce,
+        "Csrf-Token" -> "nocheck",
+        "X-Requested-With" -> "XMLHttpRequest"
+      ),
     host: String = Global.playUrl,
     cred: Boolean = true
   )(
@@ -159,6 +164,11 @@ trait ComWrapper:
 
   // genPath - encodes params to URL encoded 
   def genPath(host: String, route: String, params: List[(String,String)]): String = 
-    val activeHost = if (host.trim.nonEmpty) host else "/srv"
+    val activeHost = if (host.trim.nonEmpty) {
+      host
+    } else {
+      val isLocalhost = dom.window.location.hostname == "localhost" || dom.window.location.hostname == "127.0.0.1"
+      if (isLocalhost) "/srv" else "http://backend:9500"
+    }
     val urlParams = params.map(x => s"${x._1}=${x._2}").mkString("&") 
     if (params.isEmpty) s"${activeHost}${route}" else s"${activeHost}${route}?${urlParams}"
