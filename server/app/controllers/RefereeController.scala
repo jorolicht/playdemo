@@ -43,8 +43,9 @@ class RefereeController @Inject()(
           case true =>
             Ok(Json.obj("success" -> true))
           case false =>
-            logger.warn(s"WebSocket client not connected for slug '${payload.slug}'")
-            BadRequest(Json.obj("error" -> "Turnierleitung z.Z. nicht aktiv"))
+            logger.warn(s"WebSocket client not connected for slug '${payload.slug}'. Buffering in RefereeDB.")
+            services.MatchboardStore.addRefereeResult(payload.slug, message)
+            Ok(Json.obj("success" -> true, "buffered" -> true))
         }
       case JsError(errors) =>
         Future.successful(BadRequest(Json.obj("error" -> "Invalid JSON payload", "details" -> JsError.toJson(errors))))

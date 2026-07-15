@@ -1,0 +1,389 @@
+@(slug: String, initialData: shared.model.Matchboard, initialDataJson: String)
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anzeigetafel - @initialData.tourneyName</title>
+    <link href='@("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap")' rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 100%);
+            --card-bg: rgba(30, 41, 59, 0.45);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --accent: #6366f1;
+            --accent-glow-green: rgba(16, 185, 129, 0.2);
+            --success: #10b981;
+            --info-bg: rgba(99, 102, 241, 0.1);
+            --info-border: rgba(99, 102, 241, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .header-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--text-secondary);
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .live-dot.connected {
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 1.5s infinite;
+        }
+
+        @@keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        /* Info Section Styles */
+        .info-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .info-card {
+            background: var(--info-bg);
+            border: 1px solid var(--info-border);
+            border-radius: 16px;
+            padding: 1.25rem 1.75rem;
+            font-size: 1.15rem;
+            font-weight: 500;
+            line-height: 1.5;
+            color: #e2e8f0;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.05);
+            animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        /* Match Grid Styles */
+        .match-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .match-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+            animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .match-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.1);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .court-badge {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+        }
+
+        .comp-badge {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .players-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+        }
+
+        .player-row {
+            display: flex;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .vs-divider {
+            align-self: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            opacity: 0.5;
+            letter-spacing: 0.1em;
+            margin: 0.25rem 0;
+            text-transform: uppercase;
+        }
+
+        /* Animations */
+        @@keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @@keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @@keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed var(--border-color);
+            border-radius: 20px;
+        }
+
+        /* Responsive Layout */
+        @@media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .header-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-title" id="tourney-name">@initialData.tourneyName</div>
+        <div class="live-indicator">
+            <span class="live-dot" id="ws-dot"></span>
+            <span id="ws-status">Verbinde...</span>
+        </div>
+    </div>
+
+    <!-- Info Announcments -->
+    <div class="info-container" id="info-container">
+        <!-- Rendered dynamically -->
+    </div>
+
+    <!-- Matchboard Grid -->
+    <div class="match-grid" id="match-grid">
+        <!-- Rendered dynamically -->
+    </div>
+
+    <script>
+        const slug = "@slug";
+        const tourneyHeader = document.getElementById('tourney-name');
+        const wsDot = document.getElementById('ws-dot');
+        const wsStatus = document.getElementById('ws-status');
+        const infoContainer = document.getElementById('info-container');
+        const matchGrid = document.getElementById('match-grid');
+
+        // Initial Data injected from server
+        let currentData = {
+            tourneyName: "@initialData.tourneyName",
+            entries: []
+        };
+
+        // Render function
+        function render(data) {
+            tourneyHeader.textContent = data.tourneyName;
+
+            // Clear previous items
+            infoContainer.innerHTML = '';
+            matchGrid.innerHTML = '';
+
+            const infoEntries = data.entries.filter(e => e.entryType === 'info');
+            const matchEntries = data.entries.filter(e => e.entryType === 'match');
+
+            // Render Info Entries
+            if (infoEntries.length > 0) {
+                infoEntries.forEach(info => {
+                    const card = document.createElement('div');
+                    card.className = 'info-card';
+                    card.textContent = info.text || '';
+                    infoContainer.appendChild(card);
+                });
+            }
+
+            // Render Match Entries
+            if (matchEntries.length > 0) {
+                matchEntries.forEach(match => {
+                    const card = document.createElement('div');
+                    card.className = 'match-card';
+                    card.innerHTML = `
+                        <div class="match-header">
+                            <span class="court-badge">${match.court || ''}</span>
+                            <span class="comp-badge" title="${match.compName || ''}">${match.compName || ''}</span>
+                        </div>
+                        <div class="players-container">
+                            <div class="player-row">${match.nameA || ''}</div>
+                            <div class="vs-divider">vs</div>
+                            <div class="player-row">${match.nameB || ''}</div>
+                        </div>
+                    `;
+                    matchGrid.appendChild(card);
+                });
+            } else if (infoEntries.length === 0) {
+                // Show empty state if absolutely nothing is displayed
+                const empty = document.createElement('div');
+                empty.className = 'empty-state';
+                empty.textContent = 'Aktuell keine aktiven Spiele eingetragen.';
+                matchGrid.appendChild(empty);
+            }
+        }
+
+        // Establish WebSocket Connection
+        let ws;
+        function connect() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host;
+            const path = window.location.pathname;
+            const isSrv = path.startsWith('/srv');
+            const wsPath = isSrv ? `/srv/ws/${slug}` : `/ws/${slug}`;
+            const wsUrl = `${protocol}//${host}${wsPath}`;
+
+            wsStatus.textContent = 'Verbinde...';
+            wsDot.className = 'live-dot';
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                wsStatus.textContent = 'Live';
+                wsDot.className = 'live-dot connected';
+                // Send keep-alive ping periodically
+                setInterval(() => {
+                    if (ws.readyState === WebSocket.OPEN) {
+                        ws.send('ping');
+                    }
+                }, 30000);
+            };
+
+            ws.onmessage = function(event) {
+                if (event.data.startsWith('MATCHBOARD_UPDATE:')) {
+                    try {
+                        const jsonStr = event.data.substring(18);
+                        const matchboard = JSON.parse(jsonStr);
+                        currentData = matchboard;
+                        render(matchboard);
+                    } catch (e) {
+                        console.error('Error parsing matchboard update', e);
+                    }
+                }
+            };
+
+            ws.onclose = function() {
+                wsStatus.textContent = 'Getrennt';
+                wsDot.className = 'live-dot';
+                // Retry connection after 5 seconds
+                setTimeout(connect, 5000);
+            };
+        }
+
+        // Parse and render initial entries injected as JSON safely
+        try {
+            // Unescape HTML entities if injected by Play Framework twirl compiler
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = '@initialDataJson';
+            const rawJson = tempDiv.textContent;
+            currentData = JSON.parse(rawJson);
+            render(currentData);
+        } catch (e) {
+            console.error('Error parsing initial data', e);
+            render(currentData);
+        }
+
+        // Start WebSocket
+        connect();
+    </script>
+</body>
+</html>

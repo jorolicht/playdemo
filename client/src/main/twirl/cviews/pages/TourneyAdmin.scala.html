@@ -45,6 +45,11 @@
                 <i class="bi bi-chat-dots me-1"></i>Messages
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link @{if(activeTab == "MATCHBOARD") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'MATCHBOARD')">
+                <i class="bi bi-display me-1"></i>InfoAnzeige
+            </a>
+        </li>
     </ul>
 
     <!-- Tab Contents -->
@@ -273,6 +278,92 @@
                         <button class="btn btn-primary fw-bold" id="ws-send-btn">
                             <i class="bi bi-send me-1"></i>Senden
                         </button>
+                    </div>
+                </div>
+            </div>
+        }
+        @if(activeTab == "MATCHBOARD") {
+            <div class="card shadow-sm border-start border-4 border-primary mb-4 animate-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary fw-bold mb-3">
+                        <i class="bi bi-display me-2 text-primary"></i>Matchboard / InfoAnzeige Verwaltung
+                    </h5>
+                    <p class="text-muted small">
+                        Verwalten Sie die Live-Anzeigetafel für dieses Turnier. Sie können neue Info-Meldungen und Spiel-Anzeigen hinzufügen, vorhandene Einträge löschen und die Anzeigetafel live aktualisieren.
+                    </p>
+
+                    <!-- Add Entry Form -->
+                    <div class="card bg-light border-0 mb-4">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3"><i class="bi bi-plus-circle me-1 text-primary"></i>Neuen Eintrag hinzufügen</h6>
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold">Typ</label>
+                                    <select class="form-select form-select-sm" id="mb-entry-type-select" onchange="toggleMatchboardFormFields()">
+                                        <option value="info">InfoMeldung (Info)</option>
+                                        <option value="match">Spielanzeige (Match)</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Info Entry Fields -->
+                                <div class="col-md-9" id="mb-info-fields">
+                                    <label class="form-label small fw-bold">Text der Infomeldung</label>
+                                    <input type="text" class="form-control form-control-sm" id="mb-info-text" placeholder="z.B. Mittagspause von 12:00 bis 13:00 Uhr">
+                                </div>
+
+                                <!-- Match Entry Fields -->
+                                <div class="col-md-9" id="mb-match-fields" style="display: none;">
+                                    <div class="row g-2">
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold">Tisch / Court</label>
+                                            <input type="text" class="form-control form-control-sm" id="mb-match-court" placeholder="z.B. Tisch 1">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Spieler A</label>
+                                            <input type="text" class="form-control form-control-sm" id="mb-match-player-a" placeholder="Spieler A">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Spieler B</label>
+                                            <input type="text" class="form-control form-control-sm" id="mb-match-player-b" placeholder="Spieler B">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Spielklasse</label>
+                                            <input type="text" class="form-control form-control-sm" id="mb-match-comp" placeholder="z.B. Herren A">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Stage ID</label>
+                                            <input type="text" class="form-control form-control-sm" id="mb-match-stage-id" placeholder="z.B. stage_1">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Comp ID</label>
+                                            <input type="text" class="form-control form-control-sm" id="mb-match-comp-id" placeholder="z.B. comp_1">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-end mt-3">
+                                <button class="btn btn-primary btn-sm" id="mb-add-btn">
+                                    <i class="bi bi-plus me-1"></i>Eintrag hinzufügen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Entries List Table -->
+                    <h6 class="fw-bold mb-3"><i class="bi bi-list-task me-1 text-primary"></i>Aktuelle Anzeigetafel Einträge</h6>
+                    <div class="table-responsive border rounded bg-white">
+                        <table class="table table-hover table-striped align-middle mb-0" style="font-size: 0.9rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 100px;">Typ</th>
+                                    <th>Inhalt / Details</th>
+                                    <th style="width: 100px;" class="text-end">Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mb-entries-tbody">
+                                <!-- Entries will be loaded here via ScalaJS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

@@ -30,6 +30,11 @@ GET        /hello                        controllers.Helper.hello(msg: String)
 GET        /referee                      controllers.RefereeController.input(slug: String, tourneyName: String, competition: String, stage: String, roundInfo: String, players: String, winSets: Int ?= 3)
 POST       /referee/submit               controllers.RefereeController.submit()
 
+# Matchboard endpoints
+GET        /matchboard/view/:slug        controllers.MatchboardController.view(slug: String)
+POST       /matchboard/get               controllers.MatchboardController.get(slug: String)
+POST       /matchboard/set               controllers.MatchboardController.set(slug: String)
+
 # WebSocket endpoints
 GET        /ws/:slug                     controllers.WebSocketController.socket(slug: String)
 GET        /sendmsg                      controllers.WebSocketController.sendmsg(slug: String, msg: String)

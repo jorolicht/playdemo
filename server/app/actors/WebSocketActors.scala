@@ -10,11 +10,32 @@ class WebSocketManagerActor extends Actor with Logging {
   // Map of slug -> Set of client actor refs
   private val clients = mutable.HashMap[String, mutable.Set[ActorRef]]()
 
+  override def preStart(): Unit = {
+    import context.dispatcher
+    import scala.concurrent.duration._
+    context.system.scheduler.scheduleWithFixedDelay(15.minutes, 15.minutes)(new Runnable {
+      override def run(): Unit = {
+        logger.info("Running Matchboard and Referee DB cleanup...")
+        services.MatchboardStore.cleanup()
+      }
+    })
+  }
+
   def receive: Receive = {
     case Register(slug, ref) =>
       val set = clients.getOrElseUpdate(slug, mutable.Set.empty[ActorRef])
       set.add(ref)
       logger.info(s"Registered WebSocket client for slug '$slug'. Total clients for this slug: ${set.size}")
+
+      // Push pending referee results if any
+      val pending = services.MatchboardStore.getPendingRefereeResults(slug)
+      if (pending.nonEmpty) {
+        logger.info(s"Pushing ${pending.size} pending referee results to newly registered client for slug '$slug'")
+        pending.foreach { resultStr =>
+          ref ! WebSocketClientActor.SendToClient(resultStr)
+        }
+        services.MatchboardStore.clearRefereeResults(slug)
+      }
 
     case Unregister(slug, ref) =>
       clients.get(slug).foreach { set =>
