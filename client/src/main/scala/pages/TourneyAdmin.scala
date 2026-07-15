@@ -790,9 +790,10 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
       matchboard match {
         case Some(mb) if mb.entries.nonEmpty =>
           val html = mb.entries.map { entry =>
-            val typeText = if (entry.entryType == "match") "Spiel" else "Info"
-            val typeClass = if (entry.entryType == "match") "badge bg-primary text-white" else "badge bg-info text-white"
-            val content = if (entry.entryType == "match") {
+            val isMatch = entry.entryType == "start" || entry.entryType == "match"
+            val typeText = if (isMatch) "Spiel" else "Info"
+            val typeClass = if (isMatch) "badge bg-primary text-white" else "badge bg-info text-white"
+            val content = if (isMatch) {
               s"<strong>${entry.court.getOrElse("")}</strong>: ${entry.nameA.getOrElse("")} vs ${entry.nameB.getOrElse("")} (${entry.compName.getOrElse("")})"
             } else {
               entry.text.getOrElse("")
@@ -820,7 +821,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
       val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
       val slugParam = s"${slugName.trim}-${t.wpId}"
       
-      val entry = shared.model.MatchboardEntry(id = id, entryType = "info") // Type is placeholder
+      val entry = shared.model.MatchboardEntry(id = id, entryType = "delete")
       val request = shared.model.MatchboardSetRequest(action = "delete", entry = Some(entry))
       
       ajaxPost[shared.model.MatchboardSetRequest, shared.model.MatchboardSetResponse]("/matchboard/set", List("slug" -> slugParam), request).map {
@@ -865,20 +866,26 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
           val playerA = if (playerAEl != null) playerAEl.value.trim else ""
           val playerB = if (playerBEl != null) playerBEl.value.trim else ""
           val compName = if (compEl != null) compEl.value.trim else ""
-          val stageId = if (stageIdEl != null) stageIdEl.value.trim else ""
-          val compId = if (compIdEl != null) compIdEl.value.trim else ""
+          
+          val stageIdVal = if (stageIdEl != null && stageIdEl.value.trim.nonEmpty) {
+            scala.util.Try(stageIdEl.value.trim.toInt).toOption.map(StageId.apply)
+          } else None
+          
+          val gameNoVal = if (compIdEl != null && compIdEl.value.trim.nonEmpty) {
+            scala.util.Try(compIdEl.value.trim.toInt).toOption
+          } else None
           
           if (court.nonEmpty && playerA.nonEmpty && playerB.nonEmpty) {
             val randId = scala.util.Random.alphanumeric.take(8).mkString
             Some(shared.model.MatchboardEntry(
               id = randId,
-              entryType = "match",
+              entryType = "start",
               court = Some(court),
               nameA = Some(playerA),
               nameB = Some(playerB),
               compName = Some(compName),
-              stageId = Some(stageId),
-              compId = Some(compId)
+              stageId = stageIdVal,
+              gameNo = gameNoVal
             ))
           } else None
         }

@@ -32,6 +32,7 @@ POST       /referee/submit               controllers.RefereeController.submit()
 
 # Matchboard endpoints
 GET        /matchboard/view/:slug        controllers.MatchboardController.view(slug: String)
++ nocsrf
 POST       /matchboard/get               controllers.MatchboardController.get(slug: String)
 + nocsrf
 POST       /matchboard/set               controllers.MatchboardController.set(slug: String)

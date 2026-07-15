@@ -144,10 +144,8 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         stage.inputMatch(gameNo, (aWins, bWins), parsedBalls.mkString("·"), "", playfieldVal) match {
           case Left(err) => error(s"StageInput: inputMatch failed: ${err.msgCode}")
           case Right(triggered) =>
-            if (playfieldVal.nonEmpty) {
-              stage.matches.find(_.gameNo == gameNo).foreach { m =>
-                sendMatchboardUpdate("ended", playfieldVal, m, stage)
-              }
+            stage.matches.find(_.gameNo == gameNo).foreach { m =>
+              sendMatchboardUpdate("finish", playfieldVal, m, stage)
             }
             services.TourneyDB.tourney.updateStage(stage) match {
               case Right(updatedStage) =>
@@ -194,6 +192,9 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
           List(BoxButton.Yes, BoxButton.No)
         ).map {
           case BoxButton.Yes =>
+            stage.matches.find(_.gameNo == gameNo).foreach { m =>
+              sendMatchboardUpdate("finish", m.playfield, m, stage)
+            }
             stage.resetMatch(gameNo) match {
               case Left(err) => error(s"StageInput: resetMatch failed: ${err.msgCode}")
               case Right(triggered) =>
@@ -611,12 +612,12 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
                   m.startTime = nowTimestamp()
                 }
               }
-              sendMatchboardUpdate("set", tableVal, m, stage)
+              sendMatchboardUpdate("start", tableVal, m, stage)
             } else {
               m.setStatus(MEntry.MS_READY)
               m.startTime = ""
               updateStageMatchStatuses(stage)
-              sendMatchboardUpdate("ended", oldCourtVal, m, stage)
+              sendMatchboardUpdate("start", "", m, stage)
             }
           }
           
@@ -640,43 +641,41 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         case _ =>
     }
 
-  private def sendMatchboardUpdate(action: String, courtVal: String, m: MEntry, stage: Stage): Unit =
-    if (courtVal.trim.nonEmpty) {
-      val t = services.TourneyDB.tourney
-      val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
-      val slugParam = s"${slugName.trim}-${t.wpId}"
-      
-      val comp = t.competitions.filter(_ != null).find(_.id == stage.coId).get
-      
-      // Look up player names
-      val pants = comp.pants1Stage.toSeq
-      val nameA = formatSnoName(m.stNoA, pants)
-      val nameB = formatSnoName(m.stNoB, pants)
-      
-      val entry = shared.model.MatchboardEntry(
-        id = s"match_${stage.id.value}_${m.gameNo}",
-        entryType = "match",
-        court = Some(courtVal.trim),
-        nameA = Some(nameA),
-        nameB = Some(nameB),
-        compName = Some(comp.name),
-        stageId = Some(stage.id.value.toString),
-        compId = Some(comp.id.value.toString)
-      )
-      
-      val request = shared.model.MatchboardSetRequest(
-        action = action,
-        tourneyName = Some(t.name),
-        entry = Some(entry)
-      )
-      
-      ajaxPost[shared.model.MatchboardSetRequest, shared.model.MatchboardSetResponse]("/matchboard/set", List("slug" -> slugParam), request).map {
-        case Right(res) if res.success =>
-          debug(s"Matchboard update successfully sent: action=$action, court=$courtVal")
-        case Right(_) =>
-          debug(s"Matchboard update returned success=false: action=$action, court=$courtVal")
-        case Left(err) =>
-          debug(s"Failed to send matchboard update: ${err.msgCode}")
-      }
+  private def sendMatchboardUpdate(entryType: String, courtVal: String, m: MEntry, stage: Stage): Unit =
+    val t = services.TourneyDB.tourney
+    val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
+    val slugParam = s"${slugName.trim}-${t.wpId}"
+    
+    val comp = t.competitions.filter(_ != null).find(_.id == stage.coId).get
+    
+    // Look up player names
+    val pants = comp.pants1Stage.toSeq
+    val nameA = formatSnoName(m.stNoA, pants)
+    val nameB = formatSnoName(m.stNoB, pants)
+    
+    val entry = shared.model.MatchboardEntry(
+      id = s"match_${stage.id.value}_${m.gameNo}",
+      entryType = entryType,
+      court = Some(courtVal.trim),
+      nameA = Some(nameA),
+      nameB = Some(nameB),
+      compName = Some(comp.name),
+      stageId = Some(stage.id),
+      gameNo = Some(m.gameNo)
+    )
+    
+    val request = shared.model.MatchboardSetRequest(
+      action = entryType,
+      tourneyName = Some(t.name),
+      entry = Some(entry)
+    )
+    
+    ajaxPost[shared.model.MatchboardSetRequest, shared.model.MatchboardSetResponse]("/matchboard/set", List("slug" -> slugParam), request).map {
+      case Right(res) if res.success =>
+        debug(s"Matchboard update successfully sent: entryType=$entryType, court=$courtVal")
+      case Right(_) =>
+        debug(s"Matchboard update returned success=false: entryType=$entryType, court=$courtVal")
+      case Left(err) =>
+        debug(s"Failed to send matchboard update: ${err.msgCode}")
     }
 

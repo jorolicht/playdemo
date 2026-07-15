@@ -3,14 +3,14 @@ package shared.model
 import shared.basic.Pickle.{ReadWriter, given}
 
 case class MatchboardEntry(
-  id: String,
-  entryType: String, // "match" or "info"
+  id: String,  
+  entryType: String, // "start", "finish", "info" or "delete"
   court: Option[String] = None,
   nameA: Option[String] = None,
   nameB: Option[String] = None,
   compName: Option[String] = None,
-  stageId: Option[String] = None,
-  compId: Option[String] = None,
+  stageId: Option[StageId] = None,
+  gameNo:  Option[Int] = None,
   text: Option[String] = None
 ) derives ReadWriter
 

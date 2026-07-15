@@ -17,6 +17,10 @@ class MatchboardController @Inject()(
   private val manager = actors.WebSocketManager.get
 
   // Define play-json formatters for shared models
+  implicit val stageIdFormat: Format[StageId] = new Format[StageId] {
+    def reads(json: JsValue): JsResult[StageId] = json.validate[Int].map(StageId.apply)
+    def writes(id: StageId): JsValue = JsNumber(id.value)
+  }
   implicit val matchboardEntryFormat: Format[MatchboardEntry] = Json.format[MatchboardEntry]
   implicit val matchboardFormat: Format[Matchboard] = Json.format[Matchboard]
   implicit val requestReads: Reads[MatchboardSetRequest] = Json.reads[MatchboardSetRequest]
@@ -62,60 +66,70 @@ class MatchboardController @Inject()(
         }
 
         payload.entry.foreach { entry =>
-          payload.action match {
-            case "set" =>
-              if (entry.entryType == "match") {
-                entry.court.foreach { courtNum =>
-                  val idx = data.matchboardDB.indexWhere(e => e.entryType == "match" && e.court.contains(courtNum))
-                  if (idx >= 0) {
-                    data.matchboardDB.update(idx, entry)
-                    logger.info(s"Replaced match entry on court '$courtNum' for slug '$slug'")
-                  } else {
-                    data.matchboardDB.append(entry)
-                    logger.info(s"Added new match entry on court '$courtNum' for slug '$slug'")
-                  }
+          val act = if (entry.entryType.nonEmpty) entry.entryType else payload.action
+          act match {
+            case "start" | "set" =>
+              // falls in MatchboardDB bereits Eintrag mit gleichem court, dann den Eintrag löschen (falls court nicht leer)
+              entry.court.filter(_.trim.nonEmpty).foreach { courtNum =>
+                val idx = data.matchboardDB.indexWhere(e => e.court.contains(courtNum))
+                if (idx >= 0) {
+                  data.matchboardDB.remove(idx)
+                  logger.info(s"Deleted existing entry with same court '$courtNum'")
+                }
+              }
+              // falls in MatchboardDB bereits Eintrag mit gleicher stageId und gameNo, dann den Eintrag löschen
+              for {
+                sId <- entry.stageId
+                gNo <- entry.gameNo
+              } {
+                val idx = data.matchboardDB.indexWhere(e => e.stageId.contains(sId) && e.gameNo.contains(gNo))
+                if (idx >= 0) {
+                  data.matchboardDB.remove(idx)
+                  logger.info(s"Deleted existing entry with same stageId '$sId' and gameNo '$gNo'")
+                }
+              }
+              // neuen Eintrag in MatchboardDB mit den Werten aus MatchboardEntry erstellen (falls court nicht leer)
+              if (entry.court.exists(_.trim.nonEmpty)) {
+                data.matchboardDB.append(entry)
+                logger.info(s"Created new entry: id=${entry.id}, court=${entry.court}, gameNo=${entry.gameNo}")
+              }
+              changed = true
+
+            case "finish" | "ended" =>
+              // nur falls Eintrag mit gleicher stageId und gameNo existiert, diesen Eintrag in der MatchboardDB löschen
+              for {
+                sId <- entry.stageId
+                gNo <- entry.gameNo
+              } {
+                val idx = data.matchboardDB.indexWhere(e => e.stageId.contains(sId) && e.gameNo.contains(gNo))
+                if (idx >= 0) {
+                  data.matchboardDB.remove(idx)
+                  logger.info(s"Deleted finished/reset entry with stageId '$sId' and gameNo '$gNo'")
                   changed = true
                 }
-              } else if (entry.entryType == "info") {
-                val idx = data.matchboardDB.indexWhere(_.id == entry.id)
-                if (idx >= 0) {
-                  data.matchboardDB.update(idx, entry)
-                  logger.info(s"Replaced info entry '${entry.id}' for slug '$slug'")
-                } else {
-                  data.matchboardDB.append(entry)
-                  logger.info(s"Added new info entry '${entry.id}' for slug '$slug'")
-                }
-                changed = true
               }
 
-            case "ended" =>
-              if (entry.entryType == "match") {
-                entry.court.foreach { courtNum =>
-                  val idx = data.matchboardDB.indexWhere(e => e.entryType == "match" && e.court.contains(courtNum))
-                  if (idx >= 0) {
-                    val existing = data.matchboardDB(idx)
-                    // Only delete if both stageId and compId match
-                    if (existing.stageId == entry.stageId && existing.compId == entry.compId) {
-                      data.matchboardDB.remove(idx)
-                      logger.info(s"Deleted match entry on court '$courtNum' (stageId and compId matched) for slug '$slug'")
-                      changed = true
-                    } else {
-                      logger.warn(s"Skipped deleting match entry on court '$courtNum' for slug '$slug' because stageId or compId did not match.")
-                    }
-                  }
-                }
+            case "info" =>
+              val idx = data.matchboardDB.indexWhere(_.id == entry.id)
+              if (idx >= 0) {
+                data.matchboardDB.update(idx, entry)
+                logger.info(s"Replaced info entry '${entry.id}'")
+              } else {
+                data.matchboardDB.append(entry)
+                logger.info(s"Added new info entry '${entry.id}'")
               }
+              changed = true
 
             case "delete" =>
               val idx = data.matchboardDB.indexWhere(_.id == entry.id)
               if (idx >= 0) {
                 data.matchboardDB.remove(idx)
-                logger.info(s"Deleted entry '${entry.id}' by id for slug '$slug'")
+                logger.info(s"Deleted entry '${entry.id}' by id")
                 changed = true
               }
 
             case other =>
-              logger.warn(s"Unknown action '$other' in matchboard/set request for slug '$slug'")
+              logger.warn(s"Unknown action/entryType '$other' in matchboard/set request")
           }
         }
 

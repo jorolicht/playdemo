@@ -324,7 +324,7 @@
             matchGrid.innerHTML = '';
 
             const infoEntries = data.entries.filter(e => e.entryType === 'info');
-            const matchEntries = data.entries.filter(e => e.entryType === 'match');
+            const matchEntries = data.entries.filter(e => e.entryType === 'start' || e.entryType === 'match');
 
             // Render Info Entries
             if (infoEntries.length > 0) {
