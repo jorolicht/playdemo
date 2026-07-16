@@ -12,7 +12,20 @@
             <h3 class="h5 mb-0">
                 <i class="bi bi-trophy me-2"></i>Turnier-Informationen
                 @if(tourney.slug.nonEmpty) {
-                    <span class="ms-2 opacity-75 small fw-normal">(@tourney.slug)</span>
+                    @defining(tourney.slug.split('/').lastOption.getOrElse(tourney.slug)) { slugName =>
+                      @defining(s"${slugName.trim}-${tourney.wpId}") { slugParam =>
+                        @defining(if (base.Global.playUrl.nonEmpty) base.Global.playUrl.trim else "/srv") { playBase =>
+                          @defining(if (base.Global.homeUrl.nonEmpty) base.Global.homeUrl.trim else "") { homeBase =>
+                            <a href="@homeBase/tourney/@tourney.slug" target="_blank" class="badge bg-light text-primary text-decoration-none ms-2 small fw-normal">
+                                <i class="bi bi-link-45deg me-1"></i>Turnier
+                            </a>
+                            <a href="@playBase/matchboard/view/@slugParam" target="_blank" class="badge bg-light text-success text-decoration-none ms-1 small fw-normal">
+                                <i class="bi bi-tv me-1"></i>Anzeigetafel
+                            </a>
+                          }
+                        }
+                      }
+                    }
                 }
             </h3>
             <div>
