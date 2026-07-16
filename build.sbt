@@ -202,6 +202,12 @@ lazy val server = project
       IO.copyFile(wpPluginDir / "tourney.php", dockerWpPluginDir / "tourney.php")
       IO.copyDirectory(wpPluginDir / "includes", dockerWpPluginDir / "includes")
       IO.copyDirectory(wpPluginDir / "pages", dockerWpPluginDir / "pages")
+      if ((wpPluginDir / "img").exists()) {
+        IO.copyDirectory(wpPluginDir / "img", dockerWpPluginDir / "img")
+      }
+      if ((wpPluginDir / "font").exists()) {
+        IO.copyDirectory(wpPluginDir / "font", dockerWpPluginDir / "font")
+      }
       if ((wpPluginDir / "composer.json").exists()) {
         IO.copyFile(wpPluginDir / "composer.json", dockerWpPluginDir / "composer.json")
       }
