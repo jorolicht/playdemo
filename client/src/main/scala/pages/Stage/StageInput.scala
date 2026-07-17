@@ -9,6 +9,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import base.*
 import shared.model.*
 import shared.format.*
+import dialogs.DlgMsgbox
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -23,6 +24,7 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
   val PrintSrzBtn:    HtmlId = genId(name)
   val SaveMatchBtn:   HtmlId = genId(name)
   val DeleteMatchBtn: HtmlId = genId(name)
+  val InfoMatchBtn:   HtmlId = genId(name)
   val SchiriBtn:      HtmlId = genId(name)
   val BtnStartNextRound: HtmlId = genId(name)
 
@@ -60,6 +62,9 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
       case id if id.id.startsWith(DeleteMatchBtn.id) =>
         val gameNo = elem.id.substring(DeleteMatchBtn.id.length + 1).toInt
         deleteMatchResult(gameNo)
+      case id if id.id.startsWith(InfoMatchBtn.id) =>
+        val gameNo = elem.id.substring(InfoMatchBtn.id.length + 1).toInt
+        showMatchInfo(gameNo)
       case id if id.id.startsWith(SchiriBtn.id) =>
         val gameNo = elem.id.substring(SchiriBtn.id.length + 1).toInt
         loadPage(PageNameTyp("StageScoreSheet"), gameNo.toString)
@@ -677,5 +682,52 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         debug(s"Matchboard update returned success=false: entryType=$entryType, court=$courtVal")
       case Left(err) =>
         debug(s"Failed to send matchboard update: ${err.msgCode}")
+    }
+
+  def showMatchInfo(gameNo: Int): Unit =
+    Global.currentSelection.stage.foreach { stage =>
+      val comp = Global.currentSelection.competition.get
+      stage.matches.find(_.gameNo == gameNo) match {
+        case Some(m) =>
+          val pants = comp.pants1Stage.toSeq
+          val nameA = formatSnoName(m.stNoA, pants)
+          val nameB = formatSnoName(m.stNoB, pants)
+          
+          val statusStr = m.status match {
+            case MEntry.MS_RESET => "Nicht konfiguriert"
+            case MEntry.MS_MISS  => "Spieler fehlt"
+            case MEntry.MS_BLOCK => "Blockiert"
+            case MEntry.MS_READY => "Bereit"
+            case MEntry.MS_RUN   => "Laufend"
+            case MEntry.MS_FIN   => "Beendet"
+            case MEntry.MS_FIX   => "Beendet (Kampflos/Freilos)"
+            case MEntry.MS_DRAW  => "Unentschieden"
+            case _               => "Unbekannt"
+          }
+
+          val infoText = m.info.trim
+          val infoDisplay = if (infoText.isEmpty) "-" else infoText
+
+          val startTimeDisplay = if (m.startTime == null || m.startTime.trim.isEmpty) "-" else m.startTime
+          val endTimeDisplay = if (m.endTime == null || m.endTime.trim.isEmpty) "-" else m.endTime
+          val playfieldDisplay = if (m.playfield == null || m.playfield.trim.isEmpty) "-" else m.playfield
+
+          val resultDisplay = if (m.result == null || m.result.trim.isEmpty) "-" else m.result.replace("·", ", ")
+
+          val body =
+            s"""Spiel-Nr:       ${m.gameNo}
+               |Wettbewerb:     ${comp.name}
+               |Begegnung:     $nameA  vs  $nameB
+               |Tisch:          $playfieldDisplay
+               |Status:         $statusStr
+               |Startzeit:      $startTimeDisplay
+               |Endzeit:        $endTimeDisplay
+               |Sätze:          ${m.sets._1}:${m.sets._2} (Satzstände: $resultDisplay)
+               |Bemerkung:      $infoDisplay""".stripMargin
+
+          DlgMsgbox.show(body, s"Spiel-Informationen (Spiel ${m.gameNo})", List(shared.BoxButton.Ok))
+        case None =>
+          error(s"StageInput: Match not found for info: $gameNo")
+      }
     }
 

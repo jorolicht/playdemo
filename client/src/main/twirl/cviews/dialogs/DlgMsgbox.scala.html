@@ -15,7 +15,7 @@
         <button @id(CloseId) type="button" class="btn-close"></button>
       </div>
       <div class="modal-body">
-        <p @id(BodyId)>@body</p>
+        <p @id(BodyId) style="white-space: pre-wrap;">@body</p>
       </div>
       <div class="modal-footer">
         @for(btn <- btns) {
