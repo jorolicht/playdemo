@@ -28,6 +28,7 @@ GET        /hello                        controllers.Helper.hello(msg: String)
 
 # Referee endpoints
 GET        /referee                      controllers.RefereeController.input(slug: String, tourneyName: String, competition: String, stage: String, roundInfo: String, players: String, winSets: Int ?= 3)
++ nocsrf
 POST       /referee/submit               controllers.RefereeController.submit()
 
 # Matchboard endpoints
