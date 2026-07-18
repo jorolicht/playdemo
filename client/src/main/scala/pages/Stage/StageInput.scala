@@ -763,7 +763,13 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
             val aPoints = pts(0)
             val bPoints = pts(1)
             if (aPoints > bPoints) aWins += 1 else bWins += 1
-            parsedBalls += s"$aPoints:$bPoints"
+            val shortForm = if (aPoints > bPoints) {
+              bPoints.toString
+            } else {
+              if (aPoints == 0 && bPoints == 11) "-0"
+              else s"-$aPoints"
+            }
+            parsedBalls += shortForm
           }
         }
         
