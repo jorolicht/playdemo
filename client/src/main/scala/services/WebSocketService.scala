@@ -91,7 +91,44 @@ object WebSocketService:
       webSocket.onmessage = (e: dom.MessageEvent) => {
         val msg = e.data.toString
         debug(s"[WebSocket] Message received: $msg")
-        messageListener.foreach(_(msg))
+        if (msg.startsWith("REFEREE_SUBMIT:")) {
+          val jsonStr = msg.substring(15)
+          try {
+            val payload = shared.basic.Pickle.read[shared.model.RefereeSubmitWsMsg](jsonStr)
+            val displayMsg = s"Ergebnis für ${payload.players} (${payload.roundInfo}): ${payload.sets}"
+            
+            // 1. Add to TourneyAdmin message log
+            pages.TourneyAdmin.addMessage(s"[Empfangen] $displayMsg")
+            
+            // 2. Update local Tourney DB MatchEntry info with prefix "Result "
+            for {
+              sId <- payload.stageId
+              gNo <- payload.gameNo
+            } {
+              val stageIdObj = shared.model.StageId(sId)
+              services.TourneyDB.tourney.stages.find(_.id == stageIdObj).foreach { stage =>
+                stage.matches.find(_.gameNo == gNo).foreach { m =>
+                  m.setInfo(s"Result ${payload.sets}")
+                }
+              }
+              // If we are currently on StageInput page, force a redraw to show the updated info!
+              val isStageInputActive = try {
+                val storage = org.scalajs.dom.window.sessionStorage
+                storage != null && storage.getItem("tourney_last_page") == "StageInput"
+              } catch {
+                case _: Throwable => false
+              }
+              if (isStageInputActive) {
+                pages.Stage.StageInput.render()
+              }
+            }
+          } catch {
+            case ex: Throwable =>
+              debug(s"[WebSocket] Error parsing REFEREE_SUBMIT message: ${ex.getMessage}")
+          }
+        } else {
+          messageListener.foreach(_(msg))
+        }
       }
 
       webSocket.onclose = (e: dom.CloseEvent) => {

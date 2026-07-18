@@ -28,3 +28,12 @@ case class MatchboardSetRequest(
 case class MatchboardSetResponse(
   success: Boolean
 ) derives ReadWriter
+
+case class RefereeSubmitWsMsg(
+  stageId: Option[Int],
+  gameNo: Option[Int],
+  sets: String,
+  players: String,
+  roundInfo: String
+) derives ReadWriter
+

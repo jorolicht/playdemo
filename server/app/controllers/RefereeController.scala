@@ -137,24 +137,32 @@ class RefereeController @Inject()(
           (formatDelta(deltaA), formatDelta(deltaB))
         }
 
-        (manager ? actors.WebSocketManagerActor.SendToSlug(payload.slug, message)).mapTo[Boolean].map {
+        val setsClean = payload.sets.replace("·", ", ")
+        val wsPayload = shared.model.RefereeSubmitWsMsg(
+          stageId = payload.stageId,
+          gameNo = payload.gameNo,
+          sets = setsClean,
+          players = payload.players,
+          roundInfo = payload.roundInfo
+        )
+        val broadcastMsg = s"REFEREE_SUBMIT:${shared.basic.Pickle.write(wsPayload)}"
+
+        // Unconditionally buffer the message in RefereeDB so the client can retrieve it if they reconnect/were offline
+        services.MatchboardStore.addRefereeResult(payload.slug, broadcastMsg)
+
+        (manager ? actors.WebSocketManagerActor.SendToSlug(payload.slug, broadcastMsg)).mapTo[Boolean].map {
           case isSent =>
-            if (!isSent) {
-              logger.warn(s"WebSocket client not connected for slug '${payload.slug}'. Buffering in RefereeDB.")
-              services.MatchboardStore.addRefereeResult(payload.slug, message)
-            }
-            
             ttrChanges match {
               case Some((deltaA, deltaB)) =>
                 Ok(Json.obj(
                   "success" -> true,
-                  "buffered" -> !isSent,
+                  "buffered" -> true,
                   "ttrCalculated" -> true,
                   "deltaA" -> deltaA,
                   "deltaB" -> deltaB
                 ))
               case None =>
-                Ok(Json.obj("success" -> true, "buffered" -> !isSent))
+                Ok(Json.obj("success" -> true, "buffered" -> true))
             }
         }
 
