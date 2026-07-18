@@ -753,44 +753,39 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         val setsStr = infoText.stripPrefix("Result").trim
         val sets = setsStr.split(",").map(_.trim).filter(_.nonEmpty)
         
-        var aWins = 0
-        var bWins = 0
-        val parsedBalls = ArrayBuffer[String]()
+        val winSets = stage.noWinSets
+        val maxSets = winSets * 2 - 1
         
-        for (set <- sets) {
-          val pts = set.split(":").map(_.trim.toInt)
-          if (pts.length == 2) {
-            val aPoints = pts(0)
-            val bPoints = pts(1)
-            if (aPoints > bPoints) aWins += 1 else bWins += 1
-            val shortForm = if (aPoints > bPoints) {
-              bPoints.toString
+        // 1. Fill the HTML input elements with the short format values
+        for (setIdx <- 1 to maxSets) {
+          val el = dom.document.getElementById(s"input_${gameNo}_$setIdx").asInstanceOf[dom.html.Input]
+          if (el != null) {
+            if (setIdx <= sets.length) {
+              val set = sets(setIdx - 1)
+              val pts = set.split(":").map(_.trim.toInt)
+              if (pts.length == 2) {
+                val aPoints = pts(0)
+                val bPoints = pts(1)
+                val shortForm = if (aPoints > bPoints) {
+                  bPoints.toString
+                } else {
+                  if (aPoints == 0 && bPoints == 11) "-0"
+                  else s"-$aPoints"
+                }
+                el.value = shortForm
+              } else {
+                el.value = ""
+              }
             } else {
-              if (aPoints == 0 && bPoints == 11) "-0"
-              else s"-$aPoints"
+              el.value = ""
             }
-            parsedBalls += shortForm
           }
         }
         
-        val playfieldInput = dom.document.getElementById(s"table_$gameNo").asInstanceOf[dom.html.Input]
-        val playfieldVal = if (playfieldInput != null) playfieldInput.value.trim else ""
+        // 2. Run the validation logic so that the Save button is enabled and sets badge is updated
+        checkMatchValidity(gameNo, winSets)
         
-        stage.inputMatch(gameNo, (aWins, bWins), parsedBalls.mkString("·"), "", playfieldVal) match {
-          case Left(err) => error(s"StageInput: acceptMatchResult failed: ${err.msgCode}")
-          case Right(_) =>
-            stage.matches.find(_.gameNo == gameNo).foreach { m =>
-              sendMatchboardUpdate("finish", playfieldVal, m, stage)
-            }
-            services.TourneyDB.tourney.updateStage(stage) match {
-              case Right(updatedStage) =>
-                Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
-                info(s"Ergebnis für Spiel $gameNo übernommen.")
-                render()
-              case Left(err) =>
-                error(s"StageInput: Failed to save accepted match result: ${err.msgCode}")
-            }
-        }
+        info(s"Ergebnis für Spiel $gameNo in Eingabefelder übertragen. Bitte mit dem grünen Haken-Button speichern.")
       }
     }
 
