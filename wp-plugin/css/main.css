@@ -445,3 +445,13 @@ td.boto {
   display: flex; align-items: center; justify-content: center;       
   border-top: 1px solid black;  border-right: 1px solid black; border-left: 1px solid black; border-bottom: 1px solid black;   
 }
+
+@keyframes referee-blink {
+  0% { background-color: #dc3545; color: white; border-color: #dc3545; }
+  50% { background-color: transparent; color: #dc3545; border-color: #dc3545; }
+  100% { background-color: #dc3545; color: white; border-color: #dc3545; }
+}
+
+.blink-btn-red {
+  animation: referee-blink 1.5s infinite !important;
+}

@@ -12,3 +12,4 @@ btn.retry     = WIEDERHOLEN
 btn.ignore    = IGNORIEREN
 btn.yes       = JA
 btn.no        = NEIN
+btn.acceptresult = Ergebnis übernehmen

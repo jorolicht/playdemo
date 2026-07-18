@@ -11,3 +11,4 @@ btn.retry     = RETRY
 btn.ignore    = IGNORE
 btn.yes       = YES
 btn.no        = NO
+btn.acceptresult = Accept Result

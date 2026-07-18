@@ -725,9 +725,66 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
                |Sätze:          ${m.sets._1}:${m.sets._2} (Satzstände: $resultDisplay)
                |Bemerkung:      $infoDisplay""".stripMargin
 
-          DlgMsgbox.show(body, s"Spiel-Informationen (Spiel ${m.gameNo})", List(shared.BoxButton.Ok))
+          val hasResult = infoText.startsWith("Result")
+          val buttons = if (hasResult) {
+            List(shared.BoxButton.Ok, shared.BoxButton.AcceptResult)
+          } else {
+            List(shared.BoxButton.Ok)
+          }
+
+          DlgMsgbox.show(body, s"Spiel-Informationen (Spiel ${m.gameNo})", buttons).map {
+            case shared.BoxButton.AcceptResult =>
+              acceptMatchResult(gameNo, infoText)
+            case _ =>
+              // do nothing
+          }
         case None =>
           error(s"StageInput: Match not found for info: $gameNo")
+      }
+    }
+
+  def acceptMatchResult(gameNo: Int, infoText: String): Unit =
+    Global.currentSelection.stage.foreach { stage =>
+      val comp = Global.currentSelection.competition.get
+      val isFin = comp.status == CompStatus.FIN || stage.status != StageStatus.EIN || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+      if (isFin) {
+        debug("StageInput: Cannot accept match result because stage is not in EIN status or user has no write access.")
+      } else {
+        val setsStr = infoText.stripPrefix("Result").trim
+        val sets = setsStr.split(",").map(_.trim).filter(_.nonEmpty)
+        
+        var aWins = 0
+        var bWins = 0
+        val parsedBalls = ArrayBuffer[String]()
+        
+        for (set <- sets) {
+          val pts = set.split(":").map(_.trim.toInt)
+          if (pts.length == 2) {
+            val aPoints = pts(0)
+            val bPoints = pts(1)
+            if (aPoints > bPoints) aWins += 1 else bWins += 1
+            parsedBalls += s"$aPoints:$bPoints"
+          }
+        }
+        
+        val playfieldInput = dom.document.getElementById(s"table_$gameNo").asInstanceOf[dom.html.Input]
+        val playfieldVal = if (playfieldInput != null) playfieldInput.value.trim else ""
+        
+        stage.inputMatch(gameNo, (aWins, bWins), parsedBalls.mkString("·"), "", playfieldVal) match {
+          case Left(err) => error(s"StageInput: acceptMatchResult failed: ${err.msgCode}")
+          case Right(_) =>
+            stage.matches.find(_.gameNo == gameNo).foreach { m =>
+              sendMatchboardUpdate("finish", playfieldVal, m, stage)
+            }
+            services.TourneyDB.tourney.updateStage(stage) match {
+              case Right(updatedStage) =>
+                Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                info(s"Ergebnis für Spiel $gameNo übernommen.")
+                render()
+              case Left(err) =>
+                error(s"StageInput: Failed to save accepted match result: ${err.msgCode}")
+            }
+        }
       }
     }
 
