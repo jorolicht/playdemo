@@ -6,7 +6,7 @@ set -e
 # DOCKER_PROJECT_DIR is the directory containing this script
 DOCKER_PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_PATH="$DOCKER_PROJECT_DIR/backups"
-DATE=$(date +%Y%m%d_%H%M%S)
+DATE=$(date +%Y-%m-%d_%H%M%S)
 
 # Load environment variables
 if [ -f "$DOCKER_PROJECT_DIR/.env" ]; then
@@ -28,6 +28,11 @@ CONTAINER_DB="wp-db-instance"
 DB_USER="root"
 DB_PASS="${DB_ROOT_PASSWORD:-wpUserPw4577R}"
 
+# Google Drive Info
+GDRIVE_REMOTE="${GDRIVE_REMOTE:-gdrive}"
+GDRIVE_FOLDER="${GDRIVE_FOLDER:-WP_Backups}"
+RETENTION_DAYS="${RETENTION_DAYS:-7}"
+
 # Ensure backup directory exists
 mkdir -p "$BACKUP_PATH"
 
@@ -42,6 +47,21 @@ tar --exclude='cache' -czf $BACKUP_PATH/files_$DATE.tar.gz \
   -C $DOCKER_PROJECT_DIR/wp_data wp-config.php \
   -C $DOCKER_PROJECT_DIR/wp_data/wp-content .
 
-echo "Backup erfolgreich erstellt in: $BACKUP_PATH"
-echo "- Datenbank: db_$DATE.sql"
-echo "- WordPress-Dateien & docker-compose.yml: files_$DATE.tar.gz"
+# 3. Upload zu Google Drive
+if command -v rclone &> /dev/null; then
+    if rclone listremotes | grep -q "^${GDRIVE_REMOTE}:"; then
+        echo "Übertrage zu Google Drive..."
+        rclone copy "$BACKUP_PATH/db_$DATE.sql" "$GDRIVE_REMOTE:$GDRIVE_FOLDER/$DATE/"
+        rclone copy "$BACKUP_PATH/files_$DATE.tar.gz" "$GDRIVE_REMOTE:$GDRIVE_FOLDER/$DATE/"
+    else
+        echo "WARNUNG: rclone-Remote '$GDRIVE_REMOTE' wurde in rclone nicht gefunden. Überspringe Upload."
+    fi
+else
+    echo "WARNUNG: rclone ist nicht installiert. Überspringe Upload zu Google Drive."
+fi
+
+# 4. Alte Backups löschen (älter als X Tage)
+echo "Lösche lokale Backups, die älter als $RETENTION_DAYS Tage sind..."
+find "$BACKUP_PATH" -type f -mtime +"$RETENTION_DAYS" -delete
+
+echo "Backup erfolgreich abgeschlossen: $DATE"
