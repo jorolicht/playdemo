@@ -1,0 +1,207 @@
+<!--
+ * Support & Pricing - English
+-->
+<style>
+    .prc-container {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--bs-body-color, #1e293b);
+        line-height: 1.7;
+    }
+    .prc-header {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(14, 165, 233, 0.08) 100%);
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        border-radius: 16px;
+        padding: 36px 24px;
+        margin-bottom: 32px;
+        text-align: center;
+    }
+    .prc-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 14px;
+        border-radius: 50px;
+        background: rgba(99, 102, 241, 0.12);
+        color: #4f46e5;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+    .prc-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        color: var(--bs-heading-color, #0f172a);
+    }
+    .prc-subtitle {
+        color: var(--bs-secondary-color, #64748b);
+        font-size: 1rem;
+        max-width: 680px;
+        margin: 0 auto;
+    }
+    .prc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+        gap: 24px;
+        margin-bottom: 36px;
+    }
+    .prc-card {
+        background: var(--bs-card-bg, #ffffff);
+        border: 1px solid var(--bs-border-color, #e2e8f0);
+        border-radius: 16px;
+        padding: 32px 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .prc-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.08);
+    }
+    .prc-card.featured {
+        border: 2px solid #4f46e5;
+        background: linear-gradient(180deg, rgba(99, 102, 241, 0.03) 0%, var(--bs-card-bg, #ffffff) 100%);
+    }
+    .prc-popular-tag {
+        position: absolute;
+        top: -12px;
+        right: 24px;
+        background: #4f46e5;
+        color: #ffffff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 2px 12px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .prc-card-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+    .prc-price {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: var(--bs-heading-color, #0f172a);
+        margin: 16px 0;
+    }
+    .prc-price span {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--bs-secondary-color, #64748b);
+    }
+    .prc-feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+    }
+    .prc-feature-list li {
+        padding: 8px 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.95rem;
+    }
+    .prc-feature-list i.check {
+        color: #10b981;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .prc-feature-list i.cross {
+        color: #94a3b8;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .prc-donate-box {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(239, 68, 68, 0.08) 100%);
+        border: 1px solid rgba(245, 158, 11, 0.25);
+        border-radius: 16px;
+        padding: 32px 24px;
+        text-align: center;
+    }
+</style>
+
+<div class="prc-container">
+    <div class="prc-header">
+        <div class="prc-badge">
+            <i class="bi bi-tag-fill"></i> Transparent Models
+        </div>
+        <h2 class="prc-title">Support & Pricing</h2>
+        <p class="prc-subtitle">
+            Choose the right model for your tournament management – from free local offline usage to fully networked live tournaments on the Internet.
+        </p>
+    </div>
+
+    <!-- Pricing Cards Grid -->
+    <div class="prc-grid">
+        <!-- Card 1: Offline Version -->
+        <div class="prc-card">
+            <div>
+                <h3 class="prc-card-title">Offline Standard</h3>
+                <p style="font-size: 0.9rem; color: var(--bs-secondary-color, #64748b); margin-bottom: 0;">
+                    Free usage for local tournaments without server connection
+                </p>
+                <div class="prc-price">
+                    € 0 <span>/ permanently free</span>
+                </div>
+                <ul class="prc-feature-list">
+                    <li><i class="bi bi-check-circle-fill check"></i> <span><strong>Free usage</strong> of the offline version</span></li>
+                    <li><i class="bi bi-check-circle-fill check"></i> <span>Tournament data stored <strong>locally in the browser</strong> (IndexedDB)</span></li>
+                    <li><i class="bi bi-check-circle-fill check"></i> <span>Complete group & knockout tournament management</span></li>
+                    <li><i class="bi bi-check-circle-fill check"></i> <span>Print referee score sheets & final rankings</span></li>
+                    <li><i class="bi bi-x-circle-fill cross"></i> <span class="text-muted">No online live results on the internet</span></li>
+                    <li><i class="bi bi-x-circle-fill cross"></i> <span class="text-muted">No table displays or hall monitors via WebSockets</span></li>
+                </ul>
+            </div>
+            <div>
+                <a href="javascript:appLoadPage('TourneyNew', '')" class="btn btn-outline-primary w-100 fw-bold py-2">
+                    Start Locally Now
+                </a>
+            </div>
+        </div>
+
+        <!-- Card 2: Live Server Pro -->
+        <div class="prc-card featured">
+            <div class="prc-popular-tag">Recommended</div>
+            <div>
+                <h3 class="prc-card-title" style="color: #4f46e5;">Cloud Live Pro</h3>
+                <p style="font-size: 0.9rem; color: var(--bs-secondary-color, #64748b); margin-bottom: 0;">
+                    Full live functionality with cloud server & support
+                </p>
+                <div class="prc-price">
+                    € 49 <span>/ year</span>
+                </div>
+                <ul class="prc-feature-list">
+                    <li><i class="bi bi-check-circle-fill check"></i> <span><strong>Server Storage:</strong> Tournaments are visible worldwide on the internet</span></li>
+                    <li><i class="bi bi-check-circle-fill check"></i> <span>Up to <strong>3 tournaments per year</strong> included</span></li>
+                    <li><i class="bi bi-check-circle-fill check"></i> <span><strong>Full Live Functionality:</strong> Real-time results, hall monitors & online table displays</span></li>
+                    <li><i class="bi bi-check-circle-fill check"></i> <span><strong>QR Code Referee Input</strong> directly at the table via smartphone</span></li>
+                    <li><i class="bi bi-check-circle-fill check"></i> <span><strong>Support included</strong> for setup & tournament execution</span></li>
+                    <li><i class="bi bi-check-circle-fill check"></i> <span>Click-TT / XML Import & Export</span></li>
+                </ul>
+            </div>
+            <div>
+                <a href="javascript:appLoadPage('MainView', 'contact')" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">
+                    Inquire & Activate Now
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Youth Support / Donation Call -->
+    <div class="prc-donate-box">
+        <h3 style="font-weight: 800; font-size: 1.35rem; color: #d97706; margin-bottom: 10px;">
+            <i class="bi bi-heart-fill me-2 text-danger"></i>Supporting Youth Development
+        </h3>
+        <p style="font-size: 1rem; color: var(--bs-body-color, #334155); max-width: 720px; margin: 0 auto 16px auto;">
+            Of course, we are also always happy to receive <strong>voluntary donations of any amount</strong> for our youth work at <strong>TTC Freising</strong>! With your support, you foster table tennis youth talent and training equipment.
+        </p>
+        <a href="javascript:appLoadPage('MainView', 'contact')" class="btn btn-warning fw-bold text-dark px-4 py-2 shadow-sm">
+            <i class="bi bi-gift-fill me-2"></i>Support Youth Work / Contact
+        </a>
+    </div>
+</div>

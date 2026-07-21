@@ -64,3 +64,279 @@ table.name = Name
 table.dbl.name = Name (Doppel)
 table.club = Verein
 table.ttr = TTR
+
+###
+# Navbar
+###
+navbar.brand                                        = TurnierService
+navbar.logoAlt                                      = Logo
+navbar.toggleNav                                    = Navigation umschalten
+navbar.functions                                    = Funktionen
+navbar.pricing                                      = Support/Kosten
+navbar.tools                                        = Tools
+navbar.wordpressPlugin                              = Wordpress-Plugin
+navbar.excelTemplate                                = Excel-Vorlage
+navbar.search                                       = Suchen
+navbar.start                                        = STARTEN
+navbar.fullTourney                                  = Ganzes Turnier
+navbar.singleCompetition                            = Einzelner Wettbewerb
+navbar.profilePasskeys                              = Profil / Passkeys
+navbar.logout                                       = Abmelden
+navbar.login                                        = Login
+
+###
+# Buttons & Breadcrumbs
+###
+btn.back                                            = Zurück
+btn.backToHome                                      = Zurück zur Startseite
+btn.backToOverview                                  = Zurück zur Übersicht
+btn.backToCompetition                               = Zurück zum Wettbewerb
+btn.cancel                                          = Abbrechen
+btn.edit                                            = Bearbeiten
+btn.delete                                          = Löschen
+btn.send                                            = Senden
+breadcrumb.home                                     = Startseite
+
+###
+# TourneyNew
+###
+tourneyNew.title                                    = Neues Turnier erstellen
+tourneyNew.btnLoadCtt                               = Lade ClickTT-Daten
+tourneyNew.secGeneralInfo                           = Allgemeine Informationen
+tourneyNew.name                                     = Turniername
+tourneyNew.namePlh                                  = z.B. 45. Stadtmeisterschaft
+tourneyNew.ident                                    = Ident / Kürzel
+tourneyNew.identPlh                                 = z.B. STM2026
+tourneyNew.organizer                                = Veranstalter
+tourneyNew.category                                 = Sportart / Kategorie
+tourneyNew.categoryTT                               = Tischtennis (TT)
+tourneyNew.categoryOther                            = Andere
+tourneyNew.startDate                                = Startdatum
+tourneyNew.endDate                                  = Enddatum
+tourneyNew.secContact                               = Ansprechpartner
+tourneyNew.firstname                                = Vorname
+tourneyNew.lastname                                 = Nachname
+tourneyNew.phone                                    = Telefon
+tourneyNew.email                                    = E-Mail
+tourneyNew.secVenue                                 = Austragungsort
+tourneyNew.venueName                                = Bezeichnung / Halle
+tourneyNew.venueNamePlh                             = z.B. Dreifachsporthalle am See
+tourneyNew.street                                   = Straße / Hausnummer
+tourneyNew.country                                  = Land
+tourneyNew.zip                                      = PLZ
+tourneyNew.city                                     = Ort
+tourneyNew.btnSave                                  = Turnier speichern
+
+###
+# TourneyInfo
+###
+tourneyInfo.title                                   = Turnier-Informationen
+tourneyInfo.badgeTourney                            = Turnier
+tourneyInfo.badgeMatchboard                         = Anzeigetafel
+tourneyInfo.date                                    = Datum
+tourneyInfo.dateRange                               = {0} bis {1}
+tourneyInfo.competitions                            = Wettbewerbe
+tourneyInfo.btnAddComp                              = Wettbewerb hinzufügen
+tourneyInfo.type                                    = Typ
+tourneyInfo.status                                  = Status
+tourneyInfo.actions                                 = Aktionen
+
+###
+# TourneyAdmin
+###
+tourneyAdmin.headerMeta                             = Veranstalter: {0} | ID: {1}
+tourneyAdmin.tabImpExp                              = Import / Export
+tourneyAdmin.tabCtt                                 = ClickTT Update
+tourneyAdmin.tabCert                                = Urkunden Konfiguration
+tourneyAdmin.tabMessages                            = Messages
+tourneyAdmin.tabMatchboard                          = InfoAnzeige
+tourneyAdmin.exportTitle                            = Turnier exportieren
+tourneyAdmin.exportDesc                             = Laden Sie die aktuellen Daten dieses Turniers als JSON-Datei herunter. Das Backup kann später jederzeit wieder importiert werden.
+tourneyAdmin.exportBtn                              = JSON-Export herunterladen
+tourneyAdmin.importTitle                            = Turnier importieren
+tourneyAdmin.importDesc                             = Wählen Sie ein zuvor exportiertes Turnier (.json) aus, um die Daten einzulesen und zu laden.
+tourneyAdmin.importBtn                              = JSON-Datei einlesen...
+tourneyAdmin.cttTitle                               = ClickTT Update (Spieler-Datenabgleich)
+tourneyAdmin.cttDesc                                = Laden Sie eine aktualisierte ClickTT XML-Datei hoch, um Spieler-IDs (internalNr) und Lizenznummern (licenceNr) für neu angemeldete Teilnehmer automatisch zuzuordnen und abzugleichen.
+tourneyAdmin.cttBtn                                 = ClickTT XML-Datei auswählen...
+tourneyAdmin.unassignedPlayersTitle                 = Zuordnung der neu eingetragenen Spieler (ohne IDs)
+tourneyAdmin.thPlayer                               = Spieler im Turnier
+tourneyAdmin.thClub                                 = Verein im Turnier
+tourneyAdmin.thClickTTMapping                       = ClickTT XML Zuordnung (Vorschläge sortiert nach Namensähnlichkeit)
+tourneyAdmin.optDoNotAssign                         = -- Nicht zuweisen (Manuell eingetragen lassen) --
+tourneyAdmin.btnSaveAssignments                     = Zuordnungen & Mappings aktualisieren
+tourneyAdmin.genCttTitle                            = Spielergebnisse im ClickTT Format erzeugen für Import
+tourneyAdmin.genCttDesc                             = Erzeugen Sie eine ClickTT XML-Ergebnisdatei für den Import, indem Sie die Wettbewerbe und die Phasen (Stages) auswählen, deren Ergebnisse exportiert werden sollen.
+tourneyAdmin.genCttBtn                              = ClickTT XML Ergebnis Datei erzeugen
+tourneyAdmin.certTitle                              = Urkunden-Templates Vorschau (Tischtennis)
+tourneyAdmin.certDesc                               = Wählen Sie das Standard-Urkundentemplate für dieses Turnier aus. Es werden alle Vorlagen angezeigt, die unter der WordPress-Seite "Templates" liegen und mit "TT" beginnen.
+tourneyAdmin.loadingTemplates                       = Lade Templates...
+tourneyAdmin.noTemplatesFound                       = Keine Templates mit dem Präfix "TT" unter der WordPress-Seite "Templates" gefunden.
+tourneyAdmin.selectedBadge                          = Ausgewählt
+tourneyAdmin.activeTemplateBtn                      = Aktives Template
+tourneyAdmin.selectTemplateBtn                      = Als Template wählen
+tourneyAdmin.wsMessagesTitle                        = WebSocket Live Messages
+tourneyAdmin.wsMessagesDesc                         = Hier können Sie in Echtzeit Nachrichten mit dem Server austauschen. Der Server loggt empfangene Nachrichten auf seiner Konsole.
+tourneyAdmin.wsSent                                 = Gesendet
+tourneyAdmin.wsReceived                             = Empfangen
+tourneyAdmin.wsMsgPlh                               = Nachricht an den Server...
+tourneyAdmin.mbTitle                                = Matchboard / InfoAnzeige Verwaltung
+tourneyAdmin.mbDesc                                 = Verwalten Sie die Live-Anzeigetafel für dieses Turnier. Sie können neue Info-Meldungen und Spiel-Anzeigen hinzufügen, vorhandene Einträge löschen und die Anzeigetafel live aktualisieren.
+tourneyAdmin.mbAddEntryTitle                        = Neuen Eintrag hinzufügen
+tourneyAdmin.mbInfoTextLabel                        = Text der Infomeldung
+tourneyAdmin.mbCourtLabel                           = Tisch / Court
+tourneyAdmin.mbPlayerALabel                         = Spieler A
+tourneyAdmin.mbPlayerBLabel                         = Spieler B
+tourneyAdmin.mbCompLabel                            = Spielklasse
+tourneyAdmin.mbStageIdLabel                         = Stage ID
+tourneyAdmin.mbMatchNoLabel                         = Spiel Nr.
+tourneyAdmin.mbAddBtn                               = Eintrag hinzufügen
+tourneyAdmin.mbEntriesTitle                         = Aktuelle Anzeigetafel Einträge
+tourneyAdmin.mbContentCol                           = Inhalt / Details
+tourneyAdmin.mbActionCol                            = Aktion
+
+###
+# MainView Landing
+###
+mainView.heroTitle                                  = Willkommen zur Turnierverwaltung
+mainView.heroSubtitle                               = Professionelle Organisation für Ihre sportlichen Events – schnell, einfach und übersichtlich.
+mainView.heroDesc                                   = Verwalten Sie Ihre Turniere und Wettbewerbe effizient an einem zentralen Ort. Vom ersten Teilnehmer bis zur Siegerehrung unterstützen wir Sie bei jedem Schritt.
+mainView.newTourneyTitle                            = Neues Turnier
+mainView.newTourneyDesc                             = Erstellen Sie ein komplettes Turnier mit mehreren Wettbewerben, Zeitplänen und Teilnehmerlisten.
+mainView.newTourneyBtn                              = Ganzes Turnier
+mainView.quickStartTitle                            = Schnellstart
+mainView.quickStartDesc                             = Erstellen Sie schnell einen einzelnen Wettbewerb für ein unkompliziertes, schnelles Event.
+mainView.quickStartBtn                              = Wettbewerb starten
+mainView.searchTitle                                = Suchen & Finden
+mainView.searchDesc                                 = Finden Sie bestehende Turniere oder Wettbewerbe nach Name, Datum oder Veranstalter.
+mainView.searchBtn                                  = Suche öffnen
+
+###
+# Loading & PageNotFound
+###
+loading.spinner                                     = Lade...
+loading.content                                     = Lade Inhalt für '{0}'...
+pageNotFound.title                                  = Seite nicht gefunden
+pageNotFound.desc                                   = Die angeforderte Seite ('{0}') konnte nicht geladen werden oder existiert nicht.
+pageNotFound.details                                = Details: {0}
+
+###
+# ContextHeader / Submenu
+###
+contextHeader.singleCompetition                     = Einzelwettbewerb
+contextHeader.selectCompetition                     = Selektiere Wettbewerb
+contextHeader.noCompetitions                        = Keine Wettbewerbe vorhanden
+contextHeader.showAll                               = Alle anzeigen
+contextHeader.selectStage                           = Selektiere Stage
+contextHeader.registration                          = Anmeldung
+contextHeader.participants                          = Teilnehmer
+contextHeader.results                               = Ergebnisse
+contextHeader.administration                        = Administration
+
+###
+# Certificate & Preview
+###
+cert.editTitle                                      = Urkundendaten anpassen (Vorschau aktualisiert sich live)
+cert.title                                          = URKUNDE
+cert.awardedTo                                      = Wir verleihen
+cert.the                                            = den
+cert.place                                          = {0}. Platz
+cert.inCompetition                                  = im Wettbewerb
+cert.issuedOn                                       = Ausgestellt am {0}
+cert.signature                                      = Unterschrift Turnierleitung
+cert.loadingTemplate                                = Lade Template...
+cert.loadingDesc                                    = Urkunden-Vorlage wird geladen...
+btn.print                                           = Drucken
+
+###
+# CompetitionNew
+###
+compNew.title                                       = Einzelnen Wettbewerb starten
+compNew.desc                                        = Nutzen Sie den Schnellstart, um sofort einen einzelnen Wettbewerb anzulegen. Es wird automatisch ein einfaches Turnier im Hintergrund erstellt.
+compNew.category                                    = Kategorie (Sportart)
+compNew.name                                        = Name des Wettbewerbs
+compNew.namePlh                                     = z.B. Firmen-Cup 2026
+compNew.type                                        = Wettbewerbstyp
+compNew.startDate                                   = Beginn (Datum & Zeit)
+compNew.ttrFrom                                     = TTR von (optional)
+compNew.ttrTo                                       = TTR bis (optional)
+compNew.quickStartBtn                               = SCHNELLSTART
+
+###
+# MainSearch
+###
+search.title                                        = Turniersuche
+search.name                                         = Turniername
+search.namePlh                                      = Suchen...
+search.organizer                                   = Organisator
+search.organizerPlh                                = Verein oder Name
+search.startDateFrom                                = Startdatum (ab)
+search.sortByDate                                   = Nach Datum sortieren
+search.thDate                                       = Datum
+search.thTitle                                      = Turnier / Titel
+search.thOrganizer                                  = Organisator
+search.loading                                      = Lade Turniere...
+search.count                                        = {0} Turniere gefunden
+
+###
+# ResultList
+###
+results.title                                       = Platzierungen & Ergebnisse
+results.thName                                      = Name, Vorname
+results.thClub                                      = Verein
+results.thComp                                      = Wettbewerb
+results.thPlace                                     = Platz
+results.noResults                                   = Noch keine Ergebnisse vorhanden.
+results.btnCert                                     = Urkunde
+
+###
+# UserLogin & UserRegistration
+###
+login.accountInfo                                   = Account Info
+login.title                                         = Anmelden
+login.loggedInAs                                    = Angemeldet als:
+login.loggedInSince                                 = Eingeloggt seit:
+login.loggedInDesc                                  = Sie sind erfolgreich authentifiziert und können alle Funktionen Ihres Accounts nutzen.
+login.btnAddPasskey                                 = Passkey hinzufügen
+login.btnLogout                                     = ABMELDEN
+login.successAlert                                  = Anmeldung erfolgreich! Sie werden in Kürze weitergeleitet...
+login.usernameOrEmail                               = Benutzername oder E-Mail
+login.password                                      = Passwort
+login.securedByTurnstile                            = Gesichert durch Turnstile
+login.btnLogin                                      = LOGIN
+login.btnPasskey                                    = MIT PASSKEY ANMELDEN
+login.forgotPassword                                = Passwort vergessen?
+login.noAccount                                     = Noch keinen Account?
+login.registerNow                                   = Jetzt registrieren
+reg.title                                           = Neuen Account erstellen
+reg.displayName                                     = Anzeigename
+reg.displayNamePlh                                  = Max Mustermann
+reg.email                                           = E-Mail Adresse
+reg.password                                        = Passwort (min. 8 Zeichen)
+reg.isAdmin                                         = Ich möchte Turniere verwalten (Turnier-Admin)
+reg.organizer                                       = Veranstalter / Verein (min. 6 Zeichen)
+reg.btnSubmit                                       = Registrieren & Verifizierungsemail senden
+
+###
+# ViewOrganizer & ViewTourney & Welcome
+###
+viewOrg.title                                       = Turnier-Organisatoren
+viewOrg.path                                        = Pfad: tourney/{0}
+viewOrg.tourneysCount                               = {0} Turniere
+viewOrg.btnDetails                                  = Details anzeigen
+viewTourney.noTourney                               = Kein Turnier geladen.
+viewTourney.tabComps                                = Wettbewerbe
+viewTourney.tabStages                               = Stages
+viewTourney.tabClubs                                = Vereine
+viewTourney.tabPlayers                              = Spieler
+welcome.title                                       = Herzlich Willkommen!
+
+###
+# Footer
+###
+footer.tagline                                      = Die moderne SPA-Lösung für deine Turnierverwaltung. Schnell, sicher und plattformunabhängig.
+footer.impressum                                    = Impressum
+footer.privacy                                      = Datenschutz
+footer.contact                                      = Kontakt
+footer.gtc                                          = AGB
+footer.realizedWith                                 = Realisiert mit Scala.js & WordPress.

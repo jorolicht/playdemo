@@ -150,11 +150,22 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
           case Left(err) => error(s"StageInput: inputMatch failed: ${err.msgCode}")
           case Right(triggered) =>
             stage.matches.find(_.gameNo == gameNo).foreach { m =>
+              if (m.startTime == null || m.startTime.trim.isEmpty) {
+                m.startTime = nowTimestamp()
+              }
+              m.endTime = nowTimestamp()
               sendMatchboardUpdate("finish", playfieldVal, m, stage)
             }
             services.TourneyDB.tourney.updateStage(stage) match {
               case Right(updatedStage) =>
                 Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+
+                // Reset the info button class in the DOM in case it was blinking
+                val infoBtn = dom.document.getElementById(s"${InfoMatchBtn.id}-$gameNo").asInstanceOf[dom.html.Button]
+                if (infoBtn != null) {
+                  infoBtn.className = "btn btn-outline-info"
+                }
+
                 if (updatedStage.status == StageStatus.FIN) {
                   render()
                 } else {
@@ -308,8 +319,21 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     val setsDisplay = dom.document.getElementById(s"sets_$gameNo").asInstanceOf[dom.html.Element]
     val setsPlayed = aWins + bWins
     
+    val isDifferent = Global.currentSelection.stage.flatMap(_.matches.find(_.gameNo == gameNo)).map { m =>
+      val parsedBalls = scala.collection.mutable.ArrayBuffer[String]()
+      inputs.filter(_.nonEmpty).foreach { inp =>
+        parseSetInput(inp).foreach { _ =>
+          parsedBalls += inp
+        }
+      }
+      val currentResultStr = parsedBalls.mkString("·")
+      currentResultStr != m.result
+    }.getOrElse(true)
+
+    val canSave = isValid && winnerReached && nonOptInputs.length == setsPlayed && isDifferent
+
     if (isValid && winnerReached && nonOptInputs.length == setsPlayed) {
-      if (saveBtn != null) saveBtn.disabled = false
+      if (saveBtn != null) saveBtn.disabled = !canSave
       if (setsDisplay != null) {
         setsDisplay.textContent = s"$aWins:$bWins"
         setsDisplay.className = "badge bg-success text-white"
@@ -554,6 +578,22 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     val ss = f"${d.getSeconds().toInt}%02d"
     s"$yyyy$mm$dd$hh$min$ss"
 
+  private def formatTimestamp(ts: String): String =
+    if (ts == null || ts.trim.isEmpty) "-"
+    else {
+      val t = ts.trim
+      if (t.length == 14) {
+        val hh = t.substring(8, 10)
+        val mm = t.substring(10, 12)
+        s"$hh:$mm Uhr"
+      } else if (t.length == 8) {
+        val yyyy = t.substring(0, 4)
+        val mm = t.substring(4, 6)
+        val dd = t.substring(6, 8)
+        s"$dd.$mm.$yyyy"
+      } else t
+    }
+
   def getRunningTime(startTimeStr: String): String =
     if startTimeStr == null || startTimeStr.length != 14 then return "-"
     try
@@ -708,8 +748,8 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
           val infoText = m.info.trim
           val infoDisplay = if (infoText.isEmpty) "-" else infoText
 
-          val startTimeDisplay = if (m.startTime == null || m.startTime.trim.isEmpty) "-" else m.startTime
-          val endTimeDisplay = if (m.endTime == null || m.endTime.trim.isEmpty) "-" else m.endTime
+          val startTimeDisplay = formatTimestamp(m.startTime)
+          val endTimeDisplay = formatTimestamp(m.endTime)
           val playfieldDisplay = if (m.playfield == null || m.playfield.trim.isEmpty) "-" else m.playfield
 
           val resultDisplay = if (m.result == null || m.result.trim.isEmpty) "-" else m.result.replace("·", ", ")
@@ -732,7 +772,7 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
             List(shared.BoxButton.Ok)
           }
 
-          DlgMsgbox.show(body, s"Spiel-Informationen (Spiel ${m.gameNo})", buttons).map {
+          DlgMsgbox.show(body, s"Spiel-Information (Spiel ${m.gameNo})", buttons).map {
             case shared.BoxButton.AcceptResult =>
               acceptMatchResult(gameNo, infoText)
             case _ =>
@@ -784,6 +824,12 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         
         // 2. Run the validation logic so that the Save button is enabled and sets badge is updated
         checkMatchValidity(gameNo, winSets)
+
+        // 3. Reset the info button class in the DOM
+        val infoBtn = dom.document.getElementById(s"${InfoMatchBtn.id}-$gameNo").asInstanceOf[dom.html.Button]
+        if (infoBtn != null) {
+          infoBtn.className = "btn btn-outline-info"
+        }
         
         info(s"Ergebnis für Spiel $gameNo in Eingabefelder übertragen. Bitte mit dem grünen Haken-Button speichern.")
       }

@@ -1,34 +1,35 @@
 @import shared.DomTypes.HtmlId
 @import cviews.helper.html.*
 @import pages.MainSearch.*
+@import base.Messages.gM
 
 @()
 
 <div class="container mt-4">
     <div class="card shadow-sm border-0">
         <div class="card-header bg-primary text-white py-3">
-            <h3 class="h5 mb-0"><i class="bi bi-search me-2"></i>Turniersuche</h3>
+            <h3 class="h5 mb-0"><i class="bi bi-search me-2"></i>@gM("search.title")</h3>
         </div>
         <div class="card-body bg-light">
             <form @id(IdMainSearchForm) onsubmit="return false;" class="row g-3">
                 <!-- Live Title Search -->
                 <div class="col-md-5">
-                    <label @forAttr(IdInputTitle) class="form-label fw-bold">Turniername</label>
+                    <label @forAttr(IdInputTitle) class="form-label fw-bold">@gM("search.name")</label>
                     <div class="input-group">
                         <span class="input-group-text bg-white border-end-0"><i class="bi bi-fonts"></i></span>
-                        <input type="text" class="form-control border-start-0" @id(IdInputTitle, "oninput") placeholder="Suchen...">
+                        <input type="text" class="form-control border-start-0" @id(IdInputTitle, "oninput") placeholder="@gM("search.namePlh")">
                     </div>
                 </div>
 
                 <!-- Organizer Search -->
                 <div class="col-md-4">
-                    <label @forAttr(IdInputOrganizer) class="form-label fw-bold">Organisator</label>
-                    <input type="text" class="form-control" @id(IdInputOrganizer, "oninput") placeholder="Verein oder Name">
+                    <label @forAttr(IdInputOrganizer) class="form-label fw-bold">@gM("search.organizer")</label>
+                    <input type="text" class="form-control" @id(IdInputOrganizer, "oninput") placeholder="@gM("search.organizerPlh")">
                 </div>
 
                 <!-- Date Search (From) -->
                 <div class="col-md-3">
-                    <label @forAttr(IdInputDate) class="form-label fw-bold">Startdatum (ab)</label>
+                    <label @forAttr(IdInputDate) class="form-label fw-bold">@gM("search.startDateFrom")</label>
                     <input type="date" class="form-control" @id(IdInputDate, "onchange")>
                 </div>
             </form>
@@ -42,12 +43,12 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-dark sticky-top">
                         <tr>
-                            <th class="ps-3 cursor-pointer" style="width: 150px;" @id(IdHeaderDate, "onclick") title="Nach Datum sortieren">
-                                Datum <i id="@IdSortIcon" class="bi bi-sort-numeric-up-alt ms-1"></i>
+                            <th class="ps-3 cursor-pointer" style="width: 150px;" @id(IdHeaderDate, "onclick") title="@gM("search.sortByDate")">
+                                @gM("search.thDate") <i id="@IdSortIcon" class="bi bi-sort-numeric-up-alt ms-1"></i>
                             </th>
-                            <th>Turnier / Titel</th>
-                            <th>Organisator</th>
-                            <th class="text-center" style="width: 120px;">Status</th>
+                            <th>@gM("search.thTitle")</th>
+                            <th>@gM("search.thOrganizer")</th>
+                            <th class="text-center" style="width: 120px;">@gM("tourneyInfo.status")</th>
                         </tr>
                     </thead>
                     <tbody @id(IdResultsBody)>
@@ -55,7 +56,7 @@
                         <tr>
                             <td colspan="4" class="text-center py-5 text-muted">
                                 <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                                Lade Turniere...
+                                @gM("search.loading")
                             </td>
                         </tr>
                     </tbody>
@@ -63,7 +64,7 @@
             </div>
         </div>
         <div class="card-footer bg-white text-muted small py-2">
-            <div @id(IdResultCount)>0 Turniere gefunden</div>
+            <div @id(IdResultCount)>@gM("search.count", "0")</div>
         </div>
     </div>
 </div>

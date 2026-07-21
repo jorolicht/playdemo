@@ -1,15 +1,16 @@
 @import shared.DomTypes.HtmlId
 @import cviews.helper.html.*
 @import pages.TourneyNew.*
+@import base.Messages.gM
 
 @()
 
 <div class="container mt-4 mb-5">
     <div class="card shadow">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h2 class="h4 mb-0">Neues Turnier erstellen</h2>
+            <h2 class="h4 mb-0">@gM("tourneyNew.title")</h2>
             <button class="btn btn-light btn-sm" @id(BtnLoadCtt, "onclick")>
-                <i class="bi bi-file-earmark-arrow-up me-1"></i>Lade ClickTT-Daten
+                <i class="bi bi-file-earmark-arrow-up me-1"></i>@gM("tourneyNew.btnLoadCtt")
             </button>
         </div>
         <div class="card-body p-4">
@@ -18,33 +19,33 @@
                 <!-- Basic Info -->
                 <div class="row g-3 mb-4">
                     <div class="col-12">
-                        <h5 class="border-bottom pb-2">Allgemeine Informationen</h5>
+                        <h5 class="border-bottom pb-2">@gM("tourneyNew.secGeneralInfo")</h5>
                     </div>
                     <div class="col-md-8">
-                        <label for="tn-name" class="form-label">Turniername</label>
-                        <input type="text" class="form-control" id="tn-name" placeholder="z.B. 45. Stadtmeisterschaft" required>
+                        <label for="tn-name" class="form-label">@gM("tourneyNew.name")</label>
+                        <input type="text" class="form-control" id="tn-name" placeholder="@gM("tourneyNew.namePlh")" required>
                     </div>
                     <div class="col-md-4">
-                        <label for="tn-ident" class="form-label">Ident / Kürzel</label>
-                        <input type="text" class="form-control" id="tn-ident" placeholder="z.B. STM2026">
+                        <label for="tn-ident" class="form-label">@gM("tourneyNew.ident")</label>
+                        <input type="text" class="form-control" id="tn-ident" placeholder="@gM("tourneyNew.identPlh")">
                     </div>
                     <div class="col-md-6">
-                        <label for="tn-organizer" class="form-label">Veranstalter</label>
+                        <label for="tn-organizer" class="form-label">@gM("tourneyNew.organizer")</label>
                         <input type="text" class="form-control" id="tn-organizer" value="@{base.Global.user.map(_.org).getOrElse("")}" required>
                     </div>
                     <div class="col-md-6">
-                        <label for="tn-typ" class="form-label">Sportart / Kategorie</label>
+                        <label for="tn-typ" class="form-label">@gM("tourneyNew.category")</label>
                         <select class="form-select" id="tn-typ">
-                            <option value="TT" selected>Tischtennis (TT)</option>
-                            <option value="UNKNOWN">Andere</option>
+                            <option value="TT" selected>@gM("tourneyNew.categoryTT")</option>
+                            <option value="UNKNOWN">@gM("tourneyNew.categoryOther")</option>
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label for="tn-start" class="form-label">Startdatum</label>
+                        <label for="tn-start" class="form-label">@gM("tourneyNew.startDate")</label>
                         <input type="date" class="form-control" id="tn-start" required>
                     </div>
                     <div class="col-md-6">
-                        <label for="tn-end" class="form-label">Enddatum</label>
+                        <label for="tn-end" class="form-label">@gM("tourneyNew.endDate")</label>
                         <input type="date" class="form-control" id="tn-end" required>
                     </div>
                 </div>
@@ -52,22 +53,22 @@
                 <!-- Contact Info -->
                 <div class="row g-3 mb-4">
                     <div class="col-12">
-                        <h5 class="border-bottom pb-2">Ansprechpartner</h5>
+                        <h5 class="border-bottom pb-2">@gM("tourneyNew.secContact")</h5>
                     </div>
                     <div class="col-md-6">
-                        <label for="tn-contact-fname" class="form-label">Vorname</label>
+                        <label for="tn-contact-fname" class="form-label">@gM("tourneyNew.firstname")</label>
                         <input type="text" class="form-control" id="tn-contact-fname" value="@{base.Global.user.map(_.firstname).getOrElse("")}">
                     </div>
                     <div class="col-md-6">
-                        <label for="tn-contact-lname" class="form-label">Nachname</label>
+                        <label for="tn-contact-lname" class="form-label">@gM("tourneyNew.lastname")</label>
                         <input type="text" class="form-control" id="tn-contact-lname" value="@{base.Global.user.map(_.lastname).getOrElse("")}">
                     </div>
                     <div class="col-md-6">
-                        <label for="tn-contact-phone" class="form-label">Telefon</label>
+                        <label for="tn-contact-phone" class="form-label">@gM("tourneyNew.phone")</label>
                         <input type="tel" class="form-control" id="tn-contact-phone">
                     </div>
                     <div class="col-md-6">
-                        <label for="tn-contact-email" class="form-label">E-Mail</label>
+                        <label for="tn-contact-email" class="form-label">@gM("tourneyNew.email")</label>
                         <input type="email" class="form-control" id="tn-contact-email" value="@{base.Global.user.map(_.email).getOrElse("")}">
                     </div>
                 </div>
@@ -75,26 +76,26 @@
                 <!-- Address Info -->
                 <div class="row g-3 mb-4">
                     <div class="col-12">
-                        <h5 class="border-bottom pb-2">Austragungsort</h5>
+                        <h5 class="border-bottom pb-2">@gM("tourneyNew.secVenue")</h5>
                     </div>
                     <div class="col-12">
-                        <label for="tn-addr-desc" class="form-label">Bezeichnung / Halle</label>
-                        <input type="text" class="form-control" id="tn-addr-desc" placeholder="z.B. Dreifachsporthalle am See">
+                        <label for="tn-addr-desc" class="form-label">@gM("tourneyNew.venueName")</label>
+                        <input type="text" class="form-control" id="tn-addr-desc" placeholder="@gM("tourneyNew.venueNamePlh")">
                     </div>
                     <div class="col-md-9">
-                        <label for="tn-addr-street" class="form-label">Straße / Hausnummer</label>
+                        <label for="tn-addr-street" class="form-label">@gM("tourneyNew.street")</label>
                         <input type="text" class="form-control" id="tn-addr-street">
                     </div>
                     <div class="col-md-3">
-                        <label for="tn-addr-country" class="form-label">Land</label>
+                        <label for="tn-addr-country" class="form-label">@gM("tourneyNew.country")</label>
                         <input type="text" class="form-control" id="tn-addr-country" value="DE">
                     </div>
                     <div class="col-md-4">
-                        <label for="tn-addr-zip" class="form-label">PLZ</label>
+                        <label for="tn-addr-zip" class="form-label">@gM("tourneyNew.zip")</label>
                         <input type="text" class="form-control" id="tn-addr-zip">
                     </div>
                     <div class="col-md-8">
-                        <label for="tn-addr-city" class="form-label">Ort</label>
+                        <label for="tn-addr-city" class="form-label">@gM("tourneyNew.city")</label>
                         <input type="text" class="form-control" id="tn-addr-city">
                     </div>
                 </div>
@@ -102,9 +103,9 @@
                 <div id="validationFeedback" class="mb-3"></div>
 
                 <div class="d-flex justify-content-end gap-2 border-top pt-3">
-                    <button type="button" class="btn btn-secondary" onclick="appLoadPage('MainView', '')">Abbrechen</button>
+                    <button type="button" class="btn btn-secondary" onclick="appLoadPage('MainView', '')">@gM("btn.cancel")</button>
                     <button type="submit" class="btn btn-primary px-4" @id(BtnSave, "onclick")>
-                        <i class="bi bi-save me-2"></i>Turnier speichern
+                        <i class="bi bi-save me-2"></i>@gM("tourneyNew.btnSave")
                     </button>
                 </div>
             </form>

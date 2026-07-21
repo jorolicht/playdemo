@@ -35,7 +35,7 @@
                                             <th>@gM("+name_header")</th>
                                             <th>@gM("+club_header")</th>
                                             <th class="text-center" style="width: 80px;">@gM("+ttr_header")</th>
-                                            <th class="text-center" style="width: 100px;">@gM("+active_header") / Edit</th>
+                                            <th class="text-center" style="width: 100px;">@gM("+active_header") / @gM("btn.edit")</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -60,7 +60,7 @@
                                                                             type="button"
                                                                             data-player-id="@player.id.value" 
                                                                             data-comp-id="@c.id.value" 
-                                                                            title="Spieler editieren">
+                                                                            title="@gM("btn.edit")">
                                                                         <i class="bi bi-pencil-square"></i>
                                                                     </button>
                                                                 }

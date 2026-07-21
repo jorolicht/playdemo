@@ -1,4 +1,5 @@
 @import shared.model.*
+@import base.Messages.gM
 
 @(stage: Stage, activeTab: String)(content: Html)
 
@@ -20,7 +21,7 @@
         </div>
         <div class="btn-group btn-group-sm">
             <button class="btn btn-outline-secondary" onclick="appLoadPage('CompetitionInfo', '')">
-                <i class="bi bi-arrow-left me-1"></i>Zurück zum Wettbewerb
+                <i class="bi bi-arrow-left me-1"></i>@gM("btn.backToCompetition")
             </button>
         </div>
     </div>

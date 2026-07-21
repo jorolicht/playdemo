@@ -64,3 +64,279 @@ table.name = Name
 table.dbl.name = Name (Double)
 table.club = Club
 table.ttr = TTR
+
+###
+# Navbar
+###
+navbar.brand                                        = TourneyService
+navbar.logoAlt                                      = Logo
+navbar.toggleNav                                    = Toggle navigation
+navbar.functions                                    = Features
+navbar.pricing                                      = Support/Pricing
+navbar.tools                                        = Tools
+navbar.wordpressPlugin                              = Wordpress Plugin
+navbar.excelTemplate                                = Excel Template
+navbar.search                                       = Search
+navbar.start                                        = START
+navbar.fullTourney                                  = Full Tournament
+navbar.singleCompetition                            = Single Competition
+navbar.profilePasskeys                              = Profile / Passkeys
+navbar.logout                                       = Logout
+navbar.login                                        = Login
+
+###
+# Buttons & Breadcrumbs
+###
+btn.back                                            = Back
+btn.backToHome                                      = Back to Home
+btn.backToOverview                                  = Back to Overview
+btn.backToCompetition                               = Back to Competition
+btn.cancel                                          = Cancel
+btn.edit                                            = Edit
+btn.delete                                          = Delete
+btn.send                                            = Send
+breadcrumb.home                                     = Home
+
+###
+# TourneyNew
+###
+tourneyNew.title                                    = Create New Tournament
+tourneyNew.btnLoadCtt                               = Load ClickTT Data
+tourneyNew.secGeneralInfo                           = General Information
+tourneyNew.name                                     = Tournament Name
+tourneyNew.namePlh                                  = e.g. 45th City Championship
+tourneyNew.ident                                    = Identifier / Abbreviation
+tourneyNew.identPlh                                 = e.g. STM2026
+tourneyNew.organizer                                = Organizer
+tourneyNew.category                                 = Sport / Category
+tourneyNew.categoryTT                               = Table Tennis (TT)
+tourneyNew.categoryOther                            = Other
+tourneyNew.startDate                                = Start Date
+tourneyNew.endDate                                  = End Date
+tourneyNew.secContact                               = Contact Person
+tourneyNew.firstname                                = First Name
+tourneyNew.lastname                                 = Last Name
+tourneyNew.phone                                    = Phone
+tourneyNew.email                                    = Email
+tourneyNew.secVenue                                 = Venue Location
+tourneyNew.venueName                                = Venue / Hall Name
+tourneyNew.venueNamePlh                             = e.g. Sports Complex at the Lake
+tourneyNew.street                                   = Street / House Number
+tourneyNew.country                                  = Country
+tourneyNew.zip                                      = Postal Code
+tourneyNew.city                                     = City
+tourneyNew.btnSave                                  = Save Tournament
+
+###
+# TourneyInfo
+###
+tourneyInfo.title                                   = Tournament Information
+tourneyInfo.badgeTourney                            = Tournament
+tourneyInfo.badgeMatchboard                         = Scoreboard
+tourneyInfo.date                                    = Date
+tourneyInfo.dateRange                               = {0} to {1}
+tourneyInfo.competitions                            = Competitions
+tourneyInfo.btnAddComp                              = Add Competition
+tourneyInfo.type                                    = Type
+tourneyInfo.status                                  = Status
+tourneyInfo.actions                                 = Actions
+
+###
+# TourneyAdmin
+###
+tourneyAdmin.headerMeta                             = Organizer: {0} | ID: {1}
+tourneyAdmin.tabImpExp                              = Import / Export
+tourneyAdmin.tabCtt                                 = ClickTT Update
+tourneyAdmin.tabCert                                = Certificate Configuration
+tourneyAdmin.tabMessages                            = Messages
+tourneyAdmin.tabMatchboard                          = Display Board
+tourneyAdmin.exportTitle                            = Export Tournament
+tourneyAdmin.exportDesc                             = Download current tournament data as a JSON file. The backup can be re-imported at any time.
+tourneyAdmin.exportBtn                              = Download JSON Export
+tourneyAdmin.importTitle                            = Import Tournament
+tourneyAdmin.importDesc                             = Select a previously exported tournament file (.json) to import and load data.
+tourneyAdmin.importBtn                              = Load JSON File...
+tourneyAdmin.cttTitle                               = ClickTT Update (Player Matching)
+tourneyAdmin.cttDesc                                = Upload an updated ClickTT XML file to automatically match and assign player IDs (internalNr) and license numbers (licenceNr).
+tourneyAdmin.cttBtn                                 = Select ClickTT XML File...
+tourneyAdmin.unassignedPlayersTitle                 = Assignment of Newly Registered Players (Without IDs)
+tourneyAdmin.thPlayer                               = Player in Tournament
+tourneyAdmin.thClub                                 = Club in Tournament
+tourneyAdmin.thClickTTMapping                       = ClickTT XML Mapping (Suggestions sorted by name similarity)
+tourneyAdmin.optDoNotAssign                         = -- Do not assign (Keep manually entered) --
+tourneyAdmin.btnSaveAssignments                     = Update Assignments & Mappings
+tourneyAdmin.genCttTitle                            = Generate Match Results in ClickTT Format for Import
+tourneyAdmin.genCttDesc                             = Create a ClickTT XML result file for import by selecting competitions and stages to export.
+tourneyAdmin.genCttBtn                              = Generate ClickTT XML Result File
+tourneyAdmin.certTitle                              = Certificate Templates Preview (Table Tennis)
+tourneyAdmin.certDesc                               = Select the default certificate template for this tournament. All templates starting with "TT" under the WordPress page "Templates" are displayed.
+tourneyAdmin.loadingTemplates                       = Loading templates...
+tourneyAdmin.noTemplatesFound                       = No templates with prefix "TT" found under WordPress page "Templates".
+tourneyAdmin.selectedBadge                          = Selected
+tourneyAdmin.activeTemplateBtn                      = Active Template
+tourneyAdmin.selectTemplateBtn                      = Select as Template
+tourneyAdmin.wsMessagesTitle                        = WebSocket Live Messages
+tourneyAdmin.wsMessagesDesc                         = Exchange real-time messages with the server. The server logs received messages on its console.
+tourneyAdmin.wsSent                                 = Sent
+tourneyAdmin.wsReceived                             = Received
+tourneyAdmin.wsMsgPlh                               = Message to server...
+tourneyAdmin.mbTitle                                = Matchboard / Display Management
+tourneyAdmin.mbDesc                                 = Manage the live scoreboard for this tournament. Add new info messages and match displays, delete entries, and update live.
+tourneyAdmin.mbAddEntryTitle                        = Add New Entry
+tourneyAdmin.mbInfoTextLabel                        = Info Message Text
+tourneyAdmin.mbCourtLabel                           = Table / Court
+tourneyAdmin.mbPlayerALabel                         = Player A
+tourneyAdmin.mbPlayerBLabel                         = Player B
+tourneyAdmin.mbCompLabel                            = Competition
+tourneyAdmin.mbStageIdLabel                         = Stage ID
+tourneyAdmin.mbMatchNoLabel                         = Match No.
+tourneyAdmin.mbAddBtn                               = Add Entry
+tourneyAdmin.mbEntriesTitle                         = Current Scoreboard Entries
+tourneyAdmin.mbContentCol                           = Content / Details
+tourneyAdmin.mbActionCol                            = Action
+
+###
+# MainView Landing
+###
+mainView.heroTitle                                  = Welcome to Tournament Management
+mainView.heroSubtitle                               = Professional organization for your sports events – fast, simple, and clear.
+mainView.heroDesc                                   = Efficiently manage your tournaments and competitions in one central place. From the first participant to the award ceremony, we support you every step of the way.
+mainView.newTourneyTitle                            = New Tournament
+mainView.newTourneyDesc                             = Create a complete tournament with multiple competitions, schedules, and participant lists.
+mainView.newTourneyBtn                              = Full Tournament
+mainView.quickStartTitle                            = Quick Start
+mainView.quickStartDesc                             = Quickly create a single competition for a straightforward, fast event.
+mainView.quickStartBtn                              = Start Competition
+mainView.searchTitle                                = Search & Find
+mainView.searchDesc                                 = Find existing tournaments or competitions by name, date, or organizer.
+mainView.searchBtn                                  = Open Search
+
+###
+# Loading & PageNotFound
+###
+loading.spinner                                     = Loading...
+loading.content                                     = Loading content for '{0}'...
+pageNotFound.title                                  = Page Not Found
+pageNotFound.desc                                   = The requested page ('{0}') could not be loaded or does not exist.
+pageNotFound.details                                = Details: {0}
+
+###
+# ContextHeader / Submenu
+###
+contextHeader.singleCompetition                     = Single Competition
+contextHeader.selectCompetition                     = Select Competition
+contextHeader.noCompetitions                        = No competitions available
+contextHeader.showAll                               = Show all
+contextHeader.selectStage                           = Select Stage
+contextHeader.registration                          = Registration
+contextHeader.participants                          = Participants
+contextHeader.results                               = Results
+contextHeader.administration                        = Administration
+
+###
+# Certificate & Preview
+###
+cert.editTitle                                      = Customize Certificate Data (Live Preview)
+cert.title                                          = CERTIFICATE
+cert.awardedTo                                      = Awarded to
+cert.the                                            = the
+cert.place                                          = {0} Place
+cert.inCompetition                                  = in competition
+cert.issuedOn                                       = Issued on {0}
+cert.signature                                      = Tournament Director Signature
+cert.loadingTemplate                                = Loading template...
+cert.loadingDesc                                    = Loading certificate template...
+btn.print                                           = Print
+
+###
+# CompetitionNew
+###
+compNew.title                                       = Start Single Competition
+compNew.desc                                        = Use quick start to create a single competition immediately. A simple tournament is automatically created in the background.
+compNew.category                                    = Category (Sport)
+compNew.name                                        = Competition Name
+compNew.namePlh                                     = e.g. Company Cup 2026
+compNew.type                                        = Competition Type
+compNew.startDate                                   = Start (Date & Time)
+compNew.ttrFrom                                     = TTR from (optional)
+compNew.ttrTo                                       = TTR to (optional)
+compNew.quickStartBtn                               = QUICK START
+
+###
+# MainSearch
+###
+search.title                                        = Tournament Search
+search.name                                         = Tournament Name
+search.namePlh                                      = Search...
+search.organizer                                   = Organizer
+search.organizerPlh                                = Club or Name
+search.startDateFrom                                = Start Date (from)
+search.sortByDate                                   = Sort by date
+search.thDate                                       = Date
+search.thTitle                                      = Tournament / Title
+search.thOrganizer                                  = Organizer
+search.loading                                      = Loading tournaments...
+search.count                                        = {0} tournaments found
+
+###
+# ResultList
+###
+results.title                                       = Rankings & Results
+results.thName                                      = Name, First Name
+results.thClub                                      = Club
+results.thComp                                      = Competition
+results.thPlace                                     = Place
+results.noResults                                   = No results available yet.
+results.btnCert                                     = Certificate
+
+###
+# UserLogin & UserRegistration
+###
+login.accountInfo                                   = Account Info
+login.title                                         = Sign In
+login.loggedInAs                                    = Logged in as:
+login.loggedInSince                                 = Logged in since:
+login.loggedInDesc                                  = You are successfully authenticated and can use all account features.
+login.btnAddPasskey                                 = Add Passkey
+login.btnLogout                                     = LOGOUT
+login.successAlert                                  = Login successful! Redirecting...
+login.usernameOrEmail                               = Username or Email
+login.password                                      = Password
+login.securedByTurnstile                            = Secured by Turnstile
+login.btnLogin                                      = LOGIN
+login.btnPasskey                                    = LOGIN WITH PASSKEY
+login.forgotPassword                                = Forgot password?
+login.noAccount                                     = No account yet?
+login.registerNow                                   = Register now
+reg.title                                           = Create New Account
+reg.displayName                                     = Display Name
+reg.displayNamePlh                                  = John Doe
+reg.email                                           = Email Address
+reg.password                                        = Password (min. 8 characters)
+reg.isAdmin                                         = I want to manage tournaments (Tournament Admin)
+reg.organizer                                       = Organizer / Club (min. 6 characters)
+reg.btnSubmit                                       = Register & Send Verification Email
+
+###
+# ViewOrganizer & ViewTourney & Welcome
+###
+viewOrg.title                                       = Tournament Organizers
+viewOrg.path                                        = Path: tourney/{0}
+viewOrg.tourneysCount                               = {0} Tournaments
+viewOrg.btnDetails                                  = View Details
+viewTourney.noTourney                               = No tournament loaded.
+viewTourney.tabComps                                = Competitions
+viewTourney.tabStages                               = Stages
+viewTourney.tabClubs                                = Clubs
+viewTourney.tabPlayers                              = Players
+welcome.title                                       = Welcome!
+
+###
+# Footer
+###
+footer.tagline                                      = The modern SPA solution for your tournament management. Fast, secure, and platform-independent.
+footer.impressum                                    = Imprint
+footer.privacy                                      = Privacy Policy
+footer.contact                                      = Contact
+footer.gtc                                          = Terms & Conditions
+footer.realizedWith                                 = Realized with Scala.js & WordPress.

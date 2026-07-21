@@ -2,13 +2,14 @@
 @import shared.model.*
 @import cviews.helper.html.*
 @import pages.ViewOrganizer.*
+@import base.Messages.gM
 
 @(organizers: Seq[(Int, String, String, Int)])
 
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-dark text-white">
-            <h2 class="mb-0">Turnier-Organisatoren</h2>
+            <h2 class="mb-0">@gM("viewOrg.title")</h2>
         </div>
         <div class="card-body">
             <div class="list-group">
@@ -16,11 +17,11 @@
                     <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         <div class="flex-grow-1">
                             <h5 class="mb-1">@title</h5>
-                            <small class="text-muted">Pfad: tourney/@slug</small>
+                            <small class="text-muted">@gM("viewOrg.path", slug)</small>
                         </div>
-                        <span class="badge bg-primary rounded-pill">@count Turniere</span>
+                        <span class="badge bg-primary rounded-pill">@gM("viewOrg.tourneysCount", count.toString)</span>
                         <button @id(Details, "onclick") data-slug="@slug" class="btn btn-outline-primary btn-sm ms-3">
-                            Details anzeigen
+                            @gM("viewOrg.btnDetails")
                         </button>
                     </div>
                     <div id="tourneys-@slug" class="mt-2 ps-4 d-none">

@@ -51,6 +51,8 @@ object Messages extends JsWrapper with ComWrapper:
       m
     catch { case _: Throwable => error(s"getMsg -> key:${key} args:${args.mkString(":")} not found"); key }
 
+  def gM(key: String, inserts: String*): String = getMsg(key, inserts*)
+
 
   /** getErr
     *

@@ -110,7 +110,17 @@ object WebSocketService:
                 stage.matches.find(_.gameNo == gNo).foreach { m =>
                   m.setInfo(s"Result ${payload.sets}")
                 }
+                services.TourneyDB.tourney.updateStage(stage) match {
+                  case Right(updatedStage) =>
+                    if (Global.currentSelection.stage.exists(_.id == stageIdObj)) {
+                      Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+                    }
+                  case Left(err) =>
+                    debug(s"[WebSocket] Failed to update stage in TourneyDB: ${err.msgCode}")
+                }
               }
+              services.TourneyDB.sync()
+
               // If we are currently on StageInput page, force a redraw to show the updated info!
               val isStageInputActive = try {
                 val storage = org.scalajs.dom.window.sessionStorage

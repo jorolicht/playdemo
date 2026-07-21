@@ -27,7 +27,7 @@ object ViewOrganizer extends BasePage with base.JsWrapper with ComWrapper:
     case class Organizer(id: Int, title: String, slug: String, count: Int) derives ReadWriter
 
     debug(s"ViewOrganizer -> Fetching organizers")
-    ajaxGet[Seq[Organizer]]("/wp-json/tourney/v1/organizers", List()).map {
+    ajaxGet[Seq[Organizer]]("/wp-json/tourney/v1/organizers", List(), host = Global.homeUrl).map {
       case Right(orgs) =>
         val organizers = orgs.map(o => (o.id, o.title, o.slug, o.count))
         val html = cviews.pages.html.ViewOrganizer(organizers)
@@ -61,10 +61,10 @@ object ViewOrganizer extends BasePage with base.JsWrapper with ComWrapper:
         setHtml(container, "<em>Lade Turniere...</em>")
         
         // Wir brauchen die Parent ID für diesen Slug. 
-        ajaxGet[Seq[WpPost]](s"/wp-json/wp/v2/tourney?slug=$slug", List()).map {
+        ajaxGet[Seq[WpPost]](s"/wp-json/wp/v2/tourney?slug=$slug", List(), host = Global.homeUrl).map {
           case Right(parents) if parents.nonEmpty =>
             val parentId = parents.head.id
-            ajaxGet[Seq[WpPost]](s"/wp-json/wp/v2/tourney?parent=$parentId", List()).map {
+            ajaxGet[Seq[WpPost]](s"/wp-json/wp/v2/tourney?parent=$parentId", List(), host = Global.homeUrl).map {
               case Right(children) =>
                 if (children.isEmpty) {
                   setHtml(container, "<div class='alert alert-info py-1'>Keine Turniere gefunden.</div>")

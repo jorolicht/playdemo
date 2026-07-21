@@ -192,6 +192,16 @@ lazy val server = project
       val wpCssDestination2 = dockerWpPluginDir / "css"
 
       val wpPluginDir = baseDirectory.value / ".." / "wp-plugin"
+      val siteContentDir = baseDirectory.value / ".." / "site" / "content"
+      val siteDownloadDir = baseDirectory.value / ".." / "site" / "download"
+
+      // Copy site/content -> wp-plugin/pages and site/download -> wp-plugin/download
+      if (siteContentDir.exists()) {
+        IO.copyDirectory(siteContentDir, wpPluginDir / "pages")
+      }
+      if (siteDownloadDir.exists()) {
+        IO.copyDirectory(siteDownloadDir, wpPluginDir / "download")
+      }
 
       IO.copyDirectory(clientTargetDir, wpJsDestination)
       IO.copyDirectory(clientCssSource, wpCssDestination)
@@ -207,6 +217,9 @@ lazy val server = project
       }
       if ((wpPluginDir / "font").exists()) {
         IO.copyDirectory(wpPluginDir / "font", dockerWpPluginDir / "font")
+      }
+      if ((wpPluginDir / "download").exists()) {
+        IO.copyDirectory(wpPluginDir / "download", dockerWpPluginDir / "download")
       }
       if ((wpPluginDir / "composer.json").exists()) {
         IO.copyFile(wpPluginDir / "composer.json", dockerWpPluginDir / "composer.json")

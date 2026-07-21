@@ -1,0 +1,309 @@
+<!--
+ * Funktionen & Features des Turnierprogramms
+ * 
+ * Diese Datei enthält die vollständige Funktionsbeschreibung der Turniersoftware.
+ * Sie ist so aufgebaut, dass sie sowohl direkt als auch dynamisch via appLoadPage('MainView', 'functions')
+ * in der Single Page Application geladen und gerendert werden kann.
+-->
+<style>
+    .fn-wrapper {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--bs-body-color, #1e293b);
+    }
+    .fn-hero {
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.08) 0%, rgba(102, 16, 242, 0.08) 100%);
+        border: 1px solid rgba(13, 110, 253, 0.15);
+        border-radius: 16px;
+        padding: 40px 28px;
+        margin-bottom: 36px;
+        text-align: center;
+    }
+    .fn-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 50px;
+        background: rgba(13, 110, 253, 0.12);
+        color: #0d6efd;
+        font-size: 0.88rem;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+    .fn-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 14px;
+        color: var(--bs-heading-color, #0f172a);
+    }
+    .fn-subtitle {
+        font-size: 1.1rem;
+        color: var(--bs-secondary-color, #64748b);
+        max-width: 760px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+    .fn-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+    .fn-card {
+        background: var(--bs-card-bg, #ffffff);
+        border: 1px solid var(--bs-border-color, #e2e8f0);
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    .fn-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -6px rgba(13, 110, 253, 0.15);
+        border-color: rgba(13, 110, 253, 0.4);
+    }
+    .fn-icon-box {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 18px;
+        background: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+    }
+    .fn-card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: var(--bs-heading-color, #0f172a);
+    }
+    .fn-card-text {
+        font-size: 0.95rem;
+        color: var(--bs-secondary-color, #64748b);
+        line-height: 1.6;
+        margin-bottom: 16px;
+    }
+    .fn-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        margin-top: auto;
+    }
+    .fn-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        color: var(--bs-body-color, #334155);
+    }
+    .fn-list li i {
+        color: #198754;
+        font-size: 1.05rem;
+        margin-top: 1px;
+    }
+    .fn-banner {
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, rgba(102, 16, 242, 0.1) 100%);
+        border: 1px solid rgba(13, 110, 253, 0.2);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+        flex-wrap: wrap;
+    }
+    .fn-banner-content {
+        flex: 1;
+        min-width: 280px;
+    }
+    .fn-banner-content h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: var(--bs-heading-color, #0f172a);
+    }
+    .fn-tech-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 20px;
+    }
+    .fn-tag {
+        background: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.04));
+        border: 1px solid var(--bs-border-color, #cbd5e1);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: var(--bs-secondary-color, #475569);
+    }
+    .fn-cta {
+        text-align: center;
+        padding: 32px 20px;
+        background: var(--bs-tertiary-bg, rgba(248, 250, 252, 0.8));
+        border-radius: 16px;
+        border: 1px solid var(--bs-border-color, #e2e8f0);
+    }
+</style>
+
+<div class="fn-wrapper">
+    <!-- Header Hero -->
+    <div class="fn-hero">
+        <div class="fn-badge">
+            <i class="bi bi-trophy-fill"></i> Turniersoftware Features
+        </div>
+        <h2 class="fn-title">Leistungsstarke Funktionen im Überblick</h2>
+        <p class="fn-subtitle">
+            Die moderne Gesamtlösung für Tischtennis-Turniere. Von der flexiblen Rundenplanung über die mobile Ergebniseingabe per QR-Code bis hin zum Live-Infoboard in der Halle.
+        </p>
+        <div class="fn-tech-tags justify-content-center">
+            <span class="fn-tag"><i class="bi bi-lightning-charge-fill text-warning"></i> WebSockets Realtime</span>
+            <span class="fn-tag"><i class="bi bi-qr-code-scan text-primary"></i> Mobile QR-Code Scanner</span>
+            <span class="fn-tag"><i class="bi bi-file-earmark-code text-success"></i> ClickTT Import/Export</span>
+            <span class="fn-tag"><i class="bi bi-cpu text-info"></i> Scala 3 & Scala.js</span>
+        </div>
+    </div>
+
+    <!-- Feature Grid -->
+    <div class="fn-grid">
+        <!-- 1. Kombinierbare Spielphasen -->
+        <div class="fn-card">
+            <div class="fn-icon-box">
+                <i class="bi bi-diagram-3-fill"></i>
+            </div>
+            <h3 class="fn-card-title">Kombinierbare Spielphasen</h3>
+            <p class="fn-card-text">
+                Kombinieren Sie verschiedene Turniermodi beliebig miteinander. Richten Sie Vorrunden und Hauptrunden flexibel ein.
+            </p>
+            <ul class="fn-list">
+                <li><i class="bi bi-check-circle-fill"></i> <strong>Gruppenspiele:</strong> Gruppenphase mit automatischer Tabellen- & Satzverhältnisberechnung</li>
+                <li><i class="bi bi-check-circle-fill"></i> <strong>KO-Runde:</strong> K.o.-System mit Freilosen, Platzierungsspielen & Baumfortschreibung</li>
+                <li><i class="bi bi-check-circle-fill"></i> <strong>Schweizer-System:</strong> Ausgewogene Runden mit Buchholz-Feinwertung</li>
+            </ul>
+        </div>
+
+        <!-- 2. Gewinnsätze -->
+        <div class="fn-card">
+            <div class="fn-icon-box">
+                <i class="bi bi-sliders"></i>
+            </div>
+            <h3 class="fn-card-title">2 bis 4 Gewinnsätze</h3>
+            <p class="fn-card-text">
+                Konfigurieren Sie die Satzanzahl individuell pro Wettbewerb oder Turnierphase.
+            </p>
+            <ul class="fn-list">
+                <li><i class="bi bi-check-circle-fill"></i> Best-of-3 (2 Gewinnsätze) für zügige Vorrunden</li>
+                <li><i class="bi bi-check-circle-fill"></i> Best-of-5 (3 Gewinnsätze) als Standardformat</li>
+                <li><i class="bi bi-check-circle-fill"></i> Best-of-7 (4 Gewinnsätze) für Finals & Entscheidungsspiele</li>
+            </ul>
+        </div>
+
+        <!-- 3. Auslosung & Setzung -->
+        <div class="fn-card">
+            <div class="fn-icon-box">
+                <i class="bi bi-shuffle"></i>
+            </div>
+            <h3 class="fn-card-title">Intelligente Auslosung</h3>
+            <p class="fn-card-text">
+                Automatische und faire Gruppen- und KO-Auslosung unter Berücksichtigung von TTR-Werten und Vereinsschutz.
+            </p>
+            <ul class="fn-list">
+                <li><i class="bi bi-check-circle-fill"></i> Vermeidung von Vereinsduellen in der Vorrunde</li>
+                <li><i class="bi bi-check-circle-fill"></i> Setzung der Gruppenköpfe nach TTR-Rangfolge</li>
+                <li><i class="bi bi-check-circle-fill"></i> Manuelle Korrektur- & Tauschmöglichkeiten</li>
+            </ul>
+        </div>
+
+        <!-- 4. Schnelle Ergebniseingabe -->
+        <div class="fn-card">
+            <div class="fn-icon-box">
+                <i class="bi bi-keyboard-fill"></i>
+            </div>
+            <h3 class="fn-card-title">Ergebniseingabe & Zeitmessung</h3>
+            <p class="fn-card-text">
+                Schnelle Ergebniserfassung mit Tastatur-Kurzformen und automatischem Zeitstempel.
+            </p>
+            <ul class="fn-list">
+                <li><i class="bi bi-check-circle-fill"></i> Kurzschreibweise (z.B. <code>-5</code> für <code>5:11</code>, <code>10</code> für <code>12:10</code>)</li>
+                <li><i class="bi bi-check-circle-fill"></i> Start- & Endzeiten im Format HH:MM Uhr</li>
+                <li><i class="bi bi-check-circle-fill"></i> Automatische Plausibilitäts- & Gewinnsatzprüfung</li>
+            </ul>
+        </div>
+
+        <!-- 5. Schiedsrichterzettel -->
+        <div class="fn-card">
+            <div class="fn-icon-box">
+                <i class="bi bi-printer-fill"></i>
+            </div>
+            <h3 class="fn-card-title">Schiedsrichterzettel (Print)</h3>
+            <p class="fn-card-text">
+                Druckfertige Schiedsrichterzettel mit aufgedrucktem QR-Code im übersichtlichen 4-auf-1 A4-Format.
+            </p>
+            <ul class="fn-list">
+                <li><i class="bi bi-check-circle-fill"></i> Druck pro Runde, Gruppe oder als Einzelzettel</li>
+                <li><i class="bi bi-check-circle-fill"></i> Kompatibel mit allen Standard-Druckern</li>
+                <li><i class="bi bi-check-circle-fill"></i> QR-Code für direkte Smartphone-Eingabe</li>
+            </ul>
+        </div>
+
+        <!-- 6. ClickTT Integration -->
+        <div class="fn-card">
+            <div class="fn-icon-box">
+                <i class="bi bi-file-earmark-code-fill"></i>
+            </div>
+            <h3 class="fn-card-title">ClickTT Unterstützung</h3>
+            <p class="fn-card-text">
+                Direkte Anbindung für unkomplizierten Datenimport und -export von ClickTT XML-Dateien.
+            </p>
+            <ul class="fn-list">
+                <li><i class="bi bi-check-circle-fill"></i> Import von Meldelisten, Vereinen und TTR-Werten</li>
+                <li><i class="bi bi-check-circle-fill"></i> Export fertiger Spielergebnisse für ClickTT</li>
+                <li><i class="bi bi-check-circle-fill"></i> Vollautomatische Zuordnung von Identifikationsnummern</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Highlight Banner: Mobile QR Code Player Input -->
+    <div class="fn-banner">
+        <div class="fn-banner-content">
+            <div class="fn-badge" style="background: rgba(25, 135, 84, 0.12); color: #198754;">
+                <i class="bi bi-qr-code-scan"></i> Mobile Innovation
+            </div>
+            <h3>Ergebniseingabe durch Spieler via QR-Code</h3>
+            <p class="text-secondary mb-3">
+                Jeder Schiedsrichterzettel enthält einen eindeutigen QR-Code. Spieler oder Schiedsrichter scannen den Code mit der Kamera ihres Smartphones und tragen die Satzstände direkt ein.
+            </p>
+            <ul class="fn-list">
+                <li><i class="bi bi-check-circle-fill"></i> Sofortige Übertragung an die Turnierleitung via WebSockets</li>
+                <li><i class="bi bi-check-circle-fill"></i> Ein rot blinkender Info-Button signalisiert eingegangene Ergebnisse zur Prüfung & Übernahme</li>
+                <li><i class="bi bi-check-circle-fill"></i> Keine App-Installation notwendig – läuft in jedem mobilen Browser</li>
+            </ul>
+        </div>
+        <div class="text-center p-3">
+            <i class="bi bi-phone text-primary display-3 mb-2 d-block"></i>
+            <span class="badge bg-primary px-3 py-2">Echtzeit Sync</span>
+        </div>
+    </div>
+
+    <!-- Call to action / Navigation Links inside SPA -->
+    <div class="fn-cta">
+        <h4 class="fw-bold mb-2">Bereit für Ihr nächstes Turnier?</h4>
+        <p class="text-secondary mb-4">Starten Sie jetzt ein neues Turnier oder suchen Sie nach bestehenden Veranstaltungen.</p>
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
+            <button class="btn btn-primary px-4 py-2 fw-bold" onclick="appLoadPage('MainSearch', '')">
+                <i class="bi bi-search me-1"></i> Turnier suchen
+            </button>
+            <button class="btn btn-outline-secondary px-4 py-2" onclick="appLoadPage('MainView', '')">
+                <i class="bi bi-house-door me-1"></i> Zur Startseite
+            </button>
+        </div>
+    </div>
+</div>

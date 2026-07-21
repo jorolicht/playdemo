@@ -1,28 +1,29 @@
 @import shared.model.*
+@import base.Messages.gM
 
 @(param: String, tourneyName: String, compName: String, playerName: String, rank: String, templateHtml: Option[String] = None, isLoading: Boolean = false)
 
 <!-- 1. The input form (d-print-none) -->
 <div class="card shadow-sm mb-4 d-print-none animate-fade-in" style="max-width: 800px; margin: 2rem auto 0 auto; border-top: 4px solid #ffc107;">
     <div class="card-header bg-white fw-bold text-secondary py-3">
-        <i class="bi bi-pencil-square me-2 text-warning"></i>Urkundendaten anpassen (Vorschau aktualisiert sich live)
+        <i class="bi bi-pencil-square me-2 text-warning"></i>@gM("cert.editTitle")
     </div>
     <div class="card-body bg-light-subtle">
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted mb-1">Turnier</label>
+                <label class="form-label small fw-bold text-muted mb-1">@gM("tourneyInfo.badgeTourney")</label>
                 <input type="text" class="form-control form-control-sm border-secondary-subtle" id="CertEdit_Tourney" value="@tourneyName">
             </div>
             <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted mb-1">Wettbewerb</label>
+                <label class="form-label small fw-bold text-muted mb-1">@gM("results.thComp")</label>
                 <input type="text" class="form-control form-control-sm border-secondary-subtle" id="CertEdit_Comp" value="@compName">
             </div>
             <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted mb-1">Name</label>
+                <label class="form-label small fw-bold text-muted mb-1">@gM("table.name")</label>
                 <input type="text" class="form-control form-control-sm border-secondary-subtle" id="CertEdit_Name" value="@playerName">
             </div>
             <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted mb-1">Platzierung</label>
+                <label class="form-label small fw-bold text-muted mb-1">@gM("results.thPlace")</label>
                 <input type="text" class="form-control form-control-sm border-secondary-subtle" id="CertEdit_Rank" value="@rank">
             </div>
         </div>

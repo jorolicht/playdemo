@@ -1,6 +1,7 @@
 @import shared.model.*
 @import cviews.helper.html.*
 @import pages.TourneyAdmin.*
+@import base.Messages.gM
 
 @(tourney: Tourney, activeTab: String, templates: Seq[pages.TourneyAdmin.WpPage], isLoadingTemplates: Boolean)
 
@@ -15,10 +16,10 @@
         <div class="card-body d-flex justify-content-between align-items-center">
             <div>
                 <h3 class="h4 text-primary mb-1 fw-bold"><i class="bi bi-trophy-fill text-warning me-2"></i>@tourney.name</h3>
-                <p class="text-muted mb-0 small">Veranstalter: <strong>@tourney.organizer</strong> | ID: <strong>@tourney.wpId</strong></p>
+                <p class="text-muted mb-0 small">@gM("tourneyAdmin.headerMeta", tourney.organizer, tourney.wpId.toString)</p>
             </div>
             <button class="btn btn-outline-secondary btn-sm" onclick="appLoadPage('TourneyInfo', '')">
-                <i class="bi bi-arrow-left me-1"></i>Zurück zur Übersicht
+                <i class="bi bi-arrow-left me-1"></i>@gM("btn.backToOverview")
             </button>
         </div>
     </div>
@@ -27,27 +28,27 @@
     <ul class="nav nav-tabs mb-4" role="tablist">
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "IMPEXP") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'IMPEXP')">
-                <i class="bi bi-arrow-down-up me-1"></i>Import / Export
+                <i class="bi bi-arrow-down-up me-1"></i>@gM("tourneyAdmin.tabImpExp")
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "CTT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'CTT')">
-                <i class="bi bi-file-earmark-code me-1"></i>ClickTT Update
+                <i class="bi bi-file-earmark-code me-1"></i>@gM("tourneyAdmin.tabCtt")
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "CERT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'CERT')">
-                <i class="bi bi-award me-1"></i>Urkunden Konfiguration
+                <i class="bi bi-award me-1"></i>@gM("tourneyAdmin.tabCert")
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "MESSAGES") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'MESSAGES')">
-                <i class="bi bi-chat-dots me-1"></i>Messages
+                <i class="bi bi-chat-dots me-1"></i>@gM("tourneyAdmin.tabMessages")
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "MATCHBOARD") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'MATCHBOARD')">
-                <i class="bi bi-display me-1"></i>InfoAnzeige
+                <i class="bi bi-display me-1"></i>@gM("tourneyAdmin.tabMatchboard")
             </a>
         </li>
     </ul>
@@ -59,10 +60,10 @@
                 <div class="col-md-6">
                     <div class="card shadow-sm h-100 border-start border-4 border-primary">
                         <div class="card-body">
-                            <h5 class="card-title text-secondary fw-bold mb-3"><i class="bi bi-download me-2 text-primary"></i>Turnier exportieren</h5>
-                            <p class="text-muted small">Laden Sie die aktuellen Daten dieses Turniers als JSON-Datei herunter. Das Backup kann später jederzeit wieder importiert werden.</p>
+                            <h5 class="card-title text-secondary fw-bold mb-3"><i class="bi bi-download me-2 text-primary"></i>@gM("tourneyAdmin.exportTitle")</h5>
+                            <p class="text-muted small">@gM("tourneyAdmin.exportDesc")</p>
                             <button class="btn btn-primary" @id(BtnExportId, "onclick")>
-                                <i class="bi bi-download me-1"></i>JSON-Export herunterladen
+                                <i class="bi bi-download me-1"></i>@gM("tourneyAdmin.exportBtn")
                             </button>
                         </div>
                     </div>
@@ -71,10 +72,10 @@
                 <div class="col-md-6">
                     <div class="card shadow-sm h-100 border-start border-4 border-success">
                         <div class="card-body">
-                            <h5 class="card-title text-secondary fw-bold mb-3"><i class="bi bi-upload me-2 text-success"></i>Turnier importieren</h5>
-                            <p class="text-muted small">Wählen Sie ein zuvor exportiertes Turnier (.json) aus, um die Daten einzulesen und zu laden.</p>
+                            <h5 class="card-title text-secondary fw-bold mb-3"><i class="bi bi-upload me-2 text-success"></i>@gM("tourneyAdmin.importTitle")</h5>
+                            <p class="text-muted small">@gM("tourneyAdmin.importDesc")</p>
                             <button class="btn btn-success" @id(BtnImportId, "onclick")>
-                                <i class="bi bi-upload me-1"></i>JSON-Datei einlesen...
+                                <i class="bi bi-upload me-1"></i>@gM("tourneyAdmin.importBtn")
                             </button>
                             <input type="file" id="adminImportFile" style="display: none;" accept=".json" />
                         </div>
@@ -87,13 +88,13 @@
             <div class="card shadow-sm border-start border-4 border-info mb-4 animate-fade-in">
                 <div class="card-body">
                     <h5 class="card-title text-secondary fw-bold mb-3">
-                        <i class="bi bi-file-earmark-code me-2 text-info"></i>ClickTT Update (Spieler-Datenabgleich)
+                        <i class="bi bi-file-earmark-code me-2 text-info"></i>@gM("tourneyAdmin.cttTitle")
                     </h5>
                     <p class="text-muted small">
-                        Laden Sie eine aktualisierte ClickTT XML-Datei hoch, um Spieler-IDs (internalNr) und Lizenznummern (licenceNr) für neu angemeldete Teilnehmer automatisch zuzuordnen und abzugleichen.
+                        @gM("tourneyAdmin.cttDesc")
                     </p>
                     <button class="btn btn-info text-white fw-bold" onclick="document.getElementById('clickttUpdateFile').click()">
-                        <i class="bi bi-file-earmark-arrow-up me-1"></i>ClickTT XML-Datei auswählen...
+                        <i class="bi bi-file-earmark-arrow-up me-1"></i>@gM("tourneyAdmin.cttBtn")
                     </button>
                     <input type="file" id="clickttUpdateFile" style="display: none;" accept=".xml" />
                 </div>
@@ -102,16 +103,16 @@
             @if(unassignedPlayers.nonEmpty) {
                 <div class="card shadow-sm animate-fade-in mb-4">
                     <div class="card-header bg-light fw-bold text-secondary py-3">
-                        <i class="bi bi-person-check me-2 text-info"></i>Zuordnung der neu eingetragenen Spieler (ohne IDs)
+                        <i class="bi bi-person-check me-2 text-info"></i>@gM("tourneyAdmin.unassignedPlayersTitle")
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0 text-nowrap">
                                 <thead class="table-light small text-muted">
                                     <tr>
-                                        <th class="ps-4">Spieler im Turnier</th>
-                                        <th>Verein im Turnier</th>
-                                        <th>ClickTT XML Zuordnung (Vorschläge sortiert nach Namensähnlichkeit)</th>
+                                        <th class="ps-4">@gM("tourneyAdmin.thPlayer")</th>
+                                        <th>@gM("tourneyAdmin.thClub")</th>
+                                        <th>@gM("tourneyAdmin.thClickTTMapping")</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -124,7 +125,7 @@
                                                     <select class="form-select form-select-sm border-secondary-subtle" 
                                                             id="select-assign-@p.id.value"
                                                             style="max-width: 555px;">
-                                                        <option value="">-- Nicht zuweisen (Manuell eingetragen lassen) --</option>
+                                                        <option value="">@gM("tourneyAdmin.optDoNotAssign")</option>
                                                         @candidates.map { case (xp, sim) =>
                                                             @defining(playerAssignments.get(p.id.value).contains(xp.licenceNr)) { isSelected =>
                                                                 <option value="@xp.licenceNr" @{if(isSelected) "selected" else ""}>
@@ -151,7 +152,7 @@
                             <span class="text-muted small me-3">Alle Spieler sind bereits zugeordnet. Sie können die Mappings und Zuordnungen aktualisieren.</span>
                         }
                         <button class="btn btn-success fw-bold px-4" id="save-assignments-btn">
-                            <i class="bi bi-check-circle me-1"></i>Zuordnungen & Mappings aktualisieren
+                            <i class="bi bi-check-circle me-1"></i>@gM("tourneyAdmin.btnSaveAssignments")
                         </button>
                     </div>
                 </div>
@@ -161,13 +162,13 @@
             <div class="card shadow-sm border-start border-4 border-success mb-4 animate-fade-in">
                 <div class="card-body">
                     <h5 class="card-title text-secondary fw-bold mb-3">
-                        <i class="bi bi-file-earmark-diff me-2 text-success"></i>Spielergebnisse im ClickTT Format erzeugen für Import
+                        <i class="bi bi-file-earmark-diff me-2 text-success"></i>@gM("tourneyAdmin.genCttTitle")
                     </h5>
                     <p class="text-muted small">
-                        Erzeugen Sie eine ClickTT XML-Ergebnisdatei für den Import, indem Sie die Wettbewerbe und die Phasen (Stages) auswählen, deren Ergebnisse exportiert werden sollen.
+                        @gM("tourneyAdmin.genCttDesc")
                     </p>
                     <button class="btn btn-success fw-bold" id="generate-ctt-results-btn">
-                        <i class="bi bi-file-earmark-arrow-down me-1"></i>ClickTT XML Ergebnis Datei erzeugen
+                        <i class="bi bi-file-earmark-arrow-down me-1"></i>@gM("tourneyAdmin.genCttBtn")
                     </button>
                     
                     <div id="ctt-export-selection" style="display: none;" class="mt-4 animate-fade-in">
@@ -194,21 +195,21 @@
             <div class="card shadow-sm border-start border-4 border-warning">
                 <div class="card-body">
                     <h5 class="card-title text-secondary fw-bold mb-3">
-                        <i class="bi bi-file-earmark-richtext me-2 text-warning"></i>Urkunden-Templates Vorschau (Tischtennis)
+                        <i class="bi bi-file-earmark-richtext me-2 text-warning"></i>@gM("tourneyAdmin.certTitle")
                     </h5>
-                    <p class="text-muted small">Wählen Sie das Standard-Urkundentemplate für dieses Turnier aus. Es werden alle Vorlagen angezeigt, die unter der WordPress-Seite "Templates" liegen und mit "TT" beginnen.</p>
+                    <p class="text-muted small">@gM("tourneyAdmin.certDesc")</p>
                     
                     @if(isLoadingTemplates) {
                         <div class="text-center py-4">
                             <div class="spinner-border text-warning" role="status">
-                                <span class="visually-hidden">Lade Templates...</span>
+                                <span class="visually-hidden">@gM("tourneyAdmin.loadingTemplates")</span>
                             </div>
-                            <p class="text-muted small mt-2">Suche nach Vorlagen unter 'Templates'...</p>
+                            <p class="text-muted small mt-2">@gM("tourneyAdmin.loadingTemplates")</p>
                         </div>
                     } else {
                         @if(templates.isEmpty) {
                             <div class="alert alert-info py-3 mb-0">
-                                <i class="bi bi-info-circle me-2"></i>Keine Templates mit dem Präfix "TT" unter der WordPress-Seite "Templates" gefunden.
+                                <i class="bi bi-info-circle me-2"></i>@gM("tourneyAdmin.noTemplatesFound")
                             </div>
                         } else {
                             <div class="row row-cols-1 row-cols-md-2 g-3">
@@ -219,7 +220,7 @@
                                                 <div class="card-header d-flex justify-content-between align-items-center @{if(isSelected) "bg-primary text-white" else "bg-light text-dark"}" style="padding: 0.5rem 1rem;">
                                                     <span class="fw-bold small"><i class="bi bi-file-earmark-text me-1"></i>@tmpl.title.rendered</span>
                                                     @if(isSelected) {
-                                                        <span class="badge bg-white text-primary fw-bold" style="font-size: 0.75rem;">Ausgewählt</span>
+                                                        <span class="badge bg-white text-primary fw-bold" style="font-size: 0.75rem;">@gM("tourneyAdmin.selectedBadge")</span>
                                                     }
                                                 </div>
                                                 <div class="card-body p-3 bg-white overflow-auto" style="max-height: 180px; font-size: 0.8rem; border-bottom: 1px solid #eee;">
@@ -230,11 +231,11 @@
                                                 <div class="card-footer bg-white text-end p-2 border-0">
                                                     @if(isSelected) {
                                                         <button class="btn btn-sm btn-success disabled" disabled>
-                                                            <i class="bi bi-check-circle-fill me-1"></i>Aktives Template
+                                                            <i class="bi bi-check-circle-fill me-1"></i>@gM("tourneyAdmin.activeTemplateBtn")
                                                         </button>
                                                     } else {
                                                         <button class="btn btn-sm btn-outline-primary" @id(RadioCertId, "onclick", s"SETTMPL-${tmpl.title.rendered}")>
-                                                            <i class="bi bi-check-circle me-1"></i>Als Template wählen
+                                                            <i class="bi bi-check-circle me-1"></i>@gM("tourneyAdmin.selectTemplateBtn")
                                                         </button>
                                                     }
                                                 </div>
@@ -252,10 +253,10 @@
             <div class="card shadow-sm border-start border-4 border-info mb-4 animate-fade-in">
                 <div class="card-body">
                     <h5 class="card-title text-secondary fw-bold mb-3">
-                        <i class="bi bi-chat-dots me-2 text-info"></i>WebSocket Live Messages
+                        <i class="bi bi-chat-dots me-2 text-info"></i>@gM("tourneyAdmin.wsMessagesTitle")
                     </h5>
                     <p class="text-muted small">
-                        Hier können Sie in Echtzeit Nachrichten mit dem Server austauschen. Der Server loggt empfangene Nachrichten auf seiner Konsole.
+                        @gM("tourneyAdmin.wsMessagesDesc")
                     </p>
                     
                     <div id="ws-message-log" class="bg-light rounded p-3 mb-3 border" style="height: 300px; overflow-y: auto;">
@@ -263,7 +264,7 @@
                             @defining(msg.startsWith("[Gesendet]")) { isSent =>
                                 <div class="mb-2 @{if(isSent) "text-end" else "text-start"}">
                                     <span class="badge @{if(isSent) "bg-primary text-white" else "bg-success text-white"}">
-                                        @{if(isSent) "Gesendet" else "Empfangen"}
+                                        @{if(isSent) gM("tourneyAdmin.wsSent") else gM("tourneyAdmin.wsReceived")}
                                     </span>
                                     <div class="d-inline-block bg-white border rounded p-2 ms-2 me-2" style="max-width: 75%; text-align: left; word-break: break-all;">
                                         @msg.substring(msg.indexOf(" ") + 1)
@@ -274,9 +275,9 @@
                     </div>
                     
                     <div class="input-group">
-                        <input type="text" id="ws-message-input" class="form-control" placeholder="Nachricht an den Server..." autocomplete="off" />
+                        <input type="text" id="ws-message-input" class="form-control" placeholder="@gM("tourneyAdmin.wsMsgPlh")" autocomplete="off" />
                         <button class="btn btn-primary fw-bold" id="ws-send-btn">
-                            <i class="bi bi-send me-1"></i>Senden
+                            <i class="bi bi-send me-1"></i>@gM("btn.send")
                         </button>
                     </div>
                 </div>
@@ -286,19 +287,19 @@
             <div class="card shadow-sm border-start border-4 border-primary mb-4 animate-fade-in">
                 <div class="card-body">
                     <h5 class="card-title text-secondary fw-bold mb-3">
-                        <i class="bi bi-display me-2 text-primary"></i>Matchboard / InfoAnzeige Verwaltung
+                        <i class="bi bi-display me-2 text-primary"></i>@gM("tourneyAdmin.mbTitle")
                     </h5>
                     <p class="text-muted small">
-                        Verwalten Sie die Live-Anzeigetafel für dieses Turnier. Sie können neue Info-Meldungen und Spiel-Anzeigen hinzufügen, vorhandene Einträge löschen und die Anzeigetafel live aktualisieren.
+                        @gM("tourneyAdmin.mbDesc")
                     </p>
 
                     <!-- Add Entry Form -->
                     <div class="card bg-light border-0 mb-4">
                         <div class="card-body">
-                            <h6 class="fw-bold mb-3"><i class="bi bi-plus-circle me-1 text-primary"></i>Neuen Eintrag hinzufügen</h6>
+                            <h6 class="fw-bold mb-3"><i class="bi bi-plus-circle me-1 text-primary"></i>@gM("tourneyAdmin.mbAddEntryTitle")</h6>
                             <div class="row g-3">
                                 <div class="col-md-3">
-                                    <label class="form-label small fw-bold">Typ</label>
+                                    <label class="form-label small fw-bold">@gM("tourneyInfo.type")</label>
                                     <select class="form-select form-select-sm" id="mb-entry-type-select" onchange="toggleMatchboardFormFields()">
                                         <option value="info">InfoMeldung (Info)</option>
                                         <option value="match">Spielanzeige (Match)</option>
@@ -307,7 +308,7 @@
                                 
                                 <!-- Info Entry Fields -->
                                 <div class="col-md-9" id="mb-info-fields">
-                                    <label class="form-label small fw-bold">Text der Infomeldung</label>
+                                    <label class="form-label small fw-bold">@gM("tourneyAdmin.mbInfoTextLabel")</label>
                                     <input type="text" class="form-control form-control-sm" id="mb-info-text" placeholder="z.B. Mittagspause von 12:00 bis 13:00 Uhr">
                                 </div>
 
@@ -315,27 +316,27 @@
                                 <div class="col-md-9" id="mb-match-fields" style="display: none;">
                                     <div class="row g-2">
                                         <div class="col-md-3">
-                                            <label class="form-label small fw-bold">Tisch / Court</label>
+                                            <label class="form-label small fw-bold">@gM("tourneyAdmin.mbCourtLabel")</label>
                                             <input type="text" class="form-control form-control-sm" id="mb-match-court" placeholder="z.B. Tisch 1">
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label small fw-bold">Spieler A</label>
+                                            <label class="form-label small fw-bold">@gM("tourneyAdmin.mbPlayerALabel")</label>
                                             <input type="text" class="form-control form-control-sm" id="mb-match-player-a" placeholder="Spieler A">
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label small fw-bold">Spieler B</label>
+                                            <label class="form-label small fw-bold">@gM("tourneyAdmin.mbPlayerBLabel")</label>
                                             <input type="text" class="form-control form-control-sm" id="mb-match-player-b" placeholder="Spieler B">
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label small fw-bold">Spielklasse</label>
+                                            <label class="form-label small fw-bold">@gM("tourneyAdmin.mbCompLabel")</label>
                                             <input type="text" class="form-control form-control-sm" id="mb-match-comp" placeholder="z.B. Herren A">
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label small fw-bold">Stage ID</label>
+                                            <label class="form-label small fw-bold">@gM("tourneyAdmin.mbStageIdLabel")</label>
                                             <input type="text" class="form-control form-control-sm" id="mb-match-stage-id" placeholder="z.B. 1">
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label small fw-bold">Spiel Nr.</label>
+                                            <label class="form-label small fw-bold">@gM("tourneyAdmin.mbMatchNoLabel")</label>
                                             <input type="text" class="form-control form-control-sm" id="mb-match-comp-id" placeholder="z.B. 1">
                                         </div>
                                     </div>
@@ -343,21 +344,21 @@
                             </div>
                             <div class="text-end mt-3">
                                 <button class="btn btn-primary btn-sm" id="mb-add-btn">
-                                    <i class="bi bi-plus me-1"></i>Eintrag hinzufügen
+                                    <i class="bi bi-plus me-1"></i>@gM("tourneyAdmin.mbAddBtn")
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Entries List Table -->
-                    <h6 class="fw-bold mb-3"><i class="bi bi-list-task me-1 text-primary"></i>Aktuelle Anzeigetafel Einträge</h6>
+                    <h6 class="fw-bold mb-3"><i class="bi bi-list-task me-1 text-primary"></i>@gM("tourneyAdmin.mbEntriesTitle")</h6>
                     <div class="table-responsive border rounded bg-white">
                         <table class="table table-hover table-striped align-middle mb-0" style="font-size: 0.9rem;">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 100px;">Typ</th>
-                                    <th>Inhalt / Details</th>
-                                    <th style="width: 100px;" class="text-end">Aktion</th>
+                                    <th style="width: 100px;">@gM("tourneyInfo.type")</th>
+                                    <th>@gM("tourneyAdmin.mbContentCol")</th>
+                                    <th style="width: 100px;" class="text-end">@gM("tourneyAdmin.mbActionCol")</th>
                                 </tr>
                             </thead>
                             <tbody id="mb-entries-tbody">

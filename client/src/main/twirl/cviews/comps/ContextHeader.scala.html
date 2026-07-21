@@ -1,6 +1,7 @@
 @import shared.model.*
 @import shared.DomTypes.HtmlId
 @import cviews.helper.html.*
+@import base.Messages.gM
 
 @(selection: Selection, competitions: Seq[Competition], stages: Seq[Stage])
 
@@ -19,7 +20,7 @@
                     @if(selection.tourney.exists(_.ident == "SIMPLE")) {
                         <li class="breadcrumb-item active" aria-current="page">
                             <span class="badge bg-success py-1 px-2 border border-white-50 shadow-sm">
-                                <i class="bi bi-lightning-charge me-1"></i>Einzelwettbewerb
+                                <i class="bi bi-lightning-charge me-1"></i>@gM("contextHeader.singleCompetition")
                             </span>
                         </li>
                     }
@@ -40,11 +41,11 @@
                         <li class="breadcrumb-item dropdown active" aria-current="page">
                             <a class="btn btn-outline-light btn-sm dropdown-toggle border-secondary py-1 @if(selection.competition.isEmpty){text-white-50}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span class="badge bg-success me-1">C</span>
-                                @selection.competition.map(_.name).getOrElse("Selektiere Wettbewerb")
+                                @selection.competition.map(_.name).getOrElse(gM("contextHeader.selectCompetition"))
                             </a>
                             <ul class="dropdown-menu shadow">
                                 @if(competitions.isEmpty) {
-                                    <li><span class="dropdown-item-text text-muted small">Keine Wettbewerbe vorhanden</span></li>
+                                    <li><span class="dropdown-item-text text-muted small">@gM("contextHeader.noCompetitions")</span></li>
                                 }
                                 @competitions.map { c =>
                                     <li><a class="dropdown-item @if(selection.competition.exists(_.id == c.id)){active}" href="javascript:appLoadPage('CompetitionInfo', '@c.id.value')">@c.name</a></li>
@@ -52,7 +53,7 @@
                                 @if(competitions.nonEmpty) {
                                     <li><hr class="dropdown-divider"></li>
                                 }
-                                <li><a class="dropdown-item small" href="javascript:appLoadPage('TourneyInfo', '')"><i class="bi bi-list-ul me-2"></i>Alle anzeigen</a></li>
+                                <li><a class="dropdown-item small" href="javascript:appLoadPage('TourneyInfo', '')"><i class="bi bi-list-ul me-2"></i>@gM("contextHeader.showAll")</a></li>
                             </ul>
                         </li>
                     }
@@ -62,14 +63,14 @@
                         <li class="breadcrumb-item dropdown active" aria-current="page">
                             <a class="btn btn-outline-info text-white btn-sm dropdown-toggle border-secondary py-1 @if(selection.stage.isEmpty){text-white-50}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span class="badge bg-info me-1 text-dark">S</span>
-                                @selection.stage.map(_.name).getOrElse("Selektiere Stage")
+                                @selection.stage.map(_.name).getOrElse(gM("contextHeader.selectStage"))
                             </a>
                             <ul class="dropdown-menu shadow">
                                 @stages.map { r =>
                                     <li><a class="dropdown-item @if(selection.stage.exists(_.id == r.id)){active}" href="javascript:appLoadPage('StageAdmin', '@r.id.value')">@r.name</a></li>
                                 }
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item small" href="javascript:appLoadPage('CompetitionInfo', '')"><i class="bi bi-list-ul me-2"></i>Alle anzeigen</a></li>
+                                <li><a class="dropdown-item small" href="javascript:appLoadPage('CompetitionInfo', '')"><i class="bi bi-list-ul me-2"></i>@gM("contextHeader.showAll")</a></li>
                             </ul>
                         </li>
                     }
@@ -82,17 +83,17 @@
                     @{ val hasAccess = base.Global.hasTourneyAccess(selection.tourney.get) }
                     <div class="vr mx-2 bg-secondary opacity-50" style="height: 24px;"></div>
                     <button class="btn btn-outline-warning btn-sm py-1 fw-bold" onclick="appLoadPage('PlayerRegistration', '')" @if(!base.Global.hasTourneyAccess(selection.tourney.get)){disabled}>
-                        <i class="bi bi-pencil-square me-1"></i>Anmeldung
+                        <i class="bi bi-pencil-square me-1"></i>@gM("contextHeader.registration")
                     </button>
                     <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('PlayerList', '')">
-                        <i class="bi bi-people me-1"></i>Teilnehmer
+                        <i class="bi bi-people me-1"></i>@gM("contextHeader.participants")
                     </button>
                     <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('ResultList', '')">
-                        <i class="bi bi-award me-1"></i>Ergebnisse
+                        <i class="bi bi-award me-1"></i>@gM("contextHeader.results")
                     </button>
                     @if(base.Global.user.isDefined) {
                         <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('TourneyAdmin', '')">
-                            <i class="bi bi-gear-fill me-1"></i>Administration
+                            <i class="bi bi-gear-fill me-1"></i>@gM("contextHeader.administration")
                         </button>
                     }
                 }

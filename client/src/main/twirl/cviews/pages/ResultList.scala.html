@@ -1,28 +1,29 @@
 @import shared.model.*
 @import pages.ResultList.DisplayResult
+@import base.Messages.gM
 
 @(results: Seq[DisplayResult])
 
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-            <h3 class="h5 mb-0 fw-bold"><i class="bi bi-award me-2"></i>Platzierungen & Ergebnisse</h3>
+            <h3 class="h5 mb-0 fw-bold"><i class="bi bi-award me-2"></i>@gM("results.title")</h3>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light small">
                         <tr>
-                            <th class="ps-3">Name, Vorname</th>
-                            <th>Verein</th>
-                            <th>Wettbewerb</th>
-                            <th class="text-center">Platz</th>
-                            <th class="text-end pe-3">Aktionen</th>
+                            <th class="ps-3">@gM("results.thName")</th>
+                            <th>@gM("results.thClub")</th>
+                            <th>@gM("results.thComp")</th>
+                            <th class="text-center">@gM("results.thPlace")</th>
+                            <th class="text-end pe-3">@gM("tourneyInfo.actions")</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if(results.isEmpty) {
-                            <tr><td colspan="5" class="text-center py-5 text-muted italic">Noch keine Ergebnisse vorhanden.</td></tr>
+                            <tr><td colspan="5" class="text-center py-5 text-muted italic">@gM("results.noResults")</td></tr>
                         }
                         @results.map { r =>
                             <tr>
@@ -38,7 +39,7 @@
                                 </td>
                                 <td class="text-end pe-3">
                                     <button class="btn btn-outline-warning btn-sm" onclick="appLoadPage('Certificate', '@r.name|@r.compName|@r.place')">
-                                        <i class="bi bi-trophy-fill me-1"></i>Urkunde
+                                        <i class="bi bi-trophy-fill me-1"></i>@gM("results.btnCert")
                                     </button>
                                 </td>
                             </tr>

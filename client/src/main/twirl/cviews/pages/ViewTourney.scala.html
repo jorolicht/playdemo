@@ -1,5 +1,6 @@
 @import shared.model.*
 @import scala.collection.mutable.ArrayBuffer
+@import base.Messages.gM
 
 @(
   tourney: Tourney,
@@ -18,48 +19,48 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Veranstalter:</strong> @tourney.organizer</p>
-                        <p><strong>Datum:</strong> @tourney.getStartDate("de") - @tourney.getEndDate("de")</p>
+                        <p><strong>@gM("tourneyNew.organizer"):</strong> @tourney.organizer</p>
+                        <p><strong>@gM("tourneyInfo.date"):</strong> @tourney.getStartDate("de") - @tourney.getEndDate("de")</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Kategorie:</strong> @tourney.category.toString</p>
-                        <p><strong>Ident:</strong> @tourney.ident</p>
+                        <p><strong>@gM("tourneyNew.category"):</strong> @tourney.category.toString</p>
+                        <p><strong>@gM("tourneyNew.ident"):</strong> @tourney.ident</p>
                     </div>
                 </div>
             </div>
         </div>
     } else {
-        <div class="alert alert-warning">Kein Turnier geladen.</div>
+        <div class="alert alert-warning">@gM("viewTourney.noTourney")</div>
     }
 
     <div class="row">
         <div class="col-12">
             <ul class="nav nav-tabs" id="tourneyTab" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="comps-tab" data-bs-toggle="tab" data-bs-target="#comps" type="button" role="tab">Wettbewerbe</button>
+                    <button class="nav-link active" id="comps-tab" data-bs-toggle="tab" data-bs-target="#comps" type="button" role="tab">@gM("viewTourney.tabComps")</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="stages-tab" data-bs-toggle="tab" data-bs-target="#stages" type="button" role="tab">Stages</button>
+                    <button class="nav-link" id="stages-tab" data-bs-toggle="tab" data-bs-target="#stages" type="button" role="tab">@gM("viewTourney.tabStages")</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="clubs-tab" data-bs-toggle="tab" data-bs-target="#clubs" type="button" role="tab">Vereine</button>
+                    <button class="nav-link" id="clubs-tab" data-bs-toggle="tab" data-bs-target="#clubs" type="button" role="tab">@gM("viewTourney.tabClubs")</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="players-tab" data-bs-toggle="tab" data-bs-target="#players" type="button" role="tab">Spieler</button>
+                    <button class="nav-link" id="players-tab" data-bs-toggle="tab" data-bs-target="#players" type="button" role="tab">@gM("viewTourney.tabPlayers")</button>
                 </li>
             </ul>
             
             <div class="tab-content border-start border-end border-bottom p-3 bg-white" id="tourneyTabContent">
                 <!-- Wettbewerbe -->
                 <div class="tab-pane fade show active" id="comps" role="tabpanel">
-                    <h3>Wettbewerbe</h3>
+                    <h3>@gM("viewTourney.tabComps")</h3>
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Typ</th>
-                                <th>Status</th>
-                                <th>Teilnehmer</th>
+                                <th>@gM("table.name")</th>
+                                <th>@gM("tourneyInfo.type")</th>
+                                <th>@gM("tourneyInfo.status")</th>
+                                <th>@gM("contextHeader.participants")</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -77,14 +78,14 @@
 
                 <!-- Stages -->
                 <div class="tab-pane fade" id="stages" role="tabpanel">
-                    <h3>Stages</h3>
+                    <h3>@gM("viewTourney.tabStages")</h3>
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
                                 <th>Wettbewerb ID</th>
-                                <th>Name</th>
+                                <th>@gM("table.name")</th>
                                 <th>Konfiguration</th>
-                                <th>Status</th>
+                                <th>@gM("tourneyInfo.status")</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,7 +103,7 @@
 
                 <!-- Vereine -->
                 <div class="tab-pane fade" id="clubs" role="tabpanel">
-                    <h3>Vereine</h3>
+                    <h3>@gM("viewTourney.tabClubs")</h3>
                     <div class="row">
                         @for(cl <- clubs.filter(_.active).sortBy(_.name)) {
                             <div class="col-md-4 col-sm-6 mb-2">
@@ -114,13 +115,13 @@
 
                 <!-- Spieler -->
                 <div class="tab-pane fade" id="players" role="tabpanel">
-                    <h3>Spieler</h3>
+                    <h3>@gM("viewTourney.tabPlayers")</h3>
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
-                                <th>Name</th>
+                                <th>@gM("table.name")</th>
                                 <th>Verein ID</th>
-                                <th>TTR</th>
+                                <th>@gM("table.ttr")</th>
                             </tr>
                         </thead>
                         <tbody>

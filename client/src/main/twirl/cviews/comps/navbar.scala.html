@@ -26,12 +26,12 @@
     <div class="container-fluid">
         <!-- Logo und Titel -->
         <a class="navbar-brand d-flex align-items-center navbar-brand-large" href="javascript:appLoadPage('MainView', '')">
-            <img src="@{Global.imgUrl}logo.png" alt="Logo" width="70" height="47" class="d-inline-block align-text-top me-2">
-            <span class="fw-bold">TurnierService</span>
+            <img src="@{Global.imgUrl}logo.png" alt="@gM("navbar.logoAlt")" width="70" height="47" class="d-inline-block align-text-top me-2">
+            <span class="fw-bold">@gM("navbar.brand")</span>
         </a>
 
         <!-- Burger Icon für Mobile -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="@gM("navbar.toggleNav")">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -39,32 +39,32 @@
             <!-- Linke Seite -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainView', 'functions')">Funktionen</a>
+                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainView', 'functions')">@gM("navbar.functions")</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainView', 'pricing')">Support/Kosten</a>
+                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainView', 'pricing')">@gM("navbar.pricing")</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle nav-link-bold" href="#" id="navbarTools" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Tools
+                        @gM("navbar.tools")
                     </a>
                     <ul class="dropdown-menu shadow" aria-labelledby="navbarTools">
-                        <li><a class="dropdown-item" href="javascript:appLoadPage('MainView', '')">Wordpress-Plugin</a></li>
-                        <li><a class="dropdown-item" href="javascript:appLoadPage('Mockup', '')">Excel-Vorlage</a></li>
+                        <li><a class="dropdown-item" href="javascript:appLoadPage('MainView', 'plugin')">@gM("navbar.wordpressPlugin")</a></li>
+                        <li><a class="dropdown-item" href="javascript:appLoadPage('MainView', 'excel')">@gM("navbar.excelTemplate")</a></li>
                     </ul>
                 </li>
                 <li class="nav-item ms-lg-3">
-                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainSearch', '')">Suchen</a>
+                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainSearch', '')">@gM("navbar.search")</a>
                 </li>
                 @if(Global.user.exists(_.isTurnierAdmin)) {
                     <li class="nav-item ms-lg-3 dropdown d-flex align-items-center">
                         <a class="btn btn-primary fw-bold btn-start-custom dropdown-toggle" href="#" id="navbarStart" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            STARTEN
+                            @gM("navbar.start")
                         </a>
                         <ul class="dropdown-menu shadow" aria-labelledby="navbarStart">
-                            <li><a class="dropdown-item fw-bold" @id(StartFullId, "onclick")><i class="bi bi-trophy me-2"></i>Ganzes Turnier</a></li>
+                            <li><a class="dropdown-item fw-bold" @id(StartFullId, "onclick")><i class="bi bi-trophy me-2"></i>@gM("navbar.fullTourney")</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item fw-bold" @id(StartSimpleId, "onclick")><i class="bi bi-lightning-charge me-2"></i>Einzelner Wettbewerb</a></li>
+                            <li><a class="dropdown-item fw-bold" @id(StartSimpleId, "onclick")><i class="bi bi-lightning-charge me-2"></i>@gM("navbar.singleCompetition")</a></li>
                         </ul>
                     </li>
                 }
@@ -83,15 +83,15 @@
                             @Global.user.get.username
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="javascript:appLoadPage('UserLogin', '')">Profil / Passkeys</a></li>
+                            <li><a class="dropdown-item" href="javascript:appLoadPage('UserLogin', '')">@gM("navbar.profilePasskeys")</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" @id(DoLogoutId, "onclick")>Abmelden</a></li>
+                            <li><a class="dropdown-item text-danger" @id(DoLogoutId, "onclick")>@gM("navbar.logout")</a></li>
                         </ul>
                     </li>
                 } else {
                     <li class="nav-item">
                         <a class="btn btn-outline-light btn-sm fw-bold" href="javascript:appLoadPage('UserLogin', '')">
-                            <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                            <i class="bi bi-box-arrow-in-right me-1"></i> @gM("navbar.login")
                         </a>
                     </li>
                 }

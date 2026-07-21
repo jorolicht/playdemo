@@ -119,28 +119,32 @@
 }
 
 @roundTitle = @{
-  mList.headOption.map { case (m, _, _, _, _, _, _) =>
-    stage.stageConfig.format match {
-      case StageFormat.GR =>
-        val hasMultipleGroups = mList.map { case (mt, _, _, _, _, _, _) => mt.asInstanceOf[MEntryGr].grId }.distinct.length > 1
-        if (hasMultipleGroups) {
-          if (base.Global.lang == "de") s"Runde ${m.asInstanceOf[MEntryGr].round}" else s"Round ${m.asInstanceOf[MEntryGr].round}"
-        } else {
-          val grId = m.asInstanceOf[MEntryGr].grId
-          s"Gruppe ${StageHelper.cvrt2ExcelCol(grId)}"
-        }
-      case StageFormat.RR =>
-        val round = m.asInstanceOf[MEntryGr].round
-        if (base.Global.lang == "de") s"Runde $round" else s"Round $round"
-      case StageFormat.KO =>
-        val round = m.asInstanceOf[MEntryKo].round
-        if (round > 0) gM(s"competition.koRound.$round") else s"Runde $round"
-      case StageFormat.SW =>
-        if (base.Global.lang == "de") s"Runde ${m.round}" else s"Round ${m.round}"
-      case _ =>
-        if (base.Global.lang == "de") s"Runde ${m.round}" else s"Round ${m.round}"
-    }
-  }.getOrElse("")
+  if (activeSectionIdParam.isEmpty) {
+    if (base.Global.lang == "de") "Alle Runden" else "All Rounds"
+  } else {
+    mList.headOption.map { case (m, _, _, _, _, _, _) =>
+      stage.stageConfig.format match {
+        case StageFormat.GR =>
+          val hasMultipleGroups = mList.map { case (mt, _, _, _, _, _, _) => mt.asInstanceOf[MEntryGr].grId }.distinct.length > 1
+          if (hasMultipleGroups) {
+            if (base.Global.lang == "de") s"Runde ${m.asInstanceOf[MEntryGr].round}" else s"Round ${m.asInstanceOf[MEntryGr].round}"
+          } else {
+            val grId = m.asInstanceOf[MEntryGr].grId
+            s"Gruppe ${StageHelper.cvrt2ExcelCol(grId)}"
+          }
+        case StageFormat.RR =>
+          val round = m.asInstanceOf[MEntryGr].round
+          if (base.Global.lang == "de") s"Runde $round" else s"Round $round"
+        case StageFormat.KO =>
+          val round = m.asInstanceOf[MEntryKo].round
+          if (round > 0) gM(s"competition.koRound.$round") else s"Runde $round"
+        case StageFormat.SW =>
+          if (base.Global.lang == "de") s"Runde ${m.round}" else s"Round ${m.round}"
+        case _ =>
+          if (base.Global.lang == "de") s"Runde ${m.round}" else s"Round ${m.round}"
+      }
+    }.getOrElse("")
+  }
 }
 
 <div class="scoresheet-view">

@@ -1,7 +1,8 @@
+@import base.Messages.gM
 @(param: String)
 <div class="container mt-5 py-5 text-center">
     <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
-        <span class="visually-hidden">Lade...</span>
+        <span class="visually-hidden">@gM("loading.spinner")</span>
     </div>
-    <p class="text-muted">Lade Inhalt für '@param'...</p>
+    <p class="text-muted">@gM("loading.content", param)</p>
 </div>

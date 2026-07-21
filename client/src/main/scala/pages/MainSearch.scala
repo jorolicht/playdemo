@@ -91,7 +91,7 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
         "order"     -> sortOrder
       )
 
-      ajaxGet[Seq[SearchResult]]("/wp-json/tourney/v1/search", params).map {
+      ajaxGet[Seq[SearchResult]]("/wp-json/tourney/v1/search", params, host = Global.homeUrl).map {
         case Right(results) =>
           updateResultsTable(results)
         case Left(err) =>
