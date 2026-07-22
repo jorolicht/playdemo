@@ -13,7 +13,7 @@ function pd_get_webauthn() {
     // Use localhost if domain is not set (for development)
     if (empty($rpId)) $rpId = 'localhost';
     
-    return new WebAuthn($rpName, $rpId, ['android-safetynet', 'fido-u2f', 'apple', 'tpm'], true);
+    return new WebAuthn($rpName, $rpId, null, true);
 }
 
 add_action('rest_api_init', function () {
