@@ -45,6 +45,30 @@ add_action('rest_api_init', function () {
 function pd_api_login_handler($request) {
     $params = $request->get_json_params();
 
+    // Cloudflare Turnstile Verifizierung
+    $turnstile_key = get_option('cfturnstile_key', getenv('TURNSTILE_SITEKEY') ?: '');
+    if (!empty($turnstile_key)) {
+        $token = $params['turnstileToken'] ?? '';
+        $secret_key = get_option('cfturnstile_secret', getenv('TURNSTILE_SECRET') ?: '');
+        
+        if (empty($token) || empty($secret_key)) {
+            return new WP_Error('turnstile_failed', 'Sicherheitsprüfung fehlgeschlagen (Fehlendes Token).', array('status' => 403));
+        }
+
+        $response = wp_remote_post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+            'body' => [
+                'secret'   => $secret_key,
+                'response' => $token,
+                'remoteip' => $_SERVER['REMOTE_ADDR']
+            ]
+        ]);
+        
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        if (empty($body['success']) || $body['success'] !== true) {
+            return new WP_Error('bot_detected', 'Bitte bestätigen Sie, dass Sie ein Mensch sind.', array('status' => 403));
+        }
+    }
+
     if ( empty($params['email']) || empty($params['password']) ) {
         return new WP_Error('missing_params', 'Benutzername/Email und Passwort sind erforderlich.', array('status' => 400));
     }
@@ -105,10 +129,10 @@ function pd_api_register_user($request) {
     $params = $request->get_json_params();
     
     // Cloudflare Turnstile Verifizierung
-    $turnstile_key = get_option('cfturnstile_key');
+    $turnstile_key = get_option('cfturnstile_key', getenv('TURNSTILE_SITEKEY') ?: '');
     if (!empty($turnstile_key)) {
         $token = $params['turnstileToken'] ?? '';
-        $secret_key = get_option('cfturnstile_secret');
+        $secret_key = get_option('cfturnstile_secret', getenv('TURNSTILE_SECRET') ?: '');
         
         if (empty($token) || empty($secret_key)) {
             return new WP_Error('turnstile_failed', 'Sicherheitsprüfung fehlgeschlagen (Fehlendes Token).', array('status' => 403));

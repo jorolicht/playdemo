@@ -45,6 +45,8 @@ services:
       WORDPRESS_DB_USER: ${DB_USER}
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
       WORDPRESS_DB_NAME: ${DB_NAME}
+      TURNSTILE_SITEKEY: ${TURNSTILE_SITEKEY}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET}
       WORDPRESS_CONFIG_EXTRA: |
         define( 'WP_HOME', 'https://rolicht.de' );
         define( 'WP_SITEURL', 'https://rolicht.de' );

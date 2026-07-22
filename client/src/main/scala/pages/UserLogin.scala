@@ -105,8 +105,11 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
     val login    = getInput(gE(LoginId))
     val password = getInput(gE(PasswordId))
     
-    // Captcha Token (if implemented)
-    // val captchaToken = dom.window.asInstanceOf[js.Dynamic].getCaptchaToken().toString
+    // Turnstile Token (falls konfiguriert)
+    val turnstileElements = dom.document.getElementsByName("cf-turnstile-response")
+    val turnstileToken = if (turnstileElements.length > 0) {
+      turnstileElements(0).asInstanceOf[dom.html.Input].value
+    } else ""
 
     if (login.isEmpty || password.isEmpty) {
       dom.window.alert("Bitte Benutzername/E-Mail und Passwort eingeben.")
@@ -115,7 +118,8 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
 
     val data = Map(
       "email"    -> login,
-      "password" -> password
+      "password" -> password,
+      "turnstileToken" -> turnstileToken
     )
 
     ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/login", List(), data, hdrs = Map("Content-Type" -> "application/json"), host = Global.homeUrl).map {

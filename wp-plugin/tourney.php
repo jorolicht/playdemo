@@ -101,6 +101,11 @@ function tourney_render($atts) {
     $logLevel  = isset($_GET['logLevel']) ? $_GET['logLevel'] : 'debug';
     $tourney = isset($_GET['tourney']) ? $_GET['tourney'] : '';
 
+    $turnstile_key = get_option('cfturnstile_key', getenv('TURNSTILE_SITEKEY') ?: '');
+    if (!empty($turnstile_key)) {
+         wp_enqueue_script('cloudflare-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', array(), null, true);
+    }
+
     $output = '<div class="tourney-spa-root">';
     $output .= '<span id="Main_ParamId" 
         data-page="' . esc_attr($atts['page']) . '" 
@@ -112,6 +117,7 @@ function tourney_render($atts) {
         data-playurl="' . esc_url($playUrl) . '" 
         data-nonce="' . esc_attr($nonce) . '" 
         data-pageid="' . esc_attr($pageId) . '" 
+        data-turnstilesitekey="' . esc_attr($turnstile_key) . '"
     ></span>';   
    
     $output .= '<span id="Main_NavbarId"></span>';
@@ -262,7 +268,7 @@ function js_enqueue_scripts_styles() {
         wp_enqueue_script('tourney-config-script');
 
         // Hole den Cloudflare Turnstile Sitekey (falls das Plugin installiert und konfiguriert ist)
-        $turnstile_key = get_option('cfturnstile_key', '');
+        $turnstile_key = get_option('cfturnstile_key', getenv('TURNSTILE_SITEKEY') ?: '');
         
         if (!empty($turnstile_key)) {
              wp_enqueue_script('cloudflare-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', array(), null, true);
