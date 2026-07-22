@@ -41,9 +41,15 @@
                             <p class="text-muted small px-3">@gM("login.loggedInDesc")</p>
                             
                             <div class="mt-4">
-                                <button @id(BtnPasskeyAdd, "onclick") class="btn btn-sm btn-outline-success">
-                                    <i class="bi bi-shield-plus me-1"></i> @gM("login.btnAddPasskey")
-                                </button>
+                                @if(user.get.hasPasskey) {
+                                    <button @id(BtnPasskeyDelete, "onclick") class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash me-1"></i> @gM("login.btnDeletePasskey")
+                                    </button>
+                                } else {
+                                    <button @id(BtnPasskeyAdd, "onclick") class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-shield-plus me-1"></i> @gM("login.btnAddPasskey")
+                                    </button>
+                                }
                             </div>
                         </div>
 

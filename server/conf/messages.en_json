@@ -68,6 +68,7 @@
   "results.title": "Rankings & Results",
   "app.forgotPassword": "Forgot Password?",
   "login.btnAddPasskey": "Add Passkey",
+  "login.btnDeletePasskey": "Delete Passkey",
   "StageDraw.btn_back_overview": "Back to Overview",
   "StageAdmin.btn_reset_draw": "Reset Draw",
   "btn.delete": "Delete",

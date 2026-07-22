@@ -298,6 +298,7 @@ login.loggedInAs                                    = Logged in as:
 login.loggedInSince                                 = Logged in since:
 login.loggedInDesc                                  = You are successfully authenticated and can use all account features.
 login.btnAddPasskey                                 = Add Passkey
+login.btnDeletePasskey                                 = Delete Passkey
 login.btnLogout                                     = LOGOUT
 login.successAlert                                  = Login successful! Redirecting...
 login.usernameOrEmail                               = Username or Email

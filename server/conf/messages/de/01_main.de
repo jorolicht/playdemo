@@ -298,6 +298,7 @@ login.loggedInAs                                    = Angemeldet als:
 login.loggedInSince                                 = Eingeloggt seit:
 login.loggedInDesc                                  = Sie sind erfolgreich authentifiziert und können alle Funktionen Ihres Accounts nutzen.
 login.btnAddPasskey                                 = Passkey hinzufügen
+login.btnDeletePasskey                                 = Passkey löschen
 login.btnLogout                                     = ABMELDEN
 login.successAlert                                  = Anmeldung erfolgreich! Sie werden in Kürze weitergeleitet...
 login.usernameOrEmail                               = Benutzername oder E-Mail

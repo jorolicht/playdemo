@@ -31,6 +31,13 @@ add_action('rest_api_init', function () {
         'permission_callback' => function() { return is_user_logged_in(); }
     ]);
 
+    // REGISTRATION: Delete
+    register_rest_route('tourney/v1', '/auth/webauthn/delete', [
+        'methods' => 'DELETE',
+        'callback' => 'pd_webauthn_delete',
+        'permission_callback' => function() { return is_user_logged_in(); }
+    ]);
+
     // LOGIN: Get Args
     register_rest_route('tourney/v1', '/auth/webauthn/login-args', [
         'methods' => 'GET',
@@ -168,4 +175,10 @@ function pd_webauthn_login_process($request) {
     } catch (\Exception $e) {
         return new WP_Error('login_failed', $e->getMessage(), ['status' => 403]);
     }
+}
+
+function pd_webauthn_delete() {
+    $user = wp_get_current_user();
+    delete_user_meta($user->ID, 'pd_webauthn_keys');
+    return ['status' => 'success', 'message' => 'Passkey(s) erfolgreich gelöscht.'];
 }

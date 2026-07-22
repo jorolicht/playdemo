@@ -201,6 +201,7 @@ function tourney_api_callback_user($request) {
     $avatar_url     = '';
     $roles          = [];
 
+    $has_passkey    = false;
     if ( is_user_logged_in() )  {
         $user_id        = get_current_user_id();
         $current_user   = wp_get_current_user();
@@ -212,6 +213,8 @@ function tourney_api_callback_user($request) {
         $description    = $current_user->description;
         $avatar_url     = get_avatar_url($user_id);
         $roles          = $current_user->roles;
+        $keys           = get_user_meta($user_id, 'pd_webauthn_keys', true) ?: [];
+        $has_passkey    = !empty($keys);
     } 
 
     return [
@@ -224,6 +227,7 @@ function tourney_api_callback_user($request) {
         'description'   => $description,
         'avatar_url'    => $avatar_url,
         'roles'         => array_values($roles), // Ensure numeric array for JSON
+        'has_passkey'   => $has_passkey,
         'time'          => current_time('mysql'),
     ];
 }

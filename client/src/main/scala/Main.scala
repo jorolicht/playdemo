@@ -120,7 +120,8 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
               org = ui.club,
               picUrl = ui.avatar_url,
               description = ui.description,
-              roles = ui.roles
+              roles = ui.roles,
+              hasPasskey = ui.has_passkey
             ))
         } 
         

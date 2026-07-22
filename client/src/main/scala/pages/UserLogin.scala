@@ -21,6 +21,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
   val BtnLogout:    HtmlId = genId(name)
   val BtnPasskey:   HtmlId = genId(name)
   val BtnPasskeyAdd: HtmlId = genId(name)
+  val BtnPasskeyDelete: HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
     setMain(cviews.pages.html.UserLogin(Global.user))
@@ -36,12 +37,36 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
         doPasskeyLogin()
       case `BtnPasskeyAdd` =>
         doPasskeyAdd()
+      case `BtnPasskeyDelete` =>
+        doPasskeyDelete()
       case _ => debug(s"UserLogin Event: ${elem.id}")
 
   private def doPasskeyAdd(): Unit =
     services.WebAuthnService.registerPasskey().map {
-      case Right(msg) => dom.window.alert(msg)
+      case Right(msg) => 
+        Global.user.foreach(_.hasPasskey = true)
+        dom.window.alert(msg)
+        render()
       case Left(err)  => dom.window.alert(s"Passkey konnte nicht hinzugefügt werden: ${err.msg}")
+    }
+
+  private def doPasskeyDelete(): Unit =
+    import shared.BoxButton
+    dialogs.DlgMsgbox.show(
+      "Möchten Sie Ihren Passkey wirklich löschen?",
+      "Passkey löschen",
+      List(BoxButton.Yes, BoxButton.No)
+    ).map {
+      case BoxButton.Yes =>
+        ajaxDelete[Map[String, String]]("/wp-json/tourney/v1/auth/webauthn/delete", host = Global.homeUrl).map {
+          case Right(_) =>
+            Global.user.foreach(_.hasPasskey = false)
+            dom.window.alert("Passkey erfolgreich gelöscht.")
+            render()
+          case Left(err) =>
+            dom.window.alert(s"Fehler beim Löschen des Passkeys: ${err.msg}")
+        }
+      case _ => // do nothing
     }
 
   private def doLogout(): Unit =

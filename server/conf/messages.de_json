@@ -68,6 +68,7 @@
   "results.title": "Platzierungen & Ergebnisse",
   "app.forgotPassword": "Passwort vergessen?",
   "login.btnAddPasskey": "Passkey hinzufügen",
+  "login.btnDeletePasskey": "Passkey löschen",
   "StageDraw.btn_back_overview": "Zurück zur Übersicht",
   "StageAdmin.btn_reset_draw": "Auslosung löschen",
   "btn.delete": "Löschen",
