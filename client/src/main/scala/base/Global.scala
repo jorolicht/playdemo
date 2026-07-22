@@ -99,6 +99,15 @@ object Global:
     } catch {
       case _: Exception => // ignore
     }
+    try {
+      val storage = org.scalajs.dom.window.sessionStorage
+      storage.removeItem("tourney_last_page")
+      storage.removeItem("tourney_last_param")
+      storage.removeItem("tourney_last_wp_page_id")
+      storage.removeItem("tourney_last_selection")
+    } catch {
+      case _: Exception => // ignore
+    }
   }
 
   def hasTourneyAccess(tourney: shared.model.Tourney): Boolean =

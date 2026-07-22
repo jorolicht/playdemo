@@ -70,6 +70,7 @@ def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, asy
     case e: Exception => error(s"loadPage -> page:${pageName} param:${param} not found: ${e.getMessage}")
 
 private def savePageState(pageName: PageName, param: String): Unit =
+  if (pageName.value == "Goodbye") return
   try
     val storage = org.scalajs.dom.window.sessionStorage
     storage.setItem("tourney_last_page", pageName.value)
