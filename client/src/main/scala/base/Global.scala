@@ -78,7 +78,28 @@ object Global:
   var wpAppPassword: String = ""
 
   def setUser(usr: User) = user = Some(usr)
-  def resetUser = user = None
+  def resetUser: Unit = {
+    user = None
+    try {
+      val adminBar = org.scalajs.dom.document.getElementById("wpadminbar")
+      if (adminBar != null) {
+        adminBar.remove()
+      }
+      val body = org.scalajs.dom.document.body
+      if (body != null) {
+        body.classList.remove("admin-bar")
+        body.classList.remove("logged-in")
+        body.style.marginTop = ""
+      }
+      val html = org.scalajs.dom.document.documentElement.asInstanceOf[org.scalajs.dom.raw.HTMLElement]
+      if (html != null) {
+        html.classList.remove("html-admin-bar")
+        html.style.marginTop = ""
+      }
+    } catch {
+      case _: Exception => // ignore
+    }
+  }
 
   def hasTourneyAccess(tourney: shared.model.Tourney): Boolean =
     if (isDemoMode) return true
