@@ -31,10 +31,11 @@ object WebAuthnService extends JsWrapper with ComWrapper:
     }.flatMap {
       case Right(argsStr) =>
         try {
-          val args = js.JSON.parse(argsStr).asInstanceOf[js.Dynamic]
+          val resJson = js.JSON.parse(argsStr).asInstanceOf[js.Dynamic]
+          val publicKey = resJson.publicKey
           
           // 2. Transform args for browser (Strings to ArrayBuffers)
-          val credentialOptions = transformCreateArgs(args)
+          val credentialOptions = transformCreateArgs(publicKey)
           
           // 3. Call Browser API (using js.Dynamic to bypass missing types)
           val credentials = dom.window.navigator.asInstanceOf[js.Dynamic].credentials
@@ -72,11 +73,11 @@ object WebAuthnService extends JsWrapper with ComWrapper:
       case Right(resStr) =>
         try {
             val resJson = js.JSON.parse(resStr).asInstanceOf[js.Dynamic]
-            val args = resJson.args
+            val publicKey = resJson.args.publicKey
             val challengeId = resJson.challengeId.toString
             
             // 2. Transform for browser
-            val requestOptions = transformGetArgs(args)
+            val requestOptions = transformGetArgs(publicKey)
             
             // 3. Call Browser API
             val credentials = dom.window.navigator.asInstanceOf[js.Dynamic].credentials
