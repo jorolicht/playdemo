@@ -82,7 +82,6 @@
                             
                             <!-- Optional: Cloudflare Turnstile (if enabled via plugin on login form) -->
                             @if(base.Global.turnstileSitekey.nonEmpty) {
-                                <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
                                 <div class="cf-turnstile mb-3 d-flex justify-content-center" data-sitekey="@base.Global.turnstileSitekey"></div>
                             } else {
                                 <div @id(CaptchaId) class="mb-4 text-end">
