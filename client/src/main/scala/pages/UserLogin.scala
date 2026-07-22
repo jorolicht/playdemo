@@ -17,11 +17,12 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
   val LoginId:      HtmlId = genId(name)
   val PasswordId:   HtmlId = genId(name)
   val CaptchaId:    HtmlId = genId(name)
-  val BtnLogin:     HtmlId = genId(name)
-  val BtnLogout:    HtmlId = genId(name)
-  val BtnPasskey:   HtmlId = genId(name)
-  val BtnPasskeyAdd: HtmlId = genId(name)
+  val BtnLogin:         HtmlId = genId(name)
+  val BtnLogout:        HtmlId = genId(name)
+  val BtnPasskey:       HtmlId = genId(name)
+  val BtnPasskeyAdd:    HtmlId = genId(name)
   val BtnPasskeyDelete: HtmlId = genId(name)
+  val BtnForgot:        HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
     setMain(cviews.pages.html.UserLogin(Global.user))
@@ -40,6 +41,9 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
         doPasskeyAdd()
       case `BtnPasskeyDelete` =>
         doPasskeyDelete()
+      case `BtnForgot` =>
+        event.preventDefault()
+        dom.window.location.href = Global.homeUrl + "/wp-login.php?action=lostpassword"
       case _ => debug(s"UserLogin Event: ${elem.id}")
 
   private def doPasskeyAdd(): Unit =
