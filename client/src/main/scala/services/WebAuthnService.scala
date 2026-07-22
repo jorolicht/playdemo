@@ -178,7 +178,16 @@ object WebAuthnService extends JsWrapper with ComWrapper:
   // --- BINARY UTILS ---
 
   private def base64ToBuffer(base64: String): ArrayBuffer =
-    val binaryString = dom.window.atob(base64.replace("-", "+").replace("_", "/"))
+    var cleaned = base64.replace("-", "+").replace("_", "/")
+    if (cleaned.startsWith("=?BINARY?B?")) {
+      cleaned = cleaned.substring(11)
+    }
+    if (cleaned.endsWith("?=")) {
+      cleaned = cleaned.substring(0, cleaned.length - 2)
+    }
+    cleaned = cleaned.replaceAll("\\s", "")
+    val padded = cleaned + ("=" * ((4 - (cleaned.length % 4)) % 4))
+    val binaryString = dom.window.atob(padded)
     val bytes = new Uint8Array(binaryString.length)
     for (i <- 0 until binaryString.length) {
         bytes(i) = binaryString.charAt(i).toShort
