@@ -81,8 +81,8 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
           val alert = dom.document.getElementById("LoginSuccessAlert")
           if (alert != null) alert.classList.remove("d-none")
           dom.window.setTimeout(() => {
-            dom.window.location.href = Global.homeUrl
-          }, 2500)
+            loadPage(pages.MainView.name, "")
+          }, 2000)
         }
       case Left(err) =>
         dom.window.alert(s"Passkey Login fehlgeschlagen: ${err.msg}")
@@ -130,8 +130,8 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
           val alert = dom.document.getElementById("LoginSuccessAlert")
           if (alert != null) alert.classList.remove("d-none")
           dom.window.setTimeout(() => {
-            dom.window.location.href = Global.homeUrl
-          }, 2500)
+            loadPage(pages.MainView.name, "")
+          }, 2000)
         }
       case Left(err) => 
         dom.window.alert(s"Login fehlgeschlagen: $err")
