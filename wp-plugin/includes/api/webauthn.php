@@ -61,6 +61,11 @@ function pd_webauthn_register_args() {
     return $args;
 }
 
+// Helper function to decode base64url payloads from browser
+function pd_base64url_decode($data) {
+    return base64_decode(strtr($data, '-_', '+/') . str_repeat('=', (4 - strlen($data) % 4) % 4));
+}
+
 function pd_webauthn_register_process($request) {
     $user = wp_get_current_user();
     $params = $request->get_json_params();
@@ -74,8 +79,8 @@ function pd_webauthn_register_process($request) {
     try {
         $webauthn = pd_get_webauthn();
         $credential = $webauthn->processCreate(
-            $params['clientDataJSON'],
-            $params['attestationObject'],
+            pd_base64url_decode($params['clientDataJSON']),
+            pd_base64url_decode($params['attestationObject']),
             $challenge,
             true, // require user presence
             true, // require user verification
@@ -85,11 +90,11 @@ function pd_webauthn_register_process($request) {
         // Store credential in user meta
         $keys = get_user_meta($user->ID, 'pd_webauthn_keys', true) ?: [];
         $keys[] = [
-            'credentialId' => $credential->credentialId,
-            'publicKey' => $credential->publicKey,
+            'credentialId' => bin2hex($credential->credentialId),
+            'publicKey' => $credential->credentialPublicKey,
             'attestationFormat' => $credential->attestationFormat,
-            'counter' => $credential->counter,
-            'userHandle' => $credential->userHandle
+            'counter' => $credential->signatureCounter,
+            'userHandle' => $user->ID
         ];
         update_user_meta($user->ID, 'pd_webauthn_keys', $keys);
 
@@ -129,10 +134,13 @@ function pd_webauthn_login_process($request) {
         return new WP_Error('invalid_user', 'Benutzer konnte nicht identifiziert werden.', ['status' => 403]);
     }
 
-    $keys = get_user_meta($userId, 'pd_webauthn_keys', true);
+    // Convert client's base64url credential ID to hex to match DB storage
+    $client_cred_id_hex = bin2hex(pd_base64url_decode($params['id']));
+
+    $keys = get_user_meta($userId, 'pd_webauthn_keys', true) ?: [];
     $foundKey = null;
     foreach ($keys as $key) {
-        if ($key['credentialId'] === $params['id']) {
+        if ($key['credentialId'] === $client_cred_id_hex) {
             $foundKey = $key;
             break;
         }
@@ -145,9 +153,9 @@ function pd_webauthn_login_process($request) {
     try {
         $webauthn = pd_get_webauthn();
         $webauthn->processGet(
-            $params['clientDataJSON'],
-            $params['authenticatorData'],
-            $params['signature'],
+            pd_base64url_decode($params['clientDataJSON']),
+            pd_base64url_decode($params['authenticatorData']),
+            pd_base64url_decode($params['signature']),
             $foundKey['publicKey'],
             $challenge
         );
