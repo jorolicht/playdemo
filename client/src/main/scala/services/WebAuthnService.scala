@@ -125,7 +125,14 @@ object WebAuthnService extends JsWrapper with ComWrapper:
         )
     }
 
-    js.Dynamic.literal(
+    // Force platform biometrics and required user verification
+    val authSelection = js.Dynamic.literal(
+        authenticatorAttachment = "platform",
+        requireResidentKey = true,
+        userVerification = "required"
+    )
+
+    val credentialOptions = js.Dynamic.literal(
         publicKey = js.Dynamic.literal(
             rp = args.rp,
             user = userDict,
@@ -133,22 +140,28 @@ object WebAuthnService extends JsWrapper with ComWrapper:
             pubKeyCredParams = args.pubKeyCredParams,
             timeout = args.timeout,
             excludeCredentials = excludeCredentials,
-            authenticatorSelection = args.authenticatorSelection,
+            authenticatorSelection = authSelection,
             attestation = args.attestation
         )
     )
 
+    dom.window.console.log("WebAuthn Create Options (Transformed):", credentialOptions)
+    credentialOptions
+
   private def transformGetArgs(args: js.Dynamic): js.Dynamic =
     val challenge = base64ToBuffer(args.challenge.toString)
     
-    js.Dynamic.literal(
+    val requestOptions = js.Dynamic.literal(
         publicKey = js.Dynamic.literal(
             challenge = challenge,
             timeout = args.timeout,
             rpId = args.rpId,
-            userVerification = args.userVerification
+            userVerification = "required" // Force user verification on login
         )
     )
+
+    dom.window.console.log("WebAuthn Get Options (Transformed):", requestOptions)
+    requestOptions
 
 
   // --- HELPERS: Server Transformation ---
