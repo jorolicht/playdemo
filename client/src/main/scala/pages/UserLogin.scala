@@ -58,35 +58,16 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
     }
 
   private def doPasskeyLogin(): Unit =
-    services.WebAuthnService.loginPasskey().flatMap {
+    services.WebAuthnService.loginPasskey().map {
       case Right(msg) => 
         debug(s"Passkey Login successful: $msg")
-        ajaxGet[UserInfo]("/wp-json/tourney/v1/user", List(), Map("X-WP-NONCE" -> Global.wpNonce), Global.homeUrl).map {
-          case Right(ui) if ui.user_id > 0 =>
-            Global.user = Some(User(
-              id = ("", ui.user_id),
-              username = ui.username,
-              email = ui.email,
-              firstname = ui.firstname,
-              lastname = ui.lastname,
-              org = ui.club,
-              picUrl = ui.avatar_url,
-              description = ui.description,
-              roles = ui.roles
-            ))
-            comps.Navbar.render()
-          case _ =>
-            debug("Could not fetch user info after passkey login")
-        }.map { _ =>
-          val alert = dom.document.getElementById("LoginSuccessAlert")
-          if (alert != null) alert.classList.remove("d-none")
-          dom.window.setTimeout(() => {
-            loadPage(pages.MainView.name, "")
-          }, 2000)
-        }
+        val alert = dom.document.getElementById("LoginSuccessAlert")
+        if (alert != null) alert.classList.remove("d-none")
+        dom.window.setTimeout(() => {
+          dom.window.location.href = Global.homeUrl
+        }, 2000)
       case Left(err) =>
         dom.window.alert(s"Passkey Login fehlgeschlagen: ${err.msg}")
-        Future.successful(())
     }
 
   private def doLogin(): Unit =
@@ -106,34 +87,15 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
       "password" -> password
     )
 
-    ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/login", List(), data, hdrs = Map("Content-Type" -> "application/json"), host = Global.homeUrl).flatMap {
+    ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/login", List(), data, hdrs = Map("Content-Type" -> "application/json"), host = Global.homeUrl).map {
       case Right(res) => 
         debug(s"Login successful: $res")
         res.get("nonce").foreach(n => Global.wpNonce = n)
-        ajaxGet[UserInfo]("/wp-json/tourney/v1/user", List(), Map("X-WP-NONCE" -> Global.wpNonce), Global.homeUrl).map {
-          case Right(ui) if ui.user_id > 0 =>
-            Global.user = Some(User(
-              id = ("", ui.user_id),
-              username = ui.username,
-              email = ui.email,
-              firstname = ui.firstname,
-              lastname = ui.lastname,
-              org = ui.club,
-              picUrl = ui.avatar_url,
-              description = ui.description,
-              roles = ui.roles
-            ))
-            comps.Navbar.render()
-          case _ =>
-            debug("Could not fetch user info after login")
-        }.map { _ =>
-          val alert = dom.document.getElementById("LoginSuccessAlert")
-          if (alert != null) alert.classList.remove("d-none")
-          dom.window.setTimeout(() => {
-            loadPage(pages.MainView.name, "")
-          }, 2000)
-        }
+        val alert = dom.document.getElementById("LoginSuccessAlert")
+        if (alert != null) alert.classList.remove("d-none")
+        dom.window.setTimeout(() => {
+          dom.window.location.href = Global.homeUrl
+        }, 2000)
       case Left(err) => 
         dom.window.alert(s"Login fehlgeschlagen: $err")
-        Future.successful(())
     }

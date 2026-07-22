@@ -125,7 +125,15 @@ trait ComWrapper:
                 (using r: Reader[T], ct: ClassTag[T]): Future[Either[AppError,T]] =
     val name = route.split("/").lastOption.getOrElse("ajaxGet")
     debug(s"ajaxGet -> route:${route} params:${params.mkString("=")} hdrs: ${hdrs.mkString("=")}")
-    Ajax.get(genPath(host, route, params), headers = hdrs).map(_.responseText)
+    Ajax(
+      method = "GET",
+      url = genPath(host, route, params),
+      data = "",
+      timeout = 0,
+      headers = hdrs,
+      withCredentials = true,
+      responseType = ""
+    ).map(_.responseText)
       .map(content => parseJson[T](content).flatMap(res =>
         if (res == null || res.asInstanceOf[AnyRef] == null) {
           Left(AppError("err00009.ajax.get", s"${route}/${params.mkString(":")}", "response is null", name))
