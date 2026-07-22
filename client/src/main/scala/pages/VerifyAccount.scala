@@ -13,8 +13,8 @@ object VerifyAccount extends BasePage with JsWrapper with ComWrapper:
   def name = PageNameTyp("VerifyAccount")
 
   def render(param: String): Boolean = 
-    // UI initialisieren
-    setMain("""<div class='text-center mt-5'><div class='spinner-border text-primary'></div><p class='mt-3'>Verifiziere deinen Account...</p></div>""")
+    // UI initialisieren (Spinner)
+    setMain(cviews.pages.html.VerifyAccount("loading", ""))
     
     // URL Parameter extrahieren (z.B. ?uid=1&hash=abc)
     val urlParams = new dom.URLSearchParams(dom.window.location.search)
@@ -28,38 +28,11 @@ object VerifyAccount extends BasePage with JsWrapper with ComWrapper:
       ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/verify", List(), data, hdrs = Map("Content-Type" -> "application/json"), host = Global.homeUrl).map {
         case Right(res) => 
           val msg = res.getOrElse("message", "E-Mail erfolgreich bestätigt.")
-          setMain(s"""
-            <div class='container mt-5 text-center'>
-              <div class='alert alert-success shadow-sm p-5'>
-                <i class='bi bi-check-circle text-success' style='font-size: 5rem;'></i><br>
-                <h2 class='mt-4'>Erfolgreich!</h2>
-                <p class='fs-5 mt-3'>$msg</p>
-                <hr class='my-4'>
-                <button class='btn btn-primary btn-lg px-5 fw-bold' onclick='appLoadPage("UserLogin", "")'>ZUM LOGIN</button>
-              </div>
-            </div>""")
+          setMain(cviews.pages.html.VerifyAccount("success", msg))
         case Left(err) => 
-          setMain(s"""
-            <div class='container mt-5 text-center'>
-              <div class='alert alert-danger shadow-sm p-5'>
-                <i class='bi bi-exclamation-triangle text-danger' style='font-size: 5rem;'></i><br>
-                <h2 class='mt-4'>Fehler</h2>
-                <p class='fs-5 mt-3'>Verifizierung fehlgeschlagen: $err</p>
-                <hr class='my-4'>
-                <button class='btn btn-outline-secondary px-4' onclick='appLoadPage("MainView", "")'>Zur Startseite</button>
-              </div>
-            </div>""")
+          setMain(cviews.pages.html.VerifyAccount("error", err.msg))
       }
     } else {
-      setMain("""
-        <div class='container mt-5 text-center'>
-          <div class='alert alert-warning shadow-sm p-5'>
-            <i class='bi bi-question-circle text-warning' style='font-size: 5rem;'></i><br>
-            <h2 class='mt-4'>Ungültiger Link</h2>
-            <p class='fs-5 mt-3'>Der Verifizierungslink ist unvollständig oder ungültig.</p>
-            <hr class='my-4'>
-            <button class='btn btn-outline-secondary px-4' onclick='appLoadPage("MainView", "")'>Zur Startseite</button>
-          </div>
-        </div>""")
+      setMain(cviews.pages.html.VerifyAccount("invalid", ""))
     }
     true

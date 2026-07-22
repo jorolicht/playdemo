@@ -1,0 +1,99 @@
+@import base.Messages.gM
+
+@(status: String, message: String)
+
+<div class="container mt-5 py-5 text-center verify-account-view">
+    <div class="card mx-auto p-5 rounded-4 shadow-lg border-0 bg-white" style="max-width: 600px; position: relative; overflow: hidden;">
+        <!-- Animated Background Gradient Effect -->
+        <div class="verify-gradient-bg"></div>
+
+        <div class="content" style="position: relative; z-index: 2;">
+            @if(status == "loading") {
+                <div class="py-4">
+                    <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h3 class="mt-4 fw-bold text-dark">Verifizierung läuft...</h3>
+                    <p class="text-muted mt-2">Wir bestätigen Ihren Account. Bitte warten Sie einen Moment.</p>
+                </div>
+            } else if(status == "success") {
+                <div class="py-2">
+                    <div class="mb-4">
+                        <div class="icon-circle bg-success bg-gradient text-white mx-auto rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
+                            <i class="bi bi-check-circle display-4"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold text-success mb-3">Erfolgreich!</h2>
+                    <p class="lead text-muted mb-4 fs-5">@message</p>
+                    
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
+                        <button class="btn btn-primary btn-lg px-5 fw-bold shadow-sm hover-lift" onclick="appLoadPage('UserLogin', '')">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>ZUM LOGIN
+                        </button>
+                    </div>
+                </div>
+            } else if(status == "error") {
+                <div class="py-2">
+                    <div class="mb-4">
+                        <div class="icon-circle bg-danger bg-gradient text-white mx-auto rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
+                            <i class="bi bi-exclamation-triangle display-4"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold text-danger mb-3">Verifizierung fehlgeschlagen</h2>
+                    <p class="lead text-muted mb-4 fs-5">@message</p>
+                    
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
+                        <button class="btn btn-outline-secondary btn-lg px-4 fw-bold hover-lift" onclick="appLoadPage('MainView', '')">
+                            <i class="bi bi-house-door me-2"></i>Zur Startseite
+                        </button>
+                    </div>
+                </div>
+            } else {
+                <div class="py-2">
+                    <div class="mb-4">
+                        <div class="icon-circle bg-warning bg-gradient text-white mx-auto rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
+                            <i class="bi bi-question-circle display-4"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold text-warning mb-3">Ungültiger Link</h2>
+                    <p class="lead text-muted mb-4 fs-5">Der Verifizierungslink ist unvollständig oder ungültig.</p>
+                    
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
+                        <button class="btn btn-outline-secondary btn-lg px-4 fw-bold hover-lift" onclick="appLoadPage('MainView', '')">
+                            <i class="bi bi-house-door me-2"></i>Zur Startseite
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .verify-account-view {
+        animation: fadeIn 0.6s ease-out;
+    }
+    .verify-gradient-bg {
+        position: absolute;
+        top: -50%; left: -50%; right: -50%; bottom: -50%;
+        background: radial-gradient(circle, rgba(13,110,253,0.03) 0%, rgba(25,135,84,0.02) 50%, rgba(255,255,255,0) 100%);
+        z-index: 1;
+        pointer-events: none;
+    }
+    .icon-circle {
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .card:hover .icon-circle {
+        transform: scale(1.1) rotate(-10deg);
+    }
+    .hover-lift {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .hover-lift:hover {
+        transform: translateY(-2px);
+    }
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
