@@ -23,7 +23,7 @@ object WebAuthnService extends JsWrapper with ComWrapper:
    */
   def registerPasskey(): Future[Either[shared.basic.AppError, String]] =
     // 1. Get arguments from server as String
-    ajaxGet[String]("/wp-json/tourney/v1/auth/webauthn/register-args", host = Global.homeUrl).flatMap {
+    ajaxGet[String]("/wp-json/tourney/v1/auth/webauthn/register-args", List(), Map("X-WP-Nonce" -> Global.wpNonce), host = Global.homeUrl).flatMap {
       case Right(argsStr) =>
         try {
           val args = js.JSON.parse(argsStr).asInstanceOf[js.Dynamic]
