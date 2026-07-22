@@ -22,6 +22,7 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
 
   def render(param: String = ""): Boolean = 
     setMain(cviews.pages.html.UserRegistration())
+    triggerTurnstile()
     true
 
   override def handleEvent(elem: HTMLElement, event: dom.Event): Unit = 

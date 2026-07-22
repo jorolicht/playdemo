@@ -25,6 +25,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
 
   def render(param: String = ""): Boolean = 
     setMain(cviews.pages.html.UserLogin(Global.user))
+    triggerTurnstile()
     true
 
   override def handleEvent(elem: HTMLElement, event: dom.Event): Unit = 

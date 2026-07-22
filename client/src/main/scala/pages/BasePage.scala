@@ -84,3 +84,14 @@ private def savePageState(pageName: PageName, param: String): Unit =
 
 abstract class BasePage extends comps.BaseComp:
   override def handleEvent(elem: HTMLElement, event: Event): Unit = {}
+
+  def triggerTurnstile(): Unit =
+    import scala.scalajs.js
+    try {
+      val ts = js.Dynamic.global.turnstile
+      if (!js.isUndefined(ts) && ts != null) {
+        ts.implicitRender()
+      }
+    } catch {
+      case _: Throwable => // ignore
+    }
