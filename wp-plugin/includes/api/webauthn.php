@@ -60,7 +60,8 @@ function pd_webauthn_register_args() {
     $webauthn = pd_get_webauthn();
     
     // Check if user already has credentials (for residents key logic)
-    $args = $webauthn->getCreateArgs($user->ID, $user->user_login, $user->display_name, 60, true, true);
+    // parameters: $userId, $userName, $userDisplayName, $timeout, $requireResidentKey, $requireUserVerification, $crossPlatformAttachment
+    $args = $webauthn->getCreateArgs($user->ID, $user->user_login, $user->display_name, 60, true, 'required', false);
     
     // Store challenge in transient for 10 minutes (hex encoded)
     set_transient('pd_webauthn_challenge_' . $user->ID, bin2hex($webauthn->getChallenge()->getBinaryString()), 10 * MINUTE_IN_SECONDS);
