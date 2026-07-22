@@ -13,10 +13,13 @@ import scala.scalajs.js.JSON
 object UserRegistration extends BasePage with JsWrapper with services.ComWrapper:
   def name = PageNameTyp("UserRegistration")
 
-  val EmailId:      HtmlId = genId(name)
-  val IsAdminCheck: HtmlId = genId(name)
-  val OrganizerId:  HtmlId = genId(name)
-  val BtnSubmit:    HtmlId = genId(name)
+  val EmailId:            HtmlId = genId(name)
+  val PasswordlessSwitch: HtmlId = genId(name)
+  val PasswordContainer:  HtmlId = genId(name)
+  val PasswordId:         HtmlId = genId(name)
+  val IsAdminCheck:       HtmlId = genId(name)
+  val OrganizerId:        HtmlId = genId(name)
+  val BtnSubmit:          HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
     setMain(cviews.pages.html.UserRegistration())
@@ -29,6 +32,10 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
         // Organizer-Feld ein/ausblenden
         val isChecked = elem.asInstanceOf[dom.html.Input].checked
         changeClass(gE(OrganizerId).parentElement, !isChecked, "d-none")
+
+      case `PasswordlessSwitch` =>
+        val isPasswordless = elem.asInstanceOf[dom.html.Input].checked
+        changeClass(gE(PasswordContainer), isPasswordless, "d-none")
       
       case `BtnSubmit` => 
         doRegister()
@@ -37,11 +44,14 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
 
   private def doRegister(): Unit =
     val email   = getInput(gE(EmailId))
+    val isPasswordless = gE(PasswordlessSwitch).asInstanceOf[dom.html.Input].checked
+    val pwd     = if (!isPasswordless) getInput(gE(PasswordId)) else ""
     val isAdmin = gE(IsAdminCheck).asInstanceOf[dom.html.Input].checked
     val org     = if (isAdmin) getInput(gE(OrganizerId)) else ""
 
     // Validierung
     if (!email.contains("@")) { dom.window.alert("Email ungültig"); return }
+    if (!isPasswordless && pwd.length < 8) { dom.window.alert("Passwort muss mind. 8 Zeichen haben"); return }
     if (isAdmin && org.length < 6) { dom.window.alert("Veranstalter-Name muss mind. 6 Zeichen haben"); return }
 
     // Turnstile Token (falls konfiguriert)
@@ -53,6 +63,7 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
     // API Call
     val data = Map(
       "email"     -> email,
+      "password"  -> pwd,
       "role"      -> (if (isAdmin) "turnier_admin" else "subscriber"),
       "organizer" -> org,
       "turnstileToken" -> turnstileToken

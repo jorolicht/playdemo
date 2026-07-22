@@ -170,8 +170,8 @@ function pd_api_register_user($request) {
         $suffix++;
     }
 
-    // Passwort generieren für passwortlose Registrierung
-    $password = wp_generate_password(24, true, true);
+    // Passwort generieren falls passwortlose Registrierung gewählt wurde
+    $password = !empty($params['password']) ? $params['password'] : wp_generate_password(24, true, true);
 
     $user_id = wp_insert_user(array(
         'user_login' => $username,
