@@ -63,6 +63,12 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
         debug(s"Passkey Login successful: $msg")
         val alert = dom.document.getElementById("LoginSuccessAlert")
         if (alert != null) alert.classList.remove("d-none")
+        try {
+          dom.window.sessionStorage.removeItem("tourney_last_page")
+          dom.window.sessionStorage.removeItem("tourney_last_param")
+          dom.window.sessionStorage.removeItem("tourney_last_wp_page_id")
+          dom.window.sessionStorage.removeItem("tourney_last_selection")
+        } catch { case _: Exception => }
         dom.window.setTimeout(() => {
           dom.window.location.href = Global.homeUrl
         }, 2000)
@@ -93,6 +99,12 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
         res.get("nonce").foreach(n => Global.wpNonce = n)
         val alert = dom.document.getElementById("LoginSuccessAlert")
         if (alert != null) alert.classList.remove("d-none")
+        try {
+          dom.window.sessionStorage.removeItem("tourney_last_page")
+          dom.window.sessionStorage.removeItem("tourney_last_param")
+          dom.window.sessionStorage.removeItem("tourney_last_wp_page_id")
+          dom.window.sessionStorage.removeItem("tourney_last_selection")
+        } catch { case _: Exception => }
         dom.window.setTimeout(() => {
           dom.window.location.href = Global.homeUrl
         }, 2000)
