@@ -170,7 +170,7 @@ function pd_api_register_user($request) {
     $hash = wp_generate_password(32, false);
     update_user_meta($user_id, 'pd_verify_hash', $hash);
 
-    $verify_page_url = home_url("/verifikation/?uid=$user_id&hash=$hash");
+    $verify_page_url = home_url("/verification/?uid=$user_id&hash=$hash");
     
     $subject = "Willkommen bei Tourney - Bitte E-Mail bestätigen";
     $message = "Hallo " . $params['name'] . ",\n\nbitte klicke auf den Link, um deinen Account zu aktivieren:\n$verify_page_url";
