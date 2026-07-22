@@ -30,8 +30,8 @@ DB_PASS="${DB_ROOT_PASSWORD:-wpUserPw4577R}"
 
 # Google Drive Info
 GDRIVE_REMOTE="${GDRIVE_REMOTE:-gooDrive}"
-GDRIVE_FOLDER="${GDRIVE_FOLDER:-backup_dev}"
-RETENTION_DAYS="${RETENTION_DAYS:-7}"
+GDRIVE_FOLDER="${GDRIVE_FOLDER:-backup_rolicht}"
+RETENTION_DAYS="${RETENTION_DAYS:-3}"
 
 # Ensure backup directory exists
 mkdir -p "$BACKUP_PATH"

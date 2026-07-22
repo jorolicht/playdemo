@@ -332,6 +332,13 @@ viewTourney.tabPlayers                              = Spieler
 welcome.title                                       = Herzlich Willkommen!
 
 ###
+# Goodbye Page
+###
+goodbye.title                                       = Auf Wiedersehen!
+goodbye.subtitle                                    = Sie wurden erfolgreich abgemeldet.
+goodbye.info                                        = Vielen Dank für die Nutzung unserer Turnierverwaltung. Wir hoffen, Sie bald wiederzusehen.
+
+###
 # Footer
 ###
 footer.tagline                                      = Die moderne SPA-Lösung für deine Turnierverwaltung. Schnell, sicher und plattformunabhängig.

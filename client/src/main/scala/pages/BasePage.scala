@@ -13,7 +13,7 @@ import pages.Stage.*
 
 // pagesMap maps page names to page objecpts   
 val pagesMap = List(Auth, Console, PgError,
-                    ChatExample, 
+                    ChatExample, Goodbye,
                     ViewOrganizer, MainView, TourneyNew, CompetitionNew, TourneyInfo, TourneyAdmin, Mockup, CompetitionInfo, PlayerRegistration, UserRegistration, UserLogin, VerifyAccount, StageAdmin, StageDraw, StageInput, StageResult, StageScoreSheet, StageCertificate, PlayerList, ResultList, Certificate, MainSearch)
                     .map(pg => pg.name -> pg).toMap              
 

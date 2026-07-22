@@ -47,7 +47,10 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
   private def doLogout(): Unit =
     ajaxPost[String, String]("/wp-json/tourney/v1/auth/logout", List(), "", host = Global.homeUrl).map { _ =>
       Global.resetUser
-      dom.window.location.href = Global.homeUrl
+      Global.currentSelection = Selection()
+      comps.ContextHeader.hide()
+      comps.Navbar.render()
+      loadPage(shared.PageNameTyp("Goodbye"), "")
     }
 
   private def doPasskeyLogin(): Unit =

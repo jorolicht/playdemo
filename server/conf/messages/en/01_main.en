@@ -332,6 +332,13 @@ viewTourney.tabPlayers                              = Players
 welcome.title                                       = Welcome!
 
 ###
+# Goodbye Page
+###
+goodbye.title                                       = Goodbye!
+goodbye.subtitle                                    = You have been successfully logged out.
+goodbye.info                                        = Thank you for using our tournament management system. We hope to see you again soon.
+
+###
 # Footer
 ###
 footer.tagline                                      = The modern SPA solution for your tournament management. Fast, secure, and platform-independent.

@@ -98,5 +98,8 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
 
     ajaxPost[String, String]("/wp-json/tourney/v1/auth/logout", List(), "", host = Global.homeUrl).map { _ =>
       Global.resetUser
-      dom.window.location.href = Global.homeUrl
+      Global.currentSelection = shared.model.Selection()
+      comps.ContextHeader.hide()
+      comps.Navbar.render()
+      pages.loadPage(shared.PageNameTyp("Goodbye"), "")
     }
