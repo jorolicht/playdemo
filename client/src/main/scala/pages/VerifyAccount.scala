@@ -25,7 +25,7 @@ object VerifyAccount extends BasePage with JsWrapper with ComWrapper:
       val data = Map("uid" -> uid, "hash" -> hash)
       
       // API Call an den PHP Endpoint
-      ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/verify", List(), data, host = Global.homeUrl).map {
+      ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/verify", List(), data, hdrs = Map("Content-Type" -> "application/json"), host = Global.homeUrl).map {
         case Right(res) => 
           val msg = res.getOrElse("message", "E-Mail erfolgreich bestätigt.")
           setMain(s"""

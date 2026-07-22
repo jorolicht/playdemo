@@ -106,7 +106,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
       "password" -> password
     )
 
-    ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/login", List(), data, host = Global.homeUrl).flatMap {
+    ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/login", List(), data, hdrs = Map("Content-Type" -> "application/json"), host = Global.homeUrl).flatMap {
       case Right(res) => 
         debug(s"Login successful: $res")
         res.get("nonce").foreach(n => Global.wpNonce = n)

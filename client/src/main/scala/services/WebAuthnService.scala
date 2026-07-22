@@ -84,6 +84,7 @@ object WebAuthnService extends JsWrapper with ComWrapper:
                     "/wp-json/tourney/v1/auth/webauthn/login", 
                     List(), 
                     data, 
+                    hdrs = Map("Content-Type" -> "application/json"),
                     host = Global.homeUrl
                 ).map {
                     case Right(success) => Right(success.getOrElse("message", "Login erfolgreich."))
