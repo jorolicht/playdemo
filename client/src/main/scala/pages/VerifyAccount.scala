@@ -28,7 +28,8 @@ object VerifyAccount extends BasePage with JsWrapper with ComWrapper:
       ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/verify", List(), data, hdrs = Map("Content-Type" -> "application/json"), host = Global.homeUrl).map {
         case Right(res) => 
           val msg = res.getOrElse("message", "E-Mail erfolgreich bestätigt.")
-          setMain(cviews.pages.html.VerifyAccount("success", msg))
+          val loggedIn = res.get("logged_in").contains("true")
+          setMain(cviews.pages.html.VerifyAccount("success", msg, loggedIn))
         case Left(err) => 
           setMain(cviews.pages.html.VerifyAccount("error", err.msg))
       }

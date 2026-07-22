@@ -170,12 +170,15 @@ function pd_api_register_user($request) {
         $suffix++;
     }
 
+    // Passwort generieren für passwortlose Registrierung
+    $password = wp_generate_password(24, true, true);
+
     $user_id = wp_insert_user(array(
         'user_login' => $username,
         'user_email' => $params['email'],
         'display_name' => $username,
         'nickname'   => $username,
-        'user_pass'  => $params['password'],
+        'user_pass'  => $password,
         'role'       => $params['role']
     ));
 
@@ -214,7 +217,14 @@ function pd_api_verify_handler($request) {
             return array('status' => 'success', 'message' => 'E-Mail bestätigt. Dein Account wird nun vom Administrator geprüft.');
         } else {
             update_user_meta($uid, 'pd_status', 'active');
-            return array('status' => 'success', 'message' => 'E-Mail bestätigt. Du kannst dich jetzt einloggen.');
+            // Benutzer nach der erfolgreichen Verifizierung direkt einloggen
+            wp_set_current_user($uid);
+            wp_set_auth_cookie($uid, true);
+            return array(
+                'status' => 'success',
+                'logged_in' => 'true',
+                'message' => 'E-Mail erfolgreich bestätigt. Du bist jetzt eingeloggt.'
+            );
         }
     }
     return new WP_Error('verify_failed', 'Ungültiger oder abgelaufener Link.', array('status' => 403));

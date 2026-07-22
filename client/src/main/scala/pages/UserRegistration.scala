@@ -13,9 +13,7 @@ import scala.scalajs.js.JSON
 object UserRegistration extends BasePage with JsWrapper with services.ComWrapper:
   def name = PageNameTyp("UserRegistration")
 
-  val NameId:       HtmlId = genId(name)
   val EmailId:      HtmlId = genId(name)
-  val PasswordId:   HtmlId = genId(name)
   val IsAdminCheck: HtmlId = genId(name)
   val OrganizerId:  HtmlId = genId(name)
   val BtnSubmit:    HtmlId = genId(name)
@@ -39,13 +37,11 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
 
   private def doRegister(): Unit =
     val email   = getInput(gE(EmailId))
-    val pwd     = getInput(gE(PasswordId))
     val isAdmin = gE(IsAdminCheck).asInstanceOf[dom.html.Input].checked
     val org     = if (isAdmin) getInput(gE(OrganizerId)) else ""
 
     // Validierung
     if (!email.contains("@")) { dom.window.alert("Email ungültig"); return }
-    if (pwd.length < 8) { dom.window.alert("Passwort muss mind. 8 Zeichen haben"); return }
     if (isAdmin && org.length < 6) { dom.window.alert("Veranstalter-Name muss mind. 6 Zeichen haben"); return }
 
     // Turnstile Token (falls konfiguriert)
@@ -57,7 +53,6 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
     // API Call
     val data = Map(
       "email"     -> email,
-      "password"  -> pwd,
       "role"      -> (if (isAdmin) "turnier_admin" else "subscriber"),
       "organizer" -> org,
       "turnstileToken" -> turnstileToken
