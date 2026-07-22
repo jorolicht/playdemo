@@ -85,12 +85,20 @@ function pd_api_login_handler($request) {
     wp_set_current_user($user->ID);
     wp_set_auth_cookie($user->ID, true);
 
-    return array('status' => 'success', 'message' => 'Login erfolgreich');
+    return array(
+        'status' => 'success', 
+        'message' => 'Login erfolgreich',
+        'nonce' => wp_create_nonce('wp_rest')
+    );
 }
 
 function pd_api_logout_handler() {
     wp_logout();
-    return array('status' => 'success', 'message' => 'Erfolgreich abgemeldet.');
+    return array(
+        'status' => 'success',
+        'message' => 'Erfolgreich abgemeldet.',
+        'nonce' => wp_create_nonce('wp_rest')
+    );
 }
 
 function pd_api_register_user($request) {

@@ -45,7 +45,11 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
     }
 
   private def doLogout(): Unit =
-    ajaxPost[String, String]("/wp-json/tourney/v1/auth/logout", List(), "", host = Global.homeUrl).map { _ =>
+    ajaxPost[String, Map[String, String]]("/wp-json/tourney/v1/auth/logout", List(), "", host = Global.homeUrl).map { res =>
+      res match {
+        case Right(m) => m.get("nonce").foreach(n => Global.wpNonce = n)
+        case _ => // ignore
+      }
       Global.resetUser
       Global.currentSelection = Selection()
       comps.ContextHeader.hide()
@@ -105,6 +109,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
     ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/login", List(), data, host = Global.homeUrl).flatMap {
       case Right(res) => 
         debug(s"Login successful: $res")
+        res.get("nonce").foreach(n => Global.wpNonce = n)
         ajaxGet[UserInfo]("/wp-json/tourney/v1/user", List(), Map("X-WP-NONCE" -> Global.wpNonce), Global.homeUrl).map {
           case Right(ui) if ui.user_id > 0 =>
             Global.user = Some(User(

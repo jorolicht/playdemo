@@ -96,7 +96,11 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     import services.*
     import base.Global
 
-    ajaxPost[String, String]("/wp-json/tourney/v1/auth/logout", List(), "", host = Global.homeUrl).map { _ =>
+    ajaxPost[String, Map[String, String]]("/wp-json/tourney/v1/auth/logout", List(), "", host = Global.homeUrl).map { res =>
+      res match {
+        case Right(m) => m.get("nonce").foreach(n => Global.wpNonce = n)
+        case _ => // ignore
+      }
       Global.resetUser
       Global.currentSelection = shared.model.Selection()
       comps.ContextHeader.hide()
