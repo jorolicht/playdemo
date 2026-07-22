@@ -22,8 +22,13 @@ object WebAuthnService extends JsWrapper with ComWrapper:
    * Registers a new Passkey for the currently logged-in user.
    */
   def registerPasskey(): Future[Either[shared.basic.AppError, String]] =
-    // 1. Get arguments from server as String
-    ajaxGet[String]("/wp-json/tourney/v1/auth/webauthn/register-args", List(), Map("X-WP-Nonce" -> Global.wpNonce), host = Global.homeUrl).flatMap {
+    val url = genPath(Global.homeUrl, "/wp-json/tourney/v1/auth/webauthn/register-args", List())
+    org.scalajs.dom.ext.Ajax.get(url, headers = Map("X-WP-Nonce" -> Global.wpNonce)).map { resp =>
+      Right(resp.responseText)
+    }.recover {
+      case org.scalajs.dom.ext.AjaxException(req) => Left(shared.basic.parseError(req.responseText, "register-args"))
+      case e: Throwable => Left(shared.basic.AppError("webauthn.error", e.getMessage))
+    }.flatMap {
       case Right(argsStr) =>
         try {
           val args = js.JSON.parse(argsStr).asInstanceOf[js.Dynamic]
@@ -56,12 +61,14 @@ object WebAuthnService extends JsWrapper with ComWrapper:
       case Left(err) => Future.successful(Left(err))
     }
 
-  /**
-   * Performs a passwordless login using a registered Passkey.
-   */
   def loginPasskey(): Future[Either[shared.basic.AppError, String]] =
-    // 1. Get login arguments
-    ajaxGet[String]("/wp-json/tourney/v1/auth/webauthn/login-args", host = Global.homeUrl).flatMap {
+    val url = genPath(Global.homeUrl, "/wp-json/tourney/v1/auth/webauthn/login-args", List())
+    org.scalajs.dom.ext.Ajax.get(url).map { resp =>
+      Right(resp.responseText)
+    }.recover {
+      case org.scalajs.dom.ext.AjaxException(req) => Left(shared.basic.parseError(req.responseText, "login-args"))
+      case e: Throwable => Left(shared.basic.AppError("webauthn.error", e.getMessage))
+    }.flatMap {
       case Right(resStr) =>
         try {
             val resJson = js.JSON.parse(resStr).asInstanceOf[js.Dynamic]
