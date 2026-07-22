@@ -112,6 +112,8 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
       turnstileElements(0).asInstanceOf[dom.html.Input].value
     } else ""
 
+    println(s"doLogin -> sitekey: '${Global.turnstileSitekey}' elements: ${turnstileElements.length} token: '${turnstileToken}'")
+
     if (login.isEmpty || password.isEmpty) {
       dom.window.alert("Bitte Benutzername/E-Mail und Passwort eingeben.")
       return

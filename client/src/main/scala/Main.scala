@@ -40,7 +40,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     Global.turnstileSitekey = config.turnstileSitekey.asInstanceOf[String]
     Global.lang = dom.window.navigator.language.take(2)
     
-    println(s"appMain -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} mode:${mode} PageId:${Global.pageId} slug:${slug} logLevel:${logLevel}")    
+    println(s"appMain -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} mode:${mode} PageId:${Global.pageId} slug:${slug} logLevel:${logLevel} turnstile:${Global.turnstileSitekey}")    
 
     dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
     dom.window.asInstanceOf[js.Dynamic].appEvent    = (elem: HTMLElement, event: dom.Event) => appEvent(elem, event)
@@ -81,7 +81,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     val effectiveMode = if (tourney.nonEmpty || postType == "tourney" || mode.toLowerCase() == "tourney") "tourney" else mode.toLowerCase()
     val effectiveTourney = if (tourney.nonEmpty) tourney else if (postType == "tourney") slugAttr else ""
 
-    println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} mode:${effectiveMode} PageId:${Global.pageId} tourney:${effectiveTourney} logLevel:${logLevel}")
+    println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} mode:${effectiveMode} PageId:${Global.pageId} tourney:${effectiveTourney} logLevel:${logLevel} turnstile:${Global.turnstileSitekey}")
 
     dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
     dom.window.asInstanceOf[js.Dynamic].appEvent    = (elem: HTMLElement, event: dom.Event) => appEvent(elem, event)
