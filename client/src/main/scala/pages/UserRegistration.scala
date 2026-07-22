@@ -69,9 +69,52 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
       "turnstileToken" -> turnstileToken
     )
 
-    ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/register", List(), data, hdrs = Map("Content-Type" -> "application/json"), host = Global.homeUrl).map {
-      case Right(_) => 
-        loadPage(RegistrationSuccess.name, "")
+    ajaxPost[Map[String, String], Map[String, String]]("/wp-json/tourney/v1/auth/register", List(), data, hdrs = Map("Content-Type" -> "application/json"), host = Global.homeUrl).flatMap {
+      case Right(res) => 
+        val webauthnArgsOpt = res.get("webauthn_args")
+        val userIdOpt = res.get("user_id")
+
+        if (webauthnArgsOpt.isDefined && userIdOpt.isDefined) {
+          try {
+            val argsStr = webauthnArgsOpt.get
+            val userId = userIdOpt.get
+
+            val resJson = js.JSON.parse(argsStr).asInstanceOf[js.Dynamic]
+            val publicKey = resJson.publicKey
+
+            val credentialOptions = services.WebAuthnService.transformCreateArgs(publicKey)
+            val credentials = dom.window.navigator.asInstanceOf[js.Dynamic].credentials
+            val promise = credentials.create(credentialOptions).asInstanceOf[js.Promise[js.Dynamic]]
+
+            promise.toFuture.flatMap { credential =>
+              val registerData = services.WebAuthnService.transformCreateResponse(credential) + ("user_id" -> userId)
+
+              ajaxPost[Map[String, String], Map[String, String]](
+                "/wp-json/tourney/v1/auth/webauthn/register-public", 
+                List(), 
+                registerData, 
+                host = Global.homeUrl
+              ).map {
+                case Right(_) => 
+                  loadPage(RegistrationSuccess.name, "")
+                case Left(err) => 
+                  dom.window.alert(s"Fehler beim Registrieren des Passkeys: ${err.msg}")
+                  loadPage(RegistrationSuccess.name, "")
+              }
+            }.recover {
+              case e: Throwable =>
+                debug(s"WebAuthn registration cancelled/failed: ${e.getMessage}")
+                loadPage(RegistrationSuccess.name, "")
+            }
+          } catch {
+            case e: Exception =>
+              debug(s"Parsing error during passkey creation: ${e.getMessage}")
+              Future.successful(loadPage(RegistrationSuccess.name, ""))
+          }
+        } else {
+          Future.successful(loadPage(RegistrationSuccess.name, ""))
+        }
       case Left(err) => 
         dom.window.alert(s"Fehler: ${err}")
+        Future.successful(())
     }

@@ -108,7 +108,7 @@ object WebAuthnService extends JsWrapper with ComWrapper:
 
   // --- HELPERS: Browser Transformation ---
 
-  private def transformCreateArgs(args: js.Dynamic): js.Dynamic =
+  def transformCreateArgs(args: js.Dynamic): js.Dynamic =
     val challenge = base64ToBuffer(args.challenge.toString)
     val user = args.user
     val userDict = js.Dynamic.literal(
@@ -148,7 +148,7 @@ object WebAuthnService extends JsWrapper with ComWrapper:
     dom.window.console.log("WebAuthn Create Options (Transformed):", credentialOptions)
     credentialOptions
 
-  private def transformGetArgs(args: js.Dynamic): js.Dynamic =
+  def transformGetArgs(args: js.Dynamic): js.Dynamic =
     val challenge = base64ToBuffer(args.challenge.toString)
     
     val requestOptions = js.Dynamic.literal(
@@ -166,7 +166,7 @@ object WebAuthnService extends JsWrapper with ComWrapper:
 
   // --- HELPERS: Server Transformation ---
 
-  private def transformCreateResponse(res: js.Dynamic): Map[String, String] =
+  def transformCreateResponse(res: js.Dynamic): Map[String, String] =
     val response = res.response
     Map(
         "id" -> res.id.toString,
@@ -176,7 +176,7 @@ object WebAuthnService extends JsWrapper with ComWrapper:
         "type" -> res.`type`.toString
     )
 
-  private def transformGetResponse(res: js.Dynamic): Map[String, String] =
+  def transformGetResponse(res: js.Dynamic): Map[String, String] =
     val response = res.response
     Map(
         "id" -> res.id.toString,

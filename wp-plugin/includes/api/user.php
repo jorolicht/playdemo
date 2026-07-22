@@ -199,7 +199,19 @@ function pd_api_register_user($request) {
     
     wp_mail($params['email'], $subject, $message);
 
-    return array('status' => 'success', 'message' => 'Registrierung erfolgreich.');
+    // WebAuthn Creation Options generieren, um direkt bei der Registrierung den Fingerabdruck abzufragen
+    $webauthn = pd_get_webauthn();
+    $args = $webauthn->getCreateArgs($user_id, $username, $username, 60, true, 'required', false);
+    
+    // Challenge in Transient speichern
+    set_transient('pd_webauthn_challenge_reg_' . $user_id, bin2hex($webauthn->getChallenge()->getBinaryString()), 10 * MINUTE_IN_SECONDS);
+
+    return array(
+        'status' => 'success',
+        'message' => 'Registrierung erfolgreich.',
+        'user_id' => (string)$user_id,
+        'webauthn_args' => json_encode($args)
+    );
 }
 
 function pd_api_verify_handler($request) {

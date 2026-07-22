@@ -31,6 +31,13 @@ add_action('rest_api_init', function () {
         'permission_callback' => function() { return is_user_logged_in(); }
     ]);
 
+    // REGISTRATION PUBLIC: Process during signup (unauthenticated)
+    register_rest_route('tourney/v1', '/auth/webauthn/register-public', [
+        'methods' => 'POST',
+        'callback' => 'pd_webauthn_register_public',
+        'permission_callback' => '__return_true'
+    ]);
+
     // REGISTRATION: Delete
     register_rest_route('tourney/v1', '/auth/webauthn/delete', [
         'methods' => 'DELETE',
@@ -107,6 +114,48 @@ function pd_webauthn_register_process($request) {
         update_user_meta($user->ID, 'pd_webauthn_keys', $keys);
 
         return ['status' => 'success', 'message' => 'Passkey erfolgreich hinzugefügt.'];
+    } catch (\Exception $e) {
+        return new WP_Error('registration_failed', $e->getMessage(), ['status' => 400]);
+    }
+}
+
+function pd_webauthn_register_public($request) {
+    $params = $request->get_json_params();
+    $user_id = (int)$params['user_id'];
+    if (!$user_id) {
+        return new WP_Error('invalid_user', 'Benutzer konnte nicht identifiziert werden.', ['status' => 403]);
+    }
+
+    $challenge_hex = get_transient('pd_webauthn_challenge_reg_' . $user_id);
+    if (!$challenge_hex) {
+        return new WP_Error('challenge_expired', 'Challenge abgelaufen.', ['status' => 403]);
+    }
+    $challenge = \lbuchs\WebAuthn\Binary\ByteBuffer::fromHex($challenge_hex);
+
+    try {
+        $webauthn = pd_get_webauthn();
+        $credential = $webauthn->processCreate(
+            pd_base64url_decode($params['clientDataJSON']),
+            pd_base64url_decode($params['attestationObject']),
+            $challenge,
+            true, // require user presence
+            true, // require user verification
+            false // don't check domain
+        );
+
+        // Store credential in user meta
+        $keys = get_user_meta($user_id, 'pd_webauthn_keys', true) ?: [];
+        $keys[] = [
+            'credentialId' => bin2hex($credential->credentialId),
+            'publicKey' => $credential->credentialPublicKey,
+            'attestationFormat' => $credential->attestationFormat,
+            'counter' => $credential->signatureCounter,
+            'userHandle' => $user_id
+        ];
+        update_user_meta($user_id, 'pd_webauthn_keys', $keys);
+        delete_transient('pd_webauthn_challenge_reg_' . $user_id);
+
+        return ['status' => 'success', 'message' => 'Passkey erfolgreich registriert.'];
     } catch (\Exception $e) {
         return new WP_Error('registration_failed', $e->getMessage(), ['status' => 400]);
     }
