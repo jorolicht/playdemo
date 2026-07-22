@@ -60,7 +60,7 @@ function pd_webauthn_register_args() {
     $webauthn = pd_get_webauthn();
     
     // Check if user already has credentials (for residents key logic)
-    $args = $webauthn->getCreateArgs($user->ID, $user->user_login, $user->display_name, 60, true);
+    $args = $webauthn->getCreateArgs($user->ID, $user->user_login, $user->display_name, 60, true, true);
     
     // Store challenge in transient for 10 minutes (hex encoded)
     set_transient('pd_webauthn_challenge_' . $user->ID, bin2hex($webauthn->getChallenge()->getBinaryString()), 10 * MINUTE_IN_SECONDS);
@@ -113,7 +113,7 @@ function pd_webauthn_register_process($request) {
 
 function pd_webauthn_login_args() {
     $webauthn = pd_get_webauthn();
-    $args = $webauthn->getGetArgs([], 60, true, true); // Allow all users (discoverable credentials)
+    $args = $webauthn->getGetArgs([], 60, true, true, true, true, true, true); // Allow all users (discoverable credentials), require user verification
     
     // Store challenge in transient. Since we don't know the user yet, we use a random ID (hex encoded)
     $challengeId = wp_generate_password(16, false);
