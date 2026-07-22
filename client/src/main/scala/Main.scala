@@ -70,7 +70,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     Global.wpNonce  = getData(gE(ParamId), "nonce", "")
     Global.pageId   = getData(gE(ParamId), "pageid", 0)
     Global.hostPageId = Global.pageId
-    Global.turnstileSitekey = getData(gE(ParamId), "turnstileSitekey", "")
+    Global.turnstileSitekey = getData(gE(ParamId), "turnstilesitekey", "")
     Global.lang     = dom.window.navigator.language.take(2)
     Logging.setLogLevel(logLevel.toLowerCase())
 
