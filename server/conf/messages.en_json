@@ -69,6 +69,7 @@
   "app.forgotPassword": "Forgot Password?",
   "login.btnAddPasskey": "Add Passkey",
   "login.btnDeletePasskey": "Delete Passkey",
+  "login.email": "Email Address",
   "StageDraw.btn_back_overview": "Back to Overview",
   "StageAdmin.btn_reset_draw": "Reset Draw",
   "btn.delete": "Delete",

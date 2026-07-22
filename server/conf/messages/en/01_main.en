@@ -302,6 +302,7 @@ login.btnDeletePasskey                                 = Delete Passkey
 login.btnLogout                                     = LOGOUT
 login.successAlert                                  = Login successful! Redirecting...
 login.usernameOrEmail                               = Username or Email
+login.email                                         = Email Address
 login.password                                      = Password
 login.securedByTurnstile                            = Secured by Turnstile
 login.btnLogin                                      = LOGIN

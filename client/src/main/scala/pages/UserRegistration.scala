@@ -38,14 +38,12 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
       case _ => debug(s"UserRegistration Event: ${elem.id}")
 
   private def doRegister(): Unit =
-    val nameStr = getInput(gE(NameId))
     val email   = getInput(gE(EmailId))
     val pwd     = getInput(gE(PasswordId))
     val isAdmin = gE(IsAdminCheck).asInstanceOf[dom.html.Input].checked
     val org     = if (isAdmin) getInput(gE(OrganizerId)) else ""
 
     // Validierung
-    if (nameStr.length < 3) { dom.window.alert("Name zu kurz"); return }
     if (!email.contains("@")) { dom.window.alert("Email ungültig"); return }
     if (pwd.length < 8) { dom.window.alert("Passwort muss mind. 8 Zeichen haben"); return }
     if (isAdmin && org.length < 6) { dom.window.alert("Veranstalter-Name muss mind. 6 Zeichen haben"); return }
@@ -58,7 +56,6 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
 
     // API Call
     val data = Map(
-      "name"      -> nameStr,
       "email"     -> email,
       "password"  -> pwd,
       "role"      -> (if (isAdmin) "turnier_admin" else "subscriber"),

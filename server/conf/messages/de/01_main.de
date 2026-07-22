@@ -302,6 +302,7 @@ login.btnDeletePasskey                                 = Passkey löschen
 login.btnLogout                                     = ABMELDEN
 login.successAlert                                  = Anmeldung erfolgreich! Sie werden in Kürze weitergeleitet...
 login.usernameOrEmail                               = Benutzername oder E-Mail
+login.email                                         = E-Mail-Adresse
 login.password                                      = Passwort
 login.securedByTurnstile                            = Gesichert durch Turnstile
 login.btnLogin                                      = LOGIN

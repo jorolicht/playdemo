@@ -70,17 +70,19 @@ function pd_api_login_handler($request) {
     }
 
     if ( empty($params['email']) || empty($params['password']) ) {
-        return new WP_Error('missing_params', 'Benutzername/Email und Passwort sind erforderlich.', array('status' => 400));
+        return new WP_Error('missing_params', 'E-Mail und Passwort sind erforderlich.', array('status' => 400));
     }
 
-    // 1. Benutzer suchen (entweder per E-Mail oder per Login)
+    // Beim Login nur E-Mail-Adresse zulassen
+    if (strpos($params['email'], '@') === false) {
+        return new WP_Error('login_failed', 'Bitte melde dich mit deiner E-Mail-Adresse an.', array('status' => 403));
+    }
+
+    // 1. Benutzer suchen nur per E-Mail
     $user_obj = get_user_by('email', $params['email']);
-    if (!$user_obj) {
-        $user_obj = get_user_by('login', $params['email']);
-    }
 
     if (!$user_obj) {
-        return new WP_Error('login_failed', 'Benutzer oder E-Mail-Adresse unbekannt.', array('status' => 403));
+        return new WP_Error('login_failed', 'E-Mail-Adresse unbekannt.', array('status' => 403));
     }
 
     // 2. Status prüfen, bevor wir den eigentlichen Login versuchen
@@ -125,6 +127,14 @@ function pd_api_logout_handler() {
     );
 }
 
+function pd_normalize_username($email) {
+    $parts = explode('@', $email);
+    $local_part = $parts[0];
+    $subparts = explode('.', $local_part);
+    $capitalized = array_map('ucfirst', $subparts);
+    return implode('', $capitalized);
+}
+
 function pd_api_register_user($request) {
     $params = $request->get_json_params();
     
@@ -152,10 +162,19 @@ function pd_api_register_user($request) {
         }
     }
 
+    $username = pd_normalize_username($params['email']);
+    $base_username = $username;
+    $suffix = 1;
+    while (username_exists($username)) {
+        $username = $base_username . $suffix;
+        $suffix++;
+    }
+
     $user_id = wp_insert_user(array(
-        'user_login' => $params['email'],
+        'user_login' => $username,
         'user_email' => $params['email'],
-        'display_name' => $params['name'],
+        'display_name' => $username,
+        'nickname'   => $username,
         'user_pass'  => $params['password'],
         'role'       => $params['role']
     ));
@@ -173,7 +192,7 @@ function pd_api_register_user($request) {
     $verify_page_url = home_url("/verification/?uid=$user_id&hash=$hash");
     
     $subject = "Willkommen bei Tourney - Bitte E-Mail bestätigen";
-    $message = "Hallo " . $params['name'] . ",\n\nbitte klicke auf den Link, um deinen Account zu aktivieren:\n$verify_page_url";
+    $message = "Hallo " . $username . ",\n\nbitte klicke auf den Link, um deinen Account zu aktivieren:\n$verify_page_url";
     
     wp_mail($params['email'], $subject, $message);
 
