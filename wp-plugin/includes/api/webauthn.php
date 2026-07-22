@@ -55,8 +55,8 @@ function pd_webauthn_register_args() {
     // Check if user already has credentials (for residents key logic)
     $args = $webauthn->getCreateArgs($user->ID, $user->user_login, $user->display_name, 60, true);
     
-    // Store challenge in transient for 10 minutes
-    set_transient('pd_webauthn_challenge_' . $user->ID, $webauthn->getChallenge(), 10 * MINUTE_IN_SECONDS);
+    // Store challenge in transient for 10 minutes (hex encoded)
+    set_transient('pd_webauthn_challenge_' . $user->ID, bin2hex($webauthn->getChallenge()->getBinaryString()), 10 * MINUTE_IN_SECONDS);
     
     return $args;
 }
@@ -64,11 +64,12 @@ function pd_webauthn_register_args() {
 function pd_webauthn_register_process($request) {
     $user = wp_get_current_user();
     $params = $request->get_json_params();
-    $challenge = get_transient('pd_webauthn_challenge_' . $user->ID);
+    $challenge_hex = get_transient('pd_webauthn_challenge_' . $user->ID);
     
-    if (!$challenge) {
+    if (!$challenge_hex) {
         return new WP_Error('challenge_expired', 'Challenge abgelaufen.', ['status' => 403]);
     }
+    $challenge = \lbuchs\WebAuthn\Binary\ByteBuffer::fromHex($challenge_hex);
 
     try {
         $webauthn = pd_get_webauthn();
@@ -102,9 +103,9 @@ function pd_webauthn_login_args() {
     $webauthn = pd_get_webauthn();
     $args = $webauthn->getGetArgs([], 60, true, true); // Allow all users (discoverable credentials)
     
-    // Store challenge in transient. Since we don't know the user yet, we use a random ID
+    // Store challenge in transient. Since we don't know the user yet, we use a random ID (hex encoded)
     $challengeId = wp_generate_password(16, false);
-    set_transient('pd_webauthn_login_challenge_' . $challengeId, $webauthn->getChallenge(), 10 * MINUTE_IN_SECONDS);
+    set_transient('pd_webauthn_login_challenge_' . $challengeId, bin2hex($webauthn->getChallenge()->getBinaryString()), 10 * MINUTE_IN_SECONDS);
     
     return [
         'args' => $args,
@@ -115,11 +116,12 @@ function pd_webauthn_login_args() {
 function pd_webauthn_login_process($request) {
     $params = $request->get_json_params();
     $challengeId = $params['challengeId'];
-    $challenge = get_transient('pd_webauthn_login_challenge_' . $challengeId);
+    $challenge_hex = get_transient('pd_webauthn_login_challenge_' . $challengeId);
     
-    if (!$challenge) {
+    if (!$challenge_hex) {
         return new WP_Error('challenge_expired', 'Challenge abgelaufen.', ['status' => 403]);
     }
+    $challenge = \lbuchs\WebAuthn\Binary\ByteBuffer::fromHex($challenge_hex);
 
     // Find user by userHandle (which is the user ID in our case)
     $userId = (int)$params['userHandle'];
