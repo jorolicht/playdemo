@@ -19,6 +19,20 @@ add_action('rest_api_init', function () {
         'permission_callback' => '__return_true'
     ]);
 
+    // GET /tourney/v1/rounds (Alias for /stages)
+    register_rest_route('tourney/v1', '/rounds', [
+        'methods' => 'GET',
+        'callback' => 'tourney_get_stages',
+        'permission_callback' => '__return_true'
+    ]);
+
+    // POST /tourney/v1/rounds-sync (Alias for /stages-sync)
+    register_rest_route('tourney/v1', '/rounds-sync', [
+        'methods' => 'POST',
+        'callback' => 'tourney_sync_stages',
+        'permission_callback' => '__return_true'
+    ]);
+
 });
 
 /**
