@@ -15,8 +15,8 @@
                     case StageStatus.EIN => "bg-warning text-dark"
                     case StageStatus.FIN => "bg-success"
                     case _ => "bg-light text-dark"
-                }}">@stage.status</span>
-                | Format: @stage.stageConfig.format
+                }}">@gM(stage.status.msgCode)</span>
+                | Format: @gM(stage.stageConfig.msgCode)
             </div>
         </div>
         <div class="btn-group btn-group-sm">

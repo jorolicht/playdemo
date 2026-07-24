@@ -91,7 +91,7 @@
                             <tr class="cursor-pointer">
                                 <td>@(i + 1)</td>
                                 <td class="fw-bold" onclick="appLoadPage('CompetitionInfo', '@c.id.value')">@c.name</td>
-                                <td><span class="badge bg-light text-dark border">@c.typ</span></td>
+                                <td><span class="badge bg-light text-dark border">@gM(c.typ.msgCode)</span></td>
                                 <td>@{c.lowLevel.getOrElse(0)} - @{c.upperLevel.getOrElse("∞")}</td>
                                 <td>
                                     <span class="badge @{if(c.status == CompStatus.RUN) "bg-warning" else if(c.status == CompStatus.FIN) "bg-success" else "bg-secondary"}">

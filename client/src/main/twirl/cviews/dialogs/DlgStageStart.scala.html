@@ -24,7 +24,7 @@
                             <select class="form-select" @id(InputPrefId)>
                                 <option value="0">@gM("DlgStageStart.pref_placeholder")</option>
                                 @stages.map { r =>
-                                    <option value="@r.id.value">@r.name (@r.status)</option>
+                                    <option value="@r.id.value">@r.name (@gM(r.status.msgCode))</option>
                                 }
                             </select>
                         </div>

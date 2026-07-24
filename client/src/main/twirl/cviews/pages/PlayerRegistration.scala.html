@@ -32,7 +32,7 @@
                         <option value="0" @if(selection.competition.isEmpty){selected}>@gM("+please_select")</option>
                         @competitions.map { c =>
                             <option value="@c.id.value" @if(selection.competition.exists(_.id == c.id)){selected}>
-                                @c.name (@c.typ)
+                                @c.name (@gM(c.typ.msgCode))
                             </option>
                         }
                     </select>

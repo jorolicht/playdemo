@@ -27,7 +27,7 @@
         <div class="card-body bg-light">
             <div class="row text-center small">
                 <div class="col-md-3 border-end">
-                    <span class="text-muted fw-bold">@gM("+type")</span> @comp.typ
+                    <span class="text-muted fw-bold">@gM("+type")</span> @gM(comp.typ.msgCode)
                 </div>
                 <div class="col-md-3 border-end">
                     <span class="text-muted fw-bold">@gM("+start")</span> @comp.startDate
@@ -80,7 +80,7 @@
                                         case StageStatus.EIN => "bg-warning text-dark"
                                         case StageStatus.FIN => "bg-success"
                                         case _ => "bg-light text-dark"
-                                    }}">@r.status</span>
+                                    }}">@gM(r.status.msgCode)</span>
                                 </td>
                                 <td>
                                     <input type="radio" 
