@@ -7,6 +7,7 @@ import shared.basic.Pickle.*
 import shared.BoxButton
 import shared.PageNameTyp
 import base.{Global, Logging}
+import base.Messages.gM
 
 object DemoManager extends ComWrapper {
 
@@ -14,8 +15,8 @@ object DemoManager extends ComWrapper {
 
   def promptDemoMode(templateQuery: String, proceedAction: () => Unit, fallbackAction: () => Unit): Unit = {
     dialogs.DlgMsgbox.show(
-      "Du bist nicht angemeldet. Um Turniere dauerhaft auf dem Server zu speichern, logge dich bitte ein. Möchtest du stattdessen ein Demo-Turnier ausprobieren? (Die Daten werden nur in deinem Browser gespeichert)",
-      "Demo-Modus starten?",
+      gM("demo.promptMessage"),
+      gM("demo.promptTitle"),
       List(BoxButton.Yes, BoxButton.No, BoxButton.Cancel)
     ).map {
       case BoxButton.Yes =>
@@ -23,7 +24,7 @@ object DemoManager extends ComWrapper {
           if (success) {
             pages.loadPage(PageNameTyp("TourneyInfo"), "")
           } else {
-            dom.window.alert(s"Konnte kein Demo-Template ('$templateQuery') auf dem Server finden. Ein leeres Turnier wird gestartet.")
+            dom.window.alert(gM("demo.templateNotFound", templateQuery))
             startEmptyDemo(proceedAction)
           }
         }
@@ -35,7 +36,7 @@ object DemoManager extends ComWrapper {
 
   private def startEmptyDemo(proceedAction: () => Unit): Unit = {
     Global.isDemoMode = true
-    TourneyDB.tourney = shared.model.Tourney.default.copy(wpId = 999999, name = "Demo Turnier")
+    TourneyDB.tourney = shared.model.Tourney.default.copy(wpId = 999999, name = gM("demo.tourneyName"))
     TourneyDB.version = 1
     TourneyDB.tourney.clubs.clear()
     TourneyDB.tourney.players.clear()
@@ -60,7 +61,7 @@ object DemoManager extends ComWrapper {
             
             // Decouple from server
             TourneyDB.tourney.wpId = 999999
-            TourneyDB.tourney.name = "Demo: " + TourneyDB.tourney.name
+            TourneyDB.tourney.name = gM("demo.namePrefix") + TourneyDB.tourney.name
             TourneyDB.version = 1
             
             // Force sync to local storage

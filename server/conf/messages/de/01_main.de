@@ -348,4 +348,13 @@ footer.impressum                                    = Impressum
 footer.privacy                                      = Datenschutz
 footer.contact                                      = Kontakt
 footer.gtc                                          = AGB
+
+###
+# Demo mode
+###
+demo.promptMessage                                  = Du bist nicht angemeldet. Um Turniere dauerhaft auf dem Server zu speichern, logge dich bitte ein. Möchtest du stattdessen ein Demo-Turnier ausprobieren? (Die Daten werden nur in deinem Browser gespeichert)
+demo.promptTitle                                    = Demo-Modus starten?
+demo.templateNotFound                               = Konnte kein Demo-Template ('{0}') auf dem Server finden. Ein leeres Turnier wird gestartet.
+demo.tourneyName                                    = Demo Turnier
+demo.namePrefix                                     = Demo: 
 footer.realizedWith                                 = Realisiert mit Scala.js & WordPress.

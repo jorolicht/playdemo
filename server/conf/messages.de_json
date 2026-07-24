@@ -263,7 +263,7 @@
   "tourneyAdmin.cttDesc": "Laden Sie eine aktualisierte ClickTT XML-Datei hoch, um Spieler-IDs (internalNr) und Lizenznummern (licenceNr) für neu angemeldete Teilnehmer automatisch zuzuordnen und abzugleichen.",
   "login.accountInfo": "Account Info",
   "navbar.search": "Suchen",
-  "app.version": "1.0.0DE2026-01",
+  "app.version": "1.0.0DE2026-07b",
   "PlayerRegistration.status": "Status:",
   "StageResult.name_header": "Name",
   "err00014.auth.token.invalid": "Fehler Google-Token ungültig",
@@ -506,5 +506,10 @@
   "reg.organizer": "Veranstalter / Verein (min. 6 Zeichen)",
   "StageDraw.btn_start_round": "Start Runde {0}",
   "tourneyNew.city": "Ort",
-  "tourneyNew.venueName": "Bezeichnung / Halle"
+  "tourneyNew.venueName": "Bezeichnung / Halle",
+  "demo.promptMessage": "Du bist nicht angemeldet. Um Turniere dauerhaft auf dem Server zu speichern, logge dich bitte ein. Möchtest du stattdessen ein Demo-Turnier ausprobieren? (Die Daten werden nur in deinem Browser gespeichert)",
+  "demo.promptTitle": "Demo-Modus starten?",
+  "demo.templateNotFound": "Konnte kein Demo-Template ('{0}') auf dem Server finden. Ein leeres Turnier wird gestartet.",
+  "demo.tourneyName": "Demo Turnier",
+  "demo.namePrefix": "Demo: "
 }

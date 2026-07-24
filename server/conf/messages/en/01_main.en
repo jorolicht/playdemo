@@ -348,4 +348,13 @@ footer.impressum                                    = Imprint
 footer.privacy                                      = Privacy Policy
 footer.contact                                      = Contact
 footer.gtc                                          = Terms & Conditions
+
+###
+# Demo mode
+###
+demo.promptMessage                                  = You are not logged in. To save tournaments permanently on the server, please log in. Would you like to try a demo tournament instead? (Data will only be stored in your browser)
+demo.promptTitle                                    = Start Demo Mode?
+demo.templateNotFound                               = Could not find any demo template ('{0}') on the server. Starting an empty tournament.
+demo.tourneyName                                    = Demo Tournament
+demo.namePrefix                                     = Demo: 
 footer.realizedWith                                 = Realized with Scala.js & WordPress.

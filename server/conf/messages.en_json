@@ -260,7 +260,7 @@
   "tourneyAdmin.cttDesc": "Upload an updated ClickTT XML file to automatically match and assign player IDs (internalNr) and license numbers (licenceNr).",
   "login.accountInfo": "Account Info",
   "navbar.search": "Search",
-  "app.version": "1.0.0EN2026-01",
+  "app.version": "1.0.0EN2026-07b",
   "PlayerRegistration.status": "Status:",
   "StageResult.name_header": "Name",
   "err00014.auth.token.invalid": "Error google token invalid",
@@ -499,5 +499,10 @@
   "reg.organizer": "Organizer / Club (min. 6 characters)",
   "StageDraw.btn_start_round": "Start Round {0}",
   "tourneyNew.city": "City",
-  "tourneyNew.venueName": "Venue / Hall Name"
+  "tourneyNew.venueName": "Venue / Hall Name",
+  "demo.promptMessage": "You are not logged in. To save tournaments permanently on the server, please log in. Would you like to try a demo tournament instead? (Data will only be stored in your browser)",
+  "demo.promptTitle": "Start Demo Mode?",
+  "demo.templateNotFound": "Could not find any demo template ('{0}') on the server. Starting an empty tournament.",
+  "demo.tourneyName": "Demo Tournament",
+  "demo.namePrefix": "Demo: "
 }
