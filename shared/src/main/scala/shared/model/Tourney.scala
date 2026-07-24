@@ -72,8 +72,15 @@ case class Tourney(
   // Competition Management
   // ===========================================================================
 
-  /** Adds a new competition to the tournament. */
-  def addCompetition(name: String, typ: CompTyp, category: CompCategory, startDate: String, doSync: Boolean = true): Either[AppError, Competition] =
+  def addCompetition(
+    name: String, 
+    typ: CompTyp, 
+    category: CompCategory, 
+    startDate: String, 
+    lowLevel: Option[Int] = None, 
+    upperLevel: Option[Int] = None, 
+    doSync: Boolean = true
+  ): Either[AppError, Competition] =
     val firstNull = competitions.indexOf(null)
     val index = if (firstNull != -1) firstNull else competitions.indexWhere(c => c != null && c.deleted)
     
@@ -88,8 +95,8 @@ case class Tourney(
         startStage = None,
         activ = true,
         webRegister = false,
-        lowLevel = None,
-        upperLevel = None,
+        lowLevel = lowLevel,
+        upperLevel = upperLevel,
         cttInfo = None,
         pants1Stage = ArrayBuffer(),
         deleted = false,

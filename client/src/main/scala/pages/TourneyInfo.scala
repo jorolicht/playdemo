@@ -55,7 +55,9 @@ object TourneyInfo extends BasePage with JsWrapper:
               comp.name, 
               comp.typ, 
               comp.category,
-              comp.startDate.replace("-", "")
+              comp.startDate.replace("-", ""),
+              comp.lowLevel,
+              comp.upperLevel
             ) match {
               case Right(newComp) => 
                 info(s"Competition added: ${newComp.name}")

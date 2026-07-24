@@ -84,7 +84,14 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
             TourneyDB.update(dummy, doSync = false)
             
             // 3. Add the competition
-            TourneyDB.tourney.addCompetition(c.name, c.typ, c.category, c.startDate) match {
+            TourneyDB.tourney.addCompetition(
+              c.name, 
+              c.typ, 
+              c.category, 
+              c.startDate, 
+              c.lowLevel, 
+              c.upperLevel
+            ) match {
               case Right(newComp) =>
                 Global.currentSelection = Selection(Some(TourneyDB.tourney), Some(newComp))
                 comps.ContextHeader.render()
