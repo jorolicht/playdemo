@@ -65,7 +65,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     DlgCompetition.show(CompCategory.TT).flatMap {
       case Right(res) =>
         val c = res.competition
-        val dateInt = c.startDate.replace("-", "").toIntOption.getOrElse(0)
+        val dateInt = c.startDate.take(10).replace("-", "").toIntOption.getOrElse(20260101)
         
         // 1. Create SIMPLE dummy tournament
         val dummy = Tourney(
