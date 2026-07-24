@@ -1,6 +1,7 @@
 package comps
 
 import org.scalajs.dom
+import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import base.*
 import shared.MainIds.NavbarId
@@ -61,7 +62,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     import services.*
     import base.Global
 
-    DlgCompetition.show(CompCategory.TT).map {
+    DlgCompetition.show(CompCategory.TT).flatMap {
       case Right(res) =>
         val c = res.competition
         val dateInt = c.startDate.replace("-", "").toIntOption.getOrElse(0)
@@ -77,19 +78,31 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
           category = c.category
         )
         
-        // 2. Initialize TourneyDB with dummy
-        TourneyDB.update(dummy)
-        
-        // 3. Add the competition
-        TourneyDB.tourney.addCompetition(c.name, c.typ, c.category, c.startDate) match {
-          case Right(newComp) =>
-            Global.currentSelection = Selection(Some(TourneyDB.tourney), Some(newComp))
-            comps.ContextHeader.render()
-            pages.loadPage(PageNameTyp("CompetitionInfo"), "")
+        // 2. Register tournament on server/locally
+        TourneyDB.apiCreate(dummy).flatMap {
+          case Right(slug) =>
+            TourneyDB.update(dummy, doSync = false)
+            
+            // 3. Add the competition
+            TourneyDB.tourney.addCompetition(c.name, c.typ, c.category, c.startDate) match {
+              case Right(newComp) =>
+                Global.currentSelection = Selection(Some(TourneyDB.tourney), Some(newComp))
+                comps.ContextHeader.render()
+                // Force sync to ensure competition is saved
+                TourneyDB.sync().map { _ =>
+                  pages.loadPage(PageNameTyp("CompetitionInfo"), "")
+                }
+              case Left(err) =>
+                dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
+                Future.successful(())
+            }
           case Left(err) =>
-            dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
+            dom.window.alert(s"Fehler beim Erstellen des Turniers: ${err.msgCode}")
+            Future.successful(())
         }
-      case Left(_) => debug("Quick Start cancelled")
+      case Left(_) => 
+        debug("Quick Start cancelled")
+        Future.successful(())
     }
 
   private def doLogout(): Unit =
