@@ -1,0 +1,5 @@
+StageStatus.CFG = Konfiguration
+StageStatus.AUS = Auslosung
+StageStatus.EIN = Spiele laufen
+StageStatus.FIN = Beendet
+StageStatus.UNKN = Unbekannt

@@ -1,0 +1,5 @@
+StageStatus.CFG = Configuration
+StageStatus.AUS = Draw
+StageStatus.EIN = In Progress
+StageStatus.FIN = Finished
+StageStatus.UNKN = Unknown

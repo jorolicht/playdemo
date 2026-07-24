@@ -1,0 +1,14 @@
+CompStatus.CFG = Configuration
+CompStatus.RUN = Active
+CompStatus.FIN = Finished
+CompStatus.READY = Ready
+CompStatus.UNKN = Unknown
+CompStatus.VRAUS = Prelim. Draw
+CompStatus.VREIN = Prelim. Running
+CompStatus.VRFIN = Prelim. Finished
+CompStatus.ZRAUS = Intermed. Draw
+CompStatus.ZREIN = Intermed. Running
+CompStatus.ZRFIN = Intermed. Finished
+CompStatus.ERAUS = Finals Draw
+CompStatus.EREIN = Finals Running
+CompStatus.ERFIN = Finals Finished

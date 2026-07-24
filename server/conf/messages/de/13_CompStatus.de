@@ -1,0 +1,14 @@
+CompStatus.CFG = Konfiguration
+CompStatus.RUN = Aktiv
+CompStatus.FIN = Beendet
+CompStatus.READY = Bereit
+CompStatus.UNKN = Unbekannt
+CompStatus.VRAUS = Vorrunde Auslosung
+CompStatus.VREIN = Vorrunde läuft
+CompStatus.VRFIN = Vorrunde beendet
+CompStatus.ZRAUS = Zwischenrunde Auslosung
+CompStatus.ZREIN = Zwischenrunde läuft
+CompStatus.ZRFIN = Zwischenrunde beendet
+CompStatus.ERAUS = Endrunde Auslosung
+CompStatus.EREIN = Endrunde läuft
+CompStatus.ERFIN = Endrunde beendet
