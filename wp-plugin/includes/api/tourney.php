@@ -448,9 +448,8 @@ function tourney_api_create(WP_REST_Request $request) {
         ]);
     }
 
-    // Generiere den Turnier-Slug aus Datum und Name: <jjjjMMdd>-<name>
-    $slug_base = $start_date . '-' . $tourney_name;
-    $turnier_slug = sanitize_title($slug_base);
+    // Generiere den Turnier-Slug aus Datum und Name oder nutze den übergebenen Slug
+    $turnier_slug = !empty($body['slug']) ? sanitize_title($body['slug']) : sanitize_title($start_date . '-' . $tourney_name);
 
     // Prüfen, ob bereits ein Turnier mit diesem Slug unter diesem Parent existiert
     $existing_posts = get_posts([
