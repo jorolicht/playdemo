@@ -41,7 +41,7 @@
                     <div class="stats-box d-inline-block p-2 bg-white border rounded shadow-xs">
                         <span class="text-muted small me-2">@gM("+status")</span>
                         @selection.competition.map { c =>
-                            <span class="badge @if(c.status == CompStatus.RUN){bg-warning}else{bg-secondary}">@c.status</span>
+                            <span class="badge @if(c.status == CompStatus.RUN){bg-warning}else{bg-secondary}">@gM(c.status.msgCode)</span>
                             <span class="ms-3 text-muted small me-2">@gM("+participants")</span>
                             <span class="fw-bold text-primary">@participants.count(_.active) / @participants.length</span>
                         }.getOrElse {

@@ -95,7 +95,7 @@
                                 <td>@{c.lowLevel.getOrElse(0)} - @{c.upperLevel.getOrElse("∞")}</td>
                                 <td>
                                     <span class="badge @{if(c.status == CompStatus.RUN) "bg-warning" else if(c.status == CompStatus.FIN) "bg-success" else "bg-secondary"}">
-                                        @c.status
+                                        @gM(c.status.msgCode)
                                     </span>
                                 </td>
                                 <td class="text-end">
