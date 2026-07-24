@@ -881,3 +881,11 @@ object Tourney:
     catch
       case NonFatal(_) =>
         Left(AppError("TODOerr0144.decode.Tourney", json.take(20), "", "Tourney.decSeq"))
+
+case class ACI(
+  homepageInfo: String = "",
+  allowRegistration: Boolean = false,
+  dateFormat: String = "DE"
+) derives ReadWriter
+
+case class SaveAciResponse(success: Boolean) derives ReadWriter

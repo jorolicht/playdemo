@@ -30,7 +30,7 @@
                     <span class="text-muted fw-bold">@gM("+type")</span> @gM(comp.typ.msgCode)
                 </div>
                 <div class="col-md-3 border-end">
-                    <span class="text-muted fw-bold">@gM("+start")</span> @comp.startDate
+                    <span class="text-muted fw-bold">@gM("+start")</span> @base.Global.formatDateTime(comp.startDate)
                 </div>
                 <div class="col-md-3 border-end">
                     <span class="text-muted fw-bold">@gM("+ttr")</span> @{comp.lowLevel.getOrElse(0)} - @{comp.upperLevel.getOrElse("∞")}

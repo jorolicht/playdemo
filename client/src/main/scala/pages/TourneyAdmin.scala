@@ -65,7 +65,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   def render(param: String = ""): Boolean =
     Global.currentSelection.tourney match
       case Some(tourney) =>
-        if (param.nonEmpty && List("IMPEXP", "CTT", "CERT", "MESSAGES", "MATCHBOARD").contains(param.toUpperCase)) {
+        if (param.nonEmpty && List("IMPEXP", "CTT", "CERT", "MESSAGES", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT").contains(param.toUpperCase)) {
           activeTab = param.toUpperCase
         }
 
@@ -101,6 +101,63 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
 
         comps.ContextHeader.render()
         setMain(cviews.pages.html.TourneyAdmin(tourney, activeTab, templates, isLoadingTemplates))
+
+        if (activeTab == "HOMEPAGE") {
+          val ta = dom.document.getElementById("homepage-info-textarea").asInstanceOf[dom.html.TextArea]
+          val cb = dom.document.getElementById("allow-registration-checkbox").asInstanceOf[dom.html.Input]
+          val btn = dom.document.getElementById("homepage-save-btn").asInstanceOf[dom.html.Button]
+          
+          if (ta != null) ta.value = Global.currentAci.homepageInfo
+          if (cb != null) cb.checked = Global.currentAci.allowRegistration
+          
+          if (btn != null) {
+            btn.onclick = (e: dom.Event) => {
+              val updatedAci = Global.currentAci.copy(
+                homepageInfo = ta.value,
+                allowRegistration = cb.checked
+              )
+              services.TourneyDB.saveAci(tourney.wpId, updatedAci).map {
+                case Right(_) =>
+                  dom.window.alert("Homepage-Einstellungen erfolgreich gespeichert.")
+                  render()
+                case Left(err) =>
+                  dom.window.alert(s"Fehler beim Speichern: ${err.msgCode}")
+              }
+            }
+          }
+        }
+        
+        if (activeTab == "DATEFORMAT") {
+          val btn = dom.document.getElementById("dateformat-save-btn").asInstanceOf[dom.html.Button]
+          val deRadio = dom.document.getElementById("date-format-de").asInstanceOf[dom.html.Input]
+          val ukRadio = dom.document.getElementById("date-format-uk").asInstanceOf[dom.html.Input]
+          val usRadio = dom.document.getElementById("date-format-us").asInstanceOf[dom.html.Input]
+          
+          if (deRadio != null && ukRadio != null && usRadio != null) {
+            Global.currentAci.dateFormat match {
+              case "UK" => ukRadio.checked = true
+              case "US" => usRadio.checked = true
+              case _ => deRadio.checked = true
+            }
+          }
+          
+          if (btn != null) {
+            btn.onclick = (e: dom.Event) => {
+              val selectedFormat = if (deRadio != null && deRadio.checked) "DE"
+                                   else if (ukRadio != null && ukRadio.checked) "UK"
+                                   else if (usRadio != null && usRadio.checked) "US"
+                                   else "DE"
+              val updatedAci = Global.currentAci.copy(dateFormat = selectedFormat)
+              services.TourneyDB.saveAci(tourney.wpId, updatedAci).map {
+                case Right(_) =>
+                  dom.window.alert("Datumsformat erfolgreich gespeichert.")
+                  render()
+                case Left(err) =>
+                  dom.window.alert(s"Fehler beim Speichern: ${err.msgCode}")
+              }
+            }
+          }
+        }
 
         // Wire change listener for adminImportFile
         val fileInput = dom.document.getElementById("adminImportFile").asInstanceOf[dom.html.Input]

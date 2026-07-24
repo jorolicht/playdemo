@@ -51,6 +51,16 @@
                 <i class="bi bi-display me-1"></i>@gM("tourneyAdmin.tabMatchboard")
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link @{if(activeTab == "HOMEPAGE") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'HOMEPAGE')">
+                <i class="bi bi-house-door me-1"></i>@gM("tourneyAdmin.tabHomepage")
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @{if(activeTab == "DATEFORMAT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'DATEFORMAT')">
+                <i class="bi bi-calendar-event me-1"></i>@gM("tourneyAdmin.tabDateFormat")
+            </a>
+        </li>
     </ul>
 
     <!-- Tab Contents -->
@@ -366,6 +376,61 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        }
+        @if(activeTab == "HOMEPAGE") {
+            <div class="card shadow-sm border-start border-4 border-success mb-4 animate-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary fw-bold mb-3">
+                        <i class="bi bi-house-door me-2 text-success"></i>@gM("tourneyAdmin.tabHomepage")
+                    </h5>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">@gM("tourneyAdmin.homepageInfoLabel")</label>
+                        <textarea class="form-control" id="homepage-info-textarea" rows="8" placeholder="@gM("tourneyAdmin.homepageInfoPlh")"></textarea>
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="allow-registration-checkbox" />
+                        <label class="form-check-label fw-bold" for="allow-registration-checkbox">
+                            @gM("tourneyAdmin.allowRegistrationLabel")
+                        </label>
+                    </div>
+                    <button class="btn btn-success fw-bold" id="homepage-save-btn">
+                        <i class="bi bi-save me-1"></i>@gM("btn.save")
+                    </button>
+                </div>
+            </div>
+        }
+        @if(activeTab == "DATEFORMAT") {
+            <div class="card shadow-sm border-start border-4 border-warning mb-4 animate-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary fw-bold mb-3">
+                        <i class="bi bi-calendar-event me-2 text-warning"></i>@gM("tourneyAdmin.tabDateFormat")
+                    </h5>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">@gM("tourneyAdmin.selectDateFormatLabel")</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="dateFormatGroup" id="date-format-de" value="DE" />
+                            <label class="form-check-label" for="date-format-de">
+                                <strong>@gM("tourneyAdmin.dateFormatDe")</strong> (z.B. dd.MM.yyyy HH:mm)
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="dateFormatGroup" id="date-format-uk" value="UK" />
+                            <label class="form-check-label" for="date-format-uk">
+                                <strong>@gM("tourneyAdmin.dateFormatUk")</strong> (z.B. dd/MM/yyyy HH:mm)
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="dateFormatGroup" id="date-format-us" value="US" />
+                            <label class="form-check-label" for="date-format-us">
+                                <strong>@gM("tourneyAdmin.dateFormatUs")</strong> (z.B. MM/dd/yyyy hh:mm a)
+                            </label>
+                        </div>
+                    </div>
+                    <button class="btn btn-warning fw-bold" id="dateformat-save-btn">
+                        <i class="bi bi-save me-1"></i>@gM("btn.save")
+                    </button>
                 </div>
             </div>
         }

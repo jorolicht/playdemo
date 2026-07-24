@@ -147,6 +147,18 @@ object TourneyDB extends ComWrapper with Debouncer:
         PlayerDB.initHandler()
         CompetitionDB.initHandler()
         StageDB.initHandler()
+        // Load demo ACI
+        val demoWpId = req.tourney.wpId
+        val localData = org.scalajs.dom.window.localStorage.getItem("App.demo_aci_" + demoWpId)
+        if (localData != null && localData.nonEmpty) {
+          try {
+            base.Global.currentAci = read[shared.model.ACI](localData)
+          } catch {
+            case _: Exception => base.Global.currentAci = shared.model.ACI()
+          }
+        } else {
+          base.Global.currentAci = shared.model.ACI()
+        }
         Future.successful(Right(version.toLong))
       } else {
         Future.successful(Right(0L))
@@ -165,7 +177,7 @@ object TourneyDB extends ComWrapper with Debouncer:
 
       paramsOpt match {
         case Some(params) =>
-          ajaxGet[TourneyResponse](routeGet, params, host = Global.homeUrl).map {
+          ajaxGet[TourneyResponse](routeGet, params, host = Global.homeUrl).flatMap {
             case Right(res) =>
               tourney = res.tourney
               version = res.version
@@ -174,8 +186,11 @@ object TourneyDB extends ComWrapper with Debouncer:
               CompetitionDB.initHandler()
               StageDB.initHandler()
               Logging.debug(s"TourneyDB.load: tournament loaded, version: $version")
-              Right(version.toLong)
-            case Left(err) => Left(err)
+              // Load ACI asynchronously
+              loadAci(res.tourney.wpId).map { _ =>
+                Right(version.toLong)
+              }
+            case Left(err) => Future.successful(Left(err))
           }
         case None => Future.successful(Right(0L))
       }
@@ -213,3 +228,45 @@ object TourneyDB extends ComWrapper with Debouncer:
     CompetitionDB.initHandler()
     StageDB.initHandler()
     if (doSync) triggerSync()
+
+  /**
+   * Loads ACI configuration for the given tournament post ID.
+   */
+  def loadAci(wpId: Int): Future[Unit] =
+    if (base.Global.isDemoMode) {
+      val localData = org.scalajs.dom.window.localStorage.getItem("App.demo_aci_" + wpId)
+      if (localData != null && localData.nonEmpty) {
+        try {
+          base.Global.currentAci = read[shared.model.ACI](localData)
+        } catch {
+          case _: Exception => base.Global.currentAci = shared.model.ACI()
+        }
+      } else {
+        base.Global.currentAci = shared.model.ACI()
+      }
+      Future.successful(())
+    } else {
+      ajaxGet[shared.model.ACI]("/wp-json/tourney/v1/read-aci", List("postId" -> wpId.toString), host = Global.homeUrl).map {
+        case Right(aci) => base.Global.currentAci = aci
+        case Left(err) =>
+          Logging.error(s"Failed to load ACI: ${err.msgCode}")
+          base.Global.currentAci = shared.model.ACI()
+      }
+    }
+
+  /**
+   * Saves ACI configuration for the given tournament post ID.
+   */
+  def saveAci(wpId: Int, aci: shared.model.ACI): Future[Either[AppError, Unit]] =
+    if (base.Global.isDemoMode) {
+      base.Global.currentAci = aci
+      org.scalajs.dom.window.localStorage.setItem("App.demo_aci_" + wpId, write(aci))
+      Future.successful(Right(()))
+    } else {
+      ajaxPost[shared.model.ACI, shared.model.SaveAciResponse]("/wp-json/tourney/v1/save-aci", List("postId" -> wpId.toString), aci, host = Global.homeUrl).map {
+        case Right(_) =>
+          base.Global.currentAci = aci
+          Right(())
+        case Left(err) => Left(err)
+      }
+    }

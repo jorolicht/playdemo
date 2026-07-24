@@ -1,0 +1,9 @@
+tourneyAdmin.tabHomepage = Homepage
+tourneyAdmin.homepageInfoLabel = Turnierinformationen für die Homepage
+tourneyAdmin.homepageInfoPlh = Geben Sie hier Details für die Startseite ein (HTML-Markup erlaubt)...
+tourneyAdmin.allowRegistrationLabel = Spieler Turnieranmeldung erlauben
+tourneyAdmin.tabDateFormat = Datumsformat
+tourneyAdmin.selectDateFormatLabel = Wählen Sie das gewünschte Datumsformat:
+tourneyAdmin.dateFormatDe = Deutsches Format
+tourneyAdmin.dateFormatUk = Englisches / Britisches Format (UK)
+tourneyAdmin.dateFormatUs = Amerikanisches Format (US)

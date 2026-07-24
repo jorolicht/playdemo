@@ -74,6 +74,20 @@ add_action('rest_api_init', function () {
         }
     ]);
 
+    // GET /tourney/v1/read-aci
+    register_rest_route('tourney/v1', '/read-aci', [
+        'methods' => 'GET',
+        'callback' => 'tourney_read_aci',
+        'permission_callback' => '__return_true'
+    ]);
+
+    // POST /tourney/v1/save-aci
+    register_rest_route('tourney/v1', '/save-aci', [
+        'methods' => 'POST',
+        'callback' => 'tourney_save_aci',
+        'permission_callback' => '__return_true'
+    ]);
+
 });
 
 /**
@@ -601,4 +615,47 @@ function tourney_api_search(WP_REST_Request $request) {
 
     // 5. Limitierung auf 100 Ergebnisse
     return array_slice($results, 0, 100);
+}
+
+/**
+ * Reads ACI configuration JSON from post metadata.
+ */
+function tourney_read_aci(WP_REST_Request $request)
+{
+    $post_id = ApiHelper::getPostId($request);
+    if (!$post_id) {
+        return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
+    }
+    
+    $aci_json = get_post_meta($post_id, 'aci', true);
+    if (!$aci_json) {
+        $aci_json = '{}';
+    }
+    
+    $aci = json_decode($aci_json, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $aci = new stdClass();
+    }
+    
+    return new WP_REST_Response($aci, 200);
+}
+
+/**
+ * Saves ACI configuration JSON to post metadata.
+ */
+function tourney_save_aci(WP_REST_Request $request)
+{
+    $post_id = ApiHelper::getPostId($request);
+    if (!$post_id) {
+        return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
+    }
+    
+    $body = $request->get_body();
+    $aci = json_decode($body, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ApiHelper::error("invalid_json", "Invalid JSON payload", "", "", HttpStatus::BAD_REQUEST);
+    }
+    
+    update_post_meta($post_id, 'aci', $body);
+    return new WP_REST_Response(array('success' => true), 200);
 }

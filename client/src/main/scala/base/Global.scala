@@ -72,6 +72,7 @@ object Global:
   var hostPageId = 0
   var wpNonce   = ""
   var turnstileSitekey = ""
+  var currentAci: shared.model.ACI = shared.model.ACI()
 
   var authMode: AuthMode = AuthMode.Nonce
   var wpUserName: String = ""
@@ -117,6 +118,40 @@ object Global:
         u.isTurnierAdmin && (u.org == tourney.organizer || u.username == tourney.organizer || u.roles.contains("administrator"))
       case None => false
     }
+
+  def formatDateTime(dateTimeStr: String): String = {
+    val formatCode = currentAci.dateFormat
+    if (dateTimeStr == null || dateTimeStr.length < 16) {
+      dateTimeStr
+    } else {
+      val datePart = dateTimeStr.substring(0, 10)
+      val timePart = dateTimeStr.substring(11, 16)
+      val dateParts = datePart.split("-")
+      if (dateParts.length == 3) {
+        val y = dateParts(0)
+        val m = dateParts(1)
+        val d = dateParts(2)
+        formatCode match {
+          case "UK" => s"$d/$m/$y $timePart"
+          case "US" =>
+            val hoursParts = timePart.split(":")
+            if (hoursParts.length == 2) {
+              val hh = hoursParts(0).toInt
+              val mm = hoursParts(1)
+              val ampm = if (hh >= 12) "PM" else "AM"
+              val hh12 = if (hh == 0) 12 else if (hh > 12) hh - 12 else hh
+              val hh12Str = if (hh12 < 10) s"0$hh12" else hh12.toString
+              s"$m/$d/$y $hh12Str:$mm $ampm"
+            } else {
+              s"$m/$d/$y $timePart"
+            }
+          case _ => s"$d.$m.$y $timePart"
+        }
+      } else {
+        dateTimeStr
+      }
+    }
+  }
 
 
                             
