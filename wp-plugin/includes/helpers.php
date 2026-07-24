@@ -16,6 +16,7 @@ if (!class_exists('ApiHelper')) {
             if (!$post_id) {
                 $slug = $request->get_param('slug');
                 if ($slug) {
+                    // 1. Try matching by exact post_name (slug)
                     $posts = get_posts([
                         'name'           => $slug,
                         'post_type'      => ['tourney', 'page', 'post'],
@@ -25,6 +26,29 @@ if (!class_exists('ApiHelper')) {
                     ]);
                     if (!empty($posts)) {
                         $post_id = $posts[0];
+                    } else {
+                        // 2. Try matching by exact title
+                        $posts = get_posts([
+                            'title'          => $slug,
+                            'post_type'      => ['tourney', 'page', 'post'],
+                            'post_status'    => 'any',
+                            'numberposts'    => 1,
+                            'fields'         => 'ids'
+                        ]);
+                        if (!empty($posts)) {
+                            $post_id = $posts[0];
+                        } else {
+                            // 3. Try matching by post_name containing the slug
+                            global $wpdb;
+                            $escaped_slug = '%' . $wpdb->esc_like($slug) . '%';
+                            $post_id_val = $wpdb->get_var($wpdb->prepare(
+                                "SELECT ID FROM $wpdb->posts WHERE post_type IN ('tourney', 'page', 'post') AND post_status != 'trash' AND post_name LIKE %s LIMIT 1",
+                                $escaped_slug
+                            ));
+                            if ($post_id_val) {
+                                $post_id = intval($post_id_val);
+                            }
+                        }
                     }
                 }
             }
