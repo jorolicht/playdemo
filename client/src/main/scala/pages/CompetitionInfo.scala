@@ -120,6 +120,23 @@ object CompetitionInfo extends BasePage with JsWrapper:
           case _ => debug("Start stage cancelled")
         }
 
+      case `BtnEditComp` =>
+        Global.currentSelection.competition.foreach { c =>
+          dialogs.DlgCompetition.show(c.category, Some(c)).map {
+            case Right(res) =>
+              val updatedComp = res.competition
+              services.TourneyDB.tourney.updateCompetition(updatedComp) match {
+                case Right(newComp) =>
+                  Global.currentSelection = Global.currentSelection.copy(competition = Some(newComp))
+                  comps.ContextHeader.render()
+                  render()
+                case Left(err) =>
+                  error(s"Failed to update competition: ${err.msgCode}")
+              }
+            case Left(_) => debug("Edit competition cancelled")
+          }
+        }
+
       case `BtnDeleteComp` => 
         import shared.BoxButton
         DlgMsgbox.show("Möchten Sie diesen Wettbewerb wirklich löschen?", "Wettbewerb löschen", List(BoxButton.Yes, BoxButton.No)).map {

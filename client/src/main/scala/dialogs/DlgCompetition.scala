@@ -24,6 +24,7 @@ object DlgCompetition extends BaseDialog with JsWrapper:
   
   val LoadId:         HtmlId = genId(name)
   val ModalId:        HtmlId = genId(name)
+  val TitleId:        HtmlId = genId(name)
   val CompNameId:     HtmlId = genId(name)
   val CompTypId:      HtmlId = genId(name)
   val CompCategoryId: HtmlId = genId(name)
@@ -41,8 +42,12 @@ object DlgCompetition extends BaseDialog with JsWrapper:
   /**
    * Shows the competition creation dialog.
    * @param defaultCategory The default category to select (e.g. from the current tournament)
+   * @param existingComp Optional existing competition to edit
    */
-  def show(defaultCategory: CompCategory = CompCategory.UNKNOWN): Future[Either[AppError, DlgCompResult]] =
+  def show(
+    defaultCategory: CompCategory = CompCategory.UNKNOWN,
+    existingComp: Option[Competition] = None
+  ): Future[Either[AppError, DlgCompResult]] =
     val p = Promise[Either[AppError, DlgCompResult]]()
     val f = p.future
    
@@ -50,17 +55,47 @@ object DlgCompetition extends BaseDialog with JsWrapper:
       setHtml(gE(LoadId), cviews.dialogs.html.DlgCompetition())
       modal = Modal(gE(ModalId))
 
-    // Reset and Configure
-    setInput(gE(CompCategoryId), defaultCategory.toString)
-    setInput(gE(CompTypId), CompTyp.SINGLE.toString)
+    existingComp match {
+      case Some(comp) =>
+        setHtml(gE(TitleId), gM("dlg.comp.titleEdit"))
+        setHtml(gE(ApplyId), gM("btn.save"))
+        setInput(gE(CompCategoryId), comp.category.toString)
+        setInput(gE(CompTypId), comp.typ.toString)
 
-    val today = new js.Date()
-    val datePart = today.toISOString().split("T")(0)
-    val timePart = today.toTimeString().split(" ")(0).take(5) // HH:mm
-    
-    // datetime-local expects yyyy-MM-ddTHH:mm
-    setInput(gE(StartDateId), s"${datePart}T$timePart")
-    setInput(gE(CompNameId), "")
+        val formattedDate = if (comp.startDate.contains(" ")) {
+          comp.startDate.replace(" ", "T").take(16)
+        } else if (comp.startDate.length == 8) {
+          val y = comp.startDate.take(4)
+          val m = comp.startDate.substring(4, 6)
+          val d = comp.startDate.substring(6, 8)
+          s"$y-$m-${d}T12:00"
+        } else {
+          val today = new js.Date()
+          val datePart = today.toISOString().split("T")(0)
+          val timePart = today.toTimeString().split(" ")(0).take(5)
+          s"${datePart}T$timePart"
+        }
+
+        setInput(gE(StartDateId), formattedDate)
+        setInput(gE(CompNameId), comp.name)
+        setInput(gE(TtrFromId), comp.lowLevel.map(_.toString).getOrElse(""))
+        setInput(gE(TtrToId), comp.upperLevel.map(_.toString).getOrElse(""))
+
+      case None =>
+        setHtml(gE(TitleId), gM("dlg.comp.title"))
+        setHtml(gE(ApplyId), gM("dlg.comp.btnCreate"))
+        setInput(gE(CompCategoryId), defaultCategory.toString)
+        setInput(gE(CompTypId), CompTyp.SINGLE.toString)
+
+        val today = new js.Date()
+        val datePart = today.toISOString().split("T")(0)
+        val timePart = today.toTimeString().split(" ")(0).take(5) // HH:mm
+        
+        setInput(gE(StartDateId), s"${datePart}T$timePart")
+        setInput(gE(CompNameId), "")
+        setInput(gE(TtrFromId), "")
+        setInput(gE(TtrToId), "")
+    }
     
     modal.show()
 
@@ -72,14 +107,20 @@ object DlgCompetition extends BaseDialog with JsWrapper:
         val typ = CompTyp.fromString(getInput(gE(CompTypId)))
         val cat = CompCategory.valueOf(getInput(gE(CompCategoryId)))
         
-        // Convert yyyy-MM-ddTHH:mm to yyyy-MM-dd HH:mm:ss
         val startRaw = getInput(gE(StartDateId))
         val startFormatted = startRaw.replace("T", " ") + ":00"
         
         val ttrFrom = try Some(getInput(gE(TtrFromId)).toInt) catch { case _:Exception => None }
         val ttrTo   = try Some(getInput(gE(TtrToId)).toInt)   catch { case _:Exception => None }
         
-        val comp = Competition(
+        val comp = existingComp.map(_.copy(
+          name = name,
+          typ = typ,
+          category = cat,
+          startDate = startFormatted,
+          lowLevel = ttrFrom,
+          upperLevel = ttrTo
+        )).getOrElse(Competition(
           id = CompId(0), // Temporary ID
           name = name,
           typ = typ,
@@ -88,7 +129,7 @@ object DlgCompetition extends BaseDialog with JsWrapper:
           status = CompStatus.CFG,
           lowLevel = ttrFrom,
           upperLevel = ttrTo
-        )
+        ))
         
         if (!p.isCompleted) p.success(Right(DlgCompResult(comp)))
         modal.hide()

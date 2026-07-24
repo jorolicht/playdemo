@@ -372,5 +372,7 @@ dlg.comp.ttrTo                                      = TTR bis
 dlg.comp.btnCancel                                  = Abbrechen
 dlg.comp.btnCreate                                  = Erstellen
 dlg.comp.errName                                    = Bitte geben Sie einen gültigen Namen ein.
+dlg.comp.titleEdit                                  = Wettbewerb bearbeiten
+btn.save                                            = Speichern
 
 footer.realizedWith                                 = Realisiert mit Scala.js & WordPress.
