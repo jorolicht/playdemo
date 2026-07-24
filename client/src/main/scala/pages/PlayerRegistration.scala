@@ -8,6 +8,9 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import base.*
 import shared.MainIds.*
 import shared.model.*
+import shared.AuthIds.*
+import shared.BoxButton
+import scala.scalajs.js
 import dialogs.*
 
 /**
@@ -95,9 +98,7 @@ object PlayerRegistration extends BasePage with JsWrapper:
         handleAddParticipant()
 
       case `BtnUploadCsv` =>
-        debug("PlayerRegistration: CSV Upload clicked")
-        // Placeholder for CSV upload logic - as requested only to add the button
-        dom.window.alert("CSV Upload Funktion wird demnächst implementiert.")
+        doUploadCsv()
 
       case id if id.id.startsWith(IdCheckActive.id) =>
         val snoStr = elem.getAttribute("data-sno")
@@ -214,3 +215,145 @@ object PlayerRegistration extends BasePage with JsWrapper:
         }
       }
     }
+
+  private def doUploadCsv(): Unit = {
+    val selection = Global.currentSelection
+    val tourney   = services.TourneyDB.tourney
+    selection.competition.foreach { c =>
+      val fileInput = dom.document.createElement("input").asInstanceOf[dom.html.Input]
+      fileInput.`type` = "file"
+      fileInput.accept = ".csv"
+      
+      fileInput.addEventListener("change", (e: dom.Event) => {
+        val files = fileInput.files
+        if (files.length > 0) {
+          val file = files(0)
+          val reader = new dom.FileReader()
+          reader.onload = (event: dom.Event) => {
+            val csvText = reader.result.asInstanceOf[String]
+            
+            val lines = csvText.split("\n").map(_.trim).filter(_.nonEmpty).toSeq
+            if (lines.length <= 1) {
+              dom.window.alert("Die CSV-Datei enthält keine ausreichenden Daten.")
+            } else {
+              val header = lines.head
+              val sep = if (header.contains(";")) ";" else ","
+              val cols = header.split(sep).map(_.trim.toLowerCase)
+              
+              val idxVorname = if (cols.indexOf("vorname") >= 0) cols.indexOf("vorname") else cols.indexOf("first name")
+              val idxNachname = if (cols.indexOf("nachname") >= 0) cols.indexOf("nachname") else cols.indexOf("last name")
+              val idxVerein = if (cols.indexOf("verein") >= 0) cols.indexOf("verein") else cols.indexOf("club")
+              val idxTtr = cols.indexOf("ttr")
+              
+              val vIdx = if (idxVorname >= 0) idxVorname else 0
+              val nIdx = if (idxNachname >= 0) idxNachname else 1
+              val cIdx = if (idxVerein >= 0) idxVerein else 2
+              val tIdx = if (idxTtr >= 0) idxTtr else 3
+              
+              case class CsvPlayer(firstName: String, lastName: String, clubName: String, ttr: Option[Int])
+              
+              val csvPlayers = lines.tail.flatMap { line =>
+                val parts = line.split(sep).map(_.trim)
+                if (parts.length > math.max(vIdx, math.max(nIdx, cIdx))) {
+                  val fn = parts(vIdx)
+                  val ln = parts(nIdx)
+                  val cn = parts(cIdx)
+                  val ttrVal = if (parts.length > tIdx) {
+                    try Some(parts(tIdx).toInt) catch { case _: Exception => None }
+                  } else None
+                  
+                  if (fn.nonEmpty && ln.nonEmpty && cn.nonEmpty) {
+                    Some(CsvPlayer(fn, ln, cn, ttrVal))
+                  } else None
+                } else None
+              }
+              
+              def importNext(index: Int): Future[Unit] = {
+                if (index >= csvPlayers.length) {
+                  render()
+                  Future.successful(())
+                } else {
+                  val p = csvPlayers(index)
+                  val existingPlayerOpt = tourney.players.find(tp =>
+                    tp.firstName.trim.equalsIgnoreCase(p.firstName) && tp.lastName.trim.equalsIgnoreCase(p.lastName)
+                  )
+                  
+                  if (existingPlayerOpt.isDefined) {
+                    val msg = s"Spieler '${p.firstName} ${p.lastName}' existiert bereits im Turnier.\n\nMöchtest du ihn für diesen Wettbewerb anmelden (OK), diesen Spieler überspringen (Skip) oder den gesamten Import abbrechen (Abort All)?"
+                    dialogs.DlgMsgbox.show(msg, "Spieler bereits vorhanden", List(BoxButton.Ok, BoxButton.Ignore, BoxButton.Abort)).flatMap {
+                      case BoxButton.Ok =>
+                        val player = existingPlayerOpt.get
+                        val club = tourney.clubs.find(_.id.toInt == player.clubId)
+                        val singleSno = SNO.single(player.id)
+                        if (!c.pants1Stage.exists(_.id == singleSno)) {
+                          val pant = Pant(
+                            id = singleSno,
+                            name = player.displayName,
+                            club = club.map(_.name).getOrElse(""),
+                            rating = p.ttr.orElse(player.meta.ttr).getOrElse(0),
+                            birthYear = player.birthYear.map(_.toString).getOrElse(""),
+                            active = true,
+                            status = PantStatus.PLAY
+                          )
+                          c.pants1Stage += pant
+                          tourney.updateCompetition(c)
+                        }
+                        importNext(index + 1)
+                      case BoxButton.Ignore =>
+                        importNext(index + 1)
+                      case BoxButton.Abort =>
+                        render()
+                        Future.successful(())
+                      case _ =>
+                        importNext(index + 1)
+                    }
+                  } else {
+                    val club = tourney.clubs.find(_.name.equalsIgnoreCase(p.clubName)).getOrElse {
+                      tourney.addClub(p.clubName, checkSimilarity = false, doSync = true).toOption.get
+                    }
+                    
+                    tourney.addPlayer(
+                      firstName = p.firstName,
+                      lastName = p.lastName,
+                      clubId = club.id.toInt,
+                      birthYear = None,
+                      email = None,
+                      whatsApp = None,
+                      doSync = true
+                    ) match {
+                      case Right(player) =>
+                        val updatedPlayer = player.copy(
+                          meta = player.meta.copy(ttr = p.ttr)
+                        )
+                        tourney.updatePlayer(updatedPlayer)
+                        
+                        val singleSno = SNO.single(updatedPlayer.id)
+                        val pant = Pant(
+                          id = singleSno,
+                          name = updatedPlayer.displayName,
+                          club = club.name,
+                          rating = p.ttr.getOrElse(0),
+                          birthYear = "",
+                          active = true,
+                          status = PantStatus.PLAY
+                        )
+                        c.pants1Stage += pant
+                        tourney.updateCompetition(c)
+                      case Left(err) =>
+                        Logging.error(s"Failed to add player from CSV: ${err.msgCode}")
+                    }
+                    importNext(index + 1)
+                  }
+                }
+              }
+              
+              importNext(0)
+            }
+          }
+          reader.readAsText(file)
+        }
+      })
+      
+      fileInput.click()
+    }
+  }
