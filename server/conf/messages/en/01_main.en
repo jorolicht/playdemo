@@ -357,4 +357,20 @@ demo.promptTitle                                    = Start Demo Mode?
 demo.templateNotFound                               = Could not find any demo template ('{0}') on the server. Starting an empty tournament.
 demo.tourneyName                                    = Demo Tournament
 demo.namePrefix                                     = Demo: 
+
+###
+# DlgCompetition
+###
+dlg.comp.title                                      = Create Competition
+dlg.comp.category                                   = Category (Sport)
+dlg.comp.name                                       = Competition Name
+dlg.comp.namePlh                                    = e.g. Men's A Singles
+dlg.comp.type                                       = Competition Type
+dlg.comp.start                                      = Start (Date & Time)
+dlg.comp.ttrFrom                                    = TTR from
+dlg.comp.ttrTo                                      = TTR to
+dlg.comp.btnCancel                                  = Cancel
+dlg.comp.btnCreate                                  = Create
+dlg.comp.errName                                    = Please enter a valid name.
+
 footer.realizedWith                                 = Realized with Scala.js & WordPress.

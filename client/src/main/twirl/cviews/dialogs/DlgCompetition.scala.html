@@ -9,14 +9,14 @@
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="DlgCompetition-label">Wettbewerb erstellen</h5>
+                <h5 class="modal-title" id="DlgCompetition-label">@gM("dlg.comp.title")</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" @id(CloseId)></button>
             </div>
             <div class="modal-body">
                 <form onsubmit="return false;">
                     
                     <div class="mb-3">
-                        <label @forAttr(CompCategoryId) class="form-label fw-bold">Kategorie (Sportart)</label>
+                        <label @forAttr(CompCategoryId) class="form-label fw-bold">@gM("dlg.comp.category")</label>
                         <select class="form-select border-primary" @id(CompCategoryId)>
                             @CompCategory.values.map { c =>
                                 <option value="@c.toString">@c.toString</option>
@@ -25,13 +25,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <label @forAttr(CompNameId) class="form-label">Name des Wettbewerbs</label>
-                        <input type="text" class="form-control" @id(CompNameId) placeholder="z.B. Herren A Einzel" required>
+                        <label @forAttr(CompNameId) class="form-label">@gM("dlg.comp.name")</label>
+                        <input type="text" class="form-control" @id(CompNameId) placeholder="@gM("dlg.comp.namePlh")" required>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label @forAttr(CompTypId) class="form-label">Wettbewerbstyp</label>
+                            <label @forAttr(CompTypId) class="form-label">@gM("dlg.comp.type")</label>
                             <select class="form-select" @id(CompTypId)>
                                 @CompTyp.values.filter(_ != CompTyp.Typ).map { t =>
                                     <option value="@t.toString" @if(t == CompTyp.SINGLE){selected}>@t.toString</option>
@@ -39,26 +39,26 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label @forAttr(StartDateId) class="form-label">Beginn (Datum & Zeit)</label>
+                            <label @forAttr(StartDateId) class="form-label">@gM("dlg.comp.start")</label>
                             <input type="datetime-local" class="form-control" @id(StartDateId) required>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label @forAttr(TtrFromId) class="form-label">TTR von</label>
+                            <label @forAttr(TtrFromId) class="form-label">@gM("dlg.comp.ttrFrom")</label>
                             <input type="number" class="form-control" @id(TtrFromId) placeholder="0">
                         </div>
                         <div class="col-md-6">
-                            <label @forAttr(TtrToId) class="form-label">TTR bis</label>
+                            <label @forAttr(TtrToId) class="form-label">@gM("dlg.comp.ttrTo")</label>
                             <input type="number" class="form-control" @id(TtrToId) placeholder="3000">
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>Abbrechen</button>
-                <button type="button" class="btn btn-success" @id(ApplyId)>Erstellen</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>@gM("dlg.comp.btnCancel")</button>
+                <button type="button" class="btn btn-success" @id(ApplyId)>@gM("dlg.comp.btnCreate")</button>
             </div>
         </div>
     </div>

@@ -9,6 +9,7 @@ import org.scalajs.dom.raw.HTMLElement
 
 import base.*
 import base.Bootstrap.*
+import base.Messages.gM
 import shared.model.*
 
 /**
@@ -66,7 +67,7 @@ object DlgCompetition extends BaseDialog with JsWrapper:
     gE(ApplyId).onclick = { (_: MouseEvent) =>
       val name = getInput(gE(CompNameId))
       if (name.length < 3) {
-        dom.window.alert("Bitte geben Sie einen gültigen Namen ein.")
+        dom.window.alert(gM("dlg.comp.errName"))
       } else {
         val typ = CompTyp.fromString(getInput(gE(CompTypId)))
         val cat = CompCategory.valueOf(getInput(gE(CompCategoryId)))

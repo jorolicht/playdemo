@@ -357,4 +357,20 @@ demo.promptTitle                                    = Demo-Modus starten?
 demo.templateNotFound                               = Konnte kein Demo-Template ('{0}') auf dem Server finden. Ein leeres Turnier wird gestartet.
 demo.tourneyName                                    = Demo Turnier
 demo.namePrefix                                     = Demo: 
+
+###
+# DlgCompetition
+###
+dlg.comp.title                                      = Wettbewerb erstellen
+dlg.comp.category                                   = Kategorie (Sportart)
+dlg.comp.name                                       = Name des Wettbewerbs
+dlg.comp.namePlh                                    = z.B. Herren A Einzel
+dlg.comp.type                                       = Wettbewerbstyp
+dlg.comp.start                                      = Beginn (Datum & Zeit)
+dlg.comp.ttrFrom                                    = TTR von
+dlg.comp.ttrTo                                      = TTR bis
+dlg.comp.btnCancel                                  = Abbrechen
+dlg.comp.btnCreate                                  = Erstellen
+dlg.comp.errName                                    = Bitte geben Sie einen gültigen Namen ein.
+
 footer.realizedWith                                 = Realisiert mit Scala.js & WordPress.
