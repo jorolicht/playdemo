@@ -181,6 +181,7 @@ tourneyAdmin.wsSent                                 = Gesendet
 tourneyAdmin.wsReceived                             = Empfangen
 tourneyAdmin.wsMsgPlh                               = Nachricht an den Server...
 tourneyAdmin.mbTitle                                = Matchboard / InfoAnzeige Verwaltung
+tourneyAdmin.mbOpenDisplayBtn                       = InfoAnzeige öffnen
 tourneyAdmin.mbDesc                                 = Verwalten Sie die Live-Anzeigetafel für dieses Turnier. Sie können neue Info-Meldungen und Spiel-Anzeigen hinzufügen, vorhandene Einträge löschen und die Anzeigetafel live aktualisieren.
 tourneyAdmin.mbAddEntryTitle                        = Neuen Eintrag hinzufügen
 tourneyAdmin.mbInfoTextLabel                        = Text der Infomeldung

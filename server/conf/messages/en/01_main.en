@@ -181,6 +181,7 @@ tourneyAdmin.wsSent                                 = Sent
 tourneyAdmin.wsReceived                             = Received
 tourneyAdmin.wsMsgPlh                               = Message to server...
 tourneyAdmin.mbTitle                                = Matchboard / Display Management
+tourneyAdmin.mbOpenDisplayBtn                       = Open Info Display
 tourneyAdmin.mbDesc                                 = Manage the live scoreboard for this tournament. Add new info messages and match displays, delete entries, and update live.
 tourneyAdmin.mbAddEntryTitle                        = Add New Entry
 tourneyAdmin.mbInfoTextLabel                        = Info Message Text

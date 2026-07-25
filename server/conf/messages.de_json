@@ -19,6 +19,7 @@
   "StageAdmin.err_min_players": "Bitte wählen Sie mindestens drei Teilnehmer aus.",
   "viewTourney.tabPlayers": "Spieler",
   "CompCategory.UNKNOWN": "Unbekannt",
+  "PlayerRegistration.titleSimple": "Wettbewerb-Anmeldung",
   "tourneyAdmin.tabMatchboard": "InfoAnzeige",
   "search.thOrganizer": "Organisator",
   "tourneyAdmin.importDesc": "Wählen Sie ein zuvor exportiertes Turnier (.json) aus, um die Daten einzulesen und zu laden.",
