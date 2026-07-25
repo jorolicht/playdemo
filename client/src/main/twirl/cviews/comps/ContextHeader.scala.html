@@ -18,11 +18,15 @@
                     </li>
 
                     @if(selection.tourney.exists(_.ident == "SIMPLE")) {
-                        <li class="breadcrumb-item active" aria-current="page">
-                            <span class="badge bg-success py-1 px-2 border border-white-50 shadow-sm">
-                                <i class="bi bi-lightning-charge me-1"></i>@gM("contextHeader.singleCompetition")
-                            </span>
-                        </li>
+                        @defining(selection.competition.map(_.name)
+                            .orElse(selection.tourney.flatMap(_.competitions.find(_ != null).map(_.name)))
+                            .getOrElse(selection.tourney.map(_.name).getOrElse("Wettbewerb"))) { compName =>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                <a href="javascript:appLoadPage('CompetitionInfo', '')" class="btn btn-outline-light btn-sm fw-bold border-secondary py-1 text-white">
+                                    <i class="bi bi-lightning-charge text-warning me-2"></i>@compName
+                                </a>
+                            </li>
+                        }
                     }
                     
                     <!-- Tournament Link (Trophy Icon) -->
@@ -37,7 +41,7 @@
                     }
 
                     <!-- Competition Dropdown -->
-                    @if(selection.tourney.isDefined) {
+                    @if(selection.tourney.isDefined && selection.tourney.get.ident != "SIMPLE") {
                         <li class="breadcrumb-item dropdown active" aria-current="page">
                             <a class="btn btn-outline-light btn-sm dropdown-toggle border-secondary py-1 @if(selection.competition.isEmpty){text-white-50}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span class="badge bg-success me-1">C</span>
