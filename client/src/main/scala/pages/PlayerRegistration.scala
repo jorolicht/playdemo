@@ -22,6 +22,8 @@ object PlayerRegistration extends BasePage with JsWrapper:
 
   /** Button to add a new participant. */
   val BtnAddParticipant: HtmlId = genId(name)
+  /** Button to delete a registered participant. */
+  val BtnDeleteParticipant: HtmlId = genId(name)
   /** Button to upload participant list from CSV. */
   val BtnUploadCsv:      HtmlId = genId(name)
   /** Select element to choose a competition. */
@@ -108,6 +110,10 @@ object PlayerRegistration extends BasePage with JsWrapper:
       case `BtnUploadCsv` =>
         doUploadCsv()
 
+      case id if id.id.startsWith(BtnDeleteParticipant.id) =>
+        val snoStr = elem.getAttribute("data-sno")
+        removeParticipant(snoStr)
+
       case id if id.id.startsWith(IdCheckActive.id) =>
         val snoStr = elem.getAttribute("data-sno")
         val active = elem.asInstanceOf[dom.html.Input].checked
@@ -141,6 +147,18 @@ object PlayerRegistration extends BasePage with JsWrapper:
         p.active = active
         p.status = if (active) PantStatus.PLAY else PantStatus.REGI
         debug(s"Updated participant ${p.name}: active=$active")
+        services.TourneyDB.tourney.updateCompetition(c)
+        render() // Refresh UI
+      }
+    }
+
+  private def removeParticipant(snoStr: String): Unit =
+    Global.currentSelection.competition.filter(!isLocked(_)).foreach { c =>
+      val sno = SNO.fromString(snoStr)
+      val idx = c.pants1Stage.indexWhere(_.id == sno)
+      if (idx != -1) {
+        c.pants1Stage.remove(idx)
+        debug(s"Removed participant with SNO: $snoStr")
         services.TourneyDB.tourney.updateCompetition(c)
         render() // Refresh UI
       }

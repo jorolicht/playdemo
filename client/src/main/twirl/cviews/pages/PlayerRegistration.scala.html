@@ -135,7 +135,11 @@
                                             </div>
                                         </td>
                                         <td class="text-end pe-3">
-                                            <button class="btn btn-link btn-sm text-danger p-0" title="@gM("+remove")" @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isLocked){disabled}>
+                                            <button class="btn btn-link btn-sm text-danger p-0 delete-participant-btn" 
+                                                    title="@gM("+remove")" 
+                                                    @id(BtnDeleteParticipant, "onclick", p.id.idSaveSuffix)
+                                                    data-sno="@p.id"
+                                                    @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || selection.competition.exists(_.status != CompStatus.CFG)){disabled}>
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </td>
