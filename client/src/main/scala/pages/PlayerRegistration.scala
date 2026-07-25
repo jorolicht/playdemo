@@ -324,36 +324,24 @@ object PlayerRegistration extends BasePage with JsWrapper:
                   val existingPlayerOpt = tourney.players.find(tp =>
                     tp.firstName.trim.equalsIgnoreCase(p.firstName) && tp.lastName.trim.equalsIgnoreCase(p.lastName)
                   )
-                  
                   if (existingPlayerOpt.isDefined) {
-                    val msg = s"Spieler '${p.firstName} ${p.lastName}' existiert bereits im Turnier.\n\nMöchtest du ihn für diesen Wettbewerb anmelden (OK), diesen Spieler überspringen (Skip) oder den gesamten Import abbrechen (Abort All)?"
-                    dialogs.DlgMsgbox.show(msg, "Spieler bereits vorhanden", List(BoxButton.Ok, BoxButton.Ignore, BoxButton.Abort)).flatMap {
-                      case BoxButton.Ok =>
-                        val player = existingPlayerOpt.get
-                        val club = tourney.clubs.find(_.id.toInt == player.clubId)
-                        val singleSno = SNO.single(player.id)
-                        if (!c.pants1Stage.exists(_.id == singleSno)) {
-                          val pant = Pant(
-                            id = singleSno,
-                            name = player.displayName,
-                            club = club.map(_.name).getOrElse(""),
-                            rating = p.ttr.orElse(player.meta.ttr).getOrElse(0),
-                            birthYear = player.birthYear.map(_.toString).getOrElse(""),
-                            active = true,
-                            status = PantStatus.PLAY
-                          )
-                          c.pants1Stage += pant
-                          tourney.updateCompetition(c)
-                        }
-                        importNext(index + 1)
-                      case BoxButton.Ignore =>
-                        importNext(index + 1)
-                      case BoxButton.Abort =>
-                        render()
-                        Future.successful(())
-                      case _ =>
-                        importNext(index + 1)
+                    val player = existingPlayerOpt.get
+                    val club = tourney.clubs.find(_.id.toInt == player.clubId)
+                    val singleSno = SNO.single(player.id)
+                    if (!c.pants1Stage.exists(_.id == singleSno)) {
+                      val pant = Pant(
+                        id = singleSno,
+                        name = player.displayName,
+                        club = club.map(_.name).getOrElse(""),
+                        rating = p.ttr.orElse(player.meta.ttr).getOrElse(0),
+                        birthYear = player.birthYear.map(_.toString).getOrElse(""),
+                        active = true,
+                        status = PantStatus.PLAY
+                      )
+                      c.pants1Stage += pant
+                      tourney.updateCompetition(c)
                     }
+                    importNext(index + 1)
                   } else {
                     val club = tourney.clubs.find(_.name.equalsIgnoreCase(p.clubName)).getOrElse {
                       tourney.addClub(p.clubName, checkSimilarity = false, doSync = true).toOption.get
