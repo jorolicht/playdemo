@@ -22,6 +22,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
   val ImportLocalId: HtmlId = genId(name)
   val ExitOfflineId: HtmlId = genId(name)
   def render(param: String = "") = 
+    org.scalajs.dom.window.asInstanceOf[scala.scalajs.js.Dynamic].navbarGoBackToCurrentTourney = () => goBackToCurrentTourney()
     setHtml(gE(NavbarId), cviews.comps.html.navbar()) 
     true
 
@@ -220,5 +221,18 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
         comps.Navbar.render() // re-render to remove badges/menu
         pages.loadPage(pages.MainView.name, "")
       case _ =>
+    }
+  }
+
+  def goBackToCurrentTourney(): Unit = {
+    import base.Global
+    import shared.PageNameTyp
+    
+    if (Global.currentSelection.tourney.isDefined) {
+      if (Global.currentSelection.tourney.get.ident == "SIMPLE" || Global.currentSelection.competition.isDefined) {
+        pages.loadPage(PageNameTyp("CompetitionInfo"), "")
+      } else {
+        pages.loadPage(PageNameTyp("TourneyInfo"), "")
+      }
     }
   }
