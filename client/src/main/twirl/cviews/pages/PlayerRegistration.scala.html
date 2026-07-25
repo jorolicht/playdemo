@@ -8,7 +8,14 @@
 <div class="container mt-4">
     <div class="card shadow-sm mb-4 border-warning">
         <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-            <h3 class="h5 mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>@gM("+title")</h3>
+            <h3 class="h5 mb-0 fw-bold">
+                <i class="bi bi-pencil-square me-2"></i>
+                @if(selection.tourney.exists(_.ident == "SIMPLE")) {
+                    @gM("+titleSimple")
+                } else {
+                    @gM("+title")
+                }
+            </h3>
             <div class="d-flex gap-2">
                 @if(selection.competition.isDefined) {
                     @defining(selection.competition.exists(isLocked)) { isLocked =>
@@ -26,29 +33,46 @@
         </div>
         <div class="card-body bg-light py-3">
             <div class="row align-items-center">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold small text-uppercase text-muted mb-1">@gM("+select_comp")</label>
-                    <select class="form-select border-warning" @id(SelectComp, "onchange")>
-                        <option value="0" @if(selection.competition.isEmpty){selected}>@gM("+please_select")</option>
-                        @competitions.map { c =>
-                            <option value="@c.id.value" @if(selection.competition.exists(_.id == c.id)){selected}>
-                                @c.name (@gM(c.typ.msgCode))
-                            </option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                    <div class="stats-box d-inline-block p-2 bg-white border rounded shadow-xs">
-                        <span class="text-muted small me-2">@gM("+status")</span>
-                        @selection.competition.map { c =>
-                            <span class="badge @if(c.status == CompStatus.RUN){bg-warning}else{bg-secondary}">@gM(c.status.msgCode)</span>
-                            <span class="ms-3 text-muted small me-2">@gM("+participants")</span>
-                            <span class="fw-bold text-primary">@participants.count(_.active) / @participants.length</span>
-                        }.getOrElse {
-                            <span class="text-muted small italic">@gM("+no_comp_selected")</span>
-                        }
+                @if(selection.tourney.exists(_.ident == "SIMPLE")) {
+                    <!-- Single competition: hide select dropdown, show only stats box -->
+                    <div class="col-12 text-center text-md-start">
+                        <div class="stats-box d-inline-block p-2 bg-white border rounded shadow-xs">
+                            <span class="text-muted small me-2">@gM("+status")</span>
+                            @selection.competition.map { c =>
+                                <span class="badge @if(c.status == CompStatus.RUN){bg-warning}else{bg-secondary}">@gM(c.status.msgCode)</span>
+                                <span class="ms-3 text-muted small me-2">@gM("+participants")</span>
+                                <span class="fw-bold text-primary">@participants.count(_.active) / @participants.length</span>
+                            }.getOrElse {
+                                <span class="text-muted small italic">@gM("+no_comp_selected")</span>
+                            }
+                        </div>
                     </div>
-                </div>
+                } else {
+                    <!-- Multi-competition dropdown selection -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-uppercase text-muted mb-1">@gM("+select_comp")</label>
+                        <select class="form-select border-warning" @id(SelectComp, "onchange")>
+                            <option value="0" @if(selection.competition.isEmpty){selected}>@gM("+please_select")</option>
+                            @competitions.map { c =>
+                                <option value="@c.id.value" @if(selection.competition.exists(_.id == c.id)){selected}>
+                                    @c.name (@gM(c.typ.msgCode))
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                        <div class="stats-box d-inline-block p-2 bg-white border rounded shadow-xs">
+                            <span class="text-muted small me-2">@gM("+status")</span>
+                            @selection.competition.map { c =>
+                                <span class="badge @if(c.status == CompStatus.RUN){bg-warning}else{bg-secondary}">@gM(c.status.msgCode)</span>
+                                <span class="ms-3 text-muted small me-2">@gM("+participants")</span>
+                                <span class="fw-bold text-primary">@participants.count(_.active) / @participants.length</span>
+                            }.getOrElse {
+                                <span class="text-muted small italic">@gM("+no_comp_selected")</span>
+                            }
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>

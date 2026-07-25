@@ -1,4 +1,5 @@
 PlayerRegistration.title = Turnier-Anmeldung
+PlayerRegistration.titleSimple = Wettbewerb-Anmeldung
 PlayerRegistration.csv_upload = CSV Upload
 PlayerRegistration.add_double = Doppel hinzufügen
 PlayerRegistration.add_single = Teilnehmer hinzufügen

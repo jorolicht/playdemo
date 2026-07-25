@@ -50,9 +50,17 @@ object PlayerRegistration extends BasePage with JsWrapper:
       }
     }
 
-    val selection = Global.currentSelection
+    var selection = Global.currentSelection
     val competitions = services.TourneyDB.tourney.competitions.toSeq.filter(_ != null)
     
+    // If it's a SIMPLE tournament and no competition is selected, select the first one automatically
+    if (selection.competition.isEmpty && services.TourneyDB.tourney.ident == "SIMPLE") {
+      competitions.headOption.foreach { c =>
+        Global.currentSelection = Global.currentSelection.copy(competition = Some(c))
+        selection = Global.currentSelection
+      }
+    }
+
     comps.ContextHeader.render()
 
     selection.competition match
