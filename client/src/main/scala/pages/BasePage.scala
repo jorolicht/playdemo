@@ -55,6 +55,7 @@ def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, asy
     if async then
       pagesMap(targetPage).renderAsync(targetParam).map { success =>
         if success then
+          base.Global.activePageName = targetPage.value
           if withSidebar then Sidebar.setNavLink(targetPage.value)
           savePageState(targetPage, targetParam)
           comps.Navbar.render()
@@ -63,6 +64,7 @@ def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, asy
       }
     else
       if pagesMap(targetPage).render(targetParam) then
+        base.Global.activePageName = targetPage.value
         if withSidebar then Sidebar.setNavLink(targetPage.value)
         savePageState(targetPage, targetParam)
         comps.Navbar.render()

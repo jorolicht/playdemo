@@ -110,6 +110,13 @@ object Global:
   var dataUrl = ""
   var imgUrl  = ""
   var playUrl = ""
+  var activePageName: String = ""
+  def isTourneyPage(pageName: String): Boolean = 
+    Set(
+      "TourneyInfo", "TourneyAdmin", "CompetitionInfo", "PlayerRegistration", 
+      "PlayerList", "ResultList", "StageAdmin", "StageDraw", 
+      "StageInput", "StageResult", "StageScoreSheet", "StageCertificate", "Certificate"
+    ).contains(pageName)
   var pageId  = 0
   var hostPageId = 0
   var wpNonce   = ""

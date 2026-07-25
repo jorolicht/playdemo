@@ -72,7 +72,7 @@
 
             <!-- Rechte Seite: User / Login -->
             <ul class="navbar-nav align-items-center">
-                @if(Global.currentSelection.tourney.isDefined) {
+                @if(Global.currentSelection.tourney.isDefined && !Global.isTourneyPage(Global.activePageName)) {
                     @defining(Global.currentSelection.tourney.get) { t =>
                         @defining(if (t.ident == "SIMPLE") {
                             val compName = Global.currentSelection.competition.map(_.name)
