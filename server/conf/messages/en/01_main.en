@@ -352,8 +352,8 @@ footer.gtc                                          = Terms & Conditions
 ###
 # Demo mode
 ###
-demo.promptMessage                                  = You are not logged in. To save tournaments permanently on the server, please log in. Would you like to try a demo tournament instead? (Data will only be stored in your browser)
-demo.promptTitle                                    = Start Demo Mode?
+demo.promptMessage                                  = You are not logged in. Please select how you want to proceed:\n\n• Demo Mode: Try the application with pre-populated test data.\n• Local Mode: Starts an empty tournament that you can manage locally in your browser.\n• Login: Sign in with your account to access online features.
+demo.promptTitle                                    = Select Mode
 demo.templateNotFound                               = Could not find any demo template ('{0}') on the server. Starting an empty tournament.
 demo.tourneyName                                    = Demo Tournament
 demo.namePrefix                                     = Demo: 

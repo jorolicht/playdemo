@@ -12,3 +12,6 @@ btn.ignore    = Skip
 btn.yes       = YES
 btn.no        = NO
 btn.acceptresult = Accept Result
+btn.demomode   = Demo Mode
+btn.localmode  = Local Mode
+btn.loginmode  = Login

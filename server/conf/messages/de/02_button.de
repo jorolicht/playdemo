@@ -13,3 +13,6 @@ btn.ignore    = Überspringen
 btn.yes       = JA
 btn.no        = NEIN
 btn.acceptresult = Ergebnis übernehmen
+btn.demomode   = Demo-Modus
+btn.localmode  = Lokaler Modus
+btn.loginmode  = Anmelden

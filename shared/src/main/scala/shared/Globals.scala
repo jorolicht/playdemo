@@ -16,6 +16,9 @@ enum BoxButton(val value: String):
   case No     extends BoxButton("No")
   case Close  extends BoxButton("Close")
   case AcceptResult extends BoxButton("AcceptResult")
+  case DemoMode extends BoxButton("DemoMode")
+  case LocalMode extends BoxButton("LocalMode")
+  case LoginMode extends BoxButton("LoginMode")
 
   def msgCode: String =
     s"btn.${value.toLowerCase}"

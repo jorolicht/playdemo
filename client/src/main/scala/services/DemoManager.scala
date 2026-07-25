@@ -17,9 +17,9 @@ object DemoManager extends ComWrapper {
     dialogs.DlgMsgbox.show(
       gM("demo.promptMessage"),
       gM("demo.promptTitle"),
-      List(BoxButton.Yes, BoxButton.No, BoxButton.Cancel)
+      List(BoxButton.DemoMode, BoxButton.LocalMode, BoxButton.LoginMode, BoxButton.Cancel)
     ).map {
-      case BoxButton.Yes =>
+      case BoxButton.DemoMode =>
         loadDemoTemplate(templateQuery).map { success =>
           if (success) {
             pages.loadPage(PageNameTyp("TourneyInfo"), "")
@@ -28,9 +28,13 @@ object DemoManager extends ComWrapper {
             startEmptyDemo(proceedAction)
           }
         }
-      case BoxButton.No =>
+      case BoxButton.LocalMode =>
+        startLocalMode(() => {
+          pages.loadPage(PageNameTyp("TourneyInfo"), "")
+        })
+      case BoxButton.LoginMode =>
         pages.loadPage(PageNameTyp("UserLogin"), "")
-      case _ => Logging.debug("Demo prompt cancelled")
+      case _ => Logging.debug("Prompt cancelled")
     }
   }
 

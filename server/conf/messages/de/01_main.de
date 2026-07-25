@@ -352,8 +352,8 @@ footer.gtc                                          = AGB
 ###
 # Demo mode
 ###
-demo.promptMessage                                  = Du bist nicht angemeldet. Um Turniere dauerhaft auf dem Server zu speichern, logge dich bitte ein. Möchtest du stattdessen ein Demo-Turnier ausprobieren? (Die Daten werden nur in deinem Browser gespeichert)
-demo.promptTitle                                    = Demo-Modus starten?
+demo.promptMessage                                  = Sie sind nicht angemeldet. Bitte wählen Sie, wie Sie fortfahren möchten:\n\n• Demo-Modus: Ausprobieren mit vorgefertigten Spieldaten.\n• Lokaler Modus: Startet ein leeres Turnier, das lokal im Browser verwaltet wird.\n• Anmelden: Mit Benutzerkonto anmelden für Online-Funktionen.
+demo.promptTitle                                    = Modus auswählen
 demo.templateNotFound                               = Konnte kein Demo-Template ('{0}') auf dem Server finden. Ein leeres Turnier wird gestartet.
 demo.tourneyName                                    = Demo Turnier
 demo.namePrefix                                     = Demo: 
