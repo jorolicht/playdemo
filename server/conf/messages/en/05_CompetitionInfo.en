@@ -3,6 +3,7 @@ CompetitionInfo.edit = Edit
 CompetitionInfo.reactivate = Reactivate
 CompetitionInfo.finish = Finish
 CompetitionInfo.delete = Delete
+CompetitionInfo.sport = Sport:
 CompetitionInfo.type = Type:
 CompetitionInfo.start = Start:
 CompetitionInfo.ttr = TTR:

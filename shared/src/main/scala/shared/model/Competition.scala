@@ -11,6 +11,8 @@ enum CompCategory:
   case UNKNOWN
   case TT  // Table Tennis
 
+  def msgCode: String = s"CompCategory.${this.toString}"
+
 object CompCategory:
   import shared.basic.Pickle.*
 
