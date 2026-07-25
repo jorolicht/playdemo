@@ -227,6 +227,10 @@ lazy val server = project
       if ((wpPluginDir / "composer.lock").exists()) {
         IO.copyFile(wpPluginDir / "composer.lock", dockerWpPluginDir / "composer.lock")
       }
+      if ((wpPluginDir / "data").exists()) {
+        IO.copyDirectory(wpPluginDir / "data", dockerWpPluginDir / "data")
+        IO.copyDirectory(wpPluginDir / "data", baseDirectory.value / ".." / "server" / "public" / "data")
+      }
 
       log.info(s"Copied files to wordpress (including php, includes, and pages)")
     },
