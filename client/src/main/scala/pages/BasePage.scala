@@ -57,6 +57,7 @@ def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, asy
         if success then
           if withSidebar then Sidebar.setNavLink(targetPage.value)
           savePageState(targetPage, targetParam)
+          comps.Navbar.render()
         else   
           error(s"loadPage -> page:${targetPage} param:${targetParam}")
       }
@@ -64,6 +65,7 @@ def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, asy
       if pagesMap(targetPage).render(targetParam) then
         if withSidebar then Sidebar.setNavLink(targetPage.value)
         savePageState(targetPage, targetParam)
+        comps.Navbar.render()
       else   
         error(s"loadPage -> page:${targetPage} param:${targetParam}")
   catch
