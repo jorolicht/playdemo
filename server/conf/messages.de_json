@@ -356,6 +356,7 @@
   "navbar.fullTourney": "Ganzes Turnier",
   "StageDraw.draw_help": "Überprüfen Sie die Gruppenzuordnung für {0}. Sie können zwei Spieler anklicken, um sie zu vertauschen.",
   "compNew.startDate": "Beginn (Datum & Zeit)",
+  "tourneyAdmin.mbOpenDisplayBtn": "InfoAnzeige öffnen",
   "StageStatus.FIN": "Beendet",
   "dlg.comp.ttrTo": "TTR bis",
   "DlgStageStart.start": "Start",

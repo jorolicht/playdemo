@@ -352,6 +352,7 @@
   "navbar.fullTourney": "Full Tournament",
   "StageDraw.draw_help": "Check the group assignments for {0}. You can click two players to swap them.",
   "compNew.startDate": "Start (Date & Time)",
+  "tourneyAdmin.mbOpenDisplayBtn": "Open Info Display",
   "StageStatus.FIN": "Finished",
   "dlg.comp.ttrTo": "TTR to",
   "DlgStageStart.start": "Start",

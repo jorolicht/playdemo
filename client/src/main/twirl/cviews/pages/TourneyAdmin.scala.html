@@ -298,9 +298,15 @@
                 <div class="card-body">
                     <h5 class="card-title text-secondary fw-bold mb-3 d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-display me-2 text-primary"></i>@gM("tourneyAdmin.mbTitle")</span>
-                        <a href="/matchboard/view/@tourney.slug" target="_blank" class="btn btn-outline-primary btn-sm fw-bold">
-                            <i class="bi bi-box-arrow-up-right me-1"></i>@gM("tourneyAdmin.mbOpenDisplayBtn")
-                        </a>
+                        @defining(tourney.slug.split('/').lastOption.getOrElse(tourney.slug)) { slugName =>
+                            @defining(s"${slugName.trim}-${tourney.wpId}") { slugParam =>
+                                @defining(if (base.Global.playUrl.nonEmpty) base.Global.playUrl.trim else "/srv") { playBase =>
+                                    <a href="@playBase/matchboard/view/@slugParam" target="_blank" class="btn btn-outline-primary btn-sm fw-bold">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>@gM("tourneyAdmin.mbOpenDisplayBtn")
+                                    </a>
+                                }
+                            }
+                        }
                     </h5>
                     <p class="text-muted small">
                         @gM("tourneyAdmin.mbDesc")
