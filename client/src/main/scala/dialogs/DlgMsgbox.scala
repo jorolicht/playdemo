@@ -29,8 +29,9 @@ object DlgMsgbox extends BaseDialog with JsWrapper:
     val p = Promise[BoxButton]()
     val f = p.future
 
-    // init modal dialog, always copy
-    setHtml(getOrCreateDiv(LoadId), cviews.dialogs.html.DlgMsgbox(title, body, btns))
+    // init modal dialog, always copy and replace literal \n with real newlines
+    val formattedBody = body.replace("\\n", "\n")
+    setHtml(getOrCreateDiv(LoadId), cviews.dialogs.html.DlgMsgbox(title, formattedBody, btns))
     modal = Modal(gE(ModalId)) 
     modal.show()
 
