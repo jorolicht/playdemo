@@ -29,9 +29,7 @@ object DemoManager extends ComWrapper {
           }
         }
       case BoxButton.LocalMode =>
-        startLocalMode(() => {
-          pages.loadPage(PageNameTyp("TourneyInfo"), "")
-        })
+        startLocalMode(proceedAction)
       case BoxButton.LoginMode =>
         pages.loadPage(PageNameTyp("UserLogin"), "")
       case _ => Logging.debug("Prompt cancelled")

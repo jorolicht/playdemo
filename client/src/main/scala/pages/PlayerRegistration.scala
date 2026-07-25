@@ -185,36 +185,57 @@ object PlayerRegistration extends BasePage with JsWrapper:
               tourney.addClub(res.clubName, checkSimilarity = false, doSync = true).toOption.get
             }
             
-            // 2. Add player to tourney
-            tourney.addPlayer(
-              firstName = res.firstName, 
-              lastName = res.lastName, 
-              clubId = club.id.toInt, 
-              birthYear = res.year, 
-              email = res.email,
-              whatsApp = res.whatsApp,
-              doSync = true
+            // 2. Find existing player or add new player to tourney
+            val playerResult = tourney.players.find(p =>
+              p.firstName == res.firstName &&
+              p.lastName == res.lastName &&
+              p.clubId == club.id.toInt &&
+              p.birthYear == res.year
             ) match {
-              case Right(player) =>
-                val updatedPlayer = player.copy(
-                  meta = player.meta.copy(ttr = res.ttr)
+              case Some(existingPlayer) =>
+                val updatedPlayer = existingPlayer.copy(
+                  meta = existingPlayer.meta.copy(ttr = res.ttr)
                 )
                 tourney.updatePlayer(updatedPlayer)
+                Right(updatedPlayer)
+              case None =>
+                tourney.addPlayer(
+                  firstName = res.firstName, 
+                  lastName = res.lastName, 
+                  clubId = club.id.toInt, 
+                  birthYear = res.year, 
+                  email = res.email,
+                  whatsApp = res.whatsApp,
+                  doSync = true
+                ).map { player =>
+                  val updatedPlayer = player.copy(
+                    meta = player.meta.copy(ttr = res.ttr)
+                  )
+                  tourney.updatePlayer(updatedPlayer)
+                  updatedPlayer
+                }
+            }
 
+            playerResult match {
+              case Right(updatedPlayer) =>
                 // 3. Create Pant and add to competition
                 val singleSno = SNO.single(updatedPlayer.id)
-                val p = Pant(
-                  id = singleSno,
-                  name = updatedPlayer.displayName,
-                  club = club.name,
-                  rating = res.ttr.getOrElse(0),
-                  birthYear = res.year.map(_.toString).getOrElse(""),
-                  active = res.enroll,
-                  status = if (res.enroll) PantStatus.PLAY else PantStatus.REGI
-                )
-                c.pants1Stage += p
-                tourney.updateCompetition(c)
-                render()
+                if (c.pants1Stage.exists(_.id == singleSno)) {
+                  dom.window.alert("Spieler ist bereits in diesem Wettbewerb angemeldet.")
+                } else {
+                  val p = Pant(
+                    id = singleSno,
+                    name = updatedPlayer.displayName,
+                    club = club.name,
+                    rating = res.ttr.getOrElse(0),
+                    birthYear = res.year.map(_.toString).getOrElse(""),
+                    active = res.enroll,
+                    status = if (res.enroll) PantStatus.PLAY else PantStatus.REGI
+                  )
+                  c.pants1Stage += p
+                  tourney.updateCompetition(c)
+                  render()
+                }
                 
               case Left(err) =>
                 dom.window.alert(s"Fehler beim Hinzufügen des Spielers: ${err.msgCode}")
