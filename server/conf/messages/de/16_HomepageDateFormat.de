@@ -7,3 +7,20 @@ tourneyAdmin.selectDateFormatLabel = Wählen Sie das gewünschte Datumsformat:
 tourneyAdmin.dateFormatDe = Deutsches Format
 tourneyAdmin.dateFormatUk = Englisches / Britisches Format (UK)
 tourneyAdmin.dateFormatUs = Amerikanisches Format (US)
+
+# Offline / Local / Demo Mode Options
+login.offlineTitle = Ohne Anmeldung
+login.offlineSubtitle = Lokale Nutzung & Demo
+login.offlineDesc = Sie können das Tool auch ohne Benutzerkonto direkt im Browser testen. Alle Daten werden lokal auf Ihrem Gerät gespeichert.
+login.demoModeTitle = Demo-Modus
+login.demoModeDesc = Startet ein vorgefertigtes Demo-Turnier mit Testspielern und vorbereiteten Wettbewerben zum Ausprobieren.
+login.btnStartDemo = Demo-Modus starten
+login.localModeTitle = Lokaler Modus
+login.localModeDesc = Startet ein leeres Turnier. Sie können Ihre Daten jederzeit exportieren und später wieder importieren.
+login.btnStartLocal = Leeres Turnier erstellen
+login.btnImportLocal = Turnier-Datei importieren (JSON)
+
+navbar.localMenu = Lokal-Optionen
+navbar.exportTourney = Turnier exportieren (JSON)
+navbar.importTourney = Turnier importieren (JSON)
+navbar.exitLocal = Modus beenden

@@ -62,7 +62,49 @@ object Global:
   }
   var lang    = ""
   var version = ""
-  var isDemoMode: Boolean = false
+  
+  def isDemoMode: Boolean = {
+    try {
+      val storage = org.scalajs.dom.window.sessionStorage
+      if (storage != null) {
+        storage.getItem("tourney_is_demo_mode") == "true"
+      } else false
+    } catch {
+      case _: Exception => false
+    }
+  }
+  def isDemoMode_=(value: Boolean): Unit = {
+    try {
+      val storage = org.scalajs.dom.window.sessionStorage
+      if (storage != null) {
+        storage.setItem("tourney_is_demo_mode", value.toString)
+      }
+    } catch {
+      case _: Exception =>
+    }
+  }
+
+  def isLocalMode: Boolean = {
+    try {
+      val storage = org.scalajs.dom.window.sessionStorage
+      if (storage != null) {
+        storage.getItem("tourney_is_local_mode") == "true"
+      } else false
+    } catch {
+      case _: Exception => false
+    }
+  }
+  def isLocalMode_=(value: Boolean): Unit = {
+    try {
+      val storage = org.scalajs.dom.window.sessionStorage
+      if (storage != null) {
+        storage.setItem("tourney_is_local_mode", value.toString)
+      }
+    } catch {
+      case _: Exception =>
+    }
+  }
+
   var csrf    = ""
   var homeUrl = ""
   var dataUrl = ""

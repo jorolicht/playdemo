@@ -10,6 +10,7 @@ import shared.AuthIds.*
 import scala.scalajs.js
 import scala.scalajs.js.JSON
 import services.ComWrapper
+import shared.basic.Pickle.*
 
 object UserLogin extends BasePage with JsWrapper with ComWrapper:
   def name = PageNameTyp("UserLogin")
@@ -23,6 +24,9 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
   val BtnPasskeyAdd:    HtmlId = genId(name)
   val BtnPasskeyDelete: HtmlId = genId(name)
   val BtnForgot:        HtmlId = genId(name)
+  val BtnStartDemo:     HtmlId = genId(name)
+  val BtnStartLocal:    HtmlId = genId(name)
+  val BtnImportLocal:   HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
     setMain(cviews.pages.html.UserLogin(Global.user))
@@ -44,6 +48,53 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
       case `BtnForgot` =>
         event.preventDefault()
         dom.window.location.href = Global.homeUrl + "/wp-login.php?action=lostpassword"
+      case `BtnStartDemo` =>
+        services.DemoManager.promptDemoMode("template-full", () => {
+          pages.loadPage(PageNameTyp("TourneyInfo"), "")
+        }, () => ())
+      case `BtnStartLocal` =>
+        services.DemoManager.startLocalMode(() => {
+          pages.loadPage(PageNameTyp("TourneyInfo"), "")
+        })
+      case `BtnImportLocal` =>
+        val fileInput = dom.document.getElementById("local-import-file-input").asInstanceOf[dom.html.Input]
+        if (fileInput != null) {
+          fileInput.click()
+          fileInput.onchange = (e: dom.Event) => {
+            if (fileInput.files.length > 0) {
+              val file = fileInput.files(0)
+              val reader = new dom.FileReader()
+              reader.onload = (e: dom.Event) => {
+                val jsonString = reader.result.asInstanceOf[String]
+                try {
+                  val payload = read[services.DemoManager.DemoPayload](jsonString)
+                  
+                  // Set Local Mode
+                  Global.isLocalMode = true
+                  Global.isDemoMode = false
+                  
+                  // Restore Tourney
+                  services.TourneyDB.tourney = payload.tourney.tourney
+                  services.TourneyDB.version = payload.tourney.version
+                  
+                  // Force sync to local storage
+                  services.TourneyDB.sync()
+                  services.ClubDB.sync(services.TourneyDB.tourney.clubs.toSeq)
+                  services.PlayerDB.sync(services.TourneyDB.tourney.players.toSeq)
+                  services.CompetitionDB.sync(services.TourneyDB.tourney.competitions.filter(_ != null).toSeq)
+                  services.StageDB.sync(services.TourneyDB.tourney.stages.filter(_ != null).toSeq)
+                  
+                  dom.window.alert("Import erfolgreich! Das lokale Turnier wird nun geladen.")
+                  pages.loadPage(PageNameTyp("TourneyInfo"), "")
+                } catch {
+                  case ex: Exception =>
+                    dom.window.alert(s"Fehler beim Importieren der Datei: ${ex.getMessage}")
+                }
+              }
+              reader.readAsText(file)
+            }
+          }
+        }
       case _ => debug(s"UserLogin Event: ${elem.id}")
 
   private def doPasskeyAdd(): Unit =

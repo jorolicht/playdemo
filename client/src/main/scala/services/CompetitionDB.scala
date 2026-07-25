@@ -43,7 +43,7 @@ object CompetitionDB extends ComWrapper with Debouncer:
    * Synchronizes pending competition events with the WordPress server.
    */
   def sync(dirty: Seq[Competition]): Future[Either[AppError, Unit]] = {
-    if (base.Global.isDemoMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode) {
       val req = CompetitionSyncRequest(TourneyDB.tourney.competitions.filter(_ != null).toSeq)
       org.scalajs.dom.window.localStorage.setItem("App.demo_comps", write(req))
       Future.successful(Right(()))
@@ -74,7 +74,7 @@ object CompetitionDB extends ComWrapper with Debouncer:
    * Loads competitions from the WordPress server.
    */
   def load(): Future[Either[AppError, Long]] = {
-    if (base.Global.isDemoMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode) {
       val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_comps")
       if (jsStr != null && jsStr.nonEmpty) {
         val req = read[CompetitionSyncRequest](jsStr)

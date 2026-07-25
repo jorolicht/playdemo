@@ -42,7 +42,7 @@ object PlayerDB extends ComWrapper with Debouncer:
    * Synchronizes pending player events with the WordPress server.
    */
   def sync(all: Seq[Player]): Future[Either[AppError, Unit]] = {
-    if (base.Global.isDemoMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode) {
       val req = PlayerSyncRequest(version, all)
       org.scalajs.dom.window.localStorage.setItem("App.demo_players", write(req))
       Future.successful(Right(()))
@@ -76,7 +76,7 @@ object PlayerDB extends ComWrapper with Debouncer:
    * Loads players from the WordPress server.
    */
   def load(): Future[Either[AppError, Long]] = {
-    if (base.Global.isDemoMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode) {
       val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_players")
       if (jsStr != null && jsStr.nonEmpty) {
         val req = read[PlayerSyncRequest](jsStr)

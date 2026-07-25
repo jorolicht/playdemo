@@ -56,7 +56,7 @@
                 <li class="nav-item ms-lg-3">
                     <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainSearch', '')">@gM("navbar.search")</a>
                 </li>
-                @if(Global.user.exists(_.isTurnierAdmin)) {
+                @if(Global.user.exists(_.isTurnierAdmin) || Global.isDemoMode || Global.isLocalMode) {
                     <li class="nav-item ms-lg-3 dropdown d-flex align-items-center">
                         <a class="btn btn-primary fw-bold btn-start-custom dropdown-toggle" href="#" id="navbarStart" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             @gM("navbar.start")
@@ -72,8 +72,31 @@
 
             <!-- Rechte Seite: User / Login -->
             <ul class="navbar-nav align-items-center">
-                @if(Global.user.isDefined) {
-                    
+                @if(Global.isDemoMode) {
+                    <li class="nav-item me-2 d-none d-lg-block">
+                        <span class="badge bg-warning text-dark"><i class="bi bi-play-circle-fill me-1"></i>Demo-Modus</span>
+                    </li>
+                }
+                @if(Global.isLocalMode) {
+                    <li class="nav-item me-2 d-none d-lg-block">
+                        <span class="badge bg-success text-white"><i class="bi bi-hdd-fill me-1"></i>Lokaler Modus</span>
+                    </li>
+                }
+
+                @if(Global.isDemoMode || Global.isLocalMode) {
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center nav-link-bold text-white" href="#" id="offlineDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-gear-fill me-1"></i>
+                            @gM("navbar.localMenu")
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="offlineDropdown">
+                            <li><a class="dropdown-item fw-bold" @id(ExportLocalId, "onclick")><i class="bi bi-download me-2 text-primary"></i>@gM("navbar.exportTourney")</a></li>
+                            <li><a class="dropdown-item fw-bold" @id(ImportLocalId, "onclick")><i class="bi bi-upload me-2 text-success"></i>@gM("navbar.importTourney")</a></li>
+                            <input type="file" id="navbar-import-file-input" class="d-none" accept=".json" />
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger fw-bold" @id(ExitOfflineId, "onclick")><i class="bi bi-x-circle me-2"></i>@gM("navbar.exitLocal")</a></li>
+                        </ul>
+                    </li>
                 }
 
                 @if(Global.user.isDefined) {

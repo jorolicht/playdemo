@@ -45,6 +45,26 @@ object DemoManager extends ComWrapper {
     proceedAction()
   }
 
+  def startLocalMode(proceedAction: () => Unit): Unit = {
+    Global.isLocalMode = true
+    Global.isDemoMode = false
+    TourneyDB.tourney = shared.model.Tourney.default.copy(wpId = 999999, name = "Lokales Turnier")
+    TourneyDB.version = 1
+    TourneyDB.tourney.clubs.clear()
+    TourneyDB.tourney.players.clear()
+    TourneyDB.tourney.competitions.clear()
+    TourneyDB.tourney.stages.clear()
+    
+    // Force sync to local storage
+    TourneyDB.sync()
+    ClubDB.sync(Seq())
+    PlayerDB.sync(Seq())
+    CompetitionDB.sync(Seq())
+    StageDB.sync(Seq())
+    
+    proceedAction()
+  }
+
   private def loadDemoTemplate(query: String): Future[Boolean] = {
     val filename = if (query.contains("single") || query.contains("competition")) {
       "demo_competition.json"

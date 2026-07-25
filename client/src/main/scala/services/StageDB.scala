@@ -43,7 +43,7 @@ object StageDB extends ComWrapper with Debouncer:
    * Synchronizes pending stage events with the WordPress server.
    */
   def sync(dirty: Seq[Stage]): Future[Either[AppError, Unit]] = {
-    if (base.Global.isDemoMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode) {
       val req = StageSyncRequest(TourneyDB.tourney.stages.filter(_ != null).toSeq)
       org.scalajs.dom.window.localStorage.setItem("App.demo_stages", write(req))
       Future.successful(Right(()))
@@ -74,7 +74,7 @@ object StageDB extends ComWrapper with Debouncer:
    * Loads stages from the WordPress server.
    */
   def load(): Future[Either[AppError, Long]] = {
-    if (base.Global.isDemoMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode) {
       val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_stages")
       if (jsStr != null && jsStr.nonEmpty) {
         val req = read[StageSyncRequest](jsStr)

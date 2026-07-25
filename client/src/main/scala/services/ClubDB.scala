@@ -36,7 +36,7 @@ object ClubDB extends ComWrapper with Debouncer:
 
 
   def sync(all: Seq[Club]): Future[Either[AppError, Unit]] = {
-    if (base.Global.isDemoMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode) {
       val req = ClubSyncRequest(version, all)
       org.scalajs.dom.window.localStorage.setItem("App.demo_clubs", write(req))
       Future.successful(Right(()))
@@ -67,7 +67,7 @@ object ClubDB extends ComWrapper with Debouncer:
   }
 
   def load(): Future[Either[AppError, Long]] = {
-    if (base.Global.isDemoMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode) {
       val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_clubs")
       if (jsStr != null && jsStr.nonEmpty) {
         val req = read[ClubSyncRequest](jsStr)

@@ -23,6 +23,10 @@ object WebSocketService:
   def getConnectedSlug: Option[String] = currentSlug
 
   def init(): Unit = {
+    if (base.Global.isDemoMode || base.Global.isLocalMode) {
+      disconnect()
+      return
+    }
     Global.currentSelection.tourney match {
       case Some(t) if t.slug.nonEmpty =>
         // Extracts the slug name after any slash prefix if it contains one

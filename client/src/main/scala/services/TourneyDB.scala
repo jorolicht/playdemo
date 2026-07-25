@@ -86,7 +86,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Creates a new tournament post on the server.
    */
   def apiCreate(t: Tourney): Future[Either[AppError, String]] =
-    if (base.Global.isDemoMode) then
+    if (base.Global.isDemoMode || base.Global.isLocalMode) then
       t.wpId = 999999
       val req = TourneySyncRequest(1, t)
       org.scalajs.dom.window.localStorage.setItem("App.demo_tourney", write(req))
@@ -107,7 +107,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    * If a version mismatch occurs (conflict), it reloads the data from the server.
    */
   def sync(): Future[Either[AppError, Unit]] =
-    if (base.Global.isDemoMode) then
+    if (base.Global.isDemoMode || base.Global.isLocalMode) then
       val req = TourneySyncRequest(version, tourney)
       org.scalajs.dom.window.localStorage.setItem("App.demo_tourney", write(req))
       Future.successful(Right(()))
@@ -137,7 +137,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Loads basic tournament data from the WordPress server.
    */
   def load(idOrSlug: Int | String): Future[Either[AppError, Long]] =
-    if (base.Global.isDemoMode) then
+    if (base.Global.isDemoMode || base.Global.isLocalMode) then
       val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_tourney")
       if (jsStr != null && jsStr.nonEmpty) {
         val req = read[TourneySyncRequest](jsStr)
@@ -200,7 +200,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Deletes the current tournament from the WordPress server.
    */
   def apiDelete(trnyId: Int): Future[Either[AppError, Unit]] =
-    if (base.Global.isDemoMode) then
+    if (base.Global.isDemoMode || base.Global.isLocalMode) then
       org.scalajs.dom.window.localStorage.removeItem("App.demo_tourney")
       org.scalajs.dom.window.localStorage.removeItem("App.demo_clubs")
       org.scalajs.dom.window.localStorage.removeItem("App.demo_players")
@@ -233,7 +233,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Loads ACI configuration for the given tournament post ID.
    */
   def loadAci(wpId: Int): Future[Unit] =
-    if (base.Global.isDemoMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode) {
       val localData = org.scalajs.dom.window.localStorage.getItem("App.demo_aci_" + wpId)
       if (localData != null && localData.nonEmpty) {
         try {
@@ -258,7 +258,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Saves ACI configuration for the given tournament post ID.
    */
   def saveAci(wpId: Int, aci: shared.model.ACI): Future[Either[AppError, Unit]] =
-    if (base.Global.isDemoMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode) {
       base.Global.currentAci = aci
       org.scalajs.dom.window.localStorage.setItem("App.demo_aci_" + wpId, write(aci))
       Future.successful(Right(()))

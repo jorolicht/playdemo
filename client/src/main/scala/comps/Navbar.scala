@@ -18,6 +18,9 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
   val ShowQuickCompId: HtmlId = genId(name)
   val StartFullId: HtmlId = genId(name)
   val StartSimpleId: HtmlId = genId(name)
+  val ExportLocalId: HtmlId = genId(name)
+  val ImportLocalId: HtmlId = genId(name)
+  val ExitOfflineId: HtmlId = genId(name)
   def render(param: String = "") = 
     setHtml(gE(NavbarId), cviews.comps.html.navbar()) 
     true
@@ -27,13 +30,17 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
       case `ToggleSidebarId` => toggleClass(gE(AsideId), "d-none")
       case `DoLogoutId`      => doLogout()
       case `ShowQuickCompId` => 
-        if (base.Global.user.isDefined) doQuickStart() else services.DemoManager.promptDemoMode("template-single", () => doQuickStart(), () => ())
+        if (base.Global.user.isDefined || base.Global.isDemoMode || base.Global.isLocalMode) doQuickStart()
+        else services.DemoManager.promptDemoMode("template-single", () => doQuickStart(), () => ())
       case `StartFullId`     => 
-        if (base.Global.user.isDefined) confirmLeave(() => pages.loadPage(PageNameTyp("TourneyNew"), ""))
+        if (base.Global.user.isDefined || base.Global.isDemoMode || base.Global.isLocalMode) confirmLeave(() => pages.loadPage(PageNameTyp("TourneyNew"), ""))
         else services.DemoManager.promptDemoMode("template-full", () => confirmLeave(() => pages.loadPage(PageNameTyp("TourneyNew"), "")), () => ())
       case `StartSimpleId`   => 
-        if (base.Global.user.isDefined) confirmLeave(() => pages.loadPage(PageNameTyp("CompetitionNew"), ""))
+        if (base.Global.user.isDefined || base.Global.isDemoMode || base.Global.isLocalMode) confirmLeave(() => pages.loadPage(PageNameTyp("CompetitionNew"), ""))
         else services.DemoManager.promptDemoMode("template-single", () => confirmLeave(() => pages.loadPage(PageNameTyp("CompetitionNew"), "")), () => ())
+      case `ExportLocalId`   => doLocalExport()
+      case `ImportLocalId`   => doLocalImport()
+      case `ExitOfflineId`   => doExitOffline()
       case _                 => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}")
 
   private def confirmLeave(action: () => Unit): Unit =
@@ -127,3 +134,91 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
       comps.Navbar.render()
       pages.loadPage(shared.PageNameTyp("Goodbye"), "")
     }
+
+  private def doLocalExport(): Unit = {
+    import services.TourneyDB
+    import services.DemoManager.DemoPayload
+    import shared.basic.Pickle.*
+
+    val tReq = TourneyDB.TourneySyncRequest(TourneyDB.version, TourneyDB.tourney)
+    val payload = DemoPayload(tReq)
+    val jsonString = write(payload)
+    
+    val blob = new dom.Blob(scalajs.js.Array(jsonString), dom.BlobPropertyBag("application/json"))
+    val url = dom.URL.createObjectURL(blob)
+    val a = dom.document.createElement("a").asInstanceOf[dom.html.Anchor]
+    a.href = url
+    a.download = s"tourney_${TourneyDB.tourney.name.replaceAll("\\s+", "_")}_export.json"
+    dom.document.body.appendChild(a)
+    a.click()
+    dom.document.body.removeChild(a)
+    dom.URL.revokeObjectURL(url)
+  }
+
+  private def doLocalImport(): Unit = {
+    import services.*
+    import base.Global
+    import services.DemoManager.DemoPayload
+    import shared.basic.Pickle.*
+
+    val fileInput = dom.document.getElementById("navbar-import-file-input").asInstanceOf[dom.html.Input]
+    if (fileInput != null) {
+      fileInput.click()
+      fileInput.onchange = (e: dom.Event) => {
+        if (fileInput.files.length > 0) {
+          val file = fileInput.files(0)
+          val reader = new dom.FileReader()
+          reader.onload = (e: dom.Event) => {
+            val jsonString = reader.result.asInstanceOf[String]
+            try {
+              val payload = read[DemoPayload](jsonString)
+              
+              // Set Local Mode
+              Global.isLocalMode = true
+              Global.isDemoMode = false
+              
+              // Restore Tourney
+              TourneyDB.tourney = payload.tourney.tourney
+              TourneyDB.version = payload.tourney.version
+              
+              // Force sync to local storage
+              TourneyDB.sync()
+              ClubDB.sync(TourneyDB.tourney.clubs.toSeq)
+              PlayerDB.sync(TourneyDB.tourney.players.toSeq)
+              CompetitionDB.sync(TourneyDB.tourney.competitions.filter(_ != null).toSeq)
+              StageDB.sync(TourneyDB.tourney.stages.filter(_ != null).toSeq)
+              
+              dom.window.alert("Import erfolgreich! Das lokale Turnier wird nun geladen.")
+              comps.Navbar.render() // re-render to update badges/menu
+              pages.loadPage(PageNameTyp("TourneyInfo"), "")
+            } catch {
+              case ex: Exception =>
+                dom.window.alert(s"Fehler beim Importieren der Datei: ${ex.getMessage}")
+            }
+          }
+          reader.readAsText(file)
+        }
+      }
+    }
+  }
+
+  private def doExitOffline(): Unit = {
+    import shared.BoxButton
+    import shared.model.Selection
+    import base.Global
+    
+    dialogs.DlgMsgbox.show(
+      "Möchten Sie den lokalen Modus / Demo-Modus wirklich beenden? Alle ungesicherten lokalen Daten gehen verloren.",
+      "Modus beenden",
+      List(BoxButton.Yes, BoxButton.No)
+    ).map {
+      case BoxButton.Yes =>
+        Global.isDemoMode = false
+        Global.isLocalMode = false
+        Global.currentSelection = Selection()
+        comps.ContextHeader.hide()
+        comps.Navbar.render() // re-render to remove badges/menu
+        pages.loadPage(pages.MainView.name, "")
+      case _ =>
+    }
+  }
