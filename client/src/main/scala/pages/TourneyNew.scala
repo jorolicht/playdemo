@@ -122,7 +122,7 @@ object TourneyNew extends BasePage with JsWrapper:
           
         case Left(err) =>
           val errMsg = if (err.is("tourney_already_exists")) {
-            "Ein Turnier mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen."
+            base.Messages.gM("error.tourney_already_exists")
           } else {
             s"Fehler beim Erstellen des Turniers: ${err.msgCode}"
           }

@@ -114,7 +114,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
               }
             case Left(err) =>
               val errMsg = if (err.is("tourney_already_exists")) {
-                "Ein Wettbewerb mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen."
+                gM("error.competition_already_exists")
               } else {
                 s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}"
               }

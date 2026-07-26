@@ -25,3 +25,6 @@ err00054.wordpress.data.notfound                    = WordPress API return no po
 err00055.wordpress.notallowed                       = WordPress API call not allowed, missing/wrong authentication/autorization
 err00056.wordpress.error                            = WordPress error status: {0} response: {1}
 
+error.tourney_already_exists                        = Ein Turnier mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen.
+error.competition_already_exists                    = Ein Wettbewerb mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen.
+
