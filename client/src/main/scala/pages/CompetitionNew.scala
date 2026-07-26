@@ -83,6 +83,11 @@ object CompetitionNew extends BasePage with JsWrapper with services.ComWrapper:
               dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
           }
         case Left(err) =>
-          dom.window.alert(s"Fehler beim Erstellen des Turniers auf dem Server: ${err.msgCode}")
+          val errMsg = if (err.is("tourney_already_exists")) {
+            "Ein Wettbewerb mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen."
+          } else {
+            s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}"
+          }
+          dom.window.alert(errMsg)
       }
     }

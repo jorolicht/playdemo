@@ -121,7 +121,12 @@ object TourneyNew extends BasePage with JsWrapper:
           }, 1000)
           
         case Left(err) =>
-          showError(s"Fehler beim Erstellen des Turniers: ${err.msgCode}")
+          val errMsg = if (err.is("tourney_already_exists")) {
+            "Ein Turnier mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen."
+          } else {
+            s"Fehler beim Erstellen des Turniers: ${err.msgCode}"
+          }
+          showError(errMsg)
       }
     }
 

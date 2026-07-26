@@ -70,55 +70,64 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     import services.*
     import base.Global
 
-    DlgCompetition.show(CompCategory.TT).flatMap {
-      case Right(res) =>
-        val c = res.competition
-        val dateInt = c.startDate.take(10).replace("-", "").toIntOption.getOrElse(20260101)
-        
-        // 1. Create SIMPLE dummy tournament
-        val dummy = Tourney(
-          wpId = 0,
-          name = c.name,
-          organizer = Global.user.map(_.username).getOrElse("System"),
-          startDate = dateInt,
-          endDate = dateInt,
-          ident = "SIMPLE",
-          category = c.category
-        )
-        
-        // 2. Register tournament on server/locally
-        TourneyDB.apiCreate(dummy).flatMap {
-          case Right(slug) =>
-            TourneyDB.update(dummy, doSync = false)
-            
-            // 3. Add the competition
-            TourneyDB.tourney.addCompetition(
-              c.name, 
-              c.typ, 
-              c.category, 
-              c.startDate, 
-              c.lowLevel, 
-              c.upperLevel
-            ) match {
-              case Right(newComp) =>
-                Global.currentSelection = Selection(Some(TourneyDB.tourney), Some(newComp))
-                comps.ContextHeader.render()
-                // Force sync to ensure competition is saved
-                TourneyDB.sync().map { _ =>
-                  pages.loadPage(PageNameTyp("CompetitionInfo"), "")
-                }
-              case Left(err) =>
-                dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
-                Future.successful(())
-            }
-          case Left(err) =>
-            dom.window.alert(s"Fehler beim Erstellen des Turniers: ${err.msgCode}")
-            Future.successful(())
-        }
-      case Left(_) => 
-        debug("Quick Start cancelled")
-        Future.successful(())
+    def runDialog(initialCategory: CompCategory): Future[Unit] = {
+      DlgCompetition.show(initialCategory).flatMap {
+        case Right(res) =>
+          val c = res.competition
+          val dateInt = c.startDate.take(10).replace("-", "").toIntOption.getOrElse(20260101)
+          
+          // 1. Create SIMPLE dummy tournament
+          val dummy = Tourney(
+            wpId = 0,
+            name = c.name,
+            organizer = Global.user.map(_.username).getOrElse("System"),
+            startDate = dateInt,
+            endDate = dateInt,
+            ident = "SIMPLE",
+            category = c.category
+          )
+          
+          // 2. Register tournament on server/locally
+          TourneyDB.apiCreate(dummy).flatMap {
+            case Right(slug) =>
+              TourneyDB.update(dummy, doSync = false)
+              
+              // 3. Add the competition
+              TourneyDB.tourney.addCompetition(
+                c.name, 
+                c.typ, 
+                c.category, 
+                c.startDate, 
+                c.lowLevel, 
+                c.upperLevel
+              ) match {
+                case Right(newComp) =>
+                  Global.currentSelection = Selection(Some(TourneyDB.tourney), Some(newComp))
+                  comps.ContextHeader.render()
+                  // Force sync to ensure competition is saved
+                  TourneyDB.sync().map { _ =>
+                    pages.loadPage(PageNameTyp("CompetitionInfo"), "")
+                  }
+                case Left(err) =>
+                  dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
+                  Future.successful(())
+              }
+            case Left(err) =>
+              val errMsg = if (err.is("tourney_already_exists")) {
+                "Ein Wettbewerb mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen."
+              } else {
+                s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}"
+              }
+              dom.window.alert(errMsg)
+              runDialog(c.category)
+          }
+        case Left(_) => 
+          debug("Quick Start cancelled")
+          Future.successful(())
+      }
     }
+
+    runDialog(CompCategory.TT)
 
   private def doLogout(): Unit =
     import services.*

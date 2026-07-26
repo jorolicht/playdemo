@@ -460,6 +460,10 @@ function tourney_api_create(WP_REST_Request $request) {
         'posts_per_page' => 1,
     ]);
 
+    if (!empty($existing_posts)) {
+        return ApiHelper::error("tourney_already_exists", "Ein Turnier mit diesem Namen existiert bereits.", "", "tourney_api_create", HttpStatus::CONFLICT);
+    }
+
     $post_data = [
         'post_title'   => $tourney_name,
         'post_name'    => $turnier_slug,
@@ -469,16 +473,9 @@ function tourney_api_create(WP_REST_Request $request) {
         'post_status'  => 'publish',
     ];
 
-    if (!empty($existing_posts)) {
-        // Aktualisieren
-        $post_data['ID'] = $existing_posts[0]->ID;
-        $result_id = wp_update_post($post_data);
-        $action = 'updated';
-    } else {
-        // Neu erstellen
-        $result_id = wp_insert_post($post_data);
-        $action = 'created';
-    }
+    // Neu erstellen
+    $result_id = wp_insert_post($post_data);
+    $action = 'created';
 
     if (is_wp_error($result_id)) {
         return ApiHelper::error("db_error", $result_id->get_error_message(), "", "tourney_api_create_tourney", HttpStatus::INTERNAL_SERVER_ERROR);
