@@ -71,55 +71,47 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     import base.Global
 
     def runDialog(initialCategory: CompCategory): Future[Unit] = {
-      DlgCompetition.show(initialCategory).flatMap {
+      val validateFn = (c: Competition) => {
+        val dateInt = c.startDate.take(10).replace("-", "").toIntOption.getOrElse(20260101)
+        val dummy = Tourney(
+          wpId = 0,
+          name = c.name,
+          organizer = Global.user.map(_.username).getOrElse("System"),
+          startDate = dateInt,
+          endDate = dateInt,
+          ident = "SIMPLE",
+          category = c.category
+        )
+        
+        TourneyDB.apiCreate(dummy).map {
+          case Right(slug) =>
+            TourneyDB.update(dummy, doSync = false)
+            Right(())
+          case Left(err) =>
+            Left(err)
+        }
+      }
+
+      DlgCompetition.show(initialCategory, None, Some(validateFn)).flatMap {
         case Right(res) =>
           val c = res.competition
-          val dateInt = c.startDate.take(10).replace("-", "").toIntOption.getOrElse(20260101)
-          
-          // 1. Create SIMPLE dummy tournament
-          val dummy = Tourney(
-            wpId = 0,
-            name = c.name,
-            organizer = Global.user.map(_.username).getOrElse("System"),
-            startDate = dateInt,
-            endDate = dateInt,
-            ident = "SIMPLE",
-            category = c.category
-          )
-          
-          // 2. Register tournament on server/locally
-          TourneyDB.apiCreate(dummy).flatMap {
-            case Right(slug) =>
-              TourneyDB.update(dummy, doSync = false)
-              
-              // 3. Add the competition
-              TourneyDB.tourney.addCompetition(
-                c.name, 
-                c.typ, 
-                c.category, 
-                c.startDate, 
-                c.lowLevel, 
-                c.upperLevel
-              ) match {
-                case Right(newComp) =>
-                  Global.currentSelection = Selection(Some(TourneyDB.tourney), Some(newComp))
-                  comps.ContextHeader.render()
-                  // Force sync to ensure competition is saved
-                  TourneyDB.sync().map { _ =>
-                    pages.loadPage(PageNameTyp("CompetitionInfo"), "")
-                  }
-                case Left(err) =>
-                  dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
-                  Future.successful(())
+          TourneyDB.tourney.addCompetition(
+            c.name, 
+            c.typ, 
+            c.category, 
+            c.startDate, 
+            c.lowLevel, 
+            c.upperLevel
+          ) match {
+            case Right(newComp) =>
+              Global.currentSelection = Selection(Some(TourneyDB.tourney), Some(newComp))
+              comps.ContextHeader.render()
+              TourneyDB.sync().map { _ =>
+                pages.loadPage(PageNameTyp("CompetitionInfo"), "")
               }
             case Left(err) =>
-              val errMsg = if (err.is("tourney_already_exists")) {
-                gM("error.competition_already_exists")
-              } else {
-                s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}"
-              }
-              dom.window.alert(errMsg)
-              runDialog(c.category)
+              dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
+              Future.successful(())
           }
         case Left(_) => 
           debug("Quick Start cancelled")

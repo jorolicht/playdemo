@@ -46,7 +46,8 @@ object DlgCompetition extends BaseDialog with JsWrapper:
    */
   def show(
     defaultCategory: CompCategory = CompCategory.UNKNOWN,
-    existingComp: Option[Competition] = None
+    existingComp: Option[Competition] = None,
+    validate: Option[Competition => Future[Either[AppError, Unit]]] = None
   ): Future[Either[AppError, DlgCompResult]] =
     val p = Promise[Either[AppError, DlgCompResult]]()
     val f = p.future
@@ -131,8 +132,30 @@ object DlgCompetition extends BaseDialog with JsWrapper:
           upperLevel = ttrTo
         ))
         
-        if (!p.isCompleted) p.success(Right(DlgCompResult(comp)))
-        modal.hide()
+        validate match {
+          case Some(valFn) =>
+            gE(ApplyId).asInstanceOf[dom.html.Button].disabled = true
+            valFn(comp).map {
+              case Right(_) =>
+                gE(ApplyId).asInstanceOf[dom.html.Button].disabled = false
+                if (!p.isCompleted) p.success(Right(DlgCompResult(comp)))
+                modal.hide()
+              case Left(err) if err.is("tourney_already_exists") =>
+                gE(ApplyId).asInstanceOf[dom.html.Button].disabled = false
+                val inputEl = gE(CompNameId).asInstanceOf[dom.html.Input]
+                inputEl.classList.add("is-invalid")
+                inputEl.oninput = { (_: dom.Event) =>
+                  inputEl.classList.remove("is-invalid")
+                }
+                dom.window.alert(base.Messages.gM("error.competition_already_exists"))
+              case Left(err) =>
+                gE(ApplyId).asInstanceOf[dom.html.Button].disabled = false
+                dom.window.alert(s"Fehler: ${err.msgCode}")
+            }
+          case None =>
+            if (!p.isCompleted) p.success(Right(DlgCompResult(comp)))
+            modal.hide()
+        }
       }
     }
 

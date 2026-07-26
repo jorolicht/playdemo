@@ -122,6 +122,13 @@ object TourneyNew extends BasePage with JsWrapper:
           
         case Left(err) =>
           val errMsg = if (err.is("tourney_already_exists")) {
+            val nameInput = dom.document.getElementById("tn-name").asInstanceOf[dom.html.Input]
+            if (nameInput != null) {
+              nameInput.classList.add("is-invalid")
+              nameInput.oninput = { (_: dom.Event) =>
+                nameInput.classList.remove("is-invalid")
+              }
+            }
             base.Messages.gM("error.tourney_already_exists")
           } else {
             s"Fehler beim Erstellen des Turniers: ${err.msgCode}"

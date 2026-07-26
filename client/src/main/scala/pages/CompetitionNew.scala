@@ -84,6 +84,11 @@ object CompetitionNew extends BasePage with JsWrapper with services.ComWrapper:
           }
         case Left(err) =>
           val errMsg = if (err.is("tourney_already_exists")) {
+            val inputEl = gE(CompNameId).asInstanceOf[dom.html.Input]
+            inputEl.classList.add("is-invalid")
+            inputEl.oninput = { (_: dom.Event) =>
+              inputEl.classList.remove("is-invalid")
+            }
             gM("error.competition_already_exists")
           } else {
             s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}"
