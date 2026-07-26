@@ -1,7 +1,7 @@
 CompetitionInfo.title = Competition: {0}
 CompetitionInfo.edit = Edit
 CompetitionInfo.reactivate = Reactivate
-CompetitionInfo.finish = Finish
+CompetitionInfo.finish = Finalize
 CompetitionInfo.delete = Delete
 CompetitionInfo.sport = Sport:
 CompetitionInfo.type = Type:
