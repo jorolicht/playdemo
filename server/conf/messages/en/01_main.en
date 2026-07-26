@@ -94,6 +94,7 @@ btn.backToCompetition                               = Back to Competition
 btn.cancel                                          = Cancel
 btn.edit                                            = Edit
 btn.delete                                          = Delete
+btn.saveLeave                                       = Save/Leave
 btn.send                                            = Send
 breadcrumb.home                                     = Home
 

@@ -36,6 +36,11 @@
                 <button class="btn btn-danger btn-sm" @id(BtnDeleteTourney, "onclick") @if(!base.Global.hasTourneyAccess(tourney)){disabled}>
                     <i class="bi bi-trash me-1"></i>@gM("btn.delete")
                 </button>
+                @if(tourney.ident != "SIMPLE") {
+                    <button class="btn btn-warning btn-sm fw-bold text-dark ms-2" @id(BtnSaveLeave, "onclick")>
+                        <i class="bi bi-box-arrow-right me-1"></i>@gM("btn.saveLeave")
+                    </button>
+                }
             </div>
         </div>
         <div class="card-body bg-light">

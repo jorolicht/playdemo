@@ -27,4 +27,5 @@ CompetitionInfo.rounds_header = Runden
 CompetitionInfo.certificates_header = Urkunden
 CompetitionInfo.cert_yes = JA
 CompetitionInfo.cert_no = NEIN
+CompetitionInfo.save_leave = Speichern/Verlassen
 

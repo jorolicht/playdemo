@@ -22,6 +22,8 @@ object CompetitionInfo extends BasePage with JsWrapper:
   val BtnEditComp:       HtmlId = genId(name)
   /** Button to delete the competition. */
   val BtnDeleteComp:     HtmlId = genId(name)
+  /** Button to save and leave the competition. */
+  val BtnSaveLeave:      HtmlId = genId(name)
   /** Button to toggle competition status between RUN and FIN. */
   val BtnToggleStatus:   HtmlId = genId(name)
   /** Button to start a new stage. */
@@ -151,6 +153,27 @@ object CompetitionInfo extends BasePage with JsWrapper:
                 error(s"Failed to delete competition: ${err.msgCode}")
             }
           case _ => debug("Delete cancelled")
+        }
+
+      case `BtnSaveLeave` =>
+        val title = "Wettbewerb verlassen"
+        val msg = "Möchten Sie den aktuellen Wettbewerb wirklich verlassen? Alle Änderungen werden gespeichert."
+        dialogs.DlgMsgbox.show(msg, title, List(shared.BoxButton.Yes, shared.BoxButton.No)).map {
+          case shared.BoxButton.Yes =>
+            services.TourneyDB.sync().map { _ =>
+              Global.currentSelection = shared.model.Selection()
+              // Clear page state from session storage
+              try {
+                val storage = org.scalajs.dom.window.sessionStorage
+                storage.removeItem("tourney_last_page")
+                storage.removeItem("tourney_last_param")
+                storage.removeItem("tourney_last_selection")
+              } catch { case _: Exception => }
+              
+              comps.ContextHeader.hide()
+              loadPage(PageNameTyp("MainView"), "")
+            }
+          case _ => // Do nothing
         }
 
       case `BtnToggleStatus` =>

@@ -49,29 +49,58 @@ def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, asy
       }
     }
 
-    debug(s"loadPage -> pageName:${targetPage} param:${targetParam}")
-    ContextHeader.hide()
-    
-    if async then
-      pagesMap(targetPage).renderAsync(targetParam).map { success =>
-        if success then
-          base.Global.activePageName = targetPage.value
-          if withSidebar then Sidebar.setNavLink(targetPage.value)
-          savePageState(targetPage, targetParam)
-          comps.Navbar.render()
-        else   
-          error(s"loadPage -> page:${targetPage} param:${targetParam}")
+    if (base.Global.currentSelection.tourney.isDefined && !base.Global.isTourneyPage(targetPage.value)) {
+      val isSimple = base.Global.currentSelection.tourney.exists(_.ident == "SIMPLE")
+      val title = if (isSimple) "Wettbewerb verlassen" else "Turnier verlassen"
+      val msg = if (isSimple) {
+        "Möchten Sie den aktuellen Wettbewerb wirklich verlassen? Alle Änderungen werden gespeichert."
+      } else {
+        "Möchten Sie das aktuelle Turnier wirklich verlassen? Alle Änderungen werden gespeichert."
       }
-    else
-      if pagesMap(targetPage).render(targetParam) then
+      
+      dialogs.DlgMsgbox.show(msg, title, List(shared.BoxButton.Yes, shared.BoxButton.No)).map {
+        case shared.BoxButton.Yes =>
+          services.TourneyDB.sync().map { _ =>
+            base.Global.currentSelection = shared.model.Selection()
+            try {
+              val storage = org.scalajs.dom.window.sessionStorage
+              storage.removeItem("tourney_last_page")
+              storage.removeItem("tourney_last_param")
+              storage.removeItem("tourney_last_selection")
+            } catch { case _: Exception => }
+            
+            doLoadPageInternal(targetPage, targetParam, withSidebar, async)
+          }
+        case _ => // Do nothing
+      }
+    } else {
+      doLoadPageInternal(targetPage, targetParam, withSidebar, async)
+    }
+  catch
+    case e: Exception => error(s"loadPage -> page:${pageName} param:${param} not found: ${e.getMessage}")
+
+private def doLoadPageInternal(targetPage: PageName, targetParam: String, withSidebar: Boolean, async: Boolean): Unit =
+  debug(s"loadPage -> pageName:${targetPage} param:${targetParam}")
+  ContextHeader.hide()
+  
+  if async then
+    pagesMap(targetPage).renderAsync(targetParam).map { success =>
+      if success then
         base.Global.activePageName = targetPage.value
         if withSidebar then Sidebar.setNavLink(targetPage.value)
         savePageState(targetPage, targetParam)
         comps.Navbar.render()
       else   
         error(s"loadPage -> page:${targetPage} param:${targetParam}")
-  catch
-    case e: Exception => error(s"loadPage -> page:${pageName} param:${param} not found: ${e.getMessage}")
+    }
+  else
+    if pagesMap(targetPage).render(targetParam) then
+      base.Global.activePageName = targetPage.value
+      if withSidebar then Sidebar.setNavLink(targetPage.value)
+      savePageState(targetPage, targetParam)
+      comps.Navbar.render()
+    else   
+      error(s"loadPage -> page:${targetPage} param:${targetParam}")
 
 private def savePageState(pageName: PageName, param: String): Unit =
   if (pageName.value == "Goodbye") return

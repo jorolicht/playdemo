@@ -532,7 +532,7 @@
   "StageConfig.GRPS34": "3er/4er Gruppen",
   "email.register.from": "XXX@example.com",
   "DlgAddSingle.action": "Aktion",
-  "StageDraw.btn_start": "START SPIELSTAGE",
+  "StageDraw.btn_start": "START SPIELPHASE",
   "StageInput.finished": "Fertig",
   "contextHeader.participants": "Teilnehmer",
   "CompStatus.RUN": "Aktiv",
