@@ -25,7 +25,7 @@
                         </button>
                         <button class="btn btn-dark btn-sm fw-bold" @id(BtnAddParticipant, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isLocked){disabled}>
                             <i class="bi bi-plus-lg me-1"></i>
-                            @if(selection.competition.exists(_.typ == CompTyp.DOUBLE)) { @gM("+add_double") } else { @gM("+add_single") }
+                            @if(selection.competition.exists(c => c.typ == CompTyp.DOUBLE || c.typ == CompTyp.MIXED)) { @gM("+add_double") } else { @gM("+add_single") }
                         </button>
                     }
                 }
@@ -78,82 +78,88 @@
     </div>
 
     @if(selection.competition.isDefined) {
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover table-sm mb-0 align-middle">
-                        <thead class="table-light">
-                            <tr class="small text-muted text-uppercase">
-                                <th class="ps-3" style="width: 80px;">
-                                    <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderSno, "onclick")>
-                                        @gM("+snr_header") @sortIcon("sno", sortCol, sortAsc)
-                                    </button>
-                                </th>
-                                <th>
-                                    <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
-                                        @gM("+name_header") @sortIcon("name", sortCol, sortAsc)
-                                    </button>
-                                </th>
-                                <th>
-                                    <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderClub, "onclick")>
-                                        @gM("+club_header") @sortIcon("club", sortCol, sortAsc)
-                                    </button>
-                                </th>
-                                <th class="text-center" style="width: 80px;">
-                                    <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
-                                        @gM("+ttr_header") @sortIcon("ttr", sortCol, sortAsc)
-                                    </button>
-                                </th>
-                                <th class="text-center" style="width: 80px;">
-                                    <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderYear, "onclick")>
-                                        @gM("+year_header") @sortIcon("year", sortCol, sortAsc)
-                                    </button>
-                                </th>
-                                <th class="text-center" style="width: 100px;">
-                                    <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderActive, "onclick")>
-                                        @gM("+active_header") @sortIcon("active", sortCol, sortAsc)
-                                    </button>
-                                </th>
-                                <th class="text-end pe-3" style="width: 50px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if(participants.isEmpty) {
-                                <tr><td colspan="7" class="text-center py-4 text-muted italic">@gM("+no_players")</td></tr>
-                            }
-                            @participants.map { p =>
-                                <tr class="@if(!p.active){text-muted opacity-75}">
-                                    <td class="ps-3">@p.id.startId</td>
-                                    <td class="fw-bold">@p.name</td>
-                                    <td>@p.club</td>
-                                    <td class="text-center">@p.rating</td>
-                                    <td class="text-center small">@p.birthYear</td>
-                                    @defining(selection.competition.exists(isLocked)) { isLocked =>
-                                        <td class="text-center">
-                                            <div class="form-check d-flex justify-content-center">
-                                                <input @id(IdCheckActive, "onchange", p.id.idSaveSuffix) class="form-check-input" type="checkbox" data-sno="@p.id" @if(p.active){checked} @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isLocked){disabled}>
-                                            </div>
-                                        </td>
-                                        <td class="text-end pe-3">
-                                            <button class="btn btn-link btn-sm text-danger p-0 delete-participant-btn" 
-                                                    title="@gM("+remove")" 
-                                                    @id(BtnDeleteParticipant, "onclick", p.id.idSaveSuffix)
-                                                    data-sno="@p.id"
-                                                    @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || selection.competition.exists(_.status != CompStatus.CFG)){disabled}>
-                                                <i class="bi bi-trash"></i>
+        @defining(selection.competition.exists(c => c.typ == CompTyp.DOUBLE || c.typ == CompTyp.MIXED)) { isDoubleComp =>
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr class="small text-muted text-uppercase">
+                                    <th class="ps-3" style="width: 80px;">
+                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderSno, "onclick")>
+                                            @gM("+snr_header") @sortIcon("sno", sortCol, sortAsc)
+                                        </button>
+                                    </th>
+                                    <th>
+                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
+                                            @if(isDoubleComp){ @gM("+double_name_header") }else{ @gM("+name_header") } @sortIcon("name", sortCol, sortAsc)
+                                        </button>
+                                    </th>
+                                    <th>
+                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderClub, "onclick")>
+                                            @if(isDoubleComp){ @gM("+double_club_header") }else{ @gM("+club_header") } @sortIcon("club", sortCol, sortAsc)
+                                        </button>
+                                    </th>
+                                    <th class="text-center" style="width: 100px;">
+                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
+                                            @if(isDoubleComp){ @gM("+double_ttr_header") }else{ @gM("+ttr_header") } @sortIcon("ttr", sortCol, sortAsc)
+                                        </button>
+                                    </th>
+                                    @if(!isDoubleComp) {
+                                        <th class="text-center" style="width: 80px;">
+                                            <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderYear, "onclick")>
+                                                @gM("+year_header") @sortIcon("year", sortCol, sortAsc)
                                             </button>
-                                        </td>
+                                        </th>
                                     }
+                                    <th class="text-center" style="width: 100px;">
+                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderActive, "onclick")>
+                                            @gM("+active_header") @sortIcon("active", sortCol, sortAsc)
+                                        </button>
+                                    </th>
+                                    <th class="text-end pe-3" style="width: 80px;">@gM("+action_header")</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @if(participants.isEmpty) {
+                                    <tr><td colspan="@if(isDoubleComp){6}else{7}" class="text-center py-4 text-muted italic">@gM("+no_players")</td></tr>
+                                }
+                                @participants.map { p =>
+                                    <tr class="@if(!p.active){text-muted opacity-75}">
+                                        <td class="ps-3">@p.id.startId</td>
+                                        <td class="fw-bold">@p.name</td>
+                                        <td>@p.club</td>
+                                        <td class="text-center">@p.rating</td>
+                                        @if(!isDoubleComp) {
+                                            <td class="text-center small">@p.birthYear</td>
+                                        }
+                                        @defining(selection.competition.exists(isLocked)) { isLocked =>
+                                            <td class="text-center">
+                                                <div class="form-check d-flex justify-content-center">
+                                                    <input @id(IdCheckActive, "onchange", p.id.idSaveSuffix) class="form-check-input" type="checkbox" data-sno="@p.id" @if(p.active){checked} @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isLocked){disabled}>
+                                                </div>
+                                            </td>
+                                            <td class="text-end pe-3">
+                                                <button class="btn btn-link btn-sm text-danger p-0 delete-participant-btn" 
+                                                        title="@gM("+remove")" 
+                                                        @id(BtnDeleteParticipant, "onclick", p.id.idSaveSuffix)
+                                                        data-sno="@p.id"
+                                                        @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || selection.competition.exists(_.status != CompStatus.CFG)){disabled}>
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white py-2 small text-muted">
+                    <i class="bi bi-info-circle me-1"></i> @gM("+footer_info")
                 </div>
             </div>
-            <div class="card-footer bg-white py-2 small text-muted">
-                <i class="bi bi-info-circle me-1"></i> @gM("+footer_info")
-            </div>
-        </div>
+        }
     } else {
         <div class="text-center py-5 bg-light border rounded shadow-sm">
             <i class="bi bi-arrow-up-circle text-muted opacity-25" style="font-size: 4rem;"></i>

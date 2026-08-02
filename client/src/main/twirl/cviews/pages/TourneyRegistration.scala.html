@@ -1,0 +1,212 @@
+@import shared.model.*
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+@import pages.TourneyRegistration.*
+@import base.Messages.gM
+@import play.twirl.api.Html
+
+@(tourney: Tourney, competitions: Seq[Competition])
+
+@canRegister = @{
+  base.Global.currentAci.allowRegistration && isFutureOrToday(tourney)
+}
+
+@startDateFormatted = @{
+  if (tourney.startDate != 0) tourney.getStartDate(base.Global.lang, 1) else ""
+}
+
+@endDateFormatted = @{
+  if (tourney.endDate != 0) tourney.getEndDate(base.Global.lang, 1) else ""
+}
+
+<div class="container mt-4 mb-5">
+    <!-- 1. Container: Begrüßung -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4 bg-white">
+        <div class="card-body p-4">
+            <h3 class="h4 fw-bold text-dark mb-2">
+                Herzlich Willkommen zum @tourney.name
+            </h3>
+            @if(tourney.startDate != 0) {
+                <div class="text-muted small mb-2">
+                    <i class="bi bi-calendar-event me-1 text-primary"></i>
+                    @if(tourney.startDate != tourney.endDate) {
+                        vom @startDateFormatted bis zum @endDateFormatted
+                    } else {
+                        am @startDateFormatted
+                    }
+                </div>
+            }
+            <div class="d-flex flex-wrap gap-3 align-items-center text-muted small mt-2">
+                @if(tourney.organizer.nonEmpty) {
+                    <span><i class="bi bi-building text-info me-1"></i><strong>@gM("tourneyNew.organizer"):</strong> @tourney.organizer</span>
+                }
+                <span><i class="bi bi-trophy text-warning me-1"></i><strong>@gM("tourneyNew.category"):</strong> @tourney.category</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Container: Wettbewerb & Zeitplan -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom-0">
+            <h4 class="h5 mb-0 fw-bold text-dark">
+                <i class="bi bi-list-stars me-2 text-primary"></i>@gM("tourneyHomepage.competitionsContainer")
+            </h4>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4" style="width: 60px;">#</th>
+                            <th>@gM("table.name")</th>
+                            <th>@gM("tourneyInfo.type")</th>
+                            <th>@gM("tourneyHomepage.startTime")</th>
+                            <th>@gM("table.ttr")</th>
+                            <th>@gM("tourneyInfo.status")</th>
+                            <th class="text-end pe-4">@gM("tourneyInfo.actions")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(competitions.isEmpty) {
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted italic">@gM("contextHeader.noCompetitions")</td>
+                            </tr>
+                        }
+                        @competitions.zipWithIndex.map { case (c, i) =>
+                            @defining(if (c.startDate != null && c.startDate.length >= 16) c.startDate.substring(11, 16) else (if (c.startDate != null) c.startDate else "-")) { startTimeStr =>
+                                <tr>
+                                    <td class="ps-4 text-muted">@(i + 1)</td>
+                                    <td class="fw-bold text-primary">
+                                        @c.name
+                                    </td>
+                                    <td><span class="badge bg-light text-dark border">@gM(c.typ.msgCode)</span></td>
+                                    <td>
+                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                                            <i class="bi bi-clock me-1"></i>@{if (startTimeStr != null && startTimeStr.nonEmpty) startTimeStr else "-"}
+                                        </span>
+                                    </td>
+                                    <td>@{c.lowLevel.getOrElse(0)} - @{c.upperLevel.getOrElse("∞")}</td>
+                                    <td>
+                                        <span class="badge @{if(c.status == CompStatus.RUN) "bg-warning" else if(c.status == CompStatus.FIN) "bg-success" else "bg-secondary"}">
+                                            @gM(c.status.msgCode)
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        @if(canRegister) {
+                                            <a href="javascript:appLoadPage('PlayerRegistration', '@c.id.value')" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                                                <i class="bi bi-person-plus-fill me-1"></i>@gM("tourneyHomepage.registerNow")
+                                            </a>
+                                        } else {
+                                            <span class="badge bg-secondary opacity-75 fw-normal">
+                                                @gM("tourneyHomepage.registrationClosed")
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Container: Weitere Informationen -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+            <h4 class="h5 mb-0 fw-bold text-primary">
+                <i class="bi bi-info-circle-fill me-2 text-info"></i>@gM("tourneyHomepage.infoContainer")
+            </h4>
+        </div>
+        <div class="card-body px-4 pb-4">
+            @if(base.Global.currentAci.homepageInfo != null && base.Global.currentAci.homepageInfo.trim.nonEmpty) {
+                <div class="markdown-body p-3 bg-light rounded-3 border">
+                    @Html(base.MarkdownRenderer.render(base.Global.currentAci.homepageInfo))
+                </div>
+            } else {
+                <p class="text-muted mb-0 italic">@gM("tourneyHomepage.noInfo")</p>
+            }
+        </div>
+    </div>
+
+    <!-- 4. Container: Adresse & Anfahrt -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+            <h4 class="h5 mb-0 fw-bold text-primary">
+                <i class="bi bi-geo-alt-fill me-2 text-danger"></i>@gM("tourneyHomepage.addressContainer")
+            </h4>
+        </div>
+        <div class="card-body px-4 pb-4">
+            @if(tourney.address.isDefined) {
+                @defining(tourney.address.get) { addr =>
+                    <div class="row align-items-center">
+                        <div class="col-md-8 mb-3 mb-md-0">
+                            @if(addr.description.nonEmpty) {
+                                <h5 class="fw-bold mb-1">@addr.description</h5>
+                            }
+                            <p class="mb-1 text-secondary">
+                                @if(addr.street.nonEmpty) { @addr.street <br> }
+                                @if(addr.zip.nonEmpty || addr.city.nonEmpty) { @addr.zip @addr.city <br> }
+                                @if(addr.country.nonEmpty) { @addr.country }
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            @defining(s"${addr.street} ${addr.zip} ${addr.city} ${addr.country}".trim) { queryStr =>
+                                @if(queryStr.nonEmpty) {
+                                    <a href="https://www.google.com/maps/search/?api=1&query=@java.net.URLEncoder.encode(queryStr, "UTF-8")" target="_blank" class="btn btn-outline-primary rounded-pill px-3 shadow-sm">
+                                        <i class="bi bi-map me-1"></i>@gM("tourneyHomepage.openMaps")
+                                    </a>
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+            } else {
+                <p class="text-muted mb-0 italic">@gM("tourneyHomepage.noAddress")</p>
+            }
+        </div>
+    </div>
+
+    <!-- 5. Container: Ansprechpartner -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+            <h4 class="h5 mb-0 fw-bold text-primary">
+                <i class="bi bi-person-lines-fill me-2 text-success"></i>@gM("tourneyHomepage.contactContainer")
+            </h4>
+        </div>
+        <div class="card-body px-4 pb-4">
+            @if(tourney.contact.isDefined) {
+                @defining(tourney.contact.get) { c =>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <strong><i class="bi bi-person me-1"></i>Name:</strong> @c.name()
+                        </div>
+                        @if(c.phone.nonEmpty) {
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="bi bi-telephone me-1"></i>Telefon:</strong> <a href="tel:@c.phone" class="text-decoration-none">@c.phone</a>
+                            </div>
+                        }
+                        @if(c.email.nonEmpty) {
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="bi bi-envelope me-1"></i>E-Mail:</strong> <a href="mailto:@c.email" class="text-decoration-none">@c.email</a>
+                            </div>
+                        }
+                        @if(tourney.organizer.nonEmpty) {
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="bi bi-building me-1"></i>Veranstalter:</strong> @tourney.organizer
+                            </div>
+                        }
+                    </div>
+                }
+            } else if(tourney.organizer.nonEmpty) {
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong><i class="bi bi-building me-1"></i>Veranstalter:</strong> @tourney.organizer
+                    </div>
+                </div>
+            } else {
+                <p class="text-muted mb-0 italic">@gM("tourneyHomepage.noContact")</p>
+            }
+        </div>
+    </div>
+</div>

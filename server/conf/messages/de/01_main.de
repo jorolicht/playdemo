@@ -102,6 +102,7 @@ breadcrumb.home                                     = Startseite
 # TourneyNew
 ###
 tourneyNew.title                                    = Neues Turnier erstellen
+tourneyNew.titleEdit                                = Turnier bearbeiten
 tourneyNew.btnLoadCtt                               = Lade ClickTT-Daten
 tourneyNew.secGeneralInfo                           = Allgemeine Informationen
 tourneyNew.name                                     = Turniername
@@ -231,7 +232,7 @@ contextHeader.noCompetitions                        = Keine Wettbewerbe vorhande
 contextHeader.showAll                               = Alle anzeigen
 contextHeader.selectStage                           = Selektiere Stage
 contextHeader.registration                          = Anmeldung
-contextHeader.participants                          = Teilnehmer
+contextHeader.participants                          = Spieler
 contextHeader.results                               = Ergebnisse
 contextHeader.administration                        = Administration
 
@@ -267,18 +268,45 @@ compNew.quickStartBtn                               = SCHNELLSTART
 ###
 # MainSearch
 ###
-search.title                                        = Turniersuche
-search.name                                         = Turniername
+search.title                                        = Turnier- und Wettbewerbssuche
+search.name                                         = Turnier- oder Wettbewerbsname
 search.namePlh                                      = Suchen...
 search.organizer                                   = Organisator
 search.organizerPlh                                = Verein oder Name
 search.startDateFrom                                = Startdatum (ab)
 search.sortByDate                                   = Nach Datum sortieren
 search.thDate                                       = Datum
-search.thTitle                                      = Turnier / Titel
+search.thTitle                                      = Turnier/Wettbewerb Name
+search.thType                                       = Typ
+search.typeAll                                      = Turniere und Wettbewerbe
+search.typeTourney                                  = Turniere
+search.typeComp                                     = Wettbewerbe
 search.thOrganizer                                  = Organisator
-search.loading                                      = Lade Turniere...
-search.count                                        = {0} Turniere gefunden
+search.loading                                      = Lade Ergebnisse...
+search.count                                        = {0} Ergebnisse gefunden
+search.standaloneComp                               = Eigenständiger Wettbewerb
+
+###
+# Tourney Homepage
+###
+tourneyHomepage.welcome                             = Herzlich willkommen!
+tourneyHomepage.welcomeBanner                       = Herzlich Willkommen zum {0} vom {1} bis zum {2}
+tourneyHomepage.welcomeBannerSingle                 = Herzlich Willkommen zum {0} am {1}
+tourneyHomepage.title                               = Turnier-Homepage
+tourneyHomepage.competitionsSchedule                = Wettbewerbe & Zeitplan
+tourneyHomepage.startTime                           = Startzeit
+tourneyHomepage.registerNow                         = Jetzt anmelden
+tourneyHomepage.registrationClosed                  = Keine Online-Anmeldung
+tourneyHomepage.greetingContainer                   = Begrüßung
+tourneyHomepage.competitionsContainer               = Wettbewerbe & Zeitplan
+tourneyHomepage.infoContainer                       = Weitere Informationen
+tourneyHomepage.addressContainer                    = Adresse & Anfahrt
+tourneyHomepage.contactContainer                    = Ansprechpartner
+tourneyHomepage.noInfo                              = Keine weiteren Informationen vorhanden.
+tourneyHomepage.noAddress                           = Keine Adresse hinterlegt.
+tourneyHomepage.noContact                           = Kein Ansprechpartner hinterlegt.
+tourneyHomepage.openMaps                            = In Google Maps öffnen
+dlg.editTourney.title                               = Ansprechpartner & Austragungsort bearbeiten
 
 ###
 # ResultList

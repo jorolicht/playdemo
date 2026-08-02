@@ -127,51 +127,57 @@
             <div id="collapseParticipants" class="accordion-collapse collapse show" aria-labelledby="headingParticipants" data-bs-parent="#participantsAccordion">
                 <div class="accordion-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover mb-0">
-                            <thead class="table-light">
-                                <tr class="small text-muted text-uppercase">
-                                     <th class="ps-3" style="width: 80px;">
-                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderSno, "onclick")>
-                                            @gM("+snr_header") @sortIcon("sno", sortCol, sortAsc)
-                                        </button>
-                                    </th>
-                                    <th>
-                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
-                                            @gM("+name_header") @sortIcon("name", sortCol, sortAsc)
-                                        </button>
-                                    </th>
-                                    <th>
-                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderClub, "onclick")>
-                                            @gM("+club_header") @sortIcon("club", sortCol, sortAsc)
-                                        </button>
-                                    </th>
-                                    <th class="text-center" style="width: 80px;">
-                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
-                                            @gM("+ttr_header") @sortIcon("ttr", sortCol, sortAsc)
-                                        </button>
-                                    </th>
-                                    <th class="text-center" style="width: 80px;">
-                                        <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderYear, "onclick")>
-                                            @gM("+year_header") @sortIcon("year", sortCol, sortAsc)
-                                        </button>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if(participants.isEmpty) {
-                                    <tr><td colspan="5" class="text-center py-3 text-muted">@gM("+no_participants")</td></tr>
-                                }
-                                @participants.map { p =>
-                                    <tr>
-                                        <td class="ps-3">@p.id.startId</td>
-                                        <td class="fw-bold">@p.name</td>
-                                        <td>@p.club</td>
-                                        <td class="text-center">@p.rating</td>
-                                        <td class="text-center">@p.birthYear</td>
+                        @defining(comp.typ == CompTyp.DOUBLE || comp.typ == CompTyp.MIXED) { isDoubleComp =>
+                            <table class="table table-sm table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr class="small text-muted text-uppercase">
+                                         <th class="ps-3" style="width: 80px;">
+                                            <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderSno, "onclick")>
+                                                @gM("+snr_header") @sortIcon("sno", sortCol, sortAsc)
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
+                                                @if(isDoubleComp){ @gM("+double_name_header") }else{ @gM("+name_header") } @sortIcon("name", sortCol, sortAsc)
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderClub, "onclick")>
+                                                @if(isDoubleComp){ @gM("+double_club_header") }else{ @gM("+club_header") } @sortIcon("club", sortCol, sortAsc)
+                                            </button>
+                                        </th>
+                                        <th class="text-center" style="width: 100px;">
+                                            <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
+                                                @if(isDoubleComp){ @gM("+double_ttr_header") }else{ @gM("+ttr_header") } @sortIcon("ttr", sortCol, sortAsc)
+                                            </button>
+                                        </th>
+                                        @if(!isDoubleComp) {
+                                            <th class="text-center" style="width: 80px;">
+                                                <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderYear, "onclick")>
+                                                    @gM("+year_header") @sortIcon("year", sortCol, sortAsc)
+                                                </button>
+                                            </th>
+                                        }
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @if(participants.isEmpty) {
+                                        <tr><td colspan="@if(isDoubleComp){4}else{5}" class="text-center py-3 text-muted">@gM("+no_participants")</td></tr>
+                                    }
+                                    @participants.map { p =>
+                                        <tr>
+                                            <td class="ps-3">@p.id.startId</td>
+                                            <td class="fw-bold">@p.name</td>
+                                            <td>@p.club</td>
+                                            <td class="text-center">@p.rating</td>
+                                            @if(!isDoubleComp) {
+                                                <td class="text-center">@p.birthYear</td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
                     </div>
                 </div>
             </div>

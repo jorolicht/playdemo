@@ -62,11 +62,24 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
 
   private var activeTab = "IMPEXP" // Tabs: "IMPEXP", "CTT", "CERT", "MESSAGES", "MATCHBOARD"
 
+  /**
+   * Renders the tournament administration page for the currently selected tournament.
+   * For standalone competitions (ident == "SIMPLE"), the Click TT update ("CTT") and Homepage ("HOMEPAGE") tabs are hidden and fall back to "IMPEXP".
+   *
+   * @param param The optional tab name to activate.
+   * @return True if a tournament is loaded and rendered, false otherwise.
+   */
   def render(param: String = ""): Boolean =
     Global.currentSelection.tourney match
       case Some(tourney) =>
         if (param.nonEmpty && List("IMPEXP", "CTT", "CERT", "MESSAGES", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT").contains(param.toUpperCase)) {
           activeTab = param.toUpperCase
+        }
+        if (tourney.ident == "SIMPLE" && (activeTab == "CTT" || activeTab == "HOMEPAGE")) {
+          activeTab = "IMPEXP"
+        }
+        if (!Global.currentAci.showMessagesTab && activeTab == "MESSAGES") {
+          activeTab = "IMPEXP"
         }
 
         // Fetch templates if we select "CERT" and haven't loaded them yet
@@ -132,12 +145,25 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
           val deRadio = dom.document.getElementById("date-format-de").asInstanceOf[dom.html.Input]
           val ukRadio = dom.document.getElementById("date-format-uk").asInstanceOf[dom.html.Input]
           val usRadio = dom.document.getElementById("date-format-us").asInstanceOf[dom.html.Input]
+          val msgCb = dom.document.getElementById("show-messages-tab-cb").asInstanceOf[dom.html.Input]
           
           if (deRadio != null && ukRadio != null && usRadio != null) {
             Global.currentAci.dateFormat match {
               case "UK" => ukRadio.checked = true
               case "US" => usRadio.checked = true
               case _ => deRadio.checked = true
+            }
+          }
+          if (msgCb != null) {
+            msgCb.checked = Global.currentAci.showMessagesTab
+            msgCb.onchange = (_: dom.Event) => {
+              val updatedAci = Global.currentAci.copy(showMessagesTab = msgCb.checked)
+              services.TourneyDB.saveAci(tourney.wpId, updatedAci).map {
+                case Right(_) =>
+                  render()
+                case Left(err) =>
+                  dom.window.alert(s"Fehler beim Speichern: ${err.msgCode}")
+              }
             }
           }
           
@@ -147,10 +173,11 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
                                    else if (ukRadio != null && ukRadio.checked) "UK"
                                    else if (usRadio != null && usRadio.checked) "US"
                                    else "DE"
-              val updatedAci = Global.currentAci.copy(dateFormat = selectedFormat)
+              val showMessages = if (msgCb != null) msgCb.checked else Global.currentAci.showMessagesTab
+              val updatedAci = Global.currentAci.copy(dateFormat = selectedFormat, showMessagesTab = showMessages)
               services.TourneyDB.saveAci(tourney.wpId, updatedAci).map {
                 case Right(_) =>
-                  dom.window.alert("Datumsformat erfolgreich gespeichert.")
+                  dom.window.alert("Einstellungen erfolgreich gespeichert.")
                   render()
                 case Left(err) =>
                   dom.window.alert(s"Fehler beim Speichern: ${err.msgCode}")

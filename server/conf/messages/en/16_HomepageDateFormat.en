@@ -2,11 +2,13 @@ tourneyAdmin.tabHomepage = Homepage
 tourneyAdmin.homepageInfoLabel = Tournament details for the Homepage
 tourneyAdmin.homepageInfoPlh = Enter homepage details here (HTML markup allowed)...
 tourneyAdmin.allowRegistrationLabel = Allow players to register online
-tourneyAdmin.tabDateFormat = Date Format
+tourneyAdmin.tabDateFormat = Settings
 tourneyAdmin.selectDateFormatLabel = Select the desired date format:
 tourneyAdmin.dateFormatDe = German Format
 tourneyAdmin.dateFormatUk = English / British Format (UK)
 tourneyAdmin.dateFormatUs = American Format (US)
+tourneyAdmin.messagesTabSettingTitle = Messages Tab
+tourneyAdmin.showMessagesTabLabel = Show "Messages" tab in Administration
 
 # Offline / Local / Demo Mode Options
 login.offlineTitle = Without Login

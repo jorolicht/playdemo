@@ -1,0 +1,89 @@
+@import shared.model.*
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+@import dialogs.DlgEditTourney.*
+@import base.Messages.gM
+
+@(tourney: Tourney)
+
+<div class="modal fade" @id(ModalId) tabindex="-1" aria-labelledby="DlgEditTourney-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="DlgEditTourney-label" @id(TitleId)>
+                    <i class="bi bi-pencil-square me-2"></i>@gM("dlg.editTourney.title")
+                </h5>
+                <button type="button" class="btn-close btn-close-white" @id(CloseId) data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="editTourneyForm" onsubmit="return false;">
+                    
+                    <!-- Section: Ansprechpartner -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                                <i class="bi bi-person-lines-fill me-2"></i>@gM("tourneyHomepage.contactContainer")
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="@{ContactFnameId.id}" class="form-label fw-semibold">@gM("tourneyNew.firstname")</label>
+                            <input type="text" class="form-control" @id(ContactFnameId) value="@{tourney.contact.map(_.firstname).getOrElse("")}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="@{ContactLnameId.id}" class="form-label fw-semibold">@gM("tourneyNew.lastname")</label>
+                            <input type="text" class="form-control" @id(ContactLnameId) value="@{tourney.contact.map(_.lastname).getOrElse("")}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="@{ContactPhoneId.id}" class="form-label fw-semibold">@gM("tourneyNew.phone")</label>
+                            <input type="tel" class="form-control" @id(ContactPhoneId) value="@{tourney.contact.map(_.phone).getOrElse("")}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="@{ContactEmailId.id}" class="form-label fw-semibold">@gM("tourneyNew.email")</label>
+                            <input type="email" class="form-control" @id(ContactEmailId) value="@{tourney.contact.map(_.email).getOrElse("")}">
+                        </div>
+                    </div>
+
+                    <!-- Section: Austragungsort -->
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                                <i class="bi bi-geo-alt-fill me-2"></i>@gM("tourneyHomepage.addressContainer")
+                            </h6>
+                        </div>
+                        <div class="col-12">
+                            <label for="@{AddrDescId.id}" class="form-label fw-semibold">@gM("tourneyNew.venueName")</label>
+                            <input type="text" class="form-control" @id(AddrDescId) value="@{tourney.address.map(_.description).getOrElse("")}" placeholder="@gM("tourneyNew.venueNamePlh")">
+                        </div>
+                        <div class="col-md-9">
+                            <label for="@{AddrStreetId.id}" class="form-label fw-semibold">@gM("tourneyNew.street")</label>
+                            <input type="text" class="form-control" @id(AddrStreetId) value="@{tourney.address.map(_.street).getOrElse("")}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="@{AddrCountryId.id}" class="form-label fw-semibold">@gM("tourneyNew.country")</label>
+                            <input type="text" class="form-control" @id(AddrCountryId) value="@{tourney.address.map(_.country).getOrElse("DE")}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="@{AddrZipId.id}" class="form-label fw-semibold">@gM("tourneyNew.zip")</label>
+                            <input type="text" class="form-control" @id(AddrZipId) value="@{tourney.address.map(_.zip).getOrElse("")}">
+                        </div>
+                        <div class="col-md-8">
+                            <label for="@{AddrCityId.id}" class="form-label fw-semibold">@gM("tourneyNew.city")</label>
+                            <input type="text" class="form-control" @id(AddrCityId) value="@{tourney.address.map(_.city).getOrElse("")}">
+                        </div>
+                    </div>
+
+                    <div id="dlgEditTourneyFeedback" class="mt-3"></div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" @id(CancelId) data-bs-dismiss="modal">
+                    @gM("btn.cancel")
+                </button>
+                <button type="button" class="btn btn-primary rounded-pill px-4" @id(ApplyId)>
+                    <i class="bi bi-check-lg me-1"></i>@gM("btn.save")
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div @id(LoadId) data-loaded="false"></div>

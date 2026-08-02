@@ -99,7 +99,19 @@ function tourney_render($atts) {
 
     // URL Parameter 
     $logLevel  = isset($_GET['logLevel']) ? $_GET['logLevel'] : 'debug';
-    $tourney = isset($_GET['tourney']) ? $_GET['tourney'] : '';
+    $tourney   = isset($_GET['tourney']) ? $_GET['tourney'] : '';
+    $mode      = esc_attr($atts['mode']);
+
+    // Check request URI path to see if a tournament permalink URL was called (e.g. /tourney/organizer/slug/)
+    $uriPath  = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
+    $segments = array_values(array_filter(explode('/', $uriPath)));
+    if (count($segments) >= 2 && $segments[0] === 'tourney') {
+        $tourney = end($segments);
+        $mode    = 'view';
+    } elseif ($post && $post->post_type === 'tourney') {
+        $tourney = $slug;
+        $mode    = 'view';
+    }
 
     $turnstile_key = get_option('cfturnstile_key', getenv('TURNSTILE_SITEKEY') ?: '');
     if (!empty($turnstile_key)) {
@@ -133,7 +145,7 @@ function tourney_render($atts) {
     $output .= '<script type="module">';
 
     $output .= 'import { startApp } from "' . esc_url($jsUrl) . '";';
-    $output .= 'startApp("001DE1970-01", "' . esc_attr($atts['mode']) . '", "' . esc_attr($logLevel) . '", "' . esc_attr($tourney) . '");';
+    $output .= 'startApp("001DE1970-01", "' . esc_attr($mode) . '", "' . esc_attr($logLevel) . '", "' . esc_attr($tourney) . '");';
     $output .= '</script>';
     $output .= '</div>';
 
@@ -275,7 +287,7 @@ function js_enqueue_scripts_styles() {
         }
 
         $config = [
-            'mode'     => 'tourney',
+            'mode'     => 'view',
             'dataUrl'  => plugins_url('data/', __FILE__),
             'imgUrl'   => plugins_url('img/', __FILE__),
             'playUrl'  => get_option('tourney_server_url', get_option('tourney_url', '')),

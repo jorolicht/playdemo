@@ -113,7 +113,7 @@ object Global:
   var activePageName: String = ""
   def isTourneyPage(pageName: String): Boolean = 
     Set(
-      "TourneyInfo", "TourneyAdmin", "CompetitionInfo", "PlayerRegistration", 
+      "TourneyInfo", "TourneyRegistration", "TourneyAdmin", "CompetitionInfo", "PlayerRegistration", 
       "PlayerList", "ResultList", "StageAdmin", "StageDraw", 
       "StageInput", "StageResult", "StageScoreSheet", "StageCertificate", "Certificate"
     ).contains(pageName)

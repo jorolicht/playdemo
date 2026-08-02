@@ -2,11 +2,19 @@
 @import pages.MainSearch.*
 @import pages.MainSearch.SearchResult
 @import cviews.helper.html.* 
+@import base.Messages.gM
 
 @(r: SearchResult, dateDisplay: String)
 
-<tr @id(InputResultId, "onclick", r.id.toString()) data-tourney-id='@r.id' class='cursor-pointer'>
+<tr @id(InputResultId, "onclick", s"${r.id}_${r.compId.getOrElse(0)}") data-tourney-id='@r.id' data-comp-id='@r.compId.getOrElse(0)' data-result-type='@r.resultType.getOrElse("tourney")' class='cursor-pointer'>
     <td class='ps-3'><span class='badge bg-light text-dark border'>@dateDisplay</span></td>
+    <td>
+        @if(r.resultType.contains("competition") || r.compId.isDefined) {
+            <span class="badge bg-info text-dark">@gM("search.standaloneComp")</span>
+        } else {
+            <span class="badge bg-primary">@gM("tourneyInfo.badgeTourney")</span>
+        }
+    </td>
     <td class='fw-bold'>@r.name</td>
     <td>@r.organizer</td>
     <td class='text-center'><span class='badge bg-secondary opacity-75'>@r.status</span></td>

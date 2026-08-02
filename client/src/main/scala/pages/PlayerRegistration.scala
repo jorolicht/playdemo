@@ -67,7 +67,12 @@ object PlayerRegistration extends BasePage with JsWrapper:
 
     selection.competition match
       case Some(c) => 
-        val participants = sortParticipants(c.pants1Stage.toSeq)
+        val filteredPants = if (c.typ == CompTyp.DOUBLE || c.typ == CompTyp.MIXED) {
+          c.pants1Stage.filter(_.id.isDouble).toSeq
+        } else {
+          c.pants1Stage.filter(_.id.isSingle).toSeq
+        }
+        val participants = sortParticipants(filteredPants)
         setMain(cviews.pages.html.PlayerRegistration(selection, competitions, participants, sortCol, sortAsc))
         true
       case None => 
@@ -167,10 +172,17 @@ object PlayerRegistration extends BasePage with JsWrapper:
   private def handleAddParticipant(): Unit =
     Global.currentSelection.competition.filter(!isLocked(_)).foreach { c =>
       val tourney = services.TourneyDB.tourney
-      if (c.typ == CompTyp.DOUBLE) {
-        val players = tourney.players.toSeq
+      if (c.typ == CompTyp.DOUBLE || c.typ == CompTyp.MIXED) {
+        val registeredPlayerIds: Set[PlayerId] = c.pants1Stage.flatMap { pant =>
+          if (pant.id.isDouble) {
+            val (p1, p2) = pant.id.doubleId
+            Seq(p1, p2)
+          } else Seq.empty
+        }.toSet
+
+        val availablePlayers = tourney.players.toSeq.filterNot(p => registeredPlayerIds.contains(p.id))
         val clubs = tourney.clubs.toSeq
-        dialogs.DlgAddDouble.show(players, clubs).map {
+        dialogs.DlgAddDouble.show(availablePlayers, clubs).map {
           case Right(res) =>
             // Create Pant for double
             val doubleSno = SNO.double(res.player1.id, res.player2.id)
@@ -263,10 +275,16 @@ object PlayerRegistration extends BasePage with JsWrapper:
       }
     }
 
+  /**
+   * Handles uploading a CSV file containing player data.
+   * - For SINGLE competition: Players are added to tourney.players (if new) and added as inactive participants (PantStatus.REGI) to pants1Stage.
+   * - For DOUBLE or MIXED competition: Players are added to tourney.players only (if new) and NOT added to pants1Stage.
+   */
   private def doUploadCsv(): Unit = {
     val selection = Global.currentSelection
     val tourney   = services.TourneyDB.tourney
     selection.competition.foreach { c =>
+      val isSingleComp = (c.typ == CompTyp.SINGLE)
       val fileInput = dom.document.createElement("input").asInstanceOf[dom.html.Input]
       fileInput.`type` = "file"
       fileInput.accept = ".csv"
@@ -324,61 +342,60 @@ object PlayerRegistration extends BasePage with JsWrapper:
                   val existingPlayerOpt = tourney.players.find(tp =>
                     tp.firstName.trim.equalsIgnoreCase(p.firstName) && tp.lastName.trim.equalsIgnoreCase(p.lastName)
                   )
-                  if (existingPlayerOpt.isDefined) {
-                    val player = existingPlayerOpt.get
-                    val club = tourney.clubs.find(_.id.toInt == player.clubId)
-                    val singleSno = SNO.single(player.id)
-                    if (!c.pants1Stage.exists(_.id == singleSno)) {
-                      val pant = Pant(
-                        id = singleSno,
-                        name = player.displayName,
-                        club = club.map(_.name).getOrElse(""),
-                        rating = p.ttr.orElse(player.meta.ttr).getOrElse(0),
-                        birthYear = player.birthYear.map(_.toString).getOrElse(""),
-                        active = true,
-                        status = PantStatus.PLAY
+                  
+                  val playerRes: Either[AppError, Player] = existingPlayerOpt match {
+                    case Some(player) =>
+                      val updatedPlayer = player.copy(
+                        meta = player.meta.copy(ttr = p.ttr.orElse(player.meta.ttr))
                       )
-                      c.pants1Stage += pant
-                      tourney.updateCompetition(c)
-                    }
-                    importNext(index + 1)
-                  } else {
-                    val club = tourney.clubs.find(_.name.equalsIgnoreCase(p.clubName)).getOrElse {
-                      tourney.addClub(p.clubName, checkSimilarity = false, doSync = true).toOption.get
-                    }
-                    
-                    tourney.addPlayer(
-                      firstName = p.firstName,
-                      lastName = p.lastName,
-                      clubId = club.id.toInt,
-                      birthYear = None,
-                      email = None,
-                      whatsApp = None,
-                      doSync = true
-                    ) match {
-                      case Right(player) =>
+                      tourney.updatePlayer(updatedPlayer)
+                      Right(updatedPlayer)
+                    case None =>
+                      val club = tourney.clubs.find(_.name.equalsIgnoreCase(p.clubName)).getOrElse {
+                        tourney.addClub(p.clubName, checkSimilarity = false, doSync = true).toOption.get
+                      }
+                      tourney.addPlayer(
+                        firstName = p.firstName,
+                        lastName = p.lastName,
+                        clubId = club.id.toInt,
+                        birthYear = None,
+                        email = None,
+                        whatsApp = None,
+                        doSync = true
+                      ).map { player =>
                         val updatedPlayer = player.copy(
                           meta = player.meta.copy(ttr = p.ttr)
                         )
                         tourney.updatePlayer(updatedPlayer)
-                        
-                        val singleSno = SNO.single(updatedPlayer.id)
-                        val pant = Pant(
-                          id = singleSno,
-                          name = updatedPlayer.displayName,
-                          club = club.name,
-                          rating = p.ttr.getOrElse(0),
-                          birthYear = "",
-                          active = true,
-                          status = PantStatus.PLAY
-                        )
-                        c.pants1Stage += pant
-                        tourney.updateCompetition(c)
-                      case Left(err) =>
-                        Logging.error(s"Failed to add player from CSV: ${err.msgCode}")
-                    }
-                    importNext(index + 1)
+                        updatedPlayer
+                      }
                   }
+
+                  playerRes match {
+                    case Right(importedPlayer) =>
+                      // For SINGLE competition, add to pants1Stage as inactive (PantStatus.REGI)
+                      if (isSingleComp) {
+                        val singleSno = SNO.single(importedPlayer.id)
+                        val club = tourney.clubs.find(_.id.toInt == importedPlayer.clubId)
+                        if (!c.pants1Stage.exists(_.id == singleSno)) {
+                          val pant = Pant(
+                            id = singleSno,
+                            name = importedPlayer.displayName,
+                            club = club.map(_.name).getOrElse(""),
+                            rating = p.ttr.orElse(importedPlayer.meta.ttr).getOrElse(0),
+                            birthYear = importedPlayer.birthYear.map(_.toString).getOrElse(""),
+                            active = false,
+                            status = PantStatus.REGI
+                          )
+                          c.pants1Stage += pant
+                          tourney.updateCompetition(c)
+                        }
+                      }
+                    case Left(err) =>
+                      Logging.error(s"Failed to add player from CSV: ${err.msgCode}")
+                  }
+
+                  importNext(index + 1)
                 }
               }
               

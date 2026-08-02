@@ -27,8 +27,21 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
   val IdSortIcon:          HtmlId = genId(name)
   val IdMainSearchForm:    HtmlId = genId(name)
   val InputResultId:       HtmlId = genId(name)
+  val RadioTypeAllId:      HtmlId = genId(name)
+  val RadioTypeTourneyId:  HtmlId = genId(name)
+  val RadioTypeCompId:     HtmlId = genId(name)
 
-  case class SearchResult(id: Int, name: String, organizer: String, startDate: Int, status: String, slug: String) derives ReadWriter
+  case class SearchResult(
+    id: Int,
+    name: String,
+    organizer: String,
+    startDate: Int,
+    status: String,
+    slug: String,
+    resultType: Option[String] = None,
+    compId: Option[Int] = None,
+    tourneyId: Option[Int] = None
+  ) derives ReadWriter
 
   private var sortOrder = "DESC"
 
@@ -40,15 +53,19 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
-      case `IdInputTitle` | `IdInputOrganizer` | `IdInputDate` => 
-        debounce(delay = 800) {
+      case `IdInputTitle` | `IdInputOrganizer` | `IdInputDate` | `RadioTypeAllId` | `RadioTypeTourneyId` | `RadioTypeCompId` => 
+        debounce(delay = 400) {
           performSearch()
         }
       case `IdHeaderDate` =>
         toggleSort()
       case id if id.id.startsWith(InputResultId.id) =>
-        val tourneyId = getData(elem,"tourney-id", 0)
-        debug(s"Switching to tournament post: $tourneyId")
+        val tourneyId = getData(elem, "tourney-id", 0)
+        val compId = getData(elem, "comp-id", 0)
+        val resType = getData(elem, "result-type", "")
+        val isComp = resType == "competition" || compId > 0
+
+        debug(s"Switching to tourney: $tourneyId, compId: $compId, isComp: $isComp")
 
         // 1. Update Global PageId
         Global.pageId = tourneyId
@@ -59,7 +76,18 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
         // 3. Initialize all data from server for the new ID
         TourneyDB.init(tourneyId).map {
           case Right(_) => 
-            loadPage(TourneyInfo.name, "")
+            if (isComp) {
+              val compOpt = CompetitionDB.competitions.find(c => c != null && (compId == 0 || c.id.value == compId)).orElse(CompetitionDB.competitions.find(_ != null))
+              compOpt.foreach { comp =>
+                Global.currentSelection = Global.currentSelection.copy(
+                  tourney = Some(TourneyDB.tourney),
+                  competition = Some(comp)
+                )
+              }
+              loadPage(CompetitionInfo.name, compOpt.map(_.id.value.toString).getOrElse(""))
+            } else {
+              loadPage(TourneyInfo.name, "")
+            }
           case Left(err) => 
             error(s"Failed to initialize tournament $tourneyId: ${err.msgCode}")
             dom.window.alert(s"Fehler beim Laden des Turniers: ${err.msgCode}")
@@ -81,6 +109,10 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
     val organizer = getInput(gE(IdInputOrganizer), "")
     val date      = getInput(gE(IdInputDate), "").replace("-", "")
 
+    val typeVal = if (gE(RadioTypeTourneyId) != null && gE(RadioTypeTourneyId).asInstanceOf[dom.html.Input].checked) "tourney"
+                  else if (gE(RadioTypeCompId) != null && gE(RadioTypeCompId).asInstanceOf[dom.html.Input].checked) "competition"
+                  else "all"
+
     if (title.isEmpty && organizer.isEmpty && date.isEmpty) {
       updateResultsTable(Nil)
     } else {
@@ -88,28 +120,34 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
         "q"         -> title,
         "organizer" -> organizer,
         "dateFrom"  -> date,
-        "order"     -> sortOrder
+        "order"     -> sortOrder,
+        "type"      -> typeVal
       )
 
       ajaxGet[Seq[SearchResult]]("/wp-json/tourney/v1/search", params, host = Global.homeUrl).map {
         case Right(results) =>
-          updateResultsTable(results)
+          val filtered = typeVal match {
+            case "tourney"     => results.filter(r => !r.resultType.contains("competition") && r.compId.isEmpty)
+            case "competition" => results.filter(r => r.resultType.contains("competition") || r.compId.isDefined)
+            case _             => results
+          }
+          updateResultsTable(filtered)
         case Left(err) =>
           error(s"Search failed: ${err.msgCode}")
-          setHtml(gE(IdResultsBody), s"<tr><td colspan='4' class='text-center text-danger'>Suche fehlgeschlagen: ${err.msgCode}</td></tr>")
+          setHtml(gE(IdResultsBody), s"<tr><td colspan='5' class='text-center text-danger'>Suche fehlgeschlagen: ${err.msgCode}</td></tr>")
       }
     }
 
   private def updateResultsTable(results: Seq[SearchResult]): Unit =
-    setHtml(gE(IdResultCount), s"${results.length} Turniere gefunden")
+    setHtml(gE(IdResultCount), s"${results.length} Ergebnisse gefunden")
     
     if (results.isEmpty) {
       val msg = if (getInput(gE(IdInputTitle), "").isEmpty && 
                     getInput(gE(IdInputOrganizer), "").isEmpty && 
                     getInput(gE(IdInputDate), "").isEmpty) 
                 "Geben Sie einen Suchbegriff ein, um die Suche zu starten."
-                else "Keine Turniere gefunden."
-      setHtml(gE(IdResultsBody), s"<tr><td colspan='4' class='text-center py-4 text-muted'>$msg</td></tr>")
+                else "Keine Ergebnisse gefunden."
+      setHtml(gE(IdResultsBody), s"<tr><td colspan='5' class='text-center py-4 text-muted'>$msg</td></tr>")
     } else {
       val html = results.map { r =>
         val dateDisplay = formatDate(r.startDate.toString)

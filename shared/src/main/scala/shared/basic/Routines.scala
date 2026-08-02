@@ -55,8 +55,16 @@ type EiErr[T] = Either[Error, T]
 type FuEiErr[T] = Future[Either[AppError, T]]
 
 extension (str: String)
+  /**
+   * Splits a string by a separator into a tuple of two parts.
+   * Uses limit = 2 so that only the first occurrence of the separator is split,
+   * preserving any subsequent occurrences within the second part.
+   *
+   * @param sep The string separator (default ":").
+   * @return Tuple containing (firstPart, restPart) or ("", "") if separator is not found.
+   */
   def toTuple(sep: String=":"): Tuple2[String, String] = 
-    val x = str.split(sep)
+    val x = str.split(sep, 2)
     if x.length != 2 then ("","") else (x(0),x(1))
 
   def toError(func: String): AppError = 

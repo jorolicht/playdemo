@@ -531,10 +531,11 @@ function tourney_api_create(WP_REST_Request $request) {
  * Sucht nach Turnieren basierend auf verschiedenen Kriterien.
  */
 function tourney_api_search(WP_REST_Request $request) {
-    $q         = $request->get_param('q');
-    $organizer = $request->get_param('organizer');
-    $date_from = $request->get_param('dateFrom');
-    $order     = strtoupper($request->get_param('order') ?? 'DESC');
+    $q          = $request->get_param('q');
+    $organizer  = $request->get_param('organizer');
+    $date_from  = $request->get_param('dateFrom');
+    $order      = strtoupper($request->get_param('order') ?? 'DESC');
+    $type_param = strtolower($request->get_param('type') ?? 'all');
 
     $args = [
         'post_type'      => 'tourney',
@@ -582,16 +583,41 @@ function tourney_api_search(WP_REST_Request $request) {
             continue;
         }
 
-        $status = $basic['status'] ?? 'Active';
+        $ident = (is_array($basic) && isset($basic['ident'])) ? $basic['ident'] : '';
+        $is_simple = ($ident === 'SIMPLE');
+        $status = (is_array($basic) && isset($basic['status']) && is_string($basic['status'])) ? $basic['status'] : 'Active';
 
-        $results[] = [
-            'id'        => $post->ID,
-            'name'      => $post->post_title,
-            'organizer' => $org_meta,
-            'startDate' => $start_date_int,
-            'status'    => $status,
-            'slug'      => $post->post_name
-        ];
+        if ($is_simple) {
+            // Standalone Competition (Single Wettbewerb)
+            if ($type_param === 'all' || $type_param === 'competition') {
+                $results[] = [
+                    'id'         => intval($post->ID),
+                    'name'       => strval($post->post_title),
+                    'organizer'  => strval($org_meta),
+                    'startDate'  => $start_date_int,
+                    'status'     => strval($status),
+                    'slug'       => strval($post->post_name),
+                    'resultType' => 'competition',
+                    'compId'     => 1,
+                    'tourneyId'  => intval($post->ID)
+                ];
+            }
+        } else {
+            // Full Tournament (Turnier)
+            if ($type_param === 'all' || $type_param === 'tourney') {
+                $results[] = [
+                    'id'         => intval($post->ID),
+                    'name'       => strval($post->post_title),
+                    'organizer'  => strval($org_meta),
+                    'startDate'  => $start_date_int,
+                    'status'     => strval($status),
+                    'slug'       => strval($post->post_name),
+                    'resultType' => 'tourney',
+                    'compId'     => null,
+                    'tourneyId'  => intval($post->ID)
+                ];
+            }
+        }
     }
 
     // 4. Sortierung in PHP
@@ -619,12 +645,12 @@ function tourney_read_aci(WP_REST_Request $request)
     }
     
     $aci_json = get_post_meta($post_id, 'aci', true);
-    if (!$aci_json) {
+    if (!$aci_json || !is_string($aci_json) || trim($aci_json) === '') {
         $aci_json = '{}';
     }
     
-    $aci = json_decode($aci_json, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
+    $aci = json_decode($aci_json, false);
+    if (!is_object($aci)) {
         $aci = new stdClass();
     }
     

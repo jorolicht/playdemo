@@ -5,69 +5,101 @@ import org.scalajs.dom.Event
 import org.scalajs.dom.raw.HTMLElement
 import base.*
 import shared.model.*
+import shared.BoxButton
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 /**
- * Page listing participants for all competitions.
- * Displays participant IDs and allows toggling their active status for the initial stage.
+ * Page listing all players in the tournament (Breadcrumb "Teilnehmer").
+ * Displays ID, Name, Club, TTR, enrolled competitions, and allows deletion from all competitions.
  */
 object PlayerList extends BasePage with JsWrapper:
   def name = PageNameTyp("PlayerList")
 
-  /** HTML ID for the active/participation checkbox. */
-  val IdCheckActive: HtmlId = genId(name)
-
-  /** Stores the ID of the currently expanded competition accordion item. */
-  private var expandedCompId: Option[Int] = None
-
   /**
-   * Captures the currently open accordion item from the DOM and saves its ID.
-   */
-  private def saveExpandedState(): Unit =
-    val openItem = dom.document.querySelector(".accordion-collapse.show")
-    if (openItem != null) {
-      val idStr = openItem.id.replace("collapsePlayer", "")
-      expandedCompId = idStr.toIntOption
-    } else {
-      expandedCompId = None
-    }
-
-  /**
-   * Renders the page.
+   * Data model for a row in the player overview table.
    *
-   * @param param Optional page parameter.
+   * @param player The Player model object.
+   * @param clubName Name of the player's club.
+   * @param competitions Sequence of competition names in which the player is participating.
+   */
+  case class PlayerListRow(
+    player: Player,
+    clubName: String,
+    competitions: Seq[String]
+  )
+
+  /** HTML ID for sorting by ID column. */
+  val IdHeaderId: HtmlId = genId(name)
+
+  /** HTML ID for sorting by Name column. */
+  val IdHeaderName: HtmlId = genId(name)
+
+  /** HTML ID for sorting by Club column. */
+  val IdHeaderClub: HtmlId = genId(name)
+
+  /** HTML ID for sorting by TTR column. */
+  val IdHeaderTtr: HtmlId = genId(name)
+
+  /** HTML ID prefix for deleting a player. */
+  val BtnDeletePlayer: HtmlId = genId(name)
+
+  private var sortCol = "name"
+  private var sortAsc = true
+
+  /**
+   * Toggles the current sorting column or direction.
+   *
+   * @param col Column key to sort by.
+   */
+  private def toggleSort(col: String): Unit =
+    if (sortCol == col) sortAsc = !sortAsc
+    else {
+      sortCol = col
+      sortAsc = true
+    }
+    render()
+
+  /**
+   * Sorts the sequence of PlayerListRow objects based on the active sort column and direction.
+   *
+   * @param rows Sequence of rows to sort.
+   * @return Sorted sequence of rows.
+   */
+  private def sortRows(rows: Seq[PlayerListRow]): Seq[PlayerListRow] =
+    val sorted = sortCol match
+      case "id"   => rows.sortBy(_.player.id.value)
+      case "club" => rows.sortBy(_.clubName.toLowerCase)(Ordering.String)
+      case "ttr"  => rows.sortBy(-_.player.meta.ttr.getOrElse(0))
+      case _      => rows.sortBy(_.player.displayName.toLowerCase)(Ordering.String)
+    
+    if (sortAsc) sorted else sorted.reverse
+
+  /**
+   * Renders the player list overview page.
+   *
+   * @param param Optional rendering parameter.
    * @return true if rendering succeeded.
    */
   def render(param: String = ""): Boolean = 
     comps.ContextHeader.render()
-    val competitions = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
-    setMain(cviews.pages.html.PlayerList(competitions, expandedCompId))
+    val tourney = services.TourneyDB.tourney
+    val compsSeq = tourney.competitions.toSeq.filter(c => c != null && !c.deleted)
+    val clubsMap = tourney.clubs.map(c => c.id.toInt -> c.name).toMap
 
-    // Attach click listeners to edit buttons
-    val buttons = dom.document.querySelectorAll(".edit-player-btn")
-    for (i <- 0 until buttons.length) {
-      val btn = buttons.item(i).asInstanceOf[dom.html.Button]
-      val pIdVal = btn.getAttribute("data-player-id").toInt
-      btn.onclick = (e: dom.Event) => {
-        val tourney = services.TourneyDB.tourney
-        tourney.players.find(_.id == PlayerId(pIdVal)).foreach { player =>
-          dialogs.DlgEditPlayer.show(player).map {
-            case Right(updatedPlayer) =>
-              tourney.updatePlayer(updatedPlayer)
-              
-
-              
-              saveExpandedState()
-              render()
-              
-            case Left(err) =>
-              debug(s"Player edit cancelled or failed: $err")
-          }
+    val rows = tourney.players.toSeq.map { p =>
+      val club = clubsMap.getOrElse(p.clubId, "")
+      val playerComps = compsSeq.filter { c =>
+        c.pants1Stage.exists { pant =>
+          (pant.id.isSingle && pant.id.singleId == p.id) ||
+          (pant.id.isDouble && (pant.id.doubleId._1 == p.id || pant.id.doubleId._2 == p.id))
         }
-      }
+      }.map(_.name)
+      PlayerListRow(p, club, playerComps)
     }
 
+    val sortedRows = sortRows(rows)
+    setMain(cviews.pages.html.PlayerList(sortedRows, sortCol, sortAsc))
     true
 
   /**
@@ -78,28 +110,25 @@ object PlayerList extends BasePage with JsWrapper:
    */
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
-      case id if id.id.startsWith(IdCheckActive.id) =>
-        val compIdVal = elem.getAttribute("data-comp-id").toInt
-        val snoStr = elem.getAttribute("data-sno")
-        val checked = elem.asInstanceOf[dom.html.Input].checked
-        
-        val t = services.TourneyDB.tourney
-        val cIdx = compIdVal - 1
-        if (cIdx >= 0 && cIdx < 64 && t.competitions(cIdx) != null) {
-          val comp = t.competitions(cIdx)
-          if (!t.isRegLocked(comp)) {
-            val sno = SNO.fromString(snoStr)
-            comp.pants1Stage.find(_.id == sno).foreach { p =>
-              p.active = checked
-              p.status = if (checked) PantStatus.PLAY else PantStatus.REGI
-              debug(s"Updated player active status: ${p.name} -> active=$checked")
-              
-              // Capture expanded state right before updating and rerendering
-              saveExpandedState()
-              
-              t.updateCompetition(comp)
+      case `IdHeaderId`   => toggleSort("id")
+      case `IdHeaderName` => toggleSort("name")
+      case `IdHeaderClub` => toggleSort("club")
+      case `IdHeaderTtr`  => toggleSort("ttr")
+
+      case id if id.id.startsWith(BtnDeletePlayer.id) =>
+        val pIdVal = elem.getAttribute("data-player-id").toInt
+        val tourney = services.TourneyDB.tourney
+        tourney.players.find(_.id == PlayerId(pIdVal)).foreach { player =>
+          dialogs.DlgMsgbox.show(
+            s"Möchten Sie den Spieler '${player.displayName}' wirklich aus allen Wettbewerben und dem Turnier löschen?",
+            "Spieler löschen",
+            List(BoxButton.Yes, BoxButton.No)
+          ).map { btn =>
+            if (btn == BoxButton.Yes) {
+              tourney.removePlayer(player.id)
               render()
             }
           }
         }
+
       case _ =>

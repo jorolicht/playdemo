@@ -651,6 +651,29 @@ case class Tourney(
       case None =>
         Left(AppError("player.notFound"))
 
+  /**
+   * Removes a player from the tournament and from all competitions' participants list (pants1Stage).
+   *
+   * @param playerId The PlayerId of the player to remove.
+   * @param doSync Whether to trigger sync after removal.
+   */
+  def removePlayer(playerId: PlayerId, doSync: Boolean = true): Unit =
+    players.find(_.id == playerId).foreach { p =>
+      players -= p
+      if (!dirtyPlayer.exists(_.id == p.id)) dirtyPlayer += p
+      competitions.filter(_ != null).foreach { comp =>
+        val toRemove = comp.pants1Stage.filter { pant =>
+          (pant.id.isSingle && pant.id.singleId == playerId) ||
+          (pant.id.isDouble && (pant.id.doubleId._1 == playerId || pant.id.doubleId._2 == playerId))
+        }
+        if (toRemove.nonEmpty) {
+          comp.pants1Stage --= toRemove
+          updateCompetition(comp, doSync)
+        }
+      }
+      if (doSync) triggerPlayerSync()
+    }
+
   /** Merges one player into another. The merged player is deactivated. */
   def mergePlayer(mainId: PlayerId, mergedId: PlayerId, doSync: Boolean = true): Either[AppError, Unit] =
     if (mainId == mergedId) return Left(AppError("player.merge.sameId"))
@@ -882,10 +905,12 @@ object Tourney:
       case NonFatal(_) =>
         Left(AppError("TODOerr0144.decode.Tourney", json.take(20), "", "Tourney.decSeq"))
 
+/** Access Control and Configuration Info (ACI) */
 case class ACI(
   homepageInfo: String = "",
   allowRegistration: Boolean = false,
-  dateFormat: String = "DE"
+  dateFormat: String = "DE",
+  showMessagesTab: Boolean = true
 ) derives ReadWriter
 
 case class SaveAciResponse(success: Boolean) derives ReadWriter

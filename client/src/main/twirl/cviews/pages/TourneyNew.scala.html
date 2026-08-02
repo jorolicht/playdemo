@@ -3,12 +3,12 @@
 @import pages.TourneyNew.*
 @import base.Messages.gM
 
-@()
+@(isEdit: Boolean = false)
 
 <div class="container mt-4 mb-5">
     <div class="card shadow">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h2 class="h4 mb-0">@gM("tourneyNew.title")</h2>
+            <h2 class="h4 mb-0">@if(isEdit){@gM("tourneyNew.titleEdit")}else{@gM("tourneyNew.title")}</h2>
             <button class="btn btn-light btn-sm" @id(BtnLoadCtt, "onclick")>
                 <i class="bi bi-file-earmark-arrow-up me-1"></i>@gM("tourneyNew.btnLoadCtt")
             </button>

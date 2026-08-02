@@ -3,132 +3,82 @@
 @import cviews.helper.html.*
 @import pages.PlayerList.*
 
-@(competitions: Seq[Competition], expandedCompId: Option[Int])
+@(rows: Seq[PlayerListRow], sortCol: String, sortAsc: Boolean)
 
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
             <h3 class="h5 mb-0"><i class="bi bi-people me-2"></i>@gM("+title")</h3>
+            <span class="badge bg-secondary rounded-pill">@rows.length @gM("+players_suffix")</span>
         </div>
         <div class="card-body p-0">
-            @if(base.Global.currentSelection.tourney.exists(_.ident == "SIMPLE")) {
-                @if(competitions.isEmpty) {
-                    <div class="p-4 text-center text-muted italic">@gM("+no_competitions")</div>
-                }
-                @competitions.headOption.map { c =>
-                    <table class="table table-sm table-hover mb-0">
-                        <thead class="table-light small">
-                            <tr>
-                                <th class="ps-3" style="width: 80px;">@gM("+player_id")</th>
-                                <th>@gM("+name_header")</th>
-                                <th>@gM("+club_header")</th>
-                                <th class="text-center" style="width: 80px;">@gM("+ttr_header")</th>
-                                <th class="text-center" style="width: 100px;">@gM("+active_header") / @gM("btn.edit")</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if(c.pants1Stage.isEmpty) {
-                                <tr><td colspan="5" class="text-center py-3 text-muted italic">@gM("+no_players")</td></tr>
-                            }
-                            @c.pants1Stage.map { p =>
-                                <tr>
-                                    <td class="ps-3">
-                                        @if(p.id.isSingle) { @p.id.singleId.value } else if(p.id.isDouble) { @{val (id1, id2) = p.id.doubleId; s"${id1.value}/${id2.value}"} } else { - }
-                                    </td>
-                                    <td class="fw-bold">@p.name</td>
-                                    <td>@p.club</td>
-                                    <td class="text-center">@p.rating</td>
-                                    <td class="text-center">
-                                        <div class="form-check d-flex justify-content-center align-items-center gap-2">
-                                            <input @id(IdCheckActive, "onchange", s"${c.id.value}-${p.id.idSaveSuffix}") class="form-check-input" type="checkbox" data-comp-id="@c.id.value" data-sno="@p.id" @if(p.active){checked} @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || services.TourneyDB.tourney.isRegLocked(c)){disabled}>
-                                            @if(p.id.isSingle) {
-                                                @defining(services.TourneyDB.tourney.players.find(_.id == p.id.singleId)) { playerOpt =>
-                                                    @playerOpt.map { player =>
-                                                        <button class="btn btn-sm btn-link p-0 text-primary edit-player-btn" 
-                                                                type="button"
-                                                                data-player-id="@player.id.value" 
-                                                                data-comp-id="@c.id.value" 
-                                                                title="@gM("btn.edit")">
-                                                            <i class="bi bi-pencil-square"></i>
-                                                        </button>
-                                                    }
-                                                }
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
-            } else {
-                <div class="accordion accordion-flush" id="playerAccordion">
-                    @if(competitions.isEmpty) {
-                        <div class="p-4 text-center text-muted italic">@gM("+no_competitions")</div>
-                    }
-                    @competitions.map { c =>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button @if(expandedCompId.contains(c.id.value)){}else{collapsed}" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePlayer@c.id.value">
-                                    <div class="d-flex justify-content-between w-100 me-3">
-                                        <span><strong>@gM("+comp_label")</strong> @c.name</span>
-                                        <span class="badge bg-secondary rounded-pill">@c.pants1Stage.length @gM("+players_suffix")</span>
-                                    </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr class="small text-muted text-uppercase">
+                            <th class="ps-3" style="width: 80px;">
+                                <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderId, "onclick")>
+                                    @gM("+player_id") @sortIcon("id", sortCol, sortAsc)
                                 </button>
-                            </h2>
-                            <div id="collapsePlayer@c.id.value" class="accordion-collapse collapse @if(expandedCompId.contains(c.id.value)){show}" data-bs-parent="#playerAccordion">
-                                <div class="accordion-body p-0">
-    
-                                    <table class="table table-sm table-hover mb-0">
-                                        <thead class="table-light small">
-                                            <tr>
-                                                <th class="ps-3" style="width: 80px;">@gM("+player_id")</th>
-                                                <th>@gM("+name_header")</th>
-                                                <th>@gM("+club_header")</th>
-                                                <th class="text-center" style="width: 80px;">@gM("+ttr_header")</th>
-                                                <th class="text-center" style="width: 100px;">@gM("+active_header") / @gM("btn.edit")</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @if(c.pants1Stage.isEmpty) {
-                                                <tr><td colspan="5" class="text-center py-3 text-muted italic">@gM("+no_players")</td></tr>
-                                            }
-                                            @c.pants1Stage.map { p =>
-                                                <tr>
-                                                    <td class="ps-3">
-                                                        @if(p.id.isSingle) { @p.id.singleId.value } else if(p.id.isDouble) { @{val (id1, id2) = p.id.doubleId; s"${id1.value}/${id2.value}"} } else { - }
-                                                    </td>
-                                                    <td class="fw-bold">@p.name</td>
-                                                    <td>@p.club</td>
-                                                    <td class="text-center">@p.rating</td>
-                                                    <td class="text-center">
-                                                        <div class="form-check d-flex justify-content-center align-items-center gap-2">
-                                                            <input @id(IdCheckActive, "onchange", s"${c.id.value}-${p.id.idSaveSuffix}") class="form-check-input" type="checkbox" data-comp-id="@c.id.value" data-sno="@p.id" @if(p.active){checked} @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || services.TourneyDB.tourney.isRegLocked(c)){disabled}>
-                                                            @if(p.id.isSingle) {
-                                                                @defining(services.TourneyDB.tourney.players.find(_.id == p.id.singleId)) { playerOpt =>
-                                                                    @playerOpt.map { player =>
-                                                                        <button class="btn btn-sm btn-link p-0 text-primary edit-player-btn" 
-                                                                                type="button"
-                                                                                data-player-id="@player.id.value" 
-                                                                                data-comp-id="@c.id.value" 
-                                                                                title="@gM("btn.edit")">
-                                                                            <i class="bi bi-pencil-square"></i>
-                                                                        </button>
-                                                                    }
-                                                                }
-                                                            }
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
+                            </th>
+                            <th>
+                                <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
+                                    @gM("+name_header") @sortIcon("name", sortCol, sortAsc)
+                                </button>
+                            </th>
+                            <th>
+                                <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderClub, "onclick")>
+                                    @gM("+club_header") @sortIcon("club", sortCol, sortAsc)
+                                </button>
+                            </th>
+                            <th class="text-center" style="width: 80px;">
+                                <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
+                                    @gM("+ttr_header") @sortIcon("ttr", sortCol, sortAsc)
+                                </button>
+                            </th>
+                            <th>@gM("+comp_header")</th>
+                            <th class="text-end pe-3" style="width: 80px;">@gM("+action_header")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(rows.isEmpty) {
+                            <tr><td colspan="6" class="text-center py-4 text-muted italic">@gM("+no_players")</td></tr>
+                        }
+                        @rows.map { row =>
+                            <tr>
+                                <td class="ps-3">@row.player.id.value</td>
+                                <td class="fw-bold">@row.player.displayName</td>
+                                <td>@row.clubName</td>
+                                <td class="text-center">@row.player.meta.ttr.map(_.toString).getOrElse("-")</td>
+                                <td>
+                                    @if(row.competitions.isEmpty) {
+                                        <span class="text-muted small">-</span>
+                                    } else {
+                                        @row.competitions.map { cName =>
+                                            <span class="badge bg-secondary me-1">@cName</span>
+                                        }
+                                    }
+                                </td>
+                                <td class="text-end pe-3">
+                                    <button class="btn btn-link btn-sm text-danger p-0 delete-player-btn"
+                                            title="@gM("+remove")"
+                                            @id(BtnDeletePlayer, "onclick", row.player.id.value.toString)
+                                            data-player-id="@row.player.id.value"
+                                            @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+
+@sortIcon(col: String, currentSort: String, asc: Boolean) = {
+    @if(col == currentSort) {
+        <i class="bi bi-sort-@{if(asc) "alpha-down" else "alpha-up-alt"} ms-1"></i>
+    }
+}

@@ -46,6 +46,16 @@ object TourneyInfo extends BasePage with JsWrapper:
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
+      case `BtnEditTourney` =>
+        val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
+        dialogs.DlgEditTourney.show(tourney).map {
+          case Right(updatedTourney) =>
+            info(s"Turnier '${updatedTourney.name}' wurde aktualisiert.")
+            Global.currentSelection = Selection(Some(updatedTourney))
+            render()
+          case Left(_) =>
+            debug("Edit tourney cancelled")
+        }
       case `BtnAddComp` => 
         val currentCategory = Global.currentSelection.tourney.map(_.category).getOrElse(CompCategory.TT)
         DlgCompetition.show(currentCategory).map {
@@ -99,14 +109,14 @@ object TourneyInfo extends BasePage with JsWrapper:
                 val storage = org.scalajs.dom.window.sessionStorage
                 storage.removeItem("tourney_last_page")
                 storage.removeItem("tourney_last_param")
+                storage.removeItem("tourney_last_wp_page_id")
                 storage.removeItem("tourney_last_selection")
-              } catch { case _: Exception => }
-              
-              comps.ContextHeader.hide()
-              loadPage(PageNameTyp("MainView"), "")
+              } catch {
+                case _: Exception => // ignore
+              }
+              comps.ContextHeader.render()
+              loadPage(MainView.name, "")
             }
-          case _ => // Do nothing
+          case _ => debug("Save/Leave cancelled")
         }
-
-      case _ => 
-        debug(s"TourneyInfo handleEvent: ${elem.id}")
+      case _ =>

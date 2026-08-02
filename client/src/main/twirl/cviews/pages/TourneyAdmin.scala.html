@@ -31,34 +31,40 @@
                 <i class="bi bi-arrow-down-up me-1"></i>@gM("tourneyAdmin.tabImpExp")
             </a>
         </li>
+        @if(tourney.ident != "SIMPLE") {
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "CTT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'CTT')">
                 <i class="bi bi-file-earmark-code me-1"></i>@gM("tourneyAdmin.tabCtt")
             </a>
         </li>
+        }
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "CERT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'CERT')">
                 <i class="bi bi-award me-1"></i>@gM("tourneyAdmin.tabCert")
             </a>
         </li>
+        @if(base.Global.currentAci.showMessagesTab) {
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "MESSAGES") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'MESSAGES')">
                 <i class="bi bi-chat-dots me-1"></i>@gM("tourneyAdmin.tabMessages")
             </a>
         </li>
+        }
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "MATCHBOARD") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'MATCHBOARD')">
                 <i class="bi bi-display me-1"></i>@gM("tourneyAdmin.tabMatchboard")
             </a>
         </li>
+        @if(tourney.ident != "SIMPLE") {
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "HOMEPAGE") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'HOMEPAGE')">
                 <i class="bi bi-house-door me-1"></i>@gM("tourneyAdmin.tabHomepage")
             </a>
         </li>
+        }
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "DATEFORMAT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'DATEFORMAT')">
-                <i class="bi bi-calendar-event me-1"></i>@gM("tourneyAdmin.tabDateFormat")
+                <i class="bi bi-gear me-1"></i>@gM("tourneyAdmin.tabDateFormat")
             </a>
         </li>
     </ul>
@@ -94,7 +100,7 @@
             </div>
         }
 
-        @if(activeTab == "CTT") {
+        @if(activeTab == "CTT" && tourney.ident != "SIMPLE") {
             <div class="card shadow-sm border-start border-4 border-info mb-4 animate-fade-in">
                 <div class="card-body">
                     <h5 class="card-title text-secondary fw-bold mb-3">
@@ -259,7 +265,7 @@
                 </div>
             </div>
         }
-        @if(activeTab == "MESSAGES") {
+        @if(activeTab == "MESSAGES" && base.Global.currentAci.showMessagesTab) {
             <div class="card shadow-sm border-start border-4 border-info mb-4 animate-fade-in">
                 <div class="card-body">
                     <h5 class="card-title text-secondary fw-bold mb-3">
@@ -388,7 +394,7 @@
                 </div>
             </div>
         }
-        @if(activeTab == "HOMEPAGE") {
+        @if(activeTab == "HOMEPAGE" && tourney.ident != "SIMPLE") {
             <div class="card shadow-sm border-start border-4 border-success mb-4 animate-fade-in">
                 <div class="card-body">
                     <h5 class="card-title text-secondary fw-bold mb-3">
@@ -414,7 +420,7 @@
             <div class="card shadow-sm border-start border-4 border-warning mb-4 animate-fade-in">
                 <div class="card-body">
                     <h5 class="card-title text-secondary fw-bold mb-3">
-                        <i class="bi bi-calendar-event me-2 text-warning"></i>@gM("tourneyAdmin.tabDateFormat")
+                        <i class="bi bi-gear me-2 text-warning"></i>@gM("tourneyAdmin.tabDateFormat")
                     </h5>
                     <div class="mb-4">
                         <label class="form-label fw-bold">@gM("tourneyAdmin.selectDateFormatLabel")</label>
@@ -440,6 +446,21 @@
                     <button class="btn btn-warning fw-bold" id="dateformat-save-btn">
                         <i class="bi bi-save me-1"></i>@gM("btn.save")
                     </button>
+                </div>
+            </div>
+
+            <!-- Messages Tab Setting Card -->
+            <div class="card shadow-sm border-start border-4 border-info mb-4 animate-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary fw-bold mb-3">
+                        <i class="bi bi-chat-dots me-2 text-info"></i>@gM("tourneyAdmin.messagesTabSettingTitle")
+                    </h5>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="show-messages-tab-cb" />
+                        <label class="form-check-label fw-bold" for="show-messages-tab-cb">
+                            @gM("tourneyAdmin.showMessagesTabLabel")
+                        </label>
+                    </div>
                 </div>
             </div>
         }

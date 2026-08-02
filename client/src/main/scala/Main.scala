@@ -77,8 +77,8 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     val slugAttr = getData(gE(ParamId), "slug", "")
     val postType = getData(gE(ParamId), "posttype", "")
     
-    // If we are on a tourney post, or tourney param is set, or mode is tourney
-    val effectiveMode = if (tourney.nonEmpty || postType == "tourney" || mode.toLowerCase() == "tourney") "tourney" else mode.toLowerCase()
+    // If mode is view, or tourney param is set, or postType is tourney
+    val effectiveMode = if (mode.toLowerCase() == "view" || tourney.nonEmpty || postType == "tourney") "view" else mode.toLowerCase()
     val effectiveTourney = if (tourney.nonEmpty) tourney else if (postType == "tourney") slugAttr else ""
 
     println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} mode:${effectiveMode} PageId:${Global.pageId} tourney:${effectiveTourney} logLevel:${logLevel} turnstile:${Global.turnstileSitekey}")
@@ -136,7 +136,9 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
         val lastParam = Option(storage.getItem("tourney_last_param")).getOrElse("")
         val selectionJson = storage.getItem("tourney_last_selection")
 
-        val canRestore = lastWpPageId != null && 
+        val isExplicitViewMode = mode == "view" && tourneyParam.nonEmpty
+        val canRestore = !isExplicitViewMode && 
+                         lastWpPageId != null && 
                          lastWpPageId == Global.pageId.toString && 
                          lastPage != null && 
                          pages.pagesMap.contains(PageNameTyp(lastPage))
@@ -188,13 +190,39 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       case "register"  => pages.loadPage(pages.UserRegistration.name, "")
       case "verify"    => pages.loadPage(pages.VerifyAccount.name, "")
       case "tourney"   => modeTourney(if (tourneyParam.nonEmpty) tourneyParam else Global.pageId) 
-      case "view"      => modeView(Global.pageId)
+      case "view"      => modeView(if (tourneyParam.nonEmpty) tourneyParam else Global.pageId)
       case "home"      => modeHome()
       case _           => modeDefault(Global.pageId)
     }
 
-  def modeView(pageId: Int): Unit = 
-    pages.loadPage(pages.MainView.name, pageId.toString)
+  /**
+   * Initializes the tournament for public view mode and displays the modern tournament Homepage without breadcrumb.
+   *
+   * @param idOrSlug Tournament Post ID or Slug.
+   */
+  def modeView(idOrSlug: Int | String): Unit = 
+    import services.*
+    import shared.model.*
+
+    debug(s"modeView -> idOrSlug: ${idOrSlug}")
+    val shouldLoad = idOrSlug match {
+      case id: Int => id > 0
+      case s: String => s.nonEmpty
+    }
+
+    if (shouldLoad) {
+      TourneyDB.init(idOrSlug).map {
+        case Right(ts) => 
+          debug(s"Tourney initialized for view mode, timestamp: $ts")
+          Global.currentSelection = Selection(Some(TourneyDB.tourney))
+          pages.loadPage(pages.TourneyRegistration.name, "")
+        case Left(err) => 
+          error(s"Error loading tournament for view mode: ${err}")
+          pages.loadPage(pages.MainView.name, "")
+      }
+    } else {
+      pages.loadPage(pages.MainView.name, "")
+    }
 
   def modeHome(): Unit = 
     pages.loadPage(pages.MainView.name, "")
