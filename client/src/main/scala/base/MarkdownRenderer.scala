@@ -15,7 +15,8 @@ object MarkdownRenderer:
   def render(md: String): String =
     try {
       if md == null || md.trim.isEmpty then return ""
-      val rawLines = md.trim.split("\n")
+      val normalized = md.replace("\\n", "\n").replace("\r\n", "\n").trim
+      val rawLines = normalized.split("\n")
       val sb = new StringBuilder()
       var inList = false
 

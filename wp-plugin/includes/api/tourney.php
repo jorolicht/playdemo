@@ -673,6 +673,6 @@ function tourney_save_aci(WP_REST_Request $request)
         return ApiHelper::error("invalid_json", "Invalid JSON payload", "", "", HttpStatus::BAD_REQUEST);
     }
     
-    update_post_meta($post_id, 'aci', $body);
+    update_post_meta($post_id, 'aci', wp_slash(json_encode($aci, JSON_UNESCAPED_UNICODE)));
     return new WP_REST_Response(array('success' => true), 200);
 }
