@@ -5,92 +5,10 @@
 
 @(selection: Selection, competitions: Seq[Competition], stages: Seq[Stage])
 
-<div class="context-header bg-dark text-white p-2 mb-3 shadow-sm">
-    <div class="container-fluid">
-        @if(base.Global.isViewMode) {
-            <!-- VIEW-Mode Sub-Menu: Fixed tournament name on the left (without home icon), menu items on the right -->
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 py-1">
-                <!-- Left Side: Fixed Tournament Name (No house icon) -->
-                <div class="d-flex align-items-center">
-                    @selection.tourney.map { t =>
-                        <a href="javascript:appLoadPage('TourneyRegistration', '')" class="text-decoration-none fw-bold text-white fs-6 me-2">
-                            <i class="bi bi-trophy text-warning me-2"></i>@t.name
-                        </a>
-                    }
-                </div>
-
-                <!-- Right Side: Sub-Menu Points -->
-                <div class="context-menu d-flex flex-wrap gap-2 align-items-center">
-                    @if(selection.tourney.isDefined) {
-                        <!-- 1. Sub-Menu Point: Welcome / Registration (TourneyRegistration) -->
-                        <a href="javascript:appLoadPage('TourneyRegistration', '')" 
-                           class="btn btn-sm @if(base.Global.activePageName == "TourneyRegistration"){btn-warning fw-bold text-dark}else{btn-outline-light}">
-                            <i class="bi bi-card-checklist me-1"></i>@gM("contextHeader.registration")
-                        </a>
-
-                        <!-- 2. Sub-Menu Point: Ergebnisse mit DropDown-Auswahl für alle Wettbewerbe -->
-                        <div class="dropdown">
-                            <button class="btn btn-sm dropdown-toggle @if(base.Global.activePageName == "ResultList" || base.Global.activePageName == "CompetitionInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}" 
-                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-award me-1"></i>@gM("contextHeader.results")
-                            </button>
-                            <ul class="dropdown-menu shadow dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item @if(base.Global.activePageName == "ResultList" && selection.competition.isEmpty){active}" 
-                                       href="javascript:appLoadPage('ResultList', '')">
-                                        <i class="bi bi-list-stars me-2 text-primary"></i>@gM("contextHeader.allResults")
-                                    </a>
-                                </li>
-                                @if(competitions.nonEmpty) {
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><h6 class="dropdown-header small text-muted text-uppercase">@gM("tourneyHomepage.competitionsContainer")</h6></li>
-                                    @competitions.map { c =>
-                                        <li>
-                                            <a class="dropdown-item @if(selection.competition.exists(_.id == c.id)){active}" 
-                                               href="javascript:appLoadPage('ResultList', '@c.id.value')">
-                                                <i class="bi bi-chevron-right me-1 small"></i>@c.name
-                                            </a>
-                                        </li>
-                                    }
-                                }
-                            </ul>
-                        </div>
-
-                        <!-- 3. Sub-Menu Point: InfoAnzeige / Matchboard -->
-                        @selection.tourney.map { t =>
-                            @defining(if (t.slug.nonEmpty) {
-                                val slugName = t.slug.split('/').lastOption.getOrElse(t.slug).trim
-                                val slugParam = s"${slugName}-${t.wpId}"
-                                val playBase = if (base.Global.playUrl.nonEmpty) base.Global.playUrl.trim else "/srv"
-                                s"$playBase/matchboard/view/$slugParam"
-                            } else "") { matchboardUrl =>
-                                @if(matchboardUrl.nonEmpty) {
-                                    <a href="@matchboardUrl" target="_blank" 
-                                       class="btn btn-sm @if(base.Global.activePageName == "TourneyInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}">
-                                        <i class="bi bi-tv me-1"></i>@gM("contextHeader.infoAnzeige")
-                                    </a>
-                                } else {
-                                    <a href="javascript:appLoadPage('TourneyInfo', '')" 
-                                       class="btn btn-sm @if(base.Global.activePageName == "TourneyInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}">
-                                        <i class="bi bi-tv me-1"></i>@gM("contextHeader.infoAnzeige")
-                                    </a>
-                                }
-                            }
-                        }
-
-                        <!-- Optional Administration button for logged-in users with access -->
-                        @if(base.Global.user.isDefined && base.Global.hasTourneyAccess(selection.tourney.get)) {
-                            <div class="vr mx-1 bg-secondary opacity-50" style="height: 20px;"></div>
-                            <a href="javascript:appLoadPage('TourneyAdmin', '')" 
-                               class="btn btn-sm @if(base.Global.activePageName == "TourneyAdmin"){btn-primary fw-bold}else{btn-outline-secondary text-white}">
-                                <i class="bi bi-gear-fill me-1"></i>@gM("contextHeader.administration")
-                            </a>
-                        }
-                    }
-                </div>
-            </div>
-        } else {
-            <!-- Standard / HOME-Mode Sub-Menu with Breadcrumb -->
+@if(!base.Global.isViewMode) {
+    <!-- Standard / HOME-Mode Sub-Menu with Breadcrumb -->
+    <div class="context-header bg-dark text-white p-2 mb-3 shadow-sm">
+        <div class="container-fluid">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <!-- Left Side: Tournament Selection Info (Without House Icon) -->
                 <nav aria-label="breadcrumb" class="mb-0">
@@ -207,9 +125,9 @@
                     }
                 </div>
             </div>
-        }
+        </div>
     </div>
-</div>
+}
 
 <style>
     .context-header .breadcrumb-item + .breadcrumb-item::before {

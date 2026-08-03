@@ -23,7 +23,11 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
   val ExitOfflineId: HtmlId = genId(name)
   def render(param: String = "") = 
     org.scalajs.dom.window.asInstanceOf[scala.scalajs.js.Dynamic].navbarGoBackToCurrentTourney = () => goBackToCurrentTourney()
-    setHtml(gE(NavbarId), cviews.comps.html.navbar()) 
+    val comps = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
+    val stages = base.Global.currentSelection.competition.map { c =>
+      services.StageDB.stages.toSeq.filter(s => s != null && s.coId == c.id && !s.deleted)
+    }.getOrElse(Seq.empty)
+    setHtml(gE(NavbarId), cviews.comps.html.navbar(base.Global.currentSelection, comps, stages)) 
     true
 
   override def handleEvent(elem: org.scalajs.dom.raw.HTMLElement, event: org.scalajs.dom.Event) =

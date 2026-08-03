@@ -1,10 +1,11 @@
 @import shared.DomTypes.HtmlId
 @import cviews.helper.html.*
 @import comps.Navbar.*
-@import pages.*
 @import base.Global
+@import shared.model.*
 
-@()
+@(selection: Selection, competitions: Seq[Competition], stages: Seq[shared.model.Stage])
+
 <style>
     .navbar-custom {
         background-color: #336699 !important;
@@ -22,105 +23,207 @@
     }
 </style>
 
-<nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm sticky-top">
-    <div class="container-fluid">
-        <!-- Logo und Titel -->
-        <a class="navbar-brand d-flex align-items-center navbar-brand-large" href="javascript:appLoadPage('MainView', '')">
-            <img src="@{Global.imgUrl}logo.png" alt="@gM("navbar.logoAlt")" width="70" height="47" class="d-inline-block align-text-top me-2">
-            <span class="fw-bold">@gM("navbar.brand")</span>
-        </a>
-
-        <!-- Burger Icon für Mobile -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="@gM("navbar.toggleNav")">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarMain">
-            <!-- Linke Seite -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainView', 'functions')">@gM("navbar.functions")</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainView', 'pricing')">@gM("navbar.pricing")</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle nav-link-bold" href="#" id="navbarTools" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        @gM("navbar.tools")
+@if(Global.isViewMode) {
+    <!-- VIEW-Mode Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm sticky-top">
+        <div class="container-fluid">
+            <!-- Left Side: Logo (link to Homepage) and Tournament Name -->
+            <div class="d-flex align-items-center">
+                @defining(if (Global.homeUrl.nonEmpty) Global.homeUrl else "https://localhost") { targetHome =>
+                    <a class="navbar-brand d-flex align-items-center me-3" href="@targetHome">
+                        <img src="@{Global.imgUrl}logo.png" alt="@gM("navbar.logoAlt")" width="60" height="40" class="d-inline-block align-text-top">
                     </a>
-                    <ul class="dropdown-menu shadow" aria-labelledby="navbarTools">
-                        <li><a class="dropdown-item" href="javascript:appLoadPage('MainView', 'plugin')">@gM("navbar.wordpressPlugin")</a></li>
-                        <li><a class="dropdown-item" href="javascript:appLoadPage('MainView', 'excel')">@gM("navbar.excelTemplate")</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item ms-lg-3">
-                    <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainSearch', '')">@gM("navbar.search")</a>
-                </li>
-                @if(Global.user.exists(_.isTurnierAdmin) || Global.isDemoMode || Global.isLocalMode) {
-                    <li class="nav-item ms-lg-3 dropdown d-flex align-items-center">
-                        <a class="btn btn-primary fw-bold btn-start-custom dropdown-toggle" href="#" id="navbarStart" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            @gM("navbar.start")
-                        </a>
-                        <ul class="dropdown-menu shadow" aria-labelledby="navbarStart">
-                            <li><a class="dropdown-item fw-bold" @id(StartFullId, "onclick")><i class="bi bi-trophy me-2"></i>@gM("navbar.fullTourney")</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item fw-bold" @id(StartSimpleId, "onclick")><i class="bi bi-lightning-charge me-2"></i>@gM("navbar.singleCompetition")</a></li>
-                        </ul>
-                    </li>
                 }
-            </ul>
-
-            <!-- Rechte Seite: User / Login -->
-            <ul class="navbar-nav align-items-center">
-
-
-                @if(Global.isDemoMode) {
-                    <li class="nav-item me-2 d-none d-lg-block">
-                        <span class="badge bg-warning text-dark"><i class="bi bi-play-circle-fill me-1"></i>Demo-Modus</span>
-                    </li>
+                @selection.tourney.map { t =>
+                    <a href="javascript:appLoadPage('TourneyRegistration', '')" class="text-decoration-none fw-bold text-white fs-5 d-flex align-items-center me-2">
+                        <i class="bi bi-trophy-fill text-warning me-2"></i>@t.name
+                    </a>
                 }
-                @if(Global.isLocalMode) {
-                    <li class="nav-item me-2 d-none d-lg-block">
-                        <span class="badge bg-success text-white"><i class="bi bi-hdd-fill me-1"></i>Lokaler Modus</span>
-                    </li>
-                }
+            </div>
 
-                @if(Global.isDemoMode || Global.isLocalMode) {
-                    <li class="nav-item dropdown me-3">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center nav-link-bold text-white" href="#" id="offlineDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-gear-fill me-1"></i>
-                            @gM("navbar.localMenu")
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="offlineDropdown">
-                            <li><a class="dropdown-item fw-bold" @id(ExportLocalId, "onclick")><i class="bi bi-download me-2 text-primary"></i>@gM("navbar.exportTourney")</a></li>
-                            <li><a class="dropdown-item fw-bold" @id(ImportLocalId, "onclick")><i class="bi bi-upload me-2 text-success"></i>@gM("navbar.importTourney")</a></li>
-                            <input type="file" id="navbar-import-file-input" class="d-none" accept=".json" />
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger fw-bold" @id(ExitOfflineId, "onclick")><i class="bi bi-x-circle me-2"></i>@gM("navbar.exitLocal")</a></li>
-                        </ul>
-                    </li>
-                }
+            <!-- Burger Icon for Mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarViewMode" aria-controls="navbarViewMode" aria-expanded="false" aria-label="@gM("navbar.toggleNav")">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                @if(Global.user.isDefined) {
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center nav-link-bold" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle fs-5 me-2"></i>
-                            @Global.user.get.username
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="javascript:appLoadPage('UserLogin', '')">@gM("navbar.profilePasskeys")</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" @id(DoLogoutId, "onclick")>@gM("navbar.logout")</a></li>
-                        </ul>
-                    </li>
-                } else {
-                    <li class="nav-item">
-                        <a class="btn btn-outline-light btn-sm fw-bold" href="javascript:appLoadPage('UserLogin', '')">
-                            <i class="bi bi-box-arrow-in-right me-1"></i> @gM("navbar.login")
-                        </a>
-                    </li>
-                }
-            </ul>
+            <!-- Right Side: VIEW-Mode Menu Items -->
+            <div class="collapse navbar-collapse justify-content-end" id="navbarViewMode">
+                <ul class="navbar-nav align-items-lg-center gap-2 mt-2 mt-lg-0">
+                    @if(selection.tourney.isDefined) {
+                        <!-- 1. Welcome -->
+                        <li class="nav-item">
+                            <a href="javascript:appLoadPage('TourneyRegistration', '')" 
+                               class="btn btn-sm @if(Global.activePageName == "TourneyRegistration"){btn-warning fw-bold text-dark}else{btn-outline-light}">
+                                <i class="bi bi-card-checklist me-1"></i>@gM("contextHeader.registration")
+                            </a>
+                        </li>
+
+                        <!-- 2. Results (with Dropdown for all competitions) -->
+                        <li class="nav-item dropdown">
+                            <button class="btn btn-sm dropdown-toggle @if(Global.activePageName == "ResultList" || Global.activePageName == "CompetitionInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}" 
+                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-award me-1"></i>@gM("contextHeader.results")
+                            </button>
+                            <ul class="dropdown-menu shadow dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item @if(Global.activePageName == "ResultList" && selection.competition.isEmpty){active}" 
+                                       href="javascript:appLoadPage('ResultList', '')">
+                                        <i class="bi bi-list-stars me-2 text-primary"></i>@gM("contextHeader.allResults")
+                                    </a>
+                                </li>
+                                @if(competitions.nonEmpty) {
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header small text-muted text-uppercase">@gM("tourneyHomepage.competitionsContainer")</h6></li>
+                                    @competitions.map { c =>
+                                        <li>
+                                            <a class="dropdown-item @if(selection.competition.exists(_.id == c.id)){active}" 
+                                               href="javascript:appLoadPage('ResultList', '@c.id.value')">
+                                                <i class="bi bi-chevron-right me-1 small"></i>@c.name
+                                            </a>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </li>
+
+                        <!-- 3. Matchboard / InfoAnzeige -->
+                        <li class="nav-item">
+                            @selection.tourney.map { t =>
+                                @defining(if (t.slug.nonEmpty) {
+                                    val slugName = t.slug.split('/').lastOption.getOrElse(t.slug).trim
+                                    val slugParam = s"${slugName}-${t.wpId}"
+                                    val playBase = if (Global.playUrl.nonEmpty) Global.playUrl.trim else "/srv"
+                                    s"$playBase/matchboard/view/$slugParam"
+                                } else "") { matchboardUrl =>
+                                    @if(matchboardUrl.nonEmpty) {
+                                        <a href="@matchboardUrl" target="_blank" 
+                                           class="btn btn-sm @if(Global.activePageName == "TourneyInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}">
+                                            <i class="bi bi-tv me-1"></i>@gM("contextHeader.infoAnzeige")
+                                        </a>
+                                    } else {
+                                        <a href="javascript:appLoadPage('TourneyInfo', '')" 
+                                           class="btn btn-sm @if(Global.activePageName == "TourneyInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}">
+                                            <i class="bi bi-tv me-1"></i>@gM("contextHeader.infoAnzeige")
+                                        </a>
+                                    }
+                                }
+                            }
+                        </li>
+
+                        <!-- Optional Administration button for logged-in users -->
+                        @if(Global.user.isDefined && Global.hasTourneyAccess(selection.tourney.get)) {
+                            <li class="nav-item ms-lg-2">
+                                <a href="javascript:appLoadPage('TourneyAdmin', '')" 
+                                   class="btn btn-sm @if(Global.activePageName == "TourneyAdmin"){btn-primary fw-bold}else{btn-outline-secondary text-white}">
+                                    <i class="bi bi-gear-fill me-1"></i>@gM("contextHeader.administration")
+                                </a>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
+} else {
+    <!-- Standard HOME-Mode Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm sticky-top">
+        <div class="container-fluid">
+            <!-- Logo und Titel -->
+            <a class="navbar-brand d-flex align-items-center navbar-brand-large" href="javascript:appLoadPage('MainView', '')">
+                <img src="@{Global.imgUrl}logo.png" alt="@gM("navbar.logoAlt")" width="70" height="47" class="d-inline-block align-text-top me-2">
+                <span class="fw-bold">@gM("navbar.brand")</span>
+            </a>
+
+            <!-- Burger Icon für Mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="@gM("navbar.toggleNav")">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <!-- Linke Seite -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainView', 'functions')">@gM("navbar.functions")</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainView', 'pricing')">@gM("navbar.pricing")</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle nav-link-bold" href="#" id="navbarTools" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @gM("navbar.tools")
+                        </a>
+                        <ul class="dropdown-menu shadow" aria-labelledby="navbarTools">
+                            <li><a class="dropdown-item" href="javascript:appLoadPage('MainView', 'plugin')">@gM("navbar.wordpressPlugin")</a></li>
+                            <li><a class="dropdown-item" href="javascript:appLoadPage('MainView', 'excel')">@gM("navbar.excelTemplate")</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainSearch', '')">@gM("navbar.search")</a>
+                    </li>
+                    @if(Global.user.exists(_.isTurnierAdmin) || Global.isDemoMode || Global.isLocalMode) {
+                        <li class="nav-item ms-lg-3 dropdown d-flex align-items-center">
+                            <a class="btn btn-primary fw-bold btn-start-custom dropdown-toggle" href="#" id="navbarStart" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                @gM("navbar.start")
+                            </a>
+                            <ul class="dropdown-menu shadow" aria-labelledby="navbarStart">
+                                <li><a class="dropdown-item fw-bold" @id(StartFullId, "onclick")><i class="bi bi-trophy me-2"></i>@gM("navbar.fullTourney")</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item fw-bold" @id(StartSimpleId, "onclick")><i class="bi bi-lightning-charge me-2"></i>@gM("navbar.singleCompetition")</a></li>
+                            </ul>
+                        </li>
+                    }
+                </ul>
+
+                <!-- Rechte Seite: User / Login -->
+                <ul class="navbar-nav align-items-center">
+                    @if(Global.isDemoMode) {
+                        <li class="nav-item me-2 d-none d-lg-block">
+                            <span class="badge bg-warning text-dark"><i class="bi bi-play-circle-fill me-1"></i>Demo-Modus</span>
+                        </li>
+                    }
+                    @if(Global.isLocalMode) {
+                        <li class="nav-item me-2 d-none d-lg-block">
+                            <span class="badge bg-success text-white"><i class="bi bi-hdd-fill me-1"></i>Lokaler Modus</span>
+                        </li>
+                    }
+
+                    @if(Global.isDemoMode || Global.isLocalMode) {
+                        <li class="nav-item dropdown me-3">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center nav-link-bold text-white" href="#" id="offlineDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-gear-fill me-1"></i>
+                                @gM("navbar.localMenu")
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="offlineDropdown">
+                                <li><a class="dropdown-item fw-bold" @id(ExportLocalId, "onclick")><i class="bi bi-download me-2 text-primary"></i>@gM("navbar.exportTourney")</a></li>
+                                <li><a class="dropdown-item fw-bold" @id(ImportLocalId, "onclick")><i class="bi bi-upload me-2 text-success"></i>@gM("navbar.importTourney")</a></li>
+                                <input type="file" id="navbar-import-file-input" class="d-none" accept=".json" />
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger fw-bold" @id(ExitOfflineId, "onclick")><i class="bi bi-x-circle me-2"></i>@gM("navbar.exitLocal")</a></li>
+                            </ul>
+                        </li>
+                    }
+
+                    @if(Global.user.isDefined) {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center nav-link-bold" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle fs-5 me-2"></i>
+                                @Global.user.get.username
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="javascript:appLoadPage('UserLogin', '')">@gM("navbar.profilePasskeys")</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" @id(DoLogoutId, "onclick")>@gM("navbar.logout")</a></li>
+                            </ul>
+                        </li>
+                    } else {
+                        <li class="nav-item">
+                            <a class="btn btn-outline-light btn-sm fw-bold" href="javascript:appLoadPage('UserLogin', '')">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> @gM("navbar.login")
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+}
