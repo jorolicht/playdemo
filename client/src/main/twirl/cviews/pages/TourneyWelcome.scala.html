@@ -7,10 +7,6 @@
 
 @(tourney: Tourney, competitions: Seq[Competition])
 
-@canRegister = @{
-  base.Global.currentAci.allowRegistration && isFutureOrToday(tourney)
-}
-
 @startDateFormatted = @{
   if (tourney.startDate != 0) tourney.getStartDate(base.Global.lang, 1) else ""
 }
@@ -139,7 +135,7 @@
                                                         </span>
                                                     </td>
                                                     <td class="text-end pe-4">
-                                                        @if(canRegister) {
+                                                        @if(base.Global.currentAci.allowRegistration && isCompStartInFuture(c, tourney)) {
                                                             <a href="javascript:appLoadPage('PlayerRegistration', '@c.id.value')" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
                                                                 <i class="bi bi-person-plus-fill me-1"></i>@gM("tourneyHomepage.registerNow")
                                                             </a>

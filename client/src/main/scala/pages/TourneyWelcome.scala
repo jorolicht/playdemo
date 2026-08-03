@@ -36,6 +36,40 @@ object TourneyWelcome extends BasePage with JsWrapper:
     }
 
   /**
+   * Checks whether a competition start date/time (or tournament date) is in the future or present.
+   *
+   * @param c The competition object.
+   * @param tourney The tournament object.
+   * @return True if competition start date/time is in the future or present, false if in the past.
+   */
+  def isCompStartInFuture(c: Competition, tourney: Tourney): Boolean =
+    try {
+      val now = new scala.scalajs.js.Date().getTime()
+      val startDateStr = if (c.startDate != null && c.startDate.nonEmpty) c.startDate else ""
+      val clean = startDateStr.replaceAll("[^0-9]", "")
+
+      if (clean.length >= 12) {
+        val yyyy = clean.substring(0, 4).toInt
+        val mm = clean.substring(4, 6).toInt - 1
+        val dd = clean.substring(6, 8).toInt
+        val hh = clean.substring(8, 10).toInt
+        val min = clean.substring(10, 12).toInt
+        val compTime = new scala.scalajs.js.Date(yyyy, mm, dd, hh, min).getTime()
+        compTime >= now
+      } else if (clean.length >= 8) {
+        val yyyy = clean.substring(0, 4).toInt
+        val mm = clean.substring(4, 6).toInt - 1
+        val dd = clean.substring(6, 8).toInt
+        val compTime = new scala.scalajs.js.Date(yyyy, mm, dd, 23, 59, 59).getTime()
+        compTime >= now
+      } else {
+        isFutureOrToday(tourney)
+      }
+    } catch {
+      case _: Exception => isFutureOrToday(tourney)
+    }
+
+  /**
    * Generates and triggers download of an iCalendar (.ics) file.
    *
    * @param title Event title.
