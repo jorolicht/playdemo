@@ -44,8 +44,10 @@ object DlgPublicRegistration extends BaseDialog with JsWrapper:
     val p = Promise[Either[AppError, Player]]()
     val f = p.future
 
-    setHtml(gE(LoadId), cviews.dialogs.html.DlgPublicRegistration(tourney, comp))
-    modal = Modal(gE(ModalId))
+    if isEmpty(eE(LoadId, "span")) then
+      setHtml(gE(LoadId), cviews.dialogs.html.DlgPublicRegistration(tourney, comp))
+      modal = Modal(gE(ModalId))    
+
 
     // Initialize Turnstile Captcha if sitekey is available
     if (Global.turnstileSitekey.nonEmpty) {
