@@ -189,7 +189,6 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       case "login"     => pages.loadPage(pages.UserLogin.name, "")
       case "register"  => pages.loadPage(pages.UserRegistration.name, "")
       case "verify"    => pages.loadPage(pages.VerifyAccount.name, "")
-      case "tourney"   => modeTourney(if (tourneyParam.nonEmpty) tourneyParam else Global.pageId) 
       case "view"      => modeView(if (tourneyParam.nonEmpty) tourneyParam else Global.pageId)
       case "home"      => modeHome()
       case _           => modeDefault(Global.pageId)
@@ -229,31 +228,6 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
   def modeDefault(pageId: Int): Unit = 
     pages.loadPage(pages.MainView.name, pageId.toString)
-
-  def modeTourney(idOrSlug: Int | String): Unit = 
-    import services.*
-    import shared.model.*
-
-    debug(s"modeTourney -> idOrSlug: ${idOrSlug}")
-    
-    val shouldLoad = idOrSlug match {
-      case id: Int => id > 0
-      case s: String => s.nonEmpty
-    }
-
-    if (shouldLoad) {
-      TourneyDB.init(idOrSlug).map {
-        case Right(ts) => 
-          debug(s"Tourney initialized, timestamp: $ts")
-          Global.currentSelection = Selection(Some(TourneyDB.tourney))
-          pages.loadPage(pages.TourneyInfo.name, "")
-        case Left(err) => 
-          error(s"Error loading tournament: ${err}")
-          pages.loadPage(pages.MainView.name, "")
-      }
-    } else {
-      pages.loadPage(pages.MainView.name, "")
-    }
 
   def handleGoogleCredential(credentials: String): Unit = pages.Auth.googleLogin(credentials)
 
