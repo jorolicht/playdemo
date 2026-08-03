@@ -51,11 +51,11 @@ def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, asy
 
     if (base.Global.currentSelection.tourney.isDefined && !base.Global.isTourneyPage(targetPage.value)) {
       val isSimple = base.Global.currentSelection.tourney.exists(_.ident == "SIMPLE")
-      val title = if (isSimple) "Wettbewerb verlassen" else "Turnier verlassen"
+      val title = if (isSimple) base.Messages.gM("dlg.leaveCompetition.title") else base.Messages.gM("dlg.leaveTourney.title")
       val msg = if (isSimple) {
-        "Möchten Sie den aktuellen Wettbewerb wirklich verlassen? Alle Änderungen werden gespeichert."
+        base.Messages.gM("dlg.leaveCompetition.msg")
       } else {
-        "Möchten Sie das aktuelle Turnier wirklich verlassen? Alle Änderungen werden gespeichert."
+        base.Messages.gM("dlg.leaveTourney.msg")
       }
       
       dialogs.DlgMsgbox.show(msg, title, List(shared.BoxButton.Yes, shared.BoxButton.No)).map {

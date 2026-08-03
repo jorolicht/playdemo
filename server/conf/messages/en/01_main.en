@@ -97,6 +97,10 @@ btn.delete                                          = Delete
 btn.saveLeave                                       = Save/Leave
 btn.send                                            = Send
 breadcrumb.home                                     = Home
+dlg.leaveCompetition.title                           = Leave Competition
+dlg.leaveCompetition.msg                             = Are you sure you want to leave the current competition? All changes will be saved.
+dlg.leaveTourney.title                               = Leave Tournament
+dlg.leaveTourney.msg                                 = Are you sure you want to leave the current tournament? All changes will be saved.
 
 ###
 # TourneyNew

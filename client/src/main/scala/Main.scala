@@ -111,16 +111,8 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     ajaxGet[UserInfo]("/wp-json/tourney/v1/user", List(), Map("X-WP-NONCE"->Global.wpNonce), Global.homeUrl).map {
       case Right(ui) => 
         if (ui.user_id > 0) {
-            Global.user = Some(User(
-              id = ("", ui.user_id),
-              username = ui.username,
-              email = ui.email,
-              firstname = ui.firstname,
-              lastname = ui.lastname,
-              org = ui.club,
-              picUrl = ui.avatar_url,
-              description = ui.description,
-              roles = ui.roles,
+            Global.user = Some(User(id = ("", ui.user_id), username = ui.username, email = ui.email, firstname = ui.firstname,
+              lastname = ui.lastname, org = ui.club, picUrl = ui.avatar_url, description = ui.description, roles = ui.roles,
               hasPasskey = ui.has_passkey
             ))
         } 
