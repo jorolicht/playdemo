@@ -235,9 +235,11 @@ contextHeader.selectCompetition                     = Selektiere Wettbewerb
 contextHeader.noCompetitions                        = Keine Wettbewerbe vorhanden
 contextHeader.showAll                               = Alle anzeigen
 contextHeader.selectStage                           = Selektiere Stage
-contextHeader.registration                          = Anmeldung
+contextHeader.registration                          = Registration
 contextHeader.participants                          = Spieler
 contextHeader.results                               = Ergebnisse
+contextHeader.allResults                             = Alle Ergebnisse
+contextHeader.infoAnzeige                            = InfoAnzeige
 contextHeader.administration                        = Administration
 
 ###

@@ -49,7 +49,9 @@ object TourneyRegistration extends BasePage with JsWrapper:
     if (tourney.wpId != 0) {
       Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney))
       
-      // Do NOT render ContextHeader breadcrumb for public registration homepage
+      // Render ContextHeader sub-menu
+      comps.ContextHeader.render()
+
       val compList = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
 
       setMain(cviews.pages.html.TourneyRegistration(tourney, compList))

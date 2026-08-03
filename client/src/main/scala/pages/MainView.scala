@@ -73,12 +73,12 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
   private def loadStaticPageFallback(param: String): Unit =
     val baseName = param match {
       case "functions" | "funktionen"           => "funktionen"
-      case "agb" | "gtc"                         => "gtc"
+      case "agb" | "gtc"                        => "gtc"
       case "privacy" | "dataprotection"         => "dataprotection"
-      case "impressum" | "imprint"               => "impressum"
-      case "contact" | "kontakt"                 => "contact"
-      case "pricing" | "preise"                  => "pricing"
-      case other                                 => other
+      case "impressum" | "imprint"              => "impressum"
+      case "contact" | "kontakt"                => "contact"
+      case "pricing" | "preise"                 => "pricing"
+      case other                                => other
     }
     val langSuffix = if (Global.lang == "en") "_en" else ""
     val staticName = s"$baseName$langSuffix"
