@@ -40,7 +40,7 @@
                 @if(tourney.organizer.nonEmpty) {
                     <span><i class="bi bi-building text-info me-1"></i><strong>@gM("tourneyNew.organizer"):</strong> @tourney.organizer</span>
                 }
-                <span><i class="bi bi-trophy text-warning me-1"></i><strong>@gM("tourneyNew.category"):</strong> @tourney.category</span>
+                <span><i class="bi bi-trophy text-warning me-1"></i><strong>@gM("tourneyNew.category"):</strong> @gM(tourney.category.msgCode)</span>
             </div>
         </div>
     </div>

@@ -6,6 +6,14 @@
 
 @(tourney: Tourney, competitions: Seq[Competition])
 
+@startDateFormatted = @{
+  if (tourney.startDate != 0) tourney.getStartDate(base.Global.lang, 1) else ""
+}
+
+@endDateFormatted = @{
+  if (tourney.endDate != 0) tourney.getEndDate(base.Global.lang, 1) else ""
+}
+
 <div class="container mt-4">
     <!-- Compact Tourney Info Card -->
     <div class="card shadow-sm mb-4 border-primary">
@@ -51,7 +59,15 @@
                 </div>
                 <div class="col-md-3 border-end">
                     <div class="text-muted small uppercase fw-bold">@gM("tourneyInfo.date")</div>
-                    <div>@gM("tourneyInfo.dateRange", tourney.startDate.toString, tourney.endDate.toString)</div>
+                    <div>
+                        @if(tourney.startDate != 0) {
+                            @if(tourney.startDate != tourney.endDate && tourney.endDate != 0) {
+                                @gM("tourneyInfo.dateRange", startDateFormatted, endDateFormatted)
+                            } else {
+                                @startDateFormatted
+                            }
+                        }
+                    </div>
                 </div>
                 <div class="col-md-3 border-end">
                     <div class="text-muted small uppercase fw-bold">@gM("tourneyNew.organizer")</div>
@@ -59,7 +75,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="text-muted small uppercase fw-bold">@gM("tourneyNew.category")</div>
-                    <span class="badge bg-secondary">@tourney.category</span>
+                    <span class="badge bg-secondary">@gM(tourney.category.msgCode)</span>
                 </div>
             </div>
         </div>
