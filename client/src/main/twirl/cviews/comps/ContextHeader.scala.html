@@ -6,127 +6,106 @@
 @(selection: Selection, competitions: Seq[Competition], stages: Seq[Stage])
 
 @if(!base.Global.isViewMode) {
-    <!-- Standard / HOME-Mode Sub-Menu with Breadcrumb -->
-    <div class="context-header bg-dark text-white p-2 mb-3 shadow-sm">
-        <div class="container-fluid">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <!-- Left Side: Tournament Selection Info (Without House Icon) -->
-                <nav aria-label="breadcrumb" class="mb-0">
-                    <ol class="breadcrumb mb-0 bg-transparent p-0 align-items-center">
-                        @if(selection.tourney.exists(_.ident == "SIMPLE")) {
-                            @defining(selection.competition.map(_.name)
-                                .orElse(selection.tourney.flatMap(_.competitions.find(_ != null).map(_.name)))
-                                .getOrElse(selection.tourney.map(_.name).getOrElse("Wettbewerb"))) { compName =>
-                                <li class="breadcrumb-item active" aria-current="page">
-                                    <a href="javascript:appLoadPage('CompetitionInfo', '')" class="btn btn-outline-light btn-sm fw-bold border-secondary py-1 text-white">
-                                        <i class="bi bi-lightning-charge text-warning me-2"></i>@compName
-                                    </a>
-                                </li>
-                            }
-                        }
-                        
-                        <!-- Fixed Tournament Name -->
-                        @selection.tourney.map { t =>
-                            @if(t.ident != "SIMPLE") {
-                                <li class="breadcrumb-item active" aria-current="page">
-                                    <a href="javascript:appLoadPage('TourneyRegistration', '')" class="btn btn-outline-light btn-sm fw-bold border-secondary py-1 text-white">
-                                        <i class="bi bi-trophy text-warning me-2"></i>@t.name
-                                    </a>
-                                </li>
-                            }
-                        }
+<div class="context-header bg-dark text-white p-2 mb-3 shadow-sm">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+            <!-- Breadcrumb / Selection Info -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 bg-transparent p-0 align-items-center">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:appLoadPage('MainView', '')" class="text-white-50 text-decoration-none hover-white">
+                            <i class="bi bi-house-door"></i>
+                        </a>
+                    </li>
 
-                        <!-- Stage Dropdown if stage selected -->
-                        @if(selection.competition.isDefined && stages.nonEmpty) {
-                            <li class="breadcrumb-item dropdown active" aria-current="page">
-                                <a class="btn btn-outline-info text-white btn-sm dropdown-toggle border-secondary py-1 @if(selection.stage.isEmpty){text-white-50}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="badge bg-info me-1 text-dark">S</span>
-                                    @selection.stage.map(_.name).getOrElse(gM("contextHeader.selectStage"))
+                    @if(selection.tourney.exists(_.ident == "SIMPLE")) {
+                        @defining(selection.competition.map(_.name)
+                            .orElse(selection.tourney.flatMap(_.competitions.find(_ != null).map(_.name)))
+                            .getOrElse(selection.tourney.map(_.name).getOrElse("Wettbewerb"))) { compName =>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                <a href="javascript:appLoadPage('CompetitionInfo', '')" class="btn btn-outline-light btn-sm fw-bold border-secondary py-1 text-white">
+                                    <i class="bi bi-lightning-charge text-warning me-2"></i>@compName
                                 </a>
-                                <ul class="dropdown-menu shadow">
-                                    @stages.map { r =>
-                                        <li><a class="dropdown-item @if(selection.stage.exists(_.id == r.id)){active}" href="javascript:appLoadPage('StageAdmin', '@r.id.value')">@r.name</a></li>
-                                    }
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item small" href="javascript:appLoadPage('CompetitionInfo', '')"><i class="bi bi-list-ul me-2"></i>@gM("contextHeader.showAll")</a></li>
-                                </ul>
                             </li>
                         }
-                    </ol>
-                </nav>
-
-                <!-- Right Side: Sub-Menu Points -->
-                <div class="context-menu d-flex flex-wrap gap-2 align-items-center">
-                    @if(selection.tourney.isDefined) {
-                        <!-- 1. Sub-Menu Point: Registration (TourneyRegistration) -->
-                        <a href="javascript:appLoadPage('TourneyRegistration', '')" 
-                           class="btn btn-sm @if(base.Global.activePageName == "TourneyRegistration"){btn-warning fw-bold text-dark}else{btn-outline-light}">
-                            <i class="bi bi-card-checklist me-1"></i>@gM("contextHeader.registration")
-                        </a>
-
-                        <!-- 2. Sub-Menu Point: Ergebnisse mit DropDown-Auswahl für alle Wettbewerbe -->
-                        <div class="dropdown">
-                            <button class="btn btn-sm dropdown-toggle @if(base.Global.activePageName == "ResultList" || base.Global.activePageName == "CompetitionInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}" 
-                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-award me-1"></i>@gM("contextHeader.results")
-                            </button>
-                            <ul class="dropdown-menu shadow dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item @if(base.Global.activePageName == "ResultList" && selection.competition.isEmpty){active}" 
-                                       href="javascript:appLoadPage('ResultList', '')">
-                                        <i class="bi bi-list-stars me-2 text-primary"></i>@gM("contextHeader.allResults")
-                                    </a>
-                                </li>
-                                @if(competitions.nonEmpty) {
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><h6 class="dropdown-header small text-muted text-uppercase">@gM("tourneyHomepage.competitionsContainer")</h6></li>
-                                    @competitions.map { c =>
-                                        <li>
-                                            <a class="dropdown-item @if(selection.competition.exists(_.id == c.id)){active}" 
-                                               href="javascript:appLoadPage('ResultList', '@c.id.value')">
-                                                <i class="bi bi-chevron-right me-1 small"></i>@c.name
-                                            </a>
-                                        </li>
-                                    }
-                                }
-                            </ul>
-                        </div>
-
-                        <!-- 3. Sub-Menu Point: InfoAnzeige / Matchboard -->
-                        @selection.tourney.map { t =>
-                            @defining(if (t.slug.nonEmpty) {
-                                val slugName = t.slug.split('/').lastOption.getOrElse(t.slug).trim
-                                val slugParam = s"${slugName}-${t.wpId}"
-                                val playBase = if (base.Global.playUrl.nonEmpty) base.Global.playUrl.trim else "/srv"
-                                s"$playBase/matchboard/view/$slugParam"
-                            } else "") { matchboardUrl =>
-                                @if(matchboardUrl.nonEmpty) {
-                                    <a href="@matchboardUrl" target="_blank" 
-                                       class="btn btn-sm @if(base.Global.activePageName == "TourneyInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}">
-                                        <i class="bi bi-tv me-1"></i>@gM("contextHeader.infoAnzeige")
-                                    </a>
-                                } else {
-                                    <a href="javascript:appLoadPage('TourneyInfo', '')" 
-                                       class="btn btn-sm @if(base.Global.activePageName == "TourneyInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}">
-                                        <i class="bi bi-tv me-1"></i>@gM("contextHeader.infoAnzeige")
-                                    </a>
-                                }
-                            }
-                        }
-
-                        <!-- Optional Administration button for logged-in users with access -->
-                        @if(base.Global.user.isDefined && base.Global.hasTourneyAccess(selection.tourney.get)) {
-                            <div class="vr mx-1 bg-secondary opacity-50" style="height: 20px;"></div>
-                            <a href="javascript:appLoadPage('TourneyAdmin', '')" 
-                               class="btn btn-sm @if(base.Global.activePageName == "TourneyAdmin"){btn-primary fw-bold}else{btn-outline-secondary text-white}">
-                                <i class="bi bi-gear-fill me-1"></i>@gM("contextHeader.administration")
-                            </a>
+                    }
+                    
+                    <!-- Tournament Link (Trophy Icon) -->
+                    @selection.tourney.map { t =>
+                        @if(t.ident != "SIMPLE") {
+                            <li class="breadcrumb-item active" aria-current="page">
+                                <a href="javascript:appLoadPage('TourneyInfo', '')" class="btn btn-outline-light btn-sm fw-bold border-secondary py-1">
+                                    <i class="bi bi-trophy text-warning me-2"></i>@t.name
+                                </a>
+                            </li>
                         }
                     }
-                </div>
+
+                    <!-- Competition Dropdown -->
+                    @if(selection.tourney.isDefined && selection.tourney.get.ident != "SIMPLE") {
+                        <li class="breadcrumb-item dropdown active" aria-current="page">
+                            <a class="btn btn-outline-light btn-sm dropdown-toggle border-secondary py-1 @if(selection.competition.isEmpty){text-white-50}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="badge bg-success me-1">C</span>
+                                @selection.competition.map(_.name).getOrElse(gM("contextHeader.selectCompetition"))
+                            </a>
+                            <ul class="dropdown-menu shadow">
+                                @if(competitions.isEmpty) {
+                                    <li><span class="dropdown-item-text text-muted small">@gM("contextHeader.noCompetitions")</span></li>
+                                }
+                                @competitions.map { c =>
+                                    <li><a class="dropdown-item @if(selection.competition.exists(_.id == c.id)){active}" href="javascript:appLoadPage('CompetitionInfo', '@c.id.value')">@c.name</a></li>
+                                }
+                                @if(competitions.nonEmpty) {
+                                    <li><hr class="dropdown-divider"></li>
+                                }
+                                <li><a class="dropdown-item small" href="javascript:appLoadPage('TourneyInfo', '')"><i class="bi bi-list-ul me-2"></i>@gM("contextHeader.showAll")</a></li>
+                            </ul>
+                        </li>
+                    }
+
+                    <!-- Stage Dropdown -->
+                    @if(selection.competition.isDefined && stages.nonEmpty) {
+                        <li class="breadcrumb-item dropdown active" aria-current="page">
+                            <a class="btn btn-outline-info text-white btn-sm dropdown-toggle border-secondary py-1 @if(selection.stage.isEmpty){text-white-50}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="badge bg-info me-1 text-dark">S</span>
+                                @selection.stage.map(_.name).getOrElse(gM("contextHeader.selectStage"))
+                            </a>
+                            <ul class="dropdown-menu shadow">
+                                @stages.map { r =>
+                                    <li><a class="dropdown-item @if(selection.stage.exists(_.id == r.id)){active}" href="javascript:appLoadPage('StageAdmin', '@r.id.value')">@r.name</a></li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item small" href="javascript:appLoadPage('CompetitionInfo', '')"><i class="bi bi-list-ul me-2"></i>@gM("contextHeader.showAll")</a></li>
+                            </ul>
+                        </li>
+                    }
+                </ol>
+            </nav>
+
+            <!-- Horizontal Menu based on context -->
+            <div class="context-menu d-flex gap-2 align-items-center">
+                @if(selection.tourney.isDefined) {
+                    @{ val hasAccess = base.Global.hasTourneyAccess(selection.tourney.get) }
+                    <div class="vr mx-2 bg-secondary opacity-50" style="height: 24px;"></div>
+                    <button class="btn btn-outline-warning btn-sm py-1 fw-bold" onclick="appLoadPage('PlayerRegistration', '')" @if(!base.Global.hasTourneyAccess(selection.tourney.get)){disabled}>
+                        <i class="bi bi-pencil-square me-1"></i>@gM("contextHeader.registration")
+                    </button>
+                    <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('PlayerList', '')">
+                        <i class="bi bi-people me-1"></i>@gM("contextHeader.participants")
+                    </button>
+                    <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('ResultList', '')">
+                        <i class="bi bi-award me-1"></i>@gM("contextHeader.results")
+                    </button>
+                    @if(base.Global.user.isDefined) {
+                        <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('TourneyAdmin', '')">
+                            <i class="bi bi-gear-fill me-1"></i>@gM("contextHeader.administration")
+                        </button>
+                    }
+                }
             </div>
         </div>
     </div>
+</div>
 }
 
 <style>
