@@ -74,35 +74,69 @@
                         }
                         @competitions.zipWithIndex.map { case (c, i) =>
                             @defining(if (c.startDate != null && c.startDate.length >= 16) c.startDate.substring(11, 16) else (if (c.startDate != null) c.startDate else "-")) { startTimeStr =>
-                                <tr>
-                                    <td class="ps-4 text-muted">@(i + 1)</td>
-                                    <td class="fw-bold text-primary">
-                                        @c.name
-                                    </td>
-                                    <td><span class="badge bg-light text-dark border">@gM(c.typ.msgCode)</span></td>
-                                    <td>
-                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
-                                            <i class="bi bi-clock me-1"></i>@{if (startTimeStr != null && startTimeStr.nonEmpty) startTimeStr else "-"}
-                                        </span>
-                                    </td>
-                                    <td>@{c.lowLevel.getOrElse(0)} - @{c.upperLevel.getOrElse("∞")}</td>
-                                    <td>
-                                        <span class="badge @{if(c.status == CompStatus.RUN) "bg-warning" else if(c.status == CompStatus.FIN) "bg-success" else "bg-secondary"}">
-                                            @gM(c.status.msgCode)
-                                        </span>
-                                    </td>
-                                    <td class="text-end pe-4">
-                                        @if(canRegister) {
-                                            <a href="javascript:appLoadPage('PlayerRegistration', '@c.id.value')" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
-                                                <i class="bi bi-person-plus-fill me-1"></i>@gM("tourneyHomepage.registerNow")
-                                            </a>
-                                        } else {
-                                            <span class="badge bg-secondary opacity-75 fw-normal">
-                                                @gM("tourneyHomepage.registrationClosed")
-                                            </span>
+                                @defining(tourney.address.map(a => s"${a.street} ${a.zip} ${a.city} ${a.country}".trim).getOrElse(tourney.organizer)) { venueStr =>
+                                    @defining(s"${tourney.name} - ${c.name}") { eventTitleStr =>
+                                        @defining(if (c.startDate != null && c.startDate.nonEmpty) c.startDate else tourney.startDate.toString) { fullDateStr =>
+                                            <tr>
+                                                <td class="ps-4 text-muted">@(i + 1)</td>
+                                                <td class="fw-bold text-primary">
+                                                    @c.name
+                                                </td>
+                                                <td><span class="badge bg-light text-dark border">@gM(c.typ.msgCode)</span></td>
+                                                <td>
+                                                    <div class="d-inline-flex align-items-center gap-1">
+                                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                                                            <i class="bi bi-clock me-1"></i>@{if (startTimeStr != null && startTimeStr.nonEmpty) startTimeStr else "-"}
+                                                        </span>
+                                                        <div class="dropdown d-inline">
+                                                            <button class="btn btn-sm btn-light border py-0 px-2 dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown" title="@gM("tourneyHomepage.addCalendar")">
+                                                                <i class="bi bi-calendar-plus text-primary"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu shadow dropdown-menu-end">
+                                                                <li>
+                                                                    <a class="dropdown-item" href="javascript:void(0)" onclick="downloadCalendarEvent('@eventTitleStr.replace("'", "\\'")', '@fullDateStr', '@venueStr.replace("'", "\\'")', 'Wettbewerb: @c.name.replace("'", "\\'")')">
+                                                                        <i class="bi bi-file-earmark-text text-primary me-2"></i>@gM("tourneyHomepage.icsDownload")
+                                                                    </a>
+                                                                </li>
+                                                                @defining(if (fullDateStr.length >= 8) {
+                                                                    val clean = fullDateStr.replaceAll("[^0-9]", "")
+                                                                    val startClean = if (clean.length >= 12) clean.substring(0, 12) + "00" else clean.substring(0, 8) + "T090000"
+                                                                    val endClean = if (clean.length >= 12) (clean.substring(0, 12).toLong + 300).toString + "00" else clean.substring(0, 8) + "T120000"
+                                                                    s"https://calendar.google.com/calendar/render?action=TEMPLATE&text=${java.net.URLEncoder.encode(eventTitleStr, "UTF-8")}&details=${java.net.URLEncoder.encode(s"Wettbewerb: ${c.name}", "UTF-8")}&location=${java.net.URLEncoder.encode(venueStr, "UTF-8")}&dates=${startClean}/${endClean}"
+                                                                } else "") { googleCalUrl =>
+                                                                    @if(googleCalUrl.nonEmpty) {
+                                                                        <li>
+                                                                            <a class="dropdown-item" href="@googleCalUrl" target="_blank">
+                                                                                <i class="bi bi-google text-danger me-2"></i>@gM("tourneyHomepage.googleCal")
+                                                                            </a>
+                                                                        </li>
+                                                                    }
+                                                                }
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>@{c.lowLevel.getOrElse(0)} - @{c.upperLevel.getOrElse("∞")}</td>
+                                                <td>
+                                                    <span class="badge @{if(c.status == CompStatus.RUN) "bg-warning" else if(c.status == CompStatus.FIN) "bg-success" else "bg-secondary"}">
+                                                        @gM(c.status.msgCode)
+                                                    </span>
+                                                </td>
+                                                <td class="text-end pe-4">
+                                                    @if(canRegister) {
+                                                        <a href="javascript:appLoadPage('PlayerRegistration', '@c.id.value')" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                                                            <i class="bi bi-person-plus-fill me-1"></i>@gM("tourneyHomepage.registerNow")
+                                                        </a>
+                                                    } else {
+                                                        <span class="badge bg-secondary opacity-75 fw-normal">
+                                                            @gM("tourneyHomepage.registrationClosed")
+                                                        </span>
+                                                    }
+                                                </td>
+                                            </tr>
                                         }
-                                    </td>
-                                </tr>
+                                    }
+                                }
                             }
                         }
                     </tbody>
@@ -210,3 +244,49 @@
         </div>
     </div>
 </div>
+
+<script>
+function downloadCalendarEvent(title, rawDateStr, venue, description) {
+  try {
+    var clean = rawDateStr.replace(/[- :T]/g, '');
+    if (clean.length < 8) return;
+    var year = parseInt(clean.substring(0, 4));
+    var month = parseInt(clean.substring(4, 6)) - 1;
+    var day = parseInt(clean.substring(6, 8));
+    var hour = clean.length >= 10 ? parseInt(clean.substring(8, 10)) : 9;
+    var min = clean.length >= 12 ? parseInt(clean.substring(10, 12)) : 0;
+    
+    var startDate = new Date(year, month, day, hour, min);
+    var endDate = new Date(startDate.getTime() + 3 * 3600 * 1000);
+    
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    var dtStart = startDate.getFullYear() + pad(startDate.getMonth() + 1) + pad(startDate.getDate()) + 'T' + pad(startDate.getHours()) + pad(startDate.getMinutes()) + '00';
+    var dtEnd = endDate.getFullYear() + pad(endDate.getMonth() + 1) + pad(endDate.getDate()) + 'T' + pad(endDate.getHours()) + pad(endDate.getMinutes()) + '00';
+
+    var ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Playdemo//Tournament Calendar//DE',
+      'BEGIN:VEVENT',
+      'SUMMARY:' + title,
+      'DESCRIPTION:' + description,
+      'LOCATION:' + venue,
+      'DTSTART:' + dtStart,
+      'DTEND:' + dtEnd,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+
+    var blob = new Blob([ics], { type: 'text/calendar;charset=utf-8;' });
+    var url = window.URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = (title.replace(/[^a-z0-9]/gi, '_')) + '.ics';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch(e) {
+    console.error("Calendar download failed", e);
+  }
+}
+</script>
