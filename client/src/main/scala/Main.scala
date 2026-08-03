@@ -105,6 +105,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
 
   def initApp(mode: String, tourneyParam: String = ""): Unit =
+    Global.appMode = mode.toLowerCase()
     import services.*
     import shared.model.*
     import shared.model.UserInfo

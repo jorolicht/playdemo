@@ -10,7 +10,7 @@
         @if(base.Global.isViewMode) {
             <!-- VIEW-Mode Sub-Menu: Fixed tournament name on the left (without home icon), menu items on the right -->
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 py-1">
-                <!-- Left Side: Fixed Tournament Name -->
+                <!-- Left Side: Fixed Tournament Name (No house icon) -->
                 <div class="d-flex align-items-center">
                     @selection.tourney.map { t =>
                         <a href="javascript:appLoadPage('TourneyRegistration', '')" class="text-decoration-none fw-bold text-white fs-6 me-2">
@@ -76,15 +76,9 @@
         } else {
             <!-- Standard / HOME-Mode Sub-Menu with Breadcrumb -->
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <!-- Left Side: Breadcrumb / Tournament Selection Info -->
+                <!-- Left Side: Tournament Selection Info (Without House Icon) -->
                 <nav aria-label="breadcrumb" class="mb-0">
                     <ol class="breadcrumb mb-0 bg-transparent p-0 align-items-center">
-                        <li class="breadcrumb-item">
-                            <a href="javascript:appLoadPage('MainView', '')" class="text-white-50 text-decoration-none hover-white">
-                                <i class="bi bi-house-door"></i>
-                            </a>
-                        </li>
-
                         @if(selection.tourney.exists(_.ident == "SIMPLE")) {
                             @defining(selection.competition.map(_.name)
                                 .orElse(selection.tourney.flatMap(_.competitions.find(_ != null).map(_.name)))
@@ -97,7 +91,7 @@
                             }
                         }
                         
-                        <!-- Tournament Name -->
+                        <!-- Fixed Tournament Name -->
                         @selection.tourney.map { t =>
                             @if(t.ident != "SIMPLE") {
                                 <li class="breadcrumb-item active" aria-current="page">
