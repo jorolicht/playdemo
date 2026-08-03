@@ -110,6 +110,8 @@ object Global:
   var dataUrl = ""
   var imgUrl  = ""
   var playUrl = ""
+  var appMode: String = "home"
+  def isViewMode: Boolean = appMode == "view"
   var activePageName: String = ""
   def isTourneyPage(pageName: String): Boolean = 
     Set(

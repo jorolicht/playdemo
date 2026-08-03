@@ -81,6 +81,8 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     val effectiveMode = if (mode.toLowerCase() == "view" || tourney.nonEmpty || postType == "tourney") "view" else mode.toLowerCase()
     val effectiveTourney = if (tourney.nonEmpty) tourney else if (postType == "tourney") slugAttr else ""
 
+    Global.appMode = effectiveMode
+
     println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} mode:${effectiveMode} PageId:${Global.pageId} tourney:${effectiveTourney} logLevel:${logLevel} turnstile:${Global.turnstileSitekey}")
 
     dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
