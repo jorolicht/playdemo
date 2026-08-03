@@ -36,6 +36,64 @@ object TourneyWelcome extends BasePage with JsWrapper:
     }
 
   /**
+   * Generates and triggers download of an iCalendar (.ics) file.
+   *
+   * @param title Event title.
+   * @param rawDateStr Raw start date/time string.
+   * @param venue Event location/address.
+   * @param description Event description.
+   */
+  def downloadCalendarEvent(title: String, rawDateStr: String, venue: String, description: String): Unit =
+    try {
+      val clean = rawDateStr.replaceAll("[^0-9]", "")
+      if (clean.length < 8) return
+
+      val year = clean.substring(0, 4).toIntOption.getOrElse(2026)
+      val month = clean.substring(4, 6).toIntOption.getOrElse(1) - 1
+      val day = clean.substring(6, 8).toIntOption.getOrElse(1)
+      val hour = if (clean.length >= 10) clean.substring(8, 10).toIntOption.getOrElse(9) else 9
+      val min = if (clean.length >= 12) clean.substring(10, 12).toIntOption.getOrElse(0) else 0
+
+      val startDate = new scala.scalajs.js.Date(year, month, day, hour, min)
+      val endDate = new scala.scalajs.js.Date(startDate.getTime() + 3.0 * 3600.0 * 1000.0)
+
+      def pad(n: Int): String = if (n < 10) s"0$n" else n.toString
+
+      val dtStart = s"${startDate.getFullYear()}${pad(startDate.getMonth().toInt + 1)}${pad(startDate.getDate().toInt)}T${pad(startDate.getHours().toInt)}${pad(startDate.getMinutes().toInt)}00"
+      val dtEnd = s"${endDate.getFullYear()}${pad(endDate.getMonth().toInt + 1)}${pad(endDate.getDate().toInt)}T${pad(endDate.getHours().toInt)}${pad(endDate.getMinutes().toInt)}00"
+
+      val icsContent = List(
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Playdemo//Tournament Calendar//DE",
+        "BEGIN:VEVENT",
+        s"SUMMARY:$title",
+        s"DESCRIPTION:$description",
+        s"LOCATION:$venue",
+        s"DTSTART:$dtStart",
+        s"DTEND:$dtEnd",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ).mkString("\r\n")
+
+      val blob = new dom.Blob(
+        scala.scalajs.js.Array(icsContent),
+        dom.BlobPropertyBag(`type` = "text/calendar;charset=utf-8;")
+      )
+
+      val url = dom.URL.createObjectURL(blob)
+      val a = dom.document.createElement("a").asInstanceOf[dom.html.Anchor]
+      a.href = url
+      val safeTitle = title.replaceAll("[^a-zA-Z0-9]", "_")
+      a.setAttribute("download", s"$safeTitle.ics")
+      dom.document.body.appendChild(a)
+      a.click()
+      dom.document.body.removeChild(a)
+    } catch {
+      case e: Exception => error(s"downloadCalendarEvent error: ${e.getMessage}")
+    }
+
+  /**
    * Renders the public tournament welcome homepage for VIEW-mode.
    *
    * @param param Optional parameter string.
@@ -49,6 +107,11 @@ object TourneyWelcome extends BasePage with JsWrapper:
     if (tourney.wpId != 0) {
       Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney))
       
+      // Register calendar download function on window object
+      dom.window.asInstanceOf[scala.scalajs.js.Dynamic].downloadCalendarEvent = 
+        (title: String, rawDateStr: String, venue: String, description: String) =>
+          downloadCalendarEvent(title, rawDateStr, venue, description)
+
       // Render ContextHeader sub-menu
       comps.ContextHeader.render()
 
