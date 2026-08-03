@@ -111,11 +111,11 @@ object Global:
   var imgUrl  = ""
   var playUrl = ""
   var appMode: String = "home"
-  def isViewMode: Boolean = appMode == "view" || activePageName == "TourneyRegistration"
+  def isViewMode: Boolean = appMode == "view" || activePageName == "TourneyWelcome"
   var activePageName: String = ""
   def isTourneyPage(pageName: String): Boolean = 
     Set(
-      "TourneyInfo", "TourneyRegistration", "TourneyAdmin", "CompetitionInfo", "PlayerRegistration", 
+      "TourneyInfo", "TourneyWelcome", "TourneyAdmin", "CompetitionInfo", "PlayerRegistration", 
       "PlayerList", "ResultList", "StageAdmin", "StageDraw", 
       "StageInput", "StageResult", "StageScoreSheet", "StageCertificate", "Certificate"
     ).contains(pageName)

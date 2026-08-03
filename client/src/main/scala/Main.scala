@@ -209,7 +209,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
         case Right(ts) => 
           debug(s"Tourney initialized for view mode, timestamp: $ts")
           Global.currentSelection = Selection(Some(TourneyDB.tourney))
-          pages.loadPage(pages.TourneyRegistration.name, "")
+          pages.loadPage(pages.TourneyWelcome.name, "")
         case Left(err) => 
           error(s"Error loading tournament for view mode: ${err}")
           pages.loadPage(pages.MainView.name, "")

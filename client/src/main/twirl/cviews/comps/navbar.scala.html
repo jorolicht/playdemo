@@ -35,7 +35,7 @@
                     </a>
                 }
                 @selection.tourney.map { t =>
-                    <a href="javascript:appLoadPage('TourneyRegistration', '')" class="text-decoration-none fw-bold text-white fs-5 d-flex align-items-center me-2">
+                    <a href="javascript:appLoadPage('TourneyWelcome', '')" class="text-decoration-none fw-bold text-white fs-5 d-flex align-items-center me-2">
                         <i class="bi bi-trophy-fill text-warning me-2"></i>@t.name
                     </a>
                 }
@@ -52,8 +52,8 @@
                     @if(selection.tourney.isDefined) {
                         <!-- 1. Welcome -->
                         <li class="nav-item">
-                            <a href="javascript:appLoadPage('TourneyRegistration', '')" 
-                               class="btn btn-sm @if(Global.activePageName == "TourneyRegistration"){btn-warning fw-bold text-dark}else{btn-outline-light}">
+                            <a href="javascript:appLoadPage('TourneyWelcome', '')" 
+                               class="btn btn-sm @if(Global.activePageName == "TourneyWelcome"){btn-warning fw-bold text-dark}else{btn-outline-light}">
                                 <i class="bi bi-card-checklist me-1"></i>@gM("contextHeader.welcome")
                             </a>
                         </li>

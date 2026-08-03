@@ -10,12 +10,12 @@ import shared.MainIds.*
 import shared.model.*
 
 /**
- * Public Tournament Registration Homepage page.
+ * Public Tournament Welcome Homepage page for VIEW-Mode.
  * Displays greeting, tournament name, date, competitions schedule with start times,
- * online registration buttons, and homepageInfo in Markdown format without breadcrumbs.
+ * online registration buttons, and homepageInfo in Markdown format.
  */
-object TourneyRegistration extends BasePage with JsWrapper:
-  def name = PageNameTyp("TourneyRegistration")
+object TourneyWelcome extends BasePage with JsWrapper:
+  def name = PageNameTyp("TourneyWelcome")
 
   /**
    * Checks whether a tournament start/end date is today or in the future.
@@ -36,7 +36,7 @@ object TourneyRegistration extends BasePage with JsWrapper:
     }
 
   /**
-   * Renders the tournament registration homepage without breadcrumbs.
+   * Renders the public tournament welcome homepage for VIEW-mode.
    *
    * @param param Optional parameter string.
    * @return True if tournament is present and rendered, false otherwise.
@@ -54,10 +54,10 @@ object TourneyRegistration extends BasePage with JsWrapper:
 
       val compList = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
 
-      setMain(cviews.pages.html.TourneyRegistration(tourney, compList))
+      setMain(cviews.pages.html.TourneyWelcome(tourney, compList))
       true
     } else {
-      debug("TourneyRegistration: No tournament found, redirecting to Home")
+      debug("TourneyWelcome: No tournament found, redirecting to Home")
       loadPage(MainView.name, "")
       false
     }
