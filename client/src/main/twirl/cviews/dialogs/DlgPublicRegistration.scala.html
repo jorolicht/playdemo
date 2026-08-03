@@ -1,0 +1,119 @@
+@import shared.model.*
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+@import dialogs.DlgPublicRegistration.*
+@import base.Messages.gM
+
+@(tourney: Tourney, competition: Competition)
+
+<div class="modal fade" @id(ModalId) tabindex="-1" aria-labelledby="dlgPublicRegistrationLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-primary text-white rounded-top-4 py-3 px-4">
+                <h5 class="modal-title fw-bold d-flex align-items-center" id="dlgPublicRegistrationLabel">
+                    <i class="bi bi-person-plus-fill fs-4 me-2"></i>
+                    @gM("tourneyHomepage.registerNow")
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" @id(CloseId)></button>
+            </div>
+            
+            <div class="modal-body p-4">
+                <!-- Tournament & Competition Banner -->
+                <div class="card bg-light border-0 rounded-3 mb-3">
+                    <div class="card-body p-3">
+                        <div class="small text-muted text-uppercase fw-bold">@tourney.name</div>
+                        <div class="fs-5 fw-bold text-primary mb-1">
+                            <i class="bi bi-award me-1 text-warning"></i>@competition.name
+                        </div>
+                        <div class="small text-secondary">
+                            <span class="badge bg-secondary me-2">@gM(competition.typ.msgCode)</span>
+                            <i class="bi bi-clock me-1"></i>@{if (competition.startDate != null && competition.startDate.length >= 16) competition.startDate.substring(11, 16) else "-"}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Alert -->
+                <div id="reg-error-alert" class="alert alert-danger d-none shadow-sm small py-2 px-3 mb-3"></div>
+
+                <!-- STEP 1: Details & Captcha -->
+                <div id="reg-step-1">
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-dark mb-1">@gM("table.lastName") *</label>
+                            <input type="text" id="reg-lastname" class="form-control border-secondary-subtle" placeholder="z.B. Mustermann" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-dark mb-1">@gM("table.firstName") *</label>
+                            <input type="text" id="reg-firstname" class="form-control border-secondary-subtle" placeholder="z.B. Max" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-bold small text-dark mb-1">@gM("table.club") *</label>
+                        <input type="text" id="reg-club" class="form-control border-secondary-subtle" placeholder="z.B. TTC Freising" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold small text-dark mb-1">@gM("table.ttr")</label>
+                            <input type="number" id="reg-ttr" class="form-control border-secondary-subtle" value="1000" min="0" max="3000">
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label fw-bold small text-dark mb-1">E-Mail-Adresse *</label>
+                            <input type="email" id="reg-email" class="form-control border-secondary-subtle" placeholder="name@@example.com" required>
+                        </div>
+                    </div>
+
+                    <!-- Captcha Section -->
+                    @if(base.Global.turnstileSitekey.nonEmpty) {
+                        <div class="cf-turnstile mt-3 d-flex justify-content-center" data-sitekey="@base.Global.turnstileSitekey"></div>
+                    } else {
+                        <div class="p-3 bg-light rounded-3 border text-center my-3">
+                            <label class="form-label fw-bold small text-muted mb-1 d-block">
+                                <i class="bi bi-shield-check me-1 text-primary"></i>Sicherheitsabfrage: Was ist 4 + 3?
+                            </label>
+                            <input type="text" id="reg-captcha-fallback" class="form-control form-control-sm text-center mx-auto" style="max-width: 100px;" placeholder="7">
+                        </div>
+                    }
+                </div>
+
+                <!-- STEP 2: Email Verification Code Entry (hidden initially) -->
+                <div id="reg-step-2" class="d-none text-center py-2">
+                    <div class="alert alert-info shadow-sm text-start mb-3">
+                        <i class="bi bi-envelope-check-fill text-info fs-4 me-2 align-middle"></i>
+                        <span>Ein 4-stelliger Verifizierungscode wurde an <strong id="reg-email-display"></strong> gesendet.</span>
+                    </div>
+
+                    <!-- Demo display of code for easy testing -->
+                    <div class="p-3 bg-warning-subtle text-warning-emphasis rounded-3 border border-warning-subtle mb-3">
+                        <i class="bi bi-key-fill me-1"></i>Dein Verifizierungscode lautet: <strong id="reg-demo-code" class="fs-4 ms-1 text-dark"></strong>
+                    </div>
+
+                    <label class="form-label fw-bold text-dark mb-2">4-stelligen Verifizierungscode eingeben:</label>
+                    <input type="text" id="reg-code-input" maxlength="4" class="form-control form-control-lg text-center fw-bold fs-3 letter-spacing-2 mx-auto border-primary" style="max-width: 180px;" placeholder="1234" autocomplete="off">
+                </div>
+
+                <!-- STEP 3: Success Confirmation (hidden initially) -->
+                <div id="reg-step-3" class="d-none text-center py-4">
+                    <div class="text-success display-4 mb-3">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">Anmeldung erfolgreich!</h4>
+                    <p class="text-muted mb-0" id="reg-success-msg"></p>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-light rounded-bottom-4 py-2 px-4 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal" @id(CancelId)>@gM("btn.cancel")</button>
+                <div id="reg-footer-buttons">
+                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm fw-bold" @id(ApplyId)>
+                        <i class="bi bi-arrow-right-circle me-1"></i>Verifizierungscode anfordern
+                    </button>
+                    <button type="button" class="btn btn-success btn-sm rounded-pill px-4 shadow-sm fw-bold text-white d-none" id="btn-submit-code">
+                        <i class="bi bi-check-circle-fill me-1"></i>Anmeldung abschließen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

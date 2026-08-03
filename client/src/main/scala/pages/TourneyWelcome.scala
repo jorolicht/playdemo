@@ -70,6 +70,34 @@ object TourneyWelcome extends BasePage with JsWrapper:
     }
 
   /**
+   * Opens the public registration dialog for a competition in VIEW-mode.
+   *
+   * @param compIdStr Competition ID string.
+   */
+  def openPublicRegistration(compIdStr: String): Unit =
+    try {
+      val cId = compIdStr.toIntOption.getOrElse(0)
+      val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
+      val compOpt = services.CompetitionDB.competitions.find(c => c != null && c.id.value == cId)
+
+      compOpt match {
+        case Some(comp) =>
+          dialogs.DlgPublicRegistration.show(tourney, comp).map {
+            case Right(player) =>
+              debug(s"Public registration successful for ${player.firstName} ${player.lastName}")
+              // Re-render TourneyWelcome to update table
+              render("")
+            case Left(_) =>
+              debug("Public registration dialog closed")
+          }
+        case None =>
+          debug(s"Competition not found for ID: $compIdStr")
+      }
+    } catch {
+      case e: Exception => error(s"openPublicRegistration error: ${e.getMessage}")
+    }
+
+  /**
    * Generates and triggers download of an iCalendar (.ics) file.
    *
    * @param title Event title.
@@ -141,10 +169,13 @@ object TourneyWelcome extends BasePage with JsWrapper:
     if (tourney.wpId != 0) {
       Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney))
       
-      // Register calendar download function on window object
+      // Register calendar download & public registration functions on window object
       dom.window.asInstanceOf[scala.scalajs.js.Dynamic].downloadCalendarEvent = 
         (title: String, rawDateStr: String, venue: String, description: String) =>
           downloadCalendarEvent(title, rawDateStr, venue, description)
+
+      dom.window.asInstanceOf[scala.scalajs.js.Dynamic].openPublicRegistration = 
+        (compIdStr: String) => openPublicRegistration(compIdStr)
 
       // Render ContextHeader sub-menu
       comps.ContextHeader.render()

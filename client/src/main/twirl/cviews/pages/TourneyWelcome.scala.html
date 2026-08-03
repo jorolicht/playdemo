@@ -136,7 +136,7 @@
                                                     </td>
                                                     <td class="text-end pe-4">
                                                         @if(base.Global.currentAci.allowRegistration && isCompStartInFuture(c, tourney)) {
-                                                            <a href="javascript:appLoadPage('PlayerRegistration', '@c.id.value')" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                                                            <a href="javascript:openPublicRegistration('@c.id.value')" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
                                                                 <i class="bi bi-person-plus-fill me-1"></i>@gM("tourneyHomepage.registerNow")
                                                             </a>
                                                         } else {

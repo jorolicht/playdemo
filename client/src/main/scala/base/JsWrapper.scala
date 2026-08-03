@@ -13,6 +13,37 @@ import shared.MainIds
 
 trait JsWrapper:
 
+  def triggerTurnstile(): Unit =
+    try {
+      val existingScript = dom.document.getElementById("cloudflare-turnstile-script")
+      if (existingScript == null) {
+        val script = dom.document.createElement("script").asInstanceOf[dom.html.Script]
+        script.id = "cloudflare-turnstile-script"
+        script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+        script.async = true
+        script.defer = true
+        dom.document.body.appendChild(script)
+      }
+      
+      dom.window.setTimeout(() => {
+        try {
+          val ts = js.Dynamic.global.turnstile
+          if (!js.isUndefined(ts) && ts != null) {
+            val elements = dom.document.getElementsByClassName("cf-turnstile")
+            for (i <- 0 until elements.length) {
+              val el = elements(i).asInstanceOf[dom.html.Div]
+              if (el.childNodes.length == 0) {
+                val sitekey = el.getAttribute("data-sitekey")
+                if (sitekey != null && sitekey.nonEmpty) {
+                  ts.render(el, js.Dynamic.literal("sitekey" -> sitekey))
+                }
+              }
+            }
+          }
+        } catch { case _: Exception => () }
+      }, 500)
+    } catch { case _: Exception => () }
+
   def newUuidString: String = js.Dynamic.global.crypto.randomUUID().asInstanceOf[String]
 // Ergebnis: "4a080829-d602-4660-848e-7164b4c73229"
 
