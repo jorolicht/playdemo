@@ -22,7 +22,7 @@
                 <!-- Right Side: Sub-Menu Points -->
                 <div class="context-menu d-flex flex-wrap gap-2 align-items-center">
                     @if(selection.tourney.isDefined) {
-                        <!-- 1. Sub-Menu Point: Registration (TourneyRegistration) -->
+                        <!-- 1. Sub-Menu Point: Welcome / Registration (TourneyRegistration) -->
                         <a href="javascript:appLoadPage('TourneyRegistration', '')" 
                            class="btn btn-sm @if(base.Global.activePageName == "TourneyRegistration"){btn-warning fw-bold text-dark}else{btn-outline-light}">
                             <i class="bi bi-card-checklist me-1"></i>@gM("contextHeader.registration")
@@ -56,11 +56,27 @@
                             </ul>
                         </div>
 
-                        <!-- 3. Sub-Menu Point: InfoAnzeige (TourneyInfo) -->
-                        <a href="javascript:appLoadPage('TourneyInfo', '')" 
-                           class="btn btn-sm @if(base.Global.activePageName == "TourneyInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}">
-                            <i class="bi bi-info-circle me-1"></i>@gM("contextHeader.infoAnzeige")
-                        </a>
+                        <!-- 3. Sub-Menu Point: InfoAnzeige / Matchboard -->
+                        @selection.tourney.map { t =>
+                            @defining(if (t.slug.nonEmpty) {
+                                val slugName = t.slug.split('/').lastOption.getOrElse(t.slug).trim
+                                val slugParam = s"${slugName}-${t.wpId}"
+                                val playBase = if (base.Global.playUrl.nonEmpty) base.Global.playUrl.trim else "/srv"
+                                s"$playBase/matchboard/view/$slugParam"
+                            } else "") { matchboardUrl =>
+                                @if(matchboardUrl.nonEmpty) {
+                                    <a href="@matchboardUrl" target="_blank" 
+                                       class="btn btn-sm @if(base.Global.activePageName == "TourneyInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}">
+                                        <i class="bi bi-tv me-1"></i>@gM("contextHeader.infoAnzeige")
+                                    </a>
+                                } else {
+                                    <a href="javascript:appLoadPage('TourneyInfo', '')" 
+                                       class="btn btn-sm @if(base.Global.activePageName == "TourneyInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}">
+                                        <i class="bi bi-tv me-1"></i>@gM("contextHeader.infoAnzeige")
+                                    </a>
+                                }
+                            }
+                        }
 
                         <!-- Optional Administration button for logged-in users with access -->
                         @if(base.Global.user.isDefined && base.Global.hasTourneyAccess(selection.tourney.get)) {
@@ -158,11 +174,27 @@
                             </ul>
                         </div>
 
-                        <!-- 3. Sub-Menu Point: InfoAnzeige (TourneyInfo) -->
-                        <a href="javascript:appLoadPage('TourneyInfo', '')" 
-                           class="btn btn-sm @if(base.Global.activePageName == "TourneyInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}">
-                            <i class="bi bi-info-circle me-1"></i>@gM("contextHeader.infoAnzeige")
-                        </a>
+                        <!-- 3. Sub-Menu Point: InfoAnzeige / Matchboard -->
+                        @selection.tourney.map { t =>
+                            @defining(if (t.slug.nonEmpty) {
+                                val slugName = t.slug.split('/').lastOption.getOrElse(t.slug).trim
+                                val slugParam = s"${slugName}-${t.wpId}"
+                                val playBase = if (base.Global.playUrl.nonEmpty) base.Global.playUrl.trim else "/srv"
+                                s"$playBase/matchboard/view/$slugParam"
+                            } else "") { matchboardUrl =>
+                                @if(matchboardUrl.nonEmpty) {
+                                    <a href="@matchboardUrl" target="_blank" 
+                                       class="btn btn-sm @if(base.Global.activePageName == "TourneyInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}">
+                                        <i class="bi bi-tv me-1"></i>@gM("contextHeader.infoAnzeige")
+                                    </a>
+                                } else {
+                                    <a href="javascript:appLoadPage('TourneyInfo', '')" 
+                                       class="btn btn-sm @if(base.Global.activePageName == "TourneyInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}">
+                                        <i class="bi bi-tv me-1"></i>@gM("contextHeader.infoAnzeige")
+                                    </a>
+                                }
+                            }
+                        }
 
                         <!-- Optional Administration button for logged-in users with access -->
                         @if(base.Global.user.isDefined && base.Global.hasTourneyAccess(selection.tourney.get)) {
