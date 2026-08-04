@@ -96,7 +96,7 @@
                                 onclick="appLoadPage('PlayerList', '')">
                             <i class="bi bi-people me-1"></i>@gM("contextHeader.participants")
                         </button>
-                        <button class="btn btn-sm py-1 @if(base.Global.activePageName == "ResultList" || base.Global.activePageName == "CompetitionInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}" 
+                        <button class="btn btn-sm py-1 @if(base.Global.activePageName == "ResultList"){btn-warning fw-bold text-dark}else{btn-outline-light}" 
                                 onclick="appLoadPage('ResultList', '')">
                             <i class="bi bi-award me-1"></i>@gM("contextHeader.results")
                         </button>
