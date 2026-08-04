@@ -31,6 +31,16 @@ object ResultList extends BasePage with JsWrapper:
 
       for (i <- 0 until elements.length) {
         val el = elements.item(i).asInstanceOf[dom.html.Div]
+        val icon = dom.document.getElementById(s"icon-${el.id}")
+        if (icon != null) {
+          if (show) {
+            icon.classList.remove("bi-chevron-down")
+            icon.classList.add("bi-chevron-up")
+          } else {
+            icon.classList.remove("bi-chevron-up")
+            icon.classList.add("bi-chevron-down")
+          }
+        }
         if (!js.isUndefined(bootstrap) && bootstrap != null && !js.isUndefined(bootstrap.Collapse)) {
           val instance = bootstrap.Collapse.getOrCreateInstance(el, js.Dynamic.literal("toggle" -> false))
           if (show) instance.show() else instance.hide()
@@ -162,6 +172,29 @@ object ResultList extends BasePage with JsWrapper:
     // Register toggleAllCards on window object so onclick attributes work natively
     dom.window.asInstanceOf[scala.scalajs.js.Dynamic].toggleAllCards = 
       (show: Boolean) => toggleAllCards(show)
+
+    // Register event listeners to update icon-collapse-comp-? when cards expand/collapse
+    dom.document.addEventListener("show.bs.collapse", (e: dom.Event) => {
+      val target = e.target.asInstanceOf[dom.html.Div]
+      if (target != null && target.id != null && target.id.startsWith("collapse-comp-")) {
+        val icon = dom.document.getElementById(s"icon-${target.id}")
+        if (icon != null) {
+          icon.classList.remove("bi-chevron-down")
+          icon.classList.add("bi-chevron-up")
+        }
+      }
+    })
+
+    dom.document.addEventListener("hide.bs.collapse", (e: dom.Event) => {
+      val target = e.target.asInstanceOf[dom.html.Div]
+      if (target != null && target.id != null && target.id.startsWith("collapse-comp-")) {
+        val icon = dom.document.getElementById(s"icon-${target.id}")
+        if (icon != null) {
+          icon.classList.remove("bi-chevron-up")
+          icon.classList.add("bi-chevron-down")
+        }
+      }
+    })
 
     val targetComps = selectedCompId match {
       case Some(id) => allComps.filter(_.id.value == id)
