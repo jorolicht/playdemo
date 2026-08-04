@@ -85,21 +85,27 @@
             <!-- Horizontal Menu based on context -->
             <div class="context-menu d-flex gap-2 align-items-center">
                 @if(selection.tourney.isDefined) {
-                    @{ val hasAccess = base.Global.hasTourneyAccess(selection.tourney.get) }
-                    <div class="vr mx-2 bg-secondary opacity-50" style="height: 24px;"></div>
-                    <button class="btn btn-outline-warning btn-sm py-1 fw-bold" onclick="appLoadPage('PlayerRegistration', '')" @if(!base.Global.hasTourneyAccess(selection.tourney.get)){disabled}>
-                        <i class="bi bi-pencil-square me-1"></i>@gM("contextHeader.registration")
-                    </button>
-                    <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('PlayerList', '')">
-                        <i class="bi bi-people me-1"></i>@gM("contextHeader.participants")
-                    </button>
-                    <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('ResultList', '')">
-                        <i class="bi bi-award me-1"></i>@gM("contextHeader.results")
-                    </button>
-                    @if(base.Global.user.isDefined) {
-                        <button class="btn btn-outline-light btn-sm py-1" onclick="appLoadPage('TourneyAdmin', '')">
-                            <i class="bi bi-gear-fill me-1"></i>@gM("contextHeader.administration")
+                    @defining(base.Global.hasTourneyAccess(selection.tourney.get)) { hasAccess =>
+                        <div class="vr mx-2 bg-secondary opacity-50" style="height: 24px;"></div>
+                        <button class="btn btn-sm py-1 @if(base.Global.activePageName == "PlayerRegistration"){btn-warning fw-bold text-dark}else{btn-outline-light}" 
+                                onclick="appLoadPage('PlayerRegistration', '')" 
+                                @if(!hasAccess){disabled}>
+                            <i class="bi bi-pencil-square me-1"></i>@gM("contextHeader.registration")
                         </button>
+                        <button class="btn btn-sm py-1 @if(base.Global.activePageName == "PlayerList"){btn-warning fw-bold text-dark}else{btn-outline-light}" 
+                                onclick="appLoadPage('PlayerList', '')">
+                            <i class="bi bi-people me-1"></i>@gM("contextHeader.participants")
+                        </button>
+                        <button class="btn btn-sm py-1 @if(base.Global.activePageName == "ResultList" || base.Global.activePageName == "CompetitionInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}" 
+                                onclick="appLoadPage('ResultList', '')">
+                            <i class="bi bi-award me-1"></i>@gM("contextHeader.results")
+                        </button>
+                        @if(base.Global.user.isDefined && hasAccess) {
+                            <button class="btn btn-sm py-1 @if(base.Global.activePageName == "TourneyAdmin"){btn-warning fw-bold text-dark}else{btn-outline-light}" 
+                                    onclick="appLoadPage('TourneyAdmin', '')">
+                                <i class="bi bi-gear-fill me-1"></i>@gM("contextHeader.administration")
+                            </button>
+                        }
                     }
                 }
             </div>
