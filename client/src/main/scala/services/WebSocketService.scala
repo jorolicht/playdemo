@@ -24,7 +24,7 @@ object WebSocketService:
   def getConnectedSlug: Option[String] = currentSlug
 
   def init(): Unit = {
-    if (base.Global.isDemoMode || base.Global.isLocalMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode || base.Global.isViewMode) {
       disconnect()
       return
     }
@@ -59,6 +59,10 @@ object WebSocketService:
   }
 
   def connect(slug: String): Unit = {
+    if (base.Global.isDemoMode || base.Global.isLocalMode || base.Global.isViewMode) {
+      disconnect()
+      return
+    }
     // If already connected or connecting to the exact same slug, skip reconnecting
     if (currentSlug.contains(slug) && ws.exists(s => s.readyState == dom.WebSocket.OPEN || s.readyState == dom.WebSocket.CONNECTING)) {
       return
