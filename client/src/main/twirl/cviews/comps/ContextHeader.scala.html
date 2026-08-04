@@ -63,20 +63,41 @@
                         </li>
                     }
 
-                    <!-- Stage Dropdown -->
+                    <!-- Stage Dropdown / Direct Link -->
                     @if(selection.competition.isDefined && stages.nonEmpty) {
                         <li class="breadcrumb-item dropdown active" aria-current="page">
-                            <a class="btn btn-outline-info text-white btn-sm dropdown-toggle border-secondary py-1 @if(selection.stage.isEmpty){text-white-50}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="badge bg-info me-1 text-dark">S</span>
-                                @selection.stage.map(_.name).getOrElse(gM("contextHeader.selectStage"))
-                            </a>
-                            <ul class="dropdown-menu shadow">
-                                @stages.map { r =>
-                                    <li><a class="dropdown-item @if(selection.stage.exists(_.id == r.id)){active}" href="javascript:appLoadPage('StageAdmin', '@r.id.value')">@r.name</a></li>
-                                }
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item small" href="javascript:appLoadPage('CompetitionInfo', '')"><i class="bi bi-list-ul me-2"></i>@gM("contextHeader.showAll")</a></li>
-                            </ul>
+                            @if(selection.stage.isDefined) {
+                                <div class="btn-group">
+                                    <a href="javascript:appLoadPage('StageAdmin', '@selection.stage.get.id.value')" class="btn btn-outline-info text-white btn-sm border-secondary py-1 fw-bold">
+                                        <span class="badge bg-info me-1 text-dark">S</span>
+                                        @selection.stage.get.name
+                                    </a>
+                                    @if(stages.length > 1) {
+                                        <button type="button" class="btn btn-outline-info text-white btn-sm dropdown-toggle dropdown-toggle-split border-secondary py-1" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <span class="visually-hidden">Toggle Dropdown</span>
+                                        </button>
+                                        <ul class="dropdown-menu shadow">
+                                            @stages.map { r =>
+                                                <li><a class="dropdown-item @if(selection.stage.exists(_.id == r.id)){active}" href="javascript:appLoadPage('StageAdmin', '@r.id.value')">@r.name</a></li>
+                                            }
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item small" href="javascript:appLoadPage('CompetitionInfo', '')"><i class="bi bi-list-ul me-2"></i>@gM("contextHeader.showAll")</a></li>
+                                        </ul>
+                                    }
+                                </div>
+                            } else {
+                                <a class="btn btn-outline-info text-white btn-sm dropdown-toggle border-secondary py-1 text-white-50" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="badge bg-info me-1 text-dark">S</span>
+                                    @gM("contextHeader.selectStage")
+                                </a>
+                                <ul class="dropdown-menu shadow">
+                                    @stages.map { r =>
+                                        <li><a class="dropdown-item" href="javascript:appLoadPage('StageAdmin', '@r.id.value')">@r.name</a></li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item small" href="javascript:appLoadPage('CompetitionInfo', '')"><i class="bi bi-list-ul me-2"></i>@gM("contextHeader.showAll")</a></li>
+                                </ul>
+                            }
                         </li>
                     }
                 </ol>
