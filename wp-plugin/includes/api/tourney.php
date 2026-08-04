@@ -419,6 +419,23 @@ function tourney_api_create(WP_REST_Request $request) {
     }
 
     $current_user = wp_get_current_user();
+
+    // Check allowed_tourneys limit for Author (TurnierAdmin)
+    $is_admin_or_editor = tourney_is_admin_or_editor($current_user);
+    if (!$is_admin_or_editor && in_array('author', (array) $current_user->roles, true)) {
+        $allowed_meta = get_user_meta($current_user->ID, 'allowed_tourneys', true);
+        $allowed = ($allowed_meta === '') ? 0 : intval($allowed_meta);
+        if ($allowed <= 0) {
+            return ApiHelper::error(
+                "tourney_limit_reached",
+                "Sie haben das Limit für neu erstellbare Turniere erreicht. Bitte wenden Sie sich an einen TurnierMaster oder Administrator.",
+                "",
+                "tourney_api_create",
+                HttpStatus::FORBIDDEN
+            );
+        }
+    }
+
     $username = ($current_user && $current_user->exists()) ? $current_user->user_login : '';
     $organizer = ($current_user && $current_user->exists()) ? get_user_meta($current_user->ID, 'organizer', true) : '';
 

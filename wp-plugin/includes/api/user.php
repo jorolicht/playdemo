@@ -267,33 +267,37 @@ function tourney_api_callback_user($request) {
     $roles          = [];
 
     $has_passkey    = false;
+    $allowed_tourneys = 0;
     if ( is_user_logged_in() )  {
-        $user_id        = get_current_user_id();
-        $current_user   = wp_get_current_user();
-        $username       = $current_user->user_login;
-        $email          = $current_user->user_email;     
-        $organizer    = get_user_meta($user_id, 'organizer' , true );
-        $firstname      = $current_user->first_name;
-        $lastname       = $current_user->last_name;
-        $description    = $current_user->description;
-        $avatar_url     = get_avatar_url($user_id);
-        $roles          = $current_user->roles;
-        $keys           = get_user_meta($user_id, 'pd_webauthn_keys', true) ?: [];
-        $has_passkey    = !empty($keys);
+        $user_id          = get_current_user_id();
+        $current_user     = wp_get_current_user();
+        $username         = $current_user->user_login;
+        $email            = $current_user->user_email;     
+        $organizer        = get_user_meta($user_id, 'organizer' , true );
+        $allowed_meta     = get_user_meta($user_id, 'allowed_tourneys', true);
+        $allowed_tourneys = ($allowed_meta === '') ? 0 : intval($allowed_meta);
+        $firstname        = $current_user->first_name;
+        $lastname         = $current_user->last_name;
+        $description      = $current_user->description;
+        $avatar_url       = get_avatar_url($user_id);
+        $roles            = $current_user->roles;
+        $keys             = get_user_meta($user_id, 'pd_webauthn_keys', true) ?: [];
+        $has_passkey      = !empty($keys);
     } 
 
     return [
-        'username'      => $username,
-        'user_id'       => (int)$user_id,
-        'email'         => $email,
-        'club'          => $organizer,
-        'firstname'     => $firstname,
-        'lastname'      => $lastname,
-        'description'   => $description,
-        'avatar_url'    => $avatar_url,
-        'roles'         => array_values($roles), // Ensure numeric array for JSON
-        'has_passkey'   => $has_passkey,
-        'time'          => current_time('mysql'),
+        'username'         => $username,
+        'user_id'          => (int)$user_id,
+        'email'            => $email,
+        'club'             => $organizer,
+        'allowed_tourneys' => (int)$allowed_tourneys,
+        'firstname'        => $firstname,
+        'lastname'         => $lastname,
+        'description'      => $description,
+        'avatar_url'       => $avatar_url,
+        'roles'            => array_values($roles), // Ensure numeric array for JSON
+        'has_passkey'      => $has_passkey,
+        'time'             => current_time('mysql'),
     ];
 }
 

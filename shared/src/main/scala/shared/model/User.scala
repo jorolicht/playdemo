@@ -33,6 +33,7 @@ case class UserInfo(
   user_id: Int,
   email: String,
   club: String,
+  allowed_tourneys: Option[Int] = None,
   firstname: String = "",
   lastname: String = "",
   description: String = "",

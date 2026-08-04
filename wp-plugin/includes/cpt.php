@@ -160,3 +160,86 @@ add_action('rest_api_init', function () {
         ],
     ]);
 });
+
+/**
+ * Validates that an Author / TurnierAdmin has remaining allowed tournaments before post insertion in WP Admin.
+ *
+ * @param array $data    An array of slashed, sanitized, and processed post data.
+ * @param array $postarr An array of sanitized (and raw) post data.
+ * @return array Processed post data.
+ */
+function tourney_check_author_creation_limit( $data, $postarr ) {
+    if ( isset( $data['post_type'] ) && $data['post_type'] === 'tourney' && empty( $postarr['ID'] ) ) {
+        if ( isset( $data['post_status'] ) && $data['post_status'] === 'auto-draft' ) {
+            return $data;
+        }
+
+        $user_id = get_current_user_id();
+        if ( ! $user_id ) {
+            return $data;
+        }
+
+        $user = get_userdata( $user_id );
+        if ( ! $user ) {
+            return $data;
+        }
+
+        $is_admin_or_editor = user_can( $user_id, 'manage_options' ) || user_can( $user_id, 'edit_others_posts' ) || in_array( 'administrator', (array) $user->roles, true ) || in_array( 'editor', (array) $user->roles, true );
+
+        if ( ! $is_admin_or_editor && in_array( 'author', (array) $user->roles, true ) ) {
+            $allowed_meta = get_user_meta( $user_id, 'allowed_tourneys', true );
+            $allowed = ( $allowed_meta === '' ) ? 0 : intval( $allowed_meta );
+            if ( $allowed <= 0 ) {
+                wp_die(
+                    esc_html__( 'Sie haben das Limit für neu erstellbare Turniere erreicht. Bitte wenden Sie sich an einen TurnierMaster oder Administrator.', 'tourney' ),
+                    esc_html__( 'Turnier-Erstellung nicht möglich', 'tourney' ),
+                    array( 'response' => 403, 'back_link' => true )
+                );
+            }
+        }
+    }
+    return $data;
+}
+add_filter( 'wp_insert_post_data', 'tourney_check_author_creation_limit', 10, 2 );
+
+/**
+ * Decrements the allowed_tourneys counter when a new tourney is created by an Author.
+ *
+ * @param int     $post_id Post ID.
+ * @param WP_Post $post    Post object.
+ * @param bool    $update  Whether this is an existing post being updated.
+ */
+function tourney_decrement_author_creation_counter( $post_id, $post, $update ) {
+    if ( $update || ! $post || $post->post_type !== 'tourney' || $post->post_parent == 0 ) {
+        return;
+    }
+
+    if ( wp_is_post_revision( $post_id ) || $post->post_status === 'auto-draft' ) {
+        return;
+    }
+
+    if ( get_post_meta( $post_id, '_counter_decremented', true ) ) {
+        return;
+    }
+
+    $author_id = $post->post_author;
+    if ( ! $author_id ) {
+        return;
+    }
+
+    $user = get_userdata( $author_id );
+    if ( ! $user ) {
+        return;
+    }
+
+    $is_admin_or_editor = user_can( $author_id, 'manage_options' ) || user_can( $author_id, 'edit_others_posts' ) || in_array( 'administrator', (array) $user->roles, true ) || in_array( 'editor', (array) $user->roles, true );
+
+    if ( ! $is_admin_or_editor && in_array( 'author', (array) $user->roles, true ) ) {
+        $allowed_meta = get_user_meta( $author_id, 'allowed_tourneys', true );
+        $allowed = ( $allowed_meta === '' ) ? 0 : intval( $allowed_meta );
+        $new_count = max( 0, $allowed - 1 );
+        update_user_meta( $author_id, 'allowed_tourneys', $new_count );
+        update_post_meta( $post_id, '_counter_decremented', 1 );
+    }
+}
+add_action( 'wp_insert_post', 'tourney_decrement_author_creation_counter', 10, 3 );
