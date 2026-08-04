@@ -48,20 +48,24 @@ object CompetitionInfo extends BasePage with JsWrapper:
     if (param.nonEmpty) {
       val cId = CompId(param.toInt)
       services.CompetitionDB.competitions.find(c => c != null && c.id == cId).foreach { c =>
-        // Clear stage when switching competition
-        Global.currentSelection = Global.currentSelection.copy(competition = Some(c), stage = None)
+        val compStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == c.id && !s.deleted)
+        val autoStage = if (compStages.length == 1) compStages.headOption else None
+        Global.currentSelection = Global.currentSelection.copy(competition = Some(c), stage = autoStage)
         comps.ContextHeader.render()
       }
     }
 
     Global.currentSelection.competition match
       case Some(c) => 
-        comps.ContextHeader.render()
-        // Real participants from the competition object, filtered by active and sorted
-        val participants = sortParticipants(c.pants1Stage.toSeq.filter(_.active))
-        
         // Real stages from the tourney object (shared model)
         val stages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == c.id && !s.deleted)
+        if (stages.length == 1 && Global.currentSelection.stage.isEmpty) {
+          Global.currentSelection = Global.currentSelection.copy(stage = stages.headOption)
+        }
+        comps.ContextHeader.render()
+        
+        // Real participants from the competition object, filtered by active and sorted
+        val participants = sortParticipants(c.pants1Stage.toSeq.filter(_.active))
 
         setMain(cviews.pages.html.CompetitionInfo(c, participants, stages, sortCol, sortAsc))
         true
