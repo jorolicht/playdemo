@@ -130,19 +130,6 @@
     }
 </div>
 
-<script>
-    function toggleAllCards(show) {
-        document.querySelectorAll('.comp-card-collapse').forEach(function(el) {
-            if (window.bootstrap && window.bootstrap.Collapse) {
-                var instance = window.bootstrap.Collapse.getOrCreateInstance(el, { toggle: false });
-                if (show) instance.show(); else instance.hide();
-            } else {
-                if (show) el.classList.add('show'); else el.classList.remove('show');
-            }
-        });
-    }
-</script>
-
 <style>
     .comp-card-collapse.collapsing + .card-header .transition-transform,
     .comp-card-collapse.show + .card-header .transition-transform {

@@ -3,6 +3,7 @@ package pages
 import org.scalajs.dom
 import base.*
 import shared.model.*
+import scala.scalajs.js
 
 /**
  * Page displaying tournament results.
@@ -17,6 +18,29 @@ object ResultList extends BasePage with JsWrapper:
     certStage: Option[Stage],
     pants: Seq[Pant]
   )
+
+  /**
+   * Toggles collapse state for all competition cards on the page.
+   *
+   * @param show If true, expands all cards; if false, collapses all cards.
+   */
+  def toggleAllCards(show: Boolean): Unit =
+    try {
+      val elements = dom.document.querySelectorAll(".comp-card-collapse")
+      val bootstrap = js.Dynamic.global.bootstrap
+
+      for (i <- 0 until elements.length) {
+        val el = elements.item(i).asInstanceOf[dom.html.Div]
+        if (!js.isUndefined(bootstrap) && bootstrap != null && !js.isUndefined(bootstrap.Collapse)) {
+          val instance = bootstrap.Collapse.getOrCreateInstance(el, js.Dynamic.literal("toggle" -> false))
+          if (show) instance.show() else instance.hide()
+        } else {
+          if (show) el.classList.add("show") else el.classList.remove("show")
+        }
+      }
+    } catch {
+      case e: Exception => error(s"toggleAllCards error: ${e.getMessage}")
+    }
 
   /**
    * Computes ranked participants for a stage based on its format (Swiss, Groups, KO, RoundRobin).
@@ -134,6 +158,10 @@ object ResultList extends BasePage with JsWrapper:
     }
     
     comps.ContextHeader.render()
+
+    // Register toggleAllCards on window object so onclick attributes work natively
+    dom.window.asInstanceOf[scala.scalajs.js.Dynamic].toggleAllCards = 
+      (show: Boolean) => toggleAllCards(show)
 
     val targetComps = selectedCompId match {
       case Some(id) => allComps.filter(_.id.value == id)
