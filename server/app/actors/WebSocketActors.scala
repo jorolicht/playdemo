@@ -4,6 +4,9 @@ import org.apache.pekko.actor._
 import play.api.Logging
 import scala.collection.mutable
 
+/**
+ * Manager actor managing active WebSocket connections per tournament slug.
+ */
 class WebSocketManagerActor extends Actor with Logging {
   import WebSocketManagerActor._
 
@@ -60,6 +63,9 @@ class WebSocketManagerActor extends Actor with Logging {
   }
 }
 
+/**
+ * Companion object for WebSocketManagerActor.
+ */
 object WebSocketManager {
   private var _manager: Option[ActorRef] = None
 
@@ -72,6 +78,9 @@ object WebSocketManager {
   }
 }
 
+/**
+ * Messages for WebSocketManagerActor.
+ */
 object WebSocketManagerActor {
   def props: Props = Props[WebSocketManagerActor]()
 
@@ -80,6 +89,10 @@ object WebSocketManagerActor {
   case class SendToSlug(slug: String, msg: String)
 }
 
+/**
+ * Client actor handling individual WebSocket client connections.
+ * Logs incoming messages and responds to "Hallo" or "Hello" messages.
+ */
 class WebSocketClientActor(out: ActorRef, manager: ActorRef, slug: String) extends Actor with Logging {
   import WebSocketManagerActor._
   import WebSocketClientActor._
@@ -100,11 +113,21 @@ class WebSocketClientActor(out: ActorRef, manager: ActorRef, slug: String) exten
       // Console logging requirement:
       logger.info(s"[Server WebSocket] message from client ($slug): $msg")
 
+      val trimmed = msg.trim
+      if (trimmed.toLowerCase.startsWith("hallo")) {
+        out ! "Hallo hier ist der Server"
+      } else if (trimmed.toLowerCase.startsWith("hello")) {
+        out ! "Hello this is server speaking"
+      }
+
     case SendToClient(msg) =>
       out ! msg
   }
 }
 
+/**
+ * Companion object for WebSocketClientActor.
+ */
 object WebSocketClientActor {
   def props(out: ActorRef, manager: ActorRef, slug: String): Props =
     Props(new WebSocketClientActor(out, manager, slug))
