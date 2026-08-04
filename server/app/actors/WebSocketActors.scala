@@ -114,13 +114,9 @@ class WebSocketClientActor(out: ActorRef, manager: ActorRef, slug: String) exten
 
       val trimmed = msg.trim
       if (trimmed.toLowerCase.startsWith("hallo")) {
-        val reply = "Hallo hier ist der Server"
-        out ! reply
-        manager ! SendToSlug(slug, reply)
+        out ! "Hallo hier ist der Server"
       } else if (trimmed.toLowerCase.startsWith("hello")) {
-        val reply = "Hello this is server speaking"
-        out ! reply
-        manager ! SendToSlug(slug, reply)
+        out ! "Hello this is server speaking"
       }
 
     case SendToClient(msg) =>
