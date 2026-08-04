@@ -184,9 +184,9 @@ function tourney_check_author_creation_limit( $data, $postarr ) {
             return $data;
         }
 
-        $is_admin_or_editor = user_can( $user_id, 'manage_options' ) || user_can( $user_id, 'edit_others_posts' ) || in_array( 'administrator', (array) $user->roles, true ) || in_array( 'editor', (array) $user->roles, true );
+        $is_admin_or_editor = tourney_is_admin_or_editor( $user );
 
-        if ( ! $is_admin_or_editor && in_array( 'author', (array) $user->roles, true ) ) {
+        if ( ! $is_admin_or_editor ) {
             $allowed_meta = get_user_meta( $user_id, 'allowed_tourneys', true );
             $allowed = ( $allowed_meta === '' ) ? 0 : intval( $allowed_meta );
             if ( $allowed <= 0 ) {
@@ -203,7 +203,7 @@ function tourney_check_author_creation_limit( $data, $postarr ) {
 add_filter( 'wp_insert_post_data', 'tourney_check_author_creation_limit', 10, 2 );
 
 /**
- * Decrements the allowed_tourneys counter when a new tourney is created by an Author.
+ * Decrements the allowed_tourneys counter when a new tourney is created by an Author or TourneyAdmin.
  *
  * @param int     $post_id Post ID.
  * @param WP_Post $post    Post object.
@@ -232,9 +232,9 @@ function tourney_decrement_author_creation_counter( $post_id, $post, $update ) {
         return;
     }
 
-    $is_admin_or_editor = user_can( $author_id, 'manage_options' ) || user_can( $author_id, 'edit_others_posts' ) || in_array( 'administrator', (array) $user->roles, true ) || in_array( 'editor', (array) $user->roles, true );
+    $is_admin_or_editor = tourney_is_admin_or_editor( $user );
 
-    if ( ! $is_admin_or_editor && in_array( 'author', (array) $user->roles, true ) ) {
+    if ( ! $is_admin_or_editor ) {
         $allowed_meta = get_user_meta( $author_id, 'allowed_tourneys', true );
         $allowed = ( $allowed_meta === '' ) ? 0 : intval( $allowed_meta );
         $new_count = max( 0, $allowed - 1 );

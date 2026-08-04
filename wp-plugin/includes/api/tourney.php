@@ -420,9 +420,9 @@ function tourney_api_create(WP_REST_Request $request) {
 
     $current_user = wp_get_current_user();
 
-    // Check allowed_tourneys limit for Author (TurnierAdmin)
+    // Check allowed_tourneys limit for TourneyAdmin / Author / Subscriber
     $is_admin_or_editor = tourney_is_admin_or_editor($current_user);
-    if (!$is_admin_or_editor && in_array('author', (array) $current_user->roles, true)) {
+    if (!$is_admin_or_editor) {
         $allowed_meta = get_user_meta($current_user->ID, 'allowed_tourneys', true);
         $allowed = ($allowed_meta === '') ? 0 : intval($allowed_meta);
         if ($allowed <= 0) {

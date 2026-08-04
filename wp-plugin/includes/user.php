@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Helper to check if a user (or current user) is an Administrator or Editor (TurnierMaster).
+ * Helper to check if a user (or current user) is an Administrator or Editor/TourneyMaster.
  *
  * @param WP_User|null $user Optional. The user object. Defaults to current logged-in user.
- * @return bool True if Administrator or Editor, false otherwise.
+ * @return bool True if Administrator or Editor/TourneyMaster, false otherwise.
  */
 function tourney_is_admin_or_editor( $user = null ) {
     if ( ! $user ) {
@@ -13,8 +13,44 @@ function tourney_is_admin_or_editor( $user = null ) {
     if ( ! $user || ! $user->exists() ) {
         return false;
     }
-    return user_can( $user, 'manage_options' ) || user_can( $user, 'edit_others_posts' ) || in_array( 'administrator', (array) $user->roles, true ) || in_array( 'editor', (array) $user->roles, true );
+    $roles = (array) $user->roles;
+    return user_can( $user, 'manage_options' ) || 
+           user_can( $user, 'edit_others_posts' ) || 
+           in_array( 'administrator', $roles, true ) || 
+           in_array( 'editor', $roles, true ) || 
+           in_array( 'tourney_master', $roles, true );
 }
+
+/**
+ * Registers custom WordPress roles: TourneyAdmin (Subscriber permissions + edit_posts) and TourneyMaster (Editor permissions).
+ * Language-independent internal role slugs: 'tourney_admin' and 'tourney_master'.
+ */
+function tourney_register_custom_roles() {
+    // 1. TourneyAdmin role with Subscriber (Abonnent) capabilities plus tournament editing
+    $subscriber_role = get_role( 'subscriber' );
+    $tourney_admin_caps = $subscriber_role ? $subscriber_role->capabilities : array( 'read' => true );
+    $tourney_admin_caps['edit_posts'] = true;
+    $tourney_admin_caps['upload_files'] = true;
+
+    if ( null === get_role( 'tourney_admin' ) ) {
+        add_role( 'tourney_admin', __( 'TourneyAdmin', 'tourney' ), $tourney_admin_caps );
+    }
+
+    // 2. TourneyMaster role with Editor (Redakteur) capabilities
+    $editor_role = get_role( 'editor' );
+    $tourney_master_caps = $editor_role ? $editor_role->capabilities : array(
+        'read'               => true,
+        'edit_posts'         => true,
+        'edit_others_posts'  => true,
+        'publish_posts'      => true,
+        'read_private_posts' => true,
+    );
+
+    if ( null === get_role( 'tourney_master' ) ) {
+        add_role( 'tourney_master', __( 'TourneyMaster', 'tourney' ), $tourney_master_caps );
+    }
+}
+add_action( 'init', 'tourney_register_custom_roles' );
 
 /**
  * Adds custom user profile fields to the 'Edit User' and 'Your Profile' screens.
