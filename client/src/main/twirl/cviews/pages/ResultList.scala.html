@@ -11,10 +11,10 @@
         </h3>
         @if(cards.nonEmpty) {
             <div class="d-flex gap-2">
-                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="document.querySelectorAll('.comp-card-collapse').forEach(e => new bootstrap.Collapse(e, {show: true}))">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="toggleAllCards(true)">
                     <i class="bi bi-arrows-expand me-1"></i>Alle ausklappen
                 </button>
-                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="document.querySelectorAll('.comp-card-collapse').forEach(e => new bootstrap.Collapse(e, {hide: true}))">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="toggleAllCards(false)">
                     <i class="bi bi-arrows-collapse me-1"></i>Alle einklappen
                 </button>
             </div>
@@ -32,105 +32,116 @@
     } else {
         @cards.map { card =>
             @defining(s"collapse-comp-${card.comp.id.value}") { collapseId =>
-                @defining(card.comp.status == CompStatus.FIN || card.pants.nonEmpty) { isExpanded =>
-                    <div class="card shadow-sm border-0 rounded-4 mb-4 bg-white overflow-hidden">
-                        <!-- Card Header (Clickable Collapse Toggle) -->
-                        <div class="card-header bg-primary text-white py-3 px-4 rounded-top-4 d-flex justify-content-between align-items-center select-none"
-                             style="cursor: pointer;"
-                             data-bs-toggle="collapse" 
-                             data-bs-target="#@collapseId" 
-                             aria-expanded="@isExpanded" 
-                             aria-controls="@collapseId">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="bi bi-chevron-down fs-5 transition-transform" id="icon-@collapseId"></i>
-                                <div>
-                                    <h4 class="h5 mb-0 fw-bold d-flex align-items-center">
-                                        <i class="bi bi-trophy-fill text-warning me-2"></i>@card.comp.name
-                                    </h4>
-                                    <div class="small opacity-75 mt-1 d-flex flex-wrap gap-2 align-items-center">
-                                        <span class="badge bg-light text-primary border fw-normal">@gM(card.comp.typ.msgCode)</span>
-                                        @card.certStage.map { stage =>
-                                            <span class="badge bg-info text-dark fw-normal"><i class="bi bi-patch-check-fill me-1"></i>Urkundenphase: @stage.name</span>
-                                        }
-                                        <span class="badge bg-white bg-opacity-25 text-white fw-normal">
-                                            <i class="bi bi-people me-1"></i>@card.pants.length @gM("contextHeader.participants")
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="card shadow-sm border-0 rounded-4 mb-4 bg-white overflow-hidden">
+                    <!-- Card Header (Clickable Collapse Toggle) -->
+                    <div class="card-header bg-primary text-white py-3 px-4 rounded-top-4 d-flex justify-content-between align-items-center select-none"
+                         style="cursor: pointer;"
+                         data-bs-toggle="collapse" 
+                         data-bs-target="#@collapseId" 
+                         aria-expanded="false" 
+                         aria-controls="@collapseId">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-chevron-down fs-5 transition-transform" id="icon-@collapseId"></i>
                             <div>
-                                <span class="badge @{if(card.comp.status == CompStatus.FIN) "bg-success" else if(card.comp.status == CompStatus.RUN) "bg-warning text-dark" else "bg-secondary"} px-3 py-2 fs-6">
-                                    @gM(card.comp.status.msgCode)
-                                </span>
+                                <h4 class="h5 mb-0 fw-bold d-flex align-items-center">
+                                    <i class="bi bi-trophy-fill text-warning me-2"></i>@card.comp.name
+                                </h4>
+                                <div class="small opacity-75 mt-1 d-flex flex-wrap gap-2 align-items-center">
+                                    <span class="badge bg-light text-primary border fw-normal">@gM(card.comp.typ.msgCode)</span>
+                                    @card.certStage.map { stage =>
+                                        <span class="badge bg-info text-dark fw-normal"><i class="bi bi-patch-check-fill me-1"></i>Urkundenphase: @stage.name</span>
+                                    }
+                                    <span class="badge bg-white bg-opacity-25 text-white fw-normal">
+                                        <i class="bi bi-people me-1"></i>@card.pants.length @gM("contextHeader.participants")
+                                    </span>
+                                </div>
                             </div>
                         </div>
+                        <div>
+                            <span class="badge @{if(card.comp.status == CompStatus.FIN) "bg-success" else if(card.comp.status == CompStatus.RUN) "bg-warning text-dark" else "bg-secondary"} px-3 py-2 fs-6">
+                                @gM(card.comp.status.msgCode)
+                            </span>
+                        </div>
+                    </div>
 
-                        <!-- Collapsible Body -->
-                        <div id="@collapseId" class="collapse comp-card-collapse @if(isExpanded){show}">
-                            <div class="card-body p-0 border-top">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <thead class="table-light small">
+                    <!-- Collapsible Body (Initially collapsed) -->
+                    <div id="@collapseId" class="collapse comp-card-collapse">
+                        <div class="card-body p-0 border-top">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light small">
+                                        <tr>
+                                            <th class="ps-4 text-center" style="width: 110px;">@gM("results.thPlace")</th>
+                                            <th>@gM("results.thName")</th>
+                                            <th>@gM("results.thClub")</th>
+                                            <th class="text-end pe-4">@gM("tourneyInfo.actions")</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if(card.pants.isEmpty) {
                                             <tr>
-                                                <th class="ps-4 text-center" style="width: 110px;">@gM("results.thPlace")</th>
-                                                <th>@gM("results.thName")</th>
-                                                <th>@gM("results.thClub")</th>
-                                                <th class="text-end pe-4">@gM("tourneyInfo.actions")</th>
+                                                <td colspan="4" class="text-center py-4 text-muted italic">
+                                                    <i class="bi bi-info-circle me-1"></i>Noch keine Ergebnisse für diesen Wettbewerb vorhanden.
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            @if(card.pants.isEmpty) {
-                                                <tr>
-                                                    <td colspan="4" class="text-center py-4 text-muted italic">
-                                                        <i class="bi bi-info-circle me-1"></i>Noch keine Ergebnisse für diesen Wettbewerb vorhanden.
-                                                    </td>
-                                                </tr>
-                                            }
-                                            @card.pants.map { p =>
-                                                @defining(p.place._1) { placeFirst =>
-                                                    @defining(if (p.place._2 > 0 && p.place._2 != placeFirst) s"${placeFirst}.-${p.place._2}." else s"${placeFirst}.") { placeDisplayStr =>
-                                                        <tr>
-                                                            <td class="ps-4 text-center">
-                                                                @if(placeFirst == 1) {
-                                                                    <span class="badge rounded-pill bg-warning text-dark px-3 py-2 shadow-sm fs-6">
-                                                                        <i class="bi bi-trophy-fill me-1 text-dark"></i>1. Platz
-                                                                    </span>
-                                                                } else if(placeFirst == 2) {
-                                                                    <span class="badge rounded-pill bg-secondary text-white px-3 py-2 shadow-sm fs-6">
-                                                                        <i class="bi bi-award-fill me-1"></i>2. Platz
-                                                                    </span>
-                                                                } else if(placeFirst == 3) {
-                                                                    <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis border border-danger-subtle px-3 py-2 shadow-sm fs-6">
-                                                                        <i class="bi bi-award me-1"></i>@placeDisplayStr
-                                                                    </span>
-                                                                } else {
-                                                                    <span class="badge bg-light text-dark border px-3 py-1">
-                                                                        @placeDisplayStr
-                                                                    </span>
-                                                                }
-                                                            </td>
-                                                            <td class="fw-bold text-primary">@p.name</td>
-                                                            <td>@p.club</td>
-                                                            <td class="text-end pe-4">
-                                                                <button class="btn btn-outline-warning btn-sm rounded-pill px-3 shadow-sm fw-bold" onclick="appLoadPage('Certificate', '@p.name|@card.comp.name|@placeFirst')">
-                                                                    <i class="bi bi-trophy-fill me-1"></i>@gM("results.btnCert")
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    }
+                                        }
+                                        @card.pants.map { p =>
+                                            @defining(p.place._1) { placeFirst =>
+                                                @defining(if (p.place._2 > 0 && p.place._2 != placeFirst) s"${placeFirst}.-${p.place._2}." else s"${placeFirst}.") { placeDisplayStr =>
+                                                    <tr>
+                                                        <td class="ps-4 text-center">
+                                                            @if(placeFirst == 1) {
+                                                                <span class="badge rounded-pill bg-warning text-dark px-3 py-2 shadow-sm fs-6">
+                                                                    <i class="bi bi-trophy-fill me-1 text-dark"></i>1. Platz
+                                                                </span>
+                                                            } else if(placeFirst == 2) {
+                                                                <span class="badge rounded-pill bg-secondary text-white px-3 py-2 shadow-sm fs-6">
+                                                                    <i class="bi bi-award-fill me-1"></i>2. Platz
+                                                                </span>
+                                                            } else if(placeFirst == 3) {
+                                                                <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis border border-danger-subtle px-3 py-2 shadow-sm fs-6">
+                                                                    <i class="bi bi-award me-1"></i>@placeDisplayStr
+                                                                </span>
+                                                            } else {
+                                                                <span class="badge bg-light text-dark border px-3 py-1">
+                                                                    @placeDisplayStr
+                                                                </span>
+                                                            }
+                                                        </td>
+                                                        <td class="fw-bold text-primary">@p.name</td>
+                                                        <td>@p.club</td>
+                                                        <td class="text-end pe-4">
+                                                            <button class="btn btn-outline-warning btn-sm rounded-pill px-3 shadow-sm fw-bold" onclick="appLoadPage('Certificate', '@p.name|@card.comp.name|@placeFirst')">
+                                                                <i class="bi bi-trophy-fill me-1"></i>@gM("results.btnCert")
+                                                            </button>
+                                                        </td>
+                                                    </tr>
                                                 }
                                             }
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                }
+                </div>
             }
         }
     }
 </div>
+
+<script>
+    function toggleAllCards(show) {
+        document.querySelectorAll('.comp-card-collapse').forEach(function(el) {
+            if (window.bootstrap && window.bootstrap.Collapse) {
+                var instance = window.bootstrap.Collapse.getOrCreateInstance(el, { toggle: false });
+                if (show) instance.show(); else instance.hide();
+            } else {
+                if (show) el.classList.add('show'); else el.classList.remove('show');
+            }
+        });
+    }
+</script>
 
 <style>
     .comp-card-collapse.collapsing + .card-header .transition-transform,
