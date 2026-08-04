@@ -146,10 +146,10 @@ object WebSocketService:
       }
 
       webSocket.onclose = (e: dom.CloseEvent) => {
-        debug(s"[WebSocket] Connection closed for slug '$slug': ${e.reason}")
         stopHeartbeat()
         if (currentSlug.contains(slug)) {
-          // Retry connection after 5 seconds
+          debug(s"[WebSocket] Connection closed for slug '$slug': ${e.reason}")
+          // Retry connection after 5 seconds if still on same slug
           dom.window.setTimeout(() => {
             if (currentSlug.contains(slug)) connect(slug)
           }, 5000)
@@ -157,7 +157,7 @@ object WebSocketService:
       }
 
       webSocket.onerror = (e: dom.Event) => {
-        debug(s"[WebSocket] Error occurred on connection for slug '$slug'")
+        debug(s"[WebSocket] Notice: WebSocket endpoint unavailable for slug '$slug'")
       }
     } catch {
       case ex: Exception =>
@@ -167,13 +167,21 @@ object WebSocketService:
 
   def disconnect(): Unit = {
     stopHeartbeat()
+    currentSlug = None
     ws.foreach { socket =>
-      if (socket.readyState == dom.WebSocket.OPEN || socket.readyState == dom.WebSocket.CONNECTING) {
-        socket.close()
+      try {
+        socket.onopen = (e: dom.Event) => ()
+        socket.onmessage = (e: dom.MessageEvent) => ()
+        socket.onerror = (e: dom.Event) => ()
+        socket.onclose = (e: dom.CloseEvent) => ()
+        if (socket.readyState == dom.WebSocket.OPEN || socket.readyState == dom.WebSocket.CONNECTING) {
+          socket.close()
+        }
+      } catch {
+        case _: Exception => ()
       }
     }
     ws = None
-    currentSlug = None
   }
 
   def send(msg: String): Unit = {
