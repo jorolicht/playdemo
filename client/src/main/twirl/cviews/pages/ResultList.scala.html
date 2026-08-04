@@ -1,52 +1,102 @@
 @import shared.model.*
-@import pages.ResultList.DisplayResult
+@import pages.ResultList.CompResultCard
 @import base.Messages.gM
 
-@(results: Seq[DisplayResult])
+@(cards: Seq[CompResultCard])
 
-<div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-            <h3 class="h5 mb-0 fw-bold"><i class="bi bi-award me-2"></i>@gM("results.title")</h3>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light small">
-                        <tr>
-                            <th class="ps-3">@gM("results.thName")</th>
-                            <th>@gM("results.thClub")</th>
-                            <th>@gM("results.thComp")</th>
-                            <th class="text-center">@gM("results.thPlace")</th>
-                            <th class="text-end pe-3">@gM("tourneyInfo.actions")</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if(results.isEmpty) {
-                            <tr><td colspan="5" class="text-center py-5 text-muted italic">@gM("results.noResults")</td></tr>
-                        }
-                        @results.map { r =>
-                            <tr>
-                                <td class="ps-3 fw-bold text-primary">@r.name</td>
-                                <td>@r.club</td>
-                                <td>@r.compName</td>
-                                <td class="text-center">
-                                    @if(r.place <= 3) {
-                                        <span class="badge rounded-pill bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>@r.place.</span>
-                                    } else {
-                                        <span class="text-muted">@r.place.</span>
-                                    }
-                                </td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-outline-warning btn-sm" onclick="appLoadPage('Certificate', '@r.name|@r.compName|@r.place')">
-                                        <i class="bi bi-trophy-fill me-1"></i>@gM("results.btnCert")
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+<div class="container mt-4 mb-5">
+    <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center">
+        <i class="bi bi-award-fill text-warning me-2 fs-3"></i>@gM("results.title")
+    </h3>
+
+    @if(cards.isEmpty) {
+        <div class="card shadow-sm border-0 rounded-4 p-5 text-center bg-white">
+            <div class="text-muted display-4 mb-3">
+                <i class="bi bi-award opacity-50"></i>
             </div>
+            <h4 class="fw-bold text-dark mb-2">@gM("results.noResults")</h4>
+            <p class="text-muted mb-0 small">Sobald Wettbewerbe beendet sind, werden die Ergebnisse hier angezeigt.</p>
         </div>
-    </div>
+    } else {
+        @cards.map { card =>
+            <div class="card shadow-sm border-0 rounded-4 mb-4 bg-white">
+                <!-- Card Header for Competition -->
+                <div class="card-header bg-primary text-white py-3 px-4 rounded-top-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="h5 mb-0 fw-bold d-flex align-items-center">
+                            <i class="bi bi-trophy-fill text-warning me-2"></i>@card.comp.name
+                        </h4>
+                        <div class="small opacity-75 mt-1 d-flex flex-wrap gap-2 align-items-center">
+                            <span class="badge bg-light text-primary border fw-normal">@gM(card.comp.typ.msgCode)</span>
+                            @card.certStage.map { stage =>
+                                <span class="badge bg-info text-dark fw-normal"><i class="bi bi-patch-check-fill me-1"></i>Urkundenphase: @stage.name</span>
+                            }
+                        </div>
+                    </div>
+                    <div>
+                        <span class="badge @{if(card.comp.status == CompStatus.FIN) "bg-success" else "bg-warning text-dark"} px-3 py-2 fs-6">
+                            @gM(card.comp.status.msgCode)
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Card Body: Results Table -->
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th class="ps-4 text-center" style="width: 110px;">@gM("results.thPlace")</th>
+                                    <th>@gM("results.thName")</th>
+                                    <th>@gM("results.thClub")</th>
+                                    <th class="text-end pe-4">@gM("tourneyInfo.actions")</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if(card.pants.isEmpty) {
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted italic">@gM("results.noResults")</td>
+                                    </tr>
+                                }
+                                @card.pants.map { p =>
+                                    @defining(p.place._1) { placeFirst =>
+                                        @defining(if (p.place._2 > 0 && p.place._2 != placeFirst) s"${placeFirst}.-${p.place._2}." else s"${placeFirst}.") { placeDisplayStr =>
+                                            <tr>
+                                                <td class="ps-4 text-center">
+                                                    @if(placeFirst == 1) {
+                                                        <span class="badge rounded-pill bg-warning text-dark px-3 py-2 shadow-sm fs-6">
+                                                            <i class="bi bi-trophy-fill me-1 text-dark"></i>1. Platz
+                                                        </span>
+                                                    } else if(placeFirst == 2) {
+                                                        <span class="badge rounded-pill bg-secondary text-white px-3 py-2 shadow-sm fs-6">
+                                                            <i class="bi bi-award-fill me-1"></i>2. Platz
+                                                        </span>
+                                                    } else if(placeFirst == 3) {
+                                                        <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis border border-danger-subtle px-3 py-2 shadow-sm fs-6">
+                                                            <i class="bi bi-award me-1"></i>@placeDisplayStr
+                                                        </span>
+                                                    } else {
+                                                        <span class="badge bg-light text-dark border px-3 py-1">
+                                                            @placeDisplayStr
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td class="fw-bold text-primary">@p.name</td>
+                                                <td>@p.club</td>
+                                                <td class="text-end pe-4">
+                                                    <button class="btn btn-outline-warning btn-sm rounded-pill px-3 shadow-sm fw-bold" onclick="appLoadPage('Certificate', '@p.name|@card.comp.name|@placeFirst')">
+                                                        <i class="bi bi-trophy-fill me-1"></i>@gM("results.btnCert")
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    }
 </div>

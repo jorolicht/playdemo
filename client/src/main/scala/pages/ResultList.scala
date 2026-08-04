@@ -5,12 +5,18 @@ import base.*
 import shared.model.*
 
 /**
- * Page displaying tournament results, supporting overall view and competition-specific filtering.
+ * Page displaying tournament results.
+ * Displays a dedicated Card for each finished competition,
+ * showing the results of the stage where certificate == true.
  */
 object ResultList extends BasePage with JsWrapper:
   def name = PageNameTyp("ResultList")
   
-  case class DisplayResult(name: String, club: String, compName: String, place: Int)
+  case class CompResultCard(
+    comp: Competition,
+    certStage: Option[Stage],
+    pants: Seq[Pant]
+  )
 
   def render(param: String = ""): Boolean = 
     val allComps = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
@@ -33,11 +39,18 @@ object ResultList extends BasePage with JsWrapper:
       case None     => allComps
     }
     
-    val results = targetComps.flatMap { c =>
-      c.pants1Stage.filter(_.place._1 > 0).map { p =>
-        DisplayResult(p.name, p.club, c.name, p.place._1)
-      }
-    }.sortBy(_.place)
+    val allStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && !s.deleted)
 
-    setMain(cviews.pages.html.ResultList(results))
+    val cards = targetComps.flatMap { comp =>
+      val compStages = allStages.filter(_.coId == comp.id)
+      val certStage = compStages.find(_.certificate).orElse(compStages.lastOption)
+      val rankedPants = comp.pants1Stage.filter(_.place._1 > 0).sortBy(_.place._1).toSeq
+      
+      // Display card if competition is FIN or has ranked participants
+      if (comp.status == CompStatus.FIN || rankedPants.nonEmpty) {
+        Some(CompResultCard(comp, certStage, rankedPants))
+      } else None
+    }
+
+    setMain(cviews.pages.html.ResultList(cards))
     true
