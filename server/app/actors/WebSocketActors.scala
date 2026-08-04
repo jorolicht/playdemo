@@ -91,7 +91,7 @@ object WebSocketManagerActor {
 
 /**
  * Client actor handling individual WebSocket client connections.
- * Logs incoming messages and responds to "Hallo" or "Hello" messages.
+ * Logs incoming messages and responds to Hallo/Hello greeting messages.
  */
 class WebSocketClientActor(out: ActorRef, manager: ActorRef, slug: String) extends Actor with Logging {
   import WebSocketManagerActor._
@@ -107,17 +107,20 @@ class WebSocketClientActor(out: ActorRef, manager: ActorRef, slug: String) exten
 
   def receive: Receive = {
     case "ping" =>
-      // Keep-alive message, do not log to prevent cluttering
+      // Keep-alive message
 
     case msg: String =>
-      // Console logging requirement:
       logger.info(s"[Server WebSocket] message from client ($slug): $msg")
 
       val trimmed = msg.trim
       if (trimmed.toLowerCase.startsWith("hallo")) {
-        out ! "Hallo hier ist der Server"
+        val reply = "Hallo hier ist der Server"
+        out ! reply
+        manager ! SendToSlug(slug, reply)
       } else if (trimmed.toLowerCase.startsWith("hello")) {
-        out ! "Hello this is server speaking"
+        val reply = "Hello this is server speaking"
+        out ! reply
+        manager ! SendToSlug(slug, reply)
       }
 
     case SendToClient(msg) =>
