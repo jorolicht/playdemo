@@ -12,10 +12,10 @@
         @if(cards.nonEmpty) {
             <div class="d-flex gap-2">
                 <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="toggleAllCards(true)">
-                    <i class="bi bi-arrows-expand me-1"></i>Alle ausklappen
+                    <i class="bi bi-arrows-expand me-1"></i>@gM("results.expandAll")
                 </button>
                 <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="toggleAllCards(false)">
-                    <i class="bi bi-arrows-collapse me-1"></i>Alle einklappen
+                    <i class="bi bi-arrows-collapse me-1"></i>@gM("results.collapseAll")
                 </button>
             </div>
         }

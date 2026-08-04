@@ -328,6 +328,8 @@ results.thComp                                      = Wettbewerb
 results.thPlace                                     = Platz
 results.noResults                                   = Noch keine Ergebnisse vorhanden.
 results.btnCert                                     = Urkunde
+results.expandAll                                   = Alle ausklappen
+results.collapseAll                                 = Alle einklappen
 
 ###
 # UserLogin & UserRegistration
