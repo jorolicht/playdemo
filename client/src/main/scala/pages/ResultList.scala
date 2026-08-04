@@ -6,7 +6,7 @@ import shared.model.*
 
 /**
  * Page displaying tournament results.
- * Displays a dedicated Card for each competition where a stage (or competition) is completed,
+ * Displays a collapsible Card for ALL competitions in both HOME-Mode and VIEW-Mode,
  * showing the results of the stage where certificate == true (or finished stage/SwissSystem).
  */
 object ResultList extends BasePage with JsWrapper:
@@ -142,15 +142,13 @@ object ResultList extends BasePage with JsWrapper:
     
     val allStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && !s.deleted)
 
-    val cards = targetComps.flatMap { comp =>
+    // Render Cards for ALL target competitions
+    val cards = targetComps.map { comp =>
       val compStages = allStages.filter(_.coId == comp.id)
       val certStageOpt = compStages.find(_.certificate).orElse(compStages.lastOption)
       val rankedPants = getRankedPantsForStage(comp, certStageOpt)
       
-      val isStageFin = certStageOpt.exists(_.status == StageStatus.FIN)
-      if (comp.status == CompStatus.FIN || isStageFin || rankedPants.nonEmpty) {
-        Some(CompResultCard(comp, certStageOpt, rankedPants))
-      } else None
+      CompResultCard(comp, certStageOpt, rankedPants)
     }
 
     setMain(cviews.pages.html.ResultList(cards))
