@@ -58,32 +58,12 @@
                             </a>
                         </li>
 
-                        <!-- 2. Results (with Dropdown for all competitions) -->
-                        <li class="nav-item dropdown">
-                            <button class="btn btn-sm dropdown-toggle @if(Global.activePageName == "ResultList" || Global.activePageName == "CompetitionInfo"){btn-warning fw-bold text-dark}else{btn-outline-light}" 
-                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <!-- 2. Results -->
+                        <li class="nav-item">
+                            <a href="javascript:appLoadPage('ResultList', '')" 
+                               class="btn btn-sm @if(Global.activePageName == "ResultList"){btn-warning fw-bold text-dark}else{btn-outline-light}">
                                 <i class="bi bi-award me-1"></i>@gM("contextHeader.results")
-                            </button>
-                            <ul class="dropdown-menu shadow dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item @if(Global.activePageName == "ResultList" && selection.competition.isEmpty){active}" 
-                                       href="javascript:appLoadPage('ResultList', '')">
-                                        <i class="bi bi-list-stars me-2 text-primary"></i>@gM("contextHeader.allResults")
-                                    </a>
-                                </li>
-                                @if(competitions.nonEmpty) {
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><h6 class="dropdown-header small text-muted text-uppercase">@gM("tourneyHomepage.competitionsContainer")</h6></li>
-                                    @competitions.map { c =>
-                                        <li>
-                                            <a class="dropdown-item @if(selection.competition.exists(_.id == c.id)){active}" 
-                                               href="javascript:appLoadPage('ResultList', '@c.id.value')">
-                                                <i class="bi bi-chevron-right me-1 small"></i>@c.name
-                                            </a>
-                                        </li>
-                                    }
-                                }
-                            </ul>
+                            </a>
                         </li>
 
                         <!-- 3. Matchboard / InfoAnzeige -->
