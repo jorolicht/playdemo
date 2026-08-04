@@ -8,6 +8,7 @@ object WebSocketService:
   private var ws: Option[dom.WebSocket] = None
   private var currentSlug: Option[String] = None
   private var heartbeatInterval: Option[Int] = None
+  private var hasEverOpened: Boolean = false
   
   // Callback when a message is received
   private var messageListener: Option[String => Unit] = None
@@ -58,13 +59,14 @@ object WebSocketService:
   }
 
   def connect(slug: String): Unit = {
-    if (currentSlug.contains(slug) && ws.exists(_.readyState == dom.WebSocket.OPEN)) {
-      // Already connected to this slug
+    // If already connected or connecting to the exact same slug, skip reconnecting
+    if (currentSlug.contains(slug) && ws.exists(s => s.readyState == dom.WebSocket.OPEN || s.readyState == dom.WebSocket.CONNECTING)) {
       return
     }
 
     disconnect()
     currentSlug = Some(slug)
+    hasEverOpened = false
 
     val wsUrl = if (Global.playUrl.nonEmpty) {
       val wsProtocol = if (Global.playUrl.startsWith("https:")) "wss:" else "ws:"
@@ -87,7 +89,8 @@ object WebSocketService:
       val webSocket = new dom.WebSocket(wsUrl)
       ws = Some(webSocket)
 
-      webSocket.onopen = (e: dom.Event) => {
+      webSocket.onopen = (_: dom.Event) => {
+        hasEverOpened = true
         debug(s"[WebSocket] Connected to server for slug '$slug'")
         startHeartbeat()
       }
@@ -147,16 +150,16 @@ object WebSocketService:
 
       webSocket.onclose = (e: dom.CloseEvent) => {
         stopHeartbeat()
-        if (currentSlug.contains(slug)) {
+        if (currentSlug.contains(slug) && hasEverOpened) {
           debug(s"[WebSocket] Connection closed for slug '$slug': ${e.reason}")
-          // Retry connection after 5 seconds if still on same slug
+          // Retry connection after 5 seconds if connection was previously established
           dom.window.setTimeout(() => {
             if (currentSlug.contains(slug)) connect(slug)
           }, 5000)
         }
       }
 
-      webSocket.onerror = (e: dom.Event) => {
+      webSocket.onerror = (_: dom.Event) => {
         debug(s"[WebSocket] Notice: WebSocket endpoint unavailable for slug '$slug'")
       }
     } catch {
@@ -170,11 +173,18 @@ object WebSocketService:
     currentSlug = None
     ws.foreach { socket =>
       try {
-        socket.onopen = (e: dom.Event) => ()
-        socket.onmessage = (e: dom.MessageEvent) => ()
-        socket.onerror = (e: dom.Event) => ()
-        socket.onclose = (e: dom.CloseEvent) => ()
-        if (socket.readyState == dom.WebSocket.OPEN || socket.readyState == dom.WebSocket.CONNECTING) {
+        if (socket.readyState == dom.WebSocket.CONNECTING) {
+          // If socket is in CONNECTING state, close gracefully upon opening to prevent browser error logs
+          socket.onopen = (_: dom.Event) => {
+            try { socket.close() } catch { case _: Throwable => () }
+          }
+          socket.onerror = (_: dom.Event) => ()
+          socket.onclose = (_: dom.CloseEvent) => ()
+        } else if (socket.readyState == dom.WebSocket.OPEN) {
+          socket.onopen = (_: dom.Event) => ()
+          socket.onmessage = (_: dom.MessageEvent) => ()
+          socket.onerror = (_: dom.Event) => ()
+          socket.onclose = (_: dom.CloseEvent) => ()
           socket.close()
         }
       } catch {
