@@ -35,8 +35,11 @@ val dockerPushPlaysrv  = taskKey[Unit]("Pushes playsrv-image Docker image to Doc
 val dockerBuildWpCli   = taskKey[Unit]("Builds wp-cli-instance Docker image for linux/amd64 and tags for Docker Hub user jorolich")
 val dockerPushWpCli    = taskKey[Unit]("Pushes wp-cli-instance Docker image to Docker Hub for user jorolich")
 
-val dockerBuildImages  = taskKey[Unit]("Builds both playsrv-image and wp-cli-instance Docker images for linux/amd64")
-val dockerPushImages   = taskKey[Unit]("Pushes both playsrv-image and wp-cli-instance Docker images to Docker Hub for user jorolich")
+val dockerBuildWpGmp   = taskKey[Unit]("Builds wp-gmp-image Docker image for linux/amd64 and tags for Docker Hub user jorolich")
+val dockerPushWpGmp    = taskKey[Unit]("Pushes wp-gmp-image Docker image to Docker Hub for user jorolich")
+
+val dockerBuildImages  = taskKey[Unit]("Builds playsrv-image, wp-cli-instance, and wp-gmp-image Docker images for linux/amd64")
+val dockerPushImages   = taskKey[Unit]("Pushes playsrv-image, wp-cli-instance, and wp-gmp-image Docker images to Docker Hub for user jorolich")
 
 lazy val root = (project in file("."))
   .aggregate(server, client, shared.jvm, shared.js)
@@ -330,13 +333,55 @@ lazy val server = project
       }
       log.info(s"Successfully pushed $versionTag and $latestTag")
     },
+    dockerBuildWpGmp := {
+      val log = streams.value.log
+      val env = getAppEnv
+      val dockerDir = getDockerDir(baseDirectory.value, env)
+      val versionTag = s"$dockerHubUser/wp-gmp-image:$appVersion"
+      val latestTag = s"$dockerHubUser/wp-gmp-image:latest"
+      val dockerfile = dockerDir / "wordpress" / "Dockerfile"
+
+      log.info(s"Building Docker image $versionTag for platform $dockerPlatform...")
+      val buildCmd = Process(
+        Seq(
+          "docker", "build",
+          "--platform", dockerPlatform,
+          "-t", versionTag,
+          "-t", latestTag,
+          "-f", dockerfile.getAbsolutePath,
+          dockerfile.getParentFile.getAbsolutePath
+        )
+      )
+      if (buildCmd.! != 0) {
+        sys.error(s"Docker build failed for $versionTag")
+      }
+      log.info(s"Successfully built $versionTag and $latestTag")
+    },
+    dockerPushWpGmp := {
+      dockerBuildWpGmp.value
+      val log = streams.value.log
+      val versionTag = s"$dockerHubUser/wp-gmp-image:$appVersion"
+      val latestTag = s"$dockerHubUser/wp-gmp-image:latest"
+
+      log.info(s"Pushing $versionTag to Docker Hub...")
+      if (Process(Seq("docker", "push", versionTag)).! != 0) {
+        sys.error(s"Docker push failed for $versionTag")
+      }
+      log.info(s"Pushing $latestTag to Docker Hub...")
+      if (Process(Seq("docker", "push", latestTag)).! != 0) {
+        sys.error(s"Docker push failed for $latestTag")
+      }
+      log.info(s"Successfully pushed $versionTag and $latestTag")
+    },
     dockerBuildImages := {
       dockerBuildPlaysrv.value
       dockerBuildWpCli.value
+      dockerBuildWpGmp.value
     },
     dockerPushImages := {
       dockerPushPlaysrv.value
       dockerPushWpCli.value
+      dockerPushWpGmp.value
     }
   )
   .enablePlugins(PlayScala)
