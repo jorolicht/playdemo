@@ -32,14 +32,14 @@ val dockerPlatform = "linux/amd64"
 val dockerBuildPlaysrv = taskKey[Unit]("Builds playsrv-image Docker image for linux/amd64 and tags for Docker Hub user jorolich")
 val dockerPushPlaysrv  = taskKey[Unit]("Pushes playsrv-image Docker image to Docker Hub for user jorolich")
 
-val dockerBuildWpCli   = taskKey[Unit]("Builds wp-cli-instance Docker image for linux/amd64 and tags for Docker Hub user jorolich")
-val dockerPushWpCli    = taskKey[Unit]("Pushes wp-cli-instance Docker image to Docker Hub for user jorolich")
+val dockerBuildWpCli   = taskKey[Unit]("Builds wp-cli-image Docker image for linux/amd64 and tags for Docker Hub user jorolich")
+val dockerPushWpCli    = taskKey[Unit]("Pushes wp-cli-image Docker image to Docker Hub for user jorolich")
 
 val dockerBuildWpGmp   = taskKey[Unit]("Builds wp-gmp-image Docker image for linux/amd64 and tags for Docker Hub user jorolich")
 val dockerPushWpGmp    = taskKey[Unit]("Pushes wp-gmp-image Docker image to Docker Hub for user jorolich")
 
-val dockerBuildImages  = taskKey[Unit]("Builds playsrv-image, wp-cli-instance, and wp-gmp-image Docker images for linux/amd64")
-val dockerPushImages   = taskKey[Unit]("Pushes playsrv-image, wp-cli-instance, and wp-gmp-image Docker images to Docker Hub for user jorolich")
+val dockerBuildImages  = taskKey[Unit]("Builds playsrv-image, wp-cli-image, and wp-gmp-image Docker images for linux/amd64")
+val dockerPushImages   = taskKey[Unit]("Pushes playsrv-image, wp-cli-image, and wp-gmp-image Docker images to Docker Hub for user jorolich")
 
 lazy val root = (project in file("."))
   .aggregate(server, client, shared.jvm, shared.js)
@@ -297,8 +297,8 @@ lazy val server = project
       val log = streams.value.log
       val env = getAppEnv
       val dockerDir = getDockerDir(baseDirectory.value, env)
-      val versionTag = s"$dockerHubUser/wp-cli-instance:$appVersion"
-      val latestTag = s"$dockerHubUser/wp-cli-instance:latest"
+      val versionTag = s"$dockerHubUser/wp-cli-image:$appVersion"
+      val latestTag = s"$dockerHubUser/wp-cli-image:latest"
       val dockerfile = dockerDir / "wp-cli" / "Dockerfile"
 
       log.info(s"Building Docker image $versionTag for platform $dockerPlatform...")
@@ -320,8 +320,8 @@ lazy val server = project
     dockerPushWpCli := {
       dockerBuildWpCli.value
       val log = streams.value.log
-      val versionTag = s"$dockerHubUser/wp-cli-instance:$appVersion"
-      val latestTag = s"$dockerHubUser/wp-cli-instance:latest"
+      val versionTag = s"$dockerHubUser/wp-cli-image:$appVersion"
+      val latestTag = s"$dockerHubUser/wp-cli-image:latest"
 
       log.info(s"Pushing $versionTag to Docker Hub...")
       if (Process(Seq("docker", "push", versionTag)).! != 0) {
