@@ -1,0 +1,29 @@
+===================================================================
+  Cloud Live Pro - 1 Turnier
+  Vielen Dank für Ihren Kauf!
+===================================================================
+
+Produkt: Cloud Live Pro (1 Turnier)
+Preis: 0 €
+
+AUTOMATISCHE FREISCHALTUNG:
+-------------------------------------------------------------------
+Die Freischaltung Ihres gekauften Turniers erfolgt automatisch! 
+Unser Webhook ordnet den Kauf anhand Ihrer beim Kauf auf Payhip 
+angegebenen E-Mail-Adresse direkt Ihrem Benutzerkonto zu.
+
+Das Guthaben unter "Anzahl erlaubter Turniere" (allowed_tourneys) 
+wurde auf Ihrem Konto um 1 Turnier erhöht.
+
+SCHRITTE ZUR NUTZUNG:
+1. Melden Sie sich auf unserer Plattform mit Ihrer E-Mail-Adresse an.
+2. Gehen Sie auf "Neues Turnier erstellen".
+3. Ihr freigeschaltetes Turnier steht Ihnen sofort zur Verfügung.
+
+SUPPORT & HILFE:
+-------------------------------------------------------------------
+Sollten Sie Fragen zur Einrichtung oder Turnierdurchführung haben 
+oder Ihre E-Mail-Adresse beim Kauf abweichen, kontaktieren Sie 
+unseren Support bitte direkt über unser Kontaktformular oder per E-Mail.
+
+Viel Erfolg bei Ihrem Turnier!

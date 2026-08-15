@@ -60,6 +60,7 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/api/tourney.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/competition.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/stage.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/json.php';
+require_once TOURNEY_PLUGIN_PATH . 'includes/api/payhip.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/helpers.php';
 
 
@@ -267,6 +268,7 @@ function js_enqueue_scripts_styles() {
     wp_enqueue_style( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css', array(), '5.3.3' );
     wp_enqueue_style( 'bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css', array(), '1.11.3' );
     wp_enqueue_script( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', array(), '5.3.3', false );
+    wp_enqueue_script( 'payhip', 'https://payhip.com/payhip.js', array(), null, false );
 
     wp_enqueue_style( 'tourney_style', plugin_dir_url(__FILE__) . 'css/main.css', [], '1.0');
     
