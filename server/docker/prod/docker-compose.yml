@@ -31,10 +31,7 @@ services:
       - proxy
 
   wordpress:
-    image: wp-gmp-image
-    build:
-      context: .
-      dockerfile: wordpress/Dockerfile
+    image: jorolich/wp-gmp-image:latest
     container_name: wp-gmp-instance
     restart: unless-stopped
     depends_on:
@@ -71,7 +68,7 @@ services:
       - backend
 
   wp-cli:
-    image: wordpress:cli
+    image: jorolich/wp-cli-image:latest
     container_name: wp-cli-instance
     user: root
     volumes:
@@ -152,17 +149,9 @@ services:
       - backend
 
   playsrv:
-    image: playsrv-image
+    image: jorolich/playsrv-image:latest
     container_name: playsrv-instance
     restart: unless-stopped
-    build:
-      context: .
-      dockerfile: playsrv/Dockerfile
-      args:
-        - APP_HOME=${APP_HOME}
-        - APP_VERSION=${APP_VERSION}
-        - DEMON_USER=${DEMON_USER}
-        - DEMON_USERID=${DEMON_USERID}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.playsrv.entrypoints=websecure"
