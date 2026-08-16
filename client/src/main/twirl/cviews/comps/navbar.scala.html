@@ -90,15 +90,6 @@
                             }
                         </li>
 
-                        <!-- Optional Administration button for logged-in users -->
-                        @if(Global.user.isDefined && Global.hasTourneyAccess(selection.tourney.get)) {
-                            <li class="nav-item ms-lg-2">
-                                <a href="javascript:appLoadPage('TourneyAdmin', '')" 
-                                   class="btn btn-sm @if(Global.activePageName == "TourneyAdmin"){btn-primary fw-bold}else{btn-outline-secondary text-white}">
-                                    <i class="bi bi-gear-fill me-1"></i>@gM("contextHeader.administration")
-                                </a>
-                            </li>
-                        }
                     }
                 </ul>
             </div>
