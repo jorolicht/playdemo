@@ -45,8 +45,8 @@ services:
       TURNSTILE_SITEKEY: ${TURNSTILE_SITEKEY}
       TURNSTILE_SECRET: ${TURNSTILE_SECRET}
       WORDPRESS_CONFIG_EXTRA: |
-        define( 'WP_HOME', 'https://localhost' );
-        define( 'WP_SITEURL', 'https://localhost' );
+        define( 'WP_HOME', "${WP_URL}" );
+        define( 'WP_SITEURL', "${WP_URL}" );
         define( 'PLAY_SERVER_URL', "${PLAY_SERVER_URL}" );
 
     expose:
