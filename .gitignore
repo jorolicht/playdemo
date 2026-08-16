@@ -25,6 +25,8 @@ client/vite/main.map
 server/target
 server/conf/messages.de
 server/conf/messages.en
+server/conf/messages.de_json
+server/conf/messages.en_json
 server/public/bootstrap-5.0.2
 server/public/fontawesome-6.5.1
 server/public/bootstrap-5.3.3
