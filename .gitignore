@@ -78,6 +78,7 @@ shared/.js
 shared/.jvm
 
 # temp files
+*.zip
 .~*
 *~
 *.orig
