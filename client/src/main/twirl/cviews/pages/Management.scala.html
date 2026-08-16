@@ -1,0 +1,117 @@
+@import pages.Management.*
+@import cviews.helper.html.*
+@import shared.model.User
+@import base.Messages.gM
+@import base.Global
+
+@(user: Option[User])
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header Card -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-dark text-white d-flex align-items-center justify-content-between py-3">
+                    <h4 class="mb-0 fw-bold d-flex align-items-center">
+                        <i class="bi bi-sliders text-warning me-2 fs-3"></i>
+                        @gM("navbar.management")
+                    </h4>
+                    <span class="badge bg-warning text-dark px-3 py-2 fw-bold fs-6">
+                        <i class="bi bi-shield-lock-fill me-1"></i>Administrator
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-0 fs-5">
+                        Willkommen im Administrations- und Management-Bereich. Hier finden Sie System-Informationen, Benutzerverwaltung und globale Konfigurationseinstellungen.
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- User Account Info Card -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-primary text-white py-3">
+                            <h5 class="mb-0 fw-bold"><i class="bi bi-person-badge me-2"></i>Administrator Profil</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            @user.map { u =>
+                                <ul class="list-group list-group-flush mb-3">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted">Benutzername:</span>
+                                        <span class="fw-bold text-dark">@u.username</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted">E-Mail:</span>
+                                        <span class="fw-bold text-dark">@u.email</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted">Rollen:</span>
+                                        <span class="badge bg-secondary">@u.roles.mkString(", ")</span>
+                                    </li>
+                                    @if(u.org.nonEmpty) {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                            <span class="text-muted">Veranstalter / Verein:</span>
+                                            <span class="fw-bold text-dark">@u.org</span>
+                                        </li>
+                                    }
+                                </ul>
+                            }.getOrElse {
+                                <div class="alert alert-warning mb-0">Keine Benutzerdaten vorhanden.</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Info Card -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-secondary text-white py-3">
+                            <h5 class="mb-0 fw-bold"><i class="bi bi-cpu me-2"></i>System & Status</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <ul class="list-group list-group-flush mb-3">
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <span class="text-muted">App-Modus:</span>
+                                    <span class="badge bg-info text-dark fs-6">@Global.appMode</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <span class="text-muted">WP-REST API:</span>
+                                    <span class="fw-bold text-success">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Aktiv (@if(Global.homeUrl.nonEmpty) { @Global.homeUrl } else { "Local" })
+                                    </span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <span class="text-muted">Aktive Sprache:</span>
+                                    <span class="fw-bold">@Global.lang.toUpperCase</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Links / Tools -->
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light py-3">
+                            <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-tools me-2"></i>Verwaltung & Werkzeuge</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="d-flex flex-wrap gap-3">
+                                <a href="javascript:appLoadPage('MainSearch', '')" class="btn btn-outline-primary fw-bold">
+                                    <i class="bi bi-search me-1"></i>Turniersuche & Übersicht
+                                </a>
+                                <a href="javascript:appLoadPage('TourneyNew', '')" class="btn btn-outline-success fw-bold">
+                                    <i class="bi bi-plus-circle me-1"></i>Neues Turnier anlegen
+                                </a>
+                                <a href="javascript:appLoadPage('MainView', '')" class="btn btn-outline-secondary fw-bold">
+                                    <i class="bi bi-house me-1"></i>Zur Startseite
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

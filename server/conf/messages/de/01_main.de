@@ -83,6 +83,7 @@ navbar.singleCompetition                            = Einzelner Wettbewerb
 navbar.profilePasskeys                              = Profil / Passkeys
 navbar.logout                                       = Abmelden
 navbar.login                                        = Login
+navbar.management                                   = Management
 
 ###
 # Buttons & Breadcrumbs
