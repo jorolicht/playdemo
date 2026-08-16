@@ -74,14 +74,11 @@ function tourney_get_user_profile( $user_id ) {
     }
 
     if ( ! is_array( $profile ) ) {
-        $legacy_allowed = get_user_meta( $user_id, 'allowed_tourneys', true );
-        $available = ( $legacy_allowed !== '' && $legacy_allowed !== false ) ? max( 0, intval( $legacy_allowed ) ) : 0;
         $profile = array(
-            'available' => $available,
+            'available' => 0,
             'executed'  => 0,
             'history'   => array(),
         );
-        tourney_update_user_profile( $user_id, $profile );
     }
 
     return array(
@@ -108,7 +105,6 @@ function tourney_update_user_profile( $user_id, array $profile ) {
     $json_string = wp_json_encode( $clean_profile );
     update_user_meta( $user_id, 'user_profile', $json_string );
     update_user_meta( $user_id, 'UserProfile', $json_string );
-    update_user_meta( $user_id, 'allowed_tourneys', $clean_profile['available'] );
     return true;
 }
 
