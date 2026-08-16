@@ -26,7 +26,6 @@ function tourney_is_admin_or_editor( $user = null ) {
  * Language-independent internal role slugs: 'tourney_admin' and 'tourney_master'.
  */
 function tourney_register_custom_roles() {
-    // 1. TourneyAdmin role with Subscriber (Abonnent) capabilities plus tournament editing
     $subscriber_role = get_role( 'subscriber' );
     $tourney_admin_caps = $subscriber_role ? $subscriber_role->capabilities : array( 'read' => true );
     $tourney_admin_caps['edit_posts'] = true;
@@ -36,7 +35,6 @@ function tourney_register_custom_roles() {
         add_role( 'tourney_admin', __( 'TourneyAdmin', 'tourney' ), $tourney_admin_caps );
     }
 
-    // 2. TourneyMaster role with Editor (Redakteur) capabilities
     $editor_role = get_role( 'editor' );
     $tourney_master_caps = $editor_role ? $editor_role->capabilities : array(
         'read'               => true,
@@ -53,6 +51,127 @@ function tourney_register_custom_roles() {
 add_action( 'init', 'tourney_register_custom_roles' );
 
 /**
+ * Retrieves the UserProfile array structure for a given user ID.
+ * Performs automatic legacy migration from 'allowed_tourneys' if 'user_profile' meta is missing/empty.
+ *
+ * @param int $user_id The ID of the user.
+ * @return array Array with keys: available (int), executed (int), history (array of Purchase arrays)
+ */
+function tourney_get_user_profile( $user_id ) {
+    $meta = get_user_meta( $user_id, 'user_profile', true );
+    if ( empty( $meta ) ) {
+        $meta = get_user_meta( $user_id, 'UserProfile', true );
+    }
+
+    $profile = null;
+    if ( is_array( $meta ) ) {
+        $profile = $meta;
+    } elseif ( is_string( $meta ) && ! empty( $meta ) ) {
+        $decoded = json_decode( $meta, true );
+        if ( is_array( $decoded ) ) {
+            $profile = $decoded;
+        }
+    }
+
+    if ( ! is_array( $profile ) ) {
+        $legacy_allowed = get_user_meta( $user_id, 'allowed_tourneys', true );
+        $available = ( $legacy_allowed !== '' && $legacy_allowed !== false ) ? max( 0, intval( $legacy_allowed ) ) : 0;
+        $profile = array(
+            'available' => $available,
+            'executed'  => 0,
+            'history'   => array(),
+        );
+        tourney_update_user_profile( $user_id, $profile );
+    }
+
+    return array(
+        'available' => isset( $profile['available'] ) ? max( 0, intval( $profile['available'] ) ) : 0,
+        'executed'  => isset( $profile['executed'] ) ? max( 0, intval( $profile['executed'] ) ) : 0,
+        'history'   => isset( $profile['history'] ) && is_array( $profile['history'] ) ? array_values( $profile['history'] ) : array(),
+    );
+}
+
+/**
+ * Saves the UserProfile structure for a given user ID as a JSON-encoded string.
+ *
+ * @param int   $user_id The ID of the user.
+ * @param array $profile Array containing available, executed, and history.
+ * @return bool True on success.
+ */
+function tourney_update_user_profile( $user_id, array $profile ) {
+    $clean_profile = array(
+        'available' => isset( $profile['available'] ) ? max( 0, intval( $profile['available'] ) ) : 0,
+        'executed'  => isset( $profile['executed'] ) ? max( 0, intval( $profile['executed'] ) ) : 0,
+        'history'   => isset( $profile['history'] ) && is_array( $profile['history'] ) ? array_values( $profile['history'] ) : array(),
+    );
+
+    $json_string = wp_json_encode( $clean_profile );
+    update_user_meta( $user_id, 'user_profile', $json_string );
+    update_user_meta( $user_id, 'UserProfile', $json_string );
+    update_user_meta( $user_id, 'allowed_tourneys', $clean_profile['available'] );
+    return true;
+}
+
+/**
+ * Adds a purchase to the user's history and increments available tournaments count.
+ *
+ * @param int         $user_id The ID of the user.
+ * @param int         $count   Number of tournaments bought.
+ * @param float       $price   Purchase price.
+ * @param string|null $date    Format yyyymmddhhmm. Defaults to current date/time.
+ * @return array The updated UserProfile.
+ */
+function tourney_user_profile_add_purchase( $user_id, $count, $price = 0.0, $date = null ) {
+    $count = max( 1, intval( $count ) );
+    $price = floatval( $price );
+    if ( empty( $date ) ) {
+        $date = date( 'YmdHi' );
+    }
+
+    $profile = tourney_get_user_profile( $user_id );
+    $profile['available'] += $count;
+
+    $purchase = array(
+        'date'  => (string) $date,
+        'count' => $count,
+        'price' => $price,
+    );
+
+    $profile['history'][] = $purchase;
+    tourney_update_user_profile( $user_id, $profile );
+    return $profile;
+}
+
+/**
+ * Executes a tournament for a user, decrementing available by 1 and incrementing executed by 1 if available >= 1.
+ *
+ * @param int $user_id The ID of the user.
+ * @return bool True if successfully decremented, false if available < 1.
+ */
+function tourney_user_profile_execute_tournament( $user_id ) {
+    $profile = tourney_get_user_profile( $user_id );
+    if ( $profile['available'] < 1 ) {
+        return false;
+    }
+
+    $profile['available'] = max( 0, $profile['available'] - 1 );
+    $profile['executed'] += 1;
+    tourney_update_user_profile( $user_id, $profile );
+    return true;
+}
+
+/**
+ * Function to retrieve the remaining available tournaments count for a user.
+ *
+ * @param int $user_id The ID of the user.
+ * @return int The number of available tournaments.
+ */
+function tourney_get_user_allowed_tourneys( $user_id ) {
+    $profile = tourney_get_user_profile( $user_id );
+    return $profile['available'];
+}
+
+/**
  * Adds custom user profile fields to the 'Edit User' and 'Your Profile' screens.
  *
  * @param WP_User $user The WP_User object.
@@ -60,37 +179,72 @@ add_action( 'init', 'tourney_register_custom_roles' );
 function tourney_add_custom_user_profile_fields( $user ) {
     $current_user = wp_get_current_user();
     $can_edit_counter = tourney_is_admin_or_editor( $current_user );
-    $allowed_count_meta = get_user_meta( $user->ID, 'allowed_tourneys', true );
-    $allowed_val = ( $allowed_count_meta !== '' ) ? intval( $allowed_count_meta ) : 0;
+    $profile = tourney_get_user_profile( $user->ID );
     ?>
-    <h3><?php esc_html_e( 'Zusätzliche Profil-Informationen', 'tourney' ); ?></h3>
+    <h3><?php esc_html_e( 'Zusätzliche Profil-Informationen (UserProfile)', 'tourney' ); ?></h3>
 
     <table class="form-table">
         <tr>
             <th><label for="organizer"><?php esc_html_e( 'Organizer', 'tourney' ); ?></label></th>
             <td>
                 <input type="text" name="organizer" id="organizer" value="<?php echo esc_attr( get_user_meta( $user->ID, 'organizer', true ) ); ?>" class="regular-text" /><br />
-                <span class="description"><?php esc_html_e( 'Please enter name of organizer, e.g. club name.', 'tourney' ); ?></span>
+                <span class="description"><?php esc_html_e( 'Bitte Name des Veranstalters eingeben, z.B. Vereinsname.', 'tourney' ); ?></span>
             </td>
         </tr>
         <tr>
-            <th><label for="allowed_tourneys"><?php esc_html_e( 'Anzahl erlaubter Turniere', 'tourney' ); ?></label></th>
+            <th><label for="user_profile_available"><?php esc_html_e( 'Verfügbare Turniere (available)', 'tourney' ); ?></label></th>
             <td>
                 <?php if ( $can_edit_counter ) : ?>
-                    <input type="number" min="0" name="allowed_tourneys" id="allowed_tourneys" value="<?php echo esc_attr( $allowed_val ); ?>" class="regular-text" /><br />
-                    <span class="description"><?php esc_html_e( 'Anzahl der Turniere, die dieser TurnierAdmin (Autor) noch neu erstellen darf.', 'tourney' ); ?></span>
+                    <input type="number" min="0" name="user_profile_available" id="user_profile_available" value="<?php echo esc_attr( $profile['available'] ); ?>" class="regular-text" /><br />
+                    <span class="description"><?php esc_html_e( 'Anzahl der Turniere, die dieser Benutzer noch erstellen kann.', 'tourney' ); ?></span>
                 <?php else : ?>
-                    <input type="number" id="allowed_tourneys" value="<?php echo esc_attr( $allowed_val ); ?>" class="regular-text" disabled="disabled" /><br />
-                    <span class="description"><?php esc_html_e( 'Anzahl der Turniere, die Sie noch neu erstellen dürfen (kann nur von einem TurnierMaster oder Administrator geändert werden).', 'tourney' ); ?></span>
+                    <input type="number" id="user_profile_available" value="<?php echo esc_attr( $profile['available'] ); ?>" class="regular-text" disabled="disabled" /><br />
+                    <span class="description"><?php esc_html_e( 'Anzahl der Turniere, die Sie noch neu erstellen dürfen.', 'tourney' ); ?></span>
+                <?php endif; ?>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="user_profile_executed"><?php esc_html_e( 'Durchgeführte Turniere (executed)', 'tourney' ); ?></label></th>
+            <td>
+                <?php if ( $can_edit_counter ) : ?>
+                    <input type="number" min="0" name="user_profile_executed" id="user_profile_executed" value="<?php echo esc_attr( $profile['executed'] ); ?>" class="regular-text" /><br />
+                    <span class="description"><?php esc_html_e( 'Anzahl der vom Benutzer bereits durchgeführten Turniere.', 'tourney' ); ?></span>
+                <?php else : ?>
+                    <input type="number" id="user_profile_executed" value="<?php echo esc_attr( $profile['executed'] ); ?>" class="regular-text" disabled="disabled" /><br />
+                <?php endif; ?>
+            </td>
+        </tr>
+        <tr>
+            <th><?php esc_html_e( 'Kaufhistorie (history)', 'tourney' ); ?></th>
+            <td>
+                <?php if ( ! empty( $profile['history'] ) ) : ?>
+                    <table class="widefat striped" style="max-width: 600px;">
+                        <thead>
+                            <tr>
+                                <th><?php esc_html_e( 'Datum (yyyymmddhhmm)', 'tourney' ); ?></th>
+                                <th><?php esc_html_e( 'Anzahl', 'tourney' ); ?></th>
+                                <th><?php esc_html_e( 'Preis (€)', 'tourney' ); ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ( $profile['history'] as $item ) : ?>
+                                <tr>
+                                    <td><?php echo esc_html( $item['date'] ?? '' ); ?></td>
+                                    <td><?php echo esc_html( $item['count'] ?? 0 ); ?></td>
+                                    <td><?php echo esc_html( number_format( floatval( $item['price'] ?? 0 ), 2, ',', '.' ) ); ?> €</td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else : ?>
+                    <span class="description"><?php esc_html_e( 'Keine Käufe vorhanden.', 'tourney' ); ?></span>
                 <?php endif; ?>
             </td>
         </tr>
     </table>
     <?php
 }
-// For displaying fields on the 'Edit User' screen for administrators
 add_action( 'show_user_profile', 'tourney_add_custom_user_profile_fields' );
-// For displaying fields on the 'Your Profile' screen (user's own profile)
 add_action( 'edit_user_profile', 'tourney_add_custom_user_profile_fields' );
 
 /**
@@ -99,12 +253,10 @@ add_action( 'edit_user_profile', 'tourney_add_custom_user_profile_fields' );
  * @param int $user_id The ID of the user being saved.
  */
 function ucfe_save_custom_user_profile_fields( $user_id ) {
-    // Check if the current user has permission to edit this user's profile.
     if ( ! current_user_can( 'edit_user', $user_id ) ) {
         return false;
     }
 
-    // Sanitize and save the 'organizer' field.
     if ( isset( $_POST['organizer'] ) ) {
         $organizer = sanitize_text_field( $_POST['organizer'] );
         update_user_meta( $user_id, 'organizer', $organizer );
@@ -112,15 +264,20 @@ function ucfe_save_custom_user_profile_fields( $user_id ) {
         delete_user_meta( $user_id, 'organizer' );
     }
 
-    // Only Administrators and Editors (TurnierMaster) can save changes to allowed_tourneys
-    if ( tourney_is_admin_or_editor() && isset( $_POST['allowed_tourneys'] ) ) {
-        $allowed_val = max( 0, intval( $_POST['allowed_tourneys'] ) );
-        update_user_meta( $user_id, 'allowed_tourneys', $allowed_val );
+    if ( tourney_is_admin_or_editor() ) {
+        $profile = tourney_get_user_profile( $user_id );
+        if ( isset( $_POST['user_profile_available'] ) ) {
+            $profile['available'] = max( 0, intval( $_POST['user_profile_available'] ) );
+        } elseif ( isset( $_POST['allowed_tourneys'] ) ) {
+            $profile['available'] = max( 0, intval( $_POST['allowed_tourneys'] ) );
+        }
+        if ( isset( $_POST['user_profile_executed'] ) ) {
+            $profile['executed'] = max( 0, intval( $_POST['user_profile_executed'] ) );
+        }
+        tourney_update_user_profile( $user_id, $profile );
     }
 }
-// For saving fields on the 'Edit User' screen for administrators
 add_action( 'personal_options_update', 'ucfe_save_custom_user_profile_fields' );
-// For saving fields on the 'Edit User' screen (user's own profile)
 add_action( 'edit_user_profile_update', 'ucfe_save_custom_user_profile_fields' );
 
 /**
@@ -131,15 +288,4 @@ add_action( 'edit_user_profile_update', 'ucfe_save_custom_user_profile_fields' )
  */
 function ucfe_get_user_organizer( $user_id ) {
     return get_user_meta( $user_id, 'organizer', true );
-}
-
-/**
- * Function to retrieve the remaining allowed tournaments count for a user.
- *
- * @param int $user_id The ID of the user.
- * @return int The number of allowed tournaments.
- */
-function tourney_get_user_allowed_tourneys( $user_id ) {
-    $meta = get_user_meta( $user_id, 'allowed_tourneys', true );
-    return ( $meta === '' ) ? 0 : intval( $meta );
 }

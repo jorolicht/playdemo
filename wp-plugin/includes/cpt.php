@@ -187,11 +187,10 @@ function tourney_check_author_creation_limit( $data, $postarr ) {
         $is_admin_or_editor = tourney_is_admin_or_editor( $user );
 
         if ( ! $is_admin_or_editor ) {
-            $allowed_meta = get_user_meta( $user_id, 'allowed_tourneys', true );
-            $allowed = ( $allowed_meta === '' ) ? 0 : intval( $allowed_meta );
-            if ( $allowed <= 0 ) {
+            $profile = tourney_get_user_profile( $user_id );
+            if ( $profile['available'] <= 0 ) {
                 wp_die(
-                    esc_html__( 'Sie haben das Limit für neu erstellbare Turniere erreicht. Bitte wenden Sie sich an einen TurnierMaster oder Administrator.', 'tourney' ),
+                    esc_html__( 'Sie haben keine verfügbaren Turniere mehr (available = 0). Bitte kaufen Sie weitere Turniere über die Preisseite.', 'tourney' ),
                     esc_html__( 'Turnier-Erstellung nicht möglich', 'tourney' ),
                     array( 'response' => 403, 'back_link' => true )
                 );
@@ -203,7 +202,7 @@ function tourney_check_author_creation_limit( $data, $postarr ) {
 add_filter( 'wp_insert_post_data', 'tourney_check_author_creation_limit', 10, 2 );
 
 /**
- * Decrements the allowed_tourneys counter when a new tourney is created by an Author or TourneyAdmin.
+ * Decrements the UserProfile available counter and increments executed when a new tourney is created by an Author or TourneyAdmin.
  *
  * @param int     $post_id Post ID.
  * @param WP_Post $post    Post object.
@@ -235,11 +234,9 @@ function tourney_decrement_author_creation_counter( $post_id, $post, $update ) {
     $is_admin_or_editor = tourney_is_admin_or_editor( $user );
 
     if ( ! $is_admin_or_editor ) {
-        $allowed_meta = get_user_meta( $author_id, 'allowed_tourneys', true );
-        $allowed = ( $allowed_meta === '' ) ? 0 : intval( $allowed_meta );
-        $new_count = max( 0, $allowed - 1 );
-        update_user_meta( $author_id, 'allowed_tourneys', $new_count );
-        update_post_meta( $post_id, '_counter_decremented', 1 );
+        if ( tourney_user_profile_execute_tournament( $author_id ) ) {
+            update_post_meta( $post_id, '_counter_decremented', 1 );
+        }
     }
 }
 add_action( 'wp_insert_post', 'tourney_decrement_author_creation_counter', 10, 3 );

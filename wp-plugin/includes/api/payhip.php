@@ -70,12 +70,17 @@ function handle_payhip_webhook( WP_REST_Request $request ) {
         $tourneys_to_add = 1;
     }
 
-    // 4. Update user meta for allowed_tourneys (add bought tourneys to existing limit)
-    $current_allowed_meta = get_user_meta( $user->ID, 'allowed_tourneys', true );
-    $current_allowed      = ( $current_allowed_meta === '' ) ? 0 : intval( $current_allowed_meta );
-    $new_allowed          = $current_allowed + $tourneys_to_add;
+    // 4. Determine purchase price
+    $price = 0.0;
+    if ( isset( $params['price'] ) ) {
+        $price = floatval( $params['price'] );
+    } elseif ( isset( $params['amount'] ) ) {
+        $price = floatval( $params['amount'] );
+    }
 
-    update_user_meta( $user->ID, 'allowed_tourneys', $new_allowed );
+    // 5. Update UserProfile (add purchase to history & increment available count)
+    tourney_user_profile_add_purchase( $user->ID, $tourneys_to_add, $price );
+
     update_user_meta( $user->ID, 'payhip_kauf_status', 'aktiv' );
     update_user_meta( $user->ID, 'payhip_last_purchase_date', current_time( 'mysql' ) );
 

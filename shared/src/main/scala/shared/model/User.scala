@@ -28,11 +28,30 @@ object User:
   def apply(id: (String, Int), email: String, entryTime:Long) = 
     new User(id, "", email, "", "", "", "", "", "", Nil, "", false, entryTime, false)
 
+case class Purchase(
+  date: String,  // Format yyyymmddhhmm
+  count: Int,    // number of tourneys
+  price: Double  // purchase price
+)
+
+object Purchase:
+  implicit val rw: RW[Purchase] = macroRW
+
+case class UserProfile(
+  available: Int = 0,
+  executed:  Int = 0,
+  history:   List[Purchase] = Nil
+)
+
+object UserProfile:
+  implicit val rw: RW[UserProfile] = macroRW
+
 case class UserInfo(
   username: String,
   user_id: Int,
   email: String,
   club: String,
+  user_profile: Option[UserProfile] = None,
   allowed_tourneys: Option[Int] = None,
   firstname: String = "",
   lastname: String = "",

@@ -268,14 +268,15 @@ function tourney_api_callback_user($request) {
 
     $has_passkey    = false;
     $allowed_tourneys = 0;
+    $user_profile     = array('available' => 0, 'executed' => 0, 'history' => array());
     if ( is_user_logged_in() )  {
         $user_id          = get_current_user_id();
         $current_user     = wp_get_current_user();
         $username         = $current_user->user_login;
         $email            = $current_user->user_email;     
         $organizer        = get_user_meta($user_id, 'organizer' , true );
-        $allowed_meta     = get_user_meta($user_id, 'allowed_tourneys', true);
-        $allowed_tourneys = ($allowed_meta === '') ? 0 : intval($allowed_meta);
+        $user_profile     = tourney_get_user_profile($user_id);
+        $allowed_tourneys = $user_profile['available'];
         $firstname        = $current_user->first_name;
         $lastname         = $current_user->last_name;
         $description      = $current_user->description;
@@ -290,6 +291,7 @@ function tourney_api_callback_user($request) {
         'user_id'          => (int)$user_id,
         'email'            => $email,
         'club'             => $organizer,
+        'user_profile'     => $user_profile,
         'allowed_tourneys' => (int)$allowed_tourneys,
         'firstname'        => $firstname,
         'lastname'         => $lastname,
