@@ -1,0 +1,26 @@
+{
+  "tourney": {
+    "version": 1,
+    "tourney": null
+  },
+  "clubs": {
+    "version": 2,
+    "clubs": []
+  },
+  "players": {
+    "version": 2,
+    "players": []
+  },
+  "competitions": {
+    "competitions": []
+  },
+  "rounds": {
+    "rounds": []
+  },
+  "extraMeta": {
+    "startDate": "",
+    "endDate": "",
+    "ident": "IGNORE",
+    "organizer": ""
+  }
+}

@@ -1,0 +1,2688 @@
+{
+  "tourney": {
+    "version": 2,
+    "tourney": {
+      "wpId": 319,
+      "name": "template-full",
+      "organizer": "TTC Freising 64",
+      "startDate": 20300402,
+      "endDate": 20300401,
+      "ident": "",
+      "category": "TT",
+      "version": 1,
+      "slug": "tourney/ttc-freising-64__trashed/20300402-template-full",
+      "clubs": [
+        {
+          "id": 1,
+          "name": "TV Traktor Leipzig",
+          "normalizedName": "leipzig traktor tv"
+        },
+        {
+          "id": 2,
+          "name": "TTC Torpedo Moskau",
+          "normalizedName": "moskau torpedo ttc"
+        },
+        {
+          "id": 3,
+          "name": "TSV Rostocker Flammen",
+          "normalizedName": "flammen rostocker tsv"
+        },
+        {
+          "id": 4,
+          "name": "TSV Schatzinsel",
+          "normalizedName": "schatzinsel tsv"
+        },
+        {
+          "id": 5,
+          "name": "FC Lokomotive Berlin",
+          "normalizedName": "berlin lokomotive"
+        },
+        {
+          "id": 6,
+          "name": "SpVgg Röhrmoos-Großinzemoos",
+          "normalizedName": "grossinzemoos roehrmoos spvgg"
+        },
+        {
+          "id": 7,
+          "name": "FC Kiffen 08",
+          "normalizedName": "08 kiffen"
+        },
+        {
+          "id": 8,
+          "name": "VfR Netzroller",
+          "normalizedName": "netzroller vfr"
+        },
+        {
+          "id": 9,
+          "name": "SV-DJK Kantenballer",
+          "normalizedName": "djk kantenballer sv"
+        },
+        {
+          "id": 10,
+          "name": "SC Donnerfels",
+          "normalizedName": "donnerfels sc"
+        },
+        {
+          "id": 11,
+          "name": "TTC Scheibenwelt",
+          "normalizedName": "scheibenwelt ttc"
+        },
+        {
+          "id": 12,
+          "name": "SV Nokturmgasse 7",
+          "normalizedName": "7 nokturmgasse sv"
+        },
+        {
+          "id": 13,
+          "name": "SV Springfield",
+          "normalizedName": "springfield sv"
+        },
+        {
+          "id": 14,
+          "name": "SV Monkey Island e.V.",
+          "normalizedName": "island monkey sv"
+        },
+        {
+          "id": 15,
+          "name": "TSV WuChiChu",
+          "normalizedName": "tsv wuchichu"
+        },
+        {
+          "id": 16,
+          "name": "DJK SB Pandora 64",
+          "normalizedName": "64 djk pandora sb"
+        },
+        {
+          "id": 17,
+          "name": "SG Hogsmeade",
+          "normalizedName": "hogsmeade sg"
+        },
+        {
+          "id": 18,
+          "name": "SV Hundert-Morgen-Wald",
+          "normalizedName": "hundert morgen sv wald"
+        },
+        {
+          "id": 19,
+          "name": "SV Ihrlerstein 1958",
+          "normalizedName": "ihrlerstein sv"
+        },
+        {
+          "id": 20,
+          "name": "SV Isengart",
+          "normalizedName": "isengart sv"
+        },
+        {
+          "id": 21,
+          "name": "TSV Lummerland e.V.",
+          "normalizedName": "lummerland tsv"
+        },
+        {
+          "id": 22,
+          "name": "TSV 1864 Twin Peaks",
+          "normalizedName": "1864 peaks tsv twin"
+        },
+        {
+          "id": 23,
+          "name": "TTC Orgrimmar",
+          "normalizedName": "orgrimmar ttc"
+        },
+        {
+          "id": 24,
+          "name": "TSV 1907 Indersdorf",
+          "normalizedName": "indersdorf tsv"
+        },
+        {
+          "id": 25,
+          "name": "FC Askaban",
+          "normalizedName": "askaban"
+        },
+        {
+          "id": 26,
+          "name": "SV Sarching",
+          "normalizedName": "sarching sv"
+        },
+        {
+          "id": 27,
+          "name": "TTC Phatt Island",
+          "normalizedName": "island phatt ttc"
+        },
+        {
+          "id": 28,
+          "name": "ESV Wonderland",
+          "normalizedName": "esv wonderland"
+        },
+        {
+          "id": 29,
+          "name": "TSV Posemuckl 1862",
+          "normalizedName": "1862 posemuckl tsv"
+        },
+        {
+          "id": 30,
+          "name": "TV Quahog",
+          "normalizedName": "quahog tv"
+        },
+        {
+          "id": 31,
+          "name": "SC Xanadu",
+          "normalizedName": "sc xanadu"
+        },
+        {
+          "id": 32,
+          "name": "TTC Zaremonien",
+          "normalizedName": "ttc zaremonien"
+        },
+        {
+          "id": 33,
+          "name": "SV Blood Island",
+          "normalizedName": "blood island sv"
+        },
+        {
+          "id": 34,
+          "name": "Post SV Avalon",
+          "normalizedName": "avalon post sv"
+        },
+        {
+          "id": 35,
+          "name": "SC Dinky Island",
+          "normalizedName": "dinky island sc"
+        },
+        {
+          "id": 36,
+          "name": "SC Narnia",
+          "normalizedName": "narnia sc"
+        },
+        {
+          "id": 37,
+          "name": "SV PanneKlopper",
+          "normalizedName": "panneklopper sv"
+        },
+        {
+          "id": 38,
+          "name": "TSV 1880 Reichenstadt",
+          "normalizedName": "1880 reichenstadt tsv"
+        },
+        {
+          "id": 39,
+          "name": "MBB SG Motzen",
+          "normalizedName": "mbb motzen sg"
+        },
+        {
+          "id": 40,
+          "name": "TSV Jux",
+          "normalizedName": "jux tsv"
+        },
+        {
+          "id": 41,
+          "name": "1. SC Haarzopf",
+          "normalizedName": "haarzopf sc"
+        },
+        {
+          "id": 42,
+          "name": "SV Buntekuh",
+          "normalizedName": "buntekuh sv"
+        },
+        {
+          "id": 43,
+          "name": "SV Champhausen",
+          "normalizedName": "champhausen sv"
+        },
+        {
+          "id": 44,
+          "name": "TV Entenhausen",
+          "normalizedName": "entenhausen tv"
+        },
+        {
+          "id": 45,
+          "name": "TSV Lederhose",
+          "normalizedName": "lederhose tsv"
+        },
+        {
+          "id": 46,
+          "name": "SV Feucht",
+          "normalizedName": "feucht sv"
+        },
+        {
+          "id": 47,
+          "name": "DJK SV Mückenloch",
+          "normalizedName": "djk mueckenloch sv"
+        },
+        {
+          "id": 48,
+          "name": "FT Vogelsang 1966",
+          "normalizedName": "ft vogelsang"
+        },
+        {
+          "id": 49,
+          "name": "TTC Garching",
+          "normalizedName": "garching ttc"
+        },
+        {
+          "id": 50,
+          "name": "TSV Altenheim",
+          "normalizedName": "altenheim tsv"
+        },
+        {
+          "id": 51,
+          "name": "TSV Greding",
+          "normalizedName": "greding tsv"
+        },
+        {
+          "id": 52,
+          "name": "1. FC Katzenhirn",
+          "normalizedName": "katzenhirn"
+        },
+        {
+          "id": 53,
+          "name": "TTC Kuhbier",
+          "normalizedName": "kuhbier ttc"
+        },
+        {
+          "id": 54,
+          "name": "TSV Schlägerholz",
+          "normalizedName": "schlaegerholz tsv"
+        },
+        {
+          "id": 55,
+          "name": "TSV Hundeluft 65",
+          "normalizedName": "65 hundeluft tsv"
+        },
+        {
+          "id": 56,
+          "name": "VfL Busenberg e.V.",
+          "normalizedName": "busenberg vfl"
+        },
+        {
+          "id": 57,
+          "name": "TSV Sommerloch",
+          "normalizedName": "sommerloch tsv"
+        },
+        {
+          "id": 58,
+          "name": "SC Pandora 64 e.V.",
+          "normalizedName": "64 pandora sc"
+        },
+        {
+          "id": 59,
+          "name": "TSV Gammelshausen e.V.",
+          "normalizedName": "gammelshausen tsv"
+        }
+      ],
+      "players": [
+        {
+          "id": 1,
+          "firstName": "Ada",
+          "lastName": "Kahn",
+          "clubId": 1,
+          "birthYear": 1965,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1000999",
+            "licenceNr": "111009155",
+            "clubNr": "111009",
+            "clubFedNick": "ByTTV",
+            "ttr": 1792,
+            "ttrMatchCnt": 351
+          }
+        },
+        {
+          "id": 2,
+          "firstName": "Addi",
+          "lastName": "Tion",
+          "clubId": 2,
+          "birthYear": 1947,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU210649",
+            "licenceNr": "105018106",
+            "clubNr": "105018",
+            "clubFedNick": "ByTTV",
+            "ttr": 1846,
+            "ttrMatchCnt": 118
+          }
+        },
+        {
+          "id": 3,
+          "firstName": "Adi",
+          "lastName": "Lette",
+          "clubId": 3,
+          "birthYear": 1960,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU999395",
+            "licenceNr": "113015005",
+            "clubNr": "113015",
+            "clubFedNick": "ByTTV",
+            "ttr": 1922,
+            "ttrMatchCnt": 250
+          }
+        },
+        {
+          "id": 4,
+          "firstName": "Al",
+          "lastName": "ter Native",
+          "clubId": 4,
+          "birthYear": 1957,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1004283",
+            "licenceNr": "112020111",
+            "clubNr": "112020",
+            "clubFedNick": "ByTTV",
+            "ttr": 1680,
+            "ttrMatchCnt": 315
+          }
+        },
+        {
+          "id": 5,
+          "firstName": "Albert",
+          "lastName": "Herum",
+          "clubId": 5,
+          "birthYear": 1981,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1009099",
+            "licenceNr": "110011337",
+            "clubNr": "110011",
+            "clubFedNick": "ByTTV",
+            "ttr": 2190,
+            "ttrMatchCnt": 77
+          }
+        },
+        {
+          "id": 6,
+          "firstName": "Alexander",
+          "lastName": "Platz",
+          "clubId": 6,
+          "birthYear": 1962,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1314710",
+            "licenceNr": "103013138",
+            "clubNr": "103013",
+            "clubFedNick": "ByTTV",
+            "ttr": 1761,
+            "ttrMatchCnt": 123
+          }
+        },
+        {
+          "id": 7,
+          "firstName": "Ali",
+          "lastName": "Bert",
+          "clubId": 7,
+          "birthYear": 1965,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1006294",
+            "licenceNr": "112002146",
+            "clubNr": "112002",
+            "clubFedNick": "ByTTV",
+            "ttr": 1836,
+            "ttrMatchCnt": 392
+          }
+        },
+        {
+          "id": 8,
+          "firstName": "Ali",
+          "lastName": "Mente",
+          "clubId": 8,
+          "birthYear": 1972,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1006207",
+            "licenceNr": "112024034",
+            "clubNr": "112024",
+            "clubFedNick": "ByTTV",
+            "ttr": 1927,
+            "ttrMatchCnt": 251
+          }
+        },
+        {
+          "id": 9,
+          "firstName": "Alma",
+          "lastName": "Mater",
+          "clubId": 9,
+          "birthYear": 1970,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1005826",
+            "licenceNr": "110007242",
+            "clubNr": "110007",
+            "clubFedNick": "ByTTV",
+            "ttr": 1669,
+            "ttrMatchCnt": 112
+          }
+        },
+        {
+          "id": 10,
+          "firstName": "Anders",
+          "lastName": "Gehzauch",
+          "clubId": 10,
+          "birthYear": 1950,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1011848",
+            "licenceNr": "106009129",
+            "clubNr": "106009",
+            "clubFedNick": "ByTTV",
+            "ttr": 1313,
+            "ttrMatchCnt": 153
+          }
+        },
+        {
+          "id": 11,
+          "firstName": "Andi",
+          "lastName": "Völcker-Dieserweldt",
+          "clubId": 11,
+          "birthYear": 1962,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1011157",
+            "licenceNr": "112005028",
+            "clubNr": "112005",
+            "clubFedNick": "ByTTV",
+            "ttr": 1865,
+            "ttrMatchCnt": 295
+          }
+        },
+        {
+          "id": 12,
+          "firstName": "Axel",
+          "lastName": "Schweiß",
+          "clubId": 12,
+          "birthYear": 1980,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1011856",
+            "licenceNr": "106012060",
+            "clubNr": "106012",
+            "clubFedNick": "ByTTV",
+            "ttr": 1733,
+            "ttrMatchCnt": 118
+          }
+        },
+        {
+          "id": 13,
+          "firstName": "Kurt",
+          "lastName": "Achse",
+          "clubId": 13,
+          "birthYear": 1961,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1010868",
+            "licenceNr": "112010153",
+            "clubNr": "112010",
+            "clubFedNick": "ByTTV",
+            "ttr": 1996,
+            "ttrMatchCnt": 133
+          }
+        },
+        {
+          "id": 14,
+          "firstName": "Klaas",
+          "lastName": "Container",
+          "clubId": 14,
+          "birthYear": 1970,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1260286",
+            "licenceNr": "112027001",
+            "clubNr": "112027",
+            "clubFedNick": "ByTTV",
+            "ttr": 2201,
+            "ttrMatchCnt": 67
+          }
+        },
+        {
+          "id": 15,
+          "firstName": "Klaus",
+          "lastName": "Trophobie",
+          "clubId": 5,
+          "birthYear": 1978,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1376904",
+            "licenceNr": "110011483",
+            "clubNr": "110011",
+            "clubFedNick": "ByTTV",
+            "ttr": 2020,
+            "ttrMatchCnt": 12
+          }
+        },
+        {
+          "id": 16,
+          "firstName": "Knuth",
+          "lastName": "Schenn",
+          "clubId": 3,
+          "birthYear": 1965,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1228839",
+            "licenceNr": "113015094",
+            "clubNr": "113015",
+            "clubFedNick": "ByTTV",
+            "ttr": 1892,
+            "ttrMatchCnt": 37
+          }
+        },
+        {
+          "id": 17,
+          "firstName": "Mark",
+          "lastName": "Brandenburg",
+          "clubId": 15,
+          "birthYear": 1995,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1014471",
+            "licenceNr": "113009215",
+            "clubNr": "113009",
+            "clubFedNick": "ByTTV",
+            "ttr": 1877,
+            "ttrMatchCnt": 151
+          }
+        },
+        {
+          "id": 18,
+          "firstName": "Martin",
+          "lastName": "Zorn",
+          "clubId": 16,
+          "birthYear": 1988,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU402453",
+            "licenceNr": "402010400",
+            "clubNr": "402010",
+            "clubFedNick": "ByTTV",
+            "ttr": 1876,
+            "ttrMatchCnt": 52
+          }
+        },
+        {
+          "id": 19,
+          "firstName": "Lutz",
+          "lastName": "Hose",
+          "clubId": 17,
+          "birthYear": 1961,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1019633",
+            "licenceNr": "112011158",
+            "clubNr": "112011",
+            "clubFedNick": "ByTTV",
+            "ttr": 1729,
+            "ttrMatchCnt": 450
+          }
+        },
+        {
+          "id": 20,
+          "firstName": "Maik",
+          "lastName": "Ehfer",
+          "clubId": 18,
+          "birthYear": 1969,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1268250",
+            "licenceNr": "110006163",
+            "clubNr": "110006",
+            "clubFedNick": "ByTTV",
+            "ttr": 1727,
+            "ttrMatchCnt": 91
+          }
+        },
+        {
+          "id": 21,
+          "firstName": "Lukas",
+          "lastName": "Hauden",
+          "clubId": 19,
+          "birthYear": 1995,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1017849",
+            "licenceNr": "205015165",
+            "clubNr": "205015",
+            "clubFedNick": "ByTTV",
+            "ttr": 1731,
+            "ttrMatchCnt": 271
+          }
+        },
+        {
+          "id": 22,
+          "firstName": "Leif",
+          "lastName": "Schaltung",
+          "clubId": 11,
+          "birthYear": 1946,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1017876",
+            "licenceNr": "112005044",
+            "clubNr": "112005",
+            "clubFedNick": "ByTTV",
+            "ttr": 1863,
+            "ttrMatchCnt": 368
+          }
+        },
+        {
+          "id": 23,
+          "firstName": "Lucky",
+          "lastName": "Rung",
+          "clubId": 20,
+          "birthYear": 1984,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1016452",
+            "licenceNr": "110020317",
+            "clubNr": "110020",
+            "clubFedNick": "ByTTV",
+            "ttr": 1756,
+            "ttrMatchCnt": 214
+          }
+        },
+        {
+          "id": 24,
+          "firstName": "Niko",
+          "lastName": "Thien",
+          "clubId": 21,
+          "birthYear": 1958,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1128537",
+            "licenceNr": "105002220",
+            "clubNr": "105002",
+            "clubFedNick": "ByTTV",
+            "ttr": 1957,
+            "ttrMatchCnt": 221
+          }
+        },
+        {
+          "id": 25,
+          "firstName": "Nat",
+          "lastName": "Zwerg",
+          "clubId": 21,
+          "birthYear": 1995,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1137488",
+            "licenceNr": "105002221",
+            "clubNr": "105002",
+            "clubFedNick": "ByTTV",
+            "ttr": 1937,
+            "ttrMatchCnt": 16
+          }
+        },
+        {
+          "id": 26,
+          "firstName": "Nick",
+          "lastName": "Elmine",
+          "clubId": 22,
+          "birthYear": 1961,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1021171",
+            "licenceNr": "113006076",
+            "clubNr": "113006",
+            "clubFedNick": "ByTTV",
+            "ttr": 1831,
+            "ttrMatchCnt": 245
+          }
+        },
+        {
+          "id": 27,
+          "firstName": "Till",
+          "lastName": "Sitter",
+          "clubId": 23,
+          "birthYear": 1960,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1022538",
+            "licenceNr": "112023004",
+            "clubNr": "112023",
+            "clubFedNick": "ByTTV",
+            "ttr": 1792,
+            "ttrMatchCnt": 356
+          }
+        },
+        {
+          "id": 28,
+          "firstName": "Thorn",
+          "lastName": "Ister",
+          "clubId": 3,
+          "birthYear": 1944,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1020762",
+            "licenceNr": "113015101",
+            "clubNr": "113015",
+            "clubFedNick": "ByTTV",
+            "ttr": 1932,
+            "ttrMatchCnt": 47
+          }
+        },
+        {
+          "id": 29,
+          "firstName": "Theo",
+          "lastName": "Retisch",
+          "clubId": 16,
+          "birthYear": 1972,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1334904",
+            "licenceNr": "402010406",
+            "clubNr": "402010",
+            "clubFedNick": "ByTTV",
+            "ttr": 2290,
+            "ttrMatchCnt": 19
+          }
+        },
+        {
+          "id": 30,
+          "firstName": "Tom",
+          "lastName": "Ate",
+          "clubId": 24,
+          "birthYear": 1967,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1025642",
+            "licenceNr": "103008070",
+            "clubNr": "103008",
+            "clubFedNick": "ByTTV",
+            "ttr": 1802,
+            "ttrMatchCnt": 184
+          }
+        },
+        {
+          "id": 31,
+          "firstName": "Wilhelm",
+          "lastName": "Zafen",
+          "clubId": 25,
+          "birthYear": 1967,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1129013",
+            "licenceNr": "112025021",
+            "clubNr": "112025",
+            "clubFedNick": "ByTTV",
+            "ttr": 1913,
+            "ttrMatchCnt": 134
+          }
+        },
+        {
+          "id": 32,
+          "firstName": "Sam",
+          "lastName": "Elb-Rösel",
+          "clubId": 26,
+          "birthYear": 1973,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1023346",
+            "licenceNr": "401009068",
+            "clubNr": "401009",
+            "clubFedNick": "ByTTV",
+            "ttr": 1874,
+            "ttrMatchCnt": 166
+          }
+        },
+        {
+          "id": 33,
+          "firstName": "Sepp A.",
+          "lastName": "Rator",
+          "clubId": 27,
+          "birthYear": 1994,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1023592",
+            "licenceNr": "110018285",
+            "clubNr": "110018",
+            "clubFedNick": "ByTTV",
+            "ttr": 1847,
+            "ttrMatchCnt": 429
+          }
+        },
+        {
+          "id": 34,
+          "firstName": "Ron",
+          "lastName": "ter Holen",
+          "clubId": 28,
+          "birthYear": 1964,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1023635",
+            "licenceNr": "110010102",
+            "clubNr": "110010",
+            "clubFedNick": "ByTTV",
+            "ttr": 1956,
+            "ttrMatchCnt": 38
+          }
+        },
+        {
+          "id": 35,
+          "firstName": "Roman",
+          "lastName": "Held",
+          "clubId": 5,
+          "birthYear": 1976,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1184966",
+            "licenceNr": "110011468",
+            "clubNr": "110011",
+            "clubFedNick": "ByTTV",
+            "ttr": 1883,
+            "ttrMatchCnt": 76
+          }
+        },
+        {
+          "id": 36,
+          "firstName": "Stig",
+          "lastName": "Matisierung",
+          "clubId": 29,
+          "birthYear": 1988,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1029682",
+            "licenceNr": "112004159",
+            "clubNr": "112004",
+            "clubFedNick": "ByTTV",
+            "ttr": 1790,
+            "ttrMatchCnt": 392
+          }
+        },
+        {
+          "id": 37,
+          "firstName": "Qu",
+          "lastName": "Chen",
+          "clubId": 23,
+          "birthYear": 1990,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1029426",
+            "licenceNr": "112623062",
+            "clubNr": "112023",
+            "clubFedNick": "ByTTV",
+            "ttr": 1878,
+            "ttrMatchCnt": 350
+          }
+        },
+        {
+          "id": 38,
+          "firstName": "Rainer",
+          "lastName": "Zufall",
+          "clubId": 4,
+          "birthYear": 1955,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1031921",
+            "licenceNr": "112020089",
+            "clubNr": "112020",
+            "clubFedNick": "ByTTV",
+            "ttr": 1765,
+            "ttrMatchCnt": 353
+          }
+        },
+        {
+          "id": 39,
+          "firstName": "Roy",
+          "lastName": "Bär",
+          "clubId": 5,
+          "birthYear": 1976,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1229922",
+            "licenceNr": "110411432",
+            "clubNr": "110011",
+            "clubFedNick": "ByTTV",
+            "ttr": 1661,
+            "ttrMatchCnt": 76
+          }
+        },
+        {
+          "id": 40,
+          "firstName": "David",
+          "lastName": "Getter",
+          "clubId": 30,
+          "birthYear": 1992,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1136164",
+            "licenceNr": "202004161",
+            "clubNr": "202004",
+            "clubFedNick": "ByTTV",
+            "ttr": 1531,
+            "ttrMatchCnt": 54
+          }
+        },
+        {
+          "id": 41,
+          "firstName": "Ross",
+          "lastName": "Haar",
+          "clubId": 30,
+          "birthYear": 1999,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1281105",
+            "licenceNr": "202004168",
+            "clubNr": "202004",
+            "clubFedNick": "ByTTV",
+            "ttr": 1904,
+            "ttrMatchCnt": 82
+          }
+        },
+        {
+          "id": 42,
+          "firstName": "Ryan",
+          "lastName": "Kommen",
+          "clubId": 15,
+          "birthYear": 1987,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1034057",
+            "licenceNr": "113009184",
+            "clubNr": "113009",
+            "clubFedNick": "ByTTV",
+            "ttr": 1904,
+            "ttrMatchCnt": 181
+          }
+        },
+        {
+          "id": 43,
+          "firstName": "Sam",
+          "lastName": "Pler",
+          "clubId": 23,
+          "birthYear": 1969,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1200096",
+            "licenceNr": "112023107",
+            "clubNr": "112023",
+            "clubFedNick": "ByTTV",
+            "ttr": 1752,
+            "ttrMatchCnt": 58
+          }
+        },
+        {
+          "id": 44,
+          "firstName": "Stefan S.",
+          "lastName": "Dom",
+          "clubId": 31,
+          "birthYear": 1958,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1039231",
+            "licenceNr": "104010110",
+            "clubNr": "104010",
+            "clubFedNick": "ByTTV",
+            "ttr": 1801,
+            "ttrMatchCnt": 142
+          }
+        },
+        {
+          "id": 45,
+          "firstName": "Ted",
+          "lastName": "O'Wierung",
+          "clubId": 21,
+          "birthYear": 1956,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1231950",
+            "licenceNr": "105002194",
+            "clubNr": "105002",
+            "clubFedNick": "ByTTV",
+            "ttr": 2019,
+            "ttrMatchCnt": 81
+          }
+        },
+        {
+          "id": 46,
+          "firstName": "Phil",
+          "lastName": "Harmonie",
+          "clubId": 32,
+          "birthYear": 1985,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1042740",
+            "licenceNr": "103022295",
+            "clubNr": "103022",
+            "clubFedNick": "ByTTV",
+            "ttr": 1711,
+            "ttrMatchCnt": 242
+          }
+        },
+        {
+          "id": 47,
+          "firstName": "Otto",
+          "lastName": "Motor",
+          "clubId": 33,
+          "birthYear": 1984,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1043423",
+            "licenceNr": "109014130",
+            "clubNr": "109014",
+            "clubFedNick": "ByTTV",
+            "ttr": 1778,
+            "ttrMatchCnt": 187
+          }
+        },
+        {
+          "id": 48,
+          "firstName": "Peer",
+          "lastName": "Söhnlich",
+          "clubId": 34,
+          "birthYear": 1975,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1052396",
+            "licenceNr": "102006122",
+            "clubNr": "102006",
+            "clubFedNick": "ByTTV",
+            "ttr": 1771,
+            "ttrMatchCnt": 187
+          }
+        },
+        {
+          "id": 49,
+          "firstName": "Nils",
+          "lastName": "Pferd",
+          "clubId": 35,
+          "birthYear": 1965,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1258460",
+            "licenceNr": "105008044",
+            "clubNr": "105008",
+            "clubFedNick": "ByTTV",
+            "ttr": 1851,
+            "ttrMatchCnt": 106
+          }
+        },
+        {
+          "id": 50,
+          "firstName": "Pedro",
+          "lastName": "Leum",
+          "clubId": 36,
+          "birthYear": 1961,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1056499",
+            "licenceNr": "106017121",
+            "clubNr": "106017",
+            "clubFedNick": "ByTTV",
+            "ttr": 1962,
+            "ttrMatchCnt": 465
+          }
+        },
+        {
+          "id": 51,
+          "firstName": "Otto",
+          "lastName": "Päde",
+          "clubId": 5,
+          "birthYear": 1976,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1055357",
+            "licenceNr": "110011433",
+            "clubNr": "110011",
+            "clubFedNick": "ByTTV",
+            "ttr": 1657,
+            "ttrMatchCnt": 37
+          }
+        },
+        {
+          "id": 52,
+          "firstName": "Mirko",
+          "lastName": "Welle",
+          "clubId": 32,
+          "birthYear": 1977,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1060735",
+            "licenceNr": "103022128",
+            "clubNr": "103022",
+            "clubFedNick": "ByTTV",
+            "ttr": 1733,
+            "ttrMatchCnt": 223
+          }
+        },
+        {
+          "id": 53,
+          "firstName": "Mike",
+          "lastName": "Rofon",
+          "clubId": 37,
+          "birthYear": 1992,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1060146",
+            "licenceNr": "205003172",
+            "clubNr": "205003",
+            "clubFedNick": "ByTTV",
+            "ttr": 1793,
+            "ttrMatchCnt": 200
+          }
+        },
+        {
+          "id": 54,
+          "firstName": "Matt",
+          "lastName": "Jess",
+          "clubId": 38,
+          "birthYear": 1992,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1311290",
+            "licenceNr": "106013324",
+            "clubNr": "106013",
+            "clubFedNick": "ByTTV",
+            "ttr": 1975,
+            "ttrMatchCnt": 17
+          }
+        },
+        {
+          "id": 55,
+          "firstName": "Max",
+          "lastName": "Strammer",
+          "clubId": 2,
+          "birthYear": 1978,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1175847",
+            "licenceNr": "105018109",
+            "clubNr": "105018",
+            "clubFedNick": "ByTTV",
+            "ttr": 1784,
+            "ttrMatchCnt": 43
+          }
+        },
+        {
+          "id": 56,
+          "firstName": "Lene",
+          "lastName": "Arm",
+          "clubId": 39,
+          "birthYear": 1976,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU998576",
+            "licenceNr": "102011102",
+            "clubNr": "102011",
+            "clubFedNick": "ByTTV",
+            "ttr": 1195,
+            "ttrMatchCnt": 155
+          }
+        },
+        {
+          "id": 57,
+          "firstName": "Lotte",
+          "lastName": "Macchiato",
+          "clubId": 27,
+          "birthYear": 1962,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1279403",
+            "licenceNr": "110018353",
+            "clubNr": "110018",
+            "clubFedNick": "ByTTV",
+            "ttr": 1000,
+            "ttrMatchCnt": 82
+          }
+        },
+        {
+          "id": 58,
+          "firstName": "Liz",
+          "lastName": "Ten Platz",
+          "clubId": 40,
+          "birthYear": 1991,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1127543",
+            "licenceNr": "106003307",
+            "clubNr": "106003",
+            "clubFedNick": "ByTTV",
+            "ttr": 1020,
+            "ttrMatchCnt": 260
+          }
+        },
+        {
+          "id": 59,
+          "firstName": "Luzie",
+          "lastName": "Fehr",
+          "clubId": 41,
+          "birthYear": 1984,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU999584",
+            "licenceNr": "104008192",
+            "clubNr": "104008",
+            "clubFedNick": "ByTTV",
+            "ttr": 1172,
+            "ttrMatchCnt": 264
+          }
+        },
+        {
+          "id": 60,
+          "firstName": "Marga",
+          "lastName": "Quark",
+          "clubId": 36,
+          "birthYear": 1980,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1005416",
+            "licenceNr": "106017260",
+            "clubNr": "106017",
+            "clubFedNick": "ByTTV",
+            "ttr": 954,
+            "ttrMatchCnt": 348
+          }
+        },
+        {
+          "id": 61,
+          "firstName": "Rita",
+          "lastName": "Sport",
+          "clubId": 15,
+          "birthYear": 1995,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1004059",
+            "licenceNr": "113009212",
+            "clubNr": "113009",
+            "clubFedNick": "ByTTV",
+            "ttr": 873,
+            "ttrMatchCnt": 119
+          }
+        },
+        {
+          "id": 62,
+          "firstName": "Pia",
+          "lastName": "Nist",
+          "clubId": 42,
+          "birthYear": 1984,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1002499",
+            "licenceNr": "116024054",
+            "clubNr": "116024",
+            "clubFedNick": "ByTTV",
+            "ttr": 1111,
+            "ttrMatchCnt": 229
+          }
+        },
+        {
+          "id": 63,
+          "firstName": "Polly",
+          "lastName": "Zeih",
+          "clubId": 43,
+          "birthYear": 1966,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1008415",
+            "licenceNr": "105010060",
+            "clubNr": "105010",
+            "clubFedNick": "ByTTV",
+            "ttr": 1146,
+            "ttrMatchCnt": 315
+          }
+        },
+        {
+          "id": 64,
+          "firstName": "Ingrid",
+          "lastName": "Enzien",
+          "clubId": 44,
+          "birthYear": 1996,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1009163",
+            "licenceNr": "109012113",
+            "clubNr": "109012",
+            "clubFedNick": "ByTTV",
+            "ttr": 1003,
+            "ttrMatchCnt": 311
+          }
+        },
+        {
+          "id": 65,
+          "firstName": "Joyce",
+          "lastName": "Tick",
+          "clubId": 15,
+          "birthYear": 1995,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1008691",
+            "licenceNr": "113009214",
+            "clubNr": "113009",
+            "clubFedNick": "ByTTV",
+            "ttr": 935,
+            "ttrMatchCnt": 166
+          }
+        },
+        {
+          "id": 66,
+          "firstName": "Caro",
+          "lastName": "Ass",
+          "clubId": 45,
+          "birthYear": 1995,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1014014",
+            "licenceNr": "102010067",
+            "clubNr": "102010",
+            "clubFedNick": "ByTTV",
+            "ttr": 826,
+            "ttrMatchCnt": 174
+          }
+        },
+        {
+          "id": 67,
+          "firstName": "Claudia",
+          "lastName": "Manten",
+          "clubId": 15,
+          "birthYear": 1986,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1177338",
+            "licenceNr": "113009233",
+            "clubNr": "113009",
+            "clubFedNick": "ByTTV",
+            "ttr": 1009,
+            "ttrMatchCnt": 53
+          }
+        },
+        {
+          "id": 68,
+          "firstName": "Claire",
+          "lastName": "Grube",
+          "clubId": 46,
+          "birthYear": 1973,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1022365",
+            "licenceNr": "103029171",
+            "clubNr": "103029",
+            "clubFedNick": "ByTTV",
+            "ttr": 1331,
+            "ttrMatchCnt": 252
+          }
+        },
+        {
+          "id": 69,
+          "firstName": "Conny",
+          "lastName": "Fähre",
+          "clubId": 47,
+          "birthYear": 1967,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1021958",
+            "licenceNr": "202005099",
+            "clubNr": "202005",
+            "clubFedNick": "ByTTV",
+            "ttr": 1169,
+            "ttrMatchCnt": 214
+          }
+        },
+        {
+          "id": 70,
+          "firstName": "Cora",
+          "lastName": "Schiert",
+          "clubId": 48,
+          "birthYear": 1957,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1020649",
+            "licenceNr": "105005337",
+            "clubNr": "105005",
+            "clubFedNick": "ByTTV",
+            "ttr": 1084,
+            "ttrMatchCnt": 314
+          }
+        },
+        {
+          "id": 71,
+          "firstName": "Thorsten",
+          "lastName": "Kaemmerling",
+          "clubId": 49,
+          "birthYear": 1982,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU239198",
+            "licenceNr": "112006264",
+            "clubNr": "112006",
+            "clubFedNick": "ByTTV",
+            "ttr": 917,
+            "ttrMatchCnt": 225
+          }
+        },
+        {
+          "id": 72,
+          "firstName": "Donna",
+          "lastName": "Littchen",
+          "clubId": 29,
+          "birthYear": 1995,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1025584",
+            "licenceNr": "112004206",
+            "clubNr": "112004",
+            "clubFedNick": "ByTTV",
+            "ttr": 933,
+            "ttrMatchCnt": 397
+          }
+        },
+        {
+          "id": 73,
+          "firstName": "Anka",
+          "lastName": "Kette",
+          "clubId": 50,
+          "birthYear": 1965,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1026037",
+            "licenceNr": "111012015",
+            "clubNr": "111012",
+            "clubFedNick": "ByTTV",
+            "ttr": 1085,
+            "ttrMatchCnt": 397
+          }
+        },
+        {
+          "id": 74,
+          "firstName": "Martin",
+          "lastName": "Kern jun.",
+          "clubId": 51,
+          "birthYear": 1992,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1024310",
+            "licenceNr": "608004133",
+            "clubNr": "608004",
+            "clubFedNick": "ByTTV",
+            "ttr": 1046,
+            "ttrMatchCnt": 268
+          }
+        },
+        {
+          "id": 75,
+          "firstName": "Ann",
+          "lastName": "Probe",
+          "clubId": 52,
+          "birthYear": 1985,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1023481",
+            "licenceNr": "608014266",
+            "clubNr": "608014",
+            "clubFedNick": "ByTTV",
+            "ttr": 1145,
+            "ttrMatchCnt": 318
+          }
+        },
+        {
+          "id": 76,
+          "firstName": "Anna",
+          "lastName": "Nass",
+          "clubId": 53,
+          "birthYear": 1962,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1045465",
+            "licenceNr": "109001045",
+            "clubNr": "109001",
+            "clubFedNick": "ByTTV",
+            "ttr": 1130,
+            "ttrMatchCnt": 239
+          }
+        },
+        {
+          "id": 77,
+          "firstName": "Bart",
+          "lastName": "Stoppel",
+          "clubId": 54,
+          "birthYear": 1973,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1048485",
+            "licenceNr": "110015224",
+            "clubNr": "110815",
+            "clubFedNick": "ByTTV",
+            "ttr": 1183,
+            "ttrMatchCnt": 209
+          }
+        },
+        {
+          "id": 78,
+          "firstName": "Bea",
+          "lastName": "Lldich",
+          "clubId": 39,
+          "birthYear": 1986,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1053373",
+            "licenceNr": "102011076",
+            "clubNr": "102011",
+            "clubFedNick": "ByTTV",
+            "ttr": 1112,
+            "ttrMatchCnt": 255
+          }
+        },
+        {
+          "id": 79,
+          "firstName": "Donna",
+          "lastName": "Wetter",
+          "clubId": 55,
+          "birthYear": 1992,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU995873",
+            "licenceNr": "103006228",
+            "clubNr": "103006",
+            "clubFedNick": "ByTTV",
+            "ttr": 1547,
+            "ttrMatchCnt": 244
+          }
+        },
+        {
+          "id": 80,
+          "firstName": "Ella",
+          "lastName": "Nut",
+          "clubId": 56,
+          "birthYear": 1963,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU996465",
+            "licenceNr": "113013283",
+            "clubNr": "113013",
+            "clubFedNick": "ByTTV",
+            "ttr": 1547,
+            "ttrMatchCnt": 275
+          }
+        },
+        {
+          "id": 81,
+          "firstName": "Esther",
+          "lastName": "Poly",
+          "clubId": 5,
+          "birthYear": 1995,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU997673",
+            "licenceNr": "110011360",
+            "clubNr": "110011",
+            "clubFedNick": "ByTTV",
+            "ttr": 1535,
+            "ttrMatchCnt": 258
+          }
+        },
+        {
+          "id": 82,
+          "firstName": "Hanni",
+          "lastName": "Muhn",
+          "clubId": 57,
+          "birthYear": 1999,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU205625",
+            "licenceNr": "111010235",
+            "clubNr": "111010",
+            "clubFedNick": "ByTTV",
+            "ttr": 1649,
+            "ttrMatchCnt": 326
+          }
+        },
+        {
+          "id": 83,
+          "firstName": "Grete",
+          "lastName": "Fisch",
+          "clubId": 11,
+          "birthYear": 1981,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU998085",
+            "licenceNr": "112005008",
+            "clubNr": "112005",
+            "clubFedNick": "ByTTV",
+            "ttr": 1618,
+            "ttrMatchCnt": 238
+          }
+        },
+        {
+          "id": 84,
+          "firstName": "Insa",
+          "lastName": "Ihr",
+          "clubId": 58,
+          "birthYear": 1989,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1001065",
+            "licenceNr": "402015203",
+            "clubNr": "402015",
+            "clubFedNick": "ByTTV",
+            "ttr": 1534,
+            "ttrMatchCnt": 384
+          }
+        },
+        {
+          "id": 85,
+          "firstName": "Malte",
+          "lastName": "Sehr",
+          "clubId": 44,
+          "birthYear": 1964,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1009164",
+            "licenceNr": "109012147",
+            "clubNr": "109012",
+            "clubFedNick": "ByTTV",
+            "ttr": 1616,
+            "ttrMatchCnt": 290
+          }
+        },
+        {
+          "id": 86,
+          "firstName": "Mary",
+          "lastName": "Krissmes",
+          "clubId": 59,
+          "birthYear": 1978,
+          "sex": 1,
+          "meta": {
+            "internalNr": "NU1008382",
+            "licenceNr": "103009274",
+            "clubNr": "103009",
+            "clubFedNick": "ByTTV",
+            "ttr": 1454,
+            "ttrMatchCnt": 199
+          }
+        }
+      ],
+      "competitions": [
+        {
+          "id": 1,
+          "name": "S-Klasse Herren Einzel",
+          "typ": "SINGLE",
+          "category": "TT",
+          "startDate": "2030-04-01 12:00",
+          "status": "UNKN",
+          "lowLevel": 1650,
+          "upperLevel": 3000,
+          "cttInfo": {
+            "ageGroup": "Herren",
+            "ratingRemark": "S-Klasse",
+            "ratingLowLevel": 1650,
+            "ratingUpperLevel": 3000
+          },
+          "pants": [
+            {
+              "id": "[1]",
+              "name": "Kahn, Ada",
+              "club": "TV Traktor Leipzig",
+              "rating": 1792,
+              "birthYear": "1965",
+              "status": "REGI",
+              "ident": "PLAYER1"
+            },
+            {
+              "id": "[2]",
+              "name": "Tion, Addi",
+              "club": "TTC Torpedo Moskau",
+              "rating": 1846,
+              "birthYear": "1947",
+              "status": "REGI",
+              "ident": "PLAYER2"
+            },
+            {
+              "id": "[3]",
+              "name": "Lette, Adi",
+              "club": "TSV Rostocker Flammen",
+              "rating": 1922,
+              "birthYear": "1960",
+              "status": "REGI",
+              "ident": "PLAYER3"
+            },
+            {
+              "id": "[4]",
+              "name": "ter Native, Al",
+              "club": "TSV Schatzinsel",
+              "rating": 1680,
+              "birthYear": "1957",
+              "status": "REGI",
+              "ident": "PLAYER4"
+            },
+            {
+              "id": "[5]",
+              "name": "Herum, Albert",
+              "club": "FC Lokomotive Berlin",
+              "rating": 2190,
+              "birthYear": "1981",
+              "status": "REGI",
+              "ident": "PLAYER5"
+            },
+            {
+              "id": "[6]",
+              "name": "Platz, Alexander",
+              "club": "SpVgg Röhrmoos-Großinzemoos",
+              "rating": 1761,
+              "birthYear": "1962",
+              "status": "REGI",
+              "ident": "PLAYER6"
+            },
+            {
+              "id": "[7]",
+              "name": "Bert, Ali",
+              "club": "FC Kiffen 08",
+              "rating": 1836,
+              "birthYear": "1965",
+              "status": "REGI",
+              "ident": "PLAYER7"
+            },
+            {
+              "id": "[8]",
+              "name": "Mente, Ali",
+              "club": "VfR Netzroller",
+              "rating": 1927,
+              "birthYear": "1972",
+              "status": "REGI",
+              "ident": "PLAYER8"
+            },
+            {
+              "id": "[9]",
+              "name": "Mater, Alma",
+              "club": "SV-DJK Kantenballer",
+              "rating": 1669,
+              "birthYear": "1970",
+              "status": "REGI",
+              "ident": "PLAYER9"
+            },
+            {
+              "id": "[10]",
+              "name": "Gehzauch, Anders",
+              "club": "SC Donnerfels",
+              "rating": 1313,
+              "birthYear": "1950",
+              "status": "REGI",
+              "ident": "PLAYER10"
+            },
+            {
+              "id": "[11]",
+              "name": "Völcker-Dieserweldt, Andi",
+              "club": "TTC Scheibenwelt",
+              "rating": 1865,
+              "birthYear": "1962",
+              "status": "REGI",
+              "ident": "PLAYER11"
+            },
+            {
+              "id": "[12]",
+              "name": "Schweiß, Axel",
+              "club": "SV Nokturmgasse 7",
+              "rating": 1733,
+              "birthYear": "1980",
+              "status": "REGI",
+              "ident": "PLAYER12"
+            },
+            {
+              "id": "[13]",
+              "name": "Achse, Kurt",
+              "club": "SV Springfield",
+              "rating": 1996,
+              "birthYear": "1961",
+              "status": "REGI",
+              "ident": "PLAYER13"
+            },
+            {
+              "id": "[14]",
+              "name": "Container, Klaas",
+              "club": "SV Monkey Island e.V.",
+              "rating": 2201,
+              "birthYear": "1970",
+              "status": "REGI",
+              "ident": "PLAYER14"
+            },
+            {
+              "id": "[15]",
+              "name": "Trophobie, Klaus",
+              "club": "FC Lokomotive Berlin",
+              "rating": 2020,
+              "birthYear": "1978",
+              "status": "REGI",
+              "ident": "PLAYER15"
+            },
+            {
+              "id": "[16]",
+              "name": "Schenn, Knuth",
+              "club": "TSV Rostocker Flammen",
+              "rating": 1892,
+              "birthYear": "1965",
+              "status": "REGI",
+              "ident": "PLAYER16"
+            },
+            {
+              "id": "[17]",
+              "name": "Brandenburg, Mark",
+              "club": "TSV WuChiChu",
+              "rating": 1877,
+              "birthYear": "1995",
+              "status": "REGI",
+              "ident": "PLAYER17"
+            },
+            {
+              "id": "[18]",
+              "name": "Zorn, Martin",
+              "club": "DJK SB Pandora 64",
+              "rating": 1876,
+              "birthYear": "1988",
+              "status": "REGI",
+              "ident": "PLAYER18"
+            },
+            {
+              "id": "[19]",
+              "name": "Hose, Lutz",
+              "club": "SG Hogsmeade",
+              "rating": 1729,
+              "birthYear": "1961",
+              "status": "REGI",
+              "ident": "PLAYER19"
+            },
+            {
+              "id": "[20]",
+              "name": "Ehfer, Maik",
+              "club": "SV Hundert-Morgen-Wald",
+              "rating": 1727,
+              "birthYear": "1969",
+              "status": "REGI",
+              "ident": "PLAYER20"
+            },
+            {
+              "id": "[21]",
+              "name": "Hauden, Lukas",
+              "club": "SV Ihrlerstein 1958",
+              "rating": 1731,
+              "birthYear": "1995",
+              "status": "REGI",
+              "ident": "PLAYER21"
+            },
+            {
+              "id": "[22]",
+              "name": "Schaltung, Leif",
+              "club": "TTC Scheibenwelt",
+              "rating": 1863,
+              "birthYear": "1946",
+              "status": "REGI",
+              "ident": "PLAYER22"
+            },
+            {
+              "id": "[23]",
+              "name": "Rung, Lucky",
+              "club": "SV Isengart",
+              "rating": 1756,
+              "birthYear": "1984",
+              "status": "REGI",
+              "ident": "PLAYER23"
+            },
+            {
+              "id": "[24]",
+              "name": "Thien, Niko",
+              "club": "TSV Lummerland e.V.",
+              "rating": 1957,
+              "birthYear": "1958",
+              "status": "REGI",
+              "ident": "PLAYER24"
+            },
+            {
+              "id": "[25]",
+              "name": "Zwerg, Nat",
+              "club": "TSV Lummerland e.V.",
+              "rating": 1937,
+              "birthYear": "1995",
+              "status": "REGI",
+              "ident": "PLAYER25"
+            },
+            {
+              "id": "[26]",
+              "name": "Elmine, Nick",
+              "club": "TSV 1864 Twin Peaks",
+              "rating": 1831,
+              "birthYear": "1961",
+              "status": "REGI",
+              "ident": "PLAYER26"
+            },
+            {
+              "id": "[27]",
+              "name": "Sitter, Till",
+              "club": "TTC Orgrimmar",
+              "rating": 1792,
+              "birthYear": "1960",
+              "status": "REGI",
+              "ident": "PLAYER27"
+            },
+            {
+              "id": "[28]",
+              "name": "Ister, Thorn",
+              "club": "TSV Rostocker Flammen",
+              "rating": 1932,
+              "birthYear": "1944",
+              "status": "REGI",
+              "ident": "PLAYER28"
+            },
+            {
+              "id": "[29]",
+              "name": "Retisch, Theo",
+              "club": "DJK SB Pandora 64",
+              "rating": 2290,
+              "birthYear": "1972",
+              "status": "REGI",
+              "ident": "PLAYER29"
+            },
+            {
+              "id": "[30]",
+              "name": "Ate, Tom",
+              "club": "TSV 1907 Indersdorf",
+              "rating": 1802,
+              "birthYear": "1967",
+              "status": "REGI",
+              "ident": "PLAYER30"
+            },
+            {
+              "id": "[31]",
+              "name": "Zafen, Wilhelm",
+              "club": "FC Askaban",
+              "rating": 1913,
+              "birthYear": "1967",
+              "status": "REGI",
+              "ident": "PLAYER31"
+            },
+            {
+              "id": "[32]",
+              "name": "Elb-Rösel, Sam",
+              "club": "SV Sarching",
+              "rating": 1874,
+              "birthYear": "1973",
+              "status": "REGI",
+              "ident": "PLAYER32"
+            },
+            {
+              "id": "[33]",
+              "name": "Rator, Sepp A.",
+              "club": "TTC Phatt Island",
+              "rating": 1847,
+              "birthYear": "1994",
+              "status": "REGI",
+              "ident": "PLAYER33"
+            },
+            {
+              "id": "[34]",
+              "name": "ter Holen, Ron",
+              "club": "ESV Wonderland",
+              "rating": 1956,
+              "birthYear": "1964",
+              "status": "REGI",
+              "ident": "PLAYER34"
+            },
+            {
+              "id": "[35]",
+              "name": "Held, Roman",
+              "club": "FC Lokomotive Berlin",
+              "rating": 1883,
+              "birthYear": "1976",
+              "status": "REGI",
+              "ident": "PLAYER35"
+            },
+            {
+              "id": "[36]",
+              "name": "Matisierung, Stig",
+              "club": "TSV Posemuckl 1862",
+              "rating": 1790,
+              "birthYear": "1988",
+              "status": "REGI",
+              "ident": "PLAYER36"
+            },
+            {
+              "id": "[37]",
+              "name": "Chen, Qu",
+              "club": "TTC Orgrimmar",
+              "rating": 1878,
+              "birthYear": "1990",
+              "status": "REGI",
+              "ident": "PLAYER37"
+            },
+            {
+              "id": "[38]",
+              "name": "Zufall, Rainer",
+              "club": "TSV Schatzinsel",
+              "rating": 1765,
+              "birthYear": "1955",
+              "status": "REGI",
+              "ident": "PLAYER38"
+            },
+            {
+              "id": "[39]",
+              "name": "Bär, Roy",
+              "club": "FC Lokomotive Berlin",
+              "rating": 1661,
+              "birthYear": "1976",
+              "status": "REGI",
+              "ident": "PLAYER39"
+            },
+            {
+              "id": "[40]",
+              "name": "Getter, David",
+              "club": "TV Quahog",
+              "rating": 1531,
+              "birthYear": "1992",
+              "status": "REGI",
+              "ident": "PLAYER40"
+            },
+            {
+              "id": "[41]",
+              "name": "Haar, Ross",
+              "club": "TV Quahog",
+              "rating": 1904,
+              "birthYear": "1999",
+              "status": "REGI",
+              "ident": "PLAYER41"
+            },
+            {
+              "id": "[42]",
+              "name": "Kommen, Ryan",
+              "club": "TSV WuChiChu",
+              "rating": 1904,
+              "birthYear": "1987",
+              "status": "REGI",
+              "ident": "PLAYER42"
+            },
+            {
+              "id": "[43]",
+              "name": "Pler, Sam",
+              "club": "TTC Orgrimmar",
+              "rating": 1752,
+              "birthYear": "1969",
+              "status": "REGI",
+              "ident": "PLAYER43"
+            },
+            {
+              "id": "[44]",
+              "name": "Dom, Stefan S.",
+              "club": "SC Xanadu",
+              "rating": 1801,
+              "birthYear": "1958",
+              "status": "REGI",
+              "ident": "PLAYER44"
+            },
+            {
+              "id": "[45]",
+              "name": "O'Wierung, Ted",
+              "club": "TSV Lummerland e.V.",
+              "rating": 2019,
+              "birthYear": "1956",
+              "status": "REGI",
+              "ident": "PLAYER45"
+            },
+            {
+              "id": "[46]",
+              "name": "Harmonie, Phil",
+              "club": "TTC Zaremonien",
+              "rating": 1711,
+              "birthYear": "1985",
+              "status": "REGI",
+              "ident": "PLAYER46"
+            },
+            {
+              "id": "[47]",
+              "name": "Motor, Otto",
+              "club": "SV Blood Island",
+              "rating": 1778,
+              "birthYear": "1984",
+              "status": "REGI",
+              "ident": "PLAYER47"
+            },
+            {
+              "id": "[48]",
+              "name": "Söhnlich, Peer",
+              "club": "Post SV Avalon",
+              "rating": 1771,
+              "birthYear": "1975",
+              "status": "REGI",
+              "ident": "PLAYER48"
+            },
+            {
+              "id": "[49]",
+              "name": "Pferd, Nils",
+              "club": "SC Dinky Island",
+              "rating": 1851,
+              "birthYear": "1965",
+              "status": "REGI",
+              "ident": "PLAYER49"
+            },
+            {
+              "id": "[50]",
+              "name": "Leum, Pedro",
+              "club": "SC Narnia",
+              "rating": 1962,
+              "birthYear": "1961",
+              "status": "REGI",
+              "ident": "PLAYER50"
+            },
+            {
+              "id": "[51]",
+              "name": "Päde, Otto",
+              "club": "FC Lokomotive Berlin",
+              "rating": 1657,
+              "birthYear": "1976",
+              "status": "REGI",
+              "ident": "PLAYER51"
+            },
+            {
+              "id": "[52]",
+              "name": "Welle, Mirko",
+              "club": "TTC Zaremonien",
+              "rating": 1733,
+              "birthYear": "1977",
+              "status": "REGI",
+              "ident": "PLAYER52"
+            },
+            {
+              "id": "[53]",
+              "name": "Rofon, Mike",
+              "club": "SV PanneKlopper",
+              "rating": 1793,
+              "birthYear": "1992",
+              "status": "REGI",
+              "ident": "PLAYER53"
+            },
+            {
+              "id": "[54]",
+              "name": "Jess, Matt",
+              "club": "TSV 1880 Reichenstadt",
+              "rating": 1975,
+              "birthYear": "1992",
+              "status": "REGI",
+              "ident": "PLAYER54"
+            },
+            {
+              "id": "[55]",
+              "name": "Strammer, Max",
+              "club": "TTC Torpedo Moskau",
+              "rating": 1784,
+              "birthYear": "1978",
+              "status": "REGI",
+              "ident": "PLAYER55"
+            }
+          ],
+          "version": 1
+        },
+        {
+          "id": 2,
+          "name": "D-Klasse Damen Einzel",
+          "typ": "SINGLE",
+          "category": "TT",
+          "startDate": "2030-04-02 08:00",
+          "status": "UNKN",
+          "lowLevel": 0,
+          "upperLevel": 1200,
+          "cttInfo": {
+            "ageGroup": "Damen",
+            "ratingRemark": "D-Klasse",
+            "ratingUpperLevel": 1200
+          },
+          "pants": [
+            {
+              "id": "[56]",
+              "name": "Arm, Lene",
+              "club": "MBB SG Motzen",
+              "rating": 1195,
+              "birthYear": "1976",
+              "status": "REGI",
+              "ident": "PLAYER56"
+            },
+            {
+              "id": "[57]",
+              "name": "Macchiato, Lotte",
+              "club": "TTC Phatt Island",
+              "rating": 1000,
+              "birthYear": "1962",
+              "status": "REGI",
+              "ident": "PLAYER57"
+            },
+            {
+              "id": "[58]",
+              "name": "Ten Platz, Liz",
+              "club": "TSV Jux",
+              "rating": 1020,
+              "birthYear": "1991",
+              "status": "REGI",
+              "ident": "PLAYER58"
+            },
+            {
+              "id": "[59]",
+              "name": "Fehr, Luzie",
+              "club": "1. SC Haarzopf",
+              "rating": 1172,
+              "birthYear": "1984",
+              "status": "REGI",
+              "ident": "PLAYER59"
+            },
+            {
+              "id": "[60]",
+              "name": "Quark, Marga",
+              "club": "SC Narnia",
+              "rating": 954,
+              "birthYear": "1980",
+              "status": "REGI",
+              "ident": "PLAYER60"
+            },
+            {
+              "id": "[61]",
+              "name": "Sport, Rita",
+              "club": "TSV WuChiChu",
+              "rating": 873,
+              "birthYear": "1995",
+              "status": "REGI",
+              "ident": "PLAYER61"
+            },
+            {
+              "id": "[62]",
+              "name": "Nist, Pia",
+              "club": "SV Buntekuh",
+              "rating": 1111,
+              "birthYear": "1984",
+              "status": "REGI",
+              "ident": "PLAYER62"
+            },
+            {
+              "id": "[63]",
+              "name": "Zeih, Polly",
+              "club": "SV Champhausen",
+              "rating": 1146,
+              "birthYear": "1966",
+              "status": "REGI",
+              "ident": "PLAYER63"
+            },
+            {
+              "id": "[64]",
+              "name": "Enzien, Ingrid",
+              "club": "TV Entenhausen",
+              "rating": 1003,
+              "birthYear": "1996",
+              "status": "REGI",
+              "ident": "PLAYER64"
+            },
+            {
+              "id": "[65]",
+              "name": "Tick, Joyce",
+              "club": "TSV WuChiChu",
+              "rating": 935,
+              "birthYear": "1995",
+              "status": "REGI",
+              "ident": "PLAYER65"
+            },
+            {
+              "id": "[66]",
+              "name": "Ass, Caro",
+              "club": "TSV Lederhose",
+              "rating": 826,
+              "birthYear": "1995",
+              "status": "REGI",
+              "ident": "PLAYER66"
+            },
+            {
+              "id": "[17]",
+              "name": "Brandenburg, Mark",
+              "club": "TSV WuChiChu",
+              "rating": 1877,
+              "birthYear": "1995",
+              "status": "REGI",
+              "ident": "PLAYER67"
+            },
+            {
+              "id": "[19]",
+              "name": "Hose, Lutz",
+              "club": "SG Hogsmeade",
+              "rating": 1729,
+              "birthYear": "1961",
+              "status": "REGI",
+              "ident": "PLAYER68"
+            },
+            {
+              "id": "[67]",
+              "name": "Manten, Claudia",
+              "club": "TSV WuChiChu",
+              "rating": 1009,
+              "birthYear": "1986",
+              "status": "REGI",
+              "ident": "PLAYER69"
+            },
+            {
+              "id": "[68]",
+              "name": "Grube, Claire",
+              "club": "SV Feucht",
+              "rating": 1331,
+              "birthYear": "1973",
+              "status": "REGI",
+              "ident": "PLAYER70"
+            },
+            {
+              "id": "[69]",
+              "name": "Fähre, Conny",
+              "club": "DJK SV Mückenloch",
+              "rating": 1169,
+              "birthYear": "1967",
+              "status": "REGI",
+              "ident": "PLAYER71"
+            },
+            {
+              "id": "[70]",
+              "name": "Schiert, Cora",
+              "club": "FT Vogelsang 1966",
+              "rating": 1084,
+              "birthYear": "1957",
+              "status": "REGI",
+              "ident": "PLAYER72"
+            },
+            {
+              "id": "[71]",
+              "name": "Kaemmerling, Thorsten",
+              "club": "TTC Garching",
+              "rating": 917,
+              "birthYear": "1982",
+              "status": "REGI",
+              "ident": "PLAYER73"
+            },
+            {
+              "id": "[72]",
+              "name": "Littchen, Donna",
+              "club": "TSV Posemuckl 1862",
+              "rating": 933,
+              "birthYear": "1995",
+              "status": "REGI",
+              "ident": "PLAYER74"
+            },
+            {
+              "id": "[73]",
+              "name": "Kette, Anka",
+              "club": "TSV Altenheim",
+              "rating": 1085,
+              "birthYear": "1965",
+              "status": "REGI",
+              "ident": "PLAYER75"
+            },
+            {
+              "id": "[74]",
+              "name": "Kern jun., Martin",
+              "club": "TSV Greding",
+              "rating": 1046,
+              "birthYear": "1992",
+              "status": "REGI",
+              "ident": "PLAYER76"
+            },
+            {
+              "id": "[75]",
+              "name": "Probe, Ann",
+              "club": "1. FC Katzenhirn",
+              "rating": 1145,
+              "birthYear": "1985",
+              "status": "REGI",
+              "ident": "PLAYER77"
+            },
+            {
+              "id": "[76]",
+              "name": "Nass, Anna",
+              "club": "TTC Kuhbier",
+              "rating": 1130,
+              "birthYear": "1962",
+              "status": "REGI",
+              "ident": "PLAYER78"
+            },
+            {
+              "id": "[77]",
+              "name": "Stoppel, Bart",
+              "club": "TSV Schlägerholz",
+              "rating": 1183,
+              "birthYear": "1973",
+              "status": "REGI",
+              "ident": "PLAYER79"
+            },
+            {
+              "id": "[78]",
+              "name": "Lldich, Bea",
+              "club": "MBB SG Motzen",
+              "rating": 1112,
+              "birthYear": "1986",
+              "status": "REGI",
+              "ident": "PLAYER80"
+            }
+          ],
+          "version": 1
+        },
+        {
+          "id": 3,
+          "name": "B-Klasse Damen Einzel",
+          "typ": "SINGLE",
+          "category": "TT",
+          "startDate": "2030-04-02 08:00",
+          "status": "UNKN",
+          "lowLevel": 1501,
+          "upperLevel": 1650,
+          "cttInfo": {
+            "ageGroup": "Damen",
+            "ratingRemark": "B-Klasse",
+            "ratingLowLevel": 1501,
+            "ratingUpperLevel": 1650
+          },
+          "pants": [
+            {
+              "id": "[79]",
+              "name": "Wetter, Donna",
+              "club": "TSV Hundeluft 65",
+              "rating": 1547,
+              "birthYear": "1992",
+              "status": "REGI",
+              "ident": "PLAYER81"
+            },
+            {
+              "id": "[80]",
+              "name": "Nut, Ella",
+              "club": "VfL Busenberg e.V.",
+              "rating": 1547,
+              "birthYear": "1963",
+              "status": "REGI",
+              "ident": "PLAYER82"
+            },
+            {
+              "id": "[81]",
+              "name": "Poly, Esther",
+              "club": "FC Lokomotive Berlin",
+              "rating": 1535,
+              "birthYear": "1995",
+              "status": "REGI",
+              "ident": "PLAYER83"
+            },
+            {
+              "id": "[82]",
+              "name": "Muhn, Hanni",
+              "club": "TSV Sommerloch",
+              "rating": 1649,
+              "birthYear": "1999",
+              "status": "REGI",
+              "ident": "PLAYER84"
+            },
+            {
+              "id": "[83]",
+              "name": "Fisch, Grete",
+              "club": "TTC Scheibenwelt",
+              "rating": 1618,
+              "birthYear": "1981",
+              "status": "REGI",
+              "ident": "PLAYER85"
+            },
+            {
+              "id": "[84]",
+              "name": "Ihr, Insa",
+              "club": "SC Pandora 64 e.V.",
+              "rating": 1534,
+              "birthYear": "1989",
+              "status": "REGI",
+              "ident": "PLAYER86"
+            },
+            {
+              "id": "[85]",
+              "name": "Sehr, Malte",
+              "club": "TV Entenhausen",
+              "rating": 1616,
+              "birthYear": "1964",
+              "status": "REGI",
+              "ident": "PLAYER87"
+            },
+            {
+              "id": "[86]",
+              "name": "Krissmes, Mary",
+              "club": "TSV Gammelshausen e.V.",
+              "rating": 1454,
+              "birthYear": "1978",
+              "status": "REGI",
+              "ident": "PLAYER88"
+            },
+            {
+              "id": "[86]",
+              "name": "Krissmes, Mary",
+              "club": "TSV Gammelshausen e.V.",
+              "rating": 1454,
+              "birthYear": "1978",
+              "status": "REGI",
+              "ident": "PLAYER89"
+            },
+            {
+              "id": "[56]",
+              "name": "Arm, Lene",
+              "club": "MBB SG Motzen",
+              "rating": 1195,
+              "birthYear": "1976",
+              "status": "REGI",
+              "ident": "PLAYER90"
+            },
+            {
+              "id": "[78]",
+              "name": "Lldich, Bea",
+              "club": "MBB SG Motzen",
+              "rating": 1112,
+              "birthYear": "1986",
+              "status": "REGI",
+              "ident": "PLAYER91"
+            }
+          ],
+          "version": 1
+        },
+        {
+          "id": 4,
+          "name": "S-Klasse Herren Doppel",
+          "typ": "DOUBLE",
+          "category": "TT",
+          "startDate": "2030-04-01 14:00",
+          "status": "UNKN",
+          "lowLevel": 1650,
+          "upperLevel": 3000,
+          "cttInfo": {
+            "ageGroup": "Herren",
+            "ratingRemark": "S-Klasse",
+            "ratingLowLevel": 1650,
+            "ratingUpperLevel": 3000
+          },
+          "pants": [
+            {
+              "id": "[1,2]",
+              "name": "Kahn / Tion",
+              "club": "TV Traktor Leipzig, TTC Torpedo Moskau",
+              "rating": 1819,
+              "status": "REGI",
+              "ident": "PLAYER92"
+            },
+            {
+              "id": "[3,4]",
+              "name": "Lette / ter Native",
+              "club": "TSV Rostocker Flammen, TSV Schatzinsel",
+              "rating": 1801,
+              "status": "REGI",
+              "ident": "PLAYER93"
+            },
+            {
+              "id": "[5,6]",
+              "name": "Herum / Platz",
+              "club": "FC Lokomotive Berlin, SpVgg Röhrmoos-Großinzemoos",
+              "rating": 1975,
+              "status": "REGI",
+              "ident": "PLAYER94"
+            },
+            {
+              "id": "[7,8]",
+              "name": "Bert / Mente",
+              "club": "FC Kiffen 08, VfR Netzroller",
+              "rating": 1881,
+              "status": "REGI",
+              "ident": "PLAYER95"
+            }
+          ],
+          "version": 1
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "clicktt": ""
+    }
+  },
+  "extraMeta": {
+    "startDate": "20300402",
+    "endDate": "20300401",
+    "ident": "",
+    "category": "TT",
+    "organizer": "TTC Freising 64",
+    "clicktt": ""
+  }
+}

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE tournament SYSTEM 'http://www.datenautomaten.nu/dtd/nuLiga/TournamentPortal.dtd'>
+<tournament end-date="2024-06-16" name="Nationale Deutsche Tischtennis-Meisterschaften 2024" start-date="2024-06-15" tournament-id="NDM_2024">
+     <!-- ================= WETTBEWERB: HERREN EINZEL ================= -->
+     <competition age-group="Herren" type="Einzel" start-date="2024-06-15 10:00" ttr-from="2000" ttr-to="3000" ttr-remarks="Deutsche Meisterschaften Herren Einzel">
+          <players>
+               <player id="SINGLE_M_GER24_QIU" type="single">
+                    <person firstname="Dang" lastname="Qiu" birthyear="1996" internal-nr="DTTB2024_GER24_QIU" licence-nr="10100124_01" sex="1" club-name="Borussia Düsseldorf" club-nr="101001" club-federation-nickname="WTTV" ttr="2520" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_M_GER24_OVT" type="single">
+                    <person firstname="Dimitrij" lastname="Ovtcharov" birthyear="1988" internal-nr="DTTB2024_GER24_OVT" licence-nr="10100224_02" sex="1" club-name="TTC Neu-Ulm" club-nr="101002" club-federation-nickname="DTTB" ttr="2540" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_M_GER24_FRA" type="single">
+                    <person firstname="Patrick" lastname="Franziska" birthyear="1992" internal-nr="DTTB2024_GER24_FRA" licence-nr="10100324_03" sex="1" club-name="1. FC Saarbrücken" club-nr="101003" club-federation-nickname="DTTB" ttr="2480" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_M_GER24_DUD" type="single">
+                    <person firstname="Benedikt" lastname="Duda" birthyear="1994" internal-nr="DTTB2024_GER24_DUD" licence-nr="10100424_04" sex="1" club-name="TTC Schwalbe Bergneustadt" club-nr="101004" club-federation-nickname="WTTV" ttr="2410" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_M_GER24_BOL" type="single">
+                    <person firstname="Timo" lastname="Boll" birthyear="1981" internal-nr="DTTB2024_GER24_BOL" licence-nr="10100124_05" sex="1" club-name="Borussia Düsseldorf" club-nr="101001" club-federation-nickname="WTTV" ttr="2450" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_M_GER24_WAL" type="single">
+                    <person firstname="Ricardo" lastname="Walther" birthyear="1991" internal-nr="DTTB2024_GER24_WAL" licence-nr="10100524_06" sex="1" club-name="ASV Grünwettersbach" club-nr="101005" club-federation-nickname="BaTTV" ttr="2380" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_M_GER24_MEI" type="single">
+                    <person firstname="Cedric" lastname="Meissner" birthyear="2000" internal-nr="DTTB2024_GER24_MEI" licence-nr="10100324_07" sex="1" club-name="1. FC Saarbrücken" club-nr="101003" club-federation-nickname="DTTB" ttr="2310" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_M_GER24_STU" type="single">
+                    <person firstname="Kay" lastname="Stumper" birthyear="2002" internal-nr="DTTB2024_GER24_STU" licence-nr="10100124_08" sex="1" club-name="Borussia Düsseldorf" club-nr="101001" club-federation-nickname="WTTV" ttr="2340" ttr-match-count="112"/>
+               </player>
+          </players>
+     </competition>
+
+     <!-- ================= WETTBEWERB: DAMEN EINZEL ================= -->
+     <competition age-group="Damen" type="Einzel" start-date="2024-06-15 11:30" ttr-from="1800" ttr-to="2800" ttr-remarks="Deutsche Meisterschaften Damen Einzel">
+          <players>
+               <player id="SINGLE_W_GER24_MIT" type="single">
+                    <person firstname="Nina" lastname="Mittelham" birthyear="1996" internal-nr="DTTB2024_GER24_MIT" licence-nr="20100224_01" sex="0" club-name="ttc berlin eastside" club-nr="201002" club-federation-nickname="BeTTV" ttr="2215" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_W_GER24_SHA" type="single">
+                    <person firstname="Shan" lastname="Xiaona" birthyear="1983" internal-nr="DTTB2024_GER24_SHA" licence-nr="20100224_02" sex="0" club-name="ttc berlin eastside" club-nr="201002" club-federation-nickname="BeTTV" ttr="2190" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_W_GER24_KAU" type="single">
+                    <person firstname="Annett" lastname="Kaufmann" birthyear="2006" internal-nr="DTTB2024_GER24_KAU" licence-nr="20100124_03" sex="0" club-name="SV DJK Kolbermoor" club-nr="201001" club-federation-nickname="ByTTV" ttr="2140" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_W_GER24_WIN" type="single">
+                    <person firstname="Sabine" lastname="Winter" birthyear="1992" internal-nr="DTTB2024_GER24_WIN" licence-nr="20100324_04" sex="0" club-name="TSV Langstadt" club-nr="201003" club-federation-nickname="HeTTV" ttr="2150" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_W_GER24_WAN" type="single">
+                    <person firstname="Yuan" lastname="Wan" birthyear="1997" internal-nr="DTTB2024_GER24_WAN" licence-nr="20100324_05" sex="0" club-name="TSV Langstadt" club-nr="201003" club-federation-nickname="HeTTV" ttr="2110" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_W_GER24_MAN" type="single">
+                    <person firstname="Chantal" lastname="Mantz" birthyear="1996" internal-nr="DTTB2024_GER24_MAN" licence-nr="20100324_06" sex="0" club-name="TSV Langstadt" club-nr="201003" club-federation-nickname="HeTTV" ttr="2080" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_W_GER24_SCH" type="single">
+                    <person firstname="Franziska" lastname="Schreiner" birthyear="2001" internal-nr="DTTB2024_GER24_SCH" licence-nr="20100324_07" sex="0" club-name="TSV Langstadt" club-nr="201003" club-federation-nickname="HeTTV" ttr="2020" ttr-match-count="112"/>
+               </player>
+               <player id="SINGLE_W_GER24_KLE" type="single">
+                    <person firstname="Sophia" lastname="Klee" birthyear="2003" internal-nr="DTTB2024_GER24_KLE" licence-nr="20100324_08" sex="0" club-name="TSV Langstadt" club-nr="201003" club-federation-nickname="HeTTV" ttr="2005" ttr-match-count="112"/>
+               </player>
+          </players>
+     </competition>
+
+     <!-- ================= WETTBEWERB: HERREN DOPPEL ================= -->
+     <competition age-group="Herren" type="Doppel" start-date="2024-06-16 09:30" ttr-from="2000" ttr-to="3000" ttr-remarks="Deutsche Meisterschaften Herren Doppel">
+          <players>
+               <player id="DOUBLE_M_GER24_QIU_GER24_BOL" type="double">
+                    <person firstname="Dang" lastname="Qiu" birthyear="1996" internal-nr="DTTB2024_GER24_QIU" licence-nr="10100124_02" sex="1" club-name="Borussia Düsseldorf" club-nr="101001" club-federation-nickname="WTTV" ttr="2520" ttr-match-count="112"/>
+                    <person firstname="Timo" lastname="Boll" birthyear="1981" internal-nr="DTTB2024_GER24_BOL" licence-nr="10100124_03" sex="1" club-name="Borussia Düsseldorf" club-nr="101001" club-federation-nickname="WTTV" ttr="2450" ttr-match-count="112"/>
+               </player>
+               <player id="DOUBLE_M_GER24_OVT_GER24_FRA" type="double">
+                    <person firstname="Dimitrij" lastname="Ovtcharov" birthyear="1988" internal-nr="DTTB2024_GER24_OVT" licence-nr="10100224_04" sex="1" club-name="TTC Neu-Ulm" club-nr="101002" club-federation-nickname="DTTB" ttr="2540" ttr-match-count="112"/>
+                    <person firstname="Patrick" lastname="Franziska" birthyear="1992" internal-nr="DTTB2024_GER24_FRA" licence-nr="10100324_05" sex="1" club-name="1. FC Saarbrücken" club-nr="101003" club-federation-nickname="DTTB" ttr="2480" ttr-match-count="112"/>
+               </player>
+               <player id="DOUBLE_M_GER24_DUD_GER24_WAL" type="double">
+                    <person firstname="Benedikt" lastname="Duda" birthyear="1994" internal-nr="DTTB2024_GER24_DUD" licence-nr="10100424_06" sex="1" club-name="TTC Schwalbe Bergneustadt" club-nr="101004" club-federation-nickname="WTTV" ttr="2410" ttr-match-count="112"/>
+                    <person firstname="Ricardo" lastname="Walther" birthyear="1991" internal-nr="DTTB2024_GER24_WAL" licence-nr="10100524_07" sex="1" club-name="ASV Grünwettersbach" club-nr="101005" club-federation-nickname="BaTTV" ttr="2380" ttr-match-count="112"/>
+               </player>
+               <player id="DOUBLE_M_GER24_MEI_GER24_STU" type="double">
+                    <person firstname="Cedric" lastname="Meissner" birthyear="2000" internal-nr="DTTB2024_GER24_MEI" licence-nr="10100324_08" sex="1" club-name="1. FC Saarbrücken" club-nr="101003" club-federation-nickname="DTTB" ttr="2310" ttr-match-count="112"/>
+                    <person firstname="Kay" lastname="Stumper" birthyear="2002" internal-nr="DTTB2024_GER24_STU" licence-nr="10100124_09" sex="1" club-name="Borussia Düsseldorf" club-nr="101001" club-federation-nickname="WTTV" ttr="2340" ttr-match-count="112"/>
+               </player>
+          </players>
+     </competition>
+
+     <!-- ================= WETTBEWERB: DAMEN DOPPEL ================= -->
+     <competition age-group="Damen" type="Doppel" start-date="2024-06-16 10:30" ttr-from="1800" ttr-to="2800" ttr-remarks="Deutsche Meisterschaften Damen Doppel">
+          <players>
+               <player id="DOUBLE_W_GER24_MIT_GER24_SHA" type="double">
+                    <person firstname="Nina" lastname="Mittelham" birthyear="1996" internal-nr="DTTB2024_GER24_MIT" licence-nr="20100224_02" sex="0" club-name="ttc berlin eastside" club-nr="201002" club-federation-nickname="BeTTV" ttr="2215" ttr-match-count="112"/>
+                    <person firstname="Shan" lastname="Xiaona" birthyear="1983" internal-nr="DTTB2024_GER24_SHA" licence-nr="20100224_03" sex="0" club-name="ttc berlin eastside" club-nr="201002" club-federation-nickname="BeTTV" ttr="2190" ttr-match-count="112"/>
+               </player>
+               <player id="DOUBLE_W_GER24_KAU_GER24_WIN" type="double">
+                    <person firstname="Annett" lastname="Kaufmann" birthyear="2006" internal-nr="DTTB2024_GER24_KAU" licence-nr="20100124_04" sex="0" club-name="SV DJK Kolbermoor" club-nr="201001" club-federation-nickname="ByTTV" ttr="2140" ttr-match-count="112"/>
+                    <person firstname="Sabine" lastname="Winter" birthyear="1992" internal-nr="DTTB2024_GER24_WIN" licence-nr="20100324_05" sex="0" club-name="TSV Langstadt" club-nr="201003" club-federation-nickname="HeTTV" ttr="2150" ttr-match-count="112"/>
+               </player>
+               <player id="DOUBLE_W_GER24_WAN_GER24_MAN" type="double">
+                    <person firstname="Yuan" lastname="Wan" birthyear="1997" internal-nr="DTTB2024_GER24_WAN" licence-nr="20100324_06" sex="0" club-name="TSV Langstadt" club-nr="201003" club-federation-nickname="HeTTV" ttr="2110" ttr-match-count="112"/>
+                    <person firstname="Chantal" lastname="Mantz" birthyear="1996" internal-nr="DTTB2024_GER24_MAN" licence-nr="20100324_07" sex="0" club-name="TSV Langstadt" club-nr="201003" club-federation-nickname="HeTTV" ttr="2080" ttr-match-count="112"/>
+               </player>
+               <player id="DOUBLE_W_GER24_SCH_GER24_KLE" type="double">
+                    <person firstname="Franziska" lastname="Schreiner" birthyear="2001" internal-nr="DTTB2024_GER24_SCH" licence-nr="20100324_08" sex="0" club-name="TSV Langstadt" club-nr="201003" club-federation-nickname="HeTTV" ttr="2020" ttr-match-count="112"/>
+                    <person firstname="Sophia" lastname="Klee" birthyear="2003" internal-nr="DTTB2024_GER24_KLE" licence-nr="20100324_09" sex="0" club-name="TSV Langstadt" club-nr="201003" club-federation-nickname="HeTTV" ttr="2005" ttr-match-count="112"/>
+               </player>
+          </players>
+     </competition>
+</tournament>

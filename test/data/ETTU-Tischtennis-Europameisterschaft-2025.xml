@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<tournament end-date="2025-10-19" name="ETTU Tischtennis-Europameisterschaft 2025" start-date="2025-10-12" tournament-id="ETC_2025">
+     <competition age-group="Herren" type="Einzel" start-date="2025-10-12 10:00" ttr-from="2300" ttr-to="3000" ttr-remarks="European Championships Singles Elite">
+          <players>
+               <player id="E_SINGLES_EUR_LEBRUN_F" type="single">
+                    <person firstname="Felix" lastname="Lebrun" birthyear="2006" internal-nr="ETTU2025_EUR_LEBRUN_F" licence-nr="FRA_2025_001" sex="1" club-name="Frankreich" club-nr="888FRA" club-federation-nickname="FRA" ttr="2610" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_LEBRUN_A" type="single">
+                    <person firstname="Alexis" lastname="Lebrun" birthyear="2003" internal-nr="ETTU2025_EUR_LEBRUN_A" licence-nr="FRA_2025_002" sex="1" club-name="Frankreich" club-nr="888FRA" club-federation-nickname="FRA" ttr="2520" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_GAUZY_S" type="single">
+                    <person firstname="Simon" lastname="Gauzy" birthyear="1994" internal-nr="ETTU2025_EUR_GAUZY_S" licence-nr="FRA_2025_003" sex="1" club-name="Frankreich" club-nr="888FRA" club-federation-nickname="FRA" ttr="2430" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_QIU_D" type="single">
+                    <person firstname="Dang" lastname="Qiu" birthyear="1996" internal-nr="ETTU2025_EUR_QIU_D" licence-nr="GER_2025_004" sex="1" club-name="Deutschland" club-nr="888GER" club-federation-nickname="GER" ttr="2510" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_OVT_D" type="single">
+                    <person firstname="Dimitrij" lastname="Ovtcharov" birthyear="1988" internal-nr="ETTU2025_EUR_OVT_D" licence-nr="GER_2025_005" sex="1" club-name="Deutschland" club-nr="888GER" club-federation-nickname="GER" ttr="2530" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_FRA_P" type="single">
+                    <person firstname="Patrick" lastname="Franziska" birthyear="1992" internal-nr="ETTU2025_EUR_FRA_P" licence-nr="GER_2025_006" sex="1" club-name="Deutschland" club-nr="888GER" club-federation-nickname="GER" ttr="2495" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_DUD_B" type="single">
+                    <person firstname="Benedikt" lastname="Duda" birthyear="1994" internal-nr="ETTU2025_EUR_DUD_B" licence-nr="GER_2025_007" sex="1" club-name="Deutschland" club-nr="888GER" club-federation-nickname="GER" ttr="2410" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_MORE_T" type="single">
+                    <person firstname="Truls" lastname="Möregårdh" birthyear="2002" internal-nr="ETTU2025_EUR_MORE_T" licence-nr="SWE_2025_008" sex="1" club-name="Schweden" club-nr="888SWE" club-federation-nickname="SWE" ttr="2550" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_KALL_A" type="single">
+                    <person firstname="Anton" lastname="Källberg" birthyear="1997" internal-nr="ETTU2025_EUR_KALL_A" licence-nr="SWE_2025_009" sex="1" club-name="Schweden" club-nr="888SWE" club-federation-nickname="SWE" ttr="2490" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_FALC_M" type="single">
+                    <person firstname="Mattias" lastname="Falck" birthyear="1991" internal-nr="ETTU2025_EUR_FALC_M" licence-nr="SWE_2025_010" sex="1" club-name="Schweden" club-nr="888SWE" club-federation-nickname="SWE" ttr="2450" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_KARL_K" type="single">
+                    <person firstname="Kristian" lastname="Karlsson" birthyear="1991" internal-nr="ETTU2025_EUR_KARL_K" licence-nr="SWE_2025_011" sex="1" club-name="Schweden" club-nr="888SWE" club-federation-nickname="SWE" ttr="2445" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_FREI_M" type="single">
+                    <person firstname="Marcos" lastname="Freitas" birthyear="1988" internal-nr="ETTU2025_EUR_FREI_M" licence-nr="POR_2025_012" sex="1" club-name="Portugal" club-nr="888POR" club-federation-nickname="POR" ttr="2460" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_APOL_T" type="single">
+                    <person firstname="Tiago" lastname="Apolonia" birthyear="1986" internal-nr="ETTU2025_EUR_APOL_T" licence-nr="POR_2025_013" sex="1" club-name="Portugal" club-nr="888POR" club-federation-nickname="POR" ttr="2390" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_JORG_D" type="single">
+                    <person firstname="Darko" lastname="Jorgic" birthyear="1998" internal-nr="ETTU2025_EUR_JORG_D" licence-nr="SLO_2025_014" sex="1" club-name="Slowenien" club-nr="888SLO" club-federation-nickname="SLO" ttr="2525" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_HABE_D" type="single">
+                    <person firstname="Daniel" lastname="Habesohn" birthyear="1986" internal-nr="ETTU2025_EUR_HABE_D" licence-nr="AUT_2025_015" sex="1" club-name="Österreich" club-nr="888AUT" club-federation-nickname="AUT" ttr="2385" ttr-match-count="185"/>
+               </player>
+               <player id="E_SINGLES_EUR_GROT_J" type="single">
+                    <person firstname="Jonathan" lastname="Groth" birthyear="1992" internal-nr="ETTU2025_EUR_GROT_J" licence-nr="DEN_2025_016" sex="1" club-name="Dänemark" club-nr="888DEN" club-federation-nickname="DEN" ttr="2440" ttr-match-count="185"/>
+               </player>
+          </players>
+     </competition>
+     <competition age-group="Herren" type="Doppel" start-date="2025-10-13 11:00" ttr-from="2300" ttr-to="3000" ttr-remarks="European Championships Doubles Elite">
+          <players>
+               <player id="E_DOUBLES_EUR_LEBRUN_F_EUR_LEBRUN_A" type="double">
+                    <person firstname="Felix" lastname="Lebrun" birthyear="2006" internal-nr="ETTU2025_EUR_LEBRUN_F" licence-nr="FRA_2025_001" sex="1" club-name="Frankreich" club-nr="888FRA" club-federation-nickname="FRA" ttr="2610" ttr-match-count="185"/>
+                    <person firstname="Alexis" lastname="Lebrun" birthyear="2003" internal-nr="ETTU2025_EUR_LEBRUN_A" licence-nr="FRA_2025_002" sex="1" club-name="Frankreich" club-nr="888FRA" club-federation-nickname="FRA" ttr="2520" ttr-match-count="185"/>
+               </player>
+               <player id="E_DOUBLES_EUR_QIU_D_EUR_DUD_B" type="double">
+                    <person firstname="Dang" lastname="Qiu" birthyear="1996" internal-nr="ETTU2025_EUR_QIU_D" licence-nr="GER_2025_004" sex="1" club-name="Deutschland" club-nr="888GER" club-federation-nickname="GER" ttr="2510" ttr-match-count="185"/>
+                    <person firstname="Benedikt" lastname="Duda" birthyear="1994" internal-nr="ETTU2025_EUR_DUD_B" licence-nr="GER_2025_007" sex="1" club-name="Deutschland" club-nr="888GER" club-federation-nickname="GER" ttr="2410" ttr-match-count="185"/>
+               </player>
+               <player id="E_DOUBLES_EUR_OVT_D_EUR_FRA_P" type="double">
+                    <person firstname="Dimitrij" lastname="Ovtcharov" birthyear="1988" internal-nr="ETTU2025_EUR_OVT_D" licence-nr="GER_2025_005" sex="1" club-name="Deutschland" club-nr="888GER" club-federation-nickname="GER" ttr="2530" ttr-match-count="185"/>
+                    <person firstname="Patrick" lastname="Franziska" birthyear="1992" internal-nr="ETTU2025_EUR_FRA_P" licence-nr="GER_2025_006" sex="1" club-name="Deutschland" club-nr="888GER" club-federation-nickname="GER" ttr="2495" ttr-match-count="185"/>
+               </player>
+               <player id="E_DOUBLES_EUR_MORE_T_EUR_KALL_A" type="double">
+                    <person firstname="Truls" lastname="Möregårdh" birthyear="2002" internal-nr="ETTU2025_EUR_MORE_T" licence-nr="SWE_2025_008" sex="1" club-name="Schweden" club-nr="888SWE" club-federation-nickname="SWE" ttr="2550" ttr-match-count="185"/>
+                    <person firstname="Anton" lastname="Källberg" birthyear="1997" internal-nr="ETTU2025_EUR_KALL_A" licence-nr="SWE_2025_009" sex="1" club-name="Schweden" club-nr="888SWE" club-federation-nickname="SWE" ttr="2490" ttr-match-count="185"/>
+               </player>
+               <player id="E_DOUBLES_EUR_FALC_M_EUR_KARL_K" type="double">
+                    <person firstname="Mattias" lastname="Falck" birthyear="1991" internal-nr="ETTU2025_EUR_FALC_M" licence-nr="SWE_2025_010" sex="1" club-name="Schweden" club-nr="888SWE" club-federation-nickname="SWE" ttr="2450" ttr-match-count="185"/>
+                    <person firstname="Kristian" lastname="Karlsson" birthyear="1991" internal-nr="ETTU2025_EUR_KARL_K" licence-nr="SWE_2025_011" sex="1" club-name="Schweden" club-nr="888SWE" club-federation-nickname="SWE" ttr="2445" ttr-match-count="185"/>
+               </player>
+               <player id="E_DOUBLES_EUR_FREI_M_EUR_APOL_T" type="double">
+                    <person firstname="Marcos" lastname="Freitas" birthyear="1988" internal-nr="ETTU2025_EUR_FREI_M" licence-nr="POR_2025_012" sex="1" club-name="Portugal" club-nr="888POR" club-federation-nickname="POR" ttr="2460" ttr-match-count="185"/>
+                    <person firstname="Tiago" lastname="Apolonia" birthyear="1986" internal-nr="ETTU2025_EUR_APOL_T" licence-nr="POR_2025_013" sex="1" club-name="Portugal" club-nr="888POR" club-federation-nickname="POR" ttr="2390" ttr-match-count="185"/>
+               </player>
+               <player id="E_DOUBLES_EUR_JORG_D_EUR_GROT_J" type="double">
+                    <person firstname="Darko" lastname="Jorgic" birthyear="1998" internal-nr="ETTU2025_EUR_JORG_D" licence-nr="SLO_2025_014" sex="1" club-name="Slowenien" club-nr="888SLO" club-federation-nickname="SLO" ttr="2525" ttr-match-count="185"/>
+                    <person firstname="Jonathan" lastname="Groth" birthyear="1992" internal-nr="ETTU2025_EUR_GROT_J" licence-nr="DEN_2025_016" sex="1" club-name="Dänemark" club-nr="888DEN" club-federation-nickname="DEN" ttr="2440" ttr-match-count="185"/>
+               </player>
+               <player id="E_DOUBLES_EUR_GAUZY_S_EUR_HABE_D" type="double">
+                    <person firstname="Simon" lastname="Gauzy" birthyear="1994" internal-nr="ETTU2025_EUR_GAUZY_S" licence-nr="FRA_2025_003" sex="1" club-name="Frankreich" club-nr="888FRA" club-federation-nickname="FRA" ttr="2430" ttr-match-count="185"/>
+                    <person firstname="Daniel" lastname="Habesohn" birthyear="1986" internal-nr="ETTU2025_EUR_HABE_D" licence-nr="AUT_2025_015" sex="1" club-name="Österreich" club-nr="888AUT" club-federation-nickname="AUT" ttr="2385" ttr-match-count="185"/>
+               </player>
+          </players>
+     </competition>
+</tournament>

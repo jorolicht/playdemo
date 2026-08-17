@@ -1,0 +1,12 @@
+<competition age-group="Herren" start-date="2030-04-01 12:00" ttr-from="1650" ttr-remarks="S-Klasse" ttr-to="3000" type="Einzel">              
+			  
+			  </player>
+               <player id="PLAYER55" type="single">
+                    <person birthyear="1963" club-federation-nickname="ByTTV" club-name="TTC Freising" club-nr="996013" firstname="Robert" internal-nr="NU9911290" lastname="Lichtenegger" licence-nr="991013324" sex="1" ttr="1234" ttr-match-count="17"/>
+               </player>
+               <player id="PLAYER56" type="single">
+                    <person birthyear="1969" club-federation-nickname="ByTTV" club-name="TTC Freising" club-nr="996013" firstname="Josef" internal-nr="NU9921290" lastname="Lichtenegger" licence-nr="992013324" sex="1" ttr="1234" ttr-match-count="17"/>
+               </player>
+               <player id="PLAYER57" type="single">
+                    <person birthyear="1958" club-federation-nickname="ByTTV" club-name="TTC Freising" club-nr="996013" firstname="Alfons" internal-nr="NU9931290" lastname="Lichtenegger" licence-nr="993013324" sex="1" ttr="1234" ttr-match-count="17"/>
+               </player>

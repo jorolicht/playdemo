@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE tournament SYSTEM 'http://www.datenautomaten.nu/dtd/nuLiga/TournamentPortal.dtd'>
+<tournament end-date="2025-12-14" name="Bayerische Meisterschaften der Jugend &amp; Schüler 2025" start-date="2025-12-13" tournament-id="BM_NACHWUCHS_2025">
+     <!-- ================= ALTERSKLASSE U11 ================= -->
+     <competition age-group="U11" type="Einzel" start-date="2025-12-13 09:00" ttr-from="0" ttr-to="2500" ttr-remarks="Bayerische Meisterschaft U11 Einzel">
+          <players>
+               <player id="BY_SINGLE_U11_HEIDEMANN" type="single">
+                    <person firstname="Felix" lastname="Heidemann" birthyear="2015" internal-nr="BTTV2025_U11_HEIDEMANN" licence-nr="103001001" sex="1" club-name="FC Bayern München" club-nr="103001" club-federation-nickname="ByTTV" ttr="1150" ttr-match-count="65"/>
+               </player>
+               <player id="BY_SINGLE_U11_BAUER" type="single">
+                    <person firstname="Tim" lastname="Bauer" birthyear="2016" internal-nr="BTTV2025_U11_BAUER" licence-nr="103010002" sex="1" club-name="TTC Fortuna Passau" club-nr="103010" club-federation-nickname="ByTTV" ttr="1080" ttr-match-count="65"/>
+               </player>
+               <player id="BY_SINGLE_U11_HANS" type="single">
+                    <person firstname="Lara" lastname="Hans" birthyear="2015" internal-nr="BTTV2025_U11_HANS" licence-nr="103009003" sex="0" club-name="SV Esting" club-nr="103009" club-federation-nickname="ByTTV" ttr="1020" ttr-match-count="65"/>
+               </player>
+               <player id="BY_SINGLE_U11_HAUTMANN" type="single">
+                    <person firstname="Marie" lastname="Hautmann" birthyear="2015" internal-nr="BTTV2025_U11_HAUTMANN" licence-nr="103004004" sex="0" club-name="SB Versbach" club-nr="103004" club-federation-nickname="ByTTV" ttr="980" ttr-match-count="65"/>
+               </player>
+          </players>
+     </competition>
+     <competition age-group="U11" type="Doppel" start-date="2025-12-14 10:00" ttr-from="0" ttr-to="2500" ttr-remarks="Bayerische Meisterschaft U11 Doppel">
+          <players>
+               <player id="BY_DOUBLE_U11_HEIDEMANN_U11_BAUER" type="double">
+                    <person firstname="Felix" lastname="Heidemann" birthyear="2015" internal-nr="BTTV2025_U11_HEIDEMANN" licence-nr="103001001" sex="1" club-name="FC Bayern München" club-nr="103001" club-federation-nickname="ByTTV" ttr="1150" ttr-match-count="65"/>
+                    <person firstname="Tim" lastname="Bauer" birthyear="2016" internal-nr="BTTV2025_U11_BAUER" licence-nr="103010002" sex="1" club-name="TTC Fortuna Passau" club-nr="103010" club-federation-nickname="ByTTV" ttr="1080" ttr-match-count="65"/>
+               </player>
+               <player id="BY_DOUBLE_U11_HANS_U11_HAUTMANN" type="double">
+                    <person firstname="Lara" lastname="Hans" birthyear="2015" internal-nr="BTTV2025_U11_HANS" licence-nr="103009003" sex="0" club-name="SV Esting" club-nr="103009" club-federation-nickname="ByTTV" ttr="1020" ttr-match-count="65"/>
+                    <person firstname="Marie" lastname="Hautmann" birthyear="2015" internal-nr="BTTV2025_U11_HAUTMANN" licence-nr="103004004" sex="0" club-name="SB Versbach" club-nr="103004" club-federation-nickname="ByTTV" ttr="980" ttr-match-count="65"/>
+               </player>
+          </players>
+     </competition>
+
+     <!-- ================= ALTERSKLASSE U13 ================= -->
+     <competition age-group="U13" type="Einzel" start-date="2025-12-13 09:00" ttr-from="0" ttr-to="2500" ttr-remarks="Bayerische Meisterschaft U13 Einzel">
+          <players>
+               <player id="BY_SINGLE_U13_ZUBER" type="single">
+                    <person firstname="Lennart" lastname="Zuber" birthyear="2013" internal-nr="BTTV2025_U13_ZUBER" licence-nr="103004001" sex="1" club-name="SB Versbach" club-nr="103004" club-federation-nickname="ByTTV" ttr="1450" ttr-match-count="65"/>
+               </player>
+               <player id="BY_SINGLE_U13_BORN" type="single">
+                    <person firstname="Milo" lastname="Born" birthyear="2013" internal-nr="BTTV2025_U13_BORN" licence-nr="103006002" sex="1" club-name="TSV Bad Königshofen" club-nr="103006" club-federation-nickname="ByTTV" ttr="1390" ttr-match-count="65"/>
+               </player>
+               <player id="BY_SINGLE_U13_SOMMER" type="single">
+                    <person firstname="Zoe-Loreen" lastname="Sommer" birthyear="2013" internal-nr="BTTV2025_U13_SOMMER" licence-nr="103003003" sex="0" club-name="TSV Milbertshofen" club-nr="103003" club-federation-nickname="ByTTV" ttr="1320" ttr-match-count="65"/>
+               </player>
+               <player id="BY_SINGLE_U13_ALBERTI" type="single">
+                    <person firstname="Maja" lastname="Alberti" birthyear="2014" internal-nr="BTTV2025_U13_ALBERTI" licence-nr="103008004" sex="0" club-name="TSV Gräfelfing" club-nr="103008" club-federation-nickname="ByTTV" ttr="1250" ttr-match-count="65"/>
+               </player>
+          </players>
+     </competition>
+     <competition age-group="U13" type="Doppel" start-date="2025-12-14 10:00" ttr-from="0" ttr-to="2500" ttr-remarks="Bayerische Meisterschaft U13 Doppel">
+          <players>
+               <player id="BY_DOUBLE_U13_ZUBER_U13_BORN" type="double">
+                    <person firstname="Lennart" lastname="Zuber" birthyear="2013" internal-nr="BTTV2025_U13_ZUBER" licence-nr="103004001" sex="1" club-name="SB Versbach" club-nr="103004" club-federation-nickname="ByTTV" ttr="1450" ttr-match-count="65"/>
+                    <person firstname="Milo" lastname="Born" birthyear="2013" internal-nr="BTTV2025_U13_BORN" licence-nr="103006002" sex="1" club-name="TSV Bad Königshofen" club-nr="103006" club-federation-nickname="ByTTV" ttr="1390" ttr-match-count="65"/>
+               </player>
+               <player id="BY_DOUBLE_U13_SOMMER_U13_ALBERTI" type="double">
+                    <person firstname="Zoe-Loreen" lastname="Sommer" birthyear="2013" internal-nr="BTTV2025_U13_SOMMER" licence-nr="103003003" sex="0" club-name="TSV Milbertshofen" club-nr="103003" club-federation-nickname="ByTTV" ttr="1320" ttr-match-count="65"/>
+                    <person firstname="Maja" lastname="Alberti" birthyear="2014" internal-nr="BTTV2025_U13_ALBERTI" licence-nr="103008004" sex="0" club-name="TSV Gräfelfing" club-nr="103008" club-federation-nickname="ByTTV" ttr="1250" ttr-match-count="65"/>
+               </player>
+          </players>
+     </competition>
+
+     <!-- ================= ALTERSKLASSE U15 ================= -->
+     <competition age-group="U15" type="Einzel" start-date="2025-12-13 09:00" ttr-from="0" ttr-to="2500" ttr-remarks="Bayerische Meisterschaft U15 Einzel">
+          <players>
+               <player id="BY_SINGLE_U15_KUHL" type="single">
+                    <person firstname="Samuel" lastname="Kuhl" birthyear="2011" internal-nr="BTTV2025_U15_KUHL" licence-nr="103003001" sex="1" club-name="TSV Milbertshofen" club-nr="103003" club-federation-nickname="ByTTV" ttr="1680" ttr-match-count="65"/>
+               </player>
+               <player id="BY_SINGLE_U15_RINDERER" type="single">
+                    <person firstname="Jonas" lastname="Rinderer" birthyear="2012" internal-nr="BTTV2025_U15_RINDERER" licence-nr="103005002" sex="1" club-name="TV Hilpoltstein" club-nr="103005" club-federation-nickname="ByTTV" ttr="1620" ttr-match-count="65"/>
+               </player>
+               <player id="BY_SINGLE_U15_LEDWOCH" type="single">
+                    <person firstname="Anna" lastname="Ledwoch" birthyear="2011" internal-nr="BTTV2025_U15_LEDWOCH" licence-nr="103002003" sex="0" club-name="SV DJK Kolbermoor" club-nr="103002" club-federation-nickname="ByTTV" ttr="1480" ttr-match-count="65"/>
+               </player>
+               <player id="BY_SINGLE_U15_SCHORR" type="single">
+                    <person firstname="Emilia" lastname="Schorr" birthyear="2011" internal-nr="BTTV2025_U15_SCHORR" licence-nr="103009004" sex="0" club-name="SV Esting" club-nr="103009" club-federation-nickname="ByTTV" ttr="1410" ttr-match-count="65"/>
+               </player>
+          </players>
+     </competition>
+     <competition age-group="U15" type="Doppel" start-date="2025-12-14 10:00" ttr-from="0" ttr-to="2500" ttr-remarks="Bayerische Meisterschaft U15 Doppel">
+          <players>
+               <player id="BY_DOUBLE_U15_KUHL_U15_RINDERER" type="double">
+                    <person firstname="Samuel" lastname="Kuhl" birthyear="2011" internal-nr="BTTV2025_U15_KUHL" licence-nr="103003001" sex="1" club-name="TSV Milbertshofen" club-nr="103003" club-federation-nickname="ByTTV" ttr="1680" ttr-match-count="65"/>
+                    <person firstname="Jonas" lastname="Rinderer" birthyear="2012" internal-nr="BTTV2025_U15_RINDERER" licence-nr="103005002" sex="1" club-name="TV Hilpoltstein" club-nr="103005" club-federation-nickname="ByTTV" ttr="1620" ttr-match-count="65"/>
+               </player>
+               <player id="BY_DOUBLE_U15_LEDWOCH_U15_SCHORR" type="double">
+                    <person firstname="Anna" lastname="Ledwoch" birthyear="2011" internal-nr="BTTV2025_U15_LEDWOCH" licence-nr="103002003" sex="0" club-name="SV DJK Kolbermoor" club-nr="103002" club-federation-nickname="ByTTV" ttr="1480" ttr-match-count="65"/>
+                    <person firstname="Emilia" lastname="Schorr" birthyear="2011" internal-nr="BTTV2025_U15_SCHORR" licence-nr="103009004" sex="0" club-name="SV Esting" club-nr="103009" club-federation-nickname="ByTTV" ttr="1410" ttr-match-count="65"/>
+               </player>
+          </players>
+     </competition>
+
+     <!-- ================= ALTERSKLASSE U19 ================= -->
+     <competition age-group="U19" type="Einzel" start-date="2025-12-13 09:00" ttr-from="0" ttr-to="2500" ttr-remarks="Bayerische Meisterschaft U19 Einzel">
+          <players>
+               <player id="BY_SINGLE_U19_KRAUS" type="single">
+                    <person firstname="Luis" lastname="Kraus" birthyear="2007" internal-nr="BTTV2025_U19_KRAUS" licence-nr="103002001" sex="1" club-name="SV DJK Kolbermoor" club-nr="103002" club-federation-nickname="ByTTV" ttr="1950" ttr-match-count="65"/>
+               </player>
+               <player id="BY_SINGLE_U19_SCHWEIGER" type="single">
+                    <person firstname="Tom" lastname="Schweiger" birthyear="2007" internal-nr="BTTV2025_U19_SCHWEIGER" licence-nr="103001002" sex="1" club-name="FC Bayern München" club-nr="103001" club-federation-nickname="ByTTV" ttr="2010" ttr-match-count="65"/>
+               </player>
+               <player id="BY_SINGLE_U19_ITAGAKI" type="single">
+                    <person firstname="Koharu" lastname="Itagaki" birthyear="2010" internal-nr="BTTV2025_U19_ITAGAKI" licence-nr="103002003" sex="0" club-name="SV DJK Kolbermoor" club-nr="103002" club-federation-nickname="ByTTV" ttr="1920" ttr-match-count="65"/>
+               </player>
+               <player id="BY_SINGLE_U19_FALTERMAIER" type="single">
+                    <person firstname="Theresa" lastname="Faltermaier" birthyear="2008" internal-nr="BTTV2025_U19_FALTERMAIER" licence-nr="103008004" sex="0" club-name="TSV Gräfelfing" club-nr="103008" club-federation-nickname="ByTTV" ttr="1710" ttr-match-count="65"/>
+               </player>
+          </players>
+     </competition>
+     <competition age-group="U19" type="Doppel" start-date="2025-12-14 10:00" ttr-from="0" ttr-to="2500" ttr-remarks="Bayerische Meisterschaft U19 Doppel">
+          <players>
+               <player id="BY_DOUBLE_U19_KRAUS_U19_SCHWEIGER" type="double">
+                    <person firstname="Luis" lastname="Kraus" birthyear="2007" internal-nr="BTTV2025_U19_KRAUS" licence-nr="103002001" sex="1" club-name="SV DJK Kolbermoor" club-nr="103002" club-federation-nickname="ByTTV" ttr="1950" ttr-match-count="65"/>
+                    <person firstname="Tom" lastname="Schweiger" birthyear="2007" internal-nr="BTTV2025_U19_SCHWEIGER" licence-nr="103001002" sex="1" club-name="FC Bayern München" club-nr="103001" club-federation-nickname="ByTTV" ttr="2010" ttr-match-count="65"/>
+               </player>
+               <player id="BY_DOUBLE_U19_ITAGAKI_U19_FALTERMAIER" type="double">
+                    <person firstname="Koharu" lastname="Itagaki" birthyear="2010" internal-nr="BTTV2025_U19_ITAGAKI" licence-nr="103002003" sex="0" club-name="SV DJK Kolbermoor" club-nr="103002" club-federation-nickname="ByTTV" ttr="1920" ttr-match-count="65"/>
+                    <person firstname="Theresa" lastname="Faltermaier" birthyear="2008" internal-nr="BTTV2025_U19_FALTERMAIER" licence-nr="103008004" sex="0" club-name="TSV Gräfelfing" club-nr="103008" club-federation-nickname="ByTTV" ttr="1710" ttr-match-count="65"/>
+               </player>
+          </players>
+     </competition>
+</tournament>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE tournament SYSTEM 'http://www.datenautomaten.nu/dtd/nuLiga/TournamentPortal.dtd'>
+<tournament end-date="2024-02-25" name="ITTF Tischtennisweltmeisterschaft 2024" start-date="2024-02-16" tournament-id="WTTC_2024">
+     <!-- 1. WETTBEWERB: HERREN EINZEL -->
+     <competition age-group="Herren" type="Einzel" start-date="2024-02-16 10:00" ttr-from="2300" ttr-to="3000" ttr-remarks="WTTC 2024 Men Singles Elite">
+          <players>
+               <player id="M_SINGLE_CHN_WANG_C" type="single">
+                    <person firstname="Chuqin" lastname="Wang" birthyear="2000" internal-nr="ITTF2024_CHN_WANG_C" licence-nr="CHN_2024_001" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2660" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_CHN_FAN_Z" type="single">
+                    <person firstname="Zhendong" lastname="Fan" birthyear="1997" internal-nr="ITTF2024_CHN_FAN_Z" licence-nr="CHN_2024_002" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2650" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_CHN_MA_L" type="single">
+                    <person firstname="Long" lastname="Ma" birthyear="1988" internal-nr="ITTF2024_CHN_MA_L" licence-nr="CHN_2024_003" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2610" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_FRA_LEBRUN_F" type="single">
+                    <person firstname="Felix" lastname="Lebrun" birthyear="2006" internal-nr="ITTF2024_FRA_LEBRUN_F" licence-nr="FRA_2024_004" sex="1" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2590" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_FRA_LEBRUN_A" type="single">
+                    <person firstname="Alexis" lastname="Lebrun" birthyear="2003" internal-nr="ITTF2024_FRA_LEBRUN_A" licence-nr="FRA_2024_005" sex="1" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2510" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_GER_QIU_D" type="single">
+                    <person firstname="Dang" lastname="Qiu" birthyear="1996" internal-nr="ITTF2024_GER_QIU_D" licence-nr="GER_2024_006" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2520" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_GER_OVT_D" type="single">
+                    <person firstname="Dimitrij" lastname="Ovtcharov" birthyear="1988" internal-nr="ITTF2024_GER_OVT_D" licence-nr="GER_2024_007" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2540" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_GER_FRA_P" type="single">
+                    <person firstname="Patrick" lastname="Franziska" birthyear="1992" internal-nr="ITTF2024_GER_FRA_P" licence-nr="GER_2024_008" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2480" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_JPN_HARI_T" type="single">
+                    <person firstname="Tomokazu" lastname="Harimoto" birthyear="2003" internal-nr="ITTF2024_JPN_HARI_T" licence-nr="JPN_2024_009" sex="1" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2560" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_JPN_TOGA_S" type="single">
+                    <person firstname="Shunsuke" lastname="Togami" birthyear="2001" internal-nr="ITTF2024_JPN_TOGA_S" licence-nr="JPN_2024_010" sex="1" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2470" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_SWE_MORE_T" type="single">
+                    <person firstname="Truls" lastname="Möregårdh" birthyear="2002" internal-nr="ITTF2024_SWE_MORE_T" licence-nr="SWE_2024_011" sex="1" club-name="Schweden" club-nr="999SWE" club-federation-nickname="SWE" ttr="2530" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_SWE_KALL_A" type="single">
+                    <person firstname="Anton" lastname="Källberg" birthyear="1997" internal-nr="ITTF2024_SWE_KALL_A" licence-nr="SWE_2024_012" sex="1" club-name="Schweden" club-nr="999SWE" club-federation-nickname="SWE" ttr="2495" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_BRA_CALD_H" type="single">
+                    <person firstname="Hugo" lastname="Calderano" birthyear="1996" internal-nr="ITTF2024_BRA_CALD_H" licence-nr="BRA_2024_013" sex="1" club-name="Brasilien" club-nr="999BRA" club-federation-nickname="BRA" ttr="2580" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_KOR_JANG_W" type="single">
+                    <person firstname="Woojin" lastname="Jang" birthyear="1995" internal-nr="ITTF2024_KOR_JANG_W" licence-nr="KOR_2024_014" sex="1" club-name="Südkorea" club-nr="999KOR" club-federation-nickname="KOR" ttr="2490" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_KOR_LIM_J" type="single">
+                    <person firstname="Jonghoon" lastname="Lim" birthyear="1997" internal-nr="ITTF2024_KOR_LIM_J" licence-nr="KOR_2024_015" sex="1" club-name="Südkorea" club-nr="999KOR" club-federation-nickname="KOR" ttr="2465" ttr-match-count="195"/>
+               </player>
+               <player id="M_SINGLE_SLO_JORG_D" type="single">
+                    <person firstname="Darko" lastname="Jorgic" birthyear="1998" internal-nr="ITTF2024_SLO_JORG_D" licence-nr="SLO_2024_016" sex="1" club-name="Slowenien" club-nr="999SLO" club-federation-nickname="SLO" ttr="2515" ttr-match-count="195"/>
+               </player>
+          </players>
+     </competition>
+     <!-- 2. WETTBEWERB: DAMEN EINZEL -->
+     <competition age-group="Damen" type="Einzel" start-date="2024-02-16 13:00" ttr-from="2000" ttr-to="3000" ttr-remarks="WTTC 2024 Women Singles Elite">
+          <players>
+               <player id="W_SINGLE_CHN_SUN_Y" type="single">
+                    <person firstname="Yingsha" lastname="Sun" birthyear="2000" internal-nr="ITTF2024_CHN_SUN_Y" licence-nr="CHN_2024_017" sex="0" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2620" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_CHN_WANG_M" type="single">
+                    <person firstname="Manyu" lastname="Wang" birthyear="1999" internal-nr="ITTF2024_CHN_WANG_M" licence-nr="CHN_2024_018" sex="0" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2570" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_CHN_CHEN_M" type="single">
+                    <person firstname="Meng" lastname="Chen" birthyear="1994" internal-nr="ITTF2024_CHN_CHEN_M" licence-nr="CHN_2024_019" sex="0" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2590" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_JPN_HAYA_H" type="single">
+                    <person firstname="Hina" lastname="Hayata" birthyear="2000" internal-nr="ITTF2024_JPN_HAYA_H" licence-nr="JPN_2024_020" sex="0" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2460" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_JPN_ITO_M" type="single">
+                    <person firstname="Mima" lastname="Ito" birthyear="2000" internal-nr="ITTF2024_JPN_ITO_M" licence-nr="JPN_2024_021" sex="0" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2420" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_JPN_HARI_M" type="single">
+                    <person firstname="Miwa" lastname="Harimoto" birthyear="2008" internal-nr="ITTF2024_JPN_HARI_M" licence-nr="JPN_2024_022" sex="0" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2410" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_KOR_SHIN_Y" type="single">
+                    <person firstname="Shin" lastname="Yubin" birthyear="2004" internal-nr="ITTF2024_KOR_SHIN_Y" licence-nr="KOR_2024_023" sex="0" club-name="Südkorea" club-nr="999KOR" club-federation-nickname="KOR" ttr="2380" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_KOR_JEON_J" type="single">
+                    <person firstname="Jeon" lastname="Jihee" birthyear="1992" internal-nr="ITTF2024_KOR_JEON_J" licence-nr="KOR_2024_024" sex="0" club-name="Südkorea" club-nr="999KOR" club-federation-nickname="KOR" ttr="2340" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_GER_MIT_N" type="single">
+                    <person firstname="Nina" lastname="Mittelham" birthyear="1996" internal-nr="ITTF2024_GER_MIT_N" licence-nr="GER_2024_025" sex="0" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2215" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_GER_SHA_X" type="single">
+                    <person firstname="Shan" lastname="Xiaona" birthyear="1983" internal-nr="ITTF2024_GER_SHA_X" licence-nr="GER_2024_026" sex="0" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2190" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_GER_KAU_A" type="single">
+                    <person firstname="Annett" lastname="Kaufmann" birthyear="2006" internal-nr="ITTF2024_GER_KAU_A" licence-nr="GER_2024_027" sex="0" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2140" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_ROU_SZOC_B" type="single">
+                    <person firstname="Bernadette" lastname="Szőcs" birthyear="1995" internal-nr="ITTF2024_ROU_SZOC_B" licence-nr="ROU_2024_028" sex="0" club-name="Rumänien" club-nr="999ROU" club-federation-nickname="ROU" ttr="2320" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_ROU_SAMA_E" type="single">
+                    <person firstname="Elizabeta" lastname="Samara" birthyear="1989" internal-nr="ITTF2024_ROU_SAMA_E" licence-nr="ROU_2024_029" sex="0" club-name="Rumänien" club-nr="999ROU" club-federation-nickname="ROU" ttr="2210" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_AUT_POLC_S" type="single">
+                    <person firstname="Sofia" lastname="Polcanova" birthyear="1994" internal-nr="ITTF2024_AUT_POLC_S" licence-nr="AUT_2024_030" sex="0" club-name="Österreich" club-nr="999AUT" club-federation-nickname="AUT" ttr="2280" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_FRA_YUAN_J" type="single">
+                    <person firstname="Jia Nan" lastname="Yuan" birthyear="1985" internal-nr="ITTF2024_FRA_YUAN_J" licence-nr="FRA_2024_031" sex="0" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2295" ttr-match-count="195"/>
+               </player>
+               <player id="W_SINGLE_FRA_PAVA_P" type="single">
+                    <person firstname="Prithika" lastname="Pavade" birthyear="2004" internal-nr="ITTF2024_FRA_PAVA_P" licence-nr="FRA_2024_032" sex="0" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2260" ttr-match-count="195"/>
+               </player>
+          </players>
+     </competition>
+     <!-- 3. WETTBEWERB: HERREN DOPPEL -->
+     <competition age-group="Herren" type="Doppel" start-date="2024-02-17 09:00" ttr-from="2300" ttr-to="3000" ttr-remarks="WTTC 2024 Men Doubles Elite">
+          <players>
+               <player id="M_DOUBLE_CHN_WANG_C_CHN_FAN_Z" type="double">
+                    <person firstname="Chuqin" lastname="Wang" birthyear="2000" internal-nr="ITTF2024_CHN_WANG_C" licence-nr="CHN_2024_001" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2660" ttr-match-count="195"/>
+                    <person firstname="Zhendong" lastname="Fan" birthyear="1997" internal-nr="ITTF2024_CHN_FAN_Z" licence-nr="CHN_2024_002" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2650" ttr-match-count="195"/>
+               </player>
+               <player id="M_DOUBLE_FRA_LEBRUN_F_FRA_LEBRUN_A" type="double">
+                    <person firstname="Felix" lastname="Lebrun" birthyear="2006" internal-nr="ITTF2024_FRA_LEBRUN_F" licence-nr="FRA_2024_004" sex="1" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2590" ttr-match-count="195"/>
+                    <person firstname="Alexis" lastname="Lebrun" birthyear="2003" internal-nr="ITTF2024_FRA_LEBRUN_A" licence-nr="FRA_2024_005" sex="1" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2510" ttr-match-count="195"/>
+               </player>
+               <player id="M_DOUBLE_GER_QIU_D_GER_FRA_P" type="double">
+                    <person firstname="Dang" lastname="Qiu" birthyear="1996" internal-nr="ITTF2024_GER_QIU_D" licence-nr="GER_2024_006" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2520" ttr-match-count="195"/>
+                    <person firstname="Patrick" lastname="Franziska" birthyear="1992" internal-nr="ITTF2024_GER_FRA_P" licence-nr="GER_2024_008" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2480" ttr-match-count="195"/>
+               </player>
+               <player id="M_DOUBLE_JPN_HARI_T_JPN_TOGA_S" type="double">
+                    <person firstname="Tomokazu" lastname="Harimoto" birthyear="2003" internal-nr="ITTF2024_JPN_HARI_T" licence-nr="JPN_2024_009" sex="1" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2560" ttr-match-count="195"/>
+                    <person firstname="Shunsuke" lastname="Togami" birthyear="2001" internal-nr="ITTF2024_JPN_TOGA_S" licence-nr="JPN_2024_010" sex="1" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2470" ttr-match-count="195"/>
+               </player>
+               <player id="M_DOUBLE_SWE_MORE_T_SWE_KALL_A" type="double">
+                    <person firstname="Truls" lastname="Möregårdh" birthyear="2002" internal-nr="ITTF2024_SWE_MORE_T" licence-nr="SWE_2024_011" sex="1" club-name="Schweden" club-nr="999SWE" club-federation-nickname="SWE" ttr="2530" ttr-match-count="195"/>
+                    <person firstname="Anton" lastname="Källberg" birthyear="1997" internal-nr="ITTF2024_SWE_KALL_A" licence-nr="SWE_2024_012" sex="1" club-name="Schweden" club-nr="999SWE" club-federation-nickname="SWE" ttr="2495" ttr-match-count="195"/>
+               </player>
+               <player id="M_DOUBLE_KOR_JANG_W_KOR_LIM_J" type="double">
+                    <person firstname="Woojin" lastname="Jang" birthyear="1995" internal-nr="ITTF2024_KOR_JANG_W" licence-nr="KOR_2024_014" sex="1" club-name="Südkorea" club-nr="999KOR" club-federation-nickname="KOR" ttr="2490" ttr-match-count="195"/>
+                    <person firstname="Jonghoon" lastname="Lim" birthyear="1997" internal-nr="ITTF2024_KOR_LIM_J" licence-nr="KOR_2024_015" sex="1" club-name="Südkorea" club-nr="999KOR" club-federation-nickname="KOR" ttr="2465" ttr-match-count="195"/>
+               </player>
+               <player id="M_DOUBLE_CHN_MA_L_SLO_JORG_D" type="double">
+                    <person firstname="Long" lastname="Ma" birthyear="1988" internal-nr="ITTF2024_CHN_MA_L" licence-nr="CHN_2024_003" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2610" ttr-match-count="195"/>
+                    <person firstname="Darko" lastname="Jorgic" birthyear="1998" internal-nr="ITTF2024_SLO_JORG_D" licence-nr="SLO_2024_016" sex="1" club-name="Slowenien" club-nr="999SLO" club-federation-nickname="SLO" ttr="2515" ttr-match-count="195"/>
+               </player>
+               <player id="M_DOUBLE_GER_OVT_D_BRA_CALD_H" type="double">
+                    <person firstname="Dimitrij" lastname="Ovtcharov" birthyear="1988" internal-nr="ITTF2024_GER_OVT_D" licence-nr="GER_2024_007" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2540" ttr-match-count="195"/>
+                    <person firstname="Hugo" lastname="Calderano" birthyear="1996" internal-nr="ITTF2024_BRA_CALD_H" licence-nr="BRA_2024_013" sex="1" club-name="Brasilien" club-nr="999BRA" club-federation-nickname="BRA" ttr="2580" ttr-match-count="195"/>
+               </player>
+          </players>
+     </competition>
+     <!-- 4. WETTBEWERB: DAMEN DOPPEL -->
+     <competition age-group="Damen" type="Doppel" start-date="2024-02-17 14:00" ttr-from="2000" ttr-to="3000" ttr-remarks="WTTC 2024 Women Doubles Elite">
+          <players>
+               <player id="W_DOUBLE_CHN_SUN_Y_CHN_WANG_M" type="double">
+                    <person firstname="Yingsha" lastname="Sun" birthyear="2000" internal-nr="ITTF2024_CHN_SUN_Y" licence-nr="CHN_2024_017" sex="0" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2620" ttr-match-count="195"/>
+                    <person firstname="Manyu" lastname="Wang" birthyear="1999" internal-nr="ITTF2024_CHN_WANG_M" licence-nr="CHN_2024_018" sex="0" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2570" ttr-match-count="195"/>
+               </player>
+               <player id="W_DOUBLE_JPN_HAYA_H_JPN_HARI_M" type="double">
+                    <person firstname="Hina" lastname="Hayata" birthyear="2000" internal-nr="ITTF2024_JPN_HAYA_H" licence-nr="JPN_2024_020" sex="0" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2460" ttr-match-count="195"/>
+                    <person firstname="Miwa" lastname="Harimoto" birthyear="2008" internal-nr="ITTF2024_JPN_HARI_M" licence-nr="JPN_2024_022" sex="0" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2410" ttr-match-count="195"/>
+               </player>
+               <player id="W_DOUBLE_KOR_SHIN_Y_KOR_JEON_J" type="double">
+                    <person firstname="Shin" lastname="Yubin" birthyear="2004" internal-nr="ITTF2024_KOR_SHIN_Y" licence-nr="KOR_2024_023" sex="0" club-name="Südkorea" club-nr="999KOR" club-federation-nickname="KOR" ttr="2380" ttr-match-count="195"/>
+                    <person firstname="Jeon" lastname="Jihee" birthyear="1992" internal-nr="ITTF2024_KOR_JEON_J" licence-nr="KOR_2024_024" sex="0" club-name="Südkorea" club-nr="999KOR" club-federation-nickname="KOR" ttr="2340" ttr-match-count="195"/>
+               </player>
+               <player id="W_DOUBLE_GER_MIT_N_GER_SHA_X" type="double">
+                    <person firstname="Nina" lastname="Mittelham" birthyear="1996" internal-nr="ITTF2024_GER_MIT_N" licence-nr="GER_2024_025" sex="0" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2215" ttr-match-count="195"/>
+                    <person firstname="Shan" lastname="Xiaona" birthyear="1983" internal-nr="ITTF2024_GER_SHA_X" licence-nr="GER_2024_026" sex="0" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2190" ttr-match-count="195"/>
+               </player>
+               <player id="W_DOUBLE_ROU_SZOC_B_AUT_POLC_S" type="double">
+                    <person firstname="Bernadette" lastname="Szőcs" birthyear="1995" internal-nr="ITTF2024_ROU_SZOC_B" licence-nr="ROU_2024_028" sex="0" club-name="Rumänien" club-nr="999ROU" club-federation-nickname="ROU" ttr="2320" ttr-match-count="195"/>
+                    <person firstname="Sofia" lastname="Polcanova" birthyear="1994" internal-nr="ITTF2024_AUT_POLC_S" licence-nr="AUT_2024_030" sex="0" club-name="Österreich" club-nr="999AUT" club-federation-nickname="AUT" ttr="2280" ttr-match-count="195"/>
+               </player>
+               <player id="W_DOUBLE_FRA_YUAN_J_FRA_PAVA_P" type="double">
+                    <person firstname="Jia Nan" lastname="Yuan" birthyear="1985" internal-nr="ITTF2024_FRA_YUAN_J" licence-nr="FRA_2024_031" sex="0" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2295" ttr-match-count="195"/>
+                    <person firstname="Prithika" lastname="Pavade" birthyear="2004" internal-nr="ITTF2024_FRA_PAVA_P" licence-nr="FRA_2024_032" sex="0" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2260" ttr-match-count="195"/>
+               </player>
+               <player id="W_DOUBLE_CHN_CHEN_M_ROU_SAMA_E" type="double">
+                    <person firstname="Meng" lastname="Chen" birthyear="1994" internal-nr="ITTF2024_CHN_CHEN_M" licence-nr="CHN_2024_019" sex="0" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2590" ttr-match-count="195"/>
+                    <person firstname="Elizabeta" lastname="Samara" birthyear="1989" internal-nr="ITTF2024_ROU_SAMA_E" licence-nr="ROU_2024_029" sex="0" club-name="Rumänien" club-nr="999ROU" club-federation-nickname="ROU" ttr="2210" ttr-match-count="195"/>
+               </player>
+               <player id="W_DOUBLE_JPN_ITO_M_GER_KAU_A" type="double">
+                    <person firstname="Mima" lastname="Ito" birthyear="2000" internal-nr="ITTF2024_JPN_ITO_M" licence-nr="JPN_2024_021" sex="0" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2420" ttr-match-count="195"/>
+                    <person firstname="Annett" lastname="Kaufmann" birthyear="2006" internal-nr="ITTF2024_GER_KAU_A" licence-nr="GER_2024_027" sex="0" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2140" ttr-match-count="195"/>
+               </player>
+          </players>
+     </competition>
+</tournament>

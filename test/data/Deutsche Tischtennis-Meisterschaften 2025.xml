@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE tournament SYSTEM 'http://www.datenautomaten.nu/dtd/nuLiga/TournamentPortal.dtd'>
+<tournament end-date="2025-06-15" name="Deutsche Tischtennis-Meisterschaften 2025" start-date="2025-06-13" tournament-id="DTTM_2025">
+     <competition age-group="Herren" type="Einzel" start-date="2025-06-13 10:00" ttr-from="2200" ttr-to="3000" ttr-remarks="Nationale Elite">
+          <players>
+               <player id="PLAY_SINGLE_QIU" type="single">
+                    <person firstname="Dang" lastname="Qiu" birthyear="1996" internal-nr="NU2025M001" licence-nr="101001001" sex="1" club-name="Borussia Düsseldorf" club-nr="101001" club-federation-nickname="DTTB" ttr="2510" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_OVT" type="single">
+                    <person firstname="Dimitrij" lastname="Ovtcharov" birthyear="1988" internal-nr="NU2025M002" licence-nr="101002002" sex="1" club-name="TTC Neu-Ulm" club-nr="101002" club-federation-nickname="DTTB" ttr="2530" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_FRA" type="single">
+                    <person firstname="Patrick" lastname="Franziska" birthyear="1992" internal-nr="NU2025M003" licence-nr="101003003" sex="1" club-name="1. FC Saarbrücken" club-nr="101003" club-federation-nickname="DTTB" ttr="2495" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_DUD" type="single">
+                    <person firstname="Benedikt" lastname="Duda" birthyear="1994" internal-nr="NU2025M004" licence-nr="101004004" sex="1" club-name="TTC Schwalbe Bergneustadt" club-nr="101004" club-federation-nickname="DTTB" ttr="2410" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_BOL" type="single">
+                    <person firstname="Timo" lastname="Boll" birthyear="1981" internal-nr="NU2025M005" licence-nr="101001005" sex="1" club-name="Borussia Düsseldorf" club-nr="101001" club-federation-nickname="DTTB" ttr="2450" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_WAL" type="single">
+                    <person firstname="Ricardo" lastname="Walther" birthyear="1991" internal-nr="NU2025M006" licence-nr="101005006" sex="1" club-name="ASV Grünwettersbach" club-nr="101005" club-federation-nickname="DTTB" ttr="2380" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_FIL" type="single">
+                    <person firstname="Ruwen" lastname="Filus" birthyear="1988" internal-nr="NU2025M007" licence-nr="101006007" sex="1" club-name="TTC RhönSprudel Fulda-Maberzell" club-nr="101006" club-federation-nickname="DTTB" ttr="2350" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_MEN" type="single">
+                    <person firstname="Steffen" lastname="Mengel" birthyear="1988" internal-nr="NU2025M008" licence-nr="101007008" sex="1" club-name="Post SV Mühlhausen" club-nr="101007" club-federation-nickname="DTTB" ttr="2365" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_MEI" type="single">
+                    <person firstname="Cedric" lastname="Meissner" birthyear="2000" internal-nr="NU2025M009" licence-nr="101003009" sex="1" club-name="1. FC Saarbrücken" club-nr="101003" club-federation-nickname="DTTB" ttr="2310" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_STU" type="single">
+                    <person firstname="Kay" lastname="Stumper" birthyear="2002" internal-nr="NU2025M010" licence-nr="101001010" sex="1" club-name="Borussia Düsseldorf" club-nr="101001" club-federation-nickname="DTTB" ttr="2340" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_FAN" type="single">
+                    <person firstname="An Bo" lastname="Fan" birthyear="1998" internal-nr="NU2025M011" licence-nr="101006011" sex="1" club-name="TTC RhönSprudel Fulda-Maberzell" club-nr="101006" club-federation-nickname="DTTB" ttr="2290" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_HIP" type="single">
+                    <person firstname="Tobias" lastname="Hippler" birthyear="1999" internal-nr="NU2025M012" licence-nr="101008012" sex="1" club-name="1. FC Köln" club-nr="101008" club-federation-nickname="DTTB" ttr="2275" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_OEH" type="single">
+                    <person firstname="Benno" lastname="Oehme" birthyear="2000" internal-nr="NU2025M013" licence-nr="101009013" sex="1" club-name="TTC OE Bad Homburg" club-nr="101009" club-federation-nickname="DTTB" ttr="2250" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_FAD" type="single">
+                    <person firstname="Kirill" lastname="Fadeev" birthyear="2001" internal-nr="NU2025M014" licence-nr="101010014" sex="1" club-name="BVB Dortmund" club-nr="101010" club-federation-nickname="DTTB" ttr="2240" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_BER" type="single">
+                    <person firstname="Andre" lastname="Bertelsmeier" birthyear="2005" internal-nr="NU2025M015" licence-nr="101009015" sex="1" club-name="TTC OE Bad Homburg" club-nr="101009" club-federation-nickname="DTTB" ttr="2280" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_SINGLE_VER" type="single">
+                    <person firstname="Wim" lastname="Verdonschot" birthyear="2005" internal-nr="NU2025M016" licence-nr="101004016" sex="1" club-name="TTC Schwalbe Bergneustadt" club-nr="101004" club-federation-nickname="DTTB" ttr="2230" ttr-match-count="142"/>
+               </player>
+          </players>
+     </competition>
+     <competition age-group="Herren" type="Doppel" start-date="2025-06-14 09:00" ttr-from="2200" ttr-to="3000" ttr-remarks="Nationale Elite Doppel">
+          <players>
+               <player id="PLAY_DOUBLE_QIU_BOL" type="double">
+                    <person firstname="Dang" lastname="Qiu" birthyear="1996" internal-nr="NU2025M001" licence-nr="101001001" sex="1" club-name="Borussia Düsseldorf" club-nr="101001" club-federation-nickname="DTTB" ttr="2510" ttr-match-count="142"/>
+                    <person firstname="Timo" lastname="Boll" birthyear="1981" internal-nr="NU2025M005" licence-nr="101001005" sex="1" club-name="Borussia Düsseldorf" club-nr="101001" club-federation-nickname="DTTB" ttr="2450" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_DOUBLE_OVT_FRA" type="double">
+                    <person firstname="Dimitrij" lastname="Ovtcharov" birthyear="1988" internal-nr="NU2025M002" licence-nr="101002002" sex="1" club-name="TTC Neu-Ulm" club-nr="101002" club-federation-nickname="DTTB" ttr="2530" ttr-match-count="142"/>
+                    <person firstname="Patrick" lastname="Franziska" birthyear="1992" internal-nr="NU2025M003" licence-nr="101003003" sex="1" club-name="1. FC Saarbrücken" club-nr="101003" club-federation-nickname="DTTB" ttr="2495" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_DOUBLE_DUD_WAL" type="double">
+                    <person firstname="Benedikt" lastname="Duda" birthyear="1994" internal-nr="NU2025M004" licence-nr="101004004" sex="1" club-name="TTC Schwalbe Bergneustadt" club-nr="101004" club-federation-nickname="DTTB" ttr="2410" ttr-match-count="142"/>
+                    <person firstname="Ricardo" lastname="Walther" birthyear="1991" internal-nr="NU2025M006" licence-nr="101005006" sex="1" club-name="ASV Grünwettersbach" club-nr="101005" club-federation-nickname="DTTB" ttr="2380" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_DOUBLE_FIL_MEN" type="double">
+                    <person firstname="Ruwen" lastname="Filus" birthyear="1988" internal-nr="NU2025M007" licence-nr="101006007" sex="1" club-name="TTC RhönSprudel Fulda-Maberzell" club-nr="101006" club-federation-nickname="DTTB" ttr="2350" ttr-match-count="142"/>
+                    <person firstname="Steffen" lastname="Mengel" birthyear="1988" internal-nr="NU2025M008" licence-nr="101007008" sex="1" club-name="Post SV Mühlhausen" club-nr="101007" club-federation-nickname="DTTB" ttr="2365" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_DOUBLE_MEI_STU" type="double">
+                    <person firstname="Cedric" lastname="Meissner" birthyear="2000" internal-nr="NU2025M009" licence-nr="101003009" sex="1" club-name="1. FC Saarbrücken" club-nr="101003" club-federation-nickname="DTTB" ttr="2310" ttr-match-count="142"/>
+                    <person firstname="Kay" lastname="Stumper" birthyear="2002" internal-nr="NU2025M010" licence-nr="101001010" sex="1" club-name="Borussia Düsseldorf" club-nr="101001" club-federation-nickname="DTTB" ttr="2340" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_DOUBLE_FAN_HIP" type="double">
+                    <person firstname="An Bo" lastname="Fan" birthyear="1998" internal-nr="NU2025M011" licence-nr="101006011" sex="1" club-name="TTC RhönSprudel Fulda-Maberzell" club-nr="101006" club-federation-nickname="DTTB" ttr="2290" ttr-match-count="142"/>
+                    <person firstname="Tobias" lastname="Hippler" birthyear="1999" internal-nr="NU2025M012" licence-nr="101008012" sex="1" club-name="1. FC Köln" club-nr="101008" club-federation-nickname="DTTB" ttr="2275" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_DOUBLE_OEH_FAD" type="double">
+                    <person firstname="Benno" lastname="Oehme" birthyear="2000" internal-nr="NU2025M013" licence-nr="101009013" sex="1" club-name="TTC OE Bad Homburg" club-nr="101009" club-federation-nickname="DTTB" ttr="2250" ttr-match-count="142"/>
+                    <person firstname="Kirill" lastname="Fadeev" birthyear="2001" internal-nr="NU2025M014" licence-nr="101010014" sex="1" club-name="BVB Dortmund" club-nr="101010" club-federation-nickname="DTTB" ttr="2240" ttr-match-count="142"/>
+               </player>
+               <player id="PLAY_DOUBLE_BER_VER" type="double">
+                    <person firstname="Andre" lastname="Bertelsmeier" birthyear="2005" internal-nr="NU2025M015" licence-nr="101009015" sex="1" club-name="TTC OE Bad Homburg" club-nr="101009" club-federation-nickname="DTTB" ttr="2280" ttr-match-count="142"/>
+                    <person firstname="Wim" lastname="Verdonschot" birthyear="2005" internal-nr="NU2025M016" licence-nr="101004016" sex="1" club-name="TTC Schwalbe Bergneustadt" club-nr="101004" club-federation-nickname="DTTB" ttr="2230" ttr-match-count="142"/>
+               </player>
+          </players>
+     </competition>
+</tournament>

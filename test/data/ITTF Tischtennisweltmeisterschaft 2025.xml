@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE tournament SYSTEM 'http://www.datenautomaten.nu/dtd/nuLiga/TournamentPortal.dtd'>
+<tournament end-date="2025-05-25" name="ITTF Tischtennisweltmeisterschaft 2025" start-date="2025-05-17" tournament-id="WTTC_2025">
+     <competition age-group="Herren" type="Einzel" start-date="2025-05-17 09:00" ttr-from="2300" ttr-to="3000" ttr-remarks="World Championship Singles Elite">
+          <players>
+               <player id="W_SINGLES_CHN_WANG_C" type="single">
+                    <person firstname="Chuqin" lastname="Wang" birthyear="2000" internal-nr="ITTF2025_CHN_WANG_C" licence-nr="CHN_2025_001" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2650" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_CHN_FAN_Z" type="single">
+                    <person firstname="Zhendong" lastname="Fan" birthyear="1997" internal-nr="ITTF2025_CHN_FAN_Z" licence-nr="CHN_2025_002" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2640" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_CHN_LIN_G" type="single">
+                    <person firstname="Gaoyuan" lastname="Lin" birthyear="1995" internal-nr="ITTF2025_CHN_LIN_G" licence-nr="CHN_2025_003" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2580" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_CHN_LIN_S" type="single">
+                    <person firstname="Shidong" lastname="Lin" birthyear="2005" internal-nr="ITTF2025_CHN_LIN_S" licence-nr="CHN_2025_004" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2620" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_CHN_MA_L" type="single">
+                    <person firstname="Long" lastname="Ma" birthyear="1988" internal-nr="ITTF2025_CHN_MA_L" licence-nr="CHN_2025_005" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2600" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_CHN_LIANG_J" type="single">
+                    <person firstname="Jingkun" lastname="Liang" birthyear="1996" internal-nr="ITTF2025_CHN_LIANG_J" licence-nr="CHN_2025_006" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2590" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_FRA_LEBRUN_F" type="single">
+                    <person firstname="Felix" lastname="Lebrun" birthyear="2006" internal-nr="ITTF2025_FRA_LEBRUN_F" licence-nr="FRA_2025_007" sex="1" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2610" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_FRA_LEBRUN_A" type="single">
+                    <person firstname="Alexis" lastname="Lebrun" birthyear="2003" internal-nr="ITTF2025_FRA_LEBRUN_A" licence-nr="FRA_2025_008" sex="1" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2520" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_FRA_GAUZY_S" type="single">
+                    <person firstname="Simon" lastname="Gauzy" birthyear="1994" internal-nr="ITTF2025_FRA_GAUZY_S" licence-nr="FRA_2025_009" sex="1" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2430" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_FRA_ROLL_J" type="single">
+                    <person firstname="Jules" lastname="Rolland" birthyear="2000" internal-nr="ITTF2025_FRA_ROLL_J" licence-nr="FRA_2025_010" sex="1" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2350" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_GER_QIU_D" type="single">
+                    <person firstname="Dang" lastname="Qiu" birthyear="1996" internal-nr="ITTF2025_GER_QIU_D" licence-nr="GER_2025_011" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2510" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_GER_OVT_D" type="single">
+                    <person firstname="Dimitrij" lastname="Ovtcharov" birthyear="1988" internal-nr="ITTF2025_GER_OVT_D" licence-nr="GER_2025_012" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2530" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_GER_FRA_P" type="single">
+                    <person firstname="Patrick" lastname="Franziska" birthyear="1992" internal-nr="ITTF2025_GER_FRA_P" licence-nr="GER_2025_013" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2495" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_GER_DUD_B" type="single">
+                    <person firstname="Benedikt" lastname="Duda" birthyear="1994" internal-nr="ITTF2025_GER_DUD_B" licence-nr="GER_2025_014" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2410" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_JPN_HARI_T" type="single">
+                    <person firstname="Tomokazu" lastname="Harimoto" birthyear="2003" internal-nr="ITTF2025_JPN_HARI_T" licence-nr="JPN_2025_015" sex="1" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2570" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_JPN_TOGA_S" type="single">
+                    <person firstname="Shunsuke" lastname="Togami" birthyear="2001" internal-nr="ITTF2025_JPN_TOGA_S" licence-nr="JPN_2025_016" sex="1" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2480" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_JPN_SHIN_H" type="single">
+                    <person firstname="Hiroto" lastname="Shinozuka" birthyear="2003" internal-nr="ITTF2025_JPN_SHIN_H" licence-nr="JPN_2025_017" sex="1" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2440" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_JPN_MATS_S" type="single">
+                    <person firstname="Sora" lastname="Matsushima" birthyear="2007" internal-nr="ITTF2025_JPN_MATS_S" licence-nr="JPN_2025_018" sex="1" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2410" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_SWE_MORE_T" type="single">
+                    <person firstname="Truls" lastname="Möregårdh" birthyear="2002" internal-nr="ITTF2025_SWE_MORE_T" licence-nr="SWE_2025_019" sex="1" club-name="Schweden" club-nr="999SWE" club-federation-nickname="SWE" ttr="2550" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_SWE_KALL_A" type="single">
+                    <person firstname="Anton" lastname="Källberg" birthyear="1997" internal-nr="ITTF2025_SWE_KALL_A" licence-nr="SWE_2025_020" sex="1" club-name="Schweden" club-nr="999SWE" club-federation-nickname="SWE" ttr="2490" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_SWE_FALC_M" type="single">
+                    <person firstname="Mattias" lastname="Falck" birthyear="1991" internal-nr="ITTF2025_SWE_FALC_M" licence-nr="SWE_2025_021" sex="1" club-name="Schweden" club-nr="999SWE" club-federation-nickname="SWE" ttr="2450" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_SWE_KARL_K" type="single">
+                    <person firstname="Kristian" lastname="Karlsson" birthyear="1991" internal-nr="ITTF2025_SWE_KARL_K" licence-nr="SWE_2025_022" sex="1" club-name="Schweden" club-nr="999SWE" club-federation-nickname="SWE" ttr="2445" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_KOR_JANG_W" type="single">
+                    <person firstname="Woojin" lastname="Jang" birthyear="1995" internal-nr="ITTF2025_KOR_JANG_W" licence-nr="KOR_2025_023" sex="1" club-name="Südkorea" club-nr="999KOR" club-federation-nickname="KOR" ttr="2505" ttr-match-count="210"/>
+               </player>
+               <player id="W_SINGLES_BRA_CALD_H" type="single">
+                    <person firstname="Hugo" lastname="Calderano" birthyear="1996" internal-nr="ITTF2025_BRA_CALD_H" licence-nr="BRA_2025_024" sex="1" club-name="Brasilien" club-nr="999BRA" club-federation-nickname="BRA" ttr="2595" ttr-match-count="210"/>
+               </player>
+          </players>
+     </competition>
+     <competition age-group="Herren" type="Doppel" start-date="2025-05-18 10:00" ttr-from="2300" ttr-to="3000" ttr-remarks="World Championship Doubles Elite">
+          <players>
+               <player id="W_DOUBLES_CHN_WANG_C_CHN_LIN_S" type="double">
+                    <person firstname="Chuqin" lastname="Wang" birthyear="2000" internal-nr="ITTF2025_CHN_WANG_C" licence-nr="CHN_2025_001" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2650" ttr-match-count="210"/>
+                    <person firstname="Shidong" lastname="Lin" birthyear="2005" internal-nr="ITTF2025_CHN_LIN_S" licence-nr="CHN_2025_004" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2620" ttr-match-count="210"/>
+               </player>
+               <player id="W_DOUBLES_CHN_FAN_Z_CHN_MA_L" type="double">
+                    <person firstname="Zhendong" lastname="Fan" birthyear="1997" internal-nr="ITTF2025_CHN_FAN_Z" licence-nr="CHN_2025_002" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2640" ttr-match-count="210"/>
+                    <person firstname="Long" lastname="Ma" birthyear="1988" internal-nr="ITTF2025_CHN_MA_L" licence-nr="CHN_2025_005" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2600" ttr-match-count="210"/>
+               </player>
+               <player id="W_DOUBLES_FRA_LEBRUN_F_FRA_LEBRUN_A" type="double">
+                    <person firstname="Felix" lastname="Lebrun" birthyear="2006" internal-nr="ITTF2025_FRA_LEBRUN_F" licence-nr="FRA_2025_007" sex="1" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2610" ttr-match-count="210"/>
+                    <person firstname="Alexis" lastname="Lebrun" birthyear="2003" internal-nr="ITTF2025_FRA_LEBRUN_A" licence-nr="FRA_2025_008" sex="1" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2520" ttr-match-count="210"/>
+               </player>
+               <player id="W_DOUBLES_GER_QIU_D_GER_DUD_B" type="double">
+                    <person firstname="Dang" lastname="Qiu" birthyear="1996" internal-nr="ITTF2025_GER_QIU_D" licence-nr="GER_2025_011" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2510" ttr-match-count="210"/>
+                    <person firstname="Benedikt" lastname="Duda" birthyear="1994" internal-nr="ITTF2025_GER_DUD_B" licence-nr="GER_2025_014" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2410" ttr-match-count="210"/>
+               </player>
+               <player id="W_DOUBLES_GER_OVT_D_GER_FRA_P" type="double">
+                    <person firstname="Dimitrij" lastname="Ovtcharov" birthyear="1988" internal-nr="ITTF2025_GER_OVT_D" licence-nr="GER_2025_012" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2530" ttr-match-count="210"/>
+                    <person firstname="Patrick" lastname="Franziska" birthyear="1992" internal-nr="ITTF2025_GER_FRA_P" licence-nr="GER_2025_013" sex="1" club-name="Deutschland" club-nr="999GER" club-federation-nickname="GER" ttr="2495" ttr-match-count="210"/>
+               </player>
+               <player id="W_DOUBLES_JPN_HARI_T_JPN_MATS_S" type="double">
+                    <person firstname="Tomokazu" lastname="Harimoto" birthyear="2003" internal-nr="ITTF2025_JPN_HARI_T" licence-nr="JPN_2025_015" sex="1" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2570" ttr-match-count="210"/>
+                    <person firstname="Sora" lastname="Matsushima" birthyear="2007" internal-nr="ITTF2025_JPN_MATS_S" licence-nr="JPN_2025_018" sex="1" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2410" ttr-match-count="210"/>
+               </player>
+               <player id="W_DOUBLES_JPN_TOGA_S_JPN_SHIN_H" type="double">
+                    <person firstname="Shunsuke" lastname="Togami" birthyear="2001" internal-nr="ITTF2025_JPN_TOGA_S" licence-nr="JPN_2025_016" sex="1" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2480" ttr-match-count="210"/>
+                    <person firstname="Hiroto" lastname="Shinozuka" birthyear="2003" internal-nr="ITTF2025_JPN_SHIN_H" licence-nr="JPN_2025_017" sex="1" club-name="Japan" club-nr="999JPN" club-federation-nickname="JPN" ttr="2440" ttr-match-count="210"/>
+               </player>
+               <player id="W_DOUBLES_SWE_MORE_T_SWE_KALL_A" type="double">
+                    <person firstname="Truls" lastname="Möregårdh" birthyear="2002" internal-nr="ITTF2025_SWE_MORE_T" licence-nr="SWE_2025_019" sex="1" club-name="Schweden" club-nr="999SWE" club-federation-nickname="SWE" ttr="2550" ttr-match-count="210"/>
+                    <person firstname="Anton" lastname="Källberg" birthyear="1997" internal-nr="ITTF2025_SWE_KALL_A" licence-nr="SWE_2025_020" sex="1" club-name="Schweden" club-nr="999SWE" club-federation-nickname="SWE" ttr="2490" ttr-match-count="210"/>
+               </player>
+               <player id="W_DOUBLES_SWE_FALC_M_SWE_KARL_K" type="double">
+                    <person firstname="Mattias" lastname="Falck" birthyear="1991" internal-nr="ITTF2025_SWE_FALC_M" licence-nr="SWE_2025_021" sex="1" club-name="Schweden" club-nr="999SWE" club-federation-nickname="SWE" ttr="2450" ttr-match-count="210"/>
+                    <person firstname="Kristian" lastname="Karlsson" birthyear="1991" internal-nr="ITTF2025_SWE_KARL_K" licence-nr="SWE_2025_022" sex="1" club-name="Schweden" club-nr="999SWE" club-federation-nickname="SWE" ttr="2445" ttr-match-count="210"/>
+               </player>
+               <player id="W_DOUBLES_CHN_LIANG_J_CHN_LIN_G" type="double">
+                    <person firstname="Jingkun" lastname="Liang" birthyear="1996" internal-nr="ITTF2025_CHN_LIANG_J" licence-nr="CHN_2025_006" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2590" ttr-match-count="210"/>
+                    <person firstname="Gaoyuan" lastname="Lin" birthyear="1995" internal-nr="ITTF2025_CHN_LIN_G" licence-nr="CHN_2025_003" sex="1" club-name="China" club-nr="999CHN" club-federation-nickname="CHN" ttr="2580" ttr-match-count="210"/>
+               </player>
+               <player id="W_DOUBLES_FRA_GAUZY_S_FRA_ROLL_J" type="double">
+                    <person firstname="Simon" lastname="Gauzy" birthyear="1994" internal-nr="ITTF2025_FRA_GAUZY_S" licence-nr="FRA_2025_009" sex="1" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2430" ttr-match-count="210"/>
+                    <person firstname="Jules" lastname="Rolland" birthyear="2000" internal-nr="ITTF2025_FRA_ROLL_J" licence-nr="FRA_2025_010" sex="1" club-name="Frankreich" club-nr="999FRA" club-federation-nickname="FRA" ttr="2350" ttr-match-count="210"/>
+               </player>
+               <player id="W_DOUBLES_KOR_JANG_W_BRA_CALD_H" type="double">
+                    <person firstname="Woojin" lastname="Jang" birthyear="1995" internal-nr="ITTF2025_KOR_JANG_W" licence-nr="KOR_2025_023" sex="1" club-name="Südkorea" club-nr="999KOR" club-federation-nickname="KOR" ttr="2505" ttr-match-count="210"/>
+                    <person firstname="Hugo" lastname="Calderano" birthyear="1996" internal-nr="ITTF2025_BRA_CALD_H" licence-nr="BRA_2025_024" sex="1" club-name="Brasilien" club-nr="999BRA" club-federation-nickname="BRA" ttr="2595" ttr-match-count="210"/>
+               </player>
+          </players>
+     </competition>
+</tournament>
