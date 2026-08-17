@@ -8,7 +8,7 @@
 
 <div class="container mt-4 mb-5">
     <div class="row justify-content-center">
-        <div class="col-lg-10">
+        <div class="col-lg-11">
             <!-- Header Card -->
             <div class="card shadow-lg border-0 mb-4">
                 <div class="card-header bg-dark text-white d-flex align-items-center justify-content-between py-3">
@@ -22,16 +22,128 @@
                 </div>
                 <div class="card-body p-4">
                     <p class="text-muted mb-0 fs-5">
-                        Willkommen im Administrations- und Management-Bereich. Hier finden Sie System-Informationen, Benutzerverwaltung und globale Konfigurationseinstellungen.
+                        Willkommen im Administrations- und Management-Bereich. Hier können Sie Benutzer verwalten, verfügbare Turnierguthaben anpassen und System-Informationen einsehen.
                     </p>
                 </div>
             </div>
 
+            <!-- User Management Section (User Verwaltung) -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white py-3 d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-people-fill me-2"></i>User Verwaltung / User Management</h5>
+                    <span class="badge bg-light text-primary fw-bold">Benutzer & Guthaben</span>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Status Notification Alert -->
+                    <div id="mgmt-status-alert" class="alert alert-success d-none mb-4 shadow-sm" role="alert">
+                        <span id="mgmt-status-text"></span>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Left Column: Search & Select User -->
+                        <div class="col-lg-5 border-end">
+                            <h6 class="fw-bold mb-3 text-secondary"><i class="bi bi-search me-1"></i>Benutzer Suchen</h6>
+                            <div class="input-group mb-3">
+                                <input type="text" id="mgmt-user-search-input" class="form-control" placeholder="Name, E-Mail oder ID..." aria-label="Benutzer suchen">
+                                <button @id(BtnSearchUser, "onclick") class="btn btn-primary" type="button">
+                                    <i class="bi bi-search me-1"></i>Suchen
+                                </button>
+                            </div>
+                            <div class="form-text text-muted mb-3">Leeres Suchfeld zeigt alle Benutzer an.</div>
+
+                            <!-- Found Users Select / List -->
+                            <h6 class="fw-bold mb-2 text-secondary"><i class="bi bi-list-ul me-1"></i>Suchergebnisse</h6>
+                            <div id="mgmt-users-list-container" class="list-group mb-3 overflow-auto" style="max-height: 350px;">
+                                <div class="text-muted small p-3 text-center bg-light rounded border">
+                                    <i class="bi bi-info-circle me-1"></i>Klicken Sie auf "Suchen", um Benutzer zu laden.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: UserProfile Details & Edit -->
+                        <div class="col-lg-7">
+                            <div id="mgmt-user-details-placeholder" class="text-center py-5 text-muted">
+                                <i class="bi bi-person-bounding-box display-4 d-block mb-3 opacity-50"></i>
+                                <h5>Kein Benutzer ausgewählt</h5>
+                                <p class="small">Wählen Sie links einen Benutzer aus, um dessen UserProfile und Guthaben einzusehen und zu bearbeiten.</p>
+                            </div>
+
+                            <div id="mgmt-user-details-card" class="d-none">
+                                <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                                    <div>
+                                        <h5 class="fw-bold mb-0 text-primary" id="mgmt-selected-username">-</h5>
+                                        <div class="text-muted small" id="mgmt-selected-email">-</div>
+                                    </div>
+                                    <span class="badge bg-secondary" id="mgmt-selected-roles">-</span>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="bg-light p-3 rounded border">
+                                            <label for="mgmt-available-input" class="form-label fw-bold text-dark mb-1">
+                                                <i class="bi bi-trophy-fill text-warning me-1"></i>Verfügbare Turniere (available):
+                                            </label>
+                                            <div class="input-group mb-2">
+                                                <button @id(BtnDecAvailable, "onclick") class="btn btn-outline-secondary" type="button">-1</button>
+                                                <input type="number" min="0" id="mgmt-available-input" class="form-control text-center fw-bold fs-5" value="0">
+                                                <button @id(BtnIncAvailable, "onclick") class="btn btn-outline-secondary" type="button">+1</button>
+                                            </div>
+                                            <div class="d-flex gap-1 justify-content-center">
+                                                <button @id(BtnAdd5Available, "onclick") class="btn btn-sm btn-outline-primary">+5</button>
+                                                <button @id(BtnAdd10Available, "onclick") class="btn btn-sm btn-outline-primary">+10</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="bg-light p-3 rounded border h-100 d-flex flex-column justify-content-between">
+                                            <div>
+                                                <label for="mgmt-executed-input" class="form-label fw-bold text-dark mb-1">
+                                                    <i class="bi bi-check-circle-fill text-success me-1"></i>Durchgeführte Turniere (executed):
+                                                </label>
+                                                <input type="number" min="0" id="mgmt-executed-input" class="form-control text-center fw-bold fs-5" value="0">
+                                            </div>
+                                            <div class="text-muted small mt-2">
+                                                Anzahl der vom Benutzer bereits erstellten/durchgeführten Turniere.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Save Profile Button -->
+                                <div class="d-grid mb-4">
+                                    <button @id(BtnSaveUserProfile, "onclick") class="btn btn-success btn-lg fw-bold shadow-sm">
+                                        <i class="bi bi-save me-2"></i>UserProfile Speichern / Guthaben Aktualisieren
+                                    </button>
+                                </div>
+
+                                <!-- Purchase History Table -->
+                                <h6 class="fw-bold mb-2 text-secondary"><i class="bi bi-receipt me-1"></i>Kaufhistorie (history)</h6>
+                                <div id="mgmt-history-container" class="table-responsive">
+                                    <table class="table table-sm table-striped border align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Datum (yyyymmddhhmm)</th>
+                                                <th class="text-center">Anzahl</th>
+                                                <th class="text-end">Preis (€)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="mgmt-history-tbody">
+                                            <tr><td colspan="3" class="text-muted small text-center">Keine Käufe vorhanden.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Existing System & Admin Overview Cards -->
             <div class="row g-4">
                 <!-- User Account Info Card -->
                 <div class="col-md-6">
                     <div class="card shadow-sm border-0 h-100">
-                        <div class="card-header bg-primary text-white py-3">
+                        <div class="card-header bg-secondary text-white py-3">
                             <h5 class="mb-0 fw-bold"><i class="bi bi-person-badge me-2"></i>Administrator Profil</h5>
                         </div>
                         <div class="card-body p-4">
@@ -66,7 +178,7 @@
                 <!-- System Info Card -->
                 <div class="col-md-6">
                     <div class="card shadow-sm border-0 h-100">
-                        <div class="card-header bg-secondary text-white py-3">
+                        <div class="card-header bg-dark text-white py-3">
                             <h5 class="mb-0 fw-bold"><i class="bi bi-cpu me-2"></i>System & Status</h5>
                         </div>
                         <div class="card-body p-4">
@@ -86,28 +198,6 @@
                                     <span class="fw-bold">@Global.lang.toUpperCase</span>
                                 </li>
                             </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Links / Tools -->
-                <div class="col-12">
-                    <div class="card shadow-sm border-0">
-                        <div class="card-header bg-light py-3">
-                            <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-tools me-2"></i>Verwaltung & Werkzeuge</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="d-flex flex-wrap gap-3">
-                                <a href="javascript:appLoadPage('MainSearch', '')" class="btn btn-outline-primary fw-bold">
-                                    <i class="bi bi-search me-1"></i>Turniersuche & Übersicht
-                                </a>
-                                <a href="javascript:appLoadPage('TourneyNew', '')" class="btn btn-outline-success fw-bold">
-                                    <i class="bi bi-plus-circle me-1"></i>Neues Turnier anlegen
-                                </a>
-                                <a href="javascript:appLoadPage('MainView', '')" class="btn btn-outline-secondary fw-bold">
-                                    <i class="bi bi-house me-1"></i>Zur Startseite
-                                </a>
-                            </div>
                         </div>
                     </div>
                 </div>

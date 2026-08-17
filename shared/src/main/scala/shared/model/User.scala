@@ -64,3 +64,16 @@ case class UserInfo(
 
 object UserInfo:
   implicit val rw: RW[UserInfo] = macroRW
+
+case class AdminUserInfo(
+  user_id: Int,
+  username: String,
+  email: String,
+  club: String = "",
+  roles: List[String] = Nil,
+  user_profile: UserProfile = UserProfile(),
+  allowed_tourneys: Int = 0
+)
+
+object AdminUserInfo:
+  implicit val rw: RW[AdminUserInfo] = macroRW

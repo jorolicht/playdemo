@@ -40,6 +40,20 @@ add_action('rest_api_init', function () {
         'callback' => 'pd_api_verify_handler',
         'permission_callback' => '__return_true',
     ));
+
+    // Endpunkt: ADMIN USER SEARCH
+    register_rest_route('tourney/v1', '/admin/users', array(
+        'methods' => 'GET',
+        'callback' => 'tourney_api_admin_search_users',
+        'permission_callback' => 'tourney_is_admin_or_editor',
+    ));
+
+    // Endpunkt: ADMIN UPDATE USER PROFILE
+    register_rest_route('tourney/v1', '/admin/update_user_profile', array(
+        'methods' => 'POST',
+        'callback' => 'tourney_api_admin_update_user_profile',
+        'permission_callback' => 'tourney_is_admin_or_editor',
+    ));
 });
 
 function pd_api_login_handler($request) {
@@ -362,3 +376,89 @@ add_action('rest_api_init', function () {
         }
     ]);
 });
+
+/**
+ * REST API Callback: Searches users for admin management.
+ *
+ * @param WP_REST_Request $request
+ * @return WP_REST_Response|WP_Error
+ */
+function tourney_api_admin_search_users( WP_REST_Request $request ) {
+    if ( ! tourney_is_admin_or_editor() ) {
+        return new WP_Error( 'rest_forbidden', 'Keine Berechtigung.', array( 'status' => 403 ) );
+    }
+
+    $query_param = sanitize_text_field( $request->get_param( 'query' ) ?? '' );
+    $args = array(
+        'number'  => 50,
+        'orderby' => 'display_name',
+        'order'   => 'ASC',
+    );
+
+    if ( ! empty( $query_param ) ) {
+        $args['search'] = '*' . $query_param . '*';
+        $args['search_columns'] = array( 'user_login', 'user_email', 'user_nicename', 'display_name' );
+    }
+
+    $user_query = new WP_User_Query( $args );
+    $users = $user_query->get_results();
+    $result = array();
+
+    foreach ( $users as $u ) {
+        $profile = tourney_get_user_profile( $u->ID );
+        $organizer = get_user_meta( $u->ID, 'organizer', true );
+        $result[] = array(
+            'user_id'          => (int) $u->ID,
+            'username'         => $u->user_login,
+            'email'            => $u->user_email,
+            'club'             => $organizer ? $organizer : '',
+            'roles'            => array_values( (array) $u->roles ),
+            'user_profile'     => $profile,
+            'allowed_tourneys' => (int) $profile['available'],
+        );
+    }
+
+    return rest_ensure_response( $result );
+}
+
+/**
+ * REST API Callback: Updates UserProfile available/executed count for a given user ID.
+ *
+ * @param WP_REST_Request $request
+ * @return WP_REST_Response|WP_Error
+ */
+function tourney_api_admin_update_user_profile( WP_REST_Request $request ) {
+    if ( ! tourney_is_admin_or_editor() ) {
+        return new WP_Error( 'rest_forbidden', 'Keine Berechtigung.', array( 'status' => 403 ) );
+    }
+
+    $params  = $request->get_json_params();
+    $target_user_id = intval( $params['user_id'] ?? 0 );
+    if ( $target_user_id <= 0 ) {
+        return new WP_Error( 'invalid_user', 'Ungültige Benutzer-ID.', array( 'status' => 400 ) );
+    }
+
+    $user = get_userdata( $target_user_id );
+    if ( ! $user ) {
+        return new WP_Error( 'user_not_found', 'Benutzer nicht gefunden.', array( 'status' => 404 ) );
+    }
+
+    $profile = tourney_get_user_profile( $target_user_id );
+
+    if ( isset( $params['available'] ) ) {
+        $profile['available'] = max( 0, intval( $params['available'] ) );
+    }
+    if ( isset( $params['executed'] ) ) {
+        $profile['executed'] = max( 0, intval( $params['executed'] ) );
+    }
+
+    tourney_update_user_profile( $target_user_id, $profile );
+
+    return rest_ensure_response( array(
+        'success'          => true,
+        'user_id'          => $target_user_id,
+        'user_profile'     => $profile,
+        'allowed_tourneys' => (int) $profile['available'],
+        'message'          => 'UserProfile erfolgreich aktualisiert.',
+    ) );
+}
