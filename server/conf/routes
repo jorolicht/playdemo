@@ -16,6 +16,11 @@ POST       /auth/setUserPassword         controllers.Auth.setUserPassword(email:
 
 
 
+# DSGVO Map Proxy Endpoints (Alternative 3: Serverseitige Aufbereitung / Karten-Kacheln)
+GET        /api/map/tile/:z/:x/:y        controllers.MapController.tile(z: Int, x: Int, y: Int)
+GET        /api/map/geocode              controllers.MapController.geocode(query: String)
+GET        /api/map/static               controllers.MapController.staticMap(lat: Option[Double], lon: Option[Double], query: Option[String], zoom: Option[Int])
+
 # Helper endpoints
 GET        /helper/getMessages           controllers.Helper.getMessages(lang: String ?="")
 GET        /helper/getMsg                controllers.Helper.getMsg(msgCode: String, in1:String ?="", in2:String ?="", in3:String ?="")

@@ -177,36 +177,53 @@
     </div>
 
     <!-- 4. Container: Adresse & Anfahrt -->
-    <div class="card shadow-sm border-0 rounded-4 mb-4">
-        <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+    <!-- 4. Container: Veranstaltungsort & DSGVO-konforme Karte (Alternative 3: Serverseitige Kacheln / Playserver) -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4 overflow-hidden">
+        <div class="card-header bg-white border-bottom-0 pt-4 px-4 d-flex align-items-center justify-content-between">
             <h4 class="h5 mb-0 fw-bold text-primary">
                 <i class="bi bi-geo-alt-fill me-2 text-danger"></i>@gM("tourneyHomepage.addressContainer")
             </h4>
+            <span class="badge bg-success-subtle text-success border border-success rounded-pill px-3 py-2 small">
+                <i class="bi bi-shield-check me-1"></i>DSGVO-konform (Playserver Karte)
+            </span>
         </div>
         <div class="card-body px-4 pb-4">
             @if(tourney.address.isDefined) {
                 @defining(tourney.address.get) { addr =>
-                    <div class="row align-items-center">
-                        <div class="col-md-8 mb-3 mb-md-0">
-                            @if(addr.description.nonEmpty) {
-                                <h5 class="fw-bold mb-1">@addr.description</h5>
-                            }
-                            <p class="mb-1 text-secondary">
-                                @if(addr.street.nonEmpty) { @addr.street <br> }
-                                @if(addr.zip.nonEmpty || addr.city.nonEmpty) { @addr.zip @addr.city <br> }
-                                @if(addr.country.nonEmpty) { @addr.country }
-                            </p>
-                        </div>
-                        <div class="col-md-4 text-md-end">
-                            @defining(s"${addr.street} ${addr.zip} ${addr.city} ${addr.country}".trim) { queryStr =>
-                                @if(queryStr.nonEmpty) {
-                                    <a href="https://www.google.com/maps/search/?api=1&query=@java.net.URLEncoder.encode(queryStr, "UTF-8")" target="_blank" class="btn btn-outline-primary rounded-pill px-3 shadow-sm">
-                                        <i class="bi bi-map me-1"></i>@gM("tourneyHomepage.openMaps")
-                                    </a>
+                    @defining(s"${addr.street} ${addr.zip} ${addr.city} ${addr.country}".trim) { queryStr =>
+                        <div class="row g-4 align-items-center">
+                            <div class="col-md-7">
+                                @if(addr.description.nonEmpty) {
+                                    <h5 class="fw-bold mb-2 text-dark">@addr.description</h5>
                                 }
+                                <p class="mb-3 text-secondary lead fs-6">
+                                    @if(addr.street.nonEmpty) { @addr.street <br> }
+                                    @if(addr.zip.nonEmpty || addr.city.nonEmpty) { @addr.zip @addr.city <br> }
+                                    @if(addr.country.nonEmpty) { @addr.country }
+                                </p>
+                                @if(queryStr.nonEmpty) {
+                                    <div class="d-flex flex-wrap gap-2 pt-2">
+                                        <a href="https://www.openstreetmap.org/search?query=@java.net.URLEncoder.encode(queryStr, "UTF-8")" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary rounded-pill px-3 shadow-sm btn-sm">
+                                            <i class="bi bi-map me-1"></i>OpenStreetMap
+                                        </a>
+                                        <a href="https://www.google.com/maps/search/?api=1&query=@java.net.URLEncoder.encode(queryStr, "UTF-8")" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary rounded-pill px-3 shadow-sm btn-sm">
+                                            <i class="bi bi-box-arrow-up-right me-1"></i>Google Maps (Extern)
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                            @if(queryStr.nonEmpty) {
+                                <div class="col-md-5">
+                                    <div class="position-relative rounded-3 overflow-hidden border shadow-sm" style="max-height: 180px;">
+                                        <img src="/api/map/static?query=@java.net.URLEncoder.encode(queryStr, "UTF-8")&zoom=15" alt="Veranstaltungsort Karte" class="w-100 object-fit-cover" style="height: 180px;" />
+                                        <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white p-2 text-center small">
+                                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>@if(addr.description.nonEmpty) { @addr.description } else { @addr.city }
+                                        </div>
+                                    </div>
+                                </div>
                             }
                         </div>
-                    </div>
+                    }
                 }
             } else {
                 <p class="text-muted mb-0 italic">@gM("tourneyHomepage.noAddress")</p>
