@@ -90,7 +90,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
     val baseName = param match {
       case "functions" | "funktionen"           => "funktionen"
       case "agb" | "gtc"                        => "gtc"
-      case "privacy" | "dataprotection"         => "dataprotection"
+      case "privacy" | "dataprotection"         => "privacy"
       case "impressum" | "imprint"              => "impressum"
       case "contact" | "kontakt"                => "contact"
       case "pricing" | "preise"                 => "pricing"
@@ -131,7 +131,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
                 case "gtc"                          => if (Global.lang == "en") "Terms and Conditions (AGB)" else "Allgemeine Geschäftsbedingungen"
                 case "excel"                        => if (Global.lang == "en") "Excel Downloads & Software" else "Excel-Downloads & Software"
                 case "plugin"                       => if (Global.lang == "en") "WordPress Plugin (Coming Soon)" else "WordPress Plugin (Demnächst verfügbar)"
-                case "dataprotection" | "privacy"   => if (Global.lang == "en") "Privacy Policy" else "Datenschutzerklärung"
+                case "privacy" | "dataprotection"   => if (Global.lang == "en") "Privacy Policy" else "Datenschutzerklärung"
                 case "impressum" | "imprint"        => if (Global.lang == "en") "Imprint" else "Impressum"
                 case "contact" | "kontakt"          => if (Global.lang == "en") "Contact" else "Kontakt"
                 case "pricing" | "preise"           => if (Global.lang == "en") "Support & Pricing" else "Support & Kosten"
