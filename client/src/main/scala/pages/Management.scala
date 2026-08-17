@@ -18,9 +18,11 @@ object Management extends BasePage with JsWrapper with ComWrapper:
   val BtnAdd5Available:    HtmlId = genId(name)
   val BtnAdd10Available:   HtmlId = genId(name)
   val BtnSaveUserProfile:  HtmlId = genId(name)
+  val BtnRefreshUnmatched: HtmlId = genId(name)
 
   private var searchResults: List[AdminUserInfo] = Nil
   private var selectedUser: Option[AdminUserInfo] = None
+  private var unmatchedList: List[UnmatchedPurchase] = Nil
 
   def render(param: String = ""): Boolean =
     if (!Global.user.exists(_.roles.contains("administrator"))) {
@@ -28,8 +30,9 @@ object Management extends BasePage with JsWrapper with ComWrapper:
       false
     } else {
       setMain(cviews.pages.html.Management(Global.user))
-      // Automatically load initial users list upon rendering
+      // Automatically load users list and unmatched purchases upon rendering
       doSearchUsers("")
+      doLoadUnmatchedPurchases()
       true
     }
 
@@ -54,6 +57,9 @@ object Management extends BasePage with JsWrapper with ComWrapper:
 
       case `BtnSaveUserProfile` =>
         doSaveUserProfile()
+
+      case `BtnRefreshUnmatched` =>
+        doLoadUnmatchedPurchases()
 
       case _ => ()
 
@@ -185,6 +191,80 @@ object Management extends BasePage with JsWrapper with ComWrapper:
           case Left(err) =>
             showStatusAlert(s"Fehler beim Speichern von UserProfile: ${err.msgCode}", isSuccess = false)
         }
+
+  // --- Schritt 3: Unmatched Purchases Handling ---
+
+  private def doLoadUnmatchedPurchases(): Unit =
+    ajaxGet[List[UnmatchedPurchase]]("/wp-json/tourney/v1/admin/unmatched_purchases", List(), Map("X-WP-NONCE" -> Global.wpNonce), Global.homeUrl).map {
+      case Right(list) =>
+        unmatchedList = list
+        renderUnmatchedPurchases(list)
+      case Left(err) =>
+        debug(s"Failed to load unmatched purchases: ${err.msgCode}")
+    }
+
+  private def renderUnmatchedPurchases(list: List[UnmatchedPurchase]): Unit =
+    val tbody = dom.document.getElementById("mgmt-unmatched-tbody")
+    if (tbody == null) return
+
+    if (list.isEmpty) {
+      tbody.innerHTML = """<tr><td colspan="6" class="text-muted small text-center">Keine nicht zugewiesenen Käufe vorhanden.</td></tr>"""
+      return
+    }
+
+    val sb = new StringBuilder()
+    list.zipWithIndex.foreach { case (p, idx) =>
+      val formattedDate = Global.formatPurchaseDate(p.date)
+      val formattedPrice = f"${p.price}%.2f €"
+      val productName = if (p.product_name.nonEmpty) p.product_name else "-"
+      
+      sb.append(s"""
+        <tr>
+          <td class="fw-bold text-primary">${p.email}</td>
+          <td>$formattedDate</td>
+          <td class="text-center fw-bold">${p.count}</td>
+          <td class="text-end">$formattedPrice</td>
+          <td><span class="badge bg-light text-dark border">$productName</span></td>
+          <td class="text-end">
+            <button type="button" class="btn btn-sm btn-outline-success fw-bold" id="mgmt-assign-btn-$idx">
+              <i class="bi bi-person-check me-1"></i>Zuweisen
+            </button>
+          </td>
+        </tr>
+      """)
+    }
+    tbody.innerHTML = sb.toString()
+
+    // Attach click listeners to assign buttons
+    list.zipWithIndex.foreach { case (p, idx) =>
+      val btn = dom.document.getElementById(s"mgmt-assign-btn-$idx")
+      if (btn != null) {
+        btn.addEventListener("click", (_: dom.Event) => {
+          doAssignUnmatchedPurchase(idx, p)
+        })
+      }
+    }
+
+  private def doAssignUnmatchedPurchase(index: Int, purchase: UnmatchedPurchase): Unit =
+    selectedUser match {
+      case None =>
+        dom.window.alert(s"Bitte wählen Sie zuerst links in der User-Verwaltung den Ziel-Benutzer aus, dem der Kauf von '${purchase.email}' zugewiesen werden soll.")
+      case Some(u) =>
+        val confirmMsg = s"Möchten Sie den Kauf über ${purchase.count} Turnier(e) (${f"${purchase.price}%.2f €"}) von E-Mail '${purchase.email}' wirklich dem Benutzer '${u.username}' (ID: ${u.user_id}) zuweisen?"
+        if (dom.window.confirm(confirmMsg)) {
+          showStatusAlert(s"Zuweisung des Kaufs an ${u.username}...", isSuccess = true)
+          val payload = AssignPayload(u.user_id, purchase.email, index)
+          ajaxPost[String, AssignPayload]("/wp-json/tourney/v1/admin/assign_unmatched_purchase", List(), write(payload), Map("X-WP-NONCE" -> Global.wpNonce), Global.homeUrl).map {
+            case Right(_) =>
+              showStatusAlert(s"Kauf von ${purchase.email} (${purchase.count} Turniere) erfolgreich an ${u.username} zugewiesen!", isSuccess = true)
+              // Refresh selected user profile & unmatched list
+              doSearchUsers(u.username)
+              doLoadUnmatchedPurchases()
+            case Left(err) =>
+              showStatusAlert(s"Fehler bei der Zuweisung: ${err.msgCode}", isSuccess = false)
+          }
+        }
+    }
 
   private def showStatusAlert(msg: String, isSuccess: Boolean): Unit =
     val alert = dom.document.getElementById("mgmt-status-alert")

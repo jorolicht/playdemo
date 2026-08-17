@@ -77,3 +77,23 @@ case class AdminUserInfo(
 
 object AdminUserInfo:
   implicit val rw: RW[AdminUserInfo] = macroRW
+
+case class UnmatchedPurchase(
+  email: String,
+  count: Int,
+  price: Double,
+  date: String,
+  product_name: String = ""
+)
+
+object UnmatchedPurchase:
+  implicit val rw: RW[UnmatchedPurchase] = macroRW
+
+case class AssignPayload(
+  target_user_id: Int,
+  email: String,
+  index: Int
+)
+
+object AssignPayload:
+  implicit val rw: RW[AssignPayload] = macroRW

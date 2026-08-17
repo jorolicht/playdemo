@@ -54,6 +54,20 @@ add_action('rest_api_init', function () {
         'callback' => 'tourney_api_admin_update_user_profile',
         'permission_callback' => 'tourney_api_admin_permissions_check',
     ));
+
+    // Endpunkt: ADMIN GET UNMATCHED PURCHASES
+    register_rest_route('tourney/v1', '/admin/unmatched_purchases', array(
+        'methods' => 'GET',
+        'callback' => 'tourney_api_admin_get_unmatched_purchases',
+        'permission_callback' => 'tourney_api_admin_permissions_check',
+    ));
+
+    // Endpunkt: ADMIN ASSIGN UNMATCHED PURCHASE
+    register_rest_route('tourney/v1', '/admin/assign_unmatched_purchase', array(
+        'methods' => 'POST',
+        'callback' => 'tourney_api_admin_assign_unmatched_purchase',
+        'permission_callback' => 'tourney_api_admin_permissions_check',
+    ));
 });
 
 function pd_api_login_handler($request) {
@@ -474,5 +488,73 @@ function tourney_api_admin_update_user_profile( WP_REST_Request $request ) {
         'user_profile'     => $profile,
         'allowed_tourneys' => (int) $profile['available'],
         'message'          => 'UserProfile erfolgreich aktualisiert.',
+    ) );
+}
+
+/**
+ * REST API Callback: Returns all unmatched purchases from log file.
+ *
+ * @param WP_REST_Request $request
+ * @return WP_REST_Response
+ */
+function tourney_api_admin_get_unmatched_purchases( WP_REST_Request $request ) {
+    $entries = tourney_get_unmatched_purchases();
+    return rest_ensure_response( $entries );
+}
+
+/**
+ * REST API Callback: Manually assigns an unmatched purchase to a specified target_user_id.
+ *
+ * @param WP_REST_Request $request
+ * @return WP_REST_Response|WP_Error
+ */
+function tourney_api_admin_assign_unmatched_purchase( WP_REST_Request $request ) {
+    $params = $request->get_json_params();
+    $target_user_id = intval( $params['target_user_id'] ?? 0 );
+    $email = strtolower( trim( $params['email'] ?? '' ) );
+    $index = isset( $params['index'] ) ? intval( $params['index'] ) : -1;
+
+    if ( $target_user_id <= 0 ) {
+        return new WP_Error( 'invalid_user', 'Ungültige Ziel-Benutzer-ID.', array( 'status' => 400 ) );
+    }
+
+    $user = get_userdata( $target_user_id );
+    if ( ! $user ) {
+        return new WP_Error( 'user_not_found', 'Ziel-Benutzer nicht gefunden.', array( 'status' => 404 ) );
+    }
+
+    $entries = tourney_get_unmatched_purchases();
+    if ( empty( $entries ) ) {
+        return new WP_Error( 'no_entries', 'Keine nicht zugewiesenen Käufe vorhanden.', array( 'status' => 404 ) );
+    }
+
+    $remaining_entries = array();
+    $assigned_entries = array();
+
+    foreach ( $entries as $i => $entry ) {
+        if ( ( $index >= 0 && $i === $index ) || ( $index < 0 && ! empty( $email ) && strtolower( trim( $entry['email'] ) ) === $email ) ) {
+            tourney_user_profile_add_purchase( $target_user_id, $entry['count'], $entry['price'], $entry['date'] );
+            $assigned_entries[] = $entry;
+        } else {
+            $remaining_entries[] = $entry;
+        }
+    }
+
+    if ( empty( $assigned_entries ) ) {
+        return new WP_Error( 'entry_not_found', 'Passender nicht zugewiesener Kauf nicht gefunden.', array( 'status' => 404 ) );
+    }
+
+    tourney_save_unmatched_purchases( $remaining_entries );
+    update_user_meta( $target_user_id, 'payhip_kauf_status', 'aktiv' );
+    update_user_meta( $target_user_id, 'payhip_last_purchase_date', current_time( 'mysql' ) );
+
+    $updated_profile = tourney_get_user_profile( $target_user_id );
+
+    return rest_ensure_response( array(
+        'success'          => true,
+        'target_user_id'   => $target_user_id,
+        'user_profile'     => $updated_profile,
+        'remaining_count'  => count( $remaining_entries ),
+        'message'          => 'Kauf erfolgreich dem Benutzer zugewiesen.',
     ) );
 }

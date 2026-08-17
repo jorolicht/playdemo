@@ -298,3 +298,140 @@ add_action( 'edit_user_profile_update', 'ucfe_save_custom_user_profile_fields' )
 function ucfe_get_user_organizer( $user_id ) {
     return get_user_meta( $user_id, 'organizer', true );
 }
+
+/**
+ * Helper to get the log file path for unmatched purchases.
+ *
+ * @return string Absolute file path.
+ */
+function tourney_get_unmatched_purchases_file() {
+    $upload_dir = wp_upload_dir();
+    $dir = $upload_dir['basedir'];
+    if ( ! file_exists( $dir ) ) {
+        wp_mkdir_p( $dir );
+    }
+    return $dir . '/tourney_unmatched_purchases.log';
+}
+
+/**
+ * Reads all unmatched purchase entries from log file.
+ *
+ * @return array Array of unmatched purchase arrays: [ ['email' => ..., 'count' => ..., 'price' => ..., 'date' => ..., 'product_name' => ...], ... ]
+ */
+function tourney_get_unmatched_purchases() {
+    $file = tourney_get_unmatched_purchases_file();
+    if ( ! file_exists( $file ) ) {
+        return array();
+    }
+    $content = file_get_contents( $file );
+    if ( empty( $content ) ) {
+        return array();
+    }
+    $lines = explode( "\n", trim( $content ) );
+    $entries = array();
+    foreach ( $lines as $line ) {
+        $line = trim( $line );
+        if ( empty( $line ) ) {
+            continue;
+        }
+        $decoded = json_decode( $line, true );
+        if ( is_array( $decoded ) && ! empty( $decoded['email'] ) ) {
+            $entries[] = array(
+                'email'        => strtolower( sanitize_email( $decoded['email'] ) ),
+                'count'        => isset( $decoded['count'] ) ? max( 1, intval( $decoded['count'] ) ) : 1,
+                'price'        => isset( $decoded['price'] ) ? floatval( $decoded['price'] ) : 0.0,
+                'date'         => isset( $decoded['date'] ) ? (string) $decoded['date'] : date( 'YmdHi' ),
+                'product_name' => isset( $decoded['product_name'] ) ? sanitize_text_field( $decoded['product_name'] ) : '',
+            );
+        }
+    }
+    return $entries;
+}
+
+/**
+ * Appends an unmatched purchase entry to the log file.
+ *
+ * @param string $email
+ * @param int    $count
+ * @param float  $price
+ * @param string|null $date
+ * @param string $product_name
+ * @return bool
+ */
+function tourney_add_unmatched_purchase( $email, $count, $price = 0.0, $date = null, $product_name = '' ) {
+    $file = tourney_get_unmatched_purchases_file();
+    if ( empty( $date ) ) {
+        $date = date( 'YmdHi' );
+    }
+    $entry = array(
+        'email'        => strtolower( sanitize_email( $email ) ),
+        'count'        => max( 1, intval( $count ) ),
+        'price'        => floatval( $price ),
+        'date'         => (string) $date,
+        'product_name' => sanitize_text_field( $product_name ),
+    );
+    $line = wp_json_encode( $entry ) . "\n";
+    return ( file_put_contents( $file, $line, FILE_APPEND | LOCK_EX ) !== false );
+}
+
+/**
+ * Writes an array of unmatched purchase entries to the log file (overwriting existing content).
+ *
+ * @param array $entries
+ * @return bool
+ */
+function tourney_save_unmatched_purchases( array $entries ) {
+    $file = tourney_get_unmatched_purchases_file();
+    $content = '';
+    foreach ( $entries as $entry ) {
+        if ( is_array( $entry ) && ! empty( $entry['email'] ) ) {
+            $clean_entry = array(
+                'email'        => strtolower( sanitize_email( $entry['email'] ) ),
+                'count'        => max( 1, intval( $entry['count'] ) ),
+                'price'        => floatval( $entry['price'] ),
+                'date'         => (string) ( $entry['date'] ?? date( 'YmdHi' ) ),
+                'product_name' => sanitize_text_field( $entry['product_name'] ?? '' ),
+            );
+            $content .= wp_json_encode( $clean_entry ) . "\n";
+        }
+    }
+    return ( file_put_contents( $file, $content, LOCK_EX ) !== false );
+}
+
+/**
+ * Schritt 2: Automatische Zuweisung bei Neuregistrierung (user_register Hook)
+ * Checks log file for matching purchases when a new user registers and assigns them.
+ *
+ * @param int $user_id The ID of the newly registered user.
+ */
+function tourney_assign_unmatched_purchases_on_register( $user_id ) {
+    $user = get_userdata( $user_id );
+    if ( ! $user || empty( $user->user_email ) ) {
+        return;
+    }
+
+    $email = strtolower( trim( $user->user_email ) );
+    $all_entries = tourney_get_unmatched_purchases();
+    if ( empty( $all_entries ) ) {
+        return;
+    }
+
+    $remaining_entries = array();
+    $assigned_count = 0;
+
+    foreach ( $all_entries as $entry ) {
+        if ( strtolower( trim( $entry['email'] ) ) === $email ) {
+            tourney_user_profile_add_purchase( $user_id, $entry['count'], $entry['price'], $entry['date'] );
+            $assigned_count++;
+        } else {
+            $remaining_entries[] = $entry;
+        }
+    }
+
+    if ( $assigned_count > 0 ) {
+        tourney_save_unmatched_purchases( $remaining_entries );
+        update_user_meta( $user_id, 'payhip_kauf_status', 'aktiv' );
+        update_user_meta( $user_id, 'payhip_last_purchase_date', current_time( 'mysql' ) );
+    }
+}
+add_action( 'user_register', 'tourney_assign_unmatched_purchases_on_register' );

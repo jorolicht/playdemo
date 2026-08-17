@@ -42,13 +42,7 @@ function handle_payhip_webhook( WP_REST_Request $request ) {
         return new WP_REST_Response( 'Keine E-Mail übergeben', 400 );
     }
 
-    // 2. Search WordPress user by email address
-    $user = get_user_by( 'email', $email );
-    if ( ! $user ) {
-        return new WP_REST_Response( 'User nicht gefunden', 404 );
-    }
-
-    // 3. Determine number of purchased tournaments
+    // 2. Determine number of purchased tournaments
     $tourneys_to_add = 0;
     if ( isset( $params['tourneys'] ) && intval( $params['tourneys'] ) > 0 ) {
         $tourneys_to_add = intval( $params['tourneys'] );
@@ -65,17 +59,26 @@ function handle_payhip_webhook( WP_REST_Request $request ) {
         }
     }
 
-    // Default to 1 tournament if count could not be parsed
     if ( $tourneys_to_add <= 0 ) {
         $tourneys_to_add = 1;
     }
 
-    // 4. Determine purchase price
+    // 3. Determine purchase price
     $price = 0.0;
     if ( isset( $params['price'] ) ) {
         $price = floatval( $params['price'] );
     } elseif ( isset( $params['amount'] ) ) {
         $price = floatval( $params['amount'] );
+    }
+
+    $product_name = sanitize_text_field( $params['product_name'] ?? $params['item_name'] ?? '' );
+
+    // 4. Search WordPress user by email address
+    $user = get_user_by( 'email', $email );
+    if ( ! $user ) {
+        // Schritt 1: Erfassung im Payhip-Webhook bei unbekannter E-Mail in wp-content/uploads/tourney_unmatched_purchases.log
+        tourney_add_unmatched_purchase( $email, $tourneys_to_add, $price, date( 'YmdHi' ), $product_name );
+        return new WP_REST_Response( 'User nicht gefunden. Kauf in tourney_unmatched_purchases.log gespeichert.', 200 );
     }
 
     // 5. Update UserProfile (add purchase to history & increment available count)

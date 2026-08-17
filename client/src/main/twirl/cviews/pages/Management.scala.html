@@ -138,6 +138,38 @@
                 </div>
             </div>
 
+            <!-- Unmatched Purchases Card (Schritt 3: Nicht zugewiesene Käufe) -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-warning text-dark py-3 d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-cart-x-fill me-2"></i>Nicht zugewiesene Käufe (tourney_unmatched_purchases.log)</h5>
+                    <button @id(BtnRefreshUnmatched, "onclick") class="btn btn-sm btn-outline-dark fw-bold">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Aktualisieren
+                    </button>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-3">
+                        Käufe von Payhip mit E-Mail-Adressen, die bisher keinem bestehenden Benutzerkonto zugeordnet werden konnten. Bei Neuregistrierung werden passende Käufe automatisch zugewiesen. Sie können Käufe hier auch manuell einem ausgewählten Benutzer zuweisen.
+                    </p>
+                    <div id="mgmt-unmatched-container" class="table-responsive">
+                        <table class="table table-sm table-hover border align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>E-Mail</th>
+                                    <th>Kaufdatum</th>
+                                    <th class="text-center">Anzahl</th>
+                                    <th class="text-end">Preis (€)</th>
+                                    <th>Produkt</th>
+                                    <th class="text-end">Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mgmt-unmatched-tbody">
+                                <tr><td colspan="6" class="text-muted small text-center">Keine nicht zugewiesenen Käufe vorhanden.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- Existing System & Admin Overview Cards -->
             <div class="row g-4">
                 <!-- User Account Info Card -->
