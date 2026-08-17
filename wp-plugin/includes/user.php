@@ -7,7 +7,7 @@
  * @return bool True if Administrator or Editor/TourneyMaster, false otherwise.
  */
 function tourney_is_admin_or_editor( $user = null ) {
-    if ( ! $user ) {
+    if ( ! $user || ! ( $user instanceof WP_User ) ) {
         $user = wp_get_current_user();
     }
     if ( ! $user || ! $user->exists() ) {
@@ -81,10 +81,23 @@ function tourney_get_user_profile( $user_id ) {
         );
     }
 
+    $clean_history = array();
+    if ( isset( $profile['history'] ) && is_array( $profile['history'] ) ) {
+        foreach ( $profile['history'] as $item ) {
+            if ( is_array( $item ) ) {
+                $clean_history[] = array(
+                    'date'  => isset( $item['date'] ) ? (string) $item['date'] : '',
+                    'count' => isset( $item['count'] ) ? intval( $item['count'] ) : 0,
+                    'price' => isset( $item['price'] ) ? floatval( $item['price'] ) : 0.0,
+                );
+            }
+        }
+    }
+
     return array(
         'available' => isset( $profile['available'] ) ? max( 0, intval( $profile['available'] ) ) : 0,
         'executed'  => isset( $profile['executed'] ) ? max( 0, intval( $profile['executed'] ) ) : 0,
-        'history'   => isset( $profile['history'] ) && is_array( $profile['history'] ) ? array_values( $profile['history'] ) : array(),
+        'history'   => $clean_history,
     );
 }
 
