@@ -145,15 +145,19 @@
 
     <!-- Registration and Authentication -->
     <div class="dp-section">
-        <h3 class="dp-section-title">Registration & Authentication</h3>
+        <h3 class="dp-section-title">Registration & Authentication (Passkey / WebAuthn)</h3>
         <p class="dp-p">
-            By registering or authenticating, users authorize Calysima to identify them and grant access to specific services. Depending on what is specified below, third-party providers may provide login and authentication services. In such cases, Calysima may access certain data stored by these third-party providers for registration or identification purposes.
+            For user registration and authentication, we rely on modern, highly secure, and privacy-friendly authentication methods. <strong>We do not use Google OAuth or any other third-party login services.</strong> No credentials or authentication data are transferred to external servers or third parties.
         </p>
-        <h4 class="dp-subhead">Google OAuth (Google Inc.)</h4>
+        <h4 class="dp-subhead">Passkey Authentication (WebAuthn / FIDO2 Standard)</h4>
         <p class="dp-p">
-            Google OAuth is a registration and authentication service provided by Google Inc. connected to the Google network.<br>
-            <strong>Personal data collected:</strong> various types of data as described in the privacy policy of the service.<br>
-            <strong>Place of processing:</strong> USA – Google Privacy Policy.
+            Users have the option to log in passwordlessly and securely using the W3C/FIDO2 standard <strong>Passkey (WebAuthn)</strong>. This method utilizes asymmetric public-key cryptography:
+        </p>
+        <p class="dp-p">
+            • <strong>Private Key:</strong> Remains exclusively and securely on your own device (e.g., in your smartphone/laptop's Secure Enclave or hardware security key) unlocked via biometrics (Touch ID, Face ID) or device PIN. The private key never leaves your device.<br>
+            • <strong>Public Key:</strong> Stored on our server to verify digital signatures during authentication.<br>
+            • <strong>Data Collected:</strong> Anonymized credential ID, public key, and signature counter. <strong>No biometric data</strong> is ever transmitted to or stored on our server.<br>
+            • <strong>Legal Basis:</strong> Art. 6 (1) (b) GDPR (performance of contract / account provision) and Art. 6 (1) (f) GDPR (legitimate interest in IT-secure authentication).
         </p>
     </div>
 

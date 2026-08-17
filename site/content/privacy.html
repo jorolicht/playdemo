@@ -145,15 +145,19 @@
 
     <!-- Anmeldung und Authentifizierung -->
     <div class="dp-section">
-        <h3 class="dp-section-title">Anmeldung & Authentifizierung</h3>
+        <h3 class="dp-section-title">Anmeldung & Authentifizierung (Passkey / WebAuthn)</h3>
         <p class="dp-p">
-            Mit der Anmeldung oder Authentifizierung berechtigen Nutzer Calysima, sie zu identifizieren und ihnen Zugriff auf spezifische Dienste zu gewähren. Je nachdem, was im Folgenden angegeben ist, können Drittanbieter Anmelde- und Authentifizierungsdienste bereitstellen. In diesem Fall kann Calysima auf einige von diesen Drittanbietern gespeicherten Daten zu Anmelde- oder Identifizierungszwecken zugreifen.
+            Für die Anmeldung und Identifizierung von Benutzern setzen wir auf moderne, hochsichere und datenschutzfreundliche Authentifizierungsverfahren. <strong>Wir nutzen kein Google OAuth oder sonstige Drittanbieter-Anmeldedienste.</strong> Es werden keine Anmeldedaten an externe Server oder Drittanbieter übertragen.
         </p>
-        <h4 class="dp-subhead">Google OAuth (Google Inc.)</h4>
+        <h4 class="dp-subhead">Passkey-Authentifizierung (WebAuthn / FIDO2 Standard)</h4>
         <p class="dp-p">
-            Google OAuth ist ein von Google Inc. bereitgestellter Anmelde- und Authentifizierungsdienst, der mit dem Google-Netzwerk verbunden ist.<br>
-            <strong>Erhobene personenbezogene Daten:</strong> verschiedene Datenarten, wie in der Datenschutzerklärung des Dienstes beschrieben.<br>
-            <strong>Verarbeitungsort:</strong> USA – Datenschutzerklärung von Google.
+            Nutzer haben die Möglichkeit, sich über den W3C/FIDO2-Standard <strong>Passkey (WebAuthn)</strong> passwortlos und sicher anzumelden. Hierbei kommt ein asymmetrisches kryptographisches Schlüsselpaar zum Einsatz:
+        </p>
+        <p class="dp-p">
+            • <strong>Privater Schlüssel (Private Key):</strong> Verbleibt ausschließlich sicher auf Ihrem eigenen Endgerät (z. B. im Secure Enclave Ihres Smartphones, Laptops oder über Ihren Hardware-Sicherheitsschlüssel) und wird per Biometrie (Touch ID, Face ID) oder Geräte-PIN freigeschaltet. Der private Schlüssel verlässt Ihr Endgerät zu keinem Zeitpunkt.<br>
+            • <strong>Öffentlicher Schlüssel (Public Key):</strong> Wird auf unserem Server gespeichert, um bei der Anmeldung die Signatur Ihres Endgeräts zu verifizieren.<br>
+            • <strong>Erhobene Daten:</strong> Anonymisierte Credential-ID, öffentlicher Schlüssel sowie Signatur-Zähler. Es werden <strong>keine biometrischen Daten</strong> an unseren Server übertragen oder dort gespeichert.<br>
+            • <strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung / Bereitstellung des Nutzerkontos) und Art. 6 Abs. 1 lit. f DSGVO (Berechtigtes Interesse an einer IT-sicheren Authentifizierung).
         </p>
     </div>
 
