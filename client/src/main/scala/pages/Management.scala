@@ -142,10 +142,11 @@ object Management extends BasePage with JsWrapper with ComWrapper:
       } else {
         val hSb = new StringBuilder()
         u.user_profile.history.foreach { p =>
+          val formattedDate = Global.formatPurchaseDate(p.date)
           val formattedPrice = f"${p.price}%.2f €"
           hSb.append(s"""
             <tr>
-              <td>${p.date}</td>
+              <td>${formattedDate}</td>
               <td class="text-center fw-bold">${p.count}</td>
               <td class="text-end">${formattedPrice}</td>
             </tr>

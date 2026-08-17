@@ -204,5 +204,21 @@ object Global:
     }
   }
 
+  def formatPurchaseDate(rawDate: String): String = {
+    if (rawDate == null || rawDate.isEmpty) return ""
+    if (rawDate.length == 12 && rawDate.forall(_.isDigit)) {
+      val y = rawDate.substring(0, 4)
+      val m = rawDate.substring(4, 6)
+      val d = rawDate.substring(6, 8)
+      val hh = rawDate.substring(8, 10)
+      val mm = rawDate.substring(10, 12)
+      formatDateTime(s"$y-$m-$d $hh:$mm")
+    } else if (rawDate.length >= 16) {
+      formatDateTime(rawDate)
+    } else {
+      rawDate
+    }
+  }
+
 
                             
