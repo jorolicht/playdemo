@@ -23,7 +23,14 @@ fi
 if [ -f "$ZIP_FILE" ]; then
     echo "📦 Entpacke Migration-Archiv $ZIP_FILE (wp-config.php wird ausgeschlossen)..."
     mkdir -p wp_data
-    unzip -o "$ZIP_FILE" -x "wp-config.php" -d wp_data/
+    
+    SUDO_CMD=""
+    if [ "$(id -u)" -ne 0 ] && [ -d "wp_data" ] && { [ ! -w "wp_data" ] || [ -f "wp_data/wp-cron.php" -a ! -w "wp_data/wp-cron.php" ]; }; then
+        echo "🔒 Anpassung der Schreibrechte via sudo..."
+        SUDO_CMD="sudo"
+    fi
+    
+    $SUDO_CMD unzip -o "$ZIP_FILE" -x "wp-config.php" -d wp_data/
 elif [ ! -f "wp_data/dev_dump.sql" ]; then
     echo "❌ Fehler: Weder $ZIP_FILE noch wp_data/dev_dump.sql gefunden!"
     exit 1
@@ -47,6 +54,6 @@ echo "🧹 Leere WordPress-Cache..."
 docker exec wp-cli-instance wp cache flush --allow-root
 
 echo "🗑️ Entferne temporären Datenbank-Dump..."
-rm -f wp_data/dev_dump.sql
+${SUDO_CMD:-} rm -f wp_data/dev_dump.sql
 
 echo "✅ Import und Migration auf Produktivsystem erfolgreich abgeschlossen."
