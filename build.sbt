@@ -2,17 +2,6 @@ import scala.sys.process._
 
 // Global / scalaJSStage := FullOptStage
 
-val includeAddon: Boolean  = true // always include addon for now, can be disabled later if needed
-val appOrganization        = sys.env.getOrElse("APP_ORGANIZATION","org.jorolicht")
-val appVersion             = sys.env.getOrElse("APP_VERSION", "1.0.0")
-val appDate                = sys.env.getOrElse("APP_DATE", "2026-08-15")
-val appMaintainer          = sys.env.getOrElse("APP_MAINTAINER", "Joe Doe <joe.doe@example.com>")
-
-ThisBuild / scalaVersion := "3.3.7"
-ThisBuild / organization := appOrganization
-ThisBuild / version      := appVersion
-server / maintainer      := appMaintainer
-
 def getAppEnv: String = {
   sys.props.get("app.env").orElse(sys.env.get("APP_ENV")).getOrElse("prod")
 }
@@ -21,6 +10,34 @@ def getDockerDir(base: File, env: String): File = {
   if (env == "prod" || env == "prod_rolicht") base / "docker" / "prod"
   else base / "docker" / "dev"
 }
+
+def getEnvValue(base: File, key: String, defaultVal: String): String = {
+  sys.env.get(key).orElse {
+    val env = getAppEnv
+    val envFile = getDockerDir(base, env) / ".env"
+    if (envFile.exists()) {
+      val lines = IO.readLines(envFile)
+      lines.find(_.trim.startsWith(s"$key=")).flatMap { line =>
+        val parts = line.split("=", 2)
+        if (parts.length == 2) {
+          Some(parts(1).trim.stripPrefix("\"").stripSuffix("\"").stripPrefix("'").stripSuffix("'"))
+        } else None
+      }
+    } else None
+  }.getOrElse(defaultVal)
+}
+
+val includeAddon: Boolean  = true // always include addon for now, can be disabled later if needed
+val projectRootDir         = file(".")
+val appOrganization        = getEnvValue(projectRootDir, "APP_ORGANIZATION", "org.jorolicht")
+val appVersion             = getEnvValue(projectRootDir, "APP_VERSION", "1.0.1")
+val appDate                = getEnvValue(projectRootDir, "APP_DATE", "2026-08-18")
+val appMaintainer          = getEnvValue(projectRootDir, "APP_MAINTAINER", "Robert Lichtenegger <robert.lichtenegger@gmail.com>")
+
+ThisBuild / scalaVersion := "3.3.7"
+ThisBuild / organization := appOrganization
+ThisBuild / version      := appVersion
+server / maintainer      := appMaintainer
 
 def getDockerWpPluginDir(base: File, env: String): File = {
   getDockerDir(base, env) / "wp_data" / "wp-content" / "plugins" / "tourney"
