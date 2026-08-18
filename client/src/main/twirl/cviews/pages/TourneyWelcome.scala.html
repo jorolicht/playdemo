@@ -215,7 +215,9 @@
                             @if(queryStr.nonEmpty) {
                                 <div class="col-md-5">
                                     <div class="position-relative rounded-3 overflow-hidden border shadow-sm" style="max-height: 180px;">
-                                        <img src="/api/map/static?query=@java.net.URLEncoder.encode(queryStr, "UTF-8")&zoom=15" alt="Veranstaltungsort Karte" class="w-100 object-fit-cover" style="height: 180px;" />
+                                        @defining(if (base.Global.playUrl.nonEmpty) base.Global.playUrl.trim.stripSuffix("/") else "/srv") { playBase =>
+                                            <img src="@playBase/api/map/static?query=@java.net.URLEncoder.encode(queryStr, "UTF-8")&zoom=15" alt="Veranstaltungsort Karte" class="w-100 object-fit-cover" style="height: 180px;" />
+                                        }
                                         <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white p-2 text-center small">
                                             <i class="bi bi-geo-alt-fill text-danger me-1"></i>@if(addr.description.nonEmpty) { @addr.description } else { @addr.city }
                                         </div>
