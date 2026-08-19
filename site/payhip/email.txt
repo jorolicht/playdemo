@@ -1,0 +1,49 @@
+Hi [buyer_first_name],
+
+Thank you for your order! / Vielen Dank für Ihren Einkauf!
+
+---
+[EN]
+AUTOMATIC ACTIVATION:
+Your purchased tournaments will be activated automatically!
+Our webhook uses the email address you provided when making your purchase on Payhip to automatically assign the purchase directly to your user account.
+The credit under “Number of allowed tournaments” (allowed) in your account has been increased by the number of tournaments you purchased.
+
+HOW TO USE:
+1. Log in to our platform using your email address.
+2. Go to “Create New Tournament”.
+3. Your activated tournaments will be available immediately.
+
+SUPPORT & HELP:
+If you have any questions regarding setup or running a tournament, or if the email address you used for the purchase differs from the email address of your user account, please contact our support team by email or WhatsApp.
+
+Please keep this message for your records.
+
+INFORMATION REGARDING THE EXPIRATION OF THE RIGHT OF WITHDRAWAL:
+Before completing your order, you expressly agreed that the provision of the digital content would begin before the expiry of the statutory 14-day withdrawal period. Once the provision of the digital content has begun, your statutory right of withdrawal expires prematurely in accordance with Section 356 (5) of the German Civil Code (BGB).
+
+---
+[DE]
+AUTOMATISCHE FREISCHALTUNG:
+Die Freischaltung Ihrer gekauften Turniere erfolgt automatisch! 
+Unser Webhook ordnet den Kauf anhand Ihrer beim Kauf auf Payhip 
+angegebenen E-Mail-Adresse direkt Ihrem Benutzerkonto zu.
+
+Das Guthaben unter "Anzahl erlaubter Turniere" (allowed) 
+wurde auf Ihrem Konto um die gekaufte Anzahl Turniere erhöht.
+
+SCHRITTE ZUR NUTZUNG:
+1. Melden Sie sich auf unserer Plattform mit Ihrer E-Mail-Adresse an.
+2. Gehen Sie auf "Neues Turnier erstellen".
+3. Ihre freigeschalteten Turniere stehen Ihnen sofort zur Verfügung.
+
+SUPPORT & HILFE:
+Sollten Sie Fragen zur Einrichtung oder Turnierdurchführung haben 
+oder Ihre E-Mail-Adresse beim Kauf abweichen, kontaktieren Sie 
+unseren Support bitte per E-Mail oder WhatsApp
+Bitte bewahren Sie diese Nachricht für Ihre Unterlagen auf.
+
+INFORMATIONEN ZUM ERLÖSCHEN DES WIDERRUFSRECHTS:
+Sie haben vor Abschluss der Bestellung ausdrücklich zugestimmt, dass mit der Bereitstellung der digitalen Inhalte vor Ablauf der gesetzlichen 14-tägigen Widerrufsfrist begonnen wird. Mit Beginn der Bereitstellung ist Ihr gesetzliches Widerrufsrecht gemäß § 356 Abs. 5 BGB vorzeitig erloschen.
+
+Good luck with your tournaments! / Viel Erfolg bei Ihren Turnieren!
