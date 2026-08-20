@@ -1,0 +1,167 @@
+@import shared.model.*
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+@import pages.CompetitionWelcome.*
+
+@(comp: Competition, participants: Seq[Pant], stages: Seq[Stage], sortCol: String, sortAsc: Boolean, isFuture: Boolean)
+
+<div class="container mt-4">
+    <!-- Competition Header Card -->
+    <div class="card shadow-sm mb-4 border-success">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h3 class="h5 mb-0"><i class="bi bi-trophy-fill me-2"></i>@comp.name</h3>
+            <div class="d-flex align-items-center gap-2">
+                @if(isFuture) {
+                    <button class="btn btn-warning btn-sm text-dark fw-bold" onclick="openPublicRegistration('@comp.id.value')">
+                        <i class="bi bi-pencil-square me-1"></i>Online-Anmeldung
+                    </button>
+                }
+                <button class="btn btn-outline-light btn-sm" onclick="appLoadPage('TourneyWelcome', '')">
+                    <i class="bi bi-arrow-left me-1"></i>Turnier-Übersicht
+                </button>
+            </div>
+        </div>
+        <div class="card-body bg-light">
+            <div class="row text-center small">
+                <div class="col-md border-end">
+                    <span class="text-muted fw-bold">Sportart:</span> @gM(comp.category.msgCode)
+                </div>
+                <div class="col-md border-end">
+                    <span class="text-muted fw-bold">Wettbewerb-Typ:</span> @gM(comp.typ.msgCode)
+                </div>
+                <div class="col-md border-end">
+                    <span class="text-muted fw-bold">Startzeit:</span> @base.Global.formatDateTime(comp.startDate)
+                </div>
+                <div class="col-md border-end">
+                    <span class="text-muted fw-bold">TTR-Bereich:</span> @{comp.lowLevel.getOrElse(0)} - @{comp.upperLevel.getOrElse("∞")}
+                </div>
+                <div class="col-md">
+                    <span class="text-muted fw-bold">Status:</span> 
+                    <span class="badge @{if(comp.status == CompStatus.RUN) "bg-warning text-dark" else if(comp.status == CompStatus.FIN) "bg-secondary" else "bg-info text-dark"}">@gM(comp.status.msgCode)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stages / Rounds Section -->
+    <div class="card shadow-sm border-info mb-4">
+        <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
+            <h4 class="h5 mb-0 fw-bold"><i class="bi bi-layers me-2"></i>Austragungsphasen & Runden</h4>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light small text-muted">
+                        <tr>
+                            <th class="ps-3">Phase / Runden</th>
+                            <th>Teilnehmer</th>
+                            <th>Runden</th>
+                            <th>Status</th>
+                            <th class="text-end pe-3">Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(stages.isEmpty) {
+                            <tr><td colspan="5" class="text-center py-4 text-muted">Noch keine Austragungsphasen gestartet.</td></tr>
+                        }
+                        @stages.map { r =>
+                            <tr>
+                                <td class="ps-3 fw-bold">@r.name</td>
+                                <td>@r.noPlayers</td>
+                                <td>@r.getNoRounds</td>
+                                <td>
+                                    <span class="badge @{r.status match {
+                                        case StageStatus.CFG => "bg-secondary"
+                                        case StageStatus.AUS => "bg-info text-dark"
+                                        case StageStatus.EIN => "bg-warning text-dark"
+                                        case StageStatus.FIN => "bg-success"
+                                        case _ => "bg-light text-dark"
+                                    }}">@gM(r.status.msgCode)</span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <button class="btn btn-sm btn-primary" onclick="appLoadPage('StageAdmin', '@r.id.value')">
+                                        <i class="bi bi-eye me-1"></i>Ergebnisse / Runden anzeigen
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Participants Accordion -->
+    <div class="accordion mb-4 shadow-sm" id="participantsAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingParticipants">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParticipants" aria-expanded="true" aria-controls="collapseParticipants">
+                    <i class="bi bi-people me-2"></i>Teilnehmerliste (@participants.length)
+                </button>
+            </h2>
+            <div id="collapseParticipants" class="accordion-collapse collapse show" aria-labelledby="headingParticipants" data-bs-parent="#participantsAccordion">
+                <div class="accordion-body p-0">
+                    <div class="table-responsive">
+                        @defining(comp.typ == CompTyp.DOUBLE || comp.typ == CompTyp.MIXED) { isDoubleComp =>
+                            <table class="table table-sm table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr class="small text-muted text-uppercase">
+                                         <th class="ps-3" style="width: 80px;">
+                                            <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderSno, "onclick")>
+                                                Start-Nr. @sortIcon("sno", sortCol, sortAsc)
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
+                                                @if(isDoubleComp){ Doppel / Paarung }else{ Name } @sortIcon("name", sortCol, sortAsc)
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderClub, "onclick")>
+                                                Verein @sortIcon("club", sortCol, sortAsc)
+                                            </button>
+                                        </th>
+                                        <th class="text-center" style="width: 100px;">
+                                            <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
+                                                TTR @sortIcon("ttr", sortCol, sortAsc)
+                                            </button>
+                                        </th>
+                                        @if(!isDoubleComp) {
+                                            <th class="text-center" style="width: 80px;">
+                                                <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderYear, "onclick")>
+                                                    Jahrgang @sortIcon("year", sortCol, sortAsc)
+                                                </button>
+                                            </th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if(participants.isEmpty) {
+                                        <tr><td colspan="@if(isDoubleComp){4}else{5}" class="text-center py-3 text-muted">Noch keine Teilnehmer angemeldet.</td></tr>
+                                    }
+                                    @participants.map { p =>
+                                        <tr>
+                                            <td class="ps-3">@p.id.startId</td>
+                                            <td class="fw-bold">@p.name</td>
+                                            <td>@p.club</td>
+                                            <td class="text-center">@p.rating</td>
+                                            @if(!isDoubleComp) {
+                                                <td class="text-center">@p.birthYear</td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@sortIcon(col: String, currentSort: String, asc: Boolean) = {
+    @if(col == currentSort) {
+        <i class="bi bi-sort-@{if(asc) "alpha-down" else "alpha-up-alt"} ms-1"></i>
+    }
+}

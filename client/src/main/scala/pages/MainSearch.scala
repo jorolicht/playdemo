@@ -76,17 +76,30 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
         // 3. Initialize all data from server for the new ID
         TourneyDB.init(tourneyId).map {
           case Right(_) => 
+            val tourney = TourneyDB.tourney
+            val isAuthorized = Global.hasTourneyAccess(tourney)
+
             if (isComp) {
               val compOpt = CompetitionDB.competitions.find(c => c != null && (compId == 0 || c.id.value == compId)).orElse(CompetitionDB.competitions.find(_ != null))
               compOpt.foreach { comp =>
                 Global.currentSelection = Global.currentSelection.copy(
-                  tourney = Some(TourneyDB.tourney),
+                  tourney = Some(tourney),
                   competition = Some(comp)
                 )
               }
-              loadPage(CompetitionInfo.name, compOpt.map(_.id.value.toString).getOrElse(""))
+              val compParam = compOpt.map(_.id.value.toString).getOrElse("")
+              if (isAuthorized) {
+                loadPage(CompetitionInfo.name, compParam)
+              } else {
+                loadPage(CompetitionWelcome.name, compParam)
+              }
             } else {
-              loadPage(TourneyInfo.name, "")
+              Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney))
+              if (isAuthorized) {
+                loadPage(TourneyInfo.name, "")
+              } else {
+                loadPage(TourneyWelcome.name, "")
+              }
             }
           case Left(err) => 
             error(s"Failed to initialize tournament $tourneyId: ${err.msgCode}")

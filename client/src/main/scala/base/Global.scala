@@ -111,11 +111,11 @@ object Global:
   var imgUrl  = ""
   var playUrl = ""
   var appMode: String = "home"
-  def isViewMode: Boolean = appMode == "view" || activePageName == "TourneyWelcome"
+  def isViewMode: Boolean = appMode == "view" || activePageName == "TourneyWelcome" || activePageName == "CompetitionWelcome"
   var activePageName: String = ""
   def isTourneyPage(pageName: String): Boolean = 
     Set(
-      "TourneyInfo", "TourneyWelcome", "TourneyAdmin", "CompetitionInfo", "PlayerRegistration", 
+      "TourneyInfo", "TourneyWelcome", "TourneyAdmin", "CompetitionInfo", "CompetitionWelcome", "PlayerRegistration", 
       "PlayerList", "ResultList", "StageAdmin", "StageDraw", 
       "StageInput", "StageResult", "StageScoreSheet", "StageCertificate", "Certificate"
     ).contains(pageName)
@@ -166,7 +166,9 @@ object Global:
     if (isDemoMode) return true
     user match {
       case Some(u) => 
-        u.isTurnierAdmin && (u.org == tourney.organizer || u.username == tourney.organizer || u.roles.contains("administrator"))
+        val isAdminOrMaster = u.roles.exists(r => List("administrator", "editor", "tourney_master").contains(r))
+        val isTourneyAdminOfThis = u.isTurnierAdmin && (u.org == tourney.organizer || u.username == tourney.organizer || u.email == tourney.organizer)
+        isAdminOrMaster || isTourneyAdminOfThis
       case None => false
     }
 
