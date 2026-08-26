@@ -87,24 +87,19 @@ export class MainSearchPage {
    * Selects search type filter ("all", "tourney", or "competition").
    */
   async selectTypeFilter(type: 'all' | 'tourney' | 'competition') {
-    let targetId: string;
+    let target: Locator;
     switch (type) {
       case 'tourney':
-        targetId = 'MainSearch_RadioTypeTourneyId';
+        target = this.radioTypeTourney;
         break;
       case 'competition':
-        targetId = 'MainSearch_RadioTypeCompId';
+        target = this.radioTypeComp;
         break;
       default:
-        targetId = 'MainSearch_RadioTypeAllId';
+        target = this.radioTypeAll;
         break;
     }
-    const label = this.page.locator(`label[for="${targetId}"]`);
-    if (await label.isVisible()) {
-      await label.click();
-    } else {
-      await this.page.locator(`#${targetId}`).click({ force: true });
-    }
+    await target.check({ force: true });
     await this.page.waitForTimeout(500);
   }
 
