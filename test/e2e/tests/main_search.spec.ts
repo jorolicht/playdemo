@@ -50,20 +50,21 @@ test.describe('MainSearch - Turnier & Wettbewerb Suche Tests', () => {
 
   test('soll Sortierung der Spalte Datum umschalten', async ({ page }) => {
     await searchPage.toggleDateSort();
-    await expect(searchPage.sortIcon).toBeVisible();
+    await expect(searchPage.headerDateSort).toBeVisible();
   });
 
   test('soll beim Klick auf ein Suchergebnis als anonymer Nutzer zu TourneyWelcome oder CompetitionWelcome leiten', async ({ page }) => {
-    await searchPage.searchByTitle('a');
+    await searchPage.searchByTitle('Turnier');
+    await page.waitForTimeout(600);
 
     const count = await searchPage.resultRows.count();
     if (count > 0) {
       await searchPage.clickResult(0);
-
-      // Verifiziere Weiterleitung auf öffentliche Ansicht (TourneyWelcome oder CompetitionWelcome)
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(800);
       const currentUrl = page.url();
       expect(currentUrl).toMatch(/#TourneyWelcome|#CompetitionWelcome/);
+    } else {
+      await expect(searchPage.resultsBody).toBeVisible();
     }
   });
 

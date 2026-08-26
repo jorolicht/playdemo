@@ -67,7 +67,7 @@ export class MainViewPage {
    */
   async clickSearch() {
     await this.btnSearch.click();
-    await this.page.waitForURL(/.*#MainSearch/);
+    await expect(this.page.locator('#MainSearch_IdInputTitle')).toBeVisible();
   }
 
   /**

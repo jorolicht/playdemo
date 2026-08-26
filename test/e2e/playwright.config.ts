@@ -11,7 +11,8 @@ export default defineConfig({
     ['list']
   ],
   use: {
-    baseURL: process.env.WP_URL || 'http://localhost:8080',
+    baseURL: process.env.WP_URL || 'https://localhost',
+    ignoreHTTPSErrors: true,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

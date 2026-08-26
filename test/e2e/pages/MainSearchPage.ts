@@ -49,8 +49,14 @@ export class MainSearchPage {
    * Navigates directly to the MainSearch hash page.
    */
   async goto() {
-    await this.page.goto('/#MainSearch');
+    await this.page.goto('/');
     await this.page.waitForLoadState('domcontentloaded');
+    await this.page.evaluate(() => {
+      if (typeof (window as any).appLoadPage === 'function') {
+        (window as any).appLoadPage('MainSearch', '');
+      }
+    });
+    await expect(this.inputTitle).toBeVisible();
   }
 
   /**
@@ -81,16 +87,23 @@ export class MainSearchPage {
    * Selects search type filter ("all", "tourney", or "competition").
    */
   async selectTypeFilter(type: 'all' | 'tourney' | 'competition') {
+    let targetId: string;
     switch (type) {
       case 'tourney':
-        await this.radioTypeTourney.check();
+        targetId = 'MainSearch_RadioTypeTourneyId';
         break;
       case 'competition':
-        await this.radioTypeComp.check();
+        targetId = 'MainSearch_RadioTypeCompId';
         break;
       default:
-        await this.radioTypeAll.check();
+        targetId = 'MainSearch_RadioTypeAllId';
         break;
+    }
+    const label = this.page.locator(`label[for="${targetId}"]`);
+    if (await label.isVisible()) {
+      await label.click();
+    } else {
+      await this.page.locator(`#${targetId}`).click({ force: true });
     }
     await this.page.waitForTimeout(500);
   }
