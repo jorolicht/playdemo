@@ -99,8 +99,8 @@ export class MainSearchPage {
         target = this.radioTypeAll;
         break;
     }
-    await target.check({ force: true });
-    await this.page.waitForTimeout(500);
+    await target.click({ force: true });
+    await this.page.waitForTimeout(400);
   }
 
   /**

@@ -28,9 +28,11 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
   val BtnStartLocal:    HtmlId = genId(name)
   val BtnImportLocal:   HtmlId = genId(name)
 
+  private var isCaptchaVisible = false
+
   def render(param: String = ""): Boolean = 
+    isCaptchaVisible = false
     setMain(cviews.pages.html.UserLogin(Global.user))
-    triggerTurnstile()
     true
 
   override def handleEvent(elem: HTMLElement, event: dom.Event): Unit = 
@@ -154,14 +156,20 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
           dom.window.location.href = Global.homeUrl
         }, 2000)
       case Left(err) =>
-        dom.window.alert(s"Passkey Login fehlgeschlagen: ${err.msg}")
+        showError(s"Passkey Login fehlgeschlagen: ${err.msg}")
     }
 
   private def doLogin(): Unit =
     val login    = getInput(gE(LoginId))
     val password = getInput(gE(PasswordId))
     
-    // Turnstile Token (falls konfiguriert)
+    val errorAlert = dom.document.getElementById("LoginErrorAlert")
+    if (errorAlert != null) {
+      errorAlert.classList.add("d-none")
+      errorAlert.textContent = ""
+    }
+
+    // Turnstile Token (falls Captcha eingeblendet ist)
     val turnstileElements = dom.document.getElementsByName("cf-turnstile-response")
     val turnstileToken = if (turnstileElements.length > 0) {
       turnstileElements(0).asInstanceOf[dom.html.Input].value
@@ -170,7 +178,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
     println(s"doLogin -> sitekey: '${Global.turnstileSitekey}' elements: ${turnstileElements.length} token: '${turnstileToken}'")
 
     if (login.isEmpty || password.isEmpty) {
-      dom.window.alert("Bitte Benutzername/E-Mail und Passwort eingeben.")
+      showError("Bitte E-Mail-Adresse und Passwort eingeben.")
       return
     }
 
@@ -196,5 +204,29 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
           dom.window.location.href = Global.homeUrl
         }, 2000)
       case Left(err) => 
-        dom.window.alert(s"Login fehlgeschlagen: $err")
+        val msg = if (err.msg != null && err.msg.nonEmpty) err.msg else "E-Mail-Adresse oder Passwort ungültig."
+        showError(msg)
+
+        // Dynamisches Risk-Based Captcha aktivieren bei Fehllogins
+        if (Global.turnstileSitekey.nonEmpty) {
+          showDynamicCaptcha()
+        }
+    }
+
+  private def showError(message: String): Unit =
+    val errorAlert = dom.document.getElementById("LoginErrorAlert")
+    if (errorAlert != null) {
+      errorAlert.textContent = message
+      errorAlert.classList.remove("d-none")
+    } else {
+      dom.window.alert(message)
+    }
+
+  private def showDynamicCaptcha(): Unit =
+    val container = dom.document.getElementById("CaptchaContainer")
+    if (container != null && Global.turnstileSitekey.nonEmpty) {
+      isCaptchaVisible = true
+      container.innerHTML = s"""<div class="cf-turnstile mb-3 d-flex justify-content-center" data-sitekey="${Global.turnstileSitekey}"></div>"""
+      container.classList.remove("d-none")
+      triggerTurnstile()
     }

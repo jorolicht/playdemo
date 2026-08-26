@@ -73,44 +73,94 @@ add_action('rest_api_init', function () {
 function pd_api_login_handler($request) {
     $params = $request->get_json_params();
 
-    // Cloudflare Turnstile Verifizierung
+    $email = trim($params['email'] ?? '');
+    $password = $params['password'] ?? '';
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+
+    $ip_fails_key = 'pd_login_fails_ip_' . md5($ip);
+    $ip_lockout_key = 'pd_login_lockout_ip_' . md5($ip);
+
+    // 1. IP Throttling & Account Lockout (Nach 5 Fehllogins: 5 Minuten temporäre Sperre)
+    if (get_transient($ip_lockout_key)) {
+        return new WP_Error(
+            'account_locked',
+            'Zu viele fehlgeschlagene Anmeldeversuche. Dein Zugriff wurde für 5 Minuten temporär gesperrt.',
+            array('status' => 429)
+        );
+    }
+
+    $ip_fails = (int) get_transient($ip_fails_key);
+    $user_fails = 0;
+    $user_obj = null;
+    if (!empty($email) && strpos($email, '@') !== false) {
+        $user_obj = get_user_by('email', $email);
+        if ($user_obj) {
+            $user_fails = (int) get_user_meta($user_obj->ID, 'pd_login_fails_count', true);
+        }
+    }
+
+    $max_fails_before_captcha = 3;
+    $requires_captcha = ($ip_fails >= $max_fails_before_captcha || $user_fails >= $max_fails_before_captcha);
+
+    // 2. Dynamisches Risk-Based Captcha (Erst nach >= 3 Fehllogins erforderlich)
     $turnstile_key = get_option('cfturnstile_key', getenv('TURNSTILE_SITEKEY') ?: '');
-    if (!empty($turnstile_key)) {
+    if (!empty($turnstile_key) && $requires_captcha) {
         $token = $params['turnstileToken'] ?? '';
         $secret_key = get_option('cfturnstile_secret', getenv('TURNSTILE_SECRET') ?: '');
         
         if (empty($token) || empty($secret_key)) {
-            return new WP_Error('turnstile_failed', 'Sicherheitsprüfung fehlgeschlagen (Fehlendes Token).', array('status' => 403));
+            return new WP_Error(
+                'captcha_required',
+                'Aufgrund mehrerer fehlgeschlagener Anmeldeversuche ist eine Sicherheitsüberprüfung (Captcha) erforderlich.',
+                array('status' => 403, 'require_captcha' => true)
+            );
         }
 
         $response = wp_remote_post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
             'body' => [
                 'secret'   => $secret_key,
                 'response' => $token,
-                'remoteip' => $_SERVER['REMOTE_ADDR']
+                'remoteip' => $ip
             ]
         ]);
         
         $body = json_decode(wp_remote_retrieve_body($response), true);
         if (empty($body['success']) || $body['success'] !== true) {
-            return new WP_Error('bot_detected', 'Bitte bestätigen Sie, dass Sie ein Mensch sind.', array('status' => 403));
+            return new WP_Error(
+                'bot_detected',
+                'Sicherheitsüberprüfung fehlgeschlagen. Bitte bestätige, dass du ein Mensch bist.',
+                array('status' => 403, 'require_captcha' => true)
+            );
         }
     }
 
-    if ( empty($params['email']) || empty($params['password']) ) {
+    if ( empty($email) || empty($password) ) {
         return new WP_Error('missing_params', 'E-Mail und Passwort sind erforderlich.', array('status' => 400));
     }
 
     // Beim Login nur E-Mail-Adresse zulassen
-    if (strpos($params['email'], '@') === false) {
+    if (strpos($email, '@') === false) {
         return new WP_Error('login_failed', 'Bitte melde dich mit deiner E-Mail-Adresse an.', array('status' => 403));
     }
 
     // 1. Benutzer suchen nur per E-Mail
-    $user_obj = get_user_by('email', $params['email']);
+    if (!$user_obj) {
+        $user_obj = get_user_by('email', $email);
+    }
 
     if (!$user_obj) {
-        return new WP_Error('login_failed', 'E-Mail-Adresse unbekannt.', array('status' => 403));
+        $new_ip_fails = $ip_fails + 1;
+        set_transient($ip_fails_key, $new_ip_fails, 15 * MINUTE_IN_SECONDS);
+        if ($new_ip_fails >= 5) {
+            set_transient($ip_lockout_key, true, 5 * MINUTE_IN_SECONDS);
+            return new WP_Error('account_locked', 'Zu viele fehlgeschlagene Anmeldeversuche. Zugriff für 5 Minuten gesperrt.', array('status' => 429));
+        }
+        $req_cap = ($new_ip_fails >= 3);
+        return new WP_Error(
+            $req_cap ? 'login_failed_captcha' : 'login_failed',
+            'E-Mail-Adresse oder Passwort ungültig.',
+            array('status' => 403, 'require_captcha' => $req_cap)
+        );
     }
 
     // 2. Status prüfen, bevor wir den eigentlichen Login versuchen
@@ -124,16 +174,36 @@ function pd_api_login_handler($request) {
 
     // 3. Login Versuch
     $creds = array(
-        'user_login'    => $user_obj->user_login, // Wir nehmen den echten User-Login aus dem gefundenen Objekt
-        'user_password' => $params['password'],
+        'user_login'    => $user_obj->user_login,
+        'user_password' => $password,
         'remember'      => true
     );
 
     $user = wp_signon($creds, false);
 
     if (is_wp_error($user)) {
-        return new WP_Error('login_failed', 'Passwort ungültig.', array('status' => 403));
+        $new_ip_fails = $ip_fails + 1;
+        $new_user_fails = $user_fails + 1;
+        set_transient($ip_fails_key, $new_ip_fails, 15 * MINUTE_IN_SECONDS);
+        update_user_meta($user_obj->ID, 'pd_login_fails_count', $new_user_fails);
+
+        if ($new_ip_fails >= 5 || $new_user_fails >= 5) {
+            set_transient($ip_lockout_key, true, 5 * MINUTE_IN_SECONDS);
+            return new WP_Error('account_locked', 'Zu viele fehlgeschlagene Anmeldeversuche. Zugriff für 5 Minuten gesperrt.', array('status' => 429));
+        }
+
+        $req_cap = ($new_ip_fails >= 3 || $new_user_fails >= 3);
+        return new WP_Error(
+            $req_cap ? 'login_failed_captcha' : 'login_failed',
+            'E-Mail-Adresse oder Passwort ungültig.',
+            array('status' => 403, 'require_captcha' => $req_cap)
+        );
     }
+
+    // Erfolgreicher Login: Fehllogin-Zähler zurücksetzen
+    delete_transient($ip_fails_key);
+    delete_transient($ip_lockout_key);
+    delete_user_meta($user->ID, 'pd_login_fails_count');
 
     // EXPLIZIT: Cookies für die gesamte Domain setzen
     wp_set_current_user($user->ID);
