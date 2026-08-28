@@ -88,19 +88,28 @@ export class MainSearchPage {
    */
   async selectTypeFilter(type: 'all' | 'tourney' | 'competition') {
     let target: Locator;
+    let targetId: string;
     switch (type) {
       case 'tourney':
         target = this.radioTypeTourney;
+        targetId = 'MainSearch_RadioTypeTourneyId';
         break;
       case 'competition':
         target = this.radioTypeComp;
+        targetId = 'MainSearch_RadioTypeCompId';
         break;
       default:
         target = this.radioTypeAll;
+        targetId = 'MainSearch_RadioTypeAllId';
         break;
     }
-    await target.click({ force: true });
-    await this.page.waitForTimeout(400);
+    const label = this.page.locator(`label[for="${targetId}"]`);
+    if (await label.count() > 0) {
+      await label.click();
+    } else {
+      await target.click({ force: true });
+    }
+    await this.page.waitForTimeout(300);
   }
 
   /**
