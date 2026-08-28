@@ -174,3 +174,42 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 
 ### 12.2 Nicht-Admin Nutzer (🌐 / 👤)
 - [x] **TC-MG-06 [🌐/👤]:** Versuch, den URL-Hash `#Management` ohne ausreichende Admin-Rechte aufzurufen. Der Zugriff wird verweigert und die Anwendung leitet auf die Startseite um.
+
+---
+
+## 13. Cross-Browser & Responsiveness (Viewport-Testing)
+
+### 13.1 Anonymer & Angemeldeter Nutzer (🌐 / 👤)
+- [x] **TC-CB-01 [🌐]:** Mobile Viewport (375x667) & Hamburger-Menü. Validierung von sichtbarem Menü-Toggler und aufklappbaren Links im mobilen Layout.
+- [x] **TC-CB-02 [🌐]:** Tablet Viewport (768x1024) & Grid-Anpassung. Validierung von mehrspaltigen Layouts und Formularelementen.
+- [x] **TC-CB-03 [🌐]:** Desktop Viewport (1280x800) & Nebeneinander-Darstellung. Vollständige Sichtbarkeit der Haupt-Navigationsleiste ohne Hamburger-Button.
+- [x] **TC-CB-04 [🌐]:** Hoch- / Querformat-Umschaltung (Portrait vs. Landscape). Dynamische Anpassung des Viewports ohne Layout-Abbrüche.
+
+---
+
+## 14. Netzwerk-Resilienz & Error Handling (API Interception)
+
+### 14.1 Anonymer & Angemeldeter Nutzer (🌐 / 👤)
+- [x] **TC-NR-01 [🌐]:** Injektion von Server-Fehlern (HTTP 500 / 503). Simulation von Serverausfällen via `page.route()`, UI bleibt stabil und zeigt Fehlermeldungen.
+- [x] **TC-NR-02 [🌐]:** Injektion von Rate-Limiting (HTTP 429 Too Many Requests). Verifizierung der Account-Lockout Fehlermeldung bei geblocktem Login.
+- [x] **TC-NR-03 [🌐]:** Simulation von hoher Netzwerk-Latenz (Throttling / Delay). Verifizierung, dass die UI auch bei verlangsamter API-Antwort stabil bleibt.
+- [x] **TC-NR-04 [🌐]:** Simulation von Netzwerkausfall / Verbindungsabbruch (Network Abort). Prüfung, ob UI Verbindungsunterbrechungen abfängt.
+
+---
+
+## 15. Session-Management, Cookies & Security Route Guards
+
+### 15.1 Anonymer & Angemeldeter Nutzer (🌐 / 👤)
+- [x] **TC-SM-01 [🌐]:** Session-Management & Storage-Clearance bei Logout. Automatisches Löschen aller Cookies, `sessionStorage` und `localStorage` Tokens.
+- [x] **TC-SM-02 [🌐]:** Route Guard `#Management` (Zugriffsschutz für geschützte Admin-URL). Unbefugter Direktaufruf wird abgefangen und umgeleitet.
+- [x] **TC-SM-03 [🌐]:** Route Guard `#TourneyAdmin` (Zugriffsschutz für fremde Turnierverwaltung). Unbefugter Aufruf leitet auf `TourneyWelcome` um.
+
+---
+
+## 16. Input-Boundary, Edge Cases & Sicherheits-Injektionen
+
+### 16.1 Anonymer & Angemeldeter Nutzer (🌐 / 👤)
+- [x] **TC-IB-01 [🌐]:** Extreme String-Längen im Suchfeld (Boundary-Testing). Eingabe von 500+ Zeichen bricht die UI nicht und erzeugt keine JS-Fehler.
+- [x] **TC-IB-02 [🌐]:** XSS & HTML-Injektionen (`<script>alert(1)</script>`). Maskierung von Script-Payloads und HTML-Attributen in Eingabefeldern.
+- [x] **TC-IB-03 [🌐]:** Unicode, Emojis & Sonderzeichen (`äöüß`, `🏆`, `@#$&*()!`). Korrekte Verarbeitung und Anzeige von Unicode-Zeichenketten.
+- [x] **TC-IB-04 [🌐]:** Dateivalidierung beim Spielerimport (`setInputFiles()`). Überprüfung der Validierungslogik bei ungültigen Dateiformaten.
