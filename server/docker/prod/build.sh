@@ -26,6 +26,12 @@ set -a                       # Schaltet "Auto-Export" ein
 source "$ENV_FILE"           # Liest die Datei ein und exportiert jede Zeile automatisch
 set +a                       # Schaltet "Auto-Export" wieder aus
 
+# Traefik ACME Zertifikatsspeicher vorbereiten (erfordert strikte 600 Rechte)
+if [ ! -f "$SCRIPT_DIR/acme.json" ]; then
+    touch "$SCRIPT_DIR/acme.json"
+fi
+chmod 600 "$SCRIPT_DIR/acme.json"
+
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --build
 
 echo "✅ Docker Images neu erstellt, Container gestartet."
