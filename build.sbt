@@ -30,8 +30,8 @@ def getEnvValue(base: File, key: String, defaultVal: String): String = {
 val includeAddon: Boolean  = true // always include addon for now, can be disabled later if needed
 val projectRootDir         = file(".")
 val appOrganization        = getEnvValue(projectRootDir, "APP_ORGANIZATION", "org.jorolicht")
-val appVersion             = getEnvValue(projectRootDir, "APP_VERSION", "1.0.1")
-val appDate                = getEnvValue(projectRootDir, "APP_DATE", "2026-08-18")
+val appVersion             = getEnvValue(projectRootDir, "APP_VERSION", "1.0.2")
+val appDate                = getEnvValue(projectRootDir, "APP_DATE", "2026-08-30")
 val appMaintainer          = getEnvValue(projectRootDir, "APP_MAINTAINER", "Robert Lichtenegger <robert.lichtenegger@gmail.com>")
 
 ThisBuild / scalaVersion := "3.3.7"
