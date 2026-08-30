@@ -47,6 +47,35 @@ git clone https://github.com/jorolicht/playdemo.git
 cd playdemo
 ```
 
+
+ ┃   Es reicht technisch aus, nur das Verzeichnis server/docker/prod auf den Produktivserver zu übertragen (z. B. per SCP, ZIP oder Git Sparse-Checkout).
+ ┃
+ ┃   ### Warum?
+ ┃
+ ┃   Auf dem Produktivserver wird der Quellcode (Scala, Play, Twirl usw.) nicht mehr kompiliert. Stattdessen zieht docker compose die fertig gebauten Docker-Images
+ ┃   (jorolich/playsrv-image:1.0.2, wp-gmp-image, etc.) direkt von Docker Hub.
+ ┃
+ ┃   ### Gegenüberstellung der zwei Möglichkeiten:
+ ┃
+ ┃   1. Option A: Ganzes Repository klonen (Empfohlen für einfache Wartung)
+ ┃       • Vorteil: Sehr einfach per git clone auszuführen und mit git pull auf dem Server aktuell zu halten.
+ ┃       • Nachteil: Verbraucht etwas mehr Speicherplatz für Quellcode, der auf dem Produktivserver nicht direkt ausgeführt wird.
+ ┃   2. Option B: Nur server/docker/prod auf den Server kopieren
+ ┃       • Vorteil: Minimaler Speicherplatz, kein Quellcode auf dem Server.
+ ┃       • Voraussetzung: Es werden nur die Dateien aus server/docker/prod (docker-compose.yml, .env, die Shell-Skripte und die Unterordner playsrv/, wordpress/,
+ ┃       wp-cli/) auf dem Server benötigt.
+ ┃       • Umsetzung per Git Sparse-Checkout (falls nur dieser Ordner per Git gezogen werden soll):
+ ┃         mkdir playdemo-prod && cd playdemo-prod
+ ┃         git init
+ ┃         git remote add origin https://github.com/jorolicht/playdemo.git
+ ┃         git config core.sparseCheckout true
+ ┃         echo "server/docker/prod/*" >> .git/info/sparse-checkout
+ ┃         git pull origin tourney
+ ┃
+ ┃
+
+
+
 ---
 
 ## 4. Produktiv-Umgebung konfigurieren (`server/docker/prod/.env`)
