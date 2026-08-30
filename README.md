@@ -206,9 +206,7 @@ Set environment and start application in `server/docker/dev` directory using the
 <projectbase>/server/docker/dev> ./start.sh
 ```
 
-Or run docker compose manually from `server/docker/dev`:
-```
-<projectbase>/server/docker/dev> docker compose -f docker-compose.yml --env-file ../../env/docker.env up -d
+<projectbase>/server/docker/dev> docker compose -f docker-compose.yml --env-file .env up -d
 ```
 
 Check running containers:
