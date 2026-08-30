@@ -1,15 +1,16 @@
 #!/bin/bash
 
 # Pfad zur Environment-Datei
-ENV_FILE="../../env/dev.env"
-COMPOSE_FILE="docker-compose.yml"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="$SCRIPT_DIR/.env"
+COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
 
 # Liste der zu installierenden Plugins
 PLUGINS="wp-members hcaptcha-for-forms-and-more wp-mail-smtp loco-translate wp-webauthn"
 
 set -euo pipefail
 set -a                       # Schaltet "Auto-Export" ein
-source $ENV_FILE             # Liest die Datei ein und exportiert jede Zeile automatisch
+source "$ENV_FILE"           # Liest die Datei ein und exportiert jede Zeile automatisch
 set +a                       # Schaltet "Auto-Export" wieder aus
 
 # WPCLI="docker compose exec -T wp-cli wp --path=/var/www/html --allow-root"
