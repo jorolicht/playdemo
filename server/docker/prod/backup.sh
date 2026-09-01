@@ -26,7 +26,12 @@ fi
 # Configuration
 CONTAINER_DB="wp-db-instance"
 DB_USER="root"
-DB_PASS="${DB_ROOT_PASSWORD:-wpUserPw4577R}"
+DB_PASS="${DB_ROOT_PASSWORD:-}"
+
+if [ -z "$DB_PASS" ]; then
+    echo "❌ Fehler: DB_ROOT_PASSWORD ist nicht in .env definiert!"
+    exit 1
+fi
 
 # Google Drive Info
 GDRIVE_REMOTE="${GDRIVE_REMOTE:-gooDrive}"
