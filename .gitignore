@@ -46,6 +46,7 @@ server/docker/dev/backups/
 
 server/docker/prod/.env
 server/docker/prod/.env_turnier-service.info
+server/docker/prod/docker-compose.yml
 server/docker/prod/acme.json
 server/docker/prod/logs
 server/docker/prod/wp_data
