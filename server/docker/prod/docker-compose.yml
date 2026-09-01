@@ -3,7 +3,7 @@ name: ${APP_NAME}
 services:
   # Reverse Proxy (Traefik), der den HTTPS-Traffic (Port 443) verwaltet
   reverse-proxy:
-    image: traefik:v3.7.7
+    image: traefik:latest
     restart: unless-stopped
     command:
       - "--log.level=INFO"

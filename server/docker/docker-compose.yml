@@ -168,7 +168,7 @@ services:
   # ----------------------------------------------------------------------------
 
   reverse-proxy-prod:
-    image: traefik:v3.7.7
+    image: traefik:latest
     container_name: prod-reverse-proxy
     restart: unless-stopped
     profiles:
