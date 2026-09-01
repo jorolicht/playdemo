@@ -1,0 +1,186 @@
+name: ${APP_NAME}
+
+services:
+  # Reverse Proxy (Traefik), der den HTTPS-Traffic (Port 443) verwaltet
+  reverse-proxy:
+    image: traefik:v3.7.7
+    restart: unless-stopped
+    command:
+      - "--log.level=INFO"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+
+      - "--certificatesresolvers.myresolver.acme.email=robert.lichenegger@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/acme.json"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock   # Zugriff auf Docker API
+      - ./acme.json:/acme.json
+    networks:
+      - proxy
+
+  wordpress:
+    image: jorolich/wp-gmp-image:latest
+    container_name: wp-gmp-instance
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      TURNSTILE_SITEKEY: ${TURNSTILE_SITEKEY}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET}
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_HOME', "${WP_URL}" );
+        define( 'WP_SITEURL', "${WP_URL}" );
+        define( 'PLAY_SERVER_URL', "${PLAY_SERVER_URL}" );
+    expose:
+      - "80"
+    volumes:
+      - ./wp_data:/var/www/html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.entrypoints=websecure"
+      - "traefik.http.routers.wordpress.tls.certresolver=myresolver"
+      - "traefik.http.routers.wordpress.rule=Host(`rolicht.de`) && PathPrefix(`/`)"
+      - "traefik.http.routers.wordpress.tls=true"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy"
+    networks:
+      - proxy
+      - backend
+
+  wp-cli:
+    image: jorolich/wp-cli-image:latest
+    container_name: wp-cli-instance
+    user: root
+    volumes:
+      - ./wp_data:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+    command: |
+      bash -c '
+      echo "Warte auf WordPress-Dateien..."
+      until [ -f /var/www/html/wp-config.php ]; do
+        echo "Warte auf wp-config.php..."
+        sleep 2
+      done
+      echo "WordPress-Dateien gefunden."
+
+      echo "Warte auf Datenbank-Verbindung..."
+      until wp db check --path=/var/www/html --allow-root; do
+        echo "Datenbank noch nicht erreichbar. Warte..."
+        sleep 2
+      done
+      echo "Datenbank-Verbindung erfolgreich hergestellt!"
+
+      if ! wp core is-installed --path=/var/www/html --allow-root; then
+          echo "Installiere WordPress..."
+          wp core install \
+              --path=/var/www/html \
+              --url="${WP_URL}" \
+              --title="${WP_TITLE}" \
+              --admin_user="${WP_ADMIN_USER}" \
+              --admin_password="${WP_ADMIN_PASSWORD}" \
+              --admin_email="${WP_ADMIN_EMAIL}" \
+              --skip-email \
+              --allow-root
+          echo "Installation abgeschlossen."
+      else
+          echo "WordPress ist bereits installiert."
+      fi
+
+      tail -f /dev/null
+      '
+
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    container_name: wp-db-instance
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s      
+    networks:
+      - backend
+
+  playsrv:
+    image: jorolich/playsrv-image:latest
+    container_name: playsrv-instance
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.playsrv.entrypoints=websecure"
+      - "traefik.http.routers.playsrv.tls.certresolver=myresolver"
+      - "traefik.http.routers.playsrv.rule=Host(`rolicht.de`) && PathPrefix(`/srv`)"
+      - "traefik.http.routers.playsrv.tls=true"
+      - "traefik.http.services.playsrv.loadbalancer.server.port=${PLAY_HTTP_PORT}"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.playsrv.middlewares=playsrv-strip"
+      - "traefik.http.middlewares.playsrv-strip.stripprefix.prefixes=/srv"
+    environment:
+      APP_VERSION: ${APP_VERSION}
+      APP_ENVIRONMENT: ${APP_ENVIRONMENT}
+      APP_DATE: ${APP_DATE}   
+      PLAY_LOGFILE_PATH: ${APP_HOME}/logs
+      PLAY_PIDFILE_PATH: ${PLAY_PIDFILE_PATH}
+      DB_DEFAULT_URL: ${DB_DEFAULT_URL}
+      DB_DEFAULT_DRIVER: ${DB_DEFAULT_DRIVER}
+      DB_DEFAULT_USERNAME: ${DB_DEFAULT_USERNAME}
+      DB_DEFAULT_PASSWORD: ${DB_DEFAULT_PASSWORD}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      PLAY_HTTP_PORT: ${PLAY_HTTP_PORT}
+      PLAY_HTTP_HOST: ${PLAY_HTTP_HOST}
+      PLAY_HTTP_SECRET_KEY: ${PLAY_HTTP_SECRET_KEY}
+      PLAY_MAILER_HOST: ${PLAY_MAILER_HOST}
+      PLAY_MAILER_PORT: ${PLAY_MAILER_PORT}
+      PLAY_MAILER_USER: ${PLAY_MAILER_USER}
+      PLAY_MAILER_PASSWORD: ${PLAY_MAILER_PASSWORD}
+      PLAY_MAILER_DEBUG: ${PLAY_MAILER_DEBUG}
+      PLAY_MAILER_MOCK: ${PLAY_MAILER_MOCK}
+    expose:
+     - "${PLAY_HTTP_PORT}"
+    volumes:
+      - "./logs:${APP_HOME}/logs:rw"
+    depends_on:
+      - db
+    networks:
+      - proxy
+      - backend 
+
+networks:
+  proxy:
+    name: proxy
+  backend:
+    name: backend
