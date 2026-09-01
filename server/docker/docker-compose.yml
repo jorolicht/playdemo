@@ -1,0 +1,363 @@
+name: ${APP_NAME:-playdemo}
+
+# ==============================================================================
+# UNIFIZIERTE DOCKER-COMPOSE KONFIGURATION MIT PROFILEN ("dev" & "prod")
+# ==============================================================================
+# Aufruf für Entwicklungs-Umgebung (DEV):
+#   docker compose --profile dev --env-file ./dev/.env up -d
+#
+# Aufruf für Produktions-Umgebung (PROD):
+#   docker compose --profile prod --env-file ./prod/.env up -d
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # DEV SERVICES (Profile: "dev")
+  # ----------------------------------------------------------------------------
+
+  reverse-proxy-dev:
+    image: traefik:v3.7.7
+    container_name: dev-reverse-proxy
+    restart: unless-stopped
+    profiles:
+      - dev
+    command:
+      - "--log.level=DEBUG"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--providers.file.filename=/etc/traefik/dynamic_config.toml"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./dev/certs:/etc/traefik/certs:ro
+      - ./dev/dynamic_config.toml:/etc/traefik/dynamic_config.toml:ro
+    networks:
+      - proxy-dev
+
+  wordpress-dev:
+    image: jorolich/wp-gmp-image:latest
+    container_name: wp-gmp-dev
+    restart: unless-stopped
+    profiles:
+      - dev
+    depends_on:
+      db-dev:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db-dev
+      WORDPRESS_DB_USER: ${DB_USER:-wpuser}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wpUserPw4577}
+      WORDPRESS_DB_NAME: ${DB_NAME:-wordpress}
+      TURNSTILE_SITEKEY: ${TURNSTILE_SITEKEY}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET}
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_HOME', "${WP_URL:-http://localhost:8080}" );
+        define( 'WP_SITEURL', "${WP_URL:-http://localhost:8080}" );
+        define( 'PLAY_SERVER_URL', "${PLAY_SERVER_URL:-http://backend:9500}" );
+    expose:
+      - "80"
+    volumes:
+      - ./dev/wp_data:/var/www/html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.entrypoints=websecure"
+      - "traefik.http.routers.wordpress.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.wordpress.tls=true"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy-dev"
+    networks:
+      - proxy-dev
+      - backend-dev
+
+  wp-cli-dev:
+    image: jorolich/wp-cli-image:latest
+    container_name: wp-cli-dev
+    profiles:
+      - dev
+    user: root
+    volumes:
+      - ./dev/wp_data:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db-dev
+      WORDPRESS_DB_USER: ${DB_USER:-wpuser}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wpUserPw4577}
+      WORDPRESS_DB_NAME: ${DB_NAME:-wordpress}
+    depends_on:
+      db-dev:
+        condition: service_healthy
+    networks:
+      - backend-dev
+
+  db-dev:
+    image: mariadb:10.11
+    container_name: wp-db-dev
+    restart: unless-stopped
+    profiles:
+      - dev
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-wpUserPw4577R}
+      MYSQL_DATABASE: ${DB_NAME:-wordpress}
+      MYSQL_USER: ${DB_USER:-wpuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-wpUserPw4577}
+    volumes:
+      - ./dev/db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-u${DB_USER:-wpuser}", "-p${DB_PASSWORD:-wpUserPw4577}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - backend-dev
+
+  playsrv-dev:
+    image: jorolich/playsrv-image:latest
+    container_name: playsrv-dev
+    restart: unless-stopped
+    profiles:
+      - dev
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.playsrv.entrypoints=websecure"
+      - "traefik.http.routers.playsrv.rule=PathPrefix(`/srv`)"
+      - "traefik.http.routers.playsrv.tls=true"
+      - "traefik.http.services.playsrv.loadbalancer.server.port=${PLAY_HTTP_PORT:-9500}"
+      - "traefik.docker.network=proxy-dev"
+      - "traefik.http.routers.playsrv.middlewares=playsrv-strip"
+      - "traefik.http.middlewares.playsrv-strip.stripprefix.prefixes=/srv"
+    environment:
+      APP_VERSION: ${APP_VERSION:-1.0.2}
+      APP_ENVIRONMENT: ${APP_ENVIRONMENT:-development}
+      APP_DATE: ${APP_DATE:-2026-08-30}   
+      PLAY_LOGFILE_PATH: ${APP_HOME:-/app}/logs
+      PLAY_PIDFILE_PATH: ${PLAY_PIDFILE_PATH:-/dev/null}
+      DB_DEFAULT_URL: ${DB_DEFAULT_URL:-jdbc:mysql://db-dev:3306/trnydb}
+      DB_DEFAULT_DRIVER: ${DB_DEFAULT_DRIVER:-com.mysql.cj.jdbc.Driver}
+      DB_DEFAULT_USERNAME: ${DB_DEFAULT_USERNAME:-playuser}
+      DB_DEFAULT_PASSWORD: ${DB_DEFAULT_PASSWORD:-playpassword}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      PLAY_HTTP_PORT: ${PLAY_HTTP_PORT:-9500}
+      PLAY_HTTP_HOST: ${PLAY_HTTP_HOST:-backend}
+      PLAY_HTTP_SECRET_KEY: ${PLAY_HTTP_SECRET_KEY}
+      PLAY_MAILER_HOST: ${PLAY_MAILER_HOST}
+      PLAY_MAILER_PORT: ${PLAY_MAILER_PORT}
+      PLAY_MAILER_USER: ${PLAY_MAILER_USER}
+      PLAY_MAILER_PASSWORD: ${PLAY_MAILER_PASSWORD}
+      PLAY_MAILER_DEBUG: ${PLAY_MAILER_DEBUG:-yes}
+      PLAY_MAILER_MOCK: ${PLAY_MAILER_MOCK:-yes}
+    expose:
+      - "${PLAY_HTTP_PORT:-9500}"
+    volumes:
+      - "./dev/logs:${APP_HOME:-/app}/logs:rw"
+    depends_on:
+      - db-dev
+    networks:
+      - proxy-dev
+      - backend-dev
+
+
+  # ----------------------------------------------------------------------------
+  # PROD SERVICES (Profile: "prod")
+  # ----------------------------------------------------------------------------
+
+  reverse-proxy-prod:
+    image: traefik:v3.7.7
+    container_name: prod-reverse-proxy
+    restart: unless-stopped
+    profiles:
+      - prod
+    command:
+      - "--log.level=INFO"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.myresolver.acme.email=${MY_EMAIL:-robert.lichtenegger@gmail.com}"
+      - "--certificatesresolvers.myresolver.acme.storage=/acme.json"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./prod/acme.json:/acme.json
+    networks:
+      - proxy-prod
+
+  wordpress-prod:
+    image: jorolich/wp-gmp-image:latest
+    container_name: wp-gmp-prod
+    restart: unless-stopped
+    profiles:
+      - prod
+    depends_on:
+      db-prod:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db-prod
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      TURNSTILE_SITEKEY: ${TURNSTILE_SITEKEY}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET}
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_HOME', "${WP_URL}" );
+        define( 'WP_SITEURL', "${WP_URL}" );
+        define( 'PLAY_SERVER_URL', "${PLAY_SERVER_URL}" );
+    expose:
+      - "80"
+    volumes:
+      - ./prod/wp_data:/var/www/html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.entrypoints=websecure"
+      - "traefik.http.routers.wordpress.tls.certresolver=myresolver"
+      - "traefik.http.routers.wordpress.rule=Host(`${MY_DOMAIN:-rolicht.de}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.wordpress.tls=true"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy-prod"
+    networks:
+      - proxy-prod
+      - backend-prod
+
+  wp-cli-prod:
+    image: jorolich/wp-cli-image:latest
+    container_name: wp-cli-prod
+    profiles:
+      - prod
+    user: root
+    volumes:
+      - ./prod/wp_data:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db-prod
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+    depends_on:
+      db-prod:
+        condition: service_healthy
+    networks:
+      - backend-prod
+    command: |
+      bash -c '
+      echo "Warte auf WordPress-Dateien..."
+      until [ -f /var/www/html/wp-config.php ]; do
+        echo "Warte auf wp-config.php..."
+        sleep 2
+      done
+      echo "WordPress-Dateien gefunden."
+
+      echo "Warte auf Datenbank-Verbindung..."
+      until wp db check --path=/var/www/html --allow-root; do
+        echo "Datenbank noch nicht erreichbar. Warte..."
+        sleep 2
+      done
+      echo "Datenbank-Verbindung erfolgreich hergestellt!"
+
+      if ! wp core is-installed --path=/var/www/html --allow-root; then
+          echo "Installiere WordPress..."
+          wp core install \
+              --path=/var/www/html \
+              --url="${WP_URL}" \
+              --title="${WP_TITLE}" \
+              --admin_user="${WP_ADMIN_USER}" \
+              --admin_password="${WP_ADMIN_PASSWORD}" \
+              --admin_email="${WP_ADMIN_EMAIL}" \
+              --skip-email \
+              --allow-root
+          echo "Installation abgeschlossen."
+      else
+          echo "WordPress ist bereits installiert."
+      fi
+
+      tail -f /dev/null
+      '
+
+  db-prod:
+    image: mariadb:10.11
+    container_name: wp-db-prod
+    restart: unless-stopped
+    profiles:
+      - prod
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./prod/db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s      
+    networks:
+      - backend-prod
+
+  playsrv-prod:
+    image: jorolich/playsrv-image:latest
+    container_name: playsrv-prod
+    restart: unless-stopped
+    profiles:
+      - prod
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.playsrv.entrypoints=websecure"
+      - "traefik.http.routers.playsrv.tls.certresolver=myresolver"
+      - "traefik.http.routers.playsrv.rule=Host(`${MY_DOMAIN:-rolicht.de}`) && PathPrefix(`/srv`)"
+      - "traefik.http.routers.playsrv.tls=true"
+      - "traefik.http.services.playsrv.loadbalancer.server.port=${PLAY_HTTP_PORT:-9500}"
+      - "traefik.docker.network=proxy-prod"
+      - "traefik.http.routers.playsrv.middlewares=playsrv-strip"
+      - "traefik.http.middlewares.playsrv-strip.stripprefix.prefixes=/srv"
+    environment:
+      APP_VERSION: ${APP_VERSION}
+      APP_ENVIRONMENT: ${APP_ENVIRONMENT}
+      APP_DATE: ${APP_DATE}   
+      PLAY_LOGFILE_PATH: ${APP_HOME:-/app}/logs
+      PLAY_PIDFILE_PATH: ${PLAY_PIDFILE_PATH}
+      DB_DEFAULT_URL: ${DB_DEFAULT_URL}
+      DB_DEFAULT_DRIVER: ${DB_DEFAULT_DRIVER}
+      DB_DEFAULT_USERNAME: ${DB_DEFAULT_USERNAME}
+      DB_DEFAULT_PASSWORD: ${DB_DEFAULT_PASSWORD}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      PLAY_HTTP_PORT: ${PLAY_HTTP_PORT}
+      PLAY_HTTP_HOST: ${PLAY_HTTP_HOST}
+      PLAY_HTTP_SECRET_KEY: ${PLAY_HTTP_SECRET_KEY}
+      PLAY_MAILER_HOST: ${PLAY_MAILER_HOST}
+      PLAY_MAILER_PORT: ${PLAY_MAILER_PORT}
+      PLAY_MAILER_USER: ${PLAY_MAILER_USER}
+      PLAY_MAILER_PASSWORD: ${PLAY_MAILER_PASSWORD}
+      PLAY_MAILER_DEBUG: ${PLAY_MAILER_DEBUG}
+      PLAY_MAILER_MOCK: ${PLAY_MAILER_MOCK}
+    expose:
+      - "${PLAY_HTTP_PORT:-9500}"
+    volumes:
+      - "./prod/logs:${APP_HOME:-/app}/logs:rw"
+    depends_on:
+      - db-prod
+    networks:
+      - proxy-prod
+      - backend-prod
+
+networks:
+  proxy-dev:
+    name: proxy-dev
+  backend-dev:
+    name: backend-dev
+  proxy-prod:
+    name: proxy-prod
+  backend-prod:
+    name: backend-prod
