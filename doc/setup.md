@@ -75,7 +75,6 @@ cd playdemo
  ┃
 
 
-
 ---
 
 ## 4. Produktiv-Umgebung konfigurieren (`server/docker/prod/.env`)
@@ -257,3 +256,46 @@ Die Produktivumgebung enthält ein automatisches Backup-Skript [`backup.sh`](fil
 | Backup manuell ausführen | `./backup.sh` |
 | Dev-Migration importieren | `./import_to_prod_from_dev.sh` |
 | System zurücksetzen / leeren | `./clean.sh` |
+
+
+ ┃ /btw könnte man das sauberer trennen?
+ ┃
+ ┃   Ja, die Trennung lässt sich sowohl innerhalb des bestehenden Repositories als auch durch eine Aufteilung in mehrere Repositories noch deutlich sauberer und professioneller gestalten. Hier sind die
+ ┃   bewährten Best Practices dafür:
+ ┃   ──────
+ ┃   ### 1. Strukturierung im Monorepo (Empfohlen ohne Repo-Aufspaltung)
+ ┃
+ ┃   Aktuell liegen Docker-Deployments tief verschachtelt unter server/docker/. Das vermischt Applikations-Code (server/) mit Infrastruktur-Code. Eine sauberere Wurzelstruktur wäre:
+ ┃ 
+ ┃     ├── apps/               (oder server/ & client/)
+ ┃     │   ├── server/         # Play Framework Backend (Scala 3)
+ ┃     │   └── client/         # Scala.js Frontend
+ ┃     ├── wp-plugin/          # WordPress Plugin Source Code
+ ┃     ├── infra/              # Infrastruktur & Deployment (statt server/docker)
+ ┃     │   ├── dev/            # docker-compose.yml & .env.example (Dev)
+ ┃     │   └── prod/           # docker-compose.yml & .env.example (Prod)
+ ┃     ├── tests/              # Test-Suites
+ ┃   ### 2. Vermeidung von Docker-Duplikaten (DRY mit Compose Overrides)
+ ┃
+ ┃   Statt zwei fast identische docker-compose.yml-Dateien in dev/ und prod/ zu pflegen, nutzt man den Docker-Standard für Vererbung:
+ ┃
+ ┃   • docker-compose.yml (Basis): Enthält gemeinsame Services, Netzwerke und Volumes.
+ ┃   • docker-compose.override.yml (Dev): Wird lokal automatisch geladen (z. B. Port-Mappings wie 8080, Mocks, Addons).
+ ┃   • docker-compose.prod.yml (Prod): Wird für die Produktion eingebunden (z. B. Traefik-Labels, Restart-Policies, Produktions-Container).
+ ┃
+ ┃   Beispiel-Aufruf in Prod:
+ ┃
+ ┃     docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env up -d
+ ┃     ──────
+ ┃   ### 3. Aufteilung in Multi-Repositories (Bei wachsendem Team / Release-Zyklen)
+ ┃
+ ┃   Falls das WordPress-Plugin oder die Infrastruktur unabhängig vom Backend deployed/versioniert werden soll, empfiehlt sich die Trennung in drei eigene Git-Repositories:
+ ┃
+ ┃   1. tourney-app (Core Application Repository):
+ ┃       • Enthält Play Server, Scala.js Client und das shared-Modul.
+ ┃       • Baut die Docker Images (jorolich/playsrv-image) via CI/CD (GitHub Actions) bei Tags/Releases.
+ ┃   2. tourney-wp-plugin (WordPress Plugin Repository):
+ ┃       • Reines PHP/JS-Plugin für die WordPress-Integration. Kann separat im WordPress-Ökosystem versioniert und gepflegt werden.
+ ┃   3. tourney-deploy (Infrastructure & Operations Repository):
+ ┃       • Enthält ausschließlich Docker-Compose-Dateien, Server-Setup-Skripte, Backup-Routinen und .env.example-Vorlagen.
+ ┃       • Der Produktions-Server klont nur dieses Deployment-Repository.
