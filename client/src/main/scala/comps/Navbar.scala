@@ -11,16 +11,21 @@ import comps.Sidebar.AsideId
 
 object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
   def name = PageNameTyp("Navbar")
-  val ToggleSidebarId: HtmlId = genId(name)
-  val ConsoleClickId: HtmlId = genId(name)
-  val ShowLoginId: HtmlId = genId(name)
-  val DoLogoutId: HtmlId = genId(name)
-  val ShowQuickCompId: HtmlId = genId(name)
-  val StartFullId: HtmlId = genId(name)
-  val StartSimpleId: HtmlId = genId(name)
-  val ExportLocalId: HtmlId = genId(name)
-  val ImportLocalId: HtmlId = genId(name)
-  val ExitOfflineId: HtmlId = genId(name)
+  val ToggleSidebarId:    HtmlId = genId(name)
+  val ConsoleClickId:     HtmlId = genId(name)
+  val ShowLoginId:        HtmlId = genId(name)
+  val DoLogoutId:         HtmlId = genId(name)
+  val ShowQuickCompId:    HtmlId = genId(name)
+  val StartDemoId:        HtmlId = genId(name)
+  val ExportLocalId:      HtmlId = genId(name)
+  val ImportLocalId:      HtmlId = genId(name)
+  val ImportCloudId:      HtmlId = genId(name)
+  val LoadLocalTourneyId: HtmlId = genId(name)
+  /** HTML-ID for dropdown menu item "Letztes Turnier laden" */
+  val LoadLastTourneyId:  HtmlId = genId(name)
+  val MoveToCloudId:      HtmlId = genId(name)
+  val ReloadTourneyId:    HtmlId = genId(name)
+  val ExitOfflineId:      HtmlId = genId(name)
   def render(param: String = "") = 
     org.scalajs.dom.window.asInstanceOf[scala.scalajs.js.Dynamic].navbarGoBackToCurrentTourney = () => goBackToCurrentTourney()
     val comps = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
@@ -32,41 +37,42 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
 
   override def handleEvent(elem: org.scalajs.dom.raw.HTMLElement, event: org.scalajs.dom.Event) =
     HtmlId(elem.id) match
-      case `ToggleSidebarId` => toggleClass(gE(AsideId), "d-none")
-      case `DoLogoutId`      => doLogout()
-      case `ShowQuickCompId` => 
+      case `ToggleSidebarId`    => toggleClass(gE(AsideId), "d-none")
+      case `DoLogoutId`         => doLogout()
+      case `ShowQuickCompId`    => 
         if (base.Global.user.isDefined || base.Global.isDemoMode || base.Global.isLocalMode) doQuickStart()
         else services.DemoManager.promptDemoMode("template-single", () => doQuickStart(), () => ())
-      case `StartFullId`     => 
-        if (base.Global.user.isDefined || base.Global.isDemoMode || base.Global.isLocalMode) confirmLeave(() => pages.loadPage(PageNameTyp("TourneyNew"), ""))
-        else services.DemoManager.promptDemoMode("template-full", () => confirmLeave(() => pages.loadPage(PageNameTyp("TourneyNew"), "")), () => ())
-      case `StartSimpleId`   => 
-        if (base.Global.user.isDefined || base.Global.isDemoMode || base.Global.isLocalMode) confirmLeave(() => pages.loadPage(PageNameTyp("CompetitionNew"), ""))
-        else services.DemoManager.promptDemoMode("template-single", () => confirmLeave(() => pages.loadPage(PageNameTyp("CompetitionNew"), "")), () => ())
-      case `ExportLocalId`   => doLocalExport()
-      case `ImportLocalId`   => doLocalImport()
-      case `ExitOfflineId`   => doExitOffline()
-      case _                 => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}")
+      case `StartDemoId`        => doStartDemo()
+      case `ExportLocalId`      => doLocalExport()
+      case `ImportLocalId`      => doLocalImport()
+      case `ImportCloudId`      => doCloudImport()
+      case `MoveToCloudId`      => doMoveToCloud()
+      case `LoadLocalTourneyId` => doLoadLocalTourney()
+      case `LoadLastTourneyId`  => doReloadTourney()
+      case `ReloadTourneyId`    => doReloadTourney()
+      case `ExitOfflineId`      => doExitOffline()
+      case _                    => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}")
 
   private def confirmLeave(action: () => Unit): Unit =
-    import shared.BoxButton
     import shared.model.Selection
     
     if (base.Global.currentSelection.tourney.isDefined) {
-      dialogs.DlgMsgbox.show(
-        "Möchten Sie das aktuelle Turnier / den aktuellen Wettbewerb wirklich verlassen? Nicht gespeicherte Änderungen gehen verloren.",
-        "Aktion bestätigen",
-        List(BoxButton.Yes, BoxButton.No)
-      ).map {
-        case BoxButton.Yes => 
-          base.Global.currentSelection = Selection()
-          comps.ContextHeader.hide()
-          action()
-        case _ => debug("Leave cancelled")
+      val tourney = base.Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
+      dialogs.DlgExportTourney.show(tourney, saveAndLeave = true).map {
+        case Some(_) =>
+          services.TourneyDB.sync().map { _ =>
+            base.Global.currentSelection = Selection()
+            base.Global.clearSessionTourneyState()
+            comps.ContextHeader.hide()
+            action()
+          }
+        case None =>
+          debug("Leave cancelled")
       }
     } else {
       action()
     }
+
 
   def doQuickStart(): Unit =
     import dialogs.*
@@ -141,35 +147,57 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
       pages.loadPage(shared.PageNameTyp("Goodbye"), "")
     }
 
+  /**
+   * Starts a demo tournament in local mode.
+   * Displays confirmation dialog informing the user that the active local tournament will be deleted.
+   */
+  def doStartDemo(): Unit =
+    dialogs.DlgStartDemo.show().map {
+      case true =>
+        services.DemoManager.startDemoInLocalMode { () =>
+          base.Global.currentSelection = shared.model.Selection(Some(services.TourneyDB.tourney))
+          comps.ContextHeader.render()
+          comps.Navbar.render()
+          pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+        }
+      case false =>
+        debug("Start demo cancelled")
+    }
+
+  /**
+   * Exports the current tournament data to a local JSON file.
+   */
   private def doLocalExport(): Unit = {
     import services.TourneyDB
-    import services.DemoManager.DemoPayload
-    import shared.basic.Pickle.*
+    import base.Global
 
-    val tReq = TourneyDB.TourneySyncRequest(TourneyDB.version, TourneyDB.tourney)
-    val payload = DemoPayload(tReq)
-    val jsonString = write(payload)
-    
-    val blob = new dom.Blob(scalajs.js.Array(jsonString), dom.BlobPropertyBag("application/json"))
-    val url = dom.URL.createObjectURL(blob)
-    val a = dom.document.createElement("a").asInstanceOf[dom.html.Anchor]
-    a.href = url
-    a.download = s"tourney_${TourneyDB.tourney.name.replaceAll("\\s+", "_")}_export.json"
-    dom.document.body.appendChild(a)
-    a.click()
-    dom.document.body.removeChild(a)
-    dom.URL.revokeObjectURL(url)
+    val tourney = Global.currentSelection.tourney.getOrElse(TourneyDB.tourney)
+    if (tourney.wpId != 0 || tourney.name.nonEmpty) {
+      dialogs.DlgExportTourney.show(tourney, saveAndLeave = false).map {
+        case Some(filename) if filename.nonEmpty =>
+          TourneyDB.triggerExportDownload(filename, tourney)
+        case _ =>
+          debug("Local export cancelled")
+      }
+    } else {
+      dom.window.alert("Kein aktives Turnier zum Exportieren vorhanden.")
+    }
   }
 
+  /**
+   * Prompts the user to select a JSON file to import locally into the browser storage.
+   */
   private def doLocalImport(): Unit = {
     import services.*
     import base.Global
     import services.DemoManager.DemoPayload
     import shared.basic.Pickle.*
+    import shared.model.Tourney
+    import shared.model.Selection
 
     val fileInput = dom.document.getElementById("navbar-import-file-input").asInstanceOf[dom.html.Input]
     if (fileInput != null) {
-      fileInput.click()
+      fileInput.value = ""
       fileInput.onchange = (e: dom.Event) => {
         if (fileInput.files.length > 0) {
           val file = fileInput.files(0)
@@ -177,32 +205,272 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
           reader.onload = (e: dom.Event) => {
             val jsonString = reader.result.asInstanceOf[String]
             try {
-              val payload = read[DemoPayload](jsonString)
+              val tourneyData = try {
+                read[DemoPayload](jsonString).tourney.tourney
+              } catch {
+                case _: Exception => read[Tourney](jsonString)
+              }
               
-              // Set Local Mode
-              Global.isLocalMode = true
-              Global.isDemoMode = false
-              
-              // Restore Tourney
-              TourneyDB.tourney = payload.tourney.tourney
-              TourneyDB.version = payload.tourney.version
-              
-              // Force sync to local storage
-              TourneyDB.sync()
-              ClubDB.sync(TourneyDB.tourney.clubs.toSeq)
-              PlayerDB.sync(TourneyDB.tourney.players.toSeq)
-              CompetitionDB.sync(TourneyDB.tourney.competitions.filter(_ != null).toSeq)
-              StageDB.sync(TourneyDB.tourney.stages.filter(_ != null).toSeq)
-              
-              dom.window.alert("Import erfolgreich! Das lokale Turnier wird nun geladen.")
-              comps.Navbar.render() // re-render to update badges/menu
-              pages.loadPage(PageNameTyp("TourneyInfo"), "")
+              confirmLeave { () =>
+                // Set Local Mode
+                Global.isLocalMode = true
+                Global.isDemoMode = false
+                
+                // Restore Tourney
+                TourneyDB.tourney = tourneyData
+                TourneyDB.tourney.wpId = 999999
+                TourneyDB.version = 1
+                TourneyDB.addExportedFilename(file.name)
+                
+                // Force sync to local storage
+                TourneyDB.sync()
+                ClubDB.sync(TourneyDB.tourney.clubs.toSeq)
+                PlayerDB.sync(TourneyDB.tourney.players.toSeq)
+                CompetitionDB.sync(TourneyDB.tourney.competitions.filter(_ != null).toSeq)
+                StageDB.sync(TourneyDB.tourney.stages.filter(_ != null).toSeq)
+                
+                Global.currentSelection = Selection(Some(TourneyDB.tourney))
+                comps.ContextHeader.render()
+                comps.Navbar.render()
+                dom.window.alert("Import erfolgreich! Das lokale Turnier wird nun geladen.")
+                pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+              }
             } catch {
               case ex: Exception =>
                 dom.window.alert(s"Fehler beim Importieren der Datei: ${ex.getMessage}")
             }
           }
           reader.readAsText(file)
+        }
+      }
+      fileInput.click()
+    }
+  }
+
+  /**
+   * Prompts the user to select a JSON file to import to the server / cloud backend.
+   * Requires an authenticated user session.
+   */
+  private def doCloudImport(): Unit = {
+    import base.Global
+    import services.*
+    import shared.model.Selection
+
+    if (Global.user.isEmpty) {
+      dom.window.alert("Für den Cloud-Import ist eine Anmeldung erforderlich. Bitte melden Sie sich an.")
+      pages.loadPage(shared.PageNameTyp("UserLogin"), "")
+    } else {
+      val fileInput = dom.document.getElementById("navbar-import-cloud-input").asInstanceOf[dom.html.Input]
+      if (fileInput != null) {
+        fileInput.value = ""
+        fileInput.onchange = (e: dom.Event) => {
+          if (fileInput.files.length > 0) {
+            val file = fileInput.files(0)
+            val reader = new dom.FileReader()
+            reader.onload = (e: dom.Event) => {
+              val jsonString = reader.result.asInstanceOf[String]
+              confirmLeave { () =>
+                AdminManager.importTourney(jsonString).map {
+                  case Right(slug) =>
+                    Global.isLocalMode = false
+                    Global.isDemoMode = false
+                    Global.currentSelection = Selection(Some(TourneyDB.tourney))
+                    TourneyDB.addExportedFilename(file.name)
+                    comps.ContextHeader.render()
+                    comps.Navbar.render()
+                    dom.window.alert("Cloud-Import erfolgreich! Das Turnier wurde erstellt und geladen.")
+                    pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+                  case Left(err) =>
+                    dom.window.alert(s"Fehler beim Cloud-Import: ${err.msgCode}")
+                }
+              }
+            }
+            reader.readAsText(file)
+          }
+        }
+        fileInput.click()
+      }
+    }
+  }
+
+  /**
+   * Moves the currently active local tournament to the cloud (WordPress server).
+   * Verifies that the user is authenticated and the tournament is not already in the cloud.
+   * Prompts user for confirmation, then creates the tournament via AdminManager.importTourney,
+   * updates application state to cloud mode, clears local storage copy, and navigates to TourneyInfo.
+   */
+  private def doMoveToCloud(): Unit = {
+    import base.Global
+    import services.*
+    import shared.model.Selection
+    import shared.basic.Pickle.*
+    import shared.model.Tourney
+
+    if (Global.user.isEmpty) {
+      dom.window.alert(gM("navbar.reloadLoginRequired"))
+      pages.loadPage(shared.PageNameTyp("UserLogin"), "")
+      return
+    }
+
+    if (!Global.isLocalMode && !Global.isDemoMode) {
+      dom.window.alert("Das Turnier befindet sich bereits in der Cloud.")
+      return
+    }
+
+    val currentTourney = Global.currentSelection.tourney.getOrElse(TourneyDB.tourney)
+    if (currentTourney == null || currentTourney.name.trim.isEmpty) {
+      dom.window.alert(gM("navbar.moveToCloudNoTourney"))
+      return
+    }
+
+    val confirmed = dom.window.confirm(gM("navbar.moveToCloudConfirm"))
+    if (!confirmed) return
+
+    // Set organizer from logged-in user if not already set
+    if (currentTourney.organizer.trim.isEmpty && Global.user.isDefined) {
+      val u = Global.user.get
+      currentTourney.organizer = if (u.org.nonEmpty) u.org else u.username
+    }
+
+    val jsonString = write(currentTourney)
+
+    // Reset wpId and slug so local mode detection recognises the switch to cloud mode
+    currentTourney.wpId = 0
+    currentTourney.slug = ""
+    TourneyDB.tourney.wpId = 0
+    Global.currentSelection = Selection(Some(currentTourney))
+    Global.isLocalMode = false
+    Global.isDemoMode = false
+
+    AdminManager.importTourney(jsonString).map {
+      case Right(slug) =>
+        Global.currentSelection = Selection(Some(TourneyDB.tourney))
+        Global.isLocalMode = false
+        Global.isDemoMode = false
+        Global.tourneySlug = slug
+        dom.window.localStorage.removeItem("App.demo_tourney")
+        if (Global.currentAci != null) {
+          TourneyDB.saveAci(TourneyDB.tourney.wpId, Global.currentAci)
+        }
+        comps.ContextHeader.render()
+        comps.Navbar.render()
+        dom.window.alert(gM("navbar.moveToCloudSuccess"))
+        pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+
+      case Left(err) =>
+        // Revert local mode on failure
+        currentTourney.wpId = 999999
+        TourneyDB.tourney.wpId = 999999
+        Global.currentSelection = Selection(Some(currentTourney))
+        Global.isLocalMode = true
+        comps.Navbar.render()
+        dom.window.alert(s"${gM("navbar.moveToCloudError")}: ${err.msgCode}")
+    }
+  }
+
+  /**
+   * Loads a previously saved tournament from browser local storage and opens it in local mode.
+   */
+  private def doLoadLocalTourney(): Unit = {
+    import base.Global
+    import services.*
+    import shared.model.Selection
+
+    val jsStr = dom.window.localStorage.getItem("App.demo_tourney")
+    if (jsStr == null || jsStr.trim.isEmpty) {
+      dom.window.alert("Kein lokal gespeichertes Turnier vorhanden.")
+    } else {
+      confirmLeave { () =>
+        Global.isLocalMode = true
+        Global.isDemoMode = false
+        TourneyDB.load(999999).map { _ =>
+          ClubDB.load()
+          PlayerDB.load()
+          CompetitionDB.load()
+          StageDB.load()
+          Global.currentSelection = Selection(Some(TourneyDB.tourney))
+          comps.ContextHeader.render()
+          comps.Navbar.render()
+          pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+        }
+      }
+    }
+  }
+
+  /**
+   * Reloads the tournament based on the current storage mode:
+   * - If tourney_is_local_mode == true: loads and displays the locally stored tournament in TourneyInfo.
+   * - If tourney_is_local_mode == false: loads the cloud tournament with slug tourney_slug.
+   *   If user is not logged in or lacks permissions, displays an error message.
+   */
+  private def doReloadTourney(): Unit = {
+    import base.Global
+    import services.*
+    import shared.model.Selection
+
+    val sessionLocal = org.scalajs.dom.window.sessionStorage.getItem("tourney_is_local_mode") == "true"
+    val localLocal = org.scalajs.dom.window.localStorage.getItem("tourney_is_local_mode") == "true"
+    val isLocal = sessionLocal || localLocal || Global.isLocalMode
+
+    if (isLocal) {
+      val jsStr = dom.window.localStorage.getItem("App.demo_tourney")
+      if (jsStr == null || jsStr.trim.isEmpty) {
+        dom.window.alert("Kein lokal gespeichertes Turnier vorhanden.")
+      } else {
+        Global.isLocalMode = true
+        Global.isDemoMode = false
+        Global.tourneySlug = "local"
+        TourneyDB.load(999999).map {
+          case Right(_) =>
+            ClubDB.load()
+            PlayerDB.load()
+            CompetitionDB.load()
+            StageDB.load()
+            Global.currentSelection = Selection(Some(TourneyDB.tourney))
+            comps.ContextHeader.render()
+            comps.Navbar.render()
+            pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+          case Left(err) =>
+            dom.window.alert(s"Fehler beim Laden des lokalen Turniers: ${err.msgCode}")
+        }
+      }
+    } else {
+      if (Global.user.isEmpty) {
+        dom.window.alert(gM("navbar.reloadLoginRequired"))
+        pages.loadPage(shared.PageNameTyp("UserLogin"), "")
+      } else {
+        val s1 = org.scalajs.dom.window.sessionStorage.getItem("tourney_slug")
+        val s2 = org.scalajs.dom.window.localStorage.getItem("tourney_slug")
+        val slug = if (s1 != null && s1.nonEmpty && s1 != "local") s1
+                   else if (s2 != null && s2.nonEmpty && s2 != "local") s2
+                   else if (Global.currentSelection.tourney.exists(t => t.slug.nonEmpty && t.slug != "local")) Global.currentSelection.tourney.get.slug
+                   else if (TourneyDB.tourney != null && TourneyDB.tourney.slug.nonEmpty && TourneyDB.tourney.slug != "local") TourneyDB.tourney.slug
+                   else ""
+
+        if (slug.isEmpty) {
+          dom.window.alert(gM("navbar.reloadNoSlug"))
+        } else {
+          TourneyDB.load(slug).map {
+            case Right(_) =>
+              val t = TourneyDB.tourney
+              if (!Global.hasTourneyAccess(t)) {
+                dom.window.alert(gM("navbar.reloadNoPermission"))
+              } else {
+                Global.isLocalMode = false
+                Global.isDemoMode = false
+                Global.tourneySlug = t.slug
+                Global.currentSelection = Selection(Some(t))
+                comps.ContextHeader.render()
+                comps.Navbar.render()
+                pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+              }
+            case Left(err) =>
+              if (err.is("forbidden") || err.is("unauthorized") || err.msgCode.toLowerCase.contains("permission")) {
+                dom.window.alert(gM("navbar.reloadNoPermission"))
+              } else {
+                dom.window.alert(s"Fehler beim Laden des Turniers: ${err.msgCode}")
+              }
+          }
         }
       }
     }
@@ -213,21 +481,41 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     import shared.model.Selection
     import base.Global
     
-    dialogs.DlgMsgbox.show(
-      "Möchten Sie den lokalen Modus / Demo-Modus wirklich beenden? Alle ungesicherten lokalen Daten gehen verloren.",
-      "Modus beenden",
-      List(BoxButton.Yes, BoxButton.No)
-    ).map {
-      case BoxButton.Yes =>
-        Global.isDemoMode = false
-        Global.isLocalMode = false
-        Global.currentSelection = Selection()
-        comps.ContextHeader.hide()
-        comps.Navbar.render() // re-render to remove badges/menu
-        pages.loadPage(pages.MainView.name, "")
-      case _ =>
+    if (Global.isLocalMode && (Global.currentSelection.tourney.isDefined || services.TourneyDB.tourney.wpId > 0 || services.TourneyDB.tourney.name.nonEmpty)) {
+      val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
+      dialogs.DlgExportTourney.show(tourney, saveAndLeave = true).map {
+        case Some(_) =>
+          services.TourneyDB.sync().map { _ =>
+            Global.isDemoMode = false
+            Global.isLocalMode = false
+            Global.currentSelection = Selection()
+            Global.clearSessionTourneyState()
+            comps.ContextHeader.hide()
+            comps.Navbar.render()
+            pages.loadPage(pages.MainView.name, "")
+          }
+        case None =>
+          debug("Exit offline cancelled")
+      }
+    } else {
+      dialogs.DlgMsgbox.show(
+        "Möchten Sie den lokalen Modus / Demo-Modus wirklich beenden? Alle ungesicherten lokalen Daten gehen verloren.",
+        "Modus beenden",
+        List(BoxButton.Yes, BoxButton.No)
+      ).map {
+        case BoxButton.Yes =>
+          Global.isDemoMode = false
+          Global.isLocalMode = false
+          Global.currentSelection = Selection()
+          Global.clearSessionTourneyState()
+          comps.ContextHeader.hide()
+          comps.Navbar.render() // re-render to remove badges/menu
+          pages.loadPage(pages.MainView.name, "")
+        case _ =>
+      }
     }
   }
+
 
   def goBackToCurrentTourney(): Unit = {
     import base.Global

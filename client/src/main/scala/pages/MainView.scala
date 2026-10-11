@@ -17,6 +17,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
   /** Name identifier for the page. */
   def name = PageNameTyp("MainView") 
 
+  val BtnDemo:    HtmlId = genId(name)
   val BtnOption1: HtmlId = genId(name)
   val BtnOption2: HtmlId = genId(name)
   val BtnSearch:  HtmlId = genId(name)
@@ -158,17 +159,31 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
    */
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
+      case `BtnDemo` =>
+        comps.Navbar.doStartDemo()
       case `BtnOption1` => 
-        if (Global.user.isDefined) {
-          loadPage(TourneyNew.name, "")
-        } else {
-          services.DemoManager.promptDemoMode("template-full", () => loadPage(TourneyNew.name, ""), () => loadPage(MainView.name, ""))
+        dialogs.DlgStartTourney.show().map {
+          case true =>
+            services.DemoManager.startLocalMode { () =>
+              if (Global.user.isDefined) {
+                Global.isLocalMode = false
+              }
+              loadPage(TourneyNew.name, "")
+            }
+          case false =>
+            debug("Start full tournament cancelled")
         }
       case `BtnOption2` => 
-        if (Global.user.isDefined) {
-          comps.Navbar.doQuickStart()
-        } else {
-          services.DemoManager.promptDemoMode("template-single", () => comps.Navbar.doQuickStart(), () => loadPage(MainView.name, ""))
+        dialogs.DlgStartCompetition.show().map {
+          case true =>
+            services.DemoManager.startLocalMode { () =>
+              if (Global.user.isDefined) {
+                Global.isLocalMode = false
+              }
+              comps.Navbar.doQuickStart()
+            }
+          case false =>
+            debug("Start competition cancelled")
         }
       case `BtnSearch` => loadPage(MainSearch.name, "")
       case _ => debug(s"MainView handleEvent: ${elem.id}")

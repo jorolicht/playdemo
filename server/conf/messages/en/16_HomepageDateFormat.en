@@ -22,7 +22,25 @@ login.localModeDesc = Starts an empty tournament. You can export your data at an
 login.btnStartLocal = Create Empty Tournament
 login.btnImportLocal = Import Tournament File (JSON)
 
-navbar.localMenu = Local Options
+navbar.localMenu = Storage
+navbar.storage = Storage
+navbar.demo = Demo
+navbar.reload = RELOAD
+navbar.reloadLoginRequired = Login is required to load this tournament. Please log in.
+navbar.reloadNoPermission = You do not have permission for this tournament.
+navbar.reloadNoSlug = No tournament slug stored.
+navbar.loadLastTourney = Load last tournament
 navbar.exportTourney = Export Tournament (JSON)
+navbar.exportToFile = Export tournament to file (JSON)
 navbar.importTourney = Import Tournament (JSON)
+navbar.importTourneyLocal = Load Tournament (local)
+navbar.loadFromFile = Load tournament from file (JSON)
+navbar.importTourneyCloud = Load Tournament (cloud)
+navbar.moveToCloud = Move tournament to the cloud
+navbar.moveToCloudConfirm = Do you really want to move the current local tournament to the cloud?
+navbar.moveToCloudSuccess = Tournament successfully moved to the cloud!
+navbar.moveToCloudError = Error moving tournament to the cloud
+navbar.moveToCloudNoTourney = No active tournament to move.
+navbar.loadLocalTourney = Load Locally Saved Tournament
 navbar.exitLocal = Exit Local Mode
+

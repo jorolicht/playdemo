@@ -88,6 +88,7 @@ object TourneyDB extends ComWrapper with Debouncer:
   def apiCreate(t: Tourney): Future[Either[AppError, String]] =
     if (base.Global.isDemoMode || base.Global.isLocalMode) then
       t.wpId = 999999
+      base.Global.isLocalMode = true
       val req = TourneySyncRequest(1, t)
       org.scalajs.dom.window.localStorage.setItem("App.demo_tourney", write(req))
       Future.successful(Right("demo-slug"))
@@ -98,6 +99,7 @@ object TourneyDB extends ComWrapper with Debouncer:
           t.version = res.version
           t.slug = res.slug
           this.version = res.version
+          Global.tourneySlug = res.slug
           Right(res.slug)
         case Left(err) => Left(err)
       }
@@ -107,7 +109,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    * If a version mismatch occurs (conflict), it reloads the data from the server.
    */
   def sync(): Future[Either[AppError, Unit]] =
-    if (base.Global.isDemoMode || base.Global.isLocalMode) then
+    if (base.Global.isDemoMode || base.Global.isLocalMode || tourney.wpId == 999999) then
       val req = TourneySyncRequest(version, tourney)
       org.scalajs.dom.window.localStorage.setItem("App.demo_tourney", write(req))
       Future.successful(Right(()))
@@ -137,7 +139,8 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Loads basic tournament data from the WordPress server.
    */
   def load(idOrSlug: Int | String): Future[Either[AppError, Long]] =
-    if (base.Global.isDemoMode || base.Global.isLocalMode) then
+    val isDemoOrLocal = base.Global.isDemoMode || base.Global.isLocalMode || idOrSlug == 999999 || idOrSlug == "999999"
+    if (isDemoOrLocal) then
       val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_tourney")
       if (jsStr != null && jsStr.nonEmpty) {
         val req = read[TourneySyncRequest](jsStr)
@@ -181,6 +184,9 @@ object TourneyDB extends ComWrapper with Debouncer:
             case Right(res) =>
               tourney = res.tourney
               version = res.version
+              if (!Global.isLocalMode && res.tourney.slug.nonEmpty) {
+                Global.tourneySlug = res.tourney.slug
+              }
               ClubDB.initHandler() 
               PlayerDB.initHandler()
               CompetitionDB.initHandler()
@@ -200,7 +206,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Deletes the current tournament from the WordPress server.
    */
   def apiDelete(trnyId: Int): Future[Either[AppError, Unit]] =
-    if (base.Global.isDemoMode || base.Global.isLocalMode) then
+    if (base.Global.isDemoMode || base.Global.isLocalMode || trnyId == 999999) then
       org.scalajs.dom.window.localStorage.removeItem("App.demo_tourney")
       org.scalajs.dom.window.localStorage.removeItem("App.demo_clubs")
       org.scalajs.dom.window.localStorage.removeItem("App.demo_players")
@@ -233,7 +239,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Loads ACI configuration for the given tournament post ID.
    */
   def loadAci(wpId: Int): Future[Unit] =
-    if (base.Global.isDemoMode || base.Global.isLocalMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode || wpId == 999999) {
       val localData = org.scalajs.dom.window.localStorage.getItem("App.demo_aci_" + wpId)
       if (localData != null && localData.nonEmpty) {
         try {
@@ -258,7 +264,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Saves ACI configuration for the given tournament post ID.
    */
   def saveAci(wpId: Int, aci: shared.model.ACI): Future[Either[AppError, Unit]] =
-    if (base.Global.isDemoMode || base.Global.isLocalMode) {
+    if (base.Global.isDemoMode || base.Global.isLocalMode || wpId == 999999) {
       base.Global.currentAci = aci
       org.scalajs.dom.window.localStorage.setItem("App.demo_aci_" + wpId, write(aci))
       Future.successful(Right(()))
@@ -270,3 +276,97 @@ object TourneyDB extends ComWrapper with Debouncer:
         case Left(err) => Left(err)
       }
     }
+
+  /**
+   * Generates the default export filename for a tournament in the format:
+   * "tourney_<turniername>_<datum>_export.json"
+   *
+   * @param t The tournament to generate the filename for.
+   * @return Formatted filename string.
+   */
+  def defaultExportFilename(t: Tourney = tourney): String = {
+    val rawName = if (t != null && t.name.trim.nonEmpty) t.name.trim else "turnier"
+    val safeName = rawName.replaceAll("\\s+", "_").replaceAll("[^a-zA-Z0-9äöüÄÖÜß_\\.-]", "")
+    val dateStr = if (t != null && t.startDate > 0) {
+      t.startDate.toString
+    } else {
+      val d = new scala.scalajs.js.Date()
+      val y = d.getFullYear().toInt
+      val m = f"${d.getMonth().toInt + 1}%02d"
+      val day = f"${d.getDate().toInt}%02d"
+      s"$y$m$day"
+    }
+    s"tourney_${safeName}_${dateStr}_export.json"
+  }
+
+  /**
+   * Triggers a browser download of the tournament as a JSON export file.
+   *
+   * @param filename Target file name.
+   * @param t Tournament to export (defaults to current active tournament).
+   */
+  def triggerExportDownload(filename: String, t: Tourney = tourney): Unit = {
+    import services.DemoManager.DemoPayload
+    import shared.basic.Pickle.*
+
+    val finalFilename = if (filename.toLowerCase.endsWith(".json")) filename else s"$filename.json"
+    val tReq = TourneySyncRequest(version, t)
+    val payload = DemoPayload(tReq)
+    val jsonString = write(payload)
+    
+    val blob = new org.scalajs.dom.Blob(scala.scalajs.js.Array(jsonString), org.scalajs.dom.BlobPropertyBag("application/json"))
+    val url = org.scalajs.dom.URL.createObjectURL(blob)
+    val a = org.scalajs.dom.document.createElement("a").asInstanceOf[org.scalajs.dom.html.Anchor]
+    a.href = url
+    a.download = finalFilename
+    org.scalajs.dom.document.body.appendChild(a)
+    a.click()
+    org.scalajs.dom.document.body.removeChild(a)
+    org.scalajs.dom.URL.revokeObjectURL(url)
+
+    addExportedFilename(finalFilename)
+  }
+
+  /**
+   * Retrieves the set of filenames that have been exported or imported in the current browser session/storage.
+   */
+  def getExportedFilenames(): Set[String] =
+    try {
+      val raw = org.scalajs.dom.window.localStorage.getItem(s"${base.Global.localStoragePrefix}exported_files")
+      if (raw != null && raw.nonEmpty) {
+        shared.basic.Pickle.read[Set[String]](raw)
+      } else Set.empty
+    } catch {
+      case _: Exception => Set.empty
+    }
+
+  /**
+   * Records a filename as exported/imported to track file existence.
+   *
+   * @param filename Filename to record.
+   */
+  def addExportedFilename(filename: String): Unit =
+    try {
+      val clean = filename.trim.toLowerCase
+      val finalName = if (clean.endsWith(".json")) clean else s"$clean.json"
+      val current = getExportedFilenames()
+      val updated = current + finalName
+      org.scalajs.dom.window.localStorage.setItem(
+        s"${base.Global.localStoragePrefix}exported_files",
+        shared.basic.Pickle.write(updated)
+      )
+    } catch {
+      case _: Exception =>
+    }
+
+  /**
+   * Checks whether a file with the given name has already been exported or imported.
+   *
+   * @param filename Name of the file to check.
+   * @return True if a file with this name is already recorded.
+   */
+  def fileExists(filename: String): Boolean =
+    val clean = filename.trim.toLowerCase
+    val finalName = if (clean.endsWith(".json")) clean else s"$clean.json"
+    getExportedFilenames().contains(finalName)
+

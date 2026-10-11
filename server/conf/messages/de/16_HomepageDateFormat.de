@@ -22,7 +22,25 @@ login.localModeDesc = Startet ein leeres Turnier. Sie können Ihre Daten jederze
 login.btnStartLocal = Leeres Turnier erstellen
 login.btnImportLocal = Turnier-Datei importieren (JSON)
 
-navbar.localMenu = Lokal-Optionen
+navbar.localMenu = Ablage
+navbar.storage = Ablage
+navbar.demo = Demo
+navbar.reload = RELOAD
+navbar.reloadLoginRequired = Für das Laden dieses Turniers ist eine Anmeldung erforderlich. Bitte melden Sie sich an.
+navbar.reloadNoPermission = Sie haben keine Berechtigung für dieses Turnier.
+navbar.reloadNoSlug = Kein Turnier-Slug gespeichert.
+navbar.loadLastTourney = Letztes Turnier laden
 navbar.exportTourney = Turnier exportieren (JSON)
+navbar.exportToFile = Turnier exportieren in Datei (JSON)
 navbar.importTourney = Turnier importieren (JSON)
+navbar.importTourneyLocal = Turnier laden (lokal)
+navbar.loadFromFile = Turnier von Datei (JSON) laden.
+navbar.importTourneyCloud = Turnier laden (cloud)
+navbar.moveToCloud = Turnier in die Cloud verschieben
+navbar.moveToCloudConfirm = Möchten Sie das aktuelle lokale Turnier wirklich in die Cloud verschieben?
+navbar.moveToCloudSuccess = Turnier wurde erfolgreich in die Cloud verschoben!
+navbar.moveToCloudError = Fehler beim Verschieben des Turniers in die Cloud
+navbar.moveToCloudNoTourney = Kein aktives Turnier zum Verschieben vorhanden.
+navbar.loadLocalTourney = Lokal gespeichertes Turnier laden
 navbar.exitLocal = Modus beenden
+

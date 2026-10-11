@@ -6,7 +6,7 @@ import shared.DialogTypes.DialogId
 
 
 // dlgMap maps dialog names to dialog objects   
-val dlgMap = List(DlgMsgbox, DlgPrompt, DlgClickTT, DlgCompetition, DlgStageStart, DlgAddSingle, DlgAddDouble, DlgAddPlayer, DlgEditPlayer, DlgPublicRegistration)
+val dlgMap = List(DlgMsgbox, DlgPrompt, DlgClickTT, DlgCompetition, DlgStageStart, DlgAddSingle, DlgAddDouble, DlgAddPlayer, DlgEditPlayer, DlgPublicRegistration, DlgExportTourney, DlgTourneyNewMode, DlgStartDemo, DlgStartTourney, DlgStartCompetition)
                     .map(dlg => dlg.name -> dlg).toMap
 
 object Ids:

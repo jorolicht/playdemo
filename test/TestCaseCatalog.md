@@ -12,20 +12,36 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 ## 1. UseCase: Startseite & Allgemeine Navigation (`MainView`)
 
 ### 1.1 Anonymer Besucher (🌐)
-- [x] **TC-MV-01 [🌐]:** Aufrufen der Startseite (`/`). Die Seite lädt ohne Fehler, das Logo, die Schnellstart-Buttons („Guthaben / Vollversion“, „Schnellstart“) und der Such-Button („Turniersuche“) sind sichtbar.
+- [x] **TC-MV-01 [🌐]:** Aufrufen der Startseite (`/`). Die Seite lädt ohne Fehler, das Logo und die vier Haupt-Container in der Reihenfolge von links nach rechts („Demo“, „Neues Turnier“, „Schnellstart“, „Suchen & Finden“) mit ihren jeweiligen Aktions-Buttons sind sichtbar.
+- [x] **TC-MV-01b [🌐]:** Klick auf den Container-Button „Demo“ (`#MainView_BtnDemo`) auf der Startseite öffnet den Dialog `DlgStartDemo` („Demo lokal starten?“, Warnhinweis „Achtung: das aktuelle lokale Turnier wird gelöscht!“). Nach Bestätigung wird das Demo-Turnier im lokalen Modus gestartet und direkt zu `TourneyInfo` navigiert.
 - [x] **TC-MV-02 [🌐]:** Klick auf den Button „Turniersuche“. Die Anwendung wechselt ohne Seiten-Reload zum UseCase `MainSearch`.
-- [x] **TC-MV-03 [🌐]:** Klick auf „Guthaben / Vollversion“ oder „Schnellstart“ ohne Anmeldung. Es erscheint ein Demo-Modus Dialog (`promptDemoMode`), der zur Wahl zwischen Demo-Modus oder Anmeldung auffordert.
+- [x] **TC-MV-03 [🌐]:** Klick auf „Ganzes Turnier“ (`#MainView_BtnOption1`) öffnet den Dialog `DlgStartTourney` („Ganzes Turnier starten?“, Warnhinweis „Achtung: das aktuelle lokale Turnier wird gelöscht!“, Buttons „ABBRECHEN“ und „STARTEN“). Bei Klick auf „STARTEN“ wird das Formular zur Erstellung eines neuen Turniers (`TourneyNew`) geöffnet.
 - [x] **TC-MV-04 [🌐]:** Aufrufen statischer Seiten über den Footer (z. B. AGB, Datenschutz, Impressum, Kontakt, Preise). Die entsprechenden HTML-Inhalte werden korrekt geladen.
 - [x] **TC-MV-05 [🌐]:** Umschalten der Sprache in der Navigationsleiste (Deutsch / Englisch). Die UI-Texte und statischen Seiten passen sich der gewählten Sprache an.
 
 ### 1.2 Turnierverwalter (👤)
 - [x] **TC-MV-06 [👤]:** Aufrufen der Startseite im angemeldeten Zustand. In der Navigationsleiste werden der Benutzername und der Abmelden-Button angezeigt.
 - [x] **TC-MV-07 [👤]:** Klick auf „Guthaben / Vollversion“. Öffnet direkt das Formular zur Erstellung eines neuen Turniers (`TourneyNew`).
-- [x] **TC-MV-08 [👤]:** Klick auf „Schnellstart“. Erstellt direkt ein vereinfachtes Einzelturnier im Schnellstart-Modus (`doQuickStart`).
+- [x] **TC-MV-08 [🌐]:** Klick auf „Wettbewerb starten“ (`#MainView_BtnOption2`) öffnet den Dialog `DlgStartCompetition` („Wettbewerb starten?“, Warnhinweis „Achtung: der aktuelle lokale Wettbewerb bzw das aktuelle lokale Turnier wird gelöscht!“, Buttons „ABBRECHEN“ und „STARTEN“). Bei Klick auf „STARTEN“ wird der Schnellstart-Assistent zur Wettbewerbserstellung geöffnet.
 
 ### 1.3 Systemadministrator (👑)
 - [x] **TC-MV-09 [👑]:** Aufrufen der Startseite als `administrator` oder `tourney_master`. In der Navigationsleiste erscheint zusätzlich der Button „Management“.
 - [x] **TC-MV-10 [👑]:** Klick auf den Button „Management“. Die Anwendung wechselt direkt zur Admin-Verwaltungskonsole (`Management`).
+
+### 1.4 Main Navbar: Ablage-Menü (🌐 / 👤)
+- [x] **TC-NB-01 [🌐]:** Navbar-Layout: Der alte Start-Dropdown-Button, der Menüpunkt „Suchen“, das Badge „Lokaler Modus“, der Demo-Button sowie der RELOAD-Button in der Navbar wurden entfernt. In der Navbar befindet sich das Dropdown-Menü „Ablage“ (Storage) mit den 4 Einträgen „Letztes Turnier laden“ (in roter Farbe), „Turnier exportieren in Datei (JSON)“, „Turnier von Datei (JSON) laden.“ und „Turnier in die Cloud verschieben“.
+- [x] **TC-NB-02 [🌐]:** Demo-Button: Klick auf den „Demo“-Button (im MainView-Container) öffnet den Bestätigungsdialog `DlgStartDemo` („Demo lokal starten?“, Warnhinweis: „Achtung: das aktuelle lokale Turnier wird gelöscht!“) mit 2 Buttons („ABBRECHEN“ und „DEMO STARTEN“). Klick auf „ABBRECHEN“ schließt den Dialog und verbleibt auf der Seite; Klick auf „DEMO STARTEN“ startet das vorkonfigurierte Demo-Turnier direkt im lokalen Modus (`isLocalMode = true`, `isDemoMode = false`), sichert es im lokalen Browserspeicher und navigiert zu `TourneyInfo`.
+- [x] **TC-NB-03 [🌐]:** Ablage -> Turnier in die Cloud verschieben (nicht angemeldet): Ist der Benutzer nicht angemeldet, ist das Menüelement ausgegraut (`disabled`, `aria-disabled="true"`).
+- [x] **TC-NB-04 [👤]:** Ablage -> Turnier in die Cloud verschieben (bereits in der Cloud): Ist das aktuelle Turnier bereits in der Cloud (`tourney_is_local_mode = false`), ist das Menüelement ebenfalls ausgegraut (`disabled`).
+- [x] **TC-NB-04b [👤]:** Ablage -> Turnier in die Cloud verschieben (aktiv): Ist der Benutzer angemeldet und ein lokales Turnier aktiv, ist das Menüelement aktiv und anwählbar.
+- [x] **TC-NB-05 [🌐]:** Ablage -> Turnier von Datei (JSON) laden.: Öffnet den Dateiauswahldialog für JSON-Dateien. Eine ausgewählte gültige Turnierdatei wird in den lokalen Modus geladen und direkt in `TourneyInfo` geöffnet.
+- [x] **TC-NB-06 [🌐]:** Speicherschlüssel `tourney_slug`: Wird synchron zu `tourney_is_local_mode` gepflegt – bei `tourney_is_local_mode = true` ist `tourney_slug = "local"`, bei `tourney_is_local_mode = false` entspricht `tourney_slug` dem tatsächlichen Turnier-Slug `<slug>`.
+- [x] **TC-NB-07 [🌐]:** RELOAD-Button entfernt / Menüpunkt „Letztes Turnier laden“ im lokalen Modus: Bei `tourney_is_local_mode = true` lädt ein Klick auf den Menüpunkt „Letztes Turnier laden“ das im Browserspeicher (`localStorage` / `App.demo_tourney`) abgelegte lokale Turnier und öffnet direkt `TourneyInfo`. Der separate RELOAD-Button ist nicht mehr in der Navbar vorhanden.
+- [x] **TC-NB-08 [🌐]:** „Letztes Turnier laden“ im lokalen Modus ohne gespeichertes Turnier: Bei `tourney_is_local_mode = true` und leerem Speicher erscheint ein Hinweisdialog („Kein lokal gespeichertes Turnier vorhanden.“).
+- [x] **TC-NB-09 [🌐]:** „Letztes Turnier laden“ im Cloud-Modus ohne Login: Bei `tourney_is_local_mode = false` ohne angemeldeten Benutzer erscheint ein Hinweis („Für das Laden dieses Turniers ist eine Anmeldung erforderlich. Bitte melden Sie sich an.“) und leitet zu `UserLogin` weiter.
+- [x] **TC-NB-10 [👤]:** „Letztes Turnier laden“ im Cloud-Modus ohne gespeicherten Slug: Bei `tourney_is_local_mode = false` mit angemeldetem Benutzer, aber fehlendem `tourney_slug` erscheint ein Hinweisdialog („Kein Turnier-Slug gespeichert.“).
+- [x] **TC-NB-11 [👤]:** „Letztes Turnier laden“ im Cloud-Modus ohne Zugriffsrechte: Bei `tourney_is_local_mode = false` mit angemeldetem Benutzer, der weder Administrator noch Veranstalter des geladenen Turniers ist, erscheint ein Berechtigungsfehler („Sie haben keine Berechtigung für dieses Turnier.“).
+- [x] **TC-NB-12 [👤]:** Ablage -> Turnier in die Cloud verschieben (Ausführung): Klick auf die aktive Option lädt das lokale Turnier in die Cloud hoch, synchronisiert Vereine, Spieler, Wettbewerbe und Phasen, entfernt das lokale Duplikat und schaltet in den Cloud-Modus um.
 
 ---
 
@@ -85,6 +101,14 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-TI-05 [👤]:** Klick auf „PDF-Stammblatt drucken“. Ein PDF mit den vollständigen Turnierdaten wird im Browser generiert.
 - [x] **TC-TI-06 [👤]:** Klick auf „Turnier beenden / aktivieren“. Der Status des Turniers schaltet zwischen Aktiv und Beendet um.
 - [x] **TC-TI-07 [👤]:** Klick auf „Turnier löschen“. Nach Bestätigung im Sicherheitsdialog wird das Turnier gelöscht.
+- [x] **TC-TI-09 [👤]:** Anlegen eines Turniers in der Vergangenheit (`TourneyNew`): Ein Startdatum in der Vergangenheit ist nicht erlaubt und wird mit der Fehlermeldung „Das Startdatum darf nicht in der Vergangenheit liegen.“ abgewiesen.
+- [x] **TC-TI-10 [👤]:** Anlegen eines Turniers in der Zukunft mit 5 Tagen Laufzeit und Anlegen von 3 Wettbewerben im Turnierzeitraum. Überprüfung der Datumsvalidierung: Wettbewerbe außerhalb des Turnierzeitraums (vor Beginn oder nach Turnierende) werden mit dem Fehlerhinweis „Das Datum des Wettbewerbs muss im Zeitraum des Turniers liegen.“ abgewiesen.
+- [x] **TC-TI-11 [👤]:** Lokaler Modus: Nach Neuanlage eines Turniers in `TourneyNew` sind auf der Zielseite `TourneyInfo` alle Aktionsschaltflächen („Bearbeiten“, „Löschen“ sowie „Wettbewerb hinzufügen“) aktiv und voll bedienbar. Bei der Wettbewerbserstellung wird zudem sichergestellt, dass keine Duplikate mit demselben Namen angelegt werden können (wird mit Fehlermeldung „Ein Wettbewerb mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen.“ abgewiesen).
+- [x] **TC-TI-12 [👤]:** Lokaler Modus – Export über Menü: Klick auf „Lokal-Optionen“ -> „Turnier exportieren (JSON)“ öffnet den Dialog `DlgExportTourney` mit vorausgefülltem Standarddateinamen `tourney_<name>_<datum>_export.json`. Validierung verhindert leere Dateinamen. Nach Bestätigung wird die JSON-Datei heruntergeladen und der Nutzer verbleibt auf der Seite.
+- [x] **TC-TI-13 [👤]:** Lokaler Modus – Turnier verlassen: Klick auf „Speichern/Verlassen“ (`BtnSaveLeave`) oder Verlassen der Turnierseite (z.B. über Navbar-Logo) öffnet den Dialog `DlgExportTourney` mit dem Titel „Turnier verlassen“ und Hinweistext „Das aktuelle Turnier wird in der Cloud bzw. lokal gespeichert.“. Bietet genau 2 Buttons: „ABBRECHEN“ (schließt den Dialog und verbleibt auf der Seite) und „VERLASSEN“ (speichert/synchronisiert das Turnier, schließt ohne JSON-Dateidownload ab und navigiert zur Startseite).
+- [x] **TC-TI-14 [👤]:** Lokaler Modus – Überschreiben-Prüfung beim Export: Existiert bereits eine Datei mit demselben Namen (aus vorherigem Export oder Import), schließt der Klick auf Exportieren nicht sofort, sondern blendet eine Warnung ein („Eine Datei mit diesem Namen existiert bereits. Möchten Sie die vorhandene Datei wirklich überschreiben?“). Der Button wechselt zu „Überschreiben“. Erst nach Bestätigung wird die Datei überschrieben und heruntergeladen. Wird der Dateiname geändert, verschwindet die Warnung automatisch.
+- [x] **TC-TI-15 [👤]:** `TourneyNew` – Button „ERSTELLEN“ & Auswahldialog `DlgTourneyNewMode`: Beim Anlegen eines Turniers lautet der Submit-Button „ERSTELLEN“. Klick öffnet den Auswahldialog zur Wahl zwischen lokalem Turnier (`TourneyTargetMode.Local`) und Cloud-Turnier (`TourneyTargetMode.Cloud`). Für nicht angemeldete Benutzer ist die Cloud-Option ausgegraut (`disabled`) mit dem Hinweis „(Anmeldung erforderlich)“.
+- [x] **TC-TI-16 [👤]:** `TourneyNew` – Bearbeiten-Modus (`edit`): Beim Bearbeiten eines bestehenden Turniers lautet der Submit-Button „Turnier speichern“ und speichert die Änderungen direkt ohne Anzeige des Modus-Auswahldialogs.
 
 ### 5.2 Anonymer Besucher (🌐)
 - [x] **TC-TI-08 [🌐]:** Versuch, `TourneyInfo` oder `TourneyAdmin` als unbefugter/anonymer Nutzer direkt per URL aufzurufen. Die Anwendung leitet automatisch auf `TourneyWelcome` um.

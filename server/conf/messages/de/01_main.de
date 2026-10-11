@@ -131,8 +131,15 @@ tourneyNew.venueNamePlh                             = z.B. Dreifachsporthalle am
 tourneyNew.street                                   = Straße / Hausnummer
 tourneyNew.country                                  = Land
 tourneyNew.zip                                      = PLZ
-tourneyNew.city                                     = Ort
 tourneyNew.btnSave                                  = Turnier speichern
+tourneyNew.btnCreate                                = ERSTELLEN
+tourneyNew.dlgTitle                                 = Turnier erstellen
+tourneyNew.dlgSubtitle                              = Wo möchten Sie das Turnier erstellen?
+tourneyNew.createLocal                              = Turnier lokal erstellen
+tourneyNew.createLocalDesc                          = Alle Daten verbleiben lokal in Ihrem Browser. Keine Anmeldung erforderlich.
+tourneyNew.createCloud                              = Turnier in Cloud erstellen
+tourneyNew.createCloudDesc                          = Turnier wird online in der Cloud gespeichert und kann öffentlich geteilt werden.
+tourneyNew.cloudLoginRequired                       = (Anmeldung erforderlich)
 
 ###
 # TourneyInfo
@@ -209,6 +216,9 @@ tourneyAdmin.mbActionCol                            = Aktion
 mainView.heroTitle                                  = Willkommen zur Turnierverwaltung
 mainView.heroSubtitle                               = Professionelle Organisation für Ihre sportlichen Events – schnell, einfach und übersichtlich.
 mainView.heroDesc                                   = Verwalten Sie Ihre Turniere und Wettbewerbe effizient an einem zentralen Ort. Vom ersten Teilnehmer bis zur Siegerehrung unterstützen wir Sie bei jedem Schritt.
+mainView.demoTitle                                  = Demo
+mainView.demoDesc                                   = Testen Sie alle Funktionen sofort mit einem vorkonfigurierten Demo-Turnier.
+mainView.demoBtn                                    = Demo starten
 mainView.newTourneyTitle                            = Neues Turnier
 mainView.newTourneyDesc                             = Erstellen Sie ein komplettes Turnier mit mehreren Wettbewerben, Zeitplänen und Teilnehmerlisten.
 mainView.newTourneyBtn                              = Ganzes Turnier
@@ -415,7 +425,51 @@ dlg.comp.ttrTo                                      = TTR bis
 dlg.comp.btnCancel                                  = Abbrechen
 dlg.comp.btnCreate                                  = Erstellen
 dlg.comp.errName                                    = Bitte geben Sie einen gültigen Namen ein.
+dlg.comp.errDate                                    = Das Datum des Wettbewerbs muss im Zeitraum des Turniers liegen.
 dlg.comp.titleEdit                                  = Wettbewerb bearbeiten
 btn.save                                            = Speichern
+
+###
+# DlgExportTourney
+###
+dlg.exportTourney.titleExport                       = Turnier exportieren (JSON)
+dlg.exportTourney.titleLeave                        = Turnier verlassen
+dlg.exportTourney.promptExport                      = Unter welchem Namen möchten Sie das Turnier als JSON-Datei speichern?
+dlg.exportTourney.promptLeave                       = Das aktuelle Turnier wird in der Cloud bzw. lokal gespeichert.
+dlg.exportTourney.filenameLabel                     = Dateiname
+dlg.exportTourney.btnExport                         = Exportieren
+dlg.exportTourney.btnSaveLeave                      = Speichern & Verlassen
+dlg.exportTourney.btnLeave                          = VERLASSEN
+dlg.exportTourney.btnLeaveWithoutExport             = Ohne Export verlassen
+dlg.exportTourney.btnCancel                         = Abbrechen
+dlg.exportTourney.btnCancelLeave                    = ABBRECHEN
+dlg.exportTourney.errEmpty                          = Bitte geben Sie einen Dateinamen an.
+dlg.exportTourney.warnFileExists                    = Eine Datei mit diesem Namen existiert bereits.
+dlg.exportTourney.promptOverwrite                   = Möchten Sie die vorhandene Datei wirklich überschreiben?
+dlg.exportTourney.btnOverwrite                      = Überschreiben
+
+###
+# DlgStartDemo
+###
+dlg.startDemo.title                                 = Demo lokal starten?
+dlg.startDemo.text                                  = Achtung: das aktuelle lokale Turnier wird gelöscht!
+dlg.startDemo.btnCancel                             = ABBRECHEN
+dlg.startDemo.btnStart                              = DEMO STARTEN
+
+###
+# DlgStartTourney
+###
+dlg.startTourney.title                              = Ganzes Turnier starten?
+dlg.startTourney.text                               = Achtung: das aktuelle lokale Turnier wird gelöscht!
+dlg.startTourney.btnCancel                          = ABBRECHEN
+dlg.startTourney.btnStart                           = STARTEN
+
+###
+# DlgStartCompetition
+###
+dlg.startCompetition.title                          = Wettbewerb starten?
+dlg.startCompetition.text                           = Achtung: der aktuelle lokale Wettbewerb bzw das aktuelle lokale Turnier wird gelöscht!
+dlg.startCompetition.btnCancel                      = ABBRECHEN
+dlg.startCompetition.btnStart                       = STARTEN
 
 footer.realizedWith                                 = Realisiert mit Scala.js & WordPress.

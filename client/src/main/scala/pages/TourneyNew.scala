@@ -165,48 +165,69 @@ object TourneyNew extends BasePage with JsWrapper:
           }, 800)
         }
       } else {
-        val tourney = Tourney(
-          wpId = 0,         // New entry, DB will assign ID
-          name = tName,
-          organizer = tOrganizer,
-          startDate = tStart,
-          endDate = tEnd,
-          ident = tIdent,
-          category = if (tTyp == "TT") CompCategory.TT else CompCategory.UNKNOWN,
-          contact = Some(contact),
-          address = Some(address),
-          version = 0
-        )
+        val isLoggedIn = Global.user.isDefined
+        val defaultLocal = Global.isLocalMode || !isLoggedIn
 
-        Logging.info(s"Speichere neues Turnier: ${tourney}")
-        feedback.innerHTML = s"""<div class='alert alert-info mt-3'>Turnier wird auf dem Server erstellt...</div>"""
-
-        services.TourneyDB.apiCreate(tourney).map {
-          case Right(slug) =>
-            Global.pageId = tourney.wpId
-            services.TourneyDB.update(tourney, doSync = false)
-            Global.currentSelection = Selection(Some(tourney))
-            comps.ContextHeader.render()
-
-            feedback.innerHTML = s"""<div class='alert alert-success mt-3'>Turnier '${tourney.name}' wurde erfolgreich erstellt.</div>"""
-            dom.window.setTimeout(() => {
-              pages.loadPage(pages.TourneyInfo.name, "")
-            }, 1000)
-            
-          case Left(err) =>
-            val errMsg = if (err.is("tourney_already_exists")) {
-              val nameInput = dom.document.getElementById("tn-name").asInstanceOf[dom.html.Input]
-              if (nameInput != null) {
-                nameInput.classList.add("is-invalid")
-                nameInput.oninput = { (_: dom.Event) =>
-                  nameInput.classList.remove("is-invalid")
-                }
-              }
-              base.Messages.gM("error.tourney_already_exists")
-            } else {
-              s"Fehler beim Erstellen des Turniers: ${err.msgCode}"
+        dialogs.DlgTourneyNewMode.show(isLoggedIn, defaultLocal).map {
+          case Some(selectedMode) =>
+            val isLocal = selectedMode == dialogs.TourneyTargetMode.Local
+            Global.isLocalMode = isLocal
+            if (isLocal) {
+              Global.tourneySlug = "local"
             }
-            showError(errMsg)
+
+            val tourney = Tourney(
+              wpId = if (isLocal) 999999 else 0,
+              name = tName,
+              organizer = tOrganizer,
+              startDate = tStart,
+              endDate = tEnd,
+              ident = tIdent,
+              category = if (tTyp == "TT") CompCategory.TT else CompCategory.UNKNOWN,
+              contact = Some(contact),
+              address = Some(address),
+              version = 0
+            )
+
+            Logging.info(s"Speichere neues Turnier (Modus: $selectedMode): $tourney")
+            feedback.innerHTML = s"""<div class='alert alert-info mt-3'>Turnier wird erstellt...</div>"""
+
+            services.TourneyDB.apiCreate(tourney).map {
+              case Right(slug) =>
+                if (tourney.wpId == 999999 || isLocal) {
+                  Global.isLocalMode = true
+                  Global.tourneySlug = "local"
+                } else {
+                  Global.isLocalMode = false
+                  Global.tourneySlug = slug
+                }
+                Global.pageId = tourney.wpId
+                services.TourneyDB.update(tourney, doSync = false)
+                Global.currentSelection = Selection(Some(tourney))
+                comps.ContextHeader.render()
+
+                feedback.innerHTML = s"""<div class='alert alert-success mt-3'>Turnier '${tourney.name}' wurde erfolgreich erstellt.</div>"""
+                dom.window.setTimeout(() => {
+                  pages.loadPage(pages.TourneyInfo.name, "")
+                }, 1000)
+                
+              case Left(err) =>
+                val errMsg = if (err.is("tourney_already_exists")) {
+                  val nameInput = dom.document.getElementById("tn-name").asInstanceOf[dom.html.Input]
+                  if (nameInput != null) {
+                    nameInput.classList.add("is-invalid")
+                    nameInput.oninput = { (_: dom.Event) =>
+                      nameInput.classList.remove("is-invalid")
+                    }
+                  }
+                  base.Messages.gM("error.tourney_already_exists")
+                } else {
+                  s"Fehler beim Erstellen des Turniers: ${err.msgCode}"
+                }
+                showError(errMsg)
+            }
+          case None =>
+            Logging.debug("Turniererstellung im Modus-Dialog abgebrochen.")
         }
       }
     }

@@ -72,6 +72,20 @@ case class Tourney(
   // Competition Management
   // ===========================================================================
 
+  /**
+   * Adds a new competition to the tournament.
+   * Validates that the competition date is within the tournament period and that no active
+   * competition with the same name already exists in this tournament.
+   *
+   * @param name The competition name.
+   * @param typ The competition type (SINGLE, DOUBLE, etc.).
+   * @param category The competition category.
+   * @param startDate The competition start date and time.
+   * @param lowLevel Optional lower rating limit.
+   * @param upperLevel Optional upper rating limit.
+   * @param doSync Whether to trigger sync handler.
+   * @return Either an AppError or the newly created Competition.
+   */
   def addCompetition(
     name: String, 
     typ: CompTyp, 
@@ -81,15 +95,21 @@ case class Tourney(
     upperLevel: Option[Int] = None, 
     doSync: Boolean = true
   ): Either[AppError, Competition] =
-    val firstNull = competitions.indexOf(null)
-    val index = if (firstNull != -1) firstNull else competitions.indexWhere(c => c != null && c.deleted)
-    
-    if (index != -1) {
+    val compDateInt = startDate.take(10).replace("-", "").take(8).toIntOption.getOrElse(0)
+    if (this.startDate > 0 && this.endDate > 0 && compDateInt > 0 && (compDateInt < this.startDate || compDateInt > this.endDate)) {
+      Left(AppError("competition.date.outside.tourney"))
+    } else if (competitions.exists(c => c != null && !c.deleted && c.name.trim.equalsIgnoreCase(name.trim))) {
+      Left(AppError("error.competition_already_exists"))
+    } else {
+      val firstNull = competitions.indexOf(null)
+      val index = if (firstNull != -1) firstNull else competitions.indexWhere(c => c != null && c.deleted)
+      
+      if (index != -1) {
       val c = Competition(
         id = CompId(index + 1), 
         name = name, 
         typ = typ, 
-        category = category,
+        category = category, 
         startDate = startDate, 
         status = CompStatus.CFG,
         startStage = None,
@@ -109,6 +129,7 @@ case class Tourney(
     } else {
       Left(AppError("max.competitions.reached"))
     }
+  }
 
   /**
    * Checks if player registration modifications are locked for the given competition.
@@ -125,11 +146,20 @@ case class Tourney(
       }.exists(_.status != StageStatus.CFG)
     }
 
-  /** Updates an existing competition. */
+  /**
+   * Updates an existing competition.
+   * Validates that no other active competition with the same name already exists in this tournament.
+   *
+   * @param comp The competition with updated fields.
+   * @param doSync Whether to trigger sync handler.
+   * @return Either an AppError or the updated Competition.
+   */
   def updateCompetition(comp: Competition, doSync: Boolean = true): Either[AppError, Competition] =
     val i = comp.id.value - 1
     if (i < 0 || i >= 64 || competitions(i) == null) {
       Left(AppError("competition.notFound"))
+    } else if (competitions.exists(c => c != null && !c.deleted && c.id != comp.id && c.name.trim.equalsIgnoreCase(comp.name.trim))) {
+      Left(AppError("error.competition_already_exists"))
     } else {
       val originalComp = competitions(i)
       if (originalComp.status == CompStatus.FIN && comp.status == CompStatus.FIN) {

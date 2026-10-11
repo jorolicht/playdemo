@@ -299,3 +299,25 @@ Die Produktivumgebung enthält ein automatisches Backup-Skript [`backup.sh`](fil
  ┃   3. tourney-deploy (Infrastructure & Operations Repository):
  ┃       • Enthält ausschließlich Docker-Compose-Dateien, Server-Setup-Skripte, Backup-Routinen und .env.example-Vorlagen.
  ┃       • Der Produktions-Server klont nur dieses Deployment-Repository.
+
+
+
+# Sicherheitsüberprüfung Server
+
+## 1. Benutzer mit Login-Shell
+grep -E ':/bin/(bash|sh|zsh)$' /etc/passwd
+
+## 2. SSH-Schlüssel
+cat ~/.ssh/authorized_keys
+
+## 3. Sudo-Berechtigungen
+sudo -l
+
+## 4. Offene Ports
+sudo ss -lntup
+
+## 5. Fehlgeschlagene SSH-Versuche nach IP
+sudo journalctl -u ssh --since "7 days ago" |
+grep -E "Invalid user|Failed password" |
+grep -oE 'from [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' |
+sort | uniq -c | sort -nr | head -20

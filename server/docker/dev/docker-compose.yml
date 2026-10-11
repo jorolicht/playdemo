@@ -112,8 +112,8 @@ services:
     image: playsrv-image
     container_name: playsrv-instance
     build:
-      context: .
-      dockerfile: playsrv/Dockerfile
+      context: playsrv
+      dockerfile: Dockerfile
       args:
         - APP_HOME=${APP_HOME}
         - PLAY_WP_URL=${PLAY_WP_URL}

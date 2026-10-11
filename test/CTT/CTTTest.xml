@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE tournament
   SYSTEM 'http://www.datenautomaten.nu/dtd/nuLiga/TournamentPortal.dtd'>
-<tournament end-date="2030-04-01" name="1. Test Meisterschaften" start-date="2030-04-01" tournament-id="TEST1">
+<tournament end-date="2030-04-02" name="1. Test Meisterschaften" start-date="2030-04-01" tournament-id="TEST1">
      <competition age-group="Herren" start-date="2030-04-01 12:00" ttr-from="1650" ttr-remarks="S-Klasse" ttr-to="3000" type="Einzel">
           <players>
                <player id="PLAYER1" type="single">

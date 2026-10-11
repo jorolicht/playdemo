@@ -11,24 +11,18 @@ DATE=$(date +%Y-%m-%d_%H%M%S)
 # Load environment variables
 if [ -f "$DOCKER_PROJECT_DIR/.env" ]; then
     echo "Loading environment from .env..."
-    while IFS= read -r line || [ -n "$line" ]; do
-        # Strip comments starting with #
-        clean_line=$(echo "$line" | sed 's/#.*//')
-        # Trim leading/trailing whitespace
-        clean_line=$(echo "$clean_line" | xargs)
-        # Skip empty lines
-        if [ -n "$clean_line" ]; then
-            export "$clean_line" 2>/dev/null || true
-        fi
-    done < "$DOCKER_PROJECT_DIR/.env"
+    set -a
+    source "$DOCKER_PROJECT_DIR/.env"
+    set +a
 fi
 
 # Configuration
 CONTAINER_DB="wp-db-instance"
-DB_USER="root"
-DB_PASS="${DB_ROOT_PASSWORD:-}"
+# Für mariadb-dump --all-databases wird der Root-Benutzer benötigt (DB_USER in .env ist wpuser)
+BACKUP_DB_USER="${DB_ROOT_USER:-root}"
+BACKUP_DB_PASS="${DB_ROOT_PASSWORD:-${DB_PASS:-}}"
 
-if [ -z "$DB_PASS" ]; then
+if [ -z "$BACKUP_DB_PASS" ]; then
     echo "❌ Fehler: DB_ROOT_PASSWORD ist nicht in .env definiert!"
     exit 1
 fi
@@ -43,7 +37,7 @@ mkdir -p "$BACKUP_PATH"
 
 # 1. Datenbank-Dump
 echo "Sichere Datenbank..."
-docker exec -i $CONTAINER_DB /usr/bin/mariadb-dump -u$DB_USER -p$DB_PASS --all-databases > $BACKUP_PATH/db_$DATE.sql
+docker exec -i $CONTAINER_DB /usr/bin/mariadb-dump -u"$BACKUP_DB_USER" -p"$BACKUP_DB_PASS" --all-databases > $BACKUP_PATH/db_$DATE.sql
 
 # 2. Dateisystem (wp-content) sichern
 echo "Sichere WordPress-Dateien..."

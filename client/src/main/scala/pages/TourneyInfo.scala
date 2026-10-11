@@ -20,16 +20,13 @@ object TourneyInfo extends BasePage with JsWrapper:
   val BtnAddComp:       HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
-    // When viewing tourney info, we usually want to clear the competition/round selection
-    Global.currentSelection = Global.currentSelection.copy(competition = None, stage = None)
+    // Get tournament from TourneyDB or Selection
+    val tourney = if (services.TourneyDB.tourney.wpId != 0) services.TourneyDB.tourney else Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
 
-    // Get tournament from Selection or TourneyDB
-    val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
+    // When viewing tourney info, we usually want to clear the competition/round selection
+    Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney), competition = None, stage = None)
 
     if (tourney.wpId != 0) {
-        // Update selection to ensure tournament is set
-        Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney))
-        
         // Always render ContextHeader because loadPage hides it by default
         comps.ContextHeader.render()
 
@@ -66,7 +63,7 @@ object TourneyInfo extends BasePage with JsWrapper:
               comp.name, 
               comp.typ, 
               comp.category,
-              comp.startDate.replace("-", ""),
+              comp.startDate,
               comp.lowLevel,
               comp.upperLevel
             ) match {
@@ -75,12 +72,20 @@ object TourneyInfo extends BasePage with JsWrapper:
                 render() // Re-render page
               case Left(err) => 
                 error(s"Failed to add competition: ${err.msgCode}")
+                val errMsg = if (err.is("competition.date.outside.tourney")) {
+                  base.Messages.gM("dlg.comp.errDate")
+                } else if (err.is("error.competition_already_exists") || err.is("competition.alreadyExists")) {
+                  base.Messages.gM("error.competition_already_exists")
+                } else {
+                  s"Fehler beim Hinzufügen des Wettbewerbs: ${err.msgCode}"
+                }
+                dom.window.alert(errMsg)
             }
           case Left(_) => debug("Add competition cancelled")
         }
       case `BtnDeleteTourney` =>
         import shared.BoxButton
-        val tourney = services.TourneyDB.tourney
+        val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
         DlgMsgbox.show("Möchten Sie dieses Turnier wirklich unwiderruflich löschen?", "Turnier löschen", List(BoxButton.Yes, BoxButton.No)).map {
           case BoxButton.Yes =>
             services.TourneyDB.apiDelete(tourney.wpId).map {
@@ -98,25 +103,16 @@ object TourneyInfo extends BasePage with JsWrapper:
         }
 
       case `BtnSaveLeave` =>
-        val title = "Turnier verlassen"
-        val msg = "Möchten Sie das aktuelle Turnier wirklich verlassen? Alle Änderungen werden gespeichert."
-        dialogs.DlgMsgbox.show(msg, title, List(shared.BoxButton.Yes, shared.BoxButton.No)).map {
-          case shared.BoxButton.Yes =>
+        val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
+        dialogs.DlgExportTourney.show(tourney, saveAndLeave = true).map {
+          case Some(_) =>
             services.TourneyDB.sync().map { _ =>
               Global.currentSelection = shared.model.Selection()
-              // Clear page state from session storage
-              try {
-                val storage = org.scalajs.dom.window.sessionStorage
-                storage.removeItem("tourney_last_page")
-                storage.removeItem("tourney_last_param")
-                storage.removeItem("tourney_last_wp_page_id")
-                storage.removeItem("tourney_last_selection")
-              } catch {
-                case _: Exception => // ignore
-              }
+              Global.clearSessionTourneyState()
               comps.ContextHeader.render()
               loadPage(MainView.name, "")
             }
-          case _ => debug("Save/Leave cancelled")
+          case None =>
+            debug("Save/Leave cancelled")
         }
       case _ =>

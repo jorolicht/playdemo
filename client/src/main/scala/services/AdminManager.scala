@@ -75,7 +75,11 @@ object AdminManager extends ComWrapper {
    */
   def importTourney(jsonString: String): Future[Either[AppError, String]] = {
     try {
-      val newTourney = read[Tourney](jsonString)
+      val newTourney = try {
+        read[services.DemoManager.DemoPayload](jsonString).tourney.tourney
+      } catch {
+        case _: Exception => read[Tourney](jsonString)
+      }
       
       // Reset IDs to create a new tournament
       newTourney.wpId = 0

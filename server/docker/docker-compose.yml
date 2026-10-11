@@ -133,7 +133,7 @@ services:
       - "traefik.http.routers.playsrv.middlewares=playsrv-strip"
       - "traefik.http.middlewares.playsrv-strip.stripprefix.prefixes=/srv"
     environment:
-      APP_VERSION: ${APP_VERSION:-1.0.2}
+      APP_VERSION: ${APP_VERSION:-1.0.3}
       APP_ENVIRONMENT: ${APP_ENVIRONMENT:-development}
       APP_DATE: ${APP_DATE:-2026-08-30}   
       PLAY_LOGFILE_PATH: ${APP_HOME:-/app}/logs

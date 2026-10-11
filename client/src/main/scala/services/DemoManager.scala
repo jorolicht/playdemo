@@ -67,7 +67,31 @@ object DemoManager extends ComWrapper {
     proceedAction()
   }
 
-  private def loadDemoTemplate(query: String): Future[Boolean] = {
+  /**
+   * Starts a pre-populated demo tournament directly in local mode.
+   * Loads the demo template, sets isLocalMode to true and isDemoMode to false,
+   * syncs data to local storage, and invokes proceedAction.
+   *
+   * @param proceedAction Callback invoked after the demo tournament is loaded.
+   * @return A Future containing true if the template was loaded, false otherwise.
+   */
+  def startDemoInLocalMode(proceedAction: () => Unit = () => ()): Future[Boolean] = {
+    loadDemoTemplate("template-full").map { success =>
+      Global.isLocalMode = true
+      Global.isDemoMode = false
+      if (success) {
+        proceedAction()
+        true
+      } else {
+        startLocalMode(() => {
+          proceedAction()
+        })
+        false
+      }
+    }
+  }
+
+  def loadDemoTemplate(query: String): Future[Boolean] = {
     val filename = if (query.contains("single") || query.contains("competition")) {
       "demo_competition.json"
     } else {
@@ -97,7 +121,10 @@ object DemoManager extends ComWrapper {
             
             // Decouple from server
             TourneyDB.tourney.wpId = 999999
-            TourneyDB.tourney.name = gM("demo.namePrefix") + TourneyDB.tourney.name
+            val prefix = gM("demo.namePrefix")
+            if (!TourneyDB.tourney.name.startsWith(prefix)) {
+              TourneyDB.tourney.name = prefix + TourneyDB.tourney.name
+            }
             TourneyDB.version = 1
             
             // Force sync to local storage

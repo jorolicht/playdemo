@@ -138,6 +138,12 @@ object CompetitionInfo extends BasePage with JsWrapper:
                   render()
                 case Left(err) =>
                   error(s"Failed to update competition: ${err.msgCode}")
+                  val errMsg = if (err.is("error.competition_already_exists") || err.is("competition.alreadyExists")) {
+                    base.Messages.gM("error.competition_already_exists")
+                  } else {
+                    s"Fehler beim Aktualisieren des Wettbewerbs: ${err.msgCode}"
+                  }
+                  dom.window.alert(errMsg)
               }
             case Left(_) => debug("Edit competition cancelled")
           }
@@ -160,24 +166,17 @@ object CompetitionInfo extends BasePage with JsWrapper:
         }
 
       case `BtnSaveLeave` =>
-        val title = "Wettbewerb verlassen"
-        val msg = "Möchten Sie den aktuellen Wettbewerb wirklich verlassen? Alle Änderungen werden gespeichert."
-        dialogs.DlgMsgbox.show(msg, title, List(shared.BoxButton.Yes, shared.BoxButton.No)).map {
-          case shared.BoxButton.Yes =>
+        val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
+        dialogs.DlgExportTourney.show(tourney, saveAndLeave = true).map {
+          case Some(_) =>
             services.TourneyDB.sync().map { _ =>
               Global.currentSelection = shared.model.Selection()
-              // Clear page state from session storage
-              try {
-                val storage = org.scalajs.dom.window.sessionStorage
-                storage.removeItem("tourney_last_page")
-                storage.removeItem("tourney_last_param")
-                storage.removeItem("tourney_last_selection")
-              } catch { case _: Exception => }
-              
+              Global.clearSessionTourneyState()
               comps.ContextHeader.hide()
               loadPage(PageNameTyp("MainView"), "")
             }
-          case _ => // Do nothing
+          case None =>
+            debug("Save/Leave cancelled")
         }
 
       case `BtnToggleStatus` =>

@@ -51,29 +51,17 @@ def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, asy
       }
     }
 
-    if (base.Global.currentSelection.tourney.isDefined && !base.Global.isTourneyPage(targetPage.value)) {
-      val isSimple = base.Global.currentSelection.tourney.exists(_.ident == "SIMPLE")
-      val title = if (isSimple) base.Messages.gM("dlg.leaveCompetition.title") else base.Messages.gM("dlg.leaveTourney.title")
-      val msg = if (isSimple) {
-        base.Messages.gM("dlg.leaveCompetition.msg")
-      } else {
-        base.Messages.gM("dlg.leaveTourney.msg")
-      }
-      
-      dialogs.DlgMsgbox.show(msg, title, List(shared.BoxButton.Yes, shared.BoxButton.No)).map {
-        case shared.BoxButton.Yes =>
+    val isEditingCurrentTourney = targetPage.value == "TourneyNew" && targetParam == "edit"
+    if (base.Global.currentSelection.tourney.isDefined && !base.Global.isTourneyPage(targetPage.value) && !isEditingCurrentTourney) {
+      val tourney = base.Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
+      dialogs.DlgExportTourney.show(tourney, saveAndLeave = true).map {
+        case Some(_) =>
           services.TourneyDB.sync().map { _ =>
             base.Global.currentSelection = shared.model.Selection()
-            try {
-              val storage = org.scalajs.dom.window.sessionStorage
-              storage.removeItem("tourney_last_page")
-              storage.removeItem("tourney_last_param")
-              storage.removeItem("tourney_last_selection")
-            } catch { case _: Exception => }
-            
+            base.Global.clearSessionTourneyState()
             doLoadPageInternal(targetPage, targetParam, withSidebar, async)
           }
-        case _ => // Do nothing
+        case None => // User cancelled, stay on current page
       }
     } else {
       doLoadPageInternal(targetPage, targetParam, withSidebar, async)

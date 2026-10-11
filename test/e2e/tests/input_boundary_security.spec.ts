@@ -67,7 +67,7 @@ test.describe('Section 16: Input-Boundary, Edge Cases & Sicherheits-Injektionen'
       }
     });
 
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.locator('input[type="file"]').first();
     if (await fileInput.count() > 0) {
       await fileInput.setInputFiles({
         name: 'invalid_file.exe',

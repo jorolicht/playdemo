@@ -21,8 +21,22 @@
     <div class="container pb-5">
         <div class="row g-4 justify-content-center">
             
+            <!-- Demo -->
+            <div class="col-lg-3 col-md-6">
+                <div class="card h-100 border-0 shadow hover-lift">
+                    <div class="card-body text-center p-4 d-flex flex-column">
+                        <div class="feature-icon bg-warning bg-gradient text-dark mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="bi bi-play-circle fs-3"></i>
+                        </div>
+                        <h3 class="h4 mb-3">@gM("mainView.demoTitle")</h3>
+                        <p class="text-muted small">@gM("mainView.demoDesc")</p>
+                        <button class="btn btn-warning mt-auto fw-bold text-dark" @id(BtnDemo, "onclick")>@gM("mainView.demoBtn")</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Create Tournament -->
-            <div class="col-md-4">
+            <div class="col-lg-3 col-md-6">
                 <div class="card h-100 border-0 shadow hover-lift">
                     <div class="card-body text-center p-4 d-flex flex-column">
                         <div class="feature-icon bg-primary bg-gradient text-white mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
@@ -36,7 +50,7 @@
             </div>
 
             <!-- Create Single Competition -->
-            <div class="col-md-4">
+            <div class="col-lg-3 col-md-6">
                 <div class="card h-100 border-0 shadow hover-lift">
                     <div class="card-body text-center p-4 d-flex flex-column">
                         <div class="feature-icon bg-success bg-gradient text-white mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
@@ -50,7 +64,7 @@
             </div>
 
             <!-- Search -->
-            <div class="col-md-4">
+            <div class="col-lg-3 col-md-6">
                 <div class="card h-100 border-0 shadow hover-lift">
                     <div class="card-body text-center p-4 d-flex flex-column">
                         <div class="feature-icon bg-info bg-gradient text-white mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">

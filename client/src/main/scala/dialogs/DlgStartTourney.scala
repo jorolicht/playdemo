@@ -1,0 +1,79 @@
+package dialogs
+
+import scala.concurrent.{ Future, Promise }
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.scalajs.js
+import org.scalajs.dom
+import org.scalajs.dom.{ MouseEvent, Event }
+import org.scalajs.dom.raw.HTMLElement
+
+import base.*
+import base.Bootstrap.*
+import base.Messages.gM
+import shared.DomTypes.HtmlId
+
+/**
+ * Bestätigungsdialog vor dem Starten eines ganzen Turniers.
+ * Weist den Benutzer mit einer Warnmeldung darauf hin, dass das aktuelle lokale Turnier gelöscht wird.
+ */
+object DlgStartTourney extends BaseDialog with JsWrapper:
+  /** Eindeutiger Name des Dialogs für Navigation und Routing. */
+  def name = PageNameTyp("DlgStartTourney")
+
+  val LoadId:   HtmlId = genId(name)
+  val ModalId:  HtmlId = genId(name)
+  val TitleId:  HtmlId = genId(name)
+  val PromptId: HtmlId = genId(name)
+  val ApplyId:  HtmlId = genId(name)
+  val CancelId: HtmlId = genId(name)
+  val CloseId:  HtmlId = genId(name)
+
+  private var modal: Modal = null
+
+  /**
+   * Rendert den Dialog-Inhalt.
+   *
+   * @param param Optionaler Parameter für Dialog-Darstellung.
+   * @return Immer true zur Bestätigung des Renders.
+   */
+  def render(param: String = ""): Boolean = true
+
+  /**
+   * Zeigt den Bestätigungsdialog zum Starten eines ganzen Turniers an.
+   *
+   * @return Future mit true, wenn "STARTEN" geklickt wurde, andernfalls false bei "ABBRECHEN" oder Schließen des Modals.
+   */
+  def show(): Future[Boolean] =
+    val p = Promise[Boolean]()
+
+    setHtml(getOrCreateDiv(LoadId), cviews.dialogs.html.DlgStartTourney())
+    val modalElem = gE(ModalId)
+    modal = Modal(modalElem)
+
+    val applyBtn = gE(ApplyId, withWarning = false)
+    if (applyBtn != null) {
+      applyBtn.onclick = (e: MouseEvent) => {
+        e.preventDefault()
+        if (!p.isCompleted) p.trySuccess(true)
+        modal.hide()
+      }
+    }
+
+    val cancelHandler = (e: MouseEvent) => {
+      e.preventDefault()
+      if (!p.isCompleted) p.trySuccess(false)
+      modal.hide()
+    }
+
+    val cancelBtn = gE(CancelId, withWarning = false)
+    if (cancelBtn != null) cancelBtn.onclick = cancelHandler
+
+    val closeBtn = gE(CloseId, withWarning = false)
+    if (closeBtn != null) closeBtn.onclick = cancelHandler
+
+    modalElem.addEventListener("hidden.bs.modal", (_: Event) => {
+      if (!p.isCompleted) p.trySuccess(false)
+    })
+
+    modal.show()
+    p.future

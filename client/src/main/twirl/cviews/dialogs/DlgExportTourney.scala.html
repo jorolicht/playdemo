@@ -1,0 +1,59 @@
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+@import dialogs.DlgExportTourney.*
+@import base.Messages.gM
+
+@(defaultFilename: String, saveAndLeave: Boolean)
+
+<div class="modal fade" @id(ModalId) tabindex="-1" @ariaLabelledBy(TitleId) aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow border-0 rounded-3">
+            <div class="modal-header bg-primary text-white py-3">
+                <h5 class="modal-title fw-bold" @id(TitleId)>
+                    @if(saveAndLeave) {
+                        <i class="bi bi-box-arrow-right me-2"></i>@gM("dlg.exportTourney.titleLeave")
+                    } else {
+                        <i class="bi bi-file-earmark-arrow-down me-2"></i>@gM("dlg.exportTourney.titleExport")
+                    }
+                </h5>
+                <button type="button" class="btn-close btn-close-white" @id(CloseId) data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-secondary mb-3">
+                    @if(saveAndLeave) { @gM("dlg.exportTourney.promptLeave") } else { @gM("dlg.exportTourney.promptExport") }
+                </p>
+                @if(!saveAndLeave) {
+                    <div class="mb-3">
+                        <label for="@{InputFilenameId.id}" class="form-label fw-bold small text-uppercase text-muted">@gM("dlg.exportTourney.filenameLabel")</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-filetype-json text-primary"></i></span>
+                            <input type="text" class="form-control" @id(InputFilenameId) value="@defaultFilename" autocomplete="off" required>
+                        </div>
+                        <div id="dlgExportTourneyFeedback" class="invalid-feedback d-none">@gM("dlg.exportTourney.errEmpty")</div>
+                        <div id="dlgExportTourneyOverwriteWarning" class="alert alert-warning d-none mt-3 p-2 small border-warning">
+                            <div class="d-flex align-items-center mb-1 fw-bold text-dark">
+                                <i class="bi bi-exclamation-triangle-fill text-warning fs-5 me-2"></i>
+                                <span>@gM("dlg.exportTourney.warnFileExists")</span>
+                            </div>
+                            <div class="text-secondary ps-4">@gM("dlg.exportTourney.promptOverwrite")</div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer bg-light d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary" @id(CancelId) data-bs-dismiss="modal">
+                    @if(saveAndLeave) { @gM("dlg.exportTourney.btnCancelLeave") } else { @gM("dlg.exportTourney.btnCancel") }
+                </button>
+                <button type="button" class="btn btn-primary fw-bold px-3" @id(ApplyId)>
+                    @if(saveAndLeave) {
+                        <i class="bi bi-box-arrow-right me-1"></i>@gM("dlg.exportTourney.btnLeave")
+                    } else {
+                        <i class="bi bi-download me-1"></i>@gM("dlg.exportTourney.btnExport")
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

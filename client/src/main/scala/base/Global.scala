@@ -55,6 +55,12 @@ object Global:
         val selectionJson = shared.basic.Pickle.write(value)
         storage.setItem("tourney_last_selection", selectionJson)
       }
+      val effectiveSlug = if (isLocalMode) "local" else value.tourney.map(_.slug).filter(_.nonEmpty).getOrElse("")
+      if (effectiveSlug.nonEmpty) {
+        if (storage != null) storage.setItem("tourney_slug", effectiveSlug)
+        val local = org.scalajs.dom.window.localStorage
+        if (local != null) local.setItem("tourney_slug", effectiveSlug)
+      }
     } catch {
       case _: Exception => // ignore during testing or if storage is not available
     }
@@ -84,21 +90,110 @@ object Global:
     }
   }
 
+  /**
+   * Indicates whether the application is running in offline local mode.
+   * Checks sessionStorage, localStorage, and whether the current tournament is local (wpId 999999).
+   */
   def isLocalMode: Boolean = {
     try {
-      val storage = org.scalajs.dom.window.sessionStorage
-      if (storage != null) {
-        storage.getItem("tourney_is_local_mode") == "true"
-      } else false
+      val session = org.scalajs.dom.window.sessionStorage
+      val local = org.scalajs.dom.window.localStorage
+      val fromSession = if (session != null) session.getItem("tourney_is_local_mode") == "true" else false
+      val fromLocal = if (local != null) local.getItem("tourney_is_local_mode") == "true" else false
+      val isLocalTourney = currentSelection.tourney.exists(_.wpId == 999999) || 
+                           (services.TourneyDB.tourney != null && services.TourneyDB.tourney.wpId == 999999)
+      !isDemoMode && (fromSession || fromLocal || isLocalTourney)
     } catch {
       case _: Exception => false
     }
   }
+
+  /**
+   * Sets the local mode flag in both sessionStorage and localStorage,
+   * and synchronizes the tourney_slug storage key ("local" if true, or the active tournament slug if false).
+   */
   def isLocalMode_=(value: Boolean): Unit = {
     try {
-      val storage = org.scalajs.dom.window.sessionStorage
-      if (storage != null) {
-        storage.setItem("tourney_is_local_mode", value.toString)
+      val session = org.scalajs.dom.window.sessionStorage
+      val local = org.scalajs.dom.window.localStorage
+      if (session != null) {
+        session.setItem("tourney_is_local_mode", value.toString)
+      }
+      if (local != null) {
+        local.setItem("tourney_is_local_mode", value.toString)
+      }
+      
+      val effectiveSlug = if (value) "local" else currentSelection.tourney.map(_.slug).filter(_.nonEmpty).getOrElse(if (services.TourneyDB.tourney != null) services.TourneyDB.tourney.slug else "")
+      if (session != null) {
+        if (effectiveSlug.nonEmpty) session.setItem("tourney_slug", effectiveSlug)
+        else session.removeItem("tourney_slug")
+      }
+      if (local != null) {
+        if (effectiveSlug.nonEmpty) local.setItem("tourney_slug", effectiveSlug)
+        else local.removeItem("tourney_slug")
+      }
+    } catch {
+      case _: Exception =>
+    }
+  }
+
+  /**
+   * Retrieves the current tourney slug from sessionStorage, localStorage, or the current selection.
+   * If isLocalMode is true, returns "local".
+   */
+  def tourneySlug: String = {
+    try {
+      if (isLocalMode) return "local"
+      val session = org.scalajs.dom.window.sessionStorage
+      val local = org.scalajs.dom.window.localStorage
+      val fromSession = if (session != null) session.getItem("tourney_slug") else null
+      val fromLocal = if (local != null) local.getItem("tourney_slug") else null
+      if (fromSession != null && fromSession.nonEmpty) fromSession
+      else if (fromLocal != null && fromLocal.nonEmpty) fromLocal
+      else currentSelection.tourney.map(_.slug).filter(_.nonEmpty).getOrElse(if (services.TourneyDB.tourney != null) services.TourneyDB.tourney.slug else "")
+    } catch {
+      case _: Exception => if (isLocalMode) "local" else ""
+    }
+  }
+
+  /**
+   * Sets the tourney slug in both sessionStorage and localStorage.
+   * If isLocalMode is true, "local" is stored regardless of the parameter.
+   */
+  def tourneySlug_=(slug: String): Unit = {
+    try {
+      val effectiveSlug = if (isLocalMode) "local" else slug
+      val session = org.scalajs.dom.window.sessionStorage
+      val local = org.scalajs.dom.window.localStorage
+      if (session != null) {
+        if (effectiveSlug.nonEmpty) session.setItem("tourney_slug", effectiveSlug)
+        else session.removeItem("tourney_slug")
+      }
+      if (local != null) {
+        if (effectiveSlug.nonEmpty) local.setItem("tourney_slug", effectiveSlug)
+        else local.removeItem("tourney_slug")
+      }
+    } catch {
+      case _: Exception =>
+    }
+  }
+
+  /**
+   * Clears saved tournament page state from session storage and local storage.
+   */
+  def clearSessionTourneyState(): Unit = {
+    try {
+      val session = org.scalajs.dom.window.sessionStorage
+      if (session != null) {
+        session.removeItem("tourney_last_page")
+        session.removeItem("tourney_last_param")
+        session.removeItem("tourney_last_wp_page_id")
+        session.removeItem("tourney_last_selection")
+        session.removeItem("tourney_slug")
+      }
+      val local = org.scalajs.dom.window.localStorage
+      if (local != null) {
+        local.removeItem("tourney_slug")
       }
     } catch {
       case _: Exception =>
@@ -153,17 +248,32 @@ object Global:
     }
     try {
       val storage = org.scalajs.dom.window.sessionStorage
-      storage.removeItem("tourney_last_page")
-      storage.removeItem("tourney_last_param")
-      storage.removeItem("tourney_last_wp_page_id")
-      storage.removeItem("tourney_last_selection")
+      if (storage != null) {
+        storage.removeItem("tourney_last_page")
+        storage.removeItem("tourney_last_param")
+        storage.removeItem("tourney_last_wp_page_id")
+        storage.removeItem("tourney_last_selection")
+        storage.removeItem("tourney_slug")
+      }
+      val local = org.scalajs.dom.window.localStorage
+      if (local != null) {
+        local.removeItem("tourney_slug")
+      }
     } catch {
       case _: Exception => // ignore
     }
   }
 
+  /**
+   * Checks whether the current user or session has administrative access to the given tournament.
+   * Offline/Local tournaments (wpId 999999 or <= 0), Demo mode, and Local mode always have full access.
+   * Logged-in WordPress users have access if they have an administrative role or match the tournament organizer.
+   *
+   * @param tourney The tournament to check access for.
+   * @return True if edit/delete and management actions are allowed.
+   */
   def hasTourneyAccess(tourney: shared.model.Tourney): Boolean =
-    if (isDemoMode) return true
+    if (tourney == null || isDemoMode || isLocalMode || tourney.wpId == 999999 || tourney.wpId <= 0) return true
     user match {
       case Some(u) => 
         val isAdminOrMaster = u.roles.exists(r => List("administrator", "editor", "tourney_master").contains(r))

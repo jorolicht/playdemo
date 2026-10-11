@@ -5,14 +5,15 @@
 
 @()
 
-<div class="modal fade" @id(ModalId) tabindex="-1" aria-labelledby="DlgCompetition-label" aria-hidden="true">
+<div class="modal fade" @id(ModalId) tabindex="-1" @ariaLabelledBy(TitleId) aria-hidden="true">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="DlgCompetition-label" @id(TitleId)>@gM("dlg.comp.title")</h5>
+                <h5 class="modal-title" @id(TitleId)>@gM("dlg.comp.title")</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" @id(CloseId)></button>
             </div>
             <div class="modal-body">
+                <div id="dlgCompFeedback" class="mb-2"></div>
                 <form onsubmit="return false;">
                     
                     <div class="mb-3">
