@@ -7,9 +7,16 @@ import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
 import base.*
+import base.Messages.gM
 import shared.MainIds.*
 import shared.model.*
 
+/**
+ * Page component representing the quick-start competition creation wizard (Schnellstart).
+ *
+ * Allows users to quickly create a standalone competition without manually configuring a full tournament.
+ * A SIMPLE wrapper tournament is automatically created and initialized in the background.
+ */
 object CompetitionNew extends BasePage with JsWrapper with services.ComWrapper:
   def name = PageNameTyp("CompetitionNew")
   
@@ -21,6 +28,12 @@ object CompetitionNew extends BasePage with JsWrapper with services.ComWrapper:
   val TtrToId:        HtmlId = genId(name)
   val BtnSave:        HtmlId = genId(name)
 
+  /**
+   * Renders the CompetitionNew page view and initializes default values.
+   *
+   * @param param Optional routing parameter.
+   * @return True upon successful render.
+   */
   def render(param: String = ""): Boolean = 
     setMain(cviews.pages.html.CompetitionNew())
     comps.ContextHeader.render()
@@ -35,14 +48,24 @@ object CompetitionNew extends BasePage with JsWrapper with services.ComWrapper:
     
     true
 
+  /**
+   * Dispatches DOM events to appropriate action handlers.
+   *
+   * @param elem HTML element triggering the event.
+   * @param event Triggering DOM event.
+   */
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
       case `BtnSave` => 
         doSave()
       case _ => debug(s"CompetitionNew handleEvent: ${elem.id}")
 
+  /**
+   * Validates form input, creates the SIMPLE dummy tournament, adds the new competition,
+   * synchronizes state with browser storage or server, and navigates to the CompetitionInfo view.
+   */
   private def doSave(): Unit =
-    val nameStr = getInput(gE(CompNameId))
+    val nameStr = getInput(gE(CompNameId)).trim
     
     if (nameStr.length < 3) {
       dom.window.alert("Bitte geben Sie einen gültigen Namen ein.")
@@ -52,35 +75,46 @@ object CompetitionNew extends BasePage with JsWrapper with services.ComWrapper:
       
       // Convert yyyy-MM-ddTHH:mm to yyyy-MM-dd HH:mm:ss
       val startRaw = getInput(gE(StartDateId))
-      val startFormatted = startRaw.replace("T", " ") + ":00"
+      val startFormatted = if (startRaw.contains("T")) startRaw.replace("T", " ") + ":00" else startRaw
       
       val ttrFrom = try Some(getInput(gE(TtrFromId)).toInt) catch { case _:Exception => None }
       val ttrTo   = try Some(getInput(gE(TtrToId)).toInt)   catch { case _:Exception => None }
       
       // LOGIC: Create SIMPLE dummy tournament
-      val dateInt = startFormatted.take(10).replace("-", "").toIntOption.getOrElse(0)
+      val dateInt = startFormatted.take(10).replace("-", "").toIntOption.getOrElse(20260101)
       
       val dummy = Tourney(
         wpId = 0,
         name = nameStr,
-        organizer = Global.user.map(_.org).getOrElse("System"),
+        organizer = Global.user.map(u => if (u.org.nonEmpty) u.org else u.username).getOrElse("System"),
         startDate = dateInt,
         endDate = dateInt,
         ident = "SIMPLE",
         category = cat
       )
       
-      // 1. Create dummy tournament on server
-      services.TourneyDB.apiCreate(dummy).map {
+      // 1. Create dummy tournament on server or local storage
+      services.TourneyDB.apiCreate(dummy).flatMap {
         case Right(slug) =>
+          services.TourneyDB.update(dummy, doSync = false)
           // 2. Add the competition
-          services.TourneyDB.tourney.addCompetition(nameStr, typ, cat, startFormatted) match {
+          services.TourneyDB.tourney.addCompetition(
+            name = nameStr, 
+            typ = typ, 
+            category = cat, 
+            startDate = startFormatted, 
+            lowLevel = ttrFrom, 
+            upperLevel = ttrTo
+          ) match {
             case Right(newComp) =>
               Global.currentSelection = Selection(Some(services.TourneyDB.tourney), Some(newComp))
               comps.ContextHeader.render()
-              loadPage(PageNameTyp("CompetitionInfo"), "")
+              services.TourneyDB.sync().map { _ =>
+                loadPage(PageNameTyp("CompetitionInfo"), "")
+              }
             case Left(err) =>
               dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
+              Future.successful(())
           }
         case Left(err) =>
           val errMsg = if (err.is("tourney_already_exists")) {
@@ -94,5 +128,6 @@ object CompetitionNew extends BasePage with JsWrapper with services.ComWrapper:
             s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}"
           }
           dom.window.alert(errMsg)
+          Future.successful(())
       }
     }

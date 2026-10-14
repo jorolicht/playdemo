@@ -36,9 +36,10 @@ object TourneyDB extends ComWrapper with Debouncer:
   def init(idOrSlug: Int | String): Future[Either[AppError, Long]] =
     Logging.info(s"Initialisiere TourneyDB für $idOrSlug: Lade alle Daten vom Server...")
     
-    // Set internal ID immediately if it's an Int
+    // Set internal ID immediately if it's an Int or local
     idOrSlug match {
       case id: Int => this.tourney = Tourney.default.copy(wpId = id)
+      case s: String if s == "local" || s == "999999" => this.tourney = Tourney.default.copy(wpId = 999999)
       case _ => // slug will be resolved during load
     }
 
@@ -139,7 +140,7 @@ object TourneyDB extends ComWrapper with Debouncer:
    * Loads basic tournament data from the WordPress server.
    */
   def load(idOrSlug: Int | String): Future[Either[AppError, Long]] =
-    val isDemoOrLocal = base.Global.isDemoMode || base.Global.isLocalMode || idOrSlug == 999999 || idOrSlug == "999999"
+    val isDemoOrLocal = base.Global.isDemoMode || base.Global.isLocalMode || idOrSlug == 999999 || idOrSlug == "999999" || idOrSlug == "local"
     if (isDemoOrLocal) then
       val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_tourney")
       if (jsStr != null && jsStr.nonEmpty) {
@@ -203,23 +204,93 @@ object TourneyDB extends ComWrapper with Debouncer:
     }
 
   /**
-   * Deletes the current tournament from the WordPress server.
+   * Checks whether a local tournament currently exists in browser local storage or active memory.
+   *
+   * @return True if a local tournament is present, false otherwise.
+   */
+  def hasLocalTourney: Boolean = {
+    try {
+      val local = org.scalajs.dom.window.localStorage
+      val raw = if (local != null) local.getItem("App.demo_tourney") else null
+      val hasStorage = raw != null && raw.trim.nonEmpty && !raw.trim.equals("{}")
+      val hasMemory = (base.Global.isLocalMode || base.Global.isDemoMode || tourney.wpId == 999999) &&
+                      (tourney.name.nonEmpty || base.Global.currentSelection.tourney.exists(_.name.nonEmpty))
+      hasStorage || hasMemory
+    } catch {
+      case _: Exception => false
+    }
+  }
+
+  /**
+   * Thoroughly purges all tournament data, related database caches, and session/local storage keys
+   * from the browser storage and resets tournament state in memory.
+   *
+   * @param wpId Optional WordPress Post ID to clean specific ACI storage key.
+   */
+  def purgeAllTourneyStorage(wpId: Int = 0): Unit = {
+    tourney = shared.model.Tourney.default
+    base.Global.currentSelection = shared.model.Selection()
+    base.Global.isLocalMode = false
+    base.Global.isDemoMode = false
+    base.Global.tourneySlug = ""
+    try {
+      val local = org.scalajs.dom.window.localStorage
+      if (local != null) {
+        local.removeItem("App.demo_tourney")
+        local.removeItem("App.demo_clubs")
+        local.removeItem("App.demo_players")
+        local.removeItem("App.demo_comps")
+        local.removeItem("App.demo_stages")
+        local.removeItem("App.demo_aci_999999")
+        if (wpId > 0) local.removeItem("App.demo_aci_" + wpId)
+        local.removeItem("tourney_is_local_mode")
+        local.removeItem("tourney_slug")
+        local.removeItem("tourney_name")
+        local.removeItem("tourney_ident")
+        local.removeItem("tourney_last_page")
+        local.removeItem("tourney_last_param")
+        local.removeItem("tourney_last_selection")
+        local.removeItem("tourney_last_wp_page_id")
+      }
+      val session = org.scalajs.dom.window.sessionStorage
+      if (session != null) {
+        session.removeItem("tourney_is_local_mode")
+        session.removeItem("tourney_slug")
+        session.removeItem("tourney_name")
+        session.removeItem("tourney_ident")
+        session.removeItem("tourney_last_page")
+        session.removeItem("tourney_last_param")
+        session.removeItem("tourney_last_selection")
+        session.removeItem("tourney_last_wp_page_id")
+      }
+    } catch {
+      case _: Exception => // ignore storage access exceptions
+    }
+    base.Global.clearSessionTourneyState()
+  }
+
+  /**
+   * Deletes the tournament (either local storage or server WordPress post)
+   * and thoroughly purges all browser storage keys and memory state so no traces
+   * or status bar remnants remain.
+   *
+   * @param trnyId Tournament Post ID (or 999999 for local mode).
+   * @return Future containing Either AppError or Unit on success.
    */
   def apiDelete(trnyId: Int): Future[Either[AppError, Unit]] =
-    if (base.Global.isDemoMode || base.Global.isLocalMode || trnyId == 999999) then
-      org.scalajs.dom.window.localStorage.removeItem("App.demo_tourney")
-      org.scalajs.dom.window.localStorage.removeItem("App.demo_clubs")
-      org.scalajs.dom.window.localStorage.removeItem("App.demo_players")
-      org.scalajs.dom.window.localStorage.removeItem("App.demo_comps")
-      org.scalajs.dom.window.localStorage.removeItem("App.demo_stages")
+    val isLocal = base.Global.isDemoMode || base.Global.isLocalMode || trnyId == 999999
+    if (isLocal) then
+      purgeAllTourneyStorage(trnyId)
       Future.successful(Right(()))
     else if (trnyId == 0) then
+      purgeAllTourneyStorage(0)
       Future.successful(Right(()))
     else
       val params = List("postId" -> trnyId.toString)
       ajaxDelete[Unit](routeDelete, params).map {
         case Right(_) => 
           Logging.info(s"Tournament $trnyId deleted from server.")
+          purgeAllTourneyStorage(trnyId)
           Right(())
         case Left(err) => Left(err)
       }

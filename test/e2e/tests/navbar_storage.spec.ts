@@ -64,7 +64,16 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
     await expect(page.locator('a[id*="LoadLocalTourneyId"]')).not.toBeVisible();
   });
 
-  test('TC-NB-02 [🌐]: Klick auf Demo-Button (MainView) öffnet Dialog "Demo lokal starten?", Abbrechen verbleibt, Bestätigen startet Demo', async ({ page }) => {
+  test('TC-NB-02 [🌐]: Klick auf Demo-Button (MainView) öffnet Dialog "Demo lokal starten?", Abbrechen verbleibt, Bestätigen startet Demo wenn lokales Turnier vorhanden ist', async ({ page }) => {
+    await mainPage.goto();
+
+    // Prepare an existing local tournament so the warning dialog appears
+    await page.evaluate(() => {
+      window.localStorage.setItem('App.demo_tourney', JSON.stringify({
+        version: 1,
+        tourney: { wpId: 999999, name: 'Vorhandenes lokales Turnier', ident: 'LOCAL' }
+      }));
+    });
     await mainPage.goto();
 
     const demoBtn = mainPage.btnDemoBox;

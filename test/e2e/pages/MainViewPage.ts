@@ -56,6 +56,11 @@ export class MainViewPage {
   readonly btnOption1: Locator;
   readonly btnOption2: Locator;
   readonly btnSearch: Locator;
+  readonly statusTourneyBar: Locator;
+  readonly statusTourneyLabel: Locator;
+  readonly statusTourneyIcon: Locator;
+  readonly statusTourneyName: Locator;
+  readonly btnStatusLoadLast: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -65,6 +70,11 @@ export class MainViewPage {
     this.btnOption1 = page.locator('#MainView_BtnOption1');
     this.btnOption2 = page.locator('#MainView_BtnOption2');
     this.btnSearch = page.locator('#MainView_BtnSearch');
+    this.statusTourneyBar = page.locator('#MainView_StatusTourney');
+    this.statusTourneyLabel = page.locator('#MainView_StatusTourney span.fw-semibold');
+    this.statusTourneyIcon = page.locator('#MainView_StatusTourney .container i.bi').first();
+    this.statusTourneyName = page.locator('#MainView_StatusTourneyName');
+    this.btnStatusLoadLast = page.locator('#MainView_BtnLoadLast');
 
     // Header & Navigation
     this.brandLogo = page.locator('.navbar-brand');
@@ -177,12 +187,13 @@ export class MainViewPage {
   }
 
   /**
-   * Starts a demo tournament by clicking the Demo button and confirming the DlgStartDemo modal.
+   * Starts a demo tournament by clicking the Demo button and confirming the DlgStartDemo modal if present.
    */
   async startDemo() {
     await this.btnDemo.first().click();
-    await expect(this.dlgStartDemoModal).toBeVisible({ timeout: 5000 });
-    await this.btnStartDemoApply.click();
-    await expect(this.dlgStartDemoModal).not.toBeVisible({ timeout: 7000 });
+    if (await this.dlgStartDemoModal.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await this.btnStartDemoApply.click();
+      await expect(this.dlgStartDemoModal).not.toBeVisible({ timeout: 7000 });
+    }
   }
 }

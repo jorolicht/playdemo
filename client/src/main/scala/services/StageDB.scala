@@ -82,9 +82,10 @@ object StageDB extends ComWrapper with Debouncer:
         t.stages.clear()
         for (i <- 0 until 128) t.stages += null
         req.events.foreach { r =>
-           val i = r.id.value - 1
-           if (i >= 0 && i < 128) then
-             t.stages(i) = r
+           val targetIdx = if (r.id.value > 0 && r.id.value <= 128) r.id.value - 1 else t.stages.indexOf(null)
+           if (targetIdx >= 0 && targetIdx < 128) then
+             val stageToStore = if (r.id.value > 0) r else r.copy(id = StageId(targetIdx + 1))
+             t.stages(targetIdx) = stageToStore
         }
         t.dirtyStage.clear()
         initHandler()
@@ -104,9 +105,10 @@ object StageDB extends ComWrapper with Debouncer:
           t.stages.clear()
           for (i <- 0 until 128) t.stages += null
           res.stages.foreach { r =>
-             val i = r.id.value - 1
-             if (i >= 0 && i < 128) then
-               t.stages(i) = r
+             val targetIdx = if (r.id.value > 0 && r.id.value <= 128) r.id.value - 1 else t.stages.indexOf(null)
+             if (targetIdx >= 0 && targetIdx < 128) then
+               val stageToStore = if (r.id.value > 0) r else r.copy(id = StageId(targetIdx + 1))
+               t.stages(targetIdx) = stageToStore
           }
           t.dirtyStage.clear()
           initHandler() // Ensure handler is set

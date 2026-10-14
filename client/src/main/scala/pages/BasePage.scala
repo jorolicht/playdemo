@@ -52,7 +52,12 @@ def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, asy
     }
 
     val isEditingCurrentTourney = targetPage.value == "TourneyNew" && targetParam == "edit"
-    if (base.Global.currentSelection.tourney.isDefined && !base.Global.isTourneyPage(targetPage.value) && !isEditingCurrentTourney) {
+    val isLeavingTourney = base.Global.isTourneyPage(base.Global.activePageName) &&
+                           !base.Global.isTourneyPage(targetPage.value) &&
+                           base.Global.currentSelection.tourney.isDefined &&
+                           !isEditingCurrentTourney &&
+                           targetPage.value != base.Global.activePageName
+    if (isLeavingTourney) {
       val tourney = base.Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
       dialogs.DlgExportTourney.show(tourney, saveAndLeave = true).map {
         case Some(_) =>

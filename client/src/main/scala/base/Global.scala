@@ -61,6 +61,18 @@ object Global:
         val local = org.scalajs.dom.window.localStorage
         if (local != null) local.setItem("tourney_slug", effectiveSlug)
       }
+      val tourneyName = value.tourney.map(_.name).filter(_.nonEmpty).getOrElse("")
+      if (tourneyName.nonEmpty) {
+        if (storage != null) storage.setItem("tourney_name", tourneyName)
+        val local = org.scalajs.dom.window.localStorage
+        if (local != null) local.setItem("tourney_name", tourneyName)
+      }
+      val tourneyIdent = value.tourney.map(_.ident).filter(_.nonEmpty).getOrElse("")
+      if (tourneyIdent.nonEmpty) {
+        if (storage != null) storage.setItem("tourney_ident", tourneyIdent)
+        val local = org.scalajs.dom.window.localStorage
+        if (local != null) local.setItem("tourney_ident", tourneyIdent)
+      }
     } catch {
       case _: Exception => // ignore during testing or if storage is not available
     }
@@ -123,7 +135,7 @@ object Global:
         local.setItem("tourney_is_local_mode", value.toString)
       }
       
-      val effectiveSlug = if (value) "local" else currentSelection.tourney.map(_.slug).filter(_.nonEmpty).getOrElse(if (services.TourneyDB.tourney != null) services.TourneyDB.tourney.slug else "")
+      val effectiveSlug = if (value) "local" else currentSelection.tourney.map(_.slug).filter(s => s.nonEmpty && s != "local").getOrElse(if (services.TourneyDB.tourney != null && services.TourneyDB.tourney.slug != "local") services.TourneyDB.tourney.slug else "")
       if (session != null) {
         if (effectiveSlug.nonEmpty) session.setItem("tourney_slug", effectiveSlug)
         else session.removeItem("tourney_slug")
@@ -190,10 +202,16 @@ object Global:
         session.removeItem("tourney_last_wp_page_id")
         session.removeItem("tourney_last_selection")
         session.removeItem("tourney_slug")
+        session.removeItem("tourney_name")
+        session.removeItem("tourney_ident")
+        session.removeItem("tourney_is_local_mode")
       }
       val local = org.scalajs.dom.window.localStorage
       if (local != null) {
         local.removeItem("tourney_slug")
+        local.removeItem("tourney_name")
+        local.removeItem("tourney_ident")
+        local.removeItem("tourney_is_local_mode")
       }
     } catch {
       case _: Exception =>
@@ -254,10 +272,14 @@ object Global:
         storage.removeItem("tourney_last_wp_page_id")
         storage.removeItem("tourney_last_selection")
         storage.removeItem("tourney_slug")
+        storage.removeItem("tourney_name")
+        storage.removeItem("tourney_ident")
       }
       val local = org.scalajs.dom.window.localStorage
       if (local != null) {
         local.removeItem("tourney_slug")
+        local.removeItem("tourney_name")
+        local.removeItem("tourney_ident")
       }
     } catch {
       case _: Exception => // ignore

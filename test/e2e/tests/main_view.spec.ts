@@ -36,9 +36,18 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
     await expect(cardSearch.locator('#MainView_BtnSearch')).toBeVisible();
   });
 
-  test('TC-MV-01b [🌐]: Klick auf Demo-Container öffnet Dialog "Demo lokal starten?", Abbrechen verbleibt, Bestätigen startet Demo', async ({ page }) => {
+  test('TC-MV-01b [🌐]: Klick auf Demo-Container öffnet Dialog "Demo lokal starten?", Abbrechen verbleibt, Bestätigen startet Demo wenn lokales Turnier vorhanden ist', async ({ page }) => {
     const mainView = new MainViewPage(page);
     const infoPage = new TourneyInfoPage(page);
+    await mainView.goto();
+
+    // Prepare an existing local tournament so the warning dialog appears
+    await page.evaluate(() => {
+      window.localStorage.setItem('App.demo_tourney', JSON.stringify({
+        version: 1,
+        tourney: { wpId: 999999, name: 'Vorhandenes lokales Turnier', ident: 'LOCAL' }
+      }));
+    });
     await mainView.goto();
 
     // 1. Click Demo container button
@@ -70,6 +79,23 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
     await expect(tourneyNameElem).toBeVisible();
     const titleText = await tourneyNameElem.innerText();
     expect(titleText).toContain('Demo:');
+  });
+
+  test('TC-MV-01c [🌐]: Klick auf Demo-Container startet Demo direkt ohne Dialog, wenn kein lokales Turnier vorhanden ist', async ({ page }) => {
+    const mainView = new MainViewPage(page);
+    const infoPage = new TourneyInfoPage(page);
+    await mainView.goto();
+
+    // Ensure clean state (no local tournament)
+    await page.evaluate(() => {
+      window.localStorage.removeItem('App.demo_tourney');
+    });
+    await mainView.goto();
+
+    // Click Demo container button -> starts demo directly without modal
+    await mainView.clickDemoBox();
+    await expect(mainView.dlgStartDemoModal).not.toBeVisible();
+    await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
   });
 
   test('TC-MV-02 [🌐]: Klick auf Turniersuche navigiert zu MainSearch', async ({ page }) => {
@@ -169,9 +195,25 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
     await mainView.btnStartCompetitionApply.click();
     await expect(mainView.dlgStartCompetitionModal).not.toBeVisible({ timeout: 3000 });
 
-    // 5. Verify DlgCompetition modal is shown (quickstart competition creation form)
-    await expect(page.locator('div[id*="DlgCompetition"].modal')).toBeVisible({ timeout: 7000 });
-    await expect(page.locator('input[id*="DlgCompetition_CompNameId"]')).toBeVisible({ timeout: 5000 });
+    // 5. Verify CompetitionNew page is shown (quickstart competition creation form)
+    await expect(page.locator('input[id*="CompetitionNew_CompNameId"]')).toBeVisible({ timeout: 7000 });
+    await expect(page.locator('button[id*="CompetitionNew_BtnSave"]')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('TC-MV-08b [🌐]: Schnellstart über CompetitionNew erstellt Wettbewerb und navigiert zu CompetitionInfo', async ({ page }) => {
+    const mainView = new MainViewPage(page);
+    await mainView.goto();
+
+    await mainView.startQuickCompetition();
+    await expect(page.locator('input[id*="CompetitionNew_CompNameId"]')).toBeVisible({ timeout: 7000 });
+
+    const compName = `QuickComp ${Date.now()}`;
+    await page.locator('input[id*="CompetitionNew_CompNameId"]').fill(compName);
+    await page.locator('button[id*="CompetitionNew_BtnSave"]').click();
+
+    // Verify navigation to CompetitionInfo and competition name is displayed
+    await expect(page.locator('.card-header:has-text("Wettbewerb"), .card-header:has-text("Competition")').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('body')).toContainText(compName);
   });
 
   test('TC-MV-09 [👑]: Admin/Master sieht Management-Button in Navbar', async ({ page }) => {
@@ -192,6 +234,311 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
     } else {
       await expect(page.locator('body')).toBeVisible();
     }
+  });
+
+  test('TC-MV-11a [🌐]: Status-Zeile wird NICHT angezeigt, wenn keine Speicherschlüssel für ein letztes Turnier existieren', async ({ page }) => {
+    const mainView = new MainViewPage(page);
+    await mainView.goto();
+
+    await page.evaluate(() => {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+    });
+    await mainView.goto();
+
+    // Verify status bar is NOT visible
+    await expect(mainView.statusTourneyBar).not.toBeVisible();
+    await expect(page.locator('.hero-section').first()).toBeVisible();
+  });
+
+  test('TC-MV-11b [🌐]: Status-Zeile zeigt lokales Turnier an, wenn App.demo_tourney in localStorage existiert, und Klick auf Laden öffnet TourneyInfo', async ({ page }) => {
+    const mainView = new MainViewPage(page);
+    const infoPage = new TourneyInfoPage(page);
+    await mainView.goto();
+
+    // Setup local tournament in storage
+    const localTourneyName = 'Mein Lokales Vereinsturnier';
+    const samplePayload = {
+      version: 1,
+      tourney: {
+        wpId: 999999,
+        name: localTourneyName,
+        organizer: 'Verein',
+        startDate: 20261013,
+        endDate: 20261013,
+        ident: 'LOC-1',
+        category: 'Club',
+        slug: 'local',
+        clubs: [],
+        players: [],
+        competitions: [],
+        stages: []
+      }
+    };
+
+    await page.evaluate((payload) => {
+      window.localStorage.setItem('App.demo_tourney', JSON.stringify(payload));
+      window.localStorage.setItem('tourney_is_local_mode', 'true');
+      window.sessionStorage.setItem('tourney_is_local_mode', 'true');
+      window.localStorage.setItem('tourney_slug', 'local');
+      window.sessionStorage.setItem('tourney_slug', 'local');
+    }, samplePayload);
+
+    await mainView.goto();
+
+    // 1. Verify status bar is visible before hero-section
+    await expect(mainView.statusTourneyBar).toBeVisible();
+    await expect(mainView.statusTourneyName).toHaveText(localTourneyName);
+    await expect(mainView.statusTourneyBar.locator('.badge')).toHaveText(/Lokal|Local/i);
+
+    // 2. Click load button in status bar
+    await expect(mainView.btnStatusLoadLast).toBeVisible();
+    await mainView.btnStatusLoadLast.click();
+
+    // 3. Verify navigation to TourneyInfo and tournament name is loaded
+    await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
+    const tourneyNameElem = page.locator('.card-body .fw-bold.text-primary').first();
+    await expect(tourneyNameElem).toBeVisible();
+    expect(await tourneyNameElem.innerText()).toContain(localTourneyName);
+  });
+
+  test('TC-MV-11c [🌐]: Status-Zeile zeigt Cloud-Turnier an, wenn tourney_slug und tourney_name existieren', async ({ page }) => {
+    const mainView = new MainViewPage(page);
+    await mainView.goto();
+
+    const cloudTourneyName = 'Cloud Championship 2026';
+    await page.evaluate((name) => {
+      window.localStorage.removeItem('App.demo_tourney');
+      window.localStorage.setItem('tourney_is_local_mode', 'false');
+      window.sessionStorage.setItem('tourney_is_local_mode', 'false');
+      window.localStorage.setItem('tourney_slug', 'cloud-championship-2026');
+      window.sessionStorage.setItem('tourney_slug', 'cloud-championship-2026');
+      window.localStorage.setItem('tourney_name', name);
+      window.sessionStorage.setItem('tourney_name', name);
+    }, cloudTourneyName);
+
+    await mainView.goto();
+
+    // Verify status bar is visible with Cloud badge and tournament name
+    await expect(mainView.statusTourneyBar).toBeVisible();
+    await expect(mainView.statusTourneyName).toHaveText(cloudTourneyName);
+    await expect(mainView.statusTourneyBar.locator('.badge')).toHaveText(/Cloud/i);
+    await expect(mainView.btnStatusLoadLast).toBeVisible();
+  });
+
+  test('TC-MV-11d [🌐]: Status-Zeile zeigt Cloud-Slug an, wenn nur tourney_slug ohne separaten Namen gespeichert ist', async ({ page }) => {
+    const mainView = new MainViewPage(page);
+    await mainView.goto();
+
+    const cloudSlug = 'stadtliga-2026';
+    await page.evaluate((slug) => {
+      window.localStorage.removeItem('App.demo_tourney');
+      window.localStorage.removeItem('tourney_name');
+      window.sessionStorage.removeItem('tourney_name');
+      window.sessionStorage.removeItem('tourney_last_selection');
+      window.localStorage.setItem('tourney_is_local_mode', 'false');
+      window.sessionStorage.setItem('tourney_is_local_mode', 'false');
+      window.localStorage.setItem('tourney_slug', slug);
+      window.sessionStorage.setItem('tourney_slug', slug);
+    }, cloudSlug);
+
+    await mainView.goto();
+
+    // Verify status bar is visible with Cloud badge and fallback slug as name
+    await expect(mainView.statusTourneyBar).toBeVisible();
+    await expect(mainView.statusTourneyName).toHaveText(cloudSlug);
+    await expect(mainView.statusTourneyBar.locator('.badge')).toHaveText(/Cloud/i);
+  });
+
+  test('TC-MV-11e [🌐]: Status-Zeile zeigt "Letzter Wettbewerb" an, wenn ident == "SIMPLE", und Klick auf Laden öffnet CompetitionInfo', async ({ page }) => {
+    const mainView = new MainViewPage(page);
+    await mainView.goto();
+
+    const compName = 'Schnellstart Pokal 2026';
+    const samplePayload = {
+      version: 1,
+      tourney: {
+        wpId: 999999,
+        name: compName,
+        organizer: 'System',
+        startDate: 20261013,
+        endDate: 20261013,
+        ident: 'SIMPLE',
+        category: 'TT',
+        slug: 'local',
+        clubs: [],
+        players: [],
+        competitions: [
+          {
+            id: 1,
+            name: compName,
+            typ: 'KO',
+            category: 'TT',
+            startDate: '2026-10-13 10:00:00',
+            status: 'Planned',
+            deleted: false,
+            pants1Stage: []
+          }
+        ],
+        stages: []
+      }
+    };
+
+    await page.evaluate((payload) => {
+      window.localStorage.setItem('App.demo_tourney', JSON.stringify(payload));
+      window.localStorage.setItem('tourney_is_local_mode', 'true');
+      window.sessionStorage.setItem('tourney_is_local_mode', 'true');
+      window.localStorage.setItem('tourney_slug', 'local');
+      window.sessionStorage.setItem('tourney_slug', 'local');
+      window.localStorage.setItem('tourney_ident', 'SIMPLE');
+      window.sessionStorage.setItem('tourney_ident', 'SIMPLE');
+    }, samplePayload);
+
+    await mainView.goto();
+
+    // 1. Verify status bar is visible and shows "Letzter Wettbewerb" (or "Last Competition")
+    await expect(mainView.statusTourneyBar).toBeVisible();
+    await expect(mainView.statusTourneyName).toHaveText(compName);
+    await expect(mainView.statusTourneyLabel).toHaveText(/Letzter Wettbewerb|Last Competition/);
+    await expect(mainView.statusTourneyIcon).toHaveClass(/bi-lightning-charge-fill/);
+
+    // 2. Click load button
+    await expect(mainView.btnStatusLoadLast).toBeVisible();
+    await mainView.btnStatusLoadLast.click();
+
+    // 3. Verify navigation to CompetitionInfo (not TourneyInfo)
+    await expect(page.locator('.card-header:has-text("Wettbewerb"), .card-header:has-text("Competition")').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('body')).toContainText(compName);
+  });
+
+  test('TC-MV-11f [🌐]: Direkte Navigation zu TourneyInfo leitet bei SIMPLE-Wettbewerb automatisch zu CompetitionInfo weiter', async ({ page }) => {
+    const mainView = new MainViewPage(page);
+    await mainView.goto();
+
+    const compName = 'Schnellstart Blitzturnier';
+    const samplePayload = {
+      version: 1,
+      tourney: {
+        wpId: 999999,
+        name: compName,
+        organizer: 'System',
+        startDate: 20261013,
+        endDate: 20261013,
+        ident: 'SIMPLE',
+        category: 'TT',
+        slug: 'local',
+        clubs: [],
+        players: [],
+        competitions: [
+          {
+            id: 1,
+            name: compName,
+            typ: 'KO',
+            category: 'TT',
+            startDate: '2026-10-13 10:00:00',
+            status: 'Planned',
+            deleted: false,
+            pants1Stage: []
+          }
+        ],
+        stages: []
+      }
+    };
+
+    await page.evaluate((payload) => {
+      window.localStorage.setItem('App.demo_tourney', JSON.stringify(payload));
+      window.localStorage.setItem('tourney_is_local_mode', 'true');
+      window.sessionStorage.setItem('tourney_is_local_mode', 'true');
+      window.localStorage.setItem('tourney_slug', 'local');
+      window.sessionStorage.setItem('tourney_slug', 'local');
+      window.localStorage.setItem('tourney_ident', 'SIMPLE');
+      window.sessionStorage.setItem('tourney_ident', 'SIMPLE');
+    }, samplePayload);
+
+    await mainView.goto();
+
+    // 1. Click load button to load the simple tournament into memory
+    await mainView.btnStatusLoadLast.click();
+    await expect(page.locator('.card-header:has-text("Wettbewerb"), .card-header:has-text("Competition")').first()).toBeVisible({ timeout: 10000 });
+
+    // 2. Now attempt to navigate to TourneyInfo directly via appLoadPage
+    await page.evaluate(() => {
+      (window as any).appLoadPage('TourneyInfo', '');
+    });
+
+    // 3. Verify it automatically redirects to CompetitionInfo instead of displaying TourneyInfo
+    await expect(page.locator('.card-header:has-text("Wettbewerb"), .card-header:has-text("Competition")').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('body')).toContainText(compName);
+  });
+
+  test('TC-MV-11g [🌐]: Laden eines SIMPLE-Wettbewerbs mit App.demo_comps öffnet CompetitionInfo direkt ohne Dialog "Turnier verlassen"', async ({ page }) => {
+    const mainView = new MainViewPage(page);
+    await mainView.goto();
+
+    const compName = 'Schnellstart Pokal Live';
+    const tourneyPayload = {
+      version: 1,
+      tourney: {
+        wpId: 999999,
+        name: compName,
+        organizer: 'System',
+        startDate: 20261013,
+        endDate: 20261013,
+        ident: 'SIMPLE',
+        category: 'TT',
+        slug: 'local',
+        clubs: [],
+        players: [],
+        competitions: [],
+        stages: []
+      }
+    };
+
+    const compsPayload = {
+      events: [
+        {
+          id: 1,
+          name: compName,
+          typ: 'SINGLE',
+          category: 'TT',
+          startDate: '2026-10-13 10:00:00',
+          status: 'CFG',
+          activ: true,
+          deleted: false,
+          pants1Stage: []
+        }
+      ]
+    };
+
+    await page.evaluate(({ tPayload, cPayload }) => {
+      window.localStorage.setItem('App.demo_tourney', JSON.stringify(tPayload));
+      window.localStorage.setItem('App.demo_comps', JSON.stringify(cPayload));
+      window.localStorage.setItem('tourney_is_local_mode', 'true');
+      window.sessionStorage.setItem('tourney_is_local_mode', 'true');
+      window.localStorage.setItem('tourney_slug', 'local');
+      window.sessionStorage.setItem('tourney_slug', 'local');
+      window.localStorage.setItem('tourney_ident', 'SIMPLE');
+      window.sessionStorage.setItem('tourney_ident', 'SIMPLE');
+    }, { tPayload: tourneyPayload, cPayload: compsPayload });
+
+    await mainView.goto();
+
+    // Verify status bar is visible
+    await expect(mainView.statusTourneyBar).toBeVisible();
+    await expect(mainView.statusTourneyName).toHaveText(compName);
+    await expect(mainView.statusTourneyLabel).toHaveText(/Letzter Wettbewerb|Last Competition/);
+
+    // Click load button
+    await expect(mainView.btnStatusLoadLast).toBeVisible();
+    await mainView.btnStatusLoadLast.click();
+
+    // Verify leave dialog ("Turnier verlassen" / DlgExportTourney) does NOT appear
+    await expect(page.locator('#DlgExportTourney')).not.toBeVisible();
+
+    // Verify navigation to CompetitionInfo and competition name is displayed
+    await expect(page.locator('.card-header:has-text("Wettbewerb"), .card-header:has-text("Competition")').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('body')).toContainText(compName);
+    await expect(page.locator('#DlgExportTourney')).not.toBeVisible();
   });
 
 });

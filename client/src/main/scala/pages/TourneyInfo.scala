@@ -19,14 +19,30 @@ object TourneyInfo extends BasePage with JsWrapper:
   val BtnSaveLeave:     HtmlId = genId(name)
   val BtnAddComp:       HtmlId = genId(name)
 
+  /**
+   * Renders the tournament overview page.
+   * If the tournament is a simple quick-start competition (ident == "SIMPLE"),
+   * automatically redirects to CompetitionInfo instead of displaying TourneyInfo.
+   *
+   * @param param Optional routing parameter.
+   * @return True upon successful render or redirect.
+   */
   def render(param: String = ""): Boolean = 
     // Get tournament from TourneyDB or Selection
     val tourney = if (services.TourneyDB.tourney.wpId != 0) services.TourneyDB.tourney else Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
 
-    // When viewing tourney info, we usually want to clear the competition/round selection
-    Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney), competition = None, stage = None)
-
     if (tourney.wpId != 0) {
+      if (tourney.ident == "SIMPLE") {
+        val comp = services.CompetitionDB.competitions.find(c => c != null && !c.deleted)
+          .orElse(tourney.competitions.find(c => c != null && !c.deleted))
+        Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney), competition = comp, stage = None)
+        comps.ContextHeader.render()
+        loadPage(CompetitionInfo.name, "")
+        true
+      } else {
+        // When viewing tourney info, we usually want to clear the competition/round selection
+        Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney), competition = None, stage = None)
+
         // Always render ContextHeader because loadPage hides it by default
         comps.ContextHeader.render()
 
@@ -35,10 +51,11 @@ object TourneyInfo extends BasePage with JsWrapper:
 
         setMain(cviews.pages.html.TourneyInfo(tourney, compList))
         true
+      }
     } else {
-        debug("TourneyInfo: No tournament found, redirecting to Home")
-        loadPage(MainView.name, "")
-        false
+      debug("TourneyInfo: No tournament found, redirecting to Home")
+      loadPage(MainView.name, "")
+      false
     }
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
@@ -93,7 +110,8 @@ object TourneyInfo extends BasePage with JsWrapper:
                 info(s"Turnier '${tourney.name}' wurde gelöscht.")
                 services.TourneyDB.tourney = Tourney.default
                 Global.currentSelection = Selection()
-                comps.ContextHeader.render()
+                comps.ContextHeader.hide()
+                comps.Navbar.render()
                 loadPage(MainView.name, "")
               case Left(err) =>
                 error(s"Löschen fehlgeschlagen: ${err.msgCode}")

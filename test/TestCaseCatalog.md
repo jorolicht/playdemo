@@ -13,16 +13,22 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 
 ### 1.1 Anonymer Besucher (🌐)
 - [x] **TC-MV-01 [🌐]:** Aufrufen der Startseite (`/`). Die Seite lädt ohne Fehler, das Logo und die vier Haupt-Container in der Reihenfolge von links nach rechts („Demo“, „Neues Turnier“, „Schnellstart“, „Suchen & Finden“) mit ihren jeweiligen Aktions-Buttons sind sichtbar.
-- [x] **TC-MV-01b [🌐]:** Klick auf den Container-Button „Demo“ (`#MainView_BtnDemo`) auf der Startseite öffnet den Dialog `DlgStartDemo` („Demo lokal starten?“, Warnhinweis „Achtung: das aktuelle lokale Turnier wird gelöscht!“). Nach Bestätigung wird das Demo-Turnier im lokalen Modus gestartet und direkt zu `TourneyInfo` navigiert.
+- [x] **TC-MV-01b [🌐]:** Klick auf den Container-Button „Demo“ (`#MainView_BtnDemo`) auf der Startseite bei vorhandenem lokalen Turnier öffnet den Dialog `DlgStartDemo` („Demo lokal starten?“, Warnhinweis „Achtung: das aktuelle lokale Turnier wird gelöscht!“). Nach Bestätigung wird das Demo-Turnier im lokalen Modus gestartet und direkt zu `TourneyInfo` navigiert.
+- [x] **TC-MV-01c [🌐]:** Klick auf den Container-Button „Demo“ (`#MainView_BtnDemo`) auf der Startseite ohne vorhandenes lokales Turnier (oder nach dem Löschen eines Wettbewerbs) startet das Demo-Turnier direkt, ohne den Bestätigungsdialog anzuzeigen.
 - [x] **TC-MV-02 [🌐]:** Klick auf den Button „Turniersuche“. Die Anwendung wechselt ohne Seiten-Reload zum UseCase `MainSearch`.
 - [x] **TC-MV-03 [🌐]:** Klick auf „Ganzes Turnier“ (`#MainView_BtnOption1`) öffnet den Dialog `DlgStartTourney` („Ganzes Turnier starten?“, Warnhinweis „Achtung: das aktuelle lokale Turnier wird gelöscht!“, Buttons „ABBRECHEN“ und „STARTEN“). Bei Klick auf „STARTEN“ wird das Formular zur Erstellung eines neuen Turniers (`TourneyNew`) geöffnet.
 - [x] **TC-MV-04 [🌐]:** Aufrufen statischer Seiten über den Footer (z. B. AGB, Datenschutz, Impressum, Kontakt, Preise). Die entsprechenden HTML-Inhalte werden korrekt geladen.
 - [x] **TC-MV-05 [🌐]:** Umschalten der Sprache in der Navigationsleiste (Deutsch / Englisch). Die UI-Texte und statischen Seiten passen sich der gewählten Sprache an.
+- [x] **TC-MV-11 [🌐]:** Status-Zeile vor der Hero-Section: Zeigt den Namen des letzten Turniers (lokal oder Cloud/Slug) und einen Button zum Laden an, jedoch nur, wenn entsprechende Speicherschlüssel im Browserspeicher existieren. Bei Klick auf „Laden“ wird das entsprechende Turnier geladen und direkt zu `TourneyInfo` navigiert. Existieren keine Speicherschlüssel, wird die Status-Zeile nicht angezeigt.
+- [x] **TC-MV-11e [🌐]:** Status-Zeile bei einfachem Wettbewerb (`ident == "SIMPLE"`): Status-Zeile zeigt „Letzter Wettbewerb“ (bzw. auf Englisch „Last Competition“) mit Blitz-Icon statt „Letztes Turnier“. Klick auf „Laden“ öffnet direkt `CompetitionInfo` statt `TourneyInfo`.
+- [x] **TC-MV-11f [🌐]:** Automatisches Routing für einfache Wettbewerbe: Direkte Navigation zu `TourneyInfo` bei einem einfachen Wettbewerb (`ident == "SIMPLE"`) wird automatisch abgefangen und zu `CompetitionInfo` weitergeleitet.
+- [x] **TC-MV-11g [🌐]:** Resilientes Laden von einfachen Wettbewerben: Beim Laden eines einfachen Wettbewerbs (`ident == "SIMPLE"`) über die Status-Zeile oder Navbar werden alle Teildatenbanken vollständig geladen, ohne dass der Dialog „Turnier verlassen“ (`DlgExportTourney`) fälschlicherweise erscheint.
 
 ### 1.2 Turnierverwalter (👤)
 - [x] **TC-MV-06 [👤]:** Aufrufen der Startseite im angemeldeten Zustand. In der Navigationsleiste werden der Benutzername und der Abmelden-Button angezeigt.
 - [x] **TC-MV-07 [👤]:** Klick auf „Guthaben / Vollversion“. Öffnet direkt das Formular zur Erstellung eines neuen Turniers (`TourneyNew`).
-- [x] **TC-MV-08 [🌐]:** Klick auf „Wettbewerb starten“ (`#MainView_BtnOption2`) öffnet den Dialog `DlgStartCompetition` („Wettbewerb starten?“, Warnhinweis „Achtung: der aktuelle lokale Wettbewerb bzw das aktuelle lokale Turnier wird gelöscht!“, Buttons „ABBRECHEN“ und „STARTEN“). Bei Klick auf „STARTEN“ wird der Schnellstart-Assistent zur Wettbewerbserstellung geöffnet.
+- [x] **TC-MV-08 [🌐]:** Klick auf „Wettbewerb starten“ (`#MainView_BtnOption2`) öffnet den Dialog `DlgStartCompetition` („Wettbewerb starten?“, Warnhinweis „Achtung: der aktuelle lokale Wettbewerb bzw das aktuelle lokale Turnier wird gelöscht!“, Buttons „ABBRECHEN“ und „STARTEN“). Bei Klick auf „STARTEN“ wird die Schnellstart-Seite (`CompetitionNew`) zur Wettbewerbserstellung geöffnet (anstelle des `DlgCompetition`-Modals).
+- [x] **TC-MV-08b [🌐]:** Schnellstart-Assistent (`CompetitionNew`): Nach Ausfüllen des Formulars und Klick auf „SCHNELLSTART“ wird automatisch das lokale Wrapper-Turnier samt Wettbewerb angelegt und direkt die Ansicht `CompetitionInfo` geöffnet.
 
 ### 1.3 Systemadministrator (👑)
 - [x] **TC-MV-09 [👑]:** Aufrufen der Startseite als `administrator` oder `tourney_master`. In der Navigationsleiste erscheint zusätzlich der Button „Management“.
@@ -123,6 +129,10 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-CI-03 [👤]:** Klick auf „Wettbewerb bearbeiten“. Erlaubt die Anpassung von TTR-Limits, Altersklassen und Spieltischen.
 - [x] **TC-CI-04 [👤]:** Auswahl der Urkunden-Radiobuttons für eine Phase. Markiert die Phase als maßgeblich für den Urkundendruck.
 - [x] **TC-CI-05 [👤]:** Klick auf „Wettbewerb beenden“. Der Status wechselt auf Beendet und Bearbeitungsaktionen werden gesperrt.
+- [x] **TC-CI-06 [👤]:** Eigenständigen Wettbewerb (`ident == "SIMPLE"`) löschen – Bestätigungsdialog Abbrechen: Klick auf den Löschen-Button öffnet einen Sicherheits-Bestätigungsdialog (`DlgMsgbox`). Klick auf „Nein“ schließt den Dialog und behält den Wettbewerb sowie alle Daten im Speicher unverändert bei.
+- [x] **TC-CI-07 [👤]:** Eigenständigen Wettbewerb (`ident == "SIMPLE"`) im lokalen Modus löschen: Klick auf „Löschen“ und Bestätigen mit „Ja“ löscht den lokalen Speicher (`App.demo_tourney`, `App.demo_comps` etc.) sowie sämtliche Browser-Schlüssel (`tourney_is_local_mode`, `tourney_slug`, `tourney_name`, `tourney_ident`, `tourney_last_*`). Navigiert zur Startseite (`MainView`), auf der anschließend keine Status-Zeile für das letzte Turnier mehr erscheint.
+- [x] **TC-CI-08 [👤]:** Eigenständigen Wettbewerb (`ident == "SIMPLE"`) im Cloud-Modus löschen: Klick auf „Löschen“ und Bestätigen mit „Ja“ sendet einen `DELETE`-Request an den Server (`/wp-json/tourney/v1/delete`), bereinigt sämtliche Browser-Speicherschlüssel und navigiert zur Startseite (`MainView`), ohne dass eine Status-Zeile verbleibt.
+- [x] **TC-CI-09 [👤]:** Nach dem Löschen eines Wettbewerbs (`ident == "SIMPLE"`) startet ein nachfolgender Klick auf „Demo“ direkt, ohne dass die Warnmeldung „Achtung: das aktuelle lokale Turnier wird gelöscht!“ erscheint.
 
 ---
 

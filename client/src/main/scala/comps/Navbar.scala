@@ -74,62 +74,11 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     }
 
 
+  /**
+   * Starts a quick competition workflow by navigating to CompetitionNew.
+   */
   def doQuickStart(): Unit =
-    import dialogs.*
-    import shared.model.*
-    import services.*
-    import base.Global
-
-    def runDialog(initialCategory: CompCategory): Future[Unit] = {
-      val validateFn = (c: Competition) => {
-        val dateInt = c.startDate.take(10).replace("-", "").toIntOption.getOrElse(20260101)
-        val dummy = Tourney(
-          wpId = 0,
-          name = c.name,
-          organizer = Global.user.map(_.username).getOrElse("System"),
-          startDate = dateInt,
-          endDate = dateInt,
-          ident = "SIMPLE",
-          category = c.category
-        )
-        
-        TourneyDB.apiCreate(dummy).map {
-          case Right(slug) =>
-            TourneyDB.update(dummy, doSync = false)
-            Right(())
-          case Left(err) =>
-            Left(err)
-        }
-      }
-
-      DlgCompetition.show(initialCategory, None, Some(validateFn)).flatMap {
-        case Right(res) =>
-          val c = res.competition
-          TourneyDB.tourney.addCompetition(
-            c.name, 
-            c.typ, 
-            c.category, 
-            c.startDate, 
-            c.lowLevel, 
-            c.upperLevel
-          ) match {
-            case Right(newComp) =>
-              Global.currentSelection = Selection(Some(TourneyDB.tourney), Some(newComp))
-              comps.ContextHeader.render()
-              TourneyDB.sync().map { _ =>
-                pages.loadPage(PageNameTyp("CompetitionInfo"), "")
-              }
-            case Left(err) =>
-              dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
-              Future.successful(())
-          }
-        case Left(_) => 
-          debug("Quick Start cancelled")
-          Future.successful(())
-      }
-    }
-
-    runDialog(CompCategory.TT)
+    pages.loadPage(shared.PageNameTyp("CompetitionNew"), "")
 
   private def doLogout(): Unit =
     import services.*
@@ -149,20 +98,28 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
 
   /**
    * Starts a demo tournament in local mode.
-   * Displays confirmation dialog informing the user that the active local tournament will be deleted.
+   * Displays confirmation dialog informing the user that the active local tournament will be deleted,
+   * but only if an existing local tournament is actually present in storage or memory.
    */
-  def doStartDemo(): Unit =
-    dialogs.DlgStartDemo.show().map {
-      case true =>
-        services.DemoManager.startDemoInLocalMode { () =>
-          base.Global.currentSelection = shared.model.Selection(Some(services.TourneyDB.tourney))
-          comps.ContextHeader.render()
-          comps.Navbar.render()
-          pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
-        }
-      case false =>
-        debug("Start demo cancelled")
+  def doStartDemo(): Unit = {
+    def launch(): Unit = {
+      services.DemoManager.startDemoInLocalMode { () =>
+        base.Global.currentSelection = shared.model.Selection(Some(services.TourneyDB.tourney))
+        comps.ContextHeader.render()
+        comps.Navbar.render()
+        pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+      }
     }
+
+    if (services.TourneyDB.hasLocalTourney) {
+      dialogs.DlgStartDemo.show().map {
+        case true => launch()
+        case false => debug("Start demo cancelled")
+      }
+    } else {
+      launch()
+    }
+  }
 
   /**
    * Exports the current tournament data to a local JSON file.
@@ -229,11 +186,8 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
                 CompetitionDB.sync(TourneyDB.tourney.competitions.filter(_ != null).toSeq)
                 StageDB.sync(TourneyDB.tourney.stages.filter(_ != null).toSeq)
                 
-                Global.currentSelection = Selection(Some(TourneyDB.tourney))
-                comps.ContextHeader.render()
-                comps.Navbar.render()
                 dom.window.alert("Import erfolgreich! Das lokale Turnier wird nun geladen.")
-                pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+                openTourneyView(TourneyDB.tourney)
               }
             } catch {
               case ex: Exception =>
@@ -254,7 +208,6 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
   private def doCloudImport(): Unit = {
     import base.Global
     import services.*
-    import shared.model.Selection
 
     if (Global.user.isEmpty) {
       dom.window.alert("Für den Cloud-Import ist eine Anmeldung erforderlich. Bitte melden Sie sich an.")
@@ -274,12 +227,9 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
                   case Right(slug) =>
                     Global.isLocalMode = false
                     Global.isDemoMode = false
-                    Global.currentSelection = Selection(Some(TourneyDB.tourney))
                     TourneyDB.addExportedFilename(file.name)
-                    comps.ContextHeader.render()
-                    comps.Navbar.render()
                     dom.window.alert("Cloud-Import erfolgreich! Das Turnier wurde erstellt und geladen.")
-                    pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+                    openTourneyView(TourneyDB.tourney)
                   case Left(err) =>
                     dom.window.alert(s"Fehler beim Cloud-Import: ${err.msgCode}")
                 }
@@ -344,7 +294,6 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
 
     AdminManager.importTourney(jsonString).map {
       case Right(slug) =>
-        Global.currentSelection = Selection(Some(TourneyDB.tourney))
         Global.isLocalMode = false
         Global.isDemoMode = false
         Global.tourneySlug = slug
@@ -352,10 +301,8 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
         if (Global.currentAci != null) {
           TourneyDB.saveAci(TourneyDB.tourney.wpId, Global.currentAci)
         }
-        comps.ContextHeader.render()
-        comps.Navbar.render()
         dom.window.alert(gM("navbar.moveToCloudSuccess"))
-        pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+        openTourneyView(TourneyDB.tourney)
 
       case Left(err) =>
         // Revert local mode on failure
@@ -369,12 +316,37 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
   }
 
   /**
+   * Navigates to the appropriate page for the given tournament.
+   * If the tournament is a simple competition (ident == "SIMPLE"), the first competition is selected
+   * and the page navigates to CompetitionInfo instead of TourneyInfo.
+   *
+   * @param tourney The tournament to open.
+   */
+  def openTourneyView(tourney: shared.model.Tourney): Unit = {
+    import shared.model.Selection
+    if (tourney.ident == "SIMPLE") {
+      val comp = services.CompetitionDB.competitions.find(c => c != null && !c.deleted)
+        .orElse(tourney.competitions.find(c => c != null && !c.deleted))
+        .orElse(services.CompetitionDB.competitions.find(c => c != null))
+        .orElse(tourney.competitions.find(c => c != null))
+      base.Global.currentSelection = Selection(Some(tourney), comp)
+      comps.ContextHeader.render()
+      comps.Navbar.render()
+      pages.loadPage(shared.PageNameTyp("CompetitionInfo"), "")
+    } else {
+      base.Global.currentSelection = Selection(Some(tourney))
+      comps.ContextHeader.render()
+      comps.Navbar.render()
+      pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+    }
+  }
+
+  /**
    * Loads a previously saved tournament from browser local storage and opens it in local mode.
    */
   private def doLoadLocalTourney(): Unit = {
     import base.Global
     import services.*
-    import shared.model.Selection
 
     val jsStr = dom.window.localStorage.getItem("App.demo_tourney")
     if (jsStr == null || jsStr.trim.isEmpty) {
@@ -383,15 +355,11 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
       confirmLeave { () =>
         Global.isLocalMode = true
         Global.isDemoMode = false
-        TourneyDB.load(999999).map { _ =>
-          ClubDB.load()
-          PlayerDB.load()
-          CompetitionDB.load()
-          StageDB.load()
-          Global.currentSelection = Selection(Some(TourneyDB.tourney))
-          comps.ContextHeader.render()
-          comps.Navbar.render()
-          pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+        TourneyDB.init(999999).map {
+          case Right(_) =>
+            openTourneyView(TourneyDB.tourney)
+          case Left(err) =>
+            dom.window.alert(s"Fehler beim Laden des lokalen Turniers: ${err.msgCode}")
         }
       }
     }
@@ -399,14 +367,13 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
 
   /**
    * Reloads the tournament based on the current storage mode:
-   * - If tourney_is_local_mode == true: loads and displays the locally stored tournament in TourneyInfo.
+   * - If tourney_is_local_mode == true: loads and displays the locally stored tournament in TourneyInfo or CompetitionInfo.
    * - If tourney_is_local_mode == false: loads the cloud tournament with slug tourney_slug.
    *   If user is not logged in or lacks permissions, displays an error message.
    */
-  private def doReloadTourney(): Unit = {
+  def doReloadTourney(): Unit = {
     import base.Global
     import services.*
-    import shared.model.Selection
 
     val sessionLocal = org.scalajs.dom.window.sessionStorage.getItem("tourney_is_local_mode") == "true"
     val localLocal = org.scalajs.dom.window.localStorage.getItem("tourney_is_local_mode") == "true"
@@ -420,16 +387,9 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
         Global.isLocalMode = true
         Global.isDemoMode = false
         Global.tourneySlug = "local"
-        TourneyDB.load(999999).map {
+        TourneyDB.init(999999).map {
           case Right(_) =>
-            ClubDB.load()
-            PlayerDB.load()
-            CompetitionDB.load()
-            StageDB.load()
-            Global.currentSelection = Selection(Some(TourneyDB.tourney))
-            comps.ContextHeader.render()
-            comps.Navbar.render()
-            pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+            openTourneyView(TourneyDB.tourney)
           case Left(err) =>
             dom.window.alert(s"Fehler beim Laden des lokalen Turniers: ${err.msgCode}")
         }
@@ -450,7 +410,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
         if (slug.isEmpty) {
           dom.window.alert(gM("navbar.reloadNoSlug"))
         } else {
-          TourneyDB.load(slug).map {
+          TourneyDB.init(slug).map {
             case Right(_) =>
               val t = TourneyDB.tourney
               if (!Global.hasTourneyAccess(t)) {
@@ -459,10 +419,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
                 Global.isLocalMode = false
                 Global.isDemoMode = false
                 Global.tourneySlug = t.slug
-                Global.currentSelection = Selection(Some(t))
-                comps.ContextHeader.render()
-                comps.Navbar.render()
-                pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
+                openTourneyView(t)
               }
             case Left(err) =>
               if (err.is("forbidden") || err.is("unauthorized") || err.msgCode.toLowerCase.contains("permission")) {

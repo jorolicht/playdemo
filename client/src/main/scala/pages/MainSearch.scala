@@ -95,10 +95,22 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
               }
             } else {
               Global.currentSelection = Global.currentSelection.copy(tourney = Some(tourney))
-              if (isAuthorized) {
-                loadPage(TourneyInfo.name, "")
+              if (tourney.ident == "SIMPLE") {
+                val comp = services.CompetitionDB.competitions.find(c => c != null && !c.deleted)
+                  .orElse(tourney.competitions.find(c => c != null && !c.deleted))
+                Global.currentSelection = Global.currentSelection.copy(competition = comp)
+                val compParam = comp.map(_.id.value.toString).getOrElse("")
+                if (isAuthorized) {
+                  loadPage(CompetitionInfo.name, compParam)
+                } else {
+                  loadPage(CompetitionWelcome.name, compParam)
+                }
               } else {
-                loadPage(TourneyWelcome.name, "")
+                if (isAuthorized) {
+                  loadPage(TourneyInfo.name, "")
+                } else {
+                  loadPage(TourneyWelcome.name, "")
+                }
               }
             }
           case Left(err) => 

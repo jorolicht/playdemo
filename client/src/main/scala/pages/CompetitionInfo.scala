@@ -43,6 +43,14 @@ object CompetitionInfo extends BasePage with JsWrapper:
   private var sortCol = "name"
   private var sortAsc = true
 
+  /**
+   * Renders the competition details page, including participant table and stage list.
+   * If no competition is selected and the active tournament is a simple competition (ident == "SIMPLE"),
+   * automatically resolves and selects the first competition.
+   *
+   * @param param Optional competition ID parameter to select.
+   * @return True upon successful render, false otherwise.
+   */
   def render(param: String = ""): Boolean = 
     // If param is provided, try to find and select that competition
     if (param.nonEmpty) {
@@ -52,6 +60,19 @@ object CompetitionInfo extends BasePage with JsWrapper:
         val autoStage = if (compStages.length == 1) compStages.headOption else None
         Global.currentSelection = Global.currentSelection.copy(competition = Some(c), stage = autoStage)
         comps.ContextHeader.render()
+      }
+    }
+
+    val currentTourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
+    if (Global.currentSelection.competition.isEmpty && currentTourney.ident == "SIMPLE") {
+      val autoComp = services.CompetitionDB.competitions.find(c => c != null && !c.deleted)
+        .orElse(currentTourney.competitions.find(c => c != null && !c.deleted))
+        .orElse(services.CompetitionDB.competitions.find(c => c != null))
+        .orElse(currentTourney.competitions.find(c => c != null))
+      if (autoComp.isDefined) {
+        val compStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == autoComp.get.id && !s.deleted)
+        val autoStage = if (compStages.length == 1) compStages.headOption else None
+        Global.currentSelection = Global.currentSelection.copy(competition = autoComp, stage = autoStage)
       }
     }
 
@@ -70,9 +91,17 @@ object CompetitionInfo extends BasePage with JsWrapper:
         setMain(cviews.pages.html.CompetitionInfo(c, participants, stages, sortCol, sortAsc))
         true
       case None => 
-        debug("CompetitionInfo: No competition selected, redirecting to Tourney Info")
-        loadPage(TourneyInfo.name, "")
-        false
+        if (currentTourney.ident == "SIMPLE") {
+          debug("CompetitionInfo: Simple competition not found, redirecting to MainView")
+          Global.currentSelection = shared.model.Selection()
+          Global.clearSessionTourneyState()
+          loadPage(MainView.name, "")
+          false
+        } else {
+          debug("CompetitionInfo: No competition selected, redirecting to Tourney Info")
+          loadPage(TourneyInfo.name, "")
+          false
+        }
 
   private def sortParticipants(pants: Seq[Pant]): Seq[Pant] =
     val sorted = sortCol match
@@ -151,18 +180,45 @@ object CompetitionInfo extends BasePage with JsWrapper:
 
       case `BtnDeleteComp` => 
         import shared.BoxButton
-        DlgMsgbox.show("Möchten Sie diesen Wettbewerb wirklich löschen?", "Wettbewerb löschen", List(BoxButton.Yes, BoxButton.No)).map {
-          case BoxButton.Yes => 
-            val cId = Global.currentSelection.competition.map(_.id).getOrElse(CompId(0))
-            services.TourneyDB.tourney.deleteCompetition(cId) match {
-              case Right(_) => 
-                Global.currentSelection = Global.currentSelection.copy(competition = None, stage = None)
-                comps.ContextHeader.render()
-                loadPage(TourneyInfo.name, "")
-              case Left(err) => 
-                error(s"Failed to delete competition: ${err.msgCode}")
-            }
-          case _ => debug("Delete cancelled")
+        val t = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
+        if (t.ident == "SIMPLE") {
+          DlgMsgbox.show(
+            "Möchten Sie diesen Wettbewerb wirklich unwiderruflich löschen?", 
+            "Wettbewerb löschen", 
+            List(BoxButton.Yes, BoxButton.No)
+          ).map {
+            case BoxButton.Yes =>
+              services.TourneyDB.apiDelete(t.wpId).map {
+                case Right(_) =>
+                  info(s"Wettbewerb '${t.name}' wurde gelöscht.")
+                  Global.currentSelection = shared.model.Selection()
+                  comps.ContextHeader.hide()
+                  comps.Navbar.render()
+                  loadPage(MainView.name, "")
+                case Left(err) =>
+                  error(s"Fehler beim Löschen des Wettbewerbs: ${err.msgCode}")
+                  dom.window.alert(s"Fehler beim Löschen des Wettbewerbs: ${err.msgCode}")
+              }
+            case _ => debug("Delete competition cancelled")
+          }
+        } else {
+          DlgMsgbox.show(
+            "Möchten Sie diesen Wettbewerb wirklich löschen?", 
+            "Wettbewerb löschen", 
+            List(BoxButton.Yes, BoxButton.No)
+          ).map {
+            case BoxButton.Yes => 
+              val cId = Global.currentSelection.competition.map(_.id).getOrElse(CompId(0))
+              services.TourneyDB.tourney.deleteCompetition(cId) match {
+                case Right(_) => 
+                  Global.currentSelection = Global.currentSelection.copy(competition = None, stage = None)
+                  comps.ContextHeader.render()
+                  loadPage(TourneyInfo.name, "")
+                case Left(err) => 
+                  error(s"Failed to delete competition: ${err.msgCode}")
+              }
+            case _ => debug("Delete cancelled")
+          }
         }
 
       case `BtnSaveLeave` =>

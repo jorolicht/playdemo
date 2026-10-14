@@ -228,6 +228,12 @@ mainView.quickStartBtn                              = Wettbewerb starten
 mainView.searchTitle                                = Suchen & Finden
 mainView.searchDesc                                 = Finden Sie bestehende Turniere oder Wettbewerbe nach Name, Datum oder Veranstalter.
 mainView.searchBtn                                  = Suche öffnen
+mainView.lastTourneyLabel                           = Letztes Turnier
+mainView.lastTourneyLocal                           = Lokal
+mainView.lastTourneyCloud                           = Cloud
+mainView.lastTourneyLoad                            = Laden
+mainView.lastCompetitionLabel                       = Letzter Wettbewerb
+mainView.lastCompetitionLoad                        = Laden
 
 ###
 # Loading & PageNotFound

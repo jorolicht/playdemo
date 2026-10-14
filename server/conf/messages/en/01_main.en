@@ -228,6 +228,12 @@ mainView.quickStartBtn                              = Start Competition
 mainView.searchTitle                                = Search & Find
 mainView.searchDesc                                 = Find existing tournaments or competitions by name, date, or organizer.
 mainView.searchBtn                                  = Open Search
+mainView.lastTourneyLabel                           = Last Tournament
+mainView.lastTourneyLocal                           = Local
+mainView.lastTourneyCloud                           = Cloud
+mainView.lastTourneyLoad                            = Load
+mainView.lastCompetitionLabel                       = Last Competition
+mainView.lastCompetitionLoad                        = Load
 
 ###
 # Loading & PageNotFound

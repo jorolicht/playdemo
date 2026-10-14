@@ -17,15 +17,146 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
   /** Name identifier for the page. */
   def name = PageNameTyp("MainView") 
 
-  val BtnDemo:    HtmlId = genId(name)
-  val BtnOption1: HtmlId = genId(name)
-  val BtnOption2: HtmlId = genId(name)
-  val BtnSearch:  HtmlId = genId(name)
+  val BtnDemo:       HtmlId = genId(name)
+  val BtnOption1:    HtmlId = genId(name)
+  val BtnOption2:    HtmlId = genId(name)
+  val BtnSearch:     HtmlId = genId(name)
+  val StatusTourney: HtmlId = genId(name)
+  val BtnLoadLast:   HtmlId = genId(name)
   
   /** Models for standard WordPress REST API response parsing. */
   case class WpContent(rendered: String) derives ReadWriter
   case class WpTitle(rendered: String) derives ReadWriter
   case class WpPage(id: Int, title: WpTitle, content: WpContent, translations: Option[Map[String, Int]] = None) derives ReadWriter
+
+  /**
+   * Data container representing information about the last tournament or competition used in the session or local storage.
+   *
+   * @param name Tournament or competition display name or slug.
+   * @param isLocal True if the tournament is stored locally in the browser, false if hosted in the cloud.
+   * @param slug Identifier slug for the tournament ("local" for offline tournaments).
+   * @param isSimple True if the tournament is a simple quick-start competition (ident == "SIMPLE").
+   */
+  case class LastTourneyInfo(name: String, isLocal: Boolean, slug: String, isSimple: Boolean = false)
+
+  /**
+   * Inspects browser storage (sessionStorage and localStorage) to detect if a previous tournament exists.
+   * Extracts the name of the last local tournament from "App.demo_tourney" or cloud tournament from "tourney_slug" / "tourney_name".
+   * Also detects whether the tournament is a simple competition (ident == "SIMPLE").
+   *
+   * @return Option containing LastTourneyInfo if corresponding storage keys exist, None otherwise.
+   */
+  def getLastTourneyInfo(): Option[LastTourneyInfo] = {
+    try {
+      val session = org.scalajs.dom.window.sessionStorage
+      val local = org.scalajs.dom.window.localStorage
+
+      val sessionLocal = if (session != null) session.getItem("tourney_is_local_mode") == "true" else false
+      val localLocal = if (local != null) local.getItem("tourney_is_local_mode") == "true" else false
+      val s1 = if (session != null) session.getItem("tourney_slug") else null
+      val s2 = if (local != null) local.getItem("tourney_slug") else null
+      val slug = if (s1 != null && s1.nonEmpty) s1
+                 else if (s2 != null && s2.nonEmpty) s2
+                 else ""
+
+      val isLocal = sessionLocal || localLocal || slug == "local" || (local != null && local.getItem("App.demo_tourney") != null && slug.isEmpty)
+
+      if (isLocal) {
+        val raw = if (local != null) local.getItem("App.demo_tourney") else null
+        if (raw != null && raw.trim.nonEmpty) {
+          val (parsedName, parsedIdent): (Option[String], Option[String]) = try {
+            val dyn = scala.scalajs.js.JSON.parse(raw)
+            val n = if (!scala.scalajs.js.isUndefined(dyn.tourney) && dyn.tourney != null) {
+              if (!scala.scalajs.js.isUndefined(dyn.tourney.name) && dyn.tourney.name != null) dyn.tourney.name.toString
+              else if (!scala.scalajs.js.isUndefined(dyn.tourney.tourney) && dyn.tourney.tourney != null && !scala.scalajs.js.isUndefined(dyn.tourney.tourney.name) && dyn.tourney.tourney.name != null) {
+                dyn.tourney.tourney.name.toString
+              } else ""
+            } else if (!scala.scalajs.js.isUndefined(dyn.name) && dyn.name != null) {
+              dyn.name.toString
+            } else ""
+
+            val id = if (!scala.scalajs.js.isUndefined(dyn.tourney) && dyn.tourney != null) {
+              if (!scala.scalajs.js.isUndefined(dyn.tourney.ident) && dyn.tourney.ident != null) dyn.tourney.ident.toString
+              else if (!scala.scalajs.js.isUndefined(dyn.tourney.tourney) && dyn.tourney.tourney != null && !scala.scalajs.js.isUndefined(dyn.tourney.tourney.ident) && dyn.tourney.tourney.ident != null) {
+                dyn.tourney.tourney.ident.toString
+              } else ""
+            } else if (!scala.scalajs.js.isUndefined(dyn.ident) && dyn.ident != null) {
+              dyn.ident.toString
+            } else ""
+
+            (if (n.nonEmpty) Some(n) else None, if (id.nonEmpty) Some(id) else None)
+          } catch {
+            case _: Throwable =>
+              try {
+                val t = read[services.TourneyDB.TourneySyncRequest](raw).tourney
+                (Some(t.name), Some(t.ident))
+              } catch {
+                case _: Throwable =>
+                  try {
+                    val t = read[shared.model.Tourney](raw)
+                    (Some(t.name), Some(t.ident))
+                  } catch {
+                    case _: Throwable => (None, None)
+                  }
+              }
+          }
+          val tourneyName = parsedName.filter(_.nonEmpty)
+            .orElse(Global.currentSelection.tourney.map(_.name).filter(_.nonEmpty))
+            .orElse(Option(services.TourneyDB.tourney).map(_.name).filter(_.nonEmpty))
+            .getOrElse("Lokales Turnier")
+          val storedIdent = if (session != null && session.getItem("tourney_ident") != null) session.getItem("tourney_ident")
+                            else if (local != null && local.getItem("tourney_ident") != null) local.getItem("tourney_ident")
+                            else ""
+          val isSimple = parsedIdent.contains("SIMPLE") || storedIdent == "SIMPLE" ||
+            Global.currentSelection.tourney.exists(_.ident == "SIMPLE") ||
+            Option(services.TourneyDB.tourney).exists(_.ident == "SIMPLE")
+
+          Some(LastTourneyInfo(tourneyName, isLocal = true, "local", isSimple = isSimple))
+        } else {
+          None
+        }
+      } else {
+        if (slug.nonEmpty && slug != "local") {
+          val storedName = if (session != null && session.getItem("tourney_name") != null && session.getItem("tourney_name").nonEmpty) {
+            session.getItem("tourney_name")
+          } else if (local != null && local.getItem("tourney_name") != null && local.getItem("tourney_name").nonEmpty) {
+            local.getItem("tourney_name")
+          } else ""
+
+          val (selName, selIdent) = try {
+            val selJson = if (session != null) session.getItem("tourney_last_selection") else null
+            if (selJson != null && selJson.nonEmpty) {
+              val sel = read[shared.model.Selection](selJson)
+              (sel.tourney.map(_.name).filter(_.nonEmpty), sel.tourney.map(_.ident).filter(_.nonEmpty))
+            } else (None, None)
+          } catch {
+            case _: Throwable => (None, None)
+          }
+
+          val storedIdent = if (session != null && session.getItem("tourney_ident") != null && session.getItem("tourney_ident").nonEmpty) {
+            session.getItem("tourney_ident")
+          } else if (local != null && local.getItem("tourney_ident") != null && local.getItem("tourney_ident").nonEmpty) {
+            local.getItem("tourney_ident")
+          } else ""
+
+          val memName = Global.currentSelection.tourney.filter(_.slug == slug).map(_.name).filter(_.nonEmpty)
+            .orElse(Option(services.TourneyDB.tourney).filter(_.slug == slug).map(_.name).filter(_.nonEmpty))
+          val memIdent = Global.currentSelection.tourney.filter(_.slug == slug).map(_.ident).filter(_.nonEmpty)
+            .orElse(Option(services.TourneyDB.tourney).filter(_.slug == slug).map(_.ident).filter(_.nonEmpty))
+
+          val finalName = if (storedName.nonEmpty) storedName
+            else selName.getOrElse(memName.getOrElse(slug))
+          val isSimple = storedIdent == "SIMPLE" || selIdent.contains("SIMPLE") || memIdent.contains("SIMPLE")
+
+          Some(LastTourneyInfo(finalName, isLocal = false, slug, isSimple = isSimple))
+        } else {
+          None
+        }
+      }
+    } catch {
+      case _: Throwable => None
+    }
+  }
 
   /**
    * Renders the page view or static content page specified by param.
@@ -35,7 +166,8 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
    */
   def render(param: String = ""): Boolean = 
     if (param.isEmpty) {
-      setMain(cviews.pages.MainView.html.Base())
+      val lastTourney = getLastTourneyInfo()
+      setMain(cviews.pages.MainView.html.Base(lastTourney))
     } else {
       // 1. Loading State
       setMain(cviews.pages.MainView.html.Loading(param))
@@ -161,6 +293,8 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
     HtmlId(elem.id) match
       case `BtnDemo` =>
         comps.Navbar.doStartDemo()
+      case `BtnLoadLast` | `StatusTourney` =>
+        comps.Navbar.doReloadTourney()
       case `BtnOption1` => 
         dialogs.DlgStartTourney.show().map {
           case true =>

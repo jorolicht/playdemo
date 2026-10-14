@@ -82,9 +82,10 @@ object CompetitionDB extends ComWrapper with Debouncer:
         t.competitions.clear()
         for (i <- 0 until 64) t.competitions += null
         req.events.foreach { c =>
-           val i = c.id.value - 1
-           if (i >= 0 && i < 64) then
-             t.competitions(i) = c
+           val targetIdx = if (c.id.value > 0 && c.id.value <= 64) c.id.value - 1 else t.competitions.indexOf(null)
+           if (targetIdx >= 0 && targetIdx < 64) then
+             val compToStore = if (c.id.value > 0) c else c.copy(id = CompId(targetIdx + 1))
+             t.competitions(targetIdx) = compToStore
         }
         t.dirtyCompetition.clear()
         initHandler()
@@ -104,9 +105,10 @@ object CompetitionDB extends ComWrapper with Debouncer:
           t.competitions.clear()
           for (i <- 0 until 64) t.competitions += null
           res.competitions.foreach { c =>
-             val i = c.id.value - 1
-             if (i >= 0 && i < 64) then
-               t.competitions(i) = c
+             val targetIdx = if (c.id.value > 0 && c.id.value <= 64) c.id.value - 1 else t.competitions.indexOf(null)
+             if (targetIdx >= 0 && targetIdx < 64) then
+               val compToStore = if (c.id.value > 0) c else c.copy(id = CompId(targetIdx + 1))
+               t.competitions(targetIdx) = compToStore
           }
           t.dirtyCompetition.clear()
           initHandler() // Ensure handler is set

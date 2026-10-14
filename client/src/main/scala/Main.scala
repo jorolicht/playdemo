@@ -151,21 +151,26 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
             }
           }
 
-          restoredSelection.tourney match {
-            case Some(t) if t.wpId > 0 =>
-              // Initialize Tourney database before rendering the page
-              TourneyDB.init(t.wpId).map {
-                case Right(ts) =>
-                  debug(s"initApp -> Tourney initialized during state restoration, timestamp: $ts")
-                  Global.currentSelection = restoredSelection.copy(tourney = Some(TourneyDB.tourney))
-                  pages.loadPage(PageNameTyp(lastPage), lastParam)
-                case Left(err) =>
-                  error(s"initApp -> Error initializing tournament: $err")
-                  runDefaultRouting(mode, tourneyParam)
-              }
-            case _ =>
-              Global.currentSelection = restoredSelection
-              pages.loadPage(PageNameTyp(lastPage), lastParam)
+          if (!Global.isTourneyPage(lastPage)) {
+            Global.currentSelection = Selection()
+            pages.loadPage(PageNameTyp(lastPage), lastParam)
+          } else {
+            restoredSelection.tourney match {
+              case Some(t) if t.wpId > 0 =>
+                // Initialize Tourney database before rendering the page
+                TourneyDB.init(t.wpId).map {
+                  case Right(ts) =>
+                    debug(s"initApp -> Tourney initialized during state restoration, timestamp: $ts")
+                    Global.currentSelection = restoredSelection.copy(tourney = Some(TourneyDB.tourney))
+                    pages.loadPage(PageNameTyp(lastPage), lastParam)
+                  case Left(err) =>
+                    error(s"initApp -> Error initializing tournament: $err")
+                    runDefaultRouting(mode, tourneyParam)
+                }
+              case _ =>
+                Global.currentSelection = restoredSelection
+                pages.loadPage(PageNameTyp(lastPage), lastParam)
+            }
           }
         } else {
           runDefaultRouting(mode, tourneyParam)
