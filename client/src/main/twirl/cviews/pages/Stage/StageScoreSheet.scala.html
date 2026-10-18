@@ -119,7 +119,14 @@
 }
 
 @roundTitle = @{
-  if (activeSectionIdParam.isEmpty) {
+  if (mList.length == 1) {
+    val m = mList.head._1
+    val info1 = mList.head._6
+    val info2 = mList.head._7
+    val infoStr = Seq(info1, info2).filter(_.nonEmpty).mkString(", ")
+    val prefix = if (infoStr.nonEmpty) s"$infoStr - " else ""
+    if (base.Global.lang == "de") s"${prefix}Spiel ${m.gameNo}" else s"${prefix}Game ${m.gameNo}"
+  } else if (activeSectionIdParam.isEmpty) {
     if (base.Global.lang == "de") "Alle Runden" else "All Rounds"
   } else {
     mList.headOption.map { case (m, _, _, _, _, _, _) =>
@@ -155,12 +162,18 @@
                 <i class="bi bi-printer me-2"></i>@{if(base.Global.lang == "de") s"Schiedsrichterzettel für $roundTitle" else s"Referee Scoresheets for $roundTitle"}
             </h5>
             <div class="small text-muted">
-                @{if(base.Global.lang == "de") "Vorschau und Druckoptionen für diese Runde." else "Preview and print options for this round."}
+                @{if(mList.length == 1) { if(base.Global.lang == "de") "Vorschau und Druckoption für dieses Spiel." else "Preview and print option for this game." } else { if(base.Global.lang == "de") "Vorschau und Druckoptionen für diese Runde." else "Preview and print options for this round." }}
             </div>
         </div>
-        <button class="btn btn-primary px-4 fw-bold shadow-sm" onclick="window.print()">
-            <i class="bi bi-printer-fill me-1"></i>@{if(base.Global.lang == "de") "Runde drucken (4 pro Seite)" else "Print Round (4 per page)"}
-        </button>
+        @if(mList.length == 1) {
+            <button class="btn btn-primary px-4 fw-bold shadow-sm" @id(PrintSingleBtn, "onclick", mList.head._1.gameNo.toString) data-game="@mList.head._1.gameNo">
+                <i class="bi bi-printer-fill me-1"></i>@{if(base.Global.lang == "de") "Zettel drucken" else "Print Scoresheet"}
+            </button>
+        } else {
+            <button class="btn btn-primary px-4 fw-bold shadow-sm" onclick="window.print()">
+                <i class="bi bi-printer-fill me-1"></i>@{if(base.Global.lang == "de") "Runde drucken (4 pro Seite)" else "Print Round (4 per page)"}
+            </button>
+        }
     </div>
 
     @if(mList.isEmpty) {
@@ -168,12 +181,12 @@
             @{if(base.Global.lang == "de") "Keine Spiele für diesen Wettbewerb vorhanden." else "No matches available for this competition."}
         </div>
     } else {
-        @defining(mList.filterNot(x => x._1.stNoA.isBye || x._1.stNoB.isBye || x._1.stNoA.isNN || x._1.stNoB.isNN)) { activeMatches =>
+        @defining(mList.filterNot(x => x._1.stNoA.isBye || x._1.stNoB.isBye)) { activeMatches =>
             
             <!-- Cards grid preview (Screen only) -->
             <div class="row row-cols-1 row-cols-md-2 g-4 justify-content-center d-print-none mb-5">
                 @mList.zipWithIndex.map { case ((m, nameA, nameB, clubA, clubB, info1, info2), idx) =>
-                    @if(!(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN)) {
+                    @if(!(m.stNoA.isBye || m.stNoB.isBye)) {
                         <div class="col d-flex justify-content-center">
                             <div class="position-relative">
                                 <!-- Card itself -->
@@ -191,7 +204,7 @@
             <div id="scoresheets-hidden-templates" class="print-templates-only">
                 <!-- Single printing templates -->
                 @mList.map { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
-                    @if(!(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN)) {
+                    @if(!(m.stNoA.isBye || m.stNoB.isBye)) {
                         <div id="printable-card-single-@m.gameNo" class="referee-single-card-container">
                             <div class="refereeGrid mx-auto">
                                 @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
@@ -202,7 +215,7 @@
 
                 <!-- Round-specific printing templates (cloned in JS when printing a specific round) -->
                 @mList.groupBy(_._1.round).map { case (roundNo, roundMatches) =>
-                    @defining(roundMatches.filterNot(x => x._1.stNoA.isBye || x._1.stNoB.isBye || x._1.stNoA.isNN || x._1.stNoB.isNN)) { printableRoundMatches =>
+                    @defining(roundMatches.filterNot(x => x._1.stNoA.isBye || x._1.stNoB.isBye)) { printableRoundMatches =>
                         @for(i <- 1 to (printableRoundMatches.length + 3) / 4) {
                             <div class="printable-card-round-@roundNo printarea-referee py-2">
                                 <div class="row justify-content-between mb-4 mx-0">

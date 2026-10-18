@@ -58,8 +58,11 @@ object StageScoreSheet extends BasePage with JsWrapper:
           }
         }
 
-        // Filter matches to only generate and print the selected round or current active round
-        val filteredMatches = if (isPrintRound) {
+        // Filter matches to only generate and print the selected round, single game, or current active round
+        val filteredMatches = if (isPrintSingle) {
+          val single = stage.matches.toSeq.filter(_.gameNo == targetGameNo)
+          if (single.nonEmpty) single else stage.matches.toSeq
+        } else if (isPrintRound) {
           stage.matches.toSeq.filter(_.round == targetRoundNo)
         } else {
           activeSecParam match {
@@ -103,13 +106,18 @@ object StageScoreSheet extends BasePage with JsWrapper:
   override def handleEvent(elem: org.scalajs.dom.raw.HTMLElement, event: org.scalajs.dom.Event): Unit =
     val id = HtmlId(elem.id)
     if (id.id.startsWith(PrintRoundBtn.id)) {
-      val roundNo = elem.getAttribute("data-round").toInt
+      val roundNo = Option(elem.getAttribute("data-round")).flatMap(_.toIntOption).getOrElse(elem.id.substring(PrintRoundBtn.id.length + 1).toInt)
       printRound(roundNo)
     } else if (id.id.startsWith(PrintSingleBtn.id)) {
-      val gameNo = elem.getAttribute("data-game").toInt
+      val gameNo = Option(elem.getAttribute("data-game")).flatMap(_.toIntOption).getOrElse(elem.id.substring(PrintSingleBtn.id.length + 1).toInt)
       printSingle(gameNo)
     }
 
+  /**
+   * Bereitet den Druck aller Schiedsrichterzettel einer bestimmten Runde vor und öffnet den Browser-Druckdialog.
+   *
+   * @param roundNo Nummer der zu druckenden Runde.
+   */
   private def printRound(roundNo: Int): Unit =
     val body = dom.document.body
     val printArea = dom.document.getElementById("scoresheet-print-area")
@@ -134,6 +142,11 @@ object StageScoreSheet extends BasePage with JsWrapper:
       }, 150)
     }
 
+  /**
+   * Bereitet den Druck eines einzelnen Schiedsrichterzettels vor und öffnet den Browser-Druckdialog.
+   *
+   * @param gameNo Spielnummer des zu druckenden Zettels.
+   */
   private def printSingle(gameNo: Int): Unit =
     val body = dom.document.body
     val printArea = dom.document.getElementById("scoresheet-print-area")
@@ -156,6 +169,12 @@ object StageScoreSheet extends BasePage with JsWrapper:
       }, 150)
     }
 
+  /**
+   * Kopiert den Inhalt von HTML5 Canvas-Elementen (z. B. generierte QR-Codes) vom Quell-Element in das geklonte Element.
+   *
+   * @param original Ursprüngliches HTML-Element mit Canvas.
+   * @param clone Geklontes HTML-Element für den Druckbereich.
+   */
   private def copyCanvasContents(original: HTMLElement, clone: HTMLElement): Unit =
     val origCanvases = original.querySelectorAll("canvas")
     val cloneCanvases = clone.querySelectorAll("canvas")
@@ -172,8 +191,17 @@ object StageScoreSheet extends BasePage with JsWrapper:
       }
     }
 
+  /**
+   * Ermittelt die Spielerinformationen (Name, Verein, TTR) für den Schiedsrichterzettel.
+   * Steht der Spieler noch nicht fest (sno.isNN), wird ein leeres Ergebnis ("", "", "") zurückgegeben,
+   * damit der Zettel ohne Namen gedruckt und manuell beschriftet werden kann.
+   *
+   * @param sno Startnummer (SNO) des Spielers.
+   * @param pants Liste der Teilnehmer der Phase.
+   * @return Tupel aus (Name, Verein, TTR-Rating).
+   */
   def getPlayerInfo(sno: SNO, pants: Seq[Pant]): (String, String, String) =
-    if (sno.isNN) (gM("+not_determined"), "", "")
+    if (sno.isNN) ("", "", "")
     else if (sno.isBye) (gM("+bye"), "", "")
     else
       pants.find(_.id == sno) match
@@ -259,7 +287,12 @@ object StageScoreSheet extends BasePage with JsWrapper:
         val info2 = qrElem.getAttribute("data-info-2")
 
         val roundInfo = s"${Seq(info1, info2).filter(s => s != null && s.nonEmpty).mkString(" / ")} (Spiel $gameNo)"
-        val players = s"$nameA - $nameB"
+        val players = (nameA.nonEmpty, nameB.nonEmpty) match {
+          case (true, true) => s"$nameA - $nameB"
+          case (true, false) => s"$nameA -"
+          case (false, true) => s"- $nameB"
+          case (false, false) => ""
+        }
 
         val gNo = scala.util.Try(gameNo.toInt).getOrElse(0)
         val matchEntryOpt = stage.matches.find(_.gameNo == gNo)

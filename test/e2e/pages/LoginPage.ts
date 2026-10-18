@@ -27,14 +27,8 @@ export class LoginPage {
   }
 
   async goto() {
-    await this.page.goto('/');
-    await this.page.waitForLoadState('domcontentloaded');
-    await this.page.evaluate(() => {
-      if (typeof (window as any).appLoadPage === 'function') {
-        (window as any).appLoadPage('UserLogin', '');
-      }
-    });
-    await expect(this.loginBtn.or(this.logoutBtn)).toBeVisible();
+    await this.page.goto('/login/');
+    await expect(this.loginBtn.or(this.logoutBtn)).toBeVisible({ timeout: 10000 });
   }
 
   async login(email: string, pass: string) {

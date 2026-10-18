@@ -271,13 +271,15 @@ function pd_api_register_user($request) {
     // Passwort generieren falls passwortlose Registrierung gewählt wurde
     $password = !empty($params['password']) ? $params['password'] : wp_generate_password(24, true, true);
 
+    $user_role = (isset($params['role']) && ($params['role'] === 'turnier_admin' || $params['role'] === 'tourney_admin')) ? 'tourney_admin' : 'subscriber';
+
     $user_id = wp_insert_user(array(
         'user_login' => $username,
         'user_email' => $params['email'],
         'display_name' => $username,
         'nickname'   => $username,
         'user_pass'  => $password,
-        'role'       => $params['role']
+        'role'       => $user_role
     ));
 
     if (is_wp_error($user_id)) {
@@ -322,7 +324,7 @@ function pd_api_verify_handler($request) {
         delete_user_meta($uid, 'pd_verify_hash');
         $role = get_userdata($uid)->roles[0];
 
-        if ($role === 'turnier_admin') {
+        if ($role === 'tourney_admin' || $role === 'turnier_admin') {
             update_user_meta($uid, 'pd_status', 'organizer_pending');
             return array('status' => 'success', 'message' => 'E-Mail bestätigt. Dein Account wird nun vom Administrator geprüft.');
         } else {

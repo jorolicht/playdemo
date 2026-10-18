@@ -56,15 +56,16 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
 
     // Turnstile Token (falls konfiguriert)
     val turnstileElements = dom.document.getElementsByName("cf-turnstile-response")
-    val turnstileToken = if (turnstileElements.length > 0) {
-      turnstileElements(0).asInstanceOf[dom.html.Input].value
-    } else ""
+    val turnstileToken = (0 until turnstileElements.length)
+      .map(i => turnstileElements(i).asInstanceOf[dom.html.Input].value)
+      .find(_.nonEmpty)
+      .getOrElse("")
 
     // API Call
     val data = Map(
       "email"     -> email,
       "password"  -> pwd,
-      "role"      -> (if (isAdmin) "turnier_admin" else "subscriber"),
+      "role"      -> (if (isAdmin) "tourney_admin" else "subscriber"),
       "organizer" -> org,
       "turnstileToken" -> turnstileToken
     )

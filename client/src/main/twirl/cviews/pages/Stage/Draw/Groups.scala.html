@@ -14,7 +14,7 @@
         <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name)</h5>
         
         <div class="alert alert-info py-2 small d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-info-circle me-2"></i>@gM("+draw_help", stage.stageConfig.productPrefix)</span>
+            <span><i class="bi bi-info-circle me-2"></i>@gM("+draw_help", gM(stage.stageConfig.msgCode))</span>
             <span class="badge bg-primary">@groups.length @gM("+groups_suffix")</span>
         </div>
 

@@ -6,6 +6,7 @@ export class StageInputPage {
   readonly tableInputs: Locator;
   readonly btnSave: Locator;
   readonly standingsTable: Locator;
+  readonly btnDemoScores: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -13,6 +14,7 @@ export class StageInputPage {
     this.tableInputs = page.locator('input[class*="table-input"]');
     this.btnSave = page.locator('button:has-text("Speichern"), button[id*="BtnSave"]');
     this.standingsTable = page.locator('table');
+    this.btnDemoScores = page.locator('button[id*="BtnDemoScores"], button:has-text("DEMO-Ergebnisse")');
   }
 
   async goto(stageId: string = '') {

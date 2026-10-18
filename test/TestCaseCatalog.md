@@ -159,6 +159,7 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-SA-03 [👤]:** Ausführen der Auslosung (`StageDraw`). Die Spieler werden gemäß TTR-Setzung oder Zufall auf Gruppen/KO-Pfade verteilt.
 - [x] **TC-SA-04 [👤]:** Manuelles Tauschen von Spielern in Gruppen/Runden vor Freigabe der Phase.
 - [x] **TC-SA-05 [👤]:** Freigabe der Phase („Phase starten“). Der Spielplan und die Ergebniseingabe werden aktiviert.
+- [x] **TC-SA-06 [👤]:** Nachfolgende Phase mit vorangegangenem Rundenturnier (`RoundRobin`): Filterung nach „Obere Hälfte“, „Untere Hälfte“ und „Alle“ sowie Anzeige der Vorrundenplatzierung in der Spalte `prev_stage`.
 
 ---
 
@@ -170,6 +171,9 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-SI-03 [👤]:** Zuweisung eines Spieltisches (z. B. „Tisch 4“). Der Tischstatus aktualisiert sich.
 - [x] **TC-SI-04 [👤]:** Validierung ungültiger Eingaben (z. B. unvollständige Sätze). Die Anwendung zeigt eine Fehlermeldung und verhindert das Speichern.
 - [x] **TC-SI-05 [👤]:** Aufrufen von `StageResult`. Die Gruppentabellen (Spielegewinn, Satzverhältnis, Bälle, Punkte) aktualisieren sich in Echtzeit.
+- [x] **TC-SI-07 [👤]:** Im Demo-Modus erscheint in der Kopfzeile von `StageInput` (Card-Title `<h5>`) der Button „DEMO-Ergebnisse“. Ein Klick darauf generiert automatische Zufallsergebnisse für alle ungespielten Begegnungen (inkl. automatischer Siegerpropagation in Folge-K.o.-Runden) und deaktiviert den Button nach Abschluss der Phase.
+- [x] **TC-SI-08 [👤]:** Im KO-System (`SingleElimination`) wird für Spiele, bei denen die Teilnehmer noch nicht feststehen, der Button für den Schiedsrichterzettel angezeigt. Auf dem erzeugten Zettel bleiben die Spielernamen leer für manuelle Eintragungen. Bei Spielen mit Freilos wird kein Schiedsrichterzettel-Button angezeigt.
+- [x] **TC-SI-09 [👤]:** Im Gruppen-Spielsystem (`Groups`) öffnet der Schiedsrichterzettel-Button einer Spielzeile in `StageInput` die Seite `StageScoreSheet` ausschließlich mit dem ausgewählten Spiel (genau 1 Zettel in der Vorschau, passender Titel und Einzelzettel-Druckbutton) statt aller Zettel der Gruppe oder Runde.
 
 ### 9.2 Anonymer Besucher (🌐)
 - [x] **TC-SI-06 [🌐]:** Aufrufen von `StageResult` im öffentlichen Modus. Ergebnisse und Tabellenstände sind sichtbar, die Ergebniseingabefelder sind jedoch deaktiviert.
@@ -194,6 +198,12 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-AU-02 [🌐]:** Anmeldung mit gültigen Zugangsdaten. Die Anwendung wechselt in den angemeldeten Zustand, Admin-Funktionen werden freigeschaltet.
 - [x] **TC-AU-03 [🌐]:** Registrierung eines neuen Benutzers (`UserRegistration`). Überprüfung von E-Mail-Validierung und Datenschutz-Zustimmung.
 - [x] **TC-AU-04 [👤]:** Klick auf „Abmelden“. Die Session wird beendet, SessionStorage-Einträge gelöscht und die Ansicht auf die Startseite zurückgesetzt.
+
+### 11.2 Automatisierte Benutzerregistrierung via Mailcatcher (`UserRegistration` & `VerifyAccount`)
+- [x] **TC-REG-01 [🌐]:** Mailcatcher REST-API ist erreichbar und einsatzbereit.
+- [x] **TC-REG-02 [🌐]:** Passwortbasierte Registrierung (`subscriber`), Empfang der Aktivierungsmail via Mailcatcher SMTP, Verifizierung per E-Mail-Link, Auto-Login & anschließender Passwort-Login.
+- [x] **TC-REG-03 [🌐]:** Passwortlose Registrierung, E-Mail-Empfang und Aktivierung via Verifizierungslink.
+- [x] **TC-REG-04 [🌐]:** Registrierung als Turnierverwalter (`tourney_admin`) mit Veranstalter & Admin-Prüfung („Dein Account wird nun vom Administrator geprüft“).
 
 ---
 

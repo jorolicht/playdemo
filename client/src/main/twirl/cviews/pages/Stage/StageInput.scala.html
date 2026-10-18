@@ -124,7 +124,7 @@
                                                 @disabledRow>
                                             <i class="bi bi-check-lg"></i>
                                         </button>
-                                        @if(!(m.stNoA.isBye || m.stNoB.isBye || m.stNoA.isNN || m.stNoB.isNN)) {
+                                        @if(!(m.stNoA.isBye || m.stNoB.isBye)) {
                                             <button class="btn btn-outline-primary"
                                                     @id(SchiriBtn, "onclick", m.gameNo.toString)
                                                     title="Schiedsrichterzettel">
@@ -157,8 +157,16 @@
 <div class="card shadow-sm">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-            <h5 class="card-title text-secondary mb-0">
-                <i class="bi bi-pencil-square me-2"></i>Ergebniseingabe: @stage.name
+            <h5 class="card-title text-secondary mb-0 d-flex align-items-center">
+                <span><i class="bi bi-pencil-square me-2"></i>Ergebniseingabe: @stage.name</span>
+                @if(isDemo) {
+                    <button type="button" 
+                            class="btn btn-warning btn-sm ms-3 fw-bold d-print-none shadow-sm" 
+                            @id(BtnDemoScores, "onclick")
+                            @if(disabledNoAccess == "disabled" || stage.status == StageStatus.FIN || isFin) { disabled }>
+                        <i class="bi bi-dice-5 me-1"></i>DEMO-Ergebnisse
+                    </button>
+                }
             </h5>
             <button class="btn btn-outline-danger btn-sm d-print-none" onclick="appLoadPage('StageAdmin', '')">
                 <i class="bi bi-arrow-left me-1"></i>Zurück zur Übersicht

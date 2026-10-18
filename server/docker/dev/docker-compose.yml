@@ -37,6 +37,7 @@ services:
     container_name: wp-gmp-instance
     depends_on:
       - db
+      - mailcatcher
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: ${DB_USER}
@@ -48,6 +49,7 @@ services:
         define( 'WP_HOME', "${WP_URL}" );
         define( 'WP_SITEURL', "${WP_URL}" );
         define( 'PLAY_SERVER_URL', "${PLAY_SERVER_URL}" );
+        define( 'FS_METHOD', 'direct' );
 
     expose:
       - "80"
@@ -77,6 +79,11 @@ services:
       WORDPRESS_DB_USER: ${DB_USER}
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
       WORDPRESS_DB_NAME: ${DB_NAME}
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_HOME', "${WP_URL}" );
+        define( 'WP_SITEURL', "${WP_URL}" );
+        define( 'PLAY_SERVER_URL', "${PLAY_SERVER_URL}" );
+        define( 'FS_METHOD', 'direct' );
     depends_on:
       - db
     networks:
@@ -171,6 +178,18 @@ services:
       - db
     networks:
       - proxy
+      - backend
+
+  mailcatcher:
+    image: sj26/mailcatcher:latest
+    container_name: mailcatcher-instance
+    restart: unless-stopped
+    expose:
+      - "1025"
+      - "1080"
+    ports:
+      - "1080:1080"
+    networks:
       - backend
 
   composer:

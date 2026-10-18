@@ -478,4 +478,16 @@ dlg.startCompetition.text                           = Achtung: der aktuelle loka
 dlg.startCompetition.btnCancel                      = ABBRECHEN
 dlg.startCompetition.btnStart                       = STARTEN
 
+###
+# StageLayout
+###
+stageLayout.status                                  = Status:
+stageLayout.format                                  = Format:
+stageLayout.tabAdmin                                = Administration
+stageLayout.tabDraw                                 = Auslosung
+stageLayout.tabInput                                = Eingabe
+stageLayout.tabResult                               = Ergebnisse
+stageLayout.tabScoresheet                           = Schiri
+stageLayout.tabCertificate                          = Urkunde
+
 footer.realizedWith                                 = Realisiert mit Scala.js & WordPress.

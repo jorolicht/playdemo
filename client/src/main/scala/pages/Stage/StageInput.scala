@@ -27,6 +27,7 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
   val InfoMatchBtn:   HtmlId = genId(name)
   val SchiriBtn:      HtmlId = genId(name)
   val BtnStartNextRound: HtmlId = genId(name)
+  val BtnDemoScores:     HtmlId = genId(name)
 
   def render(param: String = ""): Boolean = 
     Global.currentSelection.stage match
@@ -70,6 +71,8 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         loadPage(PageNameTyp("StageScoreSheet"), gameNo.toString)
       case `BtnStartNextRound` =>
         startNextSwissRound()
+      case `BtnDemoScores` =>
+        setRandomScores()
       case _ =>
 
   /**
@@ -251,6 +254,119 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
             }
           case Left(err) =>
             error(s"Failed to generate next Swiss round pairings: ${err.msgCode}")
+        }
+      }
+    }
+
+  /**
+   * Prüft, ob sich die Anwendung im Demo-Modus befindet oder ein Demo-Turnier geladen ist.
+   *
+   * @return True, falls Demo-Modus aktiv oder der Turniername auf eine Demo hinweist.
+   */
+  def isDemo: Boolean =
+    base.Global.isDemoMode || (services.TourneyDB.tourney != null && (
+      services.TourneyDB.tourney.name.startsWith("Demo:") ||
+      services.TourneyDB.tourney.name.startsWith(base.Messages.gM("demo.namePrefix")) ||
+      services.TourneyDB.tourney.name.toLowerCase.contains("demo")
+    ))
+
+  /**
+   * Generiert ein zufälliges Satzergebnis im Tischtennis-Format für die Schnelleingabe.
+   *
+   * @param aWinsSet True wenn Spieler A den Satz gewinnt, False wenn Spieler B gewinnt.
+   * @return String im Schnelleingabe-Format (z.B. "7" für 11:7 oder "-8" für 8:11).
+   */
+  def randomSetInput(aWinsSet: Boolean): String =
+    val isOvertime = scala.util.Random.nextDouble() < 0.15
+    if (aWinsSet) {
+      if (isOvertime) {
+        val bScore = 9 + scala.util.Random.nextInt(4)
+        s"$bScore"
+      } else {
+        val bScore = scala.util.Random.nextInt(10)
+        s"$bScore"
+      }
+    } else {
+      if (isOvertime) {
+        val aScore = 9 + scala.util.Random.nextInt(4)
+        s"-$aScore"
+      } else {
+        val aScore = scala.util.Random.nextInt(10)
+        s"-$aScore"
+      }
+    }
+
+  /**
+   * Erzeugt ein vollständiges zufälliges Match-Ergebnis basierend auf den Gewinnsätzen.
+   *
+   * @param winSets Anzahl der Gewinnsätze (z.B. 3 für Best-of-5).
+   * @return Ein Tupel bestehend aus Satzverhältnis ((aWins, bWins)) und dem formatierten Ergebnisstring mit '·'.
+   */
+  def generateRandomMatchResult(winSets: Int): ((Int, Int), String) =
+    val setInputs = scala.collection.mutable.ArrayBuffer[String]()
+    var aWins = 0
+    var bWins = 0
+    while (aWins < winSets && bWins < winSets) {
+      val aWinsSet = scala.util.Random.nextBoolean()
+      if (aWinsSet) aWins += 1 else bWins += 1
+      setInputs += randomSetInput(aWinsSet)
+    }
+    ((aWins, bWins), setInputs.mkString("·"))
+
+  /**
+   * Trägt zufällige Spielergebnisse für noch ungespielte, spielbereite Begegnungen der aktuellen Phase ein.
+   * Propagiert Sieger bei K.o.-Systemen automatisch in Folgerunden und wiederholt die Vergabe,
+   * bis alle determinierten Spiele abgeschlossen sind. Aktualisiert die Spieldatenbank und rendert die Seite neu.
+   *
+   * @param roundOpt Optional eine konkrete Runde; None für alle offenen Runden.
+   */
+  def setRandomScores(roundOpt: Option[Int] = None): Unit =
+    Global.currentSelection.stage.foreach { stage =>
+      val compOpt = Global.currentSelection.competition.orElse(
+        services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId)
+      )
+      val isFin = compOpt.exists(_.status == CompStatus.FIN) || stage.status != StageStatus.EIN || !base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+      if (isFin) {
+        debug("StageInput: Cannot generate demo scores because stage is not in EIN status, competition is finalized, or user has no write access.")
+      } else {
+        val winSets = if (stage.noWinSets > 0) stage.noWinSets else 3
+        var changed = true
+        var loopCount = 0
+        while (changed && loopCount < 50) {
+          changed = false
+          loopCount += 1
+          val unplayed = stage.matches.filter(m =>
+            m != null && !m.finished && m.result.trim.isEmpty &&
+            m.status != MEntry.MS_FIX &&
+            !m.stNoA.isNN && !m.stNoB.isNN &&
+            !m.stNoA.isBye && !m.stNoB.isBye &&
+            roundOpt.forall(_ == m.round)
+          )
+          if (unplayed.nonEmpty) {
+            unplayed.foreach { m =>
+              val ((aWins, bWins), resultStr) = generateRandomMatchResult(winSets)
+              val playfield = if (m.playfield != null && m.playfield.trim.nonEmpty) m.playfield.trim else (1 + ((m.gameNo - 1) % 12)).toString
+              stage.inputMatch(m.gameNo, (aWins, bWins), resultStr, "", playfield) match {
+                case Right(_) =>
+                  if (m.startTime == null || m.startTime.trim.isEmpty) {
+                    m.startTime = nowTimestamp()
+                  }
+                  m.endTime = nowTimestamp()
+                  sendMatchboardUpdate("finish", playfield, m, stage)
+                  changed = true
+                case Left(err) =>
+                  error(s"StageInput: setRandomScores inputMatch failed for gameNo ${m.gameNo}: ${err.msgCode}")
+              }
+            }
+          }
+        }
+
+        services.TourneyDB.tourney.updateStage(stage) match {
+          case Right(updatedStage) =>
+            Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+            render()
+          case Left(err) =>
+            error(s"StageInput: Failed to update stage in database: ${err.msgCode}")
         }
       }
     }
@@ -688,40 +804,42 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
 
   private def sendMatchboardUpdate(entryType: String, courtVal: String, m: MEntry, stage: Stage): Unit =
     val t = services.TourneyDB.tourney
+    if (t == null || base.Global.isDemoMode || base.Global.isLocalMode || t.wpId == 999999 || t.wpId <= 0) return
+
     val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)
     val slugParam = s"${slugName.trim}-${t.wpId}"
     
-    val comp = t.competitions.filter(_ != null).find(_.id == stage.coId).get
-    
-    // Look up player names
-    val pants = comp.pants1Stage.toSeq
-    val nameA = formatSnoName(m.stNoA, pants)
-    val nameB = formatSnoName(m.stNoB, pants)
-    
-    val entry = shared.model.MatchboardEntry(
-      id = s"match_${stage.id.value}_${m.gameNo}",
-      entryType = entryType,
-      court = Some(courtVal.trim),
-      nameA = Some(nameA),
-      nameB = Some(nameB),
-      compName = Some(comp.name),
-      stageId = Some(stage.id),
-      gameNo = Some(m.gameNo)
-    )
-    
-    val request = shared.model.MatchboardSetRequest(
-      action = entryType,
-      tourneyName = Some(t.name),
-      entry = Some(entry)
-    )
-    
-    ajaxPost[shared.model.MatchboardSetRequest, shared.model.MatchboardSetResponse]("/matchboard/set", List("slug" -> slugParam), request).map {
-      case Right(res) if res.success =>
-        debug(s"Matchboard update successfully sent: entryType=$entryType, court=$courtVal")
-      case Right(_) =>
-        debug(s"Matchboard update returned success=false: entryType=$entryType, court=$courtVal")
-      case Left(err) =>
-        debug(s"Failed to send matchboard update: ${err.msgCode}")
+    t.competitions.filter(_ != null).find(_.id == stage.coId).foreach { comp =>
+      // Look up player names
+      val pants = comp.pants1Stage.toSeq
+      val nameA = formatSnoName(m.stNoA, pants)
+      val nameB = formatSnoName(m.stNoB, pants)
+      
+      val entry = shared.model.MatchboardEntry(
+        id = s"match_${stage.id.value}_${m.gameNo}",
+        entryType = entryType,
+        court = Some(courtVal.trim),
+        nameA = Some(nameA),
+        nameB = Some(nameB),
+        compName = Some(comp.name),
+        stageId = Some(stage.id),
+        gameNo = Some(m.gameNo)
+      )
+      
+      val request = shared.model.MatchboardSetRequest(
+        action = entryType,
+        tourneyName = Some(t.name),
+        entry = Some(entry)
+      )
+      
+      ajaxPost[shared.model.MatchboardSetRequest, shared.model.MatchboardSetResponse]("/matchboard/set", List("slug" -> slugParam), request).map {
+        case Right(res) if res.success =>
+          debug(s"Matchboard update successfully sent: entryType=$entryType, court=$courtVal")
+        case Right(_) =>
+          debug(s"Matchboard update returned success=false: entryType=$entryType, court=$courtVal")
+        case Left(err) =>
+          debug(s"Failed to send matchboard update: ${err.msgCode}")
+      }
     }
 
   def showMatchInfo(gameNo: Int): Unit =

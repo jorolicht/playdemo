@@ -17,11 +17,22 @@ def getEnvValue(base: File, key: String, defaultVal: String): String = {
     val envFile = getDockerDir(base, env) / ".env"
     if (envFile.exists()) {
       val lines = IO.readLines(envFile)
-      lines.find(_.trim.startsWith(s"$key=")).flatMap { line =>
-        val parts = line.split("=", 2)
-        if (parts.length == 2) {
-          Some(parts(1).trim.stripPrefix("\"").stripSuffix("\"").stripPrefix("'").stripSuffix("'"))
+      val envMap = lines.flatMap { line =>
+        val trimmed = line.trim
+        if (trimmed.nonEmpty && !trimmed.startsWith("#")) {
+          val parts = trimmed.split("=", 2)
+          if (parts.length == 2) {
+            val k = parts(0).trim.stripPrefix("export ").trim
+            val v = parts(1).trim.stripPrefix("\"").stripSuffix("\"").stripPrefix("'").stripSuffix("'")
+            Some(k -> v)
+          } else None
         } else None
+      }.toMap
+
+      envMap.get(key).map { rawVal =>
+        envMap.foldLeft(rawVal) { case (acc, (k, v)) =>
+          acc.replace(s"$${$k}", v)
+        }
       }
     } else None
   }.getOrElse(defaultVal)
@@ -60,11 +71,15 @@ val dockerPushImages   = taskKey[Unit]("Pushes playsrv-image, wp-cli-image, and 
 
 lazy val root = (project in file("."))
   .aggregate(server, client, shared.jvm, shared.js)
+  .settings(
+    packageWpPlugin := (server / packageWpPlugin).value
+  )
 
 val genMsgFiles = taskKey[Unit]("Generate Message Files")  
 val convertMessagesToJson = taskKey[Seq[File]]("Converts message files to JSON")
 
 lazy val syncClientWpFiles = taskKey[Unit]("Copies main.js and main.js.map to wordpress")
+val packageWpPlugin = taskKey[File]("Generates an installable WordPress plugin ZIP archive with SemVer version (tourney-<version>.zip)")
 
 lazy val server = project
   .settings(
@@ -95,15 +110,13 @@ lazy val server = project
       val msgFileEn = baseDirectory.value  / "conf" / "messages.en"
       val infoDe = baseDirectory.value  / "conf" / "messages" / "de" / "00_info.de"
       val infoEn = baseDirectory.value  / "conf" / "messages" / "en" / "00_info.en"
-      val ymd = appDate.split("-")
-      val yearMonth = s"${ymd(0)}-${ymd(1)}"
       IO.write(infoDe, s"""
-                        |app.version = ${appVersion}DE${yearMonth}
+                        |app.version = ${appVersion}
                         |app.date    = ${appDate}
                         |app.lang    = DE
                         |\n""".stripMargin)
       IO.write(infoEn, s"""
-                        |app.version = ${appVersion}EN${yearMonth}
+                        |app.version = ${appVersion}
                         |app.date    = ${appDate}
                         |app.lang    = EN
                         |\n""".stripMargin)
@@ -243,11 +256,17 @@ lazy val server = project
       if ((wpPluginDir / "download").exists()) {
         IO.copyDirectory(wpPluginDir / "download", dockerWpPluginDir / "download")
       }
+      if ((wpPluginDir / "vendor").exists()) {
+        IO.copyDirectory(wpPluginDir / "vendor", dockerWpPluginDir / "vendor")
+      }
       if ((wpPluginDir / "composer.json").exists()) {
         IO.copyFile(wpPluginDir / "composer.json", dockerWpPluginDir / "composer.json")
       }
       if ((wpPluginDir / "composer.lock").exists()) {
         IO.copyFile(wpPluginDir / "composer.lock", dockerWpPluginDir / "composer.lock")
+      }
+      if ((wpPluginDir / "readme.txt").exists()) {
+        IO.copyFile(wpPluginDir / "readme.txt", dockerWpPluginDir / "readme.txt")
       }
       if ((wpPluginDir / "data").exists()) {
         IO.copyDirectory(wpPluginDir / "data", dockerWpPluginDir / "data")
@@ -255,6 +274,107 @@ lazy val server = project
       }
 
       log.info(s"Copied files to wordpress (including php, includes, and pages)")
+    },
+    packageWpPlugin := {
+      // 1. Abhängigkeiten auflösen: Messages konvertieren und FullOpt Scala.js kompilieren
+      convertMessagesToJson.value
+      (client / Compile / fullLinkJS).value
+
+      val log = streams.value.log
+      val rootDir = baseDirectory.value / ".."
+      val wpPluginDir = rootDir / "wp-plugin"
+      val clientOptDir = (client / Compile / fullLinkJS / scalaJSLinkerOutputDirectory).value
+      val clientCssSource = rootDir / "server" / "public" / "css"
+
+      // 2. Temporäres Staging-Verzeichnis vorbereiten (unter target/wordpress/stage/tourney)
+      val stageBase = baseDirectory.value / "target" / "wordpress" / "stage"
+      val stageTourneyDir = stageBase / "tourney"
+
+      IO.delete(stageBase)
+      IO.createDirectory(stageTourneyDir)
+
+      // 3. PHP-, Konfigurations- und Dokumentationsdateien kopieren
+      IO.copyFile(wpPluginDir / "tourney.php", stageTourneyDir / "tourney.php")
+      if ((wpPluginDir / "readme.txt").exists()) {
+        IO.copyFile(wpPluginDir / "readme.txt", stageTourneyDir / "readme.txt")
+      }
+      if ((wpPluginDir / "composer.json").exists()) {
+        IO.copyFile(wpPluginDir / "composer.json", stageTourneyDir / "composer.json")
+      }
+      if ((wpPluginDir / "composer.lock").exists()) {
+        IO.copyFile(wpPluginDir / "composer.lock", stageTourneyDir / "composer.lock")
+      }
+
+      // 4. Verzeichnisse kopieren
+      IO.copyDirectory(wpPluginDir / "includes", stageTourneyDir / "includes")
+      IO.copyDirectory(wpPluginDir / "pages", stageTourneyDir / "pages")
+      if ((wpPluginDir / "img").exists()) {
+        IO.copyDirectory(wpPluginDir / "img", stageTourneyDir / "img")
+      }
+      if ((wpPluginDir / "font").exists()) {
+        IO.copyDirectory(wpPluginDir / "font", stageTourneyDir / "font")
+      }
+      if ((wpPluginDir / "download").exists()) {
+        IO.copyDirectory(wpPluginDir / "download", stageTourneyDir / "download")
+      }
+      if ((wpPluginDir / "vendor").exists()) {
+        IO.copyDirectory(wpPluginDir / "vendor", stageTourneyDir / "vendor")
+      }
+
+      // 5. CSS & Stylesheets einbinden
+      val stageCssDir = stageTourneyDir / "css"
+      IO.createDirectory(stageCssDir)
+      if (clientCssSource.exists()) {
+        IO.copyDirectory(clientCssSource, stageCssDir)
+      }
+      if ((wpPluginDir / "css").exists()) {
+        IO.copyDirectory(wpPluginDir / "css", stageCssDir)
+      }
+
+      // 6. Produktions-optimiertes JavaScript (fullLinkJS) einbinden
+      val stageJsDir = stageTourneyDir / "js"
+      IO.createDirectory(stageJsDir)
+      IO.copyDirectory(clientOptDir, stageJsDir)
+
+      // 7. Übersetzungen (JSON) einbinden
+      val stageDataDir = stageTourneyDir / "data"
+      IO.createDirectory(stageDataDir)
+      if ((wpPluginDir / "data").exists()) {
+        IO.copyDirectory(wpPluginDir / "data", stageDataDir)
+      }
+
+      // 8. Bereinigung: Ausschluss von Entwicklungs- und OS-Artefakten (.DS_Store, ~, tmp, .git)
+      val allFiles = (stageTourneyDir ** "*").get.filter(_.isFile)
+        .filterNot { f =>
+          val name = f.getName
+          name == ".DS_Store" || name.endsWith("~") || name.endsWith(".tmp") || name.startsWith(".git")
+        }
+
+      // 9. ZIP-Archiv unter target/wordpress/tourney-<version>.zip erzeugen
+      val outDir = rootDir / "target" / "wordpress"
+      val rootTargetDir = rootDir / "target"
+      IO.createDirectory(outDir)
+      IO.createDirectory(rootTargetDir)
+
+      val versionedZip = outDir / s"tourney-$appVersion.zip"
+      val unversionedZip = outDir / "tourney.zip"
+      val rootVersionedZip = rootTargetDir / s"tourney-$appVersion.zip"
+
+      val zipMappings = allFiles.map { f =>
+        (f, IO.relativize(stageBase, f).get)
+      }
+
+      IO.delete(versionedZip)
+      IO.zip(zipMappings, versionedZip)
+      IO.copyFile(versionedZip, unversionedZip)
+      IO.copyFile(versionedZip, rootVersionedZip)
+
+      log.info(s"Created installable WordPress plugin ZIP archive (Version: $appVersion):")
+      log.info(s"  - ${versionedZip.getAbsolutePath}")
+      log.info(s"  - ${rootVersionedZip.getAbsolutePath}")
+      log.info(s"  - ${unversionedZip.getAbsolutePath}")
+
+      versionedZip
     },
     Universal / dist := {
       val zipFile = (Universal / packageBin).value
@@ -458,6 +578,27 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure).in(file("shared"))
   .settings(
      name := "shared",
+     Compile / sourceGenerators += Def.task {
+       val file = (Compile / sourceManaged).value / "shared" / "AppVersion.scala"
+       val parts = appVersion.split('.')
+       val maj = if (parts.length > 0) scala.util.Try(parts(0).toInt).getOrElse(1) else 1
+       val min = if (parts.length > 1) scala.util.Try(parts(1).toInt).getOrElse(0) else 0
+       val pat = if (parts.length > 2) scala.util.Try(parts(2).toInt).getOrElse(0) else 0
+       IO.write(file,
+         s"""package shared
+            |
+            |/**
+            | * Automatisch generierte Versionsinformationen gemäß SemVer MAJOR.MINOR.PATCH.
+            | */
+            |object AppVersion:
+            |  val major: Int = $maj
+            |  val minor: Int = $min
+            |  val patch: Int = $pat
+            |  val version: String = "${appVersion}"
+            |""".stripMargin
+       )
+       Seq(file)
+     },
      libraryDependencies ++= Seq(
        "com.lihaoyi" %%% "upickle" % "3.3.1",
        "com.lihaoyi" %% "upickle" % "3.3.1",
@@ -483,3 +624,7 @@ def buildMsg = Command.command("buildMsg") { state =>
   println("--- Nachrichten-Generierung abgeschlossen ---")
   state2
 }
+
+addCommandAlias("packageWp", "packageWpPlugin")
+addCommandAlias("packagePlugin", "packageWpPlugin")
+

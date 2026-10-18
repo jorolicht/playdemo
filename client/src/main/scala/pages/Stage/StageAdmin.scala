@@ -94,33 +94,12 @@ object StageAdmin extends BasePage with JsWrapper:
         currentFilterOption = prevStageOpt match {
           case Some(prevStage) =>
             val checkedPants = participants.filter(_.status == PantStatus.PLAY)
-            val topHalfPants = participants.filter { p =>
-              prevStage.data match {
-                case StageData.GroupsStage(groups) =>
-                  groups.find(_.pants.exists(gp => gp != null && gp.id == p.id)).exists { g =>
-                    val place = g.pants.find(gp => gp != null && gp.id == p.id).map(_.place._1).getOrElse(0)
-                    val maxPlace = g.pants.count(_ != null)
-                    val threshold = (maxPlace + 1) / 2
-                    place > 0 && place <= threshold
-                  }
-                case _ => false
-              }
-            }
-            val bottomHalfPants = participants.filter { p =>
-              prevStage.data match {
-                case StageData.GroupsStage(groups) =>
-                  groups.find(_.pants.exists(gp => gp != null && gp.id == p.id)).exists { g =>
-                    val place = g.pants.find(gp => gp != null && gp.id == p.id).map(_.place._1).getOrElse(0)
-                    val maxPlace = g.pants.count(_ != null)
-                    val threshold = (maxPlace + 1) / 2
-                    place > threshold
-                  }
-                case _ => false
-              }
-            }
+            val topHalfPants = participants.filter(p => isTopHalfPlayer(prevStage, p.id))
+            val bottomHalfPants = participants.filter(p => isBottomHalfPlayer(prevStage, p.id))
             if (checkedPants.nonEmpty && checkedPants.toSet == topHalfPants.toSet) "TOP"
             else if (checkedPants.nonEmpty && checkedPants.toSet == bottomHalfPants.toSet) "BOTTOM"
-            else "ALL"
+            else if (checkedPants.length == participants.length) "ALL"
+            else "CUSTOM"
           case None => "ALL"
         }
         
@@ -286,16 +265,7 @@ object StageAdmin extends BasePage with JsWrapper:
           Global.currentSelection.competition.foreach { comp =>
             comp.pants1Stage.foreach { p =>
               if (p.active) {
-                val isTop = prevStage.data match {
-                  case StageData.GroupsStage(groups) =>
-                    groups.find(_.pants.exists(gp => gp != null && gp.id == p.id)).exists { g =>
-                      val place = g.pants.find(gp => gp != null && gp.id == p.id).map(_.place._1).getOrElse(0)
-                      val maxPlace = g.pants.count(_ != null)
-                      val threshold = (maxPlace + 1) / 2
-                      place > 0 && place <= threshold
-                    }
-                  case _ => false
-                }
+                val isTop = isTopHalfPlayer(prevStage, p.id)
                 p.status = if (isTop) PantStatus.PLAY else PantStatus.REGI
               }
             }
@@ -318,16 +288,7 @@ object StageAdmin extends BasePage with JsWrapper:
           Global.currentSelection.competition.foreach { comp =>
             comp.pants1Stage.foreach { p =>
               if (p.active) {
-                val isBottom = prevStage.data match {
-                  case StageData.GroupsStage(groups) =>
-                    groups.find(_.pants.exists(gp => gp != null && gp.id == p.id)).exists { g =>
-                      val place = g.pants.find(gp => gp != null && gp.id == p.id).map(_.place._1).getOrElse(0)
-                      val maxPlace = g.pants.count(_ != null)
-                      val threshold = (maxPlace + 1) / 2
-                      place > threshold
-                    }
-                  case _ => false
-                }
+                val isBottom = isBottomHalfPlayer(prevStage, p.id)
                 p.status = if (isBottom) PantStatus.PLAY else PantStatus.REGI
               }
             }
@@ -588,19 +549,102 @@ object StageAdmin extends BasePage with JsWrapper:
       case _ => debug("Delete cancelled")
     }
 
+  /**
+   * Liefert alle Gruppen einer Phase, sowohl für Gruppen-Phasen als auch für Rundenturniere (RoundRobin).
+   *
+   * @param stage Die Phase, aus der die Gruppen extrahiert werden sollen.
+   * @return Eine Sequenz aller Gruppen der Phase.
+   */
+  def getStageGroups(stage: Stage): Seq[Group] =
+    stage.data match
+      case StageData.GroupsStage(groups) => groups.toSeq
+      case StageData.RoundRobinStage(rrGroup) => Seq(rrGroup)
+      case _ => Seq.empty
+
+  /**
+   * Stellt sicher, dass die Platzierungen (places) innerhalb einer Gruppe berechnet sind.
+   * Falls noch keine Platzierungen ermittelt wurden (place._1 == 0), werden fertige Spiele
+   * aus der Phase in die Gruppe eingetragen und die Gruppenberechnung (calc) ausgeführt.
+   *
+   * @param prevStage Die vorangegangene Phase, die die Matches enthält.
+   * @param g Die zu überprüfende und ggf. zu berechnende Gruppe.
+   */
+  def ensureGroupCalculated(prevStage: Stage, g: Group): Unit =
+    val needsCalc = g.pants.exists(p => p != null && !p.id.isNN && !p.id.isBye && p.place._1 == 0)
+    if (needsCalc) {
+      prevStage.matches.foreach {
+        case mgr: MEntryGr if mgr.grId == g.grId =>
+          g.setMatch(mgr)
+        case _ =>
+      }
+      g.calc()
+    }
+
+  /**
+   * Ermittelt, ob ein Teilnehmer in der vorangegangenen Phase zur oberen Hälfte gehört.
+   * Dies wird anhand der Platzierung in der Gruppe oder im Rundenturnier bestimmt.
+   *
+   * @param prevStage Die vorangegangene Phase.
+   * @param sno Die Startnummer (SNO) des Teilnehmers.
+   * @return true, falls der Teilnehmer zur oberen Hälfte gehört, sonst false.
+   */
+  def isTopHalfPlayer(prevStage: Stage, sno: SNO): Boolean =
+    val groups = getStageGroups(prevStage)
+    if (groups.nonEmpty) {
+      groups.find(_.pants.exists(gp => gp != null && gp.id == sno)).exists { g =>
+        ensureGroupCalculated(prevStage, g)
+        val place = g.pants.find(gp => gp != null && gp.id == sno).map(_.place._1).getOrElse(0)
+        val maxPlace = g.pants.count(x => x != null && !x.id.isNN && !x.id.isBye)
+        val threshold = (maxPlace + 1) / 2
+        place > 0 && place <= threshold
+      }
+    } else false
+
+  /**
+   * Ermittelt, ob ein Teilnehmer in der vorangegangenen Phase zur unteren Hälfte gehört.
+   * Dies wird anhand der Platzierung in der Gruppe oder im Rundenturnier bestimmt.
+   *
+   * @param prevStage Die vorangegangene Phase.
+   * @param sno Die Startnummer (SNO) des Teilnehmers.
+   * @return true, falls der Teilnehmer zur unteren Hälfte gehört, sonst false.
+   */
+  def isBottomHalfPlayer(prevStage: Stage, sno: SNO): Boolean =
+    val groups = getStageGroups(prevStage)
+    if (groups.nonEmpty) {
+      groups.find(_.pants.exists(gp => gp != null && gp.id == sno)).exists { g =>
+        ensureGroupCalculated(prevStage, g)
+        val place = g.pants.find(gp => gp != null && gp.id == sno).map(_.place._1).getOrElse(0)
+        val maxPlace = g.pants.count(x => x != null && !x.id.isNN && !x.id.isBye)
+        val threshold = (maxPlace + 1) / 2
+        place > threshold
+      }
+    } else false
+
+  /**
+   * Erzeugt eine lesbare Beschreibung des Ergebnisses eines Teilnehmers in der vorherigen Phase
+   * zur Anzeige in der Administrationstabelle (z. B. "Gruppe A, PLATZ 1" oder "Jeder gegen Jeden, PLATZ 1").
+   *
+   * @param stage Die aktuelle Phase (zur Ermittlung der Vorgänger-Phase).
+   * @param sno Die Startnummer (SNO) des Teilnehmers.
+   * @return Textuelle Beschreibung des Vorrunden-Ergebnisses oder "-" falls nicht verfügbar.
+   */
   def getPredecessorResultDesc(stage: Stage, sno: SNO): String =
     stage.prefId.flatMap { pId =>
       services.TourneyDB.tourney.stages.find(s => s != null && s.id == pId)
     }.map { prevStage =>
-      prevStage.data match {
-        case StageData.GroupsStage(groups) =>
-          groups.find(_.pants.exists(gp => gp != null && gp.id == sno)).map { g =>
-            val place = g.pants.find(gp => gp != null && gp.id == sno).map(_.place._1).getOrElse(0)
-            if (place > 0) s"${g.name}, PLATZ $place"
-            else g.name
-          }.getOrElse("-")
-        case _ => "-"
-      }
+      val groups = getStageGroups(prevStage)
+      if (groups.nonEmpty) {
+        groups.find(_.pants.exists(gp => gp != null && gp.id == sno)).map { g =>
+          ensureGroupCalculated(prevStage, g)
+          val place = g.pants.find(gp => gp != null && gp.id == sno).map(_.place._1).getOrElse(0)
+          val name = prevStage.data match {
+            case StageData.RoundRobinStage(_) => "Jeder gegen Jeden"
+            case _ => g.name
+          }
+          if (place > 0) s"$name, PLATZ $place"
+          else name
+        }.getOrElse("-")
+      } else "-"
     }.getOrElse("-")
 
   private def getSelectedPlayersCount(): Int =

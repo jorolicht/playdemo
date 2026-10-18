@@ -285,7 +285,7 @@ object TestStage extends base.JsWrapper:
             addOutput(s"Generating random results for ${unplayed.length} matches in Stage '${stage.name}' for Round $roundNo...")
             
             unplayed.foreach { m =>
-              val ((aWins, bWins), resultStr) = generateRandomMatchResult(winSets)
+              val ((aWins, bWins), resultStr) = pages.Stage.StageInput.generateRandomMatchResult(winSets)
               stage.inputMatch(m.gameNo, (aWins, bWins), resultStr, "", m.playfield) match {
                 case Left(err) =>
                   addOutput(s"Failed to set match result for gameNo ${m.gameNo}: ${err.msg}")
@@ -311,35 +311,4 @@ object TestStage extends base.JsWrapper:
       case ex: Exception =>
         addOutput(s"Error generating random results: ${ex.getMessage}")
         Future(Left(AppError("test.failed", ex.getMessage)))
-
-  private def generateRandomMatchResult(winSets: Int): ((Int, Int), String) =
-    val setInputs = scala.collection.mutable.ArrayBuffer[String]()
-    var aWins = 0
-    var bWins = 0
-    while (aWins < winSets && bWins < winSets) {
-      val aWinsSet = scala.util.Random.nextBoolean()
-      if (aWinsSet) aWins += 1 else bWins += 1
-      setInputs += randomSetInput(aWinsSet)
-    }
-    ((aWins, bWins), setInputs.mkString("·"))
-
-  private def randomSetInput(aWinsSet: Boolean): String =
-    val isOvertime = scala.util.Random.nextDouble() < 0.15
-    if (aWinsSet) {
-      if (isOvertime) {
-        val bScore = 9 + scala.util.Random.nextInt(4)
-        s"$bScore"
-      } else {
-        val bScore = scala.util.Random.nextInt(10)
-        s"$bScore"
-      }
-    } else {
-      if (isOvertime) {
-        val aScore = 9 + scala.util.Random.nextInt(4)
-        s"-$aScore"
-      } else {
-        val aScore = scala.util.Random.nextInt(10)
-        s"-$aScore"
-      }
-    }
 

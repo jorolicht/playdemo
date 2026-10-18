@@ -224,8 +224,11 @@ case class Tourney(
 
   /** Adds a new stage to a competition, optionally linking to a predecessor. */
   def addStage(coId: CompId, prefId: Option[StageId], name: String, stageConfig: StageConfig, size: Int, noPlayers: Int, doSync: Boolean = true): Either[AppError, Stage] =
+    while (stages.length < 128) stages += null
+    while (competitions.length < 64) competitions += null
     val cIdx = coId.value - 1
-    val compIsFin = if (cIdx >= 0 && cIdx < 64 && competitions(cIdx) != null) competitions(cIdx).status == CompStatus.FIN else false
+    val compOpt = if (cIdx >= 0 && cIdx < 64 && competitions(cIdx) != null && competitions(cIdx).id == coId) Some(competitions(cIdx)) else competitions.find(c => c != null && c.id == coId)
+    val compIsFin = compOpt.exists(_.status == CompStatus.FIN)
     if (compIsFin) {
       Left(AppError("competition.finalized"))
     } else if (stages.exists(s => s != null && s.coId == coId && !s.deleted && s.name.equalsIgnoreCase(name))) {
@@ -264,7 +267,7 @@ case class Tourney(
 
         // Update predecessor
         prefId.foreach { pid =>
-          val pIdx = pid.value - 1
+          val pIdx = if (pid.value > 0 && pid.value <= 128 && stages(pid.value - 1) != null && stages(pid.value - 1).id == pid) pid.value - 1 else stages.indexWhere(s => s != null && s.id == pid)
           if (pIdx >= 0 && pIdx < 128 && stages(pIdx) != null) {
             val pref = stages(pIdx)
             val updatedPref = pref.copy(nextIds = pref.nextIds :+ id, version = pref.version + 1)
@@ -275,12 +278,11 @@ case class Tourney(
 
         // Update Competition if no predecessor (sets as startStage)
         if (prefId.isEmpty) {
-          val cIdx = coId.value - 1
-          if (cIdx >= 0 && cIdx < 64 && competitions(cIdx) != null) {
-            val comp = competitions(cIdx)
-            if (comp.startStage.isEmpty) {
+          compOpt.foreach { comp =>
+            val compCIdx = if (cIdx >= 0 && cIdx < 64 && competitions(cIdx) != null && competitions(cIdx).id == coId) cIdx else competitions.indexOf(comp)
+            if (comp.startStage.isEmpty && compCIdx >= 0 && compCIdx < 64) {
               val updatedComp = comp.copy(startStage = Some(id), status = CompStatus.RUN, version = comp.version + 1)
-              competitions(cIdx) = updatedComp
+              competitions(compCIdx) = updatedComp
               addDirtyCompetition(updatedComp)
               if (doSync) triggerCompSync()
             }
@@ -296,13 +298,23 @@ case class Tourney(
 
   /** Deletes a stage and its successors recursively (soft delete). */
   def deleteStage(id: StageId, doSync: Boolean = true): Either[AppError, Unit] =
-    val i = id.value - 1
-    if (i < 0 || i >= 128 || stages(i) == null) {
+    while (stages.length < 128) stages += null
+    while (competitions.length < 64) competitions += null
+
+    val targetIdx =
+      if (id.value > 0 && id.value <= 128 && stages(id.value - 1) != null && stages(id.value - 1).id == id) {
+        id.value - 1
+      } else {
+        stages.indexWhere(s => s != null && s.id == id)
+      }
+
+    if (targetIdx < 0 || targetIdx >= 128 || stages(targetIdx) == null) {
       Left(AppError("stage.notFound"))
     } else {
-      val r = stages(i)
+      val r = stages(targetIdx)
       val cIdx = r.coId.value - 1
-      val compIsFin = if (cIdx >= 0 && cIdx < 64 && competitions(cIdx) != null) competitions(cIdx).status == CompStatus.FIN else false
+      val compOpt = if (cIdx >= 0 && cIdx < 64 && competitions(cIdx) != null && competitions(cIdx).id == r.coId) Some(competitions(cIdx)) else competitions.find(c => c != null && c.id == r.coId)
+      val compIsFin = compOpt.exists(_.status == CompStatus.FIN)
       if (compIsFin) {
         Left(AppError("competition.finalized"))
       } else {
@@ -311,12 +323,12 @@ case class Tourney(
 
         // Soft delete current stage
         val updatedR = r.copy(deleted = true, version = r.version + 1)
-        stages(i) = updatedR
+        stages(targetIdx) = updatedR
         addDirtyStage(updatedR)
 
         // Remove from predecessor's nextIds
         r.prefId.foreach { pid =>
-          val pIdx = pid.value - 1
+          val pIdx = if (pid.value > 0 && pid.value <= 128 && stages(pid.value - 1) != null && stages(pid.value - 1).id == pid) pid.value - 1 else stages.indexWhere(s => s != null && s.id == pid)
           if (pIdx >= 0 && pIdx < 128 && stages(pIdx) != null) {
             val pref = stages(pIdx)
             val updatedPref = pref.copy(nextIds = pref.nextIds.filterNot(_ == id), version = pref.version + 1)
@@ -326,7 +338,7 @@ case class Tourney(
         }
 
         // Update Competition if it was startStage or if no active stages remain
-        val compCIdx = r.coId.value - 1
+        val compCIdx = if (cIdx >= 0 && cIdx < 64 && competitions(cIdx) != null && competitions(cIdx).id == r.coId) cIdx else competitions.indexWhere(c => c != null && c.id == r.coId)
         if (compCIdx >= 0 && compCIdx < 64 && competitions(compCIdx) != null) {
           val comp = competitions(compCIdx)
           val activeStages = stages.filter(s => s != null && s.coId == r.coId && !s.deleted)
@@ -345,17 +357,31 @@ case class Tourney(
 
   /** Updates an existing stage. */
   def updateStage(stage: Stage, doSync: Boolean = true): Either[AppError, Stage] =
-    val i = stage.id.value - 1
-    if (i < 0 || i >= 128 || stages(i) == null) {
+    while (stages.length < 128) stages += null
+    while (competitions.length < 64) competitions += null
+
+    val targetIdx =
+      if (stage.id.value > 0 && stage.id.value <= 128 && stages(stage.id.value - 1) != null && stages(stage.id.value - 1).id == stage.id) {
+        stage.id.value - 1
+      } else {
+        val found = stages.indexWhere(s => s != null && s.id == stage.id)
+        if (found != -1) found
+        else if (stage.id.value > 0 && stage.id.value <= 128) stage.id.value - 1
+        else stages.indexOf(null)
+      }
+
+    if (targetIdx < 0 || targetIdx >= 128) {
       Left(AppError("stage.notFound"))
     } else {
       val cIdx = stage.coId.value - 1
-      val compIsFin = if (cIdx >= 0 && cIdx < 64 && competitions(cIdx) != null) competitions(cIdx).status == CompStatus.FIN else false
+      val compOpt = if (cIdx >= 0 && cIdx < 64 && competitions(cIdx) != null && competitions(cIdx).id == stage.coId) Some(competitions(cIdx)) else competitions.find(c => c != null && c.id == stage.coId)
+      val compIsFin = compOpt.exists(_.status == CompStatus.FIN)
       if (compIsFin) {
         Left(AppError("competition.finalized"))
       } else {
-        val updatedR = stage.copy(version = stage.version + 1)
-        stages(i) = updatedR
+        val finalId = if (stage.id.value > 0) stage.id else StageId(targetIdx + 1)
+        val updatedR = stage.copy(id = finalId, version = stage.version + 1)
+        stages(targetIdx) = updatedR
         addDirtyStage(updatedR)
         if (doSync) triggerStageSync()
         Right(updatedR)
@@ -364,11 +390,12 @@ case class Tourney(
 
   /** Bulk synchronizes stages from external data. */
   def syncStages(newStages: Seq[Stage] = Nil): Unit = 
+    while (stages.length < 128) stages += null
     if (newStages.nonEmpty) {
       newStages.foreach { r =>
-        val i = r.id.value - 1
-        if (i >= 0 && i < 128) {
-           stages(i) = r
+        val targetIdx = if (r.id.value > 0 && r.id.value <= 128) r.id.value - 1 else stages.indexOf(null)
+        if (targetIdx >= 0 && targetIdx < 128) {
+           stages(targetIdx) = r
            addDirtyStage(r)
         }
       }

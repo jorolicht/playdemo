@@ -75,10 +75,11 @@ object StageDB extends ComWrapper with Debouncer:
    */
   def load(): Future[Either[AppError, Long]] = {
     if (base.Global.isDemoMode || base.Global.isLocalMode) {
+      val t = TourneyDB.tourney
+      while (t.stages.length < 128) t.stages += null
       val jsStr = org.scalajs.dom.window.localStorage.getItem("App.demo_stages")
       if (jsStr != null && jsStr.nonEmpty) {
         val req = read[StageSyncRequest](jsStr)
-        val t = TourneyDB.tourney
         t.stages.clear()
         for (i <- 0 until 128) t.stages += null
         req.events.foreach { r =>
@@ -88,9 +89,9 @@ object StageDB extends ComWrapper with Debouncer:
              t.stages(targetIdx) = stageToStore
         }
         t.dirtyStage.clear()
-        initHandler()
         Logging.debug(s"StageDB.load(demo): loaded ${req.events.length} stages")
       }
+      initHandler()
       return Future.successful(Right(0L))
     } else if (TourneyDB.tourney.wpId == 0) {
       Logging.debug("StageDB.load: tourney.id is 0, skipping load")

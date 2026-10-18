@@ -10,6 +10,6 @@
 }
 
 /* Server-Inhalt generell ausblenden (sowohl auf dem Bildschirm als auch beim Drucken) */
-.entry-content > *:not(#Main_AppWrapper):not(#Main_ParamId):not(#Main_NavbarId):not(#Main_ContextHeaderId):not(#Main_DynContentId) {
+.entry-content > *:not(.tourney-spa-root):not(#Main_AppWrapper):not(#Main_ParamId):not(#Main_NavbarId):not(#Main_ContextHeaderId):not(#Main_DynContentId) {
     display: none !important;
 }

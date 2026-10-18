@@ -474,4 +474,16 @@ dlg.startCompetition.text                           = Warning: the current local
 dlg.startCompetition.btnCancel                      = CANCEL
 dlg.startCompetition.btnStart                       = START
 
+###
+# StageLayout
+###
+stageLayout.status                                  = Status:
+stageLayout.format                                  = Format:
+stageLayout.tabAdmin                                = Administration
+stageLayout.tabDraw                                 = Draw
+stageLayout.tabInput                                = Input
+stageLayout.tabResult                               = Results
+stageLayout.tabScoresheet                           = Scoresheet
+stageLayout.tabCertificate                          = Certificate
+
 footer.realizedWith                                 = Realized with Scala.js & WordPress.

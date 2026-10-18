@@ -127,6 +127,14 @@ object DemoManager extends ComWrapper {
             }
             TourneyDB.version = 1
             
+            while (TourneyDB.tourney.stages.length < 128) TourneyDB.tourney.stages += null
+            while (TourneyDB.tourney.competitions.length < 64) TourneyDB.tourney.competitions += null
+
+            ClubDB.initHandler()
+            PlayerDB.initHandler()
+            CompetitionDB.initHandler()
+            StageDB.initHandler()
+
             // Force sync to local storage
             TourneyDB.sync()
             ClubDB.sync(TourneyDB.tourney.clubs.toSeq)

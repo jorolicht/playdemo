@@ -1,0 +1,1 @@
+{"mail":{"mailer":"smtp","from_email":"info@turnier-service.org","from_name":"Turnier Service","from_email_force":true,"from_name_force":true},"smtp":{"host":"smtp.strato.de","port":465,"encryption":"ssl","auth":true,"user":"info@turnier-service.org","pass":"Op8DfzApdzuOHo90RbtDcg8Oyj0shodieTDymqsUbKrvKNVZl6lqL1YwGBbqnznIuc1J"},"general":{"summary_report_email_disabled":true}}
