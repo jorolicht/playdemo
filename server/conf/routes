@@ -2,20 +2,6 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
-GET        /                             controllers.Main.home(name: String?="MainView", param: String?="start")
-GET        /main/:name                   controllers.Main.home(name: String, param: String?="")
-
-# Authentication endpoints
-POST       /auth/googleLogin             controllers.Auth.googleLogin()
-POST       /auth/regUser                 controllers.Auth.regUser()
-POST       /auth/logout                  controllers.Auth.logout()
-GET        /auth/basicLogin              controllers.Auth.basicLogin()
-GET        /auth/verifyUser/:code        controllers.Auth.verifyUser(code: String)
-POST       /auth/setUserPassword         controllers.Auth.setUserPassword(email: String)
-
-
-
 # DSGVO Map Proxy Endpoints (Alternative 3: Serverseitige Aufbereitung / Karten-Kacheln)
 GET        /api/map/tile/:z/:x/:y        controllers.MapController.tile(z: Int, x: Int, y: Int)
 GET        /api/map/geocode              controllers.MapController.geocode(query: String)

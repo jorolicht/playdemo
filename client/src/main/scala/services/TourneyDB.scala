@@ -38,8 +38,20 @@ object TourneyDB extends ComWrapper with Debouncer:
     
     // Set internal ID immediately if it's an Int or local
     idOrSlug match {
-      case id: Int => this.tourney = Tourney.default.copy(wpId = id)
-      case s: String if s == "local" || s == "999999" => this.tourney = Tourney.default.copy(wpId = 999999)
+      case id: Int if id == 999999 =>
+        this.tourney = Tourney.default.copy(wpId = 999999)
+      case id: Int =>
+        this.tourney = Tourney.default.copy(wpId = id)
+        if (id > 0) {
+          base.Global.isDemoMode = false
+          base.Global.isLocalMode = false
+        }
+      case s: String if s == "local" || s == "999999" =>
+        this.tourney = Tourney.default.copy(wpId = 999999)
+      case s: String if s.nonEmpty =>
+        this.tourney = Tourney.default.copy(slug = s)
+        base.Global.isDemoMode = false
+        base.Global.isLocalMode = false
       case _ => // slug will be resolved during load
     }
 
@@ -100,6 +112,8 @@ object TourneyDB extends ComWrapper with Debouncer:
           t.version = res.version
           t.slug = res.slug
           this.version = res.version
+          Global.isLocalMode = false
+          Global.isDemoMode = false
           Global.tourneySlug = res.slug
           Right(res.slug)
         case Left(err) => Left(err)
@@ -146,6 +160,8 @@ object TourneyDB extends ComWrapper with Debouncer:
       if (jsStr != null && jsStr.nonEmpty) {
         val req = read[TourneySyncRequest](jsStr)
         tourney = req.tourney
+        while (tourney.stages.length < 128) tourney.stages += null
+        while (tourney.competitions.length < 64) tourney.competitions += null
         version = req.version
         ClubDB.initHandler() 
         PlayerDB.initHandler()
@@ -176,7 +192,9 @@ object TourneyDB extends ComWrapper with Debouncer:
         case slug: String if slug.isEmpty =>
            Logging.debug("TourneyDB.load: slug is empty, skipping load")
            None
-        case slug: String => Some(List("slug" -> slug))
+        case slug: String =>
+           val cleanSlug = slug.split('/').filter(_.nonEmpty).lastOption.getOrElse(slug)
+           Some(List("slug" -> cleanSlug))
       }
 
       paramsOpt match {
@@ -204,18 +222,38 @@ object TourneyDB extends ComWrapper with Debouncer:
     }
 
   /**
-   * Checks whether a local tournament currently exists in browser local storage or active memory.
+   * Checks whether a local tournament currently exists as the last tournament in browser local storage or active memory.
+   * Returns false if the last saved tournament is a cloud tournament.
    *
-   * @return True if a local tournament is present, false otherwise.
+   * @return True if the last tournament is local and present in storage or memory, false otherwise.
    */
   def hasLocalTourney: Boolean = {
     try {
+      val session = org.scalajs.dom.window.sessionStorage
       val local = org.scalajs.dom.window.localStorage
-      val raw = if (local != null) local.getItem("App.demo_tourney") else null
-      val hasStorage = raw != null && raw.trim.nonEmpty && !raw.trim.equals("{}")
-      val hasMemory = (base.Global.isLocalMode || base.Global.isDemoMode || tourney.wpId == 999999) &&
-                      (tourney.name.nonEmpty || base.Global.currentSelection.tourney.exists(_.name.nonEmpty))
-      hasStorage || hasMemory
+
+      val sessionLocal = if (session != null) session.getItem("tourney_is_local_mode") == "true" else false
+      val localLocal = if (local != null) local.getItem("tourney_is_local_mode") == "true" else false
+      val sessionCloud = if (session != null) session.getItem("tourney_is_local_mode") == "false" else false
+      val localCloud = if (local != null) local.getItem("tourney_is_local_mode") == "false" else false
+      val s1 = if (session != null) session.getItem("tourney_slug") else null
+      val s2 = if (local != null) local.getItem("tourney_slug") else null
+      val slug = if (s1 != null && s1.nonEmpty) s1
+                 else if (s2 != null && s2.nonEmpty) s2
+                 else ""
+
+      val isCloudLast = !sessionLocal && !localLocal && !base.Global.isDemoMode &&
+                        ((slug.nonEmpty && slug != "local") || sessionCloud || localCloud)
+
+      if (isCloudLast) {
+        false
+      } else {
+        val raw = if (local != null) local.getItem("App.demo_tourney") else null
+        val hasStorage = raw != null && raw.trim.nonEmpty && !raw.trim.equals("{}")
+        val hasMemory = (base.Global.isLocalMode || base.Global.isDemoMode || tourney.wpId == 999999) &&
+                        (tourney.name.nonEmpty || base.Global.currentSelection.tourney.exists(_.name.nonEmpty))
+        hasStorage || hasMemory
+      }
     } catch {
       case _: Exception => false
     }

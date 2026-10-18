@@ -18,50 +18,18 @@ import addon.Console
 
 object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
   def name = PageNameTyp("Main")
-  
-  // Direct Start without Shortcode
-  @JSExportTopLevel("appMain")
-  def appMain(): Unit = 
-    val config = dom.window.asInstanceOf[js.Dynamic].tourneyConfig
 
-    val version = "001DE1970-01"
-    val mode        = config.mode.asInstanceOf[String]
-    val logLevel    = config.logLevel.asInstanceOf[String]
-    val slug        = Option(config.slug).map(_.asInstanceOf[String]).getOrElse("")
-    Logging.setLogLevel(logLevel.toLowerCase())
-    
-    Global.dataUrl  = config.dataUrl.asInstanceOf[String]
-    Global.imgUrl   = config.imgUrl.asInstanceOf[String]
-    Global.playUrl  = config.playUrl.asInstanceOf[String]
-    Global.homeUrl  = config.homeUrl.asInstanceOf[String]
-    Global.wpNonce  = config.nonce.asInstanceOf[String]
-    Global.pageId   = config.pageId.asInstanceOf[String].toIntOption.getOrElse(0)
-    Global.hostPageId = Global.pageId
-    Global.turnstileSitekey = config.turnstileSitekey.asInstanceOf[String]
-    Global.lang = dom.window.navigator.language.take(2)
-    
-    println(s"appMain -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} mode:${mode} PageId:${Global.pageId} slug:${slug} logLevel:${logLevel} turnstile:${Global.turnstileSitekey}")    
-
-    dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
-    dom.window.asInstanceOf[js.Dynamic].appEvent    = (elem: HTMLElement, event: dom.Event) => appEvent(elem, event)
-    dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
-
-    dom.window.addEventListener("beforeunload", (e: dom.Event) => {
-      services.StageDB.flushSync()
-      services.CompetitionDB.flushSync()
-      services.ClubDB.flushSync()
-      services.PlayerDB.flushSync()
-      services.TourneyDB.flushSync()
-    })
-
-    Messages.initMsg(version, Global.dataUrl, Global.lang).map {
-      case true   => initApp(mode.toLowerCase(), slug)
-       case false => println("Main program failed to initialize")  
-    }
-
-  // Start through Shortcode (non tourney CPT)
+  /**
+   * Startet die Tourney-Anwendung (über WordPress-Shortcode [tourney] sowie Direktansicht des CPT 'tourney').
+   *
+   * @param version   Versionskennung der Applikation (SemVer MAJOR.MINOR.PATCH)
+   * @param mode      Startmodus (z. B. "app", "view")
+   * @param logLevel  Log-Level ("debug", "info", "warn", "error")
+   * @param tourney   Optionaler Turnier-Identifier / Slug
+   */
   @JSExportTopLevel("startApp")
   def startApp(version: String, mode: String, logLevel: String, tourney: String = ""): Unit = 
+    val effectiveVersion = if (version != null && version.nonEmpty && version != "001DE1970-01") version else shared.AppVersion.version
 
     Global.dataUrl  = getData(gE(ParamId), "dataurl", "./data/")
     Global.imgUrl   = getData(gE(ParamId), "imgurl", "./img/")
@@ -83,7 +51,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
     Global.appMode = effectiveMode
 
-    println(s"startApp -> dataUrl:${Global.dataUrl} version:${version} lang:${Global.lang} mode:${effectiveMode} PageId:${Global.pageId} tourney:${effectiveTourney} logLevel:${logLevel} turnstile:${Global.turnstileSitekey}")
+    println(s"startApp -> dataUrl:${Global.dataUrl} version:${effectiveVersion} lang:${Global.lang} mode:${effectiveMode} PageId:${Global.pageId} tourney:${effectiveTourney} logLevel:${logLevel} turnstile:${Global.turnstileSitekey}")
 
     dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
     dom.window.asInstanceOf[js.Dynamic].appEvent    = (elem: HTMLElement, event: dom.Event) => appEvent(elem, event)
@@ -98,7 +66,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       services.TourneyDB.flushSync()
     })
 
-    Messages.initMsg(version, Global.dataUrl, Global.lang).map {
+    Messages.initMsg(effectiveVersion, Global.dataUrl, Global.lang).map {
       case true  => initApp(effectiveMode, effectiveTourney)        
       case false => println("Main program failed to initialize")  
     }
@@ -191,6 +159,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       case "verify"    => pages.loadPage(pages.VerifyAccount.name, "")
       case "view"      => modeView(if (tourneyParam.nonEmpty) tourneyParam else Global.pageId)
       case "home"      => modeHome()
+      case "base"      => modeBase()
       case _           => modeDefault(Global.pageId)
     }
 
@@ -224,6 +193,9 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     }
 
   def modeHome(): Unit = 
+    pages.loadPage(pages.MainView.name, "")
+
+  def modeBase(): Unit = 
     pages.loadPage(pages.MainView.name, "")
 
   def modeDefault(pageId: Int): Unit = 

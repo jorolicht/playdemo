@@ -138,11 +138,11 @@ object Global:
       val effectiveSlug = if (value) "local" else currentSelection.tourney.map(_.slug).filter(s => s.nonEmpty && s != "local").getOrElse(if (services.TourneyDB.tourney != null && services.TourneyDB.tourney.slug != "local") services.TourneyDB.tourney.slug else "")
       if (session != null) {
         if (effectiveSlug.nonEmpty) session.setItem("tourney_slug", effectiveSlug)
-        else session.removeItem("tourney_slug")
+        else if (session.getItem("tourney_slug") == "local") session.removeItem("tourney_slug")
       }
       if (local != null) {
         if (effectiveSlug.nonEmpty) local.setItem("tourney_slug", effectiveSlug)
-        else local.removeItem("tourney_slug")
+        else if (local.getItem("tourney_slug") == "local") local.removeItem("tourney_slug")
       }
     } catch {
       case _: Exception =>

@@ -223,6 +223,9 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
             reader.onload = (e: dom.Event) => {
               val jsonString = reader.result.asInstanceOf[String]
               confirmLeave { () =>
+                TourneyDB.tourney.wpId = 0
+                Global.isLocalMode = false
+                Global.isDemoMode = false
                 AdminManager.importTourney(jsonString).map {
                   case Right(slug) =>
                     Global.isLocalMode = false

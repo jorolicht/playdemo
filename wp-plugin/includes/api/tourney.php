@@ -497,8 +497,12 @@ function tourney_api_create(WP_REST_Request $request) {
         return ApiHelper::error("db_error", $result_id->get_error_message(), "", "tourney_api_create_tourney", HttpStatus::INTERNAL_SERVER_ERROR);
     }
 
-    // Aktualisiere die ID im Body, damit sie mit der WordPress Post-ID übereinstimmt (wpId für Scala Model)
+    // Full hierarchical slug for the response and stored basic meta
+    $full_slug = "tourney/" . $parent_slug . "/" . $turnier_slug;
+
+    // Aktualisiere die ID und den Slug im Body, damit sie im initialen 'basic' Stand vorhanden sind
     $body['wpId'] = $result_id;
+    $body['slug'] = $full_slug;
 
     // Speichere den gesamten Payload als initialen Stand in 'basic'
     update_post_meta($result_id, 'basic', wp_slash(wp_json_encode($body, JSON_UNESCAPED_UNICODE)));
@@ -527,9 +531,6 @@ function tourney_api_create(WP_REST_Request $request) {
     if (isset($body['clicktt'])) {
         update_post_meta($result_id, 'clicktt', $body['clicktt']);
     }
-
-    // Full hierarchical slug for the response
-    $full_slug = "tourney/" . $parent_slug . "/" . $turnier_slug;
 
     return [
         'success'  => true,

@@ -16,6 +16,9 @@ if (!class_exists('ApiHelper')) {
             if (!$post_id) {
                 $slug = $request->get_param('slug');
                 if ($slug) {
+                    if (strpos($slug, '/') !== false) {
+                        $slug = basename(trim($slug, '/'));
+                    }
                     // 1. Try matching by exact post_name (slug)
                     $posts = get_posts([
                         'name'           => $slug,

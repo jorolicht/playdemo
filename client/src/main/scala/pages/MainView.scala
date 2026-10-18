@@ -23,6 +23,8 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
   val BtnSearch:     HtmlId = genId(name)
   val StatusTourney: HtmlId = genId(name)
   val BtnLoadLast:   HtmlId = genId(name)
+  /** HTML-ID for button to delete the locally stored tournament in the status bar. */
+  val BtnDeleteLast: HtmlId = genId(name)
   
   /** Models for standard WordPress REST API response parsing. */
   case class WpContent(rendered: String) derives ReadWriter
@@ -295,11 +297,26 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
         comps.Navbar.doStartDemo()
       case `BtnLoadLast` | `StatusTourney` =>
         comps.Navbar.doReloadTourney()
+      case `BtnDeleteLast` =>
+        import shared.BoxButton
+        val isSimple = getLastTourneyInfo().exists(_.isSimple)
+        val msg = if (isSimple) "Möchten Sie diesen Wettbewerb wirklich unwiderruflich löschen?"
+                  else "Möchten Sie dieses Turnier wirklich unwiderruflich löschen?"
+        val title = if (isSimple) "Wettbewerb löschen" else "Turnier löschen"
+        DlgMsgbox.show(msg, title, List(BoxButton.Yes, BoxButton.No)).map {
+          case BoxButton.Yes =>
+            services.TourneyDB.purgeAllTourneyStorage(999999)
+            comps.ContextHeader.hide()
+            comps.Navbar.render()
+            render()
+          case _ => debug("Delete local tourney cancelled")
+        }
       case `BtnOption1` => 
         dialogs.DlgStartTourney.show().map {
           case true =>
             services.DemoManager.startLocalMode { () =>
               if (Global.user.isDefined) {
+                services.TourneyDB.tourney.wpId = 0
                 Global.isLocalMode = false
               }
               loadPage(TourneyNew.name, "")
@@ -312,6 +329,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
           case true =>
             services.DemoManager.startLocalMode { () =>
               if (Global.user.isDefined) {
+                services.TourneyDB.tourney.wpId = 0
                 Global.isLocalMode = false
               }
               comps.Navbar.doQuickStart()

@@ -67,8 +67,10 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
 
         debug(s"Switching to tourney: $tourneyId, compId: $compId, isComp: $isComp")
 
-        // 1. Update Global PageId
+        // 1. Update Global PageId and exit local/demo mode
         Global.pageId = tourneyId
+        Global.isDemoMode = false
+        Global.isLocalMode = false
 
         // 2. Clear current selection to force reload context
         Global.currentSelection = Selection()
@@ -77,6 +79,9 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
         TourneyDB.init(tourneyId).map {
           case Right(_) => 
             val tourney = TourneyDB.tourney
+            if (tourney.slug.nonEmpty) {
+              Global.tourneySlug = tourney.slug
+            }
             val isAuthorized = Global.hasTourneyAccess(tourney)
 
             if (isComp) {

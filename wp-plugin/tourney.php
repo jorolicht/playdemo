@@ -1,20 +1,79 @@
 <?php
-/*
-Plugin Name: Tourney
-Plugin URI: http://beispiel.de/plugins/mein-plugin
-Description: Tourney WordPress Plugin
-Version: 1.0
-Author: Max Mustermann
-Author URI: http://beispiel.de
-License: GPLv2
-*/
+/**
+ * Plugin Name: Tourney
+ * Plugin URI: https://turnier-service.info
+ * Description: Tourney WordPress Plugin - Professionelle Turnierverwaltung für Tischtennis und Turniersport
+ * Version: 1.0.3
+ * Requires at least: 6.0
+ * Requires PHP: 8.0
+ * Author: Robert Lichtenegger
+ * Author URI: https://turnier-service.info
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: tourney
+ */
 
 if (!defined('ABSPATH')) {
     exit; // Sicherheitsprüfung
 }
 
+// SemVer MAJOR.MINOR.PATCH Versionskonstanten
+define('TOURNEY_VERSION', '1.0.3');
+define('TOURNEY_DB_VERSION', '1.0.3');
+
 // Define Plugin-Path
 define('TOURNEY_PLUGIN_PATH', plugin_dir_path(__FILE__));
+
+/**
+ * Plugin activation hook.
+ *
+ * Initialisiert Schema- und Versions-Optionen bei der Aktivierung des Plugins.
+ * Führt bei Bedarf Upgrades aus.
+ *
+ * @return void
+ */
+function tourney_activate() {
+    $installed_db_ver = get_option('tourney_db_version');
+    if ($installed_db_ver === false) {
+        add_option('tourney_db_version', TOURNEY_DB_VERSION);
+    } elseif (version_compare($installed_db_ver, TOURNEY_DB_VERSION, '<')) {
+        tourney_upgrade_db($installed_db_ver, TOURNEY_DB_VERSION);
+        update_option('tourney_db_version', TOURNEY_DB_VERSION);
+    }
+    update_option('tourney_version', TOURNEY_VERSION);
+}
+register_activation_hook(__FILE__, 'tourney_activate');
+
+/**
+ * Führt Versionsprüfungen und eventuelle DB-Migrationen beim Laden der Plugins durch.
+ *
+ * @return void
+ */
+function tourney_check_version() {
+    $installed_db_ver = get_option('tourney_db_version');
+    if ($installed_db_ver && version_compare($installed_db_ver, TOURNEY_DB_VERSION, '<')) {
+        tourney_upgrade_db($installed_db_ver, TOURNEY_DB_VERSION);
+        update_option('tourney_db_version', TOURNEY_DB_VERSION);
+    } elseif ($installed_db_ver === false) {
+        // Falls Option noch fehlt (z. B. Plugin wurde vor Hook-Implementierung aktiviert)
+        update_option('tourney_db_version', TOURNEY_DB_VERSION);
+    }
+    if (get_option('tourney_version') !== TOURNEY_VERSION) {
+        update_option('tourney_version', TOURNEY_VERSION);
+    }
+}
+add_action('plugins_loaded', 'tourney_check_version');
+
+/**
+ * Führt schrittweise Upgrades / Migrationen der Datenbank durch.
+ *
+ * @param string $from_version Bisherige Version.
+ * @param string $to_version   Neue Zielversion.
+ * @return void
+ */
+function tourney_upgrade_db($from_version, $to_version) {
+    error_log(sprintf('Tourney DB upgraded from %s to %s', $from_version, $to_version));
+}
 
 
 // Update-sichere mehrsprachige Dialoge für WP-Members.
@@ -81,12 +140,13 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/helpers.php';
 function tourney_render($atts) {
 
     $atts = shortcode_atts( array(
-        'mode' => 'app', // default mode
+        'mode' => 'app',   // default mode
         'page' => '',      // optional page parameter for more specific views    
     ), $atts );
 
     $jsPath  = plugin_dir_path(__FILE__) . 'js/main.js';
-    $jsUrl   = plugins_url('js/main.js', __FILE__) . '?v=' . filemtime($jsPath);
+    $jsVer   = file_exists($jsPath) ? filemtime($jsPath) : TOURNEY_VERSION;
+    $jsUrl   = plugins_url('js/main.js', __FILE__) . '?v=' . $jsVer;
     $dataUrl = plugins_url('data/', __FILE__);
     $imgUrl  = plugins_url('img/', __FILE__);
     $playUrl = get_option('tourney_server_url', get_option('tourney_url', ''));
@@ -121,9 +181,10 @@ function tourney_render($atts) {
 
     $output = '<div class="tourney-spa-root">';
     $output .= '<span id="Main_ParamId" 
+        data-version="' . esc_attr(TOURNEY_VERSION) . '" 
         data-page="' . esc_attr($atts['page']) . '" 
         data-slug="' . esc_attr($slug) . '"
-        data-posttype="' . esc_attr($post->post_type) . '"
+        data-posttype="' . esc_attr($post ? $post->post_type : '') . '"
         data-dataurl="' . esc_url($dataUrl) . '" 
         data-imgurl="' . esc_url($imgUrl) . '" 
         data-homeurl="' . esc_url($homeUrl) . '" 
@@ -146,13 +207,27 @@ function tourney_render($atts) {
     $output .= '<script type="module">';
 
     $output .= 'import { startApp } from "' . esc_url($jsUrl) . '";';
-    $output .= 'startApp("001DE1970-01", "' . esc_attr($mode) . '", "' . esc_attr($logLevel) . '", "' . esc_attr($tourney) . '");';
+    $output .= 'startApp("' . esc_attr(TOURNEY_VERSION) . '", "' . esc_attr($mode) . '", "' . esc_attr($logLevel) . '", "' . esc_attr($tourney) . '");';
     $output .= '</script>';
     $output .= '</div>';
 
     return $output;
 }
 add_shortcode('tourney', 'tourney_render');
+
+/**
+ * Konfiguriert PHPMailer für MailCatcher im Docker-Netzwerk.
+ *
+ * @param PHPMailer $phpmailer Das PHPMailer-Instanz-Objekt.
+ */
+add_action('phpmailer_init', function($phpmailer) {
+    $phpmailer->isSMTP();
+    $phpmailer->Host = 'mailcatcher'; // Hostname im Docker-Netzwerk
+    $phpmailer->Port = 1025;
+    $phpmailer->SMTPAuth = false;
+    $phpmailer->SMTPSecure = '';
+    $phpmailer->SMTPAutoTLS = false;
+}, 99999);
 
 /**
  * Verhindert, dass WordPress den [tourney] Shortcode in <p>-Tags einschließt,
@@ -194,7 +269,7 @@ function tourney_render_direct_blank_page() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?php wp_title('|', true, 'right'); ?></title>
         <?php 
-        // Lädt Header-Metas, CSS-Dateien und das globale tourneyConfig-Objekt
+        // Lädt Header-Metas und CSS-Dateien
         wp_head(); 
         ?>
         <style>
@@ -208,24 +283,8 @@ function tourney_render_direct_blank_page() {
         </style>
     </head>
     <body <?php body_class(); ?>>
-        <!-- SPA Container Elements -->
-        <span id="Main_NavbarId"></span>
-        <span id="Main_ContextHeaderId"></span>
-        <div id="Main_AppWrapper" class="d-flex flex-column min-vh-100">
-           <div id="Main_ContentId" class="flex-grow-1">
-              <div class="d-flex mt-5 justify-content-center">
-                  <div class="spinner-border text-primary" role="status">
-                      <span class="visually-hidden">Lade...</span>
-                  </div>
-              </div>
-           </div>
-           <span id="Main_FooterId"></span>
-        </div>
-        <span id="Footer_ConsoleClickId" data-command=""></span>
-        <span id="Main_DynContentId"></span>
-
         <?php 
-        // Lädt das Modul-Skript (appMain) im Footer
+        echo tourney_render( array( 'mode' => 'view' ) );
         wp_footer(); 
         ?>
     </body>
@@ -253,65 +312,26 @@ function tourney_render_direct_blank_page() {
  * @return void
  */
 function js_enqueue_scripts_styles() {
-    // Den Pfad zur CSS-Datei dynamisch generieren
-    $url = plugin_dir_url( __FILE__ ) . 'css/style.css';
-
-    // Das Stylesheet registrieren und einreihen
+    // Basis-Stylesheet mit Cache-Busting (filemtime oder TOURNEY_VERSION)
+    $style_css_path = TOURNEY_PLUGIN_PATH . 'css/style.css';
+    $style_ver      = file_exists($style_css_path) ? filemtime($style_css_path) : TOURNEY_VERSION;
     wp_enqueue_style( 
-        'mein-plugin-basis-style', // Einzigartiger Name (Handle)
-        $url,                      // URL zur Datei
-        array(),                   // Abhängigkeiten (falls nötig)
-        '1.0.0'                    // Version (hilft beim Browser-Caching)
+        'mein-plugin-basis-style', 
+        plugin_dir_url( __FILE__ ) . 'css/style.css', 
+        array(), 
+        $style_ver 
     );    
 
-    // add script in head (false)
+    // Externe Bibliotheken
     wp_enqueue_style( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css', array(), '5.3.3' );
     wp_enqueue_style( 'bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css', array(), '1.11.3' );
     wp_enqueue_script( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', array(), '5.3.3', false );
     wp_enqueue_script( 'payhip', 'https://payhip.com/payhip.js', array(), null, false );
 
-    wp_enqueue_style( 'tourney_style', plugin_dir_url(__FILE__) . 'css/main.css', [], '1.0');
-    
-    // Scala.js Integration for Tourney CPT
-    if (is_singular('tourney')) {
-        $jsPath  = plugin_dir_path(__FILE__) . 'js/main.js';
-        $jsUrl   = plugins_url('js/main.js', __FILE__) . '?v=' . filemtime($jsPath);
-        
-        // Register a dummy handle to attach localized data
-        wp_register_script('tourney-config-script', '', [], '', false);
-        wp_enqueue_script('tourney-config-script');
-
-        // Hole den Cloudflare Turnstile Sitekey (falls das Plugin installiert und konfiguriert ist)
-        $turnstile_key = get_option('cfturnstile_key', getenv('TURNSTILE_SITEKEY') ?: '');
-        
-        if (!empty($turnstile_key)) {
-             wp_enqueue_script('cloudflare-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', array(), null, true);
-        }
-
-        $config = [
-            'mode'     => 'view',
-            'dataUrl'  => plugins_url('data/', __FILE__),
-            'imgUrl'   => plugins_url('img/', __FILE__),
-            'playUrl'  => get_option('tourney_server_url', get_option('tourney_url', '')),
-            'homeUrl'  => home_url(),
-            'nonce'    => wp_create_nonce('wp_rest'),
-            'pageId'   => strval(get_the_ID()),
-            'logLevel' => isset($_GET['logLevel']) ? sanitize_text_field($_GET['logLevel']) : 'debug',
-            'slug'     => get_post_field('post_name', get_post()),
-            'turnstileSitekey' => $turnstile_key
-        ];
-
-        // Creates a global JS variable `tourneyConfig` containing our parameters
-        wp_localize_script('tourney-config-script', 'tourneyConfig', $config);
-        
-        // Output the ES Module script tag directly to the footer to invoke the application
-        add_action('wp_footer', function() use ($jsUrl) {
-            echo "<script type='module'>\n";
-            echo "import { appMain } from '" . esc_url($jsUrl) . "';\n";
-            echo "appMain();\n";
-            echo "</script>\n";
-        }, 100);
-    }
+    // Tourney-Haupt-Stylesheet mit Cache-Busting
+    $main_css_path = TOURNEY_PLUGIN_PATH . 'css/main.css';
+    $main_ver      = file_exists($main_css_path) ? filemtime($main_css_path) : TOURNEY_VERSION;
+    wp_enqueue_style( 'tourney_style', plugin_dir_url(__FILE__) . 'css/main.css', array(), $main_ver);
 }
 add_action('wp_enqueue_scripts', 'js_enqueue_scripts_styles');
 
