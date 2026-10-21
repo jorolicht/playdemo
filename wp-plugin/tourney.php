@@ -288,13 +288,15 @@ function tourney_pure_mode_page_hierarchy( $templates ) {
 add_filter( 'single_template_hierarchy', 'tourney_pure_mode_page_hierarchy' );
 
 /**
- * 2. Das leere Template erzwingen, nur bei Full Web Site (TOURNEY_FWS = true); eingebettet bleiben Theme-Header und -Footer erhalten
+ * 2. Das leere Template erzwingen, bei Full Web Site (TOURNEY_FWS = true) für alle Frontend-Seiten:
+ *    es erscheinen keine WordPress-Header/-Footer, nur die vom Scala.js-Client erzeugten.
+ *    Eingebettet (TOURNEY_FWS = false) bleiben Theme-Header und -Footer erhalten.
  *
  * @param string $template Pfad des von WordPress gewählten Templates.
- * @return string Unverändertes Template, falls kein Turnier-CPT im Full-Web-Site-Betrieb angezeigt wird.
+ * @return string Unverändertes Template im eingebetteten Betrieb.
  */
 function tourney_force_blank_template( $template ) {
-    if ( TOURNEY_FWS && is_singular( 'tourney' ) ) {
+    if ( TOURNEY_FWS ) {
         tourney_render_direct_blank_page();
         exit;
     }
@@ -329,12 +331,28 @@ function tourney_render_direct_blank_page() {
     </head>
     <body <?php body_class(); ?>>
         <?php 
-        echo tourney_render( array() );
+        echo tourney_render( tourney_shortcode_atts_of_current_post() );
         wp_footer(); 
         ?>
     </body>
     </html>
     <?php
+}
+
+
+/**
+ * Liest die Attribute des ersten [tourney]-Shortcodes im aktuell angezeigten Post
+ * (z. B. page="login"), damit sie auch auf der leeren Seite gelten.
+ *
+ * @return array Shortcode-Attribute oder leeres Array, wenn kein Shortcode vorhanden ist.
+ */
+function tourney_shortcode_atts_of_current_post() {
+    $post = is_singular() ? get_queried_object() : null;
+    if ( $post instanceof WP_Post && preg_match( '/' . get_shortcode_regex( array( 'tourney' ) ) . '/', $post->post_content, $m ) ) {
+        $atts = shortcode_parse_atts( $m[3] );
+        return is_array( $atts ) ? $atts : array();
+    }
+    return array();
 }
 
 

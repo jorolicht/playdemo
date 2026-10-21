@@ -27,7 +27,7 @@ export class UserRegistrationPage {
   }
 
   async goto() {
-    await this.page.goto('/registrierung/');
+    await this.page.goto('/registration/');
     await expect(this.emailInput).toBeVisible({ timeout: 10000 });
   }
 
