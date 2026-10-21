@@ -30,6 +30,7 @@ object DlgPublicRegistration extends BaseDialog with JsWrapper:
 
   private var modal: Modal = null
   private var verificationCode: String = ""
+  private var turnstileToken: String = ""
 
   def render(param: String = ""): Boolean = true
 
@@ -84,6 +85,7 @@ object DlgPublicRegistration extends BaseDialog with JsWrapper:
         if (Global.turnstileSitekey.nonEmpty) {
           val turnstileElems = dom.document.getElementsByName("cf-turnstile-response")
           val token = if (turnstileElems.length > 0) turnstileElems(0).asInstanceOf[Input].value else ""
+          turnstileToken = token
           if (token.isEmpty) {
             captchaOk = false
             showError("Bitte bestätigen Sie das Captcha.")
@@ -131,6 +133,40 @@ object DlgPublicRegistration extends BaseDialog with JsWrapper:
         val ttr       = getInput(gE(HtmlId("reg-ttr"))).toIntOption.getOrElse(1000)
         val email     = getInput(gE(HtmlId("reg-email"))).trim
 
+        // Shows the success step and closes the dialog with the registered player.
+        def finish(player: Player): Unit =
+          gE(HtmlId("reg-step-2")).classList.add("d-none")
+          gE(HtmlId("reg-step-3")).classList.remove("d-none")
+          submitBtn.classList.add("d-none")
+          gE(HtmlId("reg-success-msg")).textContent = s"Vielen Dank, $firstname! Ihre Anmeldung für '${comp.name}' war erfolgreich."
+          dom.window.setTimeout(() => {
+            modal.hide()
+            p.trySuccess(Right(player))
+          }, 1800)
+
+        if (!Global.isDemoMode && !Global.isLocalMode && tourney.wpId != 0) {
+          // Server-side registration: the server checks and stores club, player and participant
+          val similarClub = Club.findSimilar(clubStr, tourney.clubs).map(_._1.toInt).getOrElse(0)
+          val req = services.PlayerDB.PublicRegisterRequest(
+            comp.id.value, firstname, lastname, clubStr, similarClub, Club.normalize(clubStr), ttr, email, turnstileToken
+          )
+          submitBtn.setAttribute("disabled", "true")
+          services.PlayerDB.publicRegister(req).foreach { res =>
+            submitBtn.removeAttribute("disabled")
+            res match {
+              case Right(playerId) =>
+                finish(tourney.players.find(_.id == playerId).getOrElse(Player(id = playerId, firstName = firstname, lastName = lastname)))
+              case Left(err) if err.is("registration_closed") =>
+                showError("Die Anmeldung zu diesem Wettbewerb ist nicht (mehr) möglich.")
+              case Left(err) if err.is("captcha_failed") =>
+                showError("Die Sicherheitsabfrage ist fehlgeschlagen. Bitte versuchen Sie es erneut.")
+              case Left(err) =>
+                showError("Die Anmeldung konnte nicht gespeichert werden. Bitte versuchen Sie es später erneut.")
+            }
+          }
+        } else {
+        // Demo/local mode: register in the local model
+
         // 1. Get or create Club
         val clubRes = tourney.addClub(clubStr)
         val clubId  = clubRes.map(_.id.toInt).getOrElse(1)
@@ -173,16 +209,8 @@ object DlgPublicRegistration extends BaseDialog with JsWrapper:
         services.PlayerDB.triggerSync(tourney.players.toSeq)
         services.CompetitionDB.triggerSync(tourney.competitions.toSeq)
 
-        // Show Step 3 Success
-        gE(HtmlId("reg-step-2")).classList.add("d-none")
-        gE(HtmlId("reg-step-3")).classList.remove("d-none")
-        submitBtn.classList.add("d-none")
-        gE(HtmlId("reg-success-msg")).textContent = s"Vielen Dank, $firstname! Ihre Anmeldung für '${comp.name}' war erfolgreich."
-
-        dom.window.setTimeout(() => {
-          modal.hide()
-          p.trySuccess(Right(player))
-        }, 1800)
+        finish(player)
+        }
       }
     }
 

@@ -199,8 +199,9 @@ add_action('rest_api_init', function () {
     register_rest_route('tourney/v1', '/update-meta', [
         'methods'  => 'POST',
         'callback' => 'update_tourney_meta',
-        'permission_callback' => function () {
-            return current_user_can('edit_posts');
+        'permission_callback' => function (WP_REST_Request $request) {
+            $data = $request->get_json_params();
+            return tourney_user_can_edit_post(intval($data['id'] ?? 0));
         }
     ]);
 

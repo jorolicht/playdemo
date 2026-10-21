@@ -7,5 +7,9 @@ object Footer extends BaseComp with base.JsWrapper:
   val ConsoleClickId: HtmlId = genId(name)
 
   def render(param: String = "") = 
-    setHtml(gE(FooterId), cviews.comps.html.footer()) 
+    if (!base.Global.fws) {
+      setHtml(gE(FooterId), play.twirl.api.Html(""))
+    } else {
+      setHtml(gE(FooterId), cviews.comps.html.footer())
+    }
     true

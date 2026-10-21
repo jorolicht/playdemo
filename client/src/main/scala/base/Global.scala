@@ -223,8 +223,13 @@ object Global:
   var dataUrl = ""
   var imgUrl  = ""
   var playUrl = ""
-  var appMode: String = "home"
-  def isViewMode: Boolean = appMode == "view" || activePageName == "TourneyWelcome" || activePageName == "CompetitionWelcome"
+  /** Plugin-Variante: true = Full Web Site (Header/Footer), false = eingebettet (ohne Header/Footer). */
+  var fws: Boolean = true
+  /** True, wenn die einbettende WordPress-Seite die Homepage ist. */
+  var isHomePage: Boolean = false
+  /** True, wenn der Benutzer Schreibrechte auf die einbettende Seite bzw. das Turnier hat (von WordPress ermittelt). */
+  var canEditPage: Boolean = false
+  def isViewMode: Boolean = activePageName == "TourneyWelcome" || activePageName == "CompetitionWelcome"
   var activePageName: String = ""
   def isTourneyPage(pageName: String): Boolean = 
     Set(
@@ -300,7 +305,8 @@ object Global:
       case Some(u) => 
         val isAdminOrMaster = u.roles.exists(r => List("administrator", "editor", "tourney_master").contains(r))
         val isTourneyAdminOfThis = u.isTurnierAdmin && (u.org == tourney.organizer || u.username == tourney.organizer || u.email == tourney.organizer)
-        isAdminOrMaster || isTourneyAdminOfThis
+        val isPageEditor = !fws && canEditPage
+        isAdminOrMaster || isTourneyAdminOfThis || isPageEditor
       case None => false
     }
 

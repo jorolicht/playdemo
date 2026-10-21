@@ -51,8 +51,8 @@ add_action('rest_api_init', function () {
     register_rest_route('tourney/v1', '/meta-data', [
         'methods' => 'POST',
         'callback' => 'tourney_update_meta_data',
-        'permission_callback' => function () {
-            return current_user_can('edit_posts');
+        'permission_callback' => function (WP_REST_Request $request) {
+            return tourney_user_can_edit_post(ApiHelper::getPostId($request));
         }
     ]);
 
@@ -60,8 +60,8 @@ add_action('rest_api_init', function () {
     register_rest_route('tourney/v1', '/delete', [
         'methods' => 'DELETE',
         'callback' => 'tourney_api_delete',
-        'permission_callback' => function () {
-            return current_user_can('edit_posts');
+        'permission_callback' => function (WP_REST_Request $request) {
+            return tourney_user_can_edit_post(ApiHelper::getPostId($request));
         }
     ]);
 
@@ -69,8 +69,8 @@ add_action('rest_api_init', function () {
     register_rest_route('tourney/v1', '/convert-to-page', [
         'methods' => 'POST',
         'callback' => 'tourney_api_convert_to_page',
-        'permission_callback' => function () {
-            return current_user_can('edit_posts');
+        'permission_callback' => function (WP_REST_Request $request) {
+            return tourney_user_can_edit_post(ApiHelper::getPostId($request));
         }
     ]);
 
@@ -85,7 +85,7 @@ add_action('rest_api_init', function () {
     register_rest_route('tourney/v1', '/save-aci', [
         'methods' => 'POST',
         'callback' => 'tourney_save_aci',
-        'permission_callback' => '__return_true'
+        'permission_callback' => 'tourney_api_can_edit_request_post'
     ]);
 
 });
@@ -123,7 +123,30 @@ function tourney_api_convert_to_page(WP_REST_Request $request) {
 }
 
 /**
- * Löscht ein Turnier unwiderruflich.
+ * Entfernt alle Turnier-Metadaten (inkl. Vereine, Spieler, Wettbewerbe und Runden) von einem Post.
+ *
+ * @param int $post_id Die WordPress Post-ID.
+ * @return void
+ */
+function tourney_clear_post_meta($post_id) {
+    $keys = ['basic', 'basic_ts', 'startDate', 'endDate', 'ident', 'category', 'organizer', 'clicktt', 'aci', 'clubs', 'clubs_ts', 'players', 'players_ts'];
+    foreach ($keys as $k) {
+        delete_post_meta($post_id, $k);
+    }
+    for ($i = 1; $i <= 64; $i++) {
+        $ck = sprintf('competition%02d', $i);
+        delete_post_meta($post_id, $ck);
+        delete_post_meta($post_id, "_{$ck}_ts");
+    }
+    for ($i = 1; $i <= 128; $i++) {
+        $sk = sprintf('stage%03d', $i);
+        delete_post_meta($post_id, $sk);
+        delete_post_meta($post_id, "_{$sk}_ts");
+    }
+}
+
+/**
+ * Löscht ein Turnier unwiderruflich (oder entfernt die Turnierdaten aus der Seite im pure-Modus).
  */
 function tourney_api_delete(WP_REST_Request $request) {
     $post_id = ApiHelper::getPostId($request);
@@ -133,6 +156,12 @@ function tourney_api_delete(WP_REST_Request $request) {
 
     if (get_post_type($post_id) !== 'tourney') {
         return ApiHelper::error("invalid_type", "Post is not a tournament", "", "", HttpStatus::BAD_REQUEST);
+    }
+
+    // Eingebettetes Plugin: Turnierdaten aus der Seite entfernen, Seite selbst bleibt erhalten
+    if (!TOURNEY_FWS) {
+        tourney_clear_post_meta($post_id);
+        return ['success' => true];
     }
 
     // Unwiderruflich löschen
@@ -252,7 +281,7 @@ function tourney_get_organizers(WP_REST_Request $request) {
 function tourney_get_read(WP_REST_Request $request)
 {
     $post_id = ApiHelper::getPostId($request);
-    $meta = $request->get_param('metafield-name') ?: 'basic';
+    $meta = 'basic';
 
     if (!$post_id) {
         return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
@@ -278,14 +307,16 @@ function tourney_get_read(WP_REST_Request $request)
         
         $post = get_post($post_id);
         if ($post) {
-            $parent_slug = 'unbekannt';
             if ($post->post_parent) {
+                $parent_slug = 'unbekannt';
                 $parent_post = get_post($post->post_parent);
                 if ($parent_post) {
                     $parent_slug = $parent_post->post_name;
                 }
+                $tourney['slug'] = "tourney/" . $parent_slug . "/" . $post->post_name;
+            } else {
+                $tourney['slug'] = "tourney/" . $post->post_name;
             }
-            $tourney['slug'] = "tourney/" . $parent_slug . "/" . $post->post_name;
         }
     }
 
@@ -300,15 +331,15 @@ function tourney_get_read(WP_REST_Request $request)
  */
 function tourney_sync_tourney(WP_REST_Request $request)
 {
-    if (!current_user_can('edit_posts')) {
-        return ApiHelper::error("auth_required", "Sie müssen angemeldet sein, um diese Aktion auszuführen.", "", "tourney_sync_tourney", HttpStatus::UNAUTHORIZED);
-    }
-
     $post_id = ApiHelper::getPostId($request);
-    $meta = $request->get_param('metafield-name') ?: 'basic';
+    $meta = 'basic';
 
     if (!$post_id) {
         return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
+    }
+
+    if (!tourney_user_can_edit_post($post_id)) {
+        return ApiHelper::error("auth_required", "Sie müssen angemeldet sein, um diese Aktion auszuführen.", "", "tourney_sync_tourney", HttpStatus::UNAUTHORIZED);
     }
 
     $body = json_decode($request->get_body(), true);
@@ -394,7 +425,7 @@ function tourney_sync_tourney(WP_REST_Request $request)
 
 /**
  * Erstellt ein neues Turnier (CPT 'tourney') mit einem vorgegebenen Slug
- * oder aktualisiert ein bestehendes, falls der Slug bereits existiert.
+ * oder speichert das Turnier direkt in eine bestehende Seite (im 'pure'-Modus).
  *
  * @param WP_REST_Request $request
  * @return array|WP_REST_Response
@@ -419,86 +450,125 @@ function tourney_api_create(WP_REST_Request $request) {
     }
 
     $current_user = wp_get_current_user();
-
-    // Check UserProfile available count limit for TourneyAdmin / Author / Subscriber
-    $is_admin_or_editor = tourney_is_admin_or_editor($current_user);
-    if (!$is_admin_or_editor) {
-        $profile = tourney_get_user_profile($current_user->ID);
-        if ($profile['available'] <= 0) {
-            return ApiHelper::error(
-                "tourney_limit_reached",
-                "Sie haben keine verfügbaren Turniere mehr (available = 0). Bitte kaufen Sie über die Preisseite weitere Turniere.",
-                "",
-                "tourney_api_create",
-                HttpStatus::FORBIDDEN
-            );
-        }
-    }
-
     $username = ($current_user && $current_user->exists()) ? $current_user->user_login : '';
     $organizer = ($current_user && $current_user->exists()) ? get_user_meta($current_user->ID, 'organizer', true) : '';
 
-    // Parent slug selection logic: organizer > username > 'admin'
-    $parent_base = !empty($organizer) ? $organizer : (!empty($username) ? $username : 'admin');
-    $parent_slug = sanitize_title($parent_base);
-    $parent_title = !empty($organizer) ? $organizer : (!empty($username) ? $username : 'admin');
+    // Prüfen, ob im 'pure'-Modus direkt in eine bestehende Seite gespeichert werden soll
+    $target_page_id = intval($request->get_param('pageId'));
+    if ($target_page_id > 0) {
+        $existing_page = get_post($target_page_id);
+        if (!$existing_page) {
+            return ApiHelper::error("post_not_found", "Zielseite nicht gefunden.", "", "tourney_api_create", HttpStatus::NOT_FOUND);
+        }
+        if (!tourney_user_can_edit_post($target_page_id)) {
+            return ApiHelper::error("forbidden", "Keine Schreibrechte auf die Zielseite.", "", "tourney_api_create", HttpStatus::FORBIDDEN);
+        }
 
-    $parent_id = 0;
+        // Ggf. Seite in CPT 'tourney' umwandeln
+        if ($existing_page->post_type !== 'tourney') {
+            set_post_type($target_page_id, 'tourney');
+            clean_post_cache($target_page_id);
+            $existing_page = get_post($target_page_id);
+        }
 
-    $existing_parents = get_posts([
-        'name'           => $parent_slug,
-        'post_type'      => 'tourney',
-        'post_parent'    => 0,
-        'post_status'    => 'any',
-        'posts_per_page' => 1,
-    ]);
+        $result_id = $target_page_id;
+        $parent_id = intval($existing_page->post_parent);
+        $action    = 'created';
 
-    if (!empty($existing_parents)) {
-        $parent_id = $existing_parents[0]->ID;
-    } else {
-        $parent_id = wp_insert_post([
-            'post_title'  => $parent_title,
-            'post_name'   => $parent_slug,
-            'post_type'   => 'tourney',
-            'post_status' => 'publish',
+        // Bestehende Turnier-Metadaten auf dieser Seite bereinigen
+        tourney_clear_post_meta($result_id);
+
+        // Seitentitel aktualisieren
+        wp_update_post([
+            'ID'         => $result_id,
+            'post_title' => $tourney_name,
         ]);
+
+        if ($parent_id > 0) {
+            $parent_post = get_post($parent_id);
+            $p_slug = $parent_post ? $parent_post->post_name : 'unbekannt';
+            $full_slug = "tourney/" . $p_slug . "/" . $existing_page->post_name;
+        } else {
+            $full_slug = "tourney/" . $existing_page->post_name;
+        }
+    } else {
+        // Check UserProfile available count limit for TourneyAdmin / Author / Subscriber
+        $is_admin_or_editor = tourney_is_admin_or_editor($current_user);
+        if (!$is_admin_or_editor) {
+            $profile = tourney_get_user_profile($current_user->ID);
+            if ($profile['available'] <= 0) {
+                return ApiHelper::error(
+                    "tourney_limit_reached",
+                    "Sie haben keine verfügbaren Turniere mehr (available = 0). Bitte kaufen Sie über die Preisseite weitere Turniere.",
+                    "",
+                    "tourney_api_create",
+                    HttpStatus::FORBIDDEN
+                );
+            }
+        }
+
+        // Parent slug selection logic: organizer > username > 'admin'
+        $parent_base = !empty($organizer) ? $organizer : (!empty($username) ? $username : 'admin');
+        $parent_slug = sanitize_title($parent_base);
+        $parent_title = !empty($organizer) ? $organizer : (!empty($username) ? $username : 'admin');
+
+        $parent_id = 0;
+
+        $existing_parents = get_posts([
+            'name'           => $parent_slug,
+            'post_type'      => 'tourney',
+            'post_parent'    => 0,
+            'post_status'    => 'any',
+            'posts_per_page' => 1,
+        ]);
+
+        if (!empty($existing_parents)) {
+            $parent_id = $existing_parents[0]->ID;
+        } else {
+            $parent_id = wp_insert_post([
+                'post_title'  => $parent_title,
+                'post_name'   => $parent_slug,
+                'post_type'   => 'tourney',
+                'post_status' => 'publish',
+            ]);
+        }
+
+        // Generiere den Turnier-Slug aus Datum und Name oder nutze den übergebenen Slug
+        $turnier_slug = !empty($body['slug']) ? sanitize_title($body['slug']) : sanitize_title($start_date . '-' . $tourney_name);
+
+        // Prüfen, ob bereits ein Turnier mit diesem Slug unter diesem Parent existiert
+        $existing_posts = get_posts([
+            'name'           => $turnier_slug,
+            'post_type'      => 'tourney',
+            'post_parent'    => $parent_id,
+            'post_status'    => 'any',
+            'posts_per_page' => 1,
+        ]);
+
+        if (!empty($existing_posts)) {
+            return ApiHelper::error("tourney_already_exists", "Ein Turnier mit diesem Namen existiert bereits.", "", "tourney_api_create", HttpStatus::CONFLICT);
+        }
+
+        $post_data = [
+            'post_title'   => $tourney_name,
+            'post_name'    => $turnier_slug,
+            'post_parent'  => $parent_id,
+            'post_content' => '[tourney]',
+            'post_type'    => 'tourney',
+            'post_status'  => 'publish',
+        ];
+
+        // Neu erstellen
+        $result_id = wp_insert_post($post_data);
+        $action = 'created';
+
+        if (is_wp_error($result_id)) {
+            return ApiHelper::error("db_error", $result_id->get_error_message(), "", "tourney_api_create_tourney", HttpStatus::INTERNAL_SERVER_ERROR);
+        }
+
+        // Full hierarchical slug for the response and stored basic meta
+        $full_slug = "tourney/" . $parent_slug . "/" . $turnier_slug;
     }
-
-    // Generiere den Turnier-Slug aus Datum und Name oder nutze den übergebenen Slug
-    $turnier_slug = !empty($body['slug']) ? sanitize_title($body['slug']) : sanitize_title($start_date . '-' . $tourney_name);
-
-    // Prüfen, ob bereits ein Turnier mit diesem Slug unter diesem Parent existiert
-    $existing_posts = get_posts([
-        'name'           => $turnier_slug,
-        'post_type'      => 'tourney',
-        'post_parent'    => $parent_id,
-        'post_status'    => 'any',
-        'posts_per_page' => 1,
-    ]);
-
-    if (!empty($existing_posts)) {
-        return ApiHelper::error("tourney_already_exists", "Ein Turnier mit diesem Namen existiert bereits.", "", "tourney_api_create", HttpStatus::CONFLICT);
-    }
-
-    $post_data = [
-        'post_title'   => $tourney_name,
-        'post_name'    => $turnier_slug,
-        'post_parent'  => $parent_id,
-        'post_content' => '[tourney mode="multi"]',
-        'post_type'    => 'tourney',
-        'post_status'  => 'publish',
-    ];
-
-    // Neu erstellen
-    $result_id = wp_insert_post($post_data);
-    $action = 'created';
-
-    if (is_wp_error($result_id)) {
-        return ApiHelper::error("db_error", $result_id->get_error_message(), "", "tourney_api_create_tourney", HttpStatus::INTERNAL_SERVER_ERROR);
-    }
-
-    // Full hierarchical slug for the response and stored basic meta
-    $full_slug = "tourney/" . $parent_slug . "/" . $turnier_slug;
 
     // Aktualisiere die ID und den Slug im Body, damit sie im initialen 'basic' Stand vorhanden sind
     $body['wpId'] = $result_id;

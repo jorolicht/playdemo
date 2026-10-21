@@ -25,6 +25,12 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
   val BtnLoadLast:   HtmlId = genId(name)
   /** HTML-ID for button to delete the locally stored tournament in the status bar. */
   val BtnDeleteLast: HtmlId = genId(name)
+  /** HTML-ID for the news bar container below the hero section. */
+  val NewsBarId:     HtmlId = genId(name)
+  /** HTML-ID for the news bar content element. */
+  val NewsContentId: HtmlId = genId(name)
+  /** HTML-ID for the close button ('x') in the news bar. */
+  val BtnCloseNews:  HtmlId = genId(name)
   
   /** Models for standard WordPress REST API response parsing. */
   case class WpContent(rendered: String) derives ReadWriter
@@ -170,11 +176,12 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
     if (param.isEmpty) {
       val lastTourney = getLastTourneyInfo()
       setMain(cviews.pages.MainView.html.Base(lastTourney))
+      loadLatestHistoryEntry()
     } else {
       // 1. Loading State
       setMain(cviews.pages.MainView.html.Loading(param))
 
-      val knownStaticPages = Set("pricing", "preise", "funktionen", "functions", "gtc", "agb", "dataprotection", "privacy", "impressum", "imprint", "contact", "kontakt", "excel", "plugin")
+      val knownStaticPages = Set("pricing", "preise", "funktionen", "functions", "gtc", "agb", "dataprotection", "privacy", "impressum", "imprint", "contact", "kontakt", "excel", "plugin", "history", "historie")
 
       if (knownStaticPages.contains(param.toLowerCase)) {
         loadStaticPageFallback(param)
@@ -217,18 +224,99 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
     true
 
   /**
+   * Fetches the history HTML page and populates the news bar with the latest (first) .history-entry.
+   *
+   * @param prefix Element ID prefix ("MainView" or "PureView").
+   */
+  def loadLatestHistoryEntry(prefix: String = "MainView"): Unit = {
+    val langSuffix = if (Global.lang == "en") "_en" else ""
+    val staticName = s"history$langSuffix"
+    val baseName = "history"
+
+    val baseHome = if (Global.homeUrl != null && Global.homeUrl.nonEmpty) Global.homeUrl.stripSuffix("/") else ""
+    val baseData = if (Global.dataUrl != null && Global.dataUrl.nonEmpty && Global.dataUrl.contains("/wp-content/plugins/")) {
+      Global.dataUrl.replaceAll("data/?$", "")
+    } else ""
+
+    val candidateUrls = List(
+      if (baseData.nonEmpty) s"${baseData}pages/$staticName.html" else "",
+      s"$baseHome/wp-content/plugins/tourney/pages/$staticName.html",
+      s"$baseHome/wp-content/plugins/playdemo/pages/$staticName.html",
+      s"/wp-content/plugins/tourney/pages/$staticName.html",
+      s"/wp-content/plugins/playdemo/pages/$staticName.html",
+      s"./pages/$staticName.html",
+      s"/pages/$staticName.html",
+      if (baseData.nonEmpty) s"${baseData}pages/$baseName.html" else "",
+      s"$baseHome/wp-content/plugins/tourney/pages/$baseName.html",
+      s"/wp-content/plugins/tourney/pages/$baseName.html",
+      s"./pages/$baseName.html"
+    ).filter(_.nonEmpty).distinct
+
+    def tryFetchHistory(urls: List[String]): Unit = urls match {
+      case Nil => ()
+      case head :: tail =>
+        val cacheBustUrl = if (head.contains("?")) s"$head&_t=${dom.window.performance.now().toLong}" else s"$head?_t=${dom.window.performance.now().toLong}"
+        org.scalajs.dom.fetch(cacheBustUrl).`then`[Unit] { resp =>
+          if (resp.ok) {
+            resp.text().`then`[Unit] { htmlText =>
+              try {
+                val tempDiv = dom.document.createElement("div")
+                tempDiv.innerHTML = htmlText
+                val firstEntry = tempDiv.querySelector(".history-entry")
+                if (firstEntry != null) {
+                  val version = Option(firstEntry.getAttribute("data-version")).filter(_.nonEmpty)
+                    .orElse(Option(firstEntry.querySelector(".history-version")).map(_.textContent.trim))
+                    .getOrElse("")
+                  val date = Option(firstEntry.getAttribute("data-date")).filter(_.nonEmpty)
+                    .orElse(Option(firstEntry.querySelector(".history-date")).map(_.textContent.trim))
+                    .getOrElse("")
+                  val summary = Option(firstEntry.getAttribute("data-summary")).filter(_.nonEmpty)
+                    .orElse(Option(firstEntry.querySelector(".history-summary")).map(_.textContent.trim))
+                    .getOrElse("")
+
+                  val vElem = dom.document.getElementById(s"${prefix}_NewsVersion")
+                  if (vElem != null && version.nonEmpty) {
+                    vElem.textContent = if (version.startsWith("v") || version.toLowerCase.startsWith("version")) version else s"v$version"
+                  }
+                  val dElem = dom.document.getElementById(s"${prefix}_NewsDate")
+                  if (dElem != null && date.nonEmpty) {
+                    dElem.textContent = s"($date)"
+                  }
+                  val sElem = dom.document.getElementById(s"${prefix}_NewsSummary")
+                  if (sElem != null && summary.nonEmpty) {
+                    sElem.textContent = summary
+                  }
+                }
+              } catch {
+                case _: Throwable => ()
+              }
+              ()
+            }
+          } else {
+            tryFetchHistory(tail)
+          }
+        }.`catch` { _ =>
+          tryFetchHistory(tail)
+        }
+    }
+
+    tryFetchHistory(candidateUrls)
+  }
+
+  /**
    * Fetches static HTML content files with cache-busting query parameter.
    *
    * @param param The page slug or identifier.
    */
   private def loadStaticPageFallback(param: String): Unit =
-    val baseName = param match {
+    val baseName = param.toLowerCase match {
       case "functions" | "funktionen"           => "funktionen"
       case "agb" | "gtc"                        => "gtc"
       case "privacy" | "dataprotection"         => "privacy"
       case "impressum" | "imprint"              => "impressum"
       case "contact" | "kontakt"                => "contact"
       case "pricing" | "preise"                 => "pricing"
+      case "history" | "historie"               => "history"
       case other                                => other
     }
     val langSuffix = if (Global.lang == "en") "_en" else ""
@@ -265,11 +353,12 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
                 case "funktionen"                   => if (Global.lang == "en") "Features & Functions" else "Funktionen & Features"
                 case "gtc"                          => if (Global.lang == "en") "Terms and Conditions (AGB)" else "Allgemeine Geschäftsbedingungen"
                 case "excel"                        => if (Global.lang == "en") "Excel Downloads & Software" else "Excel-Downloads & Software"
-                case "plugin"                       => if (Global.lang == "en") "WordPress Plugin (Coming Soon)" else "WordPress Plugin (Demnächst verfügbar)"
+                case "plugin"                       => "WordPress Plugin"
                 case "privacy" | "dataprotection"   => if (Global.lang == "en") "Privacy Policy" else "Datenschutzerklärung"
                 case "impressum" | "imprint"        => if (Global.lang == "en") "Imprint" else "Impressum"
                 case "contact" | "kontakt"          => if (Global.lang == "en") "Contact" else "Kontakt"
                 case "pricing" | "preise"           => if (Global.lang == "en") "Support & Pricing" else "Support & Kosten"
+                case "history"                      => if (Global.lang == "en") "Version History" else "Versionshistorie"
                 case _                              => staticName.capitalize
               }
               setMain(cviews.pages.MainView.html.PageContent(pageTitle, text))
@@ -295,6 +384,8 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
     HtmlId(elem.id) match
       case `BtnDemo` =>
         comps.Navbar.doStartDemo()
+      case `BtnCloseNews` =>
+        addClass(gE(NewsBarId), "d-none")
       case `BtnLoadLast` | `StatusTourney` =>
         comps.Navbar.doReloadTourney()
       case `BtnDeleteLast` =>

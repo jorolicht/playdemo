@@ -167,8 +167,13 @@ object TourneyNew extends BasePage with JsWrapper:
       } else {
         val isLoggedIn = Global.user.isDefined
         val defaultLocal = Global.isLocalMode || !isLoggedIn
+        val modeFuture = if (!Global.fws) {
+          Future.successful(Some(dialogs.TourneyTargetMode.Cloud))
+        } else {
+          dialogs.DlgTourneyNewMode.show(isLoggedIn, defaultLocal)
+        }
 
-        dialogs.DlgTourneyNewMode.show(isLoggedIn, defaultLocal).map {
+        modeFuture.map {
           case Some(selectedMode) =>
             val isLocal = selectedMode == dialogs.TourneyTargetMode.Local
             Global.isLocalMode = isLocal

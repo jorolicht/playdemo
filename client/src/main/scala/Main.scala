@@ -21,14 +21,14 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
   /**
    * Startet die Tourney-Anwendung (über WordPress-Shortcode [tourney] sowie Direktansicht des CPT 'tourney').
+   * Plugin-Variante (fws), Homepage und Schreibrechte werden von WordPress als data-Attribute übergeben.
    *
    * @param version   Versionskennung der Applikation (SemVer MAJOR.MINOR.PATCH)
-   * @param mode      Startmodus (z. B. "app", "view")
    * @param logLevel  Log-Level ("debug", "info", "warn", "error")
    * @param tourney   Optionaler Turnier-Identifier / Slug
    */
   @JSExportTopLevel("startApp")
-  def startApp(version: String, mode: String, logLevel: String, tourney: String = ""): Unit = 
+  def startApp(version: String, logLevel: String, tourney: String = ""): Unit = 
     val effectiveVersion = if (version != null && version.nonEmpty && version != "001DE1970-01") version else shared.AppVersion.version
 
     Global.dataUrl  = getData(gE(ParamId), "dataurl", "./data/")
@@ -39,19 +39,18 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     Global.pageId   = getData(gE(ParamId), "pageid", 0)
     Global.hostPageId = Global.pageId
     Global.turnstileSitekey = getData(gE(ParamId), "turnstilesitekey", "")
+    Global.fws         = getData(gE(ParamId), "fws", 1) == 1
+    Global.isHomePage  = getData(gE(ParamId), "ishome", 0) == 1
+    Global.canEditPage = getData(gE(ParamId), "canedit", 0) == 1
     Global.lang     = dom.window.navigator.language.take(2)
     Logging.setLogLevel(logLevel.toLowerCase())
 
-    val slugAttr = getData(gE(ParamId), "slug", "")
-    val postType = getData(gE(ParamId), "posttype", "")
-    
-    // If mode is view, or tourney param is set, or postType is tourney
-    val effectiveMode = if (mode.toLowerCase() == "view" || tourney.nonEmpty || postType == "tourney") "view" else mode.toLowerCase()
+    val slugAttr  = getData(gE(ParamId), "slug", "")
+    val postType  = getData(gE(ParamId), "posttype", "")
+    val startPage = getData(gE(ParamId), "page", "").toLowerCase()
     val effectiveTourney = if (tourney.nonEmpty) tourney else if (postType == "tourney") slugAttr else ""
 
-    Global.appMode = effectiveMode
-
-    println(s"startApp -> dataUrl:${Global.dataUrl} version:${effectiveVersion} lang:${Global.lang} mode:${effectiveMode} PageId:${Global.pageId} tourney:${effectiveTourney} logLevel:${logLevel} turnstile:${Global.turnstileSitekey}")
+    println(s"startApp -> dataUrl:${Global.dataUrl} version:${effectiveVersion} lang:${Global.lang} fws:${Global.fws} home:${Global.isHomePage} canEdit:${Global.canEditPage} page:${startPage} PageId:${Global.pageId} tourney:${effectiveTourney} logLevel:${logLevel} turnstile:${Global.turnstileSitekey}")
 
     dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
     dom.window.asInstanceOf[js.Dynamic].appEvent    = (elem: HTMLElement, event: dom.Event) => appEvent(elem, event)
@@ -67,13 +66,20 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     })
 
     Messages.initMsg(effectiveVersion, Global.dataUrl, Global.lang).map {
-      case true  => initApp(effectiveMode, effectiveTourney)        
+      case true  => initApp(startPage, effectiveTourney, postType == "tourney")
       case false => println("Main program failed to initialize")  
     }
 
 
-  def initApp(mode: String, tourneyParam: String = ""): Unit =
-    Global.appMode = mode.toLowerCase()
+  /**
+   * Lädt die Benutzerinformationen, rendert Navbar/Footer und stellt den letzten Seitenzustand
+   * wieder her oder wählt die Startseite (siehe runDefaultRouting).
+   *
+   * @param startPage     Optionale Startseite aus dem Shortcode-Attribut page (login, register, verify)
+   * @param tourneyParam  Optionaler Turnier-Slug (URL-Parameter, Permalink oder CPT-Slug)
+   * @param isTourneyPost True, wenn die einbettende Seite ein CPT 'tourney' ist
+   */
+  def initApp(startPage: String, tourneyParam: String, isTourneyPost: Boolean): Unit =
     import services.*
     import shared.model.*
     import shared.model.UserInfo
@@ -99,8 +105,11 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
         val lastParam = Option(storage.getItem("tourney_last_param")).getOrElse("")
         val selectionJson = storage.getItem("tourney_last_selection")
 
-        val isExplicitViewMode = mode == "view" && tourneyParam.nonEmpty
-        val canRestore = !isExplicitViewMode && 
+        // Full Web Site: Wiederherstellung nur auf der Homepage; eingebettet: nur Bearbeitungsseiten für Schreibberechtigte
+        val restoreAllowed = if (Global.fws) Global.isHomePage && tourneyParam.isEmpty
+                             else Global.canEditPage && lastPage != null && Global.isTourneyPage(lastPage) && lastPage != "TourneyWelcome" && lastPage != "CompetitionWelcome"
+        val canRestore = startPage.isEmpty &&
+                         restoreAllowed &&
                          lastWpPageId != null && 
                          lastWpPageId == Global.pageId.toString && 
                          lastPage != null && 
@@ -133,7 +142,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
                     pages.loadPage(PageNameTyp(lastPage), lastParam)
                   case Left(err) =>
                     error(s"initApp -> Error initializing tournament: $err")
-                    runDefaultRouting(mode, tourneyParam)
+                    runDefaultRouting(startPage, tourneyParam, isTourneyPost)
                 }
               case _ =>
                 Global.currentSelection = restoredSelection
@@ -141,65 +150,82 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
             }
           }
         } else {
-          runDefaultRouting(mode, tourneyParam)
+          runDefaultRouting(startPage, tourneyParam, isTourneyPost)
         }
 
       case Left(err) => 
         debug(s"initApp -> Error loading user info: ${err}")
         Navbar.render()
         Footer.render()
-        pages.loadPage(pages.MainView.name, "")
-    }
-
-  private def runDefaultRouting(mode: String, tourneyParam: String): Unit =
-    // Route based on mode
-    mode match {
-      case "login"     => pages.loadPage(pages.UserLogin.name, "")
-      case "register"  => pages.loadPage(pages.UserRegistration.name, "")
-      case "verify"    => pages.loadPage(pages.VerifyAccount.name, "")
-      case "view"      => modeView(if (tourneyParam.nonEmpty) tourneyParam else Global.pageId)
-      case "home"      => modeHome()
-      case "base"      => modeBase()
-      case _           => modeDefault(Global.pageId)
+        runDefaultRouting(startPage, tourneyParam, isTourneyPost)
     }
 
   /**
-   * Initializes the tournament for public view mode and displays the modern tournament Homepage without breadcrumb.
+   * Wählt die Startseite abhängig von Plugin-Variante (fws), Homepage und Schreibrechten:
+   *  - fws, Homepage: MainView
+   *  - fws, andere Seite: Turnier im Edit- bzw. View-Modus, ohne gültiges Turnier Fehlermeldung
+   *  - eingebettet, CPT 'tourney' mit Turnier: Edit- bzw. View-Modus
+   *  - eingebettet, ohne Turnier: PureView (Schreibrecht) bzw. Hinweisseite
    *
-   * @param idOrSlug Tournament Post ID or Slug.
+   * @param startPage     Optionale Startseite aus dem Shortcode-Attribut page (login, register, verify)
+   * @param tourneyParam  Optionaler Turnier-Slug
+   * @param isTourneyPost True, wenn die einbettende Seite ein CPT 'tourney' ist
    */
-  def modeView(idOrSlug: Int | String): Unit = 
+  private def runDefaultRouting(startPage: String, tourneyParam: String, isTourneyPost: Boolean): Unit =
+    startPage match {
+      case "login"    => pages.loadPage(pages.UserLogin.name, "")
+      case "register" => pages.loadPage(pages.UserRegistration.name, "")
+      case "verify"   => pages.loadPage(pages.VerifyAccount.name, "")
+      case _ =>
+        if (Global.fws && Global.isHomePage && tourneyParam.isEmpty) pages.loadPage(pages.MainView.name, "")
+        else if (Global.fws) openPageTourney(if (tourneyParam.nonEmpty) tourneyParam else Global.pageId)
+        else if (isTourneyPost && Global.hostPageId > 0) openPageTourney(Global.hostPageId)
+        else showNoTourney()
+    }
+
+  /**
+   * Lädt das Turnier der aktuellen Seite und zeigt es im Edit-Modus (Schreibrecht auf die Seite)
+   * oder im View-Modus an; ohne gültiges Turnier wird showNoTourney aufgerufen.
+   *
+   * @param idOrSlug Turnier-Post-ID oder Slug.
+   */
+  def openPageTourney(idOrSlug: Int | String): Unit =
     import services.*
     import shared.model.*
 
-    debug(s"modeView -> idOrSlug: ${idOrSlug}")
-    val shouldLoad = idOrSlug match {
-      case id: Int => id > 0
-      case s: String => s.nonEmpty
+    debug(s"openPageTourney -> idOrSlug: ${idOrSlug} canEdit: ${Global.canEditPage}")
+    TourneyDB.init(idOrSlug).map {
+      case Right(_) if TourneyDB.tourney != null && TourneyDB.tourney.name.nonEmpty =>
+        val t = TourneyDB.tourney
+        Global.isLocalMode = false
+        Global.isDemoMode = false
+        if (Global.canEditPage) {
+          comps.Navbar.openTourneyView(t)
+        } else {
+          val compOpt = t.competitions.find(c => c != null && !c.deleted)
+          if (t.ident == "SIMPLE" && compOpt.isDefined) {
+            Global.currentSelection = Selection(Some(t), compOpt)
+            pages.loadPage(pages.CompetitionWelcome.name, "")
+          } else {
+            Global.currentSelection = Selection(Some(t))
+            pages.loadPage(pages.TourneyWelcome.name, "")
+          }
+        }
+      case Right(_) =>
+        showNoTourney()
+      case Left(err) =>
+        error(s"openPageTourney -> Error loading tournament ${idOrSlug}: ${err}")
+        showNoTourney()
     }
 
-    if (shouldLoad) {
-      TourneyDB.init(idOrSlug).map {
-        case Right(ts) => 
-          debug(s"Tourney initialized for view mode, timestamp: $ts")
-          Global.currentSelection = Selection(Some(TourneyDB.tourney))
-          pages.loadPage(pages.TourneyWelcome.name, "")
-        case Left(err) => 
-          error(s"Error loading tournament for view mode: ${err}")
-          pages.loadPage(pages.MainView.name, "")
-      }
-    } else {
-      pages.loadPage(pages.MainView.name, "")
-    }
-
-  def modeHome(): Unit = 
-    pages.loadPage(pages.MainView.name, "")
-
-  def modeBase(): Unit = 
-    pages.loadPage(pages.MainView.name, "")
-
-  def modeDefault(pageId: Int): Unit = 
-    pages.loadPage(pages.MainView.name, pageId.toString)
+  /**
+   * Anzeige, wenn die aktuelle Seite kein gültiges Turnier enthält:
+   * Full Web Site: Fehlermeldung; eingebettet: PureView (Schreibrecht) bzw. Hinweisseite.
+   */
+  def showNoTourney(): Unit =
+    if (Global.fws) pages.loadPage(pages.TourneyNotice.name, "notFound")
+    else if (Global.canEditPage) pages.loadPage(pages.PureView.name, "")
+    else pages.loadPage(pages.TourneyNotice.name, "comingSoon")
 
   def handleGoogleCredential(credentials: String): Unit = pages.Auth.googleLogin(credentials)
 

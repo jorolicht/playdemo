@@ -53,7 +53,7 @@ Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel 
 * Korrektur von Twirl-Templates bei Stage-Layouts und Internationalisierung.
 
 = 1.0.1 =
-* Bereitstellung von Shortcode-Optionen für verschiedene Anzeigemodi (`app`, `view`).
+* Bereitstellung von Shortcode-Optionen für verschiedene Anzeigemodi (`pure`, `home`, `view`).
 * Erweiterung der REST-API um WebAuthn/Passkey-Endpunkte.
 
 = 1.0.0 =

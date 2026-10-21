@@ -96,7 +96,7 @@ object TourneyDB extends ComWrapper with Debouncer:
   private val routeDelete = "/wp-json/tourney/v1/delete"
 
   /**
-   * Creates a new tournament post on the server.
+   * Creates a new tournament post on the server (or saves into the current host page in 'pure' mode).
    */
   def apiCreate(t: Tourney): Future[Either[AppError, String]] =
     if (base.Global.isDemoMode || base.Global.isLocalMode) then
@@ -106,7 +106,8 @@ object TourneyDB extends ComWrapper with Debouncer:
       org.scalajs.dom.window.localStorage.setItem("App.demo_tourney", write(req))
       Future.successful(Right("demo-slug"))
     else
-      ajaxPost[Tourney, TourneyCreateResponse](routeCreate, List(), t, host = Global.homeUrl).map {
+      val params = if (!Global.fws && Global.hostPageId > 0) List("pageId" -> Global.hostPageId.toString) else List()
+      ajaxPost[Tourney, TourneyCreateResponse](routeCreate, params, t, host = Global.homeUrl).map {
         case Right(res) =>
           t.wpId = res.pageId
           t.version = res.version
@@ -200,7 +201,7 @@ object TourneyDB extends ComWrapper with Debouncer:
       paramsOpt match {
         case Some(params) =>
           ajaxGet[TourneyResponse](routeGet, params, host = Global.homeUrl).flatMap {
-            case Right(res) =>
+            case Right(res) if res.tourney != null && res.tourney.name.nonEmpty =>
               tourney = res.tourney
               version = res.version
               if (!Global.isLocalMode && res.tourney.slug.nonEmpty) {
@@ -215,6 +216,8 @@ object TourneyDB extends ComWrapper with Debouncer:
               loadAci(res.tourney.wpId).map { _ =>
                 Right(version.toLong)
               }
+            case Right(_) =>
+              Future.successful(Left(AppError("not_found", "No tournament stored in page")))
             case Left(err) => Future.successful(Left(err))
           }
         case None => Future.successful(Right(0L))

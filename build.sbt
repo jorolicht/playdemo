@@ -44,6 +44,20 @@ val appOrganization        = getEnvValue(projectRootDir, "APP_ORGANIZATION", "or
 val appVersion             = getEnvValue(projectRootDir, "APP_VERSION", "1.0.3")
 val appDate                = getEnvValue(projectRootDir, "APP_DATE", "2026-08-30")
 val appMaintainer          = getEnvValue(projectRootDir, "APP_MAINTAINER", "Robert Lichtenegger <robert.lichtenegger@gmail.com>")
+// Plugin-Variante: true = Full Web Site (Header/Footer + pages), false = eingebettet (ohne Header/Footer und pages)
+val fws: Boolean           = getEnvValue(projectRootDir, "APP_FWS", "true").trim.toLowerCase == "true"
+
+/**
+ * Schreibt die Plugin-Konfiguration includes/config.php mit der Konstante TOURNEY_FWS.
+ *
+ * @param pluginDir Wurzelverzeichnis des (kopierten) WordPress-Plugins
+ */
+def writeWpConfig(pluginDir: File): Unit =
+  IO.write(pluginDir / "includes" / "config.php",
+    s"""<?php
+       |// Automatisch beim Build erzeugt (APP_FWS) - nicht manuell bearbeiten.
+       |define('TOURNEY_FWS', ${fws});
+       |""".stripMargin)
 
 ThisBuild / scalaVersion := "3.3.7"
 ThisBuild / organization := appOrganization
@@ -246,7 +260,9 @@ lazy val server = project
 
       IO.copyFile(wpPluginDir / "tourney.php", dockerWpPluginDir / "tourney.php")
       IO.copyDirectory(wpPluginDir / "includes", dockerWpPluginDir / "includes")
-      IO.copyDirectory(wpPluginDir / "pages", dockerWpPluginDir / "pages")
+      writeWpConfig(dockerWpPluginDir)
+      if (fws) IO.copyDirectory(wpPluginDir / "pages", dockerWpPluginDir / "pages")
+      else IO.delete(dockerWpPluginDir / "pages")
       if ((wpPluginDir / "img").exists()) {
         IO.copyDirectory(wpPluginDir / "img", dockerWpPluginDir / "img")
       }
@@ -273,7 +289,7 @@ lazy val server = project
         IO.copyDirectory(wpPluginDir / "data", baseDirectory.value / ".." / "server" / "public" / "data")
       }
 
-      log.info(s"Copied files to wordpress (including php, includes, and pages)")
+      log.info(s"Copied files to wordpress (fws=$fws, including php, includes${if (fws) " and pages" else ""})")
     },
     packageWpPlugin := {
       // 1. Abhängigkeiten auflösen: Messages konvertieren und FullOpt Scala.js kompilieren
@@ -307,7 +323,8 @@ lazy val server = project
 
       // 4. Verzeichnisse kopieren
       IO.copyDirectory(wpPluginDir / "includes", stageTourneyDir / "includes")
-      IO.copyDirectory(wpPluginDir / "pages", stageTourneyDir / "pages")
+      writeWpConfig(stageTourneyDir)
+      if (fws) IO.copyDirectory(wpPluginDir / "pages", stageTourneyDir / "pages")
       if ((wpPluginDir / "img").exists()) {
         IO.copyDirectory(wpPluginDir / "img", stageTourneyDir / "img")
       }
@@ -356,9 +373,10 @@ lazy val server = project
       IO.createDirectory(outDir)
       IO.createDirectory(rootTargetDir)
 
-      val versionedZip = outDir / s"tourney-$appVersion.zip"
-      val unversionedZip = outDir / "tourney.zip"
-      val rootVersionedZip = rootTargetDir / s"tourney-$appVersion.zip"
+      val zipBase = if (fws) "tourney" else "tourney-embed"
+      val versionedZip = outDir / s"$zipBase-$appVersion.zip"
+      val unversionedZip = outDir / s"$zipBase.zip"
+      val rootVersionedZip = rootTargetDir / s"$zipBase-$appVersion.zip"
 
       val zipMappings = allFiles.map { f =>
         (f, IO.relativize(stageBase, f).get)
@@ -369,7 +387,7 @@ lazy val server = project
       IO.copyFile(versionedZip, unversionedZip)
       IO.copyFile(versionedZip, rootVersionedZip)
 
-      log.info(s"Created installable WordPress plugin ZIP archive (Version: $appVersion):")
+      log.info(s"Created installable WordPress plugin ZIP archive (Version: $appVersion, fws: $fws):")
       log.info(s"  - ${versionedZip.getAbsolutePath}")
       log.info(s"  - ${rootVersionedZip.getAbsolutePath}")
       log.info(s"  - ${unversionedZip.getAbsolutePath}")

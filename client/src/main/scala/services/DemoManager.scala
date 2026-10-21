@@ -91,6 +91,67 @@ object DemoManager extends ComWrapper {
     }
   }
 
+  /**
+   * Loads the pre-populated demo tournament and saves it directly into the current WordPress page
+   * (used in 'pure' mode). Sets isLocalMode and isDemoMode to false, synchronizes all demo data
+   * (basic, clubs, players, competitions, stages) to the server page, and invokes proceedAction.
+   *
+   * @param proceedAction Callback invoked after the demo tournament is saved to the page.
+   * @return A Future containing true if the demo tournament was saved to the page, false otherwise.
+   */
+  def startDemoInPageMode(proceedAction: () => Unit = () => ()): Future[Boolean] = {
+    val filename = "demo_tourney.json"
+    val url = s"${Global.dataUrl}$filename"
+    val timestamp = new scala.scalajs.js.Date().getTime().toLong
+    val cacheBustedUrl = if (url.contains("?")) s"$url&t=$timestamp" else s"$url?t=$timestamp"
+
+    val fetchOptions = new dom.RequestInit {
+      method = dom.HttpMethod.GET
+      cache = dom.RequestCache.reload
+    }
+
+    Global.isLocalMode = false
+    Global.isDemoMode = false
+
+    dom.fetch(cacheBustedUrl, fetchOptions).toFuture.flatMap { response =>
+      if (response.ok) {
+        response.text().toFuture.flatMap { content =>
+          try {
+            val payload = read[DemoPayload](content)
+            val prefix = gM("demo.namePrefix")
+            if (!payload.tourney.tourney.name.startsWith(prefix)) {
+              payload.tourney.tourney.name = prefix + payload.tourney.tourney.name
+            }
+            AdminManager.importTourney(write(payload)).map {
+              case Right(slug) =>
+                Global.isLocalMode = false
+                Global.isDemoMode = false
+                Global.tourneySlug = slug
+                Global.pageId = TourneyDB.tourney.wpId
+                Global.currentSelection = shared.model.Selection(Some(TourneyDB.tourney))
+                proceedAction()
+                true
+              case Left(err) =>
+                Logging.error(s"Failed to save demo tournament to page: ${err.msgCode}")
+                false
+            }
+          } catch {
+            case ex: Exception =>
+              Logging.error(s"Failed to parse demo payload for page mode: ${ex.getMessage}")
+              Future.successful(false)
+          }
+        }
+      } else {
+        Logging.error(s"Failed to fetch demo data: ${response.statusText}")
+        Future.successful(false)
+      }
+    }.recover {
+      case ex: Exception =>
+        Logging.error(s"Error starting demo in page mode: ${ex.getMessage}")
+        false
+    }
+  }
+
   def loadDemoTemplate(query: String): Future[Boolean] = {
     val filename = if (query.contains("single") || query.contains("competition")) {
       "demo_competition.json"

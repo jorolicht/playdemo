@@ -24,6 +24,16 @@ define('TOURNEY_DB_VERSION', '1.0.3');
 // Define Plugin-Path
 define('TOURNEY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
+// Plugin-Variante (includes/config.php wird beim Build erzeugt):
+// TOURNEY_FWS = true  -> Full Web Site mit Plugin-Header/-Footer
+// TOURNEY_FWS = false -> eingebettet in das Theme, ohne Plugin-Header/-Footer
+if (file_exists(TOURNEY_PLUGIN_PATH . 'includes/config.php')) {
+    require_once TOURNEY_PLUGIN_PATH . 'includes/config.php';
+}
+if (!defined('TOURNEY_FWS')) {
+    define('TOURNEY_FWS', true);
+}
+
 /**
  * Plugin activation hook.
  *
@@ -131,8 +141,9 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/helpers.php';
  * a container for the application and a script tag that initializes the main
  * JavaScript application with the required data.
  *
- * The shortcode `[tourney mode="wp"]` can be used to embed the application anywhere
- * on the WordPress site.
+ * The shortcode `[tourney]` embeds the application; `[tourney page="login"]`
+ * (login, register, verify) opens a specific page directly. The start view is
+ * derived from TOURNEY_FWS, the WordPress homepage and the user's edit rights.
  *
  * @param array $atts Shortcode attributes.
  * @return string The complete HTML output for the shortcode.
@@ -140,8 +151,7 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/helpers.php';
 function tourney_render($atts) {
 
     $atts = shortcode_atts( array(
-        'mode' => 'app',   // default mode
-        'page' => '',      // optional page parameter for more specific views    
+        'page' => '',      // optional page parameter for more specific views (login, register, verify)
     ), $atts );
 
     $jsPath  = plugin_dir_path(__FILE__) . 'js/main.js';
@@ -160,26 +170,38 @@ function tourney_render($atts) {
 
     // URL Parameter 
     $logLevel  = isset($_GET['logLevel']) ? $_GET['logLevel'] : 'debug';
-    $tourney   = isset($_GET['tourney']) ? $_GET['tourney'] : '';
-    $mode      = esc_attr($atts['mode']);
+    $tourney   = isset($_GET['tourney']) ? sanitize_title($_GET['tourney']) : '';
+    $isHome    = is_front_page();
 
     // Check request URI path to see if a tournament permalink URL was called (e.g. /tourney/organizer/slug/)
     $uriPath  = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
     $segments = array_values(array_filter(explode('/', $uriPath)));
     if (count($segments) >= 2 && $segments[0] === 'tourney') {
         $tourney = end($segments);
-        $mode    = 'view';
     } elseif ($post && $post->post_type === 'tourney') {
         $tourney = $slug;
-        $mode    = 'view';
     }
+
+    // Schreibrecht auf die Seite, die das Turnier enthält (bei ?tourney=<slug> der Turnier-Post selbst)
+    $editPostId = $pageId;
+    if ($tourney !== '' && $tourney !== $slug) {
+        $found = get_posts(array(
+            'name'        => $tourney,
+            'post_type'   => 'tourney',
+            'post_status' => 'any',
+            'numberposts' => 1,
+            'fields'      => 'ids',
+        ));
+        $editPostId = !empty($found) ? $found[0] : 0;
+    }
+    $canEdit = tourney_user_can_edit_post($editPostId);
 
     $turnstile_key = get_option('cfturnstile_key', getenv('TURNSTILE_SITEKEY') ?: '');
     if (!empty($turnstile_key)) {
          wp_enqueue_script('cloudflare-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', array(), null, true);
     }
 
-    $output = '<div class="tourney-spa-root">';
+    $output = '<div class="tourney-spa-root alignfull">';
     $output .= '<span id="Main_ParamId" 
         data-version="' . esc_attr(TOURNEY_VERSION) . '" 
         data-page="' . esc_attr($atts['page']) . '" 
@@ -192,11 +214,15 @@ function tourney_render($atts) {
         data-nonce="' . esc_attr($nonce) . '" 
         data-pageid="' . esc_attr($pageId) . '" 
         data-turnstilesitekey="' . esc_attr($turnstile_key) . '"
+        data-fws="' . (TOURNEY_FWS ? '1' : '0') . '"
+        data-ishome="' . ($isHome ? '1' : '0') . '"
+        data-canedit="' . ($canEdit ? '1' : '0') . '"
     ></span>';   
    
     $output .= '<span id="Main_NavbarId"></span>';
     $output .= '<span id="Main_ContextHeaderId"></span>';
-    $output .= '<div id="Main_AppWrapper" class="d-flex flex-column min-vh-100">';
+    $wrapperClass = TOURNEY_FWS ? 'd-flex flex-column min-vh-100' : 'd-flex flex-column';
+    $output .= '<div id="Main_AppWrapper" class="' . esc_attr($wrapperClass) . '">';
     $output .= '   <div id="Main_ContentId" class="flex-grow-1">';
     $output .= '      <div class="d-flex mt-5 justify-content-center"><span>Wird geladen...</span></div>';
     $output .= '   </div>';
@@ -207,7 +233,7 @@ function tourney_render($atts) {
     $output .= '<script type="module">';
 
     $output .= 'import { startApp } from "' . esc_url($jsUrl) . '";';
-    $output .= 'startApp("' . esc_attr(TOURNEY_VERSION) . '", "' . esc_attr($mode) . '", "' . esc_attr($logLevel) . '", "' . esc_attr($tourney) . '");';
+    $output .= 'startApp("' . esc_attr(TOURNEY_VERSION) . '", "' . esc_attr($logLevel) . '", "' . esc_attr($tourney) . '");';
     $output .= '</script>';
     $output .= '</div>';
 
@@ -246,10 +272,29 @@ add_filter('the_content', 'tourney_unautop_shortcode', 12);
 
 
 /**
- * 2. Das leere Template erzwingen
+ * Nutzt bei eingebettetem Plugin (TOURNEY_FWS = false) das Seiten-Template ('page.php') statt des Beitrags-Templates ('single.php'),
+ * damit keine Beitrags-Metadaten ("Verfasst von ...", Kategorien, Kommentare) angezeigt werden.
+ *
+ * @param array $templates Liste der Template-Dateinamen.
+ * @return array Angepasste Template-Hierarchie.
+ */
+function tourney_pure_mode_page_hierarchy( $templates ) {
+    $post = get_post();
+    if ( ! TOURNEY_FWS && $post && $post->post_type === 'tourney' ) {
+        array_unshift( $templates, 'page.php' );
+    }
+    return $templates;
+}
+add_filter( 'single_template_hierarchy', 'tourney_pure_mode_page_hierarchy' );
+
+/**
+ * 2. Das leere Template erzwingen, nur bei Full Web Site (TOURNEY_FWS = true); eingebettet bleiben Theme-Header und -Footer erhalten
+ *
+ * @param string $template Pfad des von WordPress gewählten Templates.
+ * @return string Unverändertes Template, falls kein Turnier-CPT im Full-Web-Site-Betrieb angezeigt wird.
  */
 function tourney_force_blank_template( $template ) {
-    if ( is_singular( 'tourney' ) ) {
+    if ( TOURNEY_FWS && is_singular( 'tourney' ) ) {
         tourney_render_direct_blank_page();
         exit;
     }
@@ -284,7 +329,7 @@ function tourney_render_direct_blank_page() {
     </head>
     <body <?php body_class(); ?>>
         <?php 
-        echo tourney_render( array( 'mode' => 'view' ) );
+        echo tourney_render( array() );
         wp_footer(); 
         ?>
     </body>

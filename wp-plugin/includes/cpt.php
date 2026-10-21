@@ -57,8 +57,8 @@ function register_trny_custom_meta_fields() {
             'show_in_rest'      => true,
             'single'            => true,
             'type'              => 'string',
-            'auth_callback'     => function() {
-                return current_user_can( 'edit_posts' );
+            'auth_callback'     => function( $allowed, $meta_key, $object_id ) {
+                return tourney_user_can_edit_post( $object_id );
             },
             'sanitize_callback' => null,
             'description'       => $description,
@@ -69,8 +69,8 @@ function register_trny_custom_meta_fields() {
             'show_in_rest'      => true,
             'single'            => true,
             'type'              => 'integer',
-            'auth_callback'     => function() {
-                return current_user_can( 'edit_posts' );
+            'auth_callback'     => function( $allowed, $meta_key, $object_id ) {
+                return tourney_user_can_edit_post( $object_id );
             },
             'sanitize_callback' => 'absint',
             'description'       => $description . ' Timestamp',
@@ -116,6 +116,10 @@ add_action('rest_api_init', function () {
 
             if (!$post_id) {
                 return ApiHelper::error("not_found", "Post nicht gefunden (ID oder Slug ungültig)", "", "", HttpStatus::NOT_FOUND);
+            }
+
+            if (!tourney_user_can_edit_post($post_id)) {
+                return ApiHelper::error("forbidden", "Keine Schreibrechte auf den Post", "", "", HttpStatus::FORBIDDEN);
             }
 
             $post = get_post($post_id);

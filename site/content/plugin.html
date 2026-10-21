@@ -1,8 +1,9 @@
 <!--
- * WordPress Plugin Page - Deutsch (Demnächst verfügbar)
+ * WordPress Plugin Page - Deutsch
  * 
- * Diese Seite informiert Benutzer darüber, dass das WordPress-Plugin
- * in Kürze verfügbar sein wird.
+ * Diese Seite beschreibt das Tourney WordPress-Plugin, seine Funktionen,
+ * die Installation und Verwendung über den Shortcode [tourney],
+ * die aktuelle Version (What's New) sowie den direkten ZIP-Download.
 -->
 <style>
     .plugin-container {
@@ -11,10 +12,10 @@
         line-height: 1.6;
     }
     .plugin-hero {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
-        border: 1px solid rgba(99, 102, 241, 0.2);
+        background: linear-gradient(135deg, rgba(51, 102, 153, 0.12) 0%, rgba(99, 102, 241, 0.1) 100%);
+        border: 1px solid rgba(51, 102, 153, 0.25);
         border-radius: 20px;
-        padding: 48px 24px;
+        padding: 40px 24px;
         margin-bottom: 32px;
         text-align: center;
         position: relative;
@@ -26,129 +27,269 @@
         gap: 8px;
         padding: 6px 18px;
         border-radius: 50px;
-        background: rgba(99, 102, 241, 0.15);
-        color: #4f46e5;
+        background: rgba(51, 102, 153, 0.15);
+        color: #336699;
         font-size: 0.85rem;
         font-weight: 700;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
     }
     .plugin-title {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         font-weight: 800;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         color: var(--bs-heading-color, #0f172a);
     }
     .plugin-subtitle {
         color: var(--bs-secondary-color, #64748b);
-        font-size: 1.1rem;
-        max-width: 620px;
+        font-size: 1.05rem;
+        max-width: 680px;
         margin: 0 auto 24px auto;
     }
-    .plugin-status-pill {
+    .plugin-download-btn {
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        background: var(--bs-card-bg, #ffffff);
-        border: 1px solid var(--bs-border-color, #e2e8f0);
-        padding: 10px 22px;
-        border-radius: 30px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        color: #6366f1;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+        background: #336699;
+        color: #ffffff !important;
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        text-decoration: none !important;
+        box-shadow: 0 4px 14px rgba(51, 102, 153, 0.3);
+        transition: background 0.2s ease, transform 0.2s ease;
     }
-    .pulse-dot {
-        width: 10px;
-        height: 10px;
-        background-color: #6366f1;
-        border-radius: 50%;
-        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
-        animation: pulse 1.8s infinite;
+    .plugin-download-btn:hover {
+        background: #264d73;
+        transform: translateY(-2px);
     }
-    @keyframes pulse {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+    .plugin-meta-info {
+        margin-top: 12px;
+        font-size: 0.85rem;
+        color: var(--bs-secondary-color, #64748b);
+    }
+    .plugin-section-title {
+        font-weight: 700;
+        font-size: 1.35rem;
+        margin-bottom: 18px;
+        color: var(--bs-heading-color, #0f172a);
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     .plugin-features-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
         gap: 20px;
-        margin-bottom: 32px;
+        margin-bottom: 36px;
     }
     .plugin-feature-card {
         background: var(--bs-card-bg, #ffffff);
         border: 1px solid var(--bs-border-color, #e2e8f0);
         border-radius: 14px;
         padding: 24px;
-        transition: transform 0.2s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .plugin-feature-card:hover {
         transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
     }
     .plugin-icon-box {
         width: 48px;
         height: 48px;
         border-radius: 12px;
-        background: rgba(99, 102, 241, 0.1);
-        color: #4f46e5;
+        background: rgba(51, 102, 153, 0.12);
+        color: #336699;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.4rem;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
+    }
+    .plugin-box {
+        background: var(--bs-card-bg, #ffffff);
+        border: 1px solid var(--bs-border-color, #e2e8f0);
+        border-radius: 14px;
+        padding: 28px;
+        margin-bottom: 32px;
+    }
+    .plugin-whatsnew-box {
+        background: var(--bs-card-bg, #ffffff);
+        border: 1px solid var(--bs-border-color, #e2e8f0);
+        border-left: 4px solid #336699;
+        border-radius: 14px;
+        padding: 24px 28px;
+        margin-bottom: 32px;
+    }
+    .plugin-step-list {
+        list-style: none;
+        padding: 0;
+        margin: 16px 0 0 0;
+    }
+    .plugin-step-item {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+    .plugin-step-item:last-child {
+        margin-bottom: 0;
+    }
+    .plugin-step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #336699;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+    .shortcode-snippet {
+        display: inline-block;
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 4px 12px;
+        font-family: monospace;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
     }
 </style>
 
 <div class="plugin-container">
-    <!-- Hero Section -->
+    <!-- Hero & Download Section -->
     <div class="plugin-hero">
         <div class="plugin-badge">
-            <i class="bi bi-wordpress"></i> WordPress Plugin
+            <i class="bi bi-wordpress"></i> WordPress Plugin • Version 1.0.3
         </div>
-        <h2 class="plugin-title">Demnächst verfügbar!</h2>
+        <h2 class="plugin-title">Tourney WordPress Plugin</h2>
         <p class="plugin-subtitle">
-            Wir arbeiten derzeit mit Hochdruck an der Veröffentlichung des offiziellen WordPress Plugins für Turnierservice & Turnierverwaltung.
+            Verwandeln Sie Ihre WordPress-Website in eine vollständige Turnierverwaltung für Tischtennis und Turniersport – einfach per Shortcode auf jeder beliebigen Seite.
         </p>
-        <div class="plugin-status-pill">
-            <span class="pulse-dot"></span> In aktiver Entwicklung • Release in Kürze
+        <div>
+            <a href="upload/download/tourney.1.0.3.zip" class="plugin-download-btn" download>
+                <i class="bi bi-download"></i> Download tourney.1.0.3.zip
+            </a>
+        </div>
+        <div class="plugin-meta-info">
+            Aktuelle Version: <strong>1.0.3</strong> (19.10.2026) • Erfordert WordPress ab 6.0 &amp; PHP ab 8.0
         </div>
     </div>
 
-    <!-- Features Preview Grid -->
-    <h3 style="font-weight: 700; font-size: 1.3rem; margin-bottom: 18px; text-align: center;">
-        Worauf Sie sich freuen können
+    <!-- Funktion des Turnierprogramms -->
+    <h3 class="plugin-section-title">
+        <i class="bi bi-trophy text-primary"></i> Funktionen des Turnierprogramms
     </h3>
-    
     <div class="plugin-features-grid">
         <div class="plugin-feature-card">
             <div class="plugin-icon-box">
-                <i class="bi bi-plug-fill"></i>
+                <i class="bi bi-diagram-3-fill"></i>
             </div>
-            <h4 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">Einfache Einbindung</h4>
-            <p style="font-size: 0.9rem; color: var(--bs-secondary-color, #64748b); margin-bottom: 0;">
-                Nahtlose Integration aller Turnier-Funktionen direkt in Ihre bestehende WordPress-Website mittels Gutenberg-Blocks & Shortcodes.
+            <h4 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">Vielseitige Turniersysteme</h4>
+            <p style="font-size: 0.92rem; color: var(--bs-secondary-color, #64748b); margin-bottom: 0;">
+                Unterstützt Einzel- und Doppel-Wettbewerbe mit Gruppenphase, KO-System (Haupt- &amp; Trostrunde), Schweizer System und Jeder-gegen-Jeden (Round Robin).
             </p>
         </div>
 
         <div class="plugin-feature-card">
             <div class="plugin-icon-box">
-                <i class="bi bi-broadcast"></i>
+                <i class="bi bi-people-fill"></i>
             </div>
-            <h4 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">Live-Ergebnisse & Infoboard</h4>
-            <p style="font-size: 0.9rem; color: var(--bs-secondary-color, #64748b); margin-bottom: 0;">
-                Echtzeit-Synchronisation von Tischanzeigen, Ergebnissen und Hallenmonitoren via WebSockets direkt auf Ihrer Vereinsseite.
+            <h4 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">Spieler, Vereine &amp; ClickTT</h4>
+            <p style="font-size: 0.92rem; color: var(--bs-secondary-color, #64748b); margin-bottom: 0;">
+                Komfortable Teilnehmer- und Vereinsverwaltung inklusive Import aus ClickTT-Dateien, Setzlisten nach TTR/QTTR sowie automatischer Auslosung.
             </p>
         </div>
 
         <div class="plugin-feature-card">
             <div class="plugin-icon-box">
-                <i class="bi bi-person-lines-fill"></i>
+                <i class="bi bi-printer-fill"></i>
             </div>
-            <h4 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">Online-Anmeldungen</h4>
-            <p style="font-size: 0.9rem; color: var(--bs-secondary-color, #64748b); margin-bottom: 0;">
-                Komfortable Erfassung von Teilnehmern und Vereinen inklusive ClickTT-Schnittstelle und automatischer TTR-Zuordnung.
+            <h4 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">Ergebniseingabe &amp; Druck</h4>
+            <p style="font-size: 0.92rem; color: var(--bs-secondary-color, #64748b); margin-bottom: 0;">
+                Schnelle Live-Ergebniserfassung, automatische Tabellen- und Platzierungsberechnung sowie Druck von Schiedsrichterzetteln, Ergebnislisten und Urkunden.
             </p>
+        </div>
+
+        <div class="plugin-feature-card">
+            <div class="plugin-icon-box">
+                <i class="bi bi-cloud-check-fill"></i>
+            </div>
+            <h4 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">Direktspeicherung &amp; Lokal-Modus</h4>
+            <p style="font-size: 0.92rem; color: var(--bs-secondary-color, #64748b); margin-bottom: 0;">
+                Turniere können direkt in der jeweiligen WordPress-Seite gespeichert und veröffentlicht oder im Browser lokal getestet (Demo &amp; Schnellstart) werden.
+            </p>
+        </div>
+    </div>
+
+    <!-- Installation & Einbindung -->
+    <div class="plugin-box">
+        <h3 class="plugin-section-title">
+            <i class="bi bi-tools text-primary"></i> Installation &amp; Verwendung in WordPress
+        </h3>
+        <p style="font-size: 0.95rem; color: var(--bs-secondary-color, #475569); margin-bottom: 12px;">
+            Das Plugin lässt sich in wenigen Schritten in jeder WordPress-Installation einrichten und direkt über den Shortcode <span class="shortcode-snippet">[tourney]</span> nutzen:
+        </p>
+        <ul class="plugin-step-list">
+            <li class="plugin-step-item">
+                <div class="plugin-step-number">1</div>
+                <div>
+                    <strong>Plugin herunterladen:</strong><br>
+                    Laden Sie das Installationsarchiv <a href="upload/download/tourney.1.0.3.zip" download><code>tourney.1.0.3.zip</code></a> herunter.
+                </div>
+            </li>
+            <li class="plugin-step-item">
+                <div class="plugin-step-number">2</div>
+                <div>
+                    <strong>In WordPress hochladen &amp; aktivieren:</strong><br>
+                    Öffnen Sie im WordPress-Adminbereich <em>Plugins &gt; Neues Plugin hinzufügen &gt; Plugin hochladen</em>, wählen Sie die Datei <code>tourney.1.0.3.zip</code> aus, klicken Sie auf <em>Jetzt installieren</em> und anschließend auf <em>Plugin aktivieren</em>.
+                </div>
+            </li>
+            <li class="plugin-step-item">
+                <div class="plugin-step-number">3</div>
+                <div>
+                    <strong>Shortcode in eine Seite einfügen:</strong><br>
+                    Erstellen Sie eine neue WordPress-Seite (oder öffnen Sie eine bestehende Seite) und fügen Sie im Editor (als Shortcode-Block oder Text) einfach folgenden Shortcode ein:<br>
+                    <div class="mt-2"><span class="shortcode-snippet">[tourney]</span></div>
+                </div>
+            </li>
+            <li class="plugin-step-item">
+                <div class="plugin-step-number">4</div>
+                <div>
+                    <strong>Turnier erstellen &amp; verwalten:</strong><br>
+                    Rufen Sie die veröffentlichte Seite auf. Sie sehen die Startansicht mit <strong>Demo</strong>, <strong>Neues Turnier</strong> und <strong>Schnellstart</strong>. Sobald Sie ein Turnier auf dieser Seite anlegen, wird es direkt in dieser Seite gespeichert. Besucher sehen automatisch die Turnierübersicht und Ergebnisse; angemeldete Benutzer mit Schreibrechten können das Turnier direkt auf derselben Seite verwalten und bearbeiten.
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Aktuelle Version / What's New -->
+    <div class="plugin-whatsnew-box">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <h3 class="plugin-section-title mb-0">
+                <i class="bi bi-stars text-primary"></i> Aktuelle Version &amp; What's New
+            </h3>
+            <span class="badge bg-primary fs-6">Version 1.0.3 (19.10.2026)</span>
+        </div>
+        <p style="font-weight: 600; color: var(--bs-heading-color, #1e293b); margin-bottom: 10px;">
+            Neuerungen in Version 1.0.3:
+        </p>
+        <ul style="margin: 0 0 16px 0; padding-left: 20px; color: var(--bs-secondary-color, #475569); font-size: 0.95rem;">
+            <li><strong>Einbettung per <code>[tourney]</code>-Shortcode (Pure-Modus):</strong> Kompakte Turnier-Startansicht ohne globale Navigation/Footer mit direkter Speicherung des Turniers in der eingebetteten WordPress-Seite.</li>
+            <li><strong>Automatische Anzeige &amp; Bearbeitung:</strong> Ist in einer Seite bereits ein Turnier gespeichert, wird dieses beim Aufruf sofort angezeigt (mit vollen Bearbeitungsfunktionen bei vorhandenen Schreibrechten).</li>
+            <li><strong>Status-Zeile für letztes Turnier:</strong> Schnelles Laden oder Löschen des zuletzt verwendeten lokalen bzw. Cloud-Turniers direkt auf der Startseite.</li>
+            <li><strong>Optimierter Demo-Start &amp; Ergebniseingabe:</strong> Direkter Start des Demo-Turniers ohne Rückfrage nach Cloud-Turnieren sowie verbesserte Stage-Darstellung, Auslosung und Schiedsrichterzettel.</li>
+        </ul>
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-2 border-top">
+            <a href="javascript:appLoadPage('MainView', 'history')" class="text-primary fw-semibold text-decoration-none">
+                <i class="bi bi-clock-history me-1"></i> Vollständige Versionshistorie anzeigen
+            </a>
+            <a href="upload/download/tourney.1.0.3.zip" class="btn btn-sm btn-primary fw-bold" download>
+                <i class="bi bi-download me-1"></i> Download tourney.1.0.3.zip
+            </a>
         </div>
     </div>
 </div>

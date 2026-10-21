@@ -234,6 +234,7 @@ mainView.lastTourneyCloud                           = Cloud
 mainView.lastTourneyLoad                            = Laden
 mainView.lastCompetitionLabel                       = Letzter Wettbewerb
 mainView.lastCompetitionLoad                        = Laden
+mainView.newsLabel                                  = Neu
 
 ###
 # Loading & PageNotFound
@@ -407,6 +408,7 @@ footer.impressum                                    = Impressum
 footer.privacy                                      = Datenschutz
 footer.contact                                      = Kontakt
 footer.gtc                                          = AGB
+footer.history                                      = HISTORIE
 
 ###
 # Demo mode
@@ -491,3 +493,8 @@ stageLayout.tabScoresheet                           = Schiri
 stageLayout.tabCertificate                          = Urkunde
 
 footer.realizedWith                                 = Realisiert mit Scala.js & WordPress.
+
+tourneyNotice.comingSoonTitle                       = Hier wird bald ein Turnier veröffentlicht
+tourneyNotice.comingSoonInfo                        = Auf dieser Seite ist noch kein Turnier verfügbar. Bitte schauen Sie später noch einmal vorbei.
+tourneyNotice.notFoundTitle                         = Kein Turnier gefunden
+tourneyNotice.notFoundInfo                          = Auf dieser Seite ist kein gültiges Turnier hinterlegt.

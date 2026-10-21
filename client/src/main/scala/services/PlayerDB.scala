@@ -108,3 +108,29 @@ object PlayerDB extends ComWrapper with Debouncer:
       case Left(err) => Left(err)
     }
   }
+
+  case class PublicRegisterRequest(
+    compId: Int, firstName: String, lastName: String, clubName: String, clubId: Int,
+    normalizedName: String, ttr: Int, email: String, turnstileToken: String
+  ) derives ReadWriter
+  case class PublicRegisterResponse(playerId: Int, clubId: Int) derives ReadWriter
+
+  /**
+   * Public (anonymous) registration of a player for a competition.
+   * The server validates the request and stores club, player and participant itself;
+   * afterwards players, clubs and competitions are reloaded from the server.
+   *
+   * @param req The registration data.
+   * @return Future containing the id of the registered player or an error.
+   */
+  def publicRegister(req: PublicRegisterRequest): Future[Either[AppError, PlayerId]] =
+    val params = List("postId" -> TourneyDB.tourney.wpId.toString)
+    ajaxPost[PublicRegisterRequest, PublicRegisterResponse]("/wp-json/tourney/v1/public-register", params, req, host = Global.homeUrl).flatMap {
+      case Right(res) =>
+        for {
+          _ <- load()
+          _ <- ClubDB.load()
+          _ <- CompetitionDB.load()
+        } yield Right(PlayerId(res.playerId))
+      case Left(err) => Future.successful(Left(err))
+    }

@@ -1,0 +1,93 @@
+@import pages.PureView.*
+@import cviews.helper.html.*
+@import shared.MainIds.*
+@import base.Messages.gM
+
+@()
+
+<div class="main-multi-landing">
+    <!-- Hero Section -->
+    <div class="hero-section text-white d-flex align-items-center justify-content-center text-center shadow-sm">
+        <div class="hero-overlay"></div>
+        <div class="hero-content px-3 py-3" style="z-index: 2;">
+            <h1 class="h2 fw-bold mb-1 hero-title-custom">@gM("mainView.heroTitle")</h1>
+            <p class="lead mb-1 fs-6">@gM("mainView.heroSubtitle")</p>
+            <p class="small opacity-75 mx-auto mb-0" style="max-width: 600px;">
+                @gM("mainView.heroDesc")
+            </p>
+        </div>
+    </div>
+
+    <div class="container mt-4 pb-5">
+        <div class="row g-4 justify-content-center">
+            
+            <!-- Demo -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow hover-lift">
+                    <div class="card-body text-center p-4 d-flex flex-column">
+                        <div class="feature-icon bg-warning bg-gradient text-dark mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="bi bi-play-circle fs-3"></i>
+                        </div>
+                        <h3 class="h4 mb-3">@gM("mainView.demoTitle")</h3>
+                        <p class="text-muted small">@gM("mainView.demoDesc")</p>
+                        <button class="btn btn-warning mt-auto fw-bold text-dark" @id(BtnDemo, "onclick")>@gM("mainView.demoBtn")</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Tournament -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow hover-lift">
+                    <div class="card-body text-center p-4 d-flex flex-column">
+                        <div class="feature-icon bg-primary bg-gradient text-white mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="bi bi-trophy fs-3"></i>
+                        </div>
+                        <h3 class="h4 mb-3">@gM("mainView.newTourneyTitle")</h3>
+                        <p class="text-muted small">@gM("mainView.newTourneyDesc")</p>
+                        <button class="btn btn-primary mt-auto fw-bold" @id(BtnOption1, "onclick")>@gM("mainView.newTourneyBtn")</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Single Competition -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow hover-lift">
+                    <div class="card-body text-center p-4 d-flex flex-column">
+                        <div class="feature-icon bg-success bg-gradient text-white mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="bi bi-lightning-charge fs-3"></i>
+                        </div>
+                        <h3 class="h4 mb-3">@gM("mainView.quickStartTitle")</h3>
+                        <p class="text-muted small">@gM("mainView.quickStartDesc")</p>
+                        <button class="btn btn-success mt-auto fw-bold" @id(BtnOption2, "onclick")>@gM("mainView.quickStartBtn")</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .hero-section {
+        position: relative;
+        min-height: 18vh;
+        background-color: #336699;
+        overflow: hidden;
+    }
+    .hero-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(135deg, rgba(51, 102, 153, 0.95) 0%, rgba(51, 102, 153, 0.7) 100%);
+    }
+    .hero-title-custom {
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .hover-lift {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,0.175) !important;
+    }
+</style>

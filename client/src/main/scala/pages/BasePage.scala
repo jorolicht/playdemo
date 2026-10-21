@@ -14,7 +14,7 @@ import pages.Stage.*
 // pagesMap maps page names to page objecpts   
 val pagesMap = List(Auth, Console, PgError,
                     ChatExample, Goodbye, RegistrationSuccess,
-                    ViewOrganizer, MainView, TourneyNew, CompetitionNew, TourneyInfo, TourneyWelcome, TourneyAdmin, Mockup, CompetitionInfo, CompetitionWelcome,
+                    ViewOrganizer, MainView, PureView, TourneyNotice, TourneyNew, CompetitionNew, TourneyInfo, TourneyWelcome, TourneyAdmin, Mockup, CompetitionInfo, CompetitionWelcome,
                     PlayerRegistration, UserRegistration, UserLogin, VerifyAccount, StageAdmin, StageDraw, StageInput, StageResult, StageScoreSheet, StageCertificate, 
                     PlayerList, ResultList, Certificate, MainSearch, Management)
                     .map(pg => pg.name -> pg).toMap              
@@ -22,7 +22,7 @@ val pagesMap = List(Auth, Console, PgError,
 
 def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, async: Boolean = false): Unit =
   try
-    var targetPage = pageName
+    var targetPage = if (pageName == MainView.name && param.isEmpty && !base.Global.fws) PureView.name else pageName
     var targetParam = param
 
     if (pageName.value == "StageAdmin" && param.nonEmpty) {

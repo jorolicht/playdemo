@@ -1,0 +1,15 @@
+@import base.Messages.gM
+
+@(icon: String, title: String, info: String)
+
+<div class="container mt-5 py-5 text-center">
+    <div class="mx-auto p-5 rounded-4 shadow border-0 bg-white" style="max-width: 600px;">
+        <div class="mb-4">
+            <div class="bg-primary bg-gradient text-white mx-auto rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
+                <i class="bi @icon display-5"></i>
+            </div>
+        </div>
+        <h1 class="h3 fw-bold text-dark mb-3">@title</h1>
+        <p class="text-muted mb-0">@info</p>
+    </div>
+</div>

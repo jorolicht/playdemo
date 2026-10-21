@@ -22,6 +22,45 @@ function tourney_is_admin_or_editor( $user = null ) {
 }
 
 /**
+ * Prüft, ob der aktuelle Benutzer Schreibrechte auf eine Seite bzw. ein Turnier hat.
+ *
+ * Schreibrecht besteht bei WordPress-Recht 'edit_post' für den Post oder, für Benutzer mit
+ * 'edit_posts' (z. B. TourneyAdmin), wenn der Veranstalter des Turniers dem eigenen
+ * Veranstalter, Benutzernamen oder der E-Mail-Adresse entspricht.
+ *
+ * @param int $post_id Die WordPress Post-ID.
+ * @return bool True, wenn der aktuelle Benutzer den Post bearbeiten darf.
+ */
+function tourney_user_can_edit_post( $post_id ) {
+    $post_id = intval( $post_id );
+    if ( $post_id <= 0 || ! is_user_logged_in() ) {
+        return false;
+    }
+    if ( current_user_can( 'edit_post', $post_id ) ) {
+        return true;
+    }
+    if ( ! current_user_can( 'edit_posts' ) ) {
+        return false;
+    }
+    $organizer = get_post_meta( $post_id, 'organizer', true );
+    if ( empty( $organizer ) ) {
+        return false;
+    }
+    $user = wp_get_current_user();
+    return in_array( $organizer, array( get_user_meta( $user->ID, 'organizer', true ), $user->user_login, $user->user_email ), true );
+}
+
+/**
+ * REST-Permission-Callback: Schreibrecht auf den im Request (postId bzw. slug) angegebenen Post.
+ *
+ * @param WP_REST_Request $request Der REST-Request.
+ * @return bool True, wenn der aktuelle Benutzer den Post bearbeiten darf.
+ */
+function tourney_api_can_edit_request_post( WP_REST_Request $request ) {
+    return tourney_user_can_edit_post( ApiHelper::getPostId( $request ) );
+}
+
+/**
  * Registers custom WordPress roles: TourneyAdmin (Subscriber permissions + edit_posts) and TourneyMaster (Editor permissions).
  * Language-independent internal role slugs: 'tourney_admin' and 'tourney_master'.
  */

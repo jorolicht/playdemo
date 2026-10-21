@@ -96,6 +96,7 @@ object CompetitionNew extends BasePage with JsWrapper with services.ComWrapper:
       // 1. Create dummy tournament on server or local storage
       services.TourneyDB.apiCreate(dummy).flatMap {
         case Right(slug) =>
+          Global.pageId = dummy.wpId
           services.TourneyDB.update(dummy, doSync = false)
           // 2. Add the competition
           services.TourneyDB.tourney.addCompetition(
@@ -109,7 +110,10 @@ object CompetitionNew extends BasePage with JsWrapper with services.ComWrapper:
             case Right(newComp) =>
               Global.currentSelection = Selection(Some(services.TourneyDB.tourney), Some(newComp))
               comps.ContextHeader.render()
-              services.TourneyDB.sync().map { _ =>
+              for {
+                _ <- services.CompetitionDB.sync(Seq(newComp))
+                _ <- services.TourneyDB.sync()
+              } yield {
                 loadPage(PageNameTyp("CompetitionInfo"), "")
               }
             case Left(err) =>

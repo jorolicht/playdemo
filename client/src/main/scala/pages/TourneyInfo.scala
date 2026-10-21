@@ -121,16 +121,26 @@ object TourneyInfo extends BasePage with JsWrapper:
         }
 
       case `BtnSaveLeave` =>
+        import shared.BoxButton
         val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
-        dialogs.DlgExportTourney.show(tourney, saveAndLeave = true).map {
-          case Some(_) =>
-            services.TourneyDB.sync().map { _ =>
-              Global.currentSelection = shared.model.Selection()
-              Global.clearSessionTourneyState()
-              comps.ContextHeader.render()
-              loadPage(MainView.name, "")
-            }
-          case None =>
-            debug("Save/Leave cancelled")
+        val isLocal = Global.isLocalMode || Global.isDemoMode || tourney.wpId == 999999 || tourney.slug == "local"
+        val locationMsg = if (isLocal) {
+          if (Global.lang == "en") "Storage location: \"local\" in browser"
+          else "Speicherort: \"lokal\" im Browser"
+        } else if (!Global.fws) {
+          val pageId = if (Global.hostPageId > 0) Global.hostPageId else tourney.wpId
+          if (Global.lang == "en") s"Storage location: WordPress Page ID $pageId"
+          else s"Speicherort: WordPress-Seite ID $pageId"
+        } else {
+          if (Global.lang == "en") s"Storage location: \"cloud\" (${tourney.slug})"
+          else s"Speicherort: \"cloud\" (${tourney.slug})"
+        }
+        val title = if (Global.lang == "en") "Save & Leave" else "Speichern & Verlassen"
+        services.TourneyDB.sync().flatMap { _ =>
+          DlgMsgbox.show(locationMsg, title, List(BoxButton.Ok)).map { _ =>
+            Global.currentSelection = shared.model.Selection()
+            comps.ContextHeader.render()
+            loadPage(MainView.name, "")
+          }
         }
       case _ =>

@@ -111,6 +111,8 @@ object AdminManager extends ComWrapper {
           // Update the DB references and register sync handlers
           TourneyDB.update(newTourney, doSync = false)
           TourneyDB.version = 1
+          ClubDB.version = 0
+          PlayerDB.version = 0
           
           // Meta-Data Update
           val extraMetaPayload = Map(
@@ -128,7 +130,7 @@ object AdminManager extends ComWrapper {
             _ <- PlayerDB.sync(TourneyDB.tourney.players.toSeq)
             _ <- CompetitionDB.sync(importedComps)
             _ <- StageDB.sync(importedStages)
-            _ <- ajaxPost[Map[String,String], String]("/wp-json/tourney/v1/meta-data", List("postId" -> newTourney.wpId.toString), extraMetaPayload, host = Global.homeUrl)
+            _ <- ajaxPost[Map[String,String], String]("/wp-json/tourney/v1/meta-data", List("postId" -> newTourney.wpId.toString), extraMetaPayload, host = Global.homeUrl).recover { case _ => Left(AppError("meta.skip", "")) }
           } yield Right(slug)
         case Left(err) => Future.successful(Left(err))
       }

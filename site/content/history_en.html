@@ -1,0 +1,158 @@
+<!--
+ * Version History (History) - English
+ *
+ * Documents the versions, release dates, and change details of TurnierService / Tourney.
+ * The top .history-entry block is automatically parsed for the news bar on the home page.
+-->
+<style>
+    .history-container {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--bs-body-color, #1e293b);
+        line-height: 1.6;
+    }
+    .history-hero {
+        background: linear-gradient(135deg, rgba(51, 102, 153, 0.1) 0%, rgba(59, 130, 246, 0.08) 100%);
+        border: 1px solid rgba(51, 102, 153, 0.2);
+        border-radius: 16px;
+        padding: 32px 24px;
+        margin-bottom: 28px;
+        text-align: center;
+    }
+    .history-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        color: var(--bs-heading-color, #0f172a);
+    }
+    .history-subtitle {
+        color: var(--bs-secondary-color, #64748b);
+        font-size: 1rem;
+        max-width: 640px;
+        margin: 0 auto;
+    }
+    .history-timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .history-entry {
+        background: var(--bs-card-bg, #ffffff);
+        border: 1px solid var(--bs-border-color, #e2e8f0);
+        border-left: 4px solid #336699;
+        border-radius: 12px;
+        padding: 20px 24px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+    .history-entry-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .history-version {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: rgba(51, 102, 153, 0.12);
+        color: #336699;
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+    .history-date {
+        color: var(--bs-secondary-color, #64748b);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    .history-summary {
+        font-weight: 600;
+        color: var(--bs-heading-color, #1e293b);
+        margin-bottom: 10px;
+    }
+    .history-details {
+        margin: 0;
+        padding-left: 20px;
+        color: var(--bs-secondary-color, #475569);
+        font-size: 0.95rem;
+    }
+    .history-details li {
+        margin-bottom: 4px;
+    }
+</style>
+
+<div class="history-container py-2">
+    <div class="history-hero">
+        <div class="history-title">
+            <i class="bi bi-clock-history me-2"></i>Version History
+        </div>
+        <p class="history-subtitle">
+            Overview of all versions, new features, and improvements in TurnierService.
+        </p>
+    </div>
+
+    <div class="history-timeline">
+        <!-- Latest entry (displayed in the MainView news bar) -->
+        <div class="history-entry" data-version="1.0.3" data-date="2026-10-19" data-summary="Status bar for last tournament (Local/Cloud) with quick load &amp; delete, streamlined demo start, and improved stage/result entry.">
+            <div class="history-entry-header">
+                <span class="history-version"><i class="bi bi-tag-fill"></i> Version 1.0.3</span>
+                <span class="history-date"><i class="bi bi-calendar3 me-1"></i>2026-10-19</span>
+            </div>
+            <div class="history-summary">
+                Status bar for last tournament (Local/Cloud) with quick load &amp; delete, streamlined demo start, and improved stage/result entry.
+            </div>
+            <ul class="history-details">
+                <li>Status bar on the home page for directly loading or deleting the most recently used local or cloud tournament.</li>
+                <li>Direct start of the demo tournament without confirmation dialog when the last tournament was saved in the cloud.</li>
+                <li>Improved stage rendering, Group/Round Robin draws, score sheets, and result input.</li>
+                <li>SemVer versioning, automatic asset cache-busting, and streamlined WordPress plugin deployment.</li>
+            </ul>
+        </div>
+
+        <div class="history-entry" data-version="1.0.2" data-date="2026-09-01" data-summary="Cloudflare Turnstile CAPTCHA protection for registration, extended backup configuration, and Docker improvements.">
+            <div class="history-entry-header">
+                <span class="history-version"><i class="bi bi-tag"></i> Version 1.0.2</span>
+                <span class="history-date"><i class="bi bi-calendar3 me-1"></i>2026-09-01</span>
+            </div>
+            <div class="history-summary">
+                Cloudflare Turnstile CAPTCHA protection for registration, extended backup configuration, and Docker improvements.
+            </div>
+            <ul class="history-details">
+                <li>Added Cloudflare Turnstile CAPTCHA for user registration and forms.</li>
+                <li>Extended production and backup configuration (Traefik, Google Drive backup).</li>
+                <li>Refined stage layouts and internationalization (DE/EN).</li>
+            </ul>
+        </div>
+
+        <div class="history-entry" data-version="1.0.1" data-date="2026-08-15" data-summary="Shortcode options for display modes and WebAuthn/Passkey support.">
+            <div class="history-entry-header">
+                <span class="history-version"><i class="bi bi-tag"></i> Version 1.0.1</span>
+                <span class="history-date"><i class="bi bi-calendar3 me-1"></i>2026-08-15</span>
+            </div>
+            <div class="history-summary">
+                Shortcode options for display modes and WebAuthn/Passkey support.
+            </div>
+            <ul class="history-details">
+                <li>Provided shortcode options for different display modes (<code>pure</code>, <code>home</code>, <code>view</code>).</li>
+                <li>Extended WordPress REST API with WebAuthn/Passkey endpoints.</li>
+            </ul>
+        </div>
+
+        <div class="history-entry" data-version="1.0.0" data-date="2026-08-01" data-summary="Initial release of the Tourney WordPress Plugin with Scala.js client integration.">
+            <div class="history-entry-header">
+                <span class="history-version"><i class="bi bi-tag"></i> Version 1.0.0</span>
+                <span class="history-date"><i class="bi bi-calendar3 me-1"></i>2026-08-01</span>
+            </div>
+            <div class="history-summary">
+                Initial release of the Tourney WordPress Plugin with Scala.js client integration.
+            </div>
+            <ul class="history-details">
+                <li>Complete tournament management (Group stage, KO system, Swiss system, Round Robin) as a reactive Single-Page Application.</li>
+                <li>Seamless WordPress integration via Custom Post Type <code>tourney</code> and REST API.</li>
+                <li>Support for local/offline mode in the browser as well as cloud synchronization.</li>
+            </ul>
+        </div>
+    </div>
+</div>

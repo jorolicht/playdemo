@@ -16,7 +16,7 @@ add_action('rest_api_init', function () {
     register_rest_route('tourney/v1', '/clubs-sync', [
         'methods' => 'POST',
         'callback' => 'tourney_sync_clubs',
-        'permission_callback' => '__return_true'
+        'permission_callback' => 'tourney_api_can_edit_request_post'
     ]);
 
 });
@@ -27,7 +27,7 @@ add_action('rest_api_init', function () {
 function tourney_get_clubs(WP_REST_Request $request)
 {
     $post_id = ApiHelper::getPostId($request);
-    $meta = $request->get_param('metafield-name') ?: 'clubs';
+    $meta = 'clubs';
 
     if (!$post_id) {
         return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);
@@ -51,7 +51,7 @@ function tourney_get_clubs(WP_REST_Request $request)
 function tourney_sync_clubs(WP_REST_Request $request)
 {
     $post_id = ApiHelper::getPostId($request);
-    $meta = $request->get_param('metafield-name') ?: 'clubs';
+    $meta = 'clubs';
 
     if (!$post_id) {
         return ApiHelper::error("missing_param", "Post ID or Slug missing", "", "", HttpStatus::BAD_REQUEST);

@@ -16,7 +16,7 @@ add_action('rest_api_init', function () {
     register_rest_route('tourney/v1', '/stages-sync', [
         'methods' => 'POST',
         'callback' => 'tourney_sync_stages',
-        'permission_callback' => '__return_true'
+        'permission_callback' => 'tourney_api_can_edit_request_post'
     ]);
 
     // GET /tourney/v1/rounds (Alias for /stages)
@@ -30,7 +30,7 @@ add_action('rest_api_init', function () {
     register_rest_route('tourney/v1', '/rounds-sync', [
         'methods' => 'POST',
         'callback' => 'tourney_sync_stages',
-        'permission_callback' => '__return_true'
+        'permission_callback' => 'tourney_api_can_edit_request_post'
     ]);
 
 });
