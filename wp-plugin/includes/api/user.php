@@ -41,33 +41,36 @@ add_action('rest_api_init', function () {
         'permission_callback' => '__return_true',
     ));
 
-    // Endpunkt: ADMIN USER SEARCH
-    register_rest_route('tourney/v1', '/admin/users', array(
-        'methods' => 'GET',
-        'callback' => 'tourney_api_admin_search_users',
-        'permission_callback' => 'tourney_api_admin_permissions_check',
-    ));
+    // Endpunkte der Management-Seite (Benutzer, UserProfile, Payhip-Käufe) nur bei Full Web Site
+    if (TOURNEY_FWS) {
+        // Endpunkt: ADMIN USER SEARCH
+        register_rest_route('tourney/v1', '/admin/users', array(
+            'methods' => 'GET',
+            'callback' => 'tourney_api_admin_search_users',
+            'permission_callback' => 'tourney_api_admin_permissions_check',
+        ));
 
-    // Endpunkt: ADMIN UPDATE USER PROFILE
-    register_rest_route('tourney/v1', '/admin/update_user_profile', array(
-        'methods' => 'POST',
-        'callback' => 'tourney_api_admin_update_user_profile',
-        'permission_callback' => 'tourney_api_admin_permissions_check',
-    ));
+        // Endpunkt: ADMIN UPDATE USER PROFILE
+        register_rest_route('tourney/v1', '/admin/update_user_profile', array(
+            'methods' => 'POST',
+            'callback' => 'tourney_api_admin_update_user_profile',
+            'permission_callback' => 'tourney_api_admin_permissions_check',
+        ));
 
-    // Endpunkt: ADMIN GET UNMATCHED PURCHASES
-    register_rest_route('tourney/v1', '/admin/unmatched_purchases', array(
-        'methods' => 'GET',
-        'callback' => 'tourney_api_admin_get_unmatched_purchases',
-        'permission_callback' => 'tourney_api_admin_permissions_check',
-    ));
+        // Endpunkt: ADMIN GET UNMATCHED PURCHASES
+        register_rest_route('tourney/v1', '/admin/unmatched_purchases', array(
+            'methods' => 'GET',
+            'callback' => 'tourney_api_admin_get_unmatched_purchases',
+            'permission_callback' => 'tourney_api_admin_permissions_check',
+        ));
 
-    // Endpunkt: ADMIN ASSIGN UNMATCHED PURCHASE
-    register_rest_route('tourney/v1', '/admin/assign_unmatched_purchase', array(
-        'methods' => 'POST',
-        'callback' => 'tourney_api_admin_assign_unmatched_purchase',
-        'permission_callback' => 'tourney_api_admin_permissions_check',
-    ));
+        // Endpunkt: ADMIN ASSIGN UNMATCHED PURCHASE
+        register_rest_route('tourney/v1', '/admin/assign_unmatched_purchase', array(
+            'methods' => 'POST',
+            'callback' => 'tourney_api_admin_assign_unmatched_purchase',
+            'permission_callback' => 'tourney_api_admin_permissions_check',
+        ));
+    }
 });
 
 function pd_api_login_handler($request) {

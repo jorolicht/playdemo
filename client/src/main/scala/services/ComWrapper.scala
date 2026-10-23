@@ -83,6 +83,15 @@ object AuthComWrapper:
 
 trait ComWrapper: 
 
+  /** True, wenn der Request an den Play-Server ginge, dieser aber nicht genutzt werden darf (siehe Global.usePlayServer). */
+  private def isPlayServerBlocked(host: String): Boolean =
+    host == Global.playUrl && !Global.usePlayServer
+
+  /** Fehlerergebnis für einen unterdrückten Play-Server-Request. */
+  private def playServerBlocked[OUT](route: String, name: String): Future[Either[AppError, OUT]] =
+    debug(s"Play-Server-Aufruf unterdrückt: $route")
+    Future.successful(Left(AppError("err00010.playserver.disabled", route, "", name)))
+
   def ajaxPost[IN, OUT](
     route: String,
     params: List[(String,String)],
@@ -98,6 +107,7 @@ trait ComWrapper:
       w: Writer[IN]
   ): Future[Either[AppError, OUT]] =
       val name = route.split("/").lastOption.getOrElse("ajaxPost")
+      if (isPlayServerBlocked(host)) return playServerBlocked(route, name)
       val jsonData = write(data)
       val dataStr = if (jsonData.length > 40) s"${jsonData.take(25)} ... ${jsonData.takeRight(10)}" else jsonData
       val finalHdrs = hdrs ++ Map(
@@ -124,6 +134,7 @@ trait ComWrapper:
   def ajaxGet[T](route: String, params: List[(String,String)]=List(), hdrs: Map[String,String]=Map(), host: String = Global.playUrl)
                 (using r: Reader[T], ct: ClassTag[T]): Future[Either[AppError,T]] =
     val name = route.split("/").lastOption.getOrElse("ajaxGet")
+    if (isPlayServerBlocked(host)) return playServerBlocked(route, name)
     debug(s"ajaxGet -> route:${route} params:${params.mkString("=")} hdrs: ${hdrs.mkString("=")}")
     Ajax(
       method = "GET",

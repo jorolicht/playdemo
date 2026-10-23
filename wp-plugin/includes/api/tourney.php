@@ -492,19 +492,22 @@ function tourney_api_create(WP_REST_Request $request) {
             $full_slug = "tourney/" . $existing_page->post_name;
         }
     } else {
+        // overwrite=1: ein bestehendes Turnier mit gleichem Slug wird neu befüllt statt abgelehnt
+        $overwrite = $request->get_param('overwrite') === '1';
+
         // Check UserProfile available count limit for TourneyAdmin / Author / Subscriber
+        // (gilt nur für neue Posts; beim Überschreiben wird erst nach der Existenzprüfung entschieden)
         $is_admin_or_editor = tourney_is_admin_or_editor($current_user);
-        if (!$is_admin_or_editor) {
-            $profile = tourney_get_user_profile($current_user->ID);
-            if ($profile['available'] <= 0) {
-                return ApiHelper::error(
-                    "tourney_limit_reached",
-                    "Sie haben keine verfügbaren Turniere mehr (available = 0). Bitte kaufen Sie über die Preisseite weitere Turniere.",
-                    "",
-                    "tourney_api_create",
-                    HttpStatus::FORBIDDEN
-                );
-            }
+        $limit_reached = !$is_admin_or_editor && tourney_get_user_profile($current_user->ID)['available'] <= 0;
+        $limit_error = ApiHelper::error(
+            "tourney_limit_reached",
+            "Sie haben keine verfügbaren Turniere mehr (available = 0). Bitte kaufen Sie über die Preisseite weitere Turniere.",
+            "",
+            "tourney_api_create",
+            HttpStatus::FORBIDDEN
+        );
+        if ($limit_reached && !$overwrite) {
+            return $limit_error;
         }
 
         // Parent slug selection logic: organizer > username > 'admin'
@@ -545,29 +548,48 @@ function tourney_api_create(WP_REST_Request $request) {
             'posts_per_page' => 1,
         ]);
 
-        if (!empty($existing_posts)) {
+        if (!empty($existing_posts) && !$overwrite) {
             return ApiHelper::error("tourney_already_exists", "Ein Turnier mit diesem Namen existiert bereits.", "", "tourney_api_create", HttpStatus::CONFLICT);
         }
 
-        $post_data = [
-            'post_title'   => $tourney_name,
-            'post_name'    => $turnier_slug,
-            'post_parent'  => $parent_id,
-            'post_content' => '[tourney]',
-            'post_type'    => 'tourney',
-            'post_status'  => 'publish',
-        ];
+        if (!empty($existing_posts)) {
+            $result_id = $existing_posts[0]->ID;
+            if (!tourney_user_can_edit_post($result_id)) {
+                return ApiHelper::error("forbidden", "Keine Schreibrechte auf das bestehende Turnier.", "", "tourney_api_create", HttpStatus::FORBIDDEN);
+            }
+            // Bestehende Turnier-Metadaten bereinigen und Titel aktualisieren
+            tourney_clear_post_meta($result_id);
+            wp_update_post([
+                'ID'         => $result_id,
+                'post_title' => $tourney_name,
+            ]);
+            $action    = 'created';
+            $full_slug = "tourney/" . $parent_slug . "/" . $turnier_slug;
+        } else {
+            if ($limit_reached) {
+                return $limit_error;
+            }
 
-        // Neu erstellen
-        $result_id = wp_insert_post($post_data);
-        $action = 'created';
+            $post_data = [
+                'post_title'   => $tourney_name,
+                'post_name'    => $turnier_slug,
+                'post_parent'  => $parent_id,
+                'post_content' => '[tourney]',
+                'post_type'    => 'tourney',
+                'post_status'  => 'publish',
+            ];
 
-        if (is_wp_error($result_id)) {
-            return ApiHelper::error("db_error", $result_id->get_error_message(), "", "tourney_api_create_tourney", HttpStatus::INTERNAL_SERVER_ERROR);
+            // Neu erstellen
+            $result_id = wp_insert_post($post_data);
+            $action = 'created';
+
+            if (is_wp_error($result_id)) {
+                return ApiHelper::error("db_error", $result_id->get_error_message(), "", "tourney_api_create_tourney", HttpStatus::INTERNAL_SERVER_ERROR);
+            }
+
+            // Full hierarchical slug for the response and stored basic meta
+            $full_slug = "tourney/" . $parent_slug . "/" . $turnier_slug;
         }
-
-        // Full hierarchical slug for the response and stored basic meta
-        $full_slug = "tourney/" . $parent_slug . "/" . $turnier_slug;
     }
 
     // Aktualisiere die ID und den Slug im Body, damit sie im initialen 'basic' Stand vorhanden sind

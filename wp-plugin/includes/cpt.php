@@ -203,7 +203,10 @@ function tourney_check_author_creation_limit( $data, $postarr ) {
     }
     return $data;
 }
-add_filter( 'wp_insert_post_data', 'tourney_check_author_creation_limit', 10, 2 );
+// Turnier-Kontingent (UserProfile) nur bei Full Web Site
+if ( TOURNEY_FWS ) {
+    add_filter( 'wp_insert_post_data', 'tourney_check_author_creation_limit', 10, 2 );
+}
 
 /**
  * Decrements the UserProfile available counter and increments executed when a new tourney is created by an Author or TourneyAdmin.
@@ -243,4 +246,6 @@ function tourney_decrement_author_creation_counter( $post_id, $post, $update ) {
         }
     }
 }
-add_action( 'wp_insert_post', 'tourney_decrement_author_creation_counter', 10, 3 );
+if ( TOURNEY_FWS ) {
+    add_action( 'wp_insert_post', 'tourney_decrement_author_creation_counter', 10, 3 );
+}

@@ -307,9 +307,11 @@
                         @defining(tourney.slug.split('/').lastOption.getOrElse(tourney.slug)) { slugName =>
                             @defining(s"${slugName.trim}-${tourney.wpId}") { slugParam =>
                                 @defining(if (base.Global.playUrl.nonEmpty) base.Global.playUrl.trim else "/srv") { playBase =>
+                                    @if(base.Global.usePlayServer) {
                                     <a href="@playBase/matchboard/view/@slugParam" target="_blank" class="btn btn-outline-primary btn-sm fw-bold">
                                         <i class="bi bi-box-arrow-up-right me-1"></i>@gM("tourneyAdmin.mbOpenDisplayBtn")
                                     </a>
+                                    }
                                 }
                             }
                         }

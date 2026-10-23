@@ -64,7 +64,7 @@
                         <!-- 3. Matchboard / InfoAnzeige -->
                         <li class="nav-item">
                             @selection.tourney.map { t =>
-                                @defining(if (t.slug.nonEmpty) {
+                                @defining(if (t.slug.nonEmpty && Global.usePlayServer) {
                                     val slugName = t.slug.split('/').lastOption.getOrElse(t.slug).trim
                                     val slugParam = s"${slugName}-${t.wpId}"
                                     val playBase = if (Global.playUrl.nonEmpty) Global.playUrl.trim else "/srv"

@@ -8,7 +8,7 @@ function tourney_register_settings() {
     add_options_page(
         'Tourney-Einstellungen',         // Titel der HTML-Seite
         'Tourney-Konfigurator',          // Titel im Admin-Menü
-        'manage_options',                 // Erforderliche Benutzerrolle ('Administrator')
+        'manage_options',                // Erforderliche Benutzerrolle ('Administrator')
         'tourney_configurator',          // Slug (URL-Identifikator) der Einstellungsseite
         'tourney_settings_page_callback' // Funktion, die das HTML der Seite rendert
     );

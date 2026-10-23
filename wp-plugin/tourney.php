@@ -120,7 +120,10 @@ function my_multilingual_registration_msgs( $msgs ) {
 // Load required files
 require_once TOURNEY_PLUGIN_PATH . 'includes/user.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/cpt.php';
-require_once TOURNEY_PLUGIN_PATH . 'includes/settings.php';
+// Tourney-Konfigurator (Einstellungsseite) nur bei Full Web Site
+if (TOURNEY_FWS) {
+    require_once TOURNEY_PLUGIN_PATH . 'includes/settings.php';
+}
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/user.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/webauthn.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/player.php';
@@ -129,7 +132,10 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/api/tourney.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/competition.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/stage.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/json.php';
-require_once TOURNEY_PLUGIN_PATH . 'includes/api/payhip.php';
+// Payhip-Webhook (Kauf von Turnier-Kontingent) nur bei Full Web Site
+if (TOURNEY_FWS) {
+    require_once TOURNEY_PLUGIN_PATH . 'includes/api/payhip.php';
+}
 require_once TOURNEY_PLUGIN_PATH . 'includes/helpers.php';
 
 
@@ -305,6 +311,21 @@ function tourney_force_blank_template( $template ) {
 add_filter( 'template_include', 'tourney_force_blank_template', 999 );
 
 /**
+ * Blendet bei Full Web Site (TOURNEY_FWS = true) die WordPress-Admin-Leiste im Frontend aus,
+ * außer für WordPress-Administratoren.
+ *
+ * @param bool $show Ob WordPress die Admin-Leiste anzeigen würde.
+ * @return bool True, wenn die Admin-Leiste angezeigt werden soll.
+ */
+function tourney_admin_bar_only_for_admins( $show ) {
+    if ( TOURNEY_FWS && ! in_array( 'administrator', (array) wp_get_current_user()->roles, true ) ) {
+        return false;
+    }
+    return $show;
+}
+add_filter( 'show_admin_bar', 'tourney_admin_bar_only_for_admins' );
+
+/**
  * 3. Das nackte HTML-Gerüst inklusive App-Root ausgeben
  */
 function tourney_render_direct_blank_page() {
@@ -389,7 +410,9 @@ function js_enqueue_scripts_styles() {
     wp_enqueue_style( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css', array(), '5.3.3' );
     wp_enqueue_style( 'bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css', array(), '1.11.3' );
     wp_enqueue_script( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', array(), '5.3.3', false );
-    wp_enqueue_script( 'payhip', 'https://payhip.com/payhip.js', array(), null, false );
+    if ( TOURNEY_FWS ) {
+        wp_enqueue_script( 'payhip', 'https://payhip.com/payhip.js', array(), null, false );
+    }
 
     // Tourney-Haupt-Stylesheet mit Cache-Busting
     $main_css_path = TOURNEY_PLUGIN_PATH . 'css/main.css';

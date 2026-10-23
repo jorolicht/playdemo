@@ -21,11 +21,6 @@ export class TourneyNewPage {
   readonly inputAddrCity: Locator;
   readonly btnSave: Locator;
   readonly btnCreate: Locator;
-  readonly dlgModeModal: Locator;
-  readonly dlgRadioLocal: Locator;
-  readonly dlgRadioCloud: Locator;
-  readonly dlgModeApply: Locator;
-  readonly dlgModeCancel: Locator;
   readonly validationFeedback: Locator;
 
   constructor(page: Page) {
@@ -46,11 +41,6 @@ export class TourneyNewPage {
     this.inputAddrCity = page.locator('#tn-addr-city');
     this.btnSave = page.locator('button[type="submit"], button:has-text("ERSTELLEN"), button:has-text("CREATE"), button:has-text("Turnier speichern"), button:has-text("Speichern")');
     this.btnCreate = page.locator('button[type="submit"]:has-text("ERSTELLEN"), button[type="submit"]:has-text("CREATE")');
-    this.dlgModeModal = page.locator('#DlgTourneyNewMode_ModalId');
-    this.dlgRadioLocal = page.locator('#DlgTourneyNewMode_RadioLocalId');
-    this.dlgRadioCloud = page.locator('#DlgTourneyNewMode_RadioCloudId');
-    this.dlgModeApply = page.locator('#DlgTourneyNewMode_ApplyId');
-    this.dlgModeCancel = page.locator('#DlgTourneyNewMode_CancelId');
     this.validationFeedback = page.locator('#validationFeedback');
   }
 
@@ -93,25 +83,13 @@ export class TourneyNewPage {
     if (data.city) await this.inputAddrCity.fill(data.city);
   }
 
-  async save(mode: 'local' | 'cloud' = 'local') {
+  /**
+   * Saves the form. The target (local in browser, cloud or current page) is already
+   * determined when the creation is started (login state and plugin variant).
+   */
+  async save() {
     await this.page.locator('#DlgMsgbox_ModalId').waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
     await this.page.locator('.modal-backdrop').waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
     await this.btnSave.click();
-
-    // If target mode selection dialog appears, select mode and apply
-    try {
-      await this.dlgModeModal.waitFor({ state: 'visible', timeout: 2000 });
-      if (mode === 'cloud') {
-        if (await this.dlgRadioCloud.isEnabled()) {
-          await this.dlgRadioCloud.check();
-        }
-      } else {
-        await this.dlgRadioLocal.check();
-      }
-      await this.dlgModeApply.click();
-      await this.dlgModeModal.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
-    } catch {
-      // Dialog not shown (e.g. edit mode or validation error)
-    }
   }
 }

@@ -71,9 +71,10 @@ object AdminManager extends ComWrapper {
    * by restoring non-null elements to their original indices, padded with nulls.
    *
    * @param jsonString The JSON serialization of the Tourney case class.
+   * @param overwrite True to overwrite an existing cloud tournament with the same slug.
    * @return A Future containing either an AppError or the slug of the newly created tournament.
    */
-  def importTourney(jsonString: String): Future[Either[AppError, String]] = {
+  def importTourney(jsonString: String, overwrite: Boolean = false): Future[Either[AppError, String]] = {
     try {
       val newTourney = try {
         read[services.DemoManager.DemoPayload](jsonString).tourney.tourney
@@ -106,7 +107,7 @@ object AdminManager extends ComWrapper {
         if (idx >= 0 && idx < 128) newTourney.stages(idx) = r
       }
 
-      TourneyDB.apiCreate(newTourney).flatMap {
+      TourneyDB.apiCreate(newTourney, overwrite).flatMap {
         case Right(slug) =>
           // Update the DB references and register sync handlers
           TourneyDB.update(newTourney, doSync = false)

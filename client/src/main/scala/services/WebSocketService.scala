@@ -24,7 +24,7 @@ object WebSocketService:
   def getConnectedSlug: Option[String] = currentSlug
 
   def init(): Unit = {
-    if (base.Global.isDemoMode || base.Global.isLocalMode || base.Global.isViewMode) {
+    if (!base.Global.usePlayServer || base.Global.isViewMode) {
       disconnect()
       return
     }
@@ -59,7 +59,7 @@ object WebSocketService:
   }
 
   def connect(slug: String): Unit = {
-    if (base.Global.isDemoMode || base.Global.isLocalMode || base.Global.isViewMode) {
+    if (!base.Global.usePlayServer || base.Global.isViewMode) {
       disconnect()
       return
     }

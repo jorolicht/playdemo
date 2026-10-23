@@ -36,30 +36,15 @@ object PureView extends BasePage with JsWrapper with ComWrapper:
 
   /**
    * Event handler for button clicks and interactions on PureView.
-   * Starts the corresponding action directly without confirmation dialogs
-   * and saves tournament data into the current WordPress page.
+   * Starts the corresponding action via StartManager, which saves the tournament
+   * into the current WordPress page (with overwrite confirmation) or shows an error without write access.
    *
    * @param elem Target HTML element.
    * @param event DOM event trigger.
    */
   override def handleEvent(elem: HTMLElement, event: Event): Unit =
     HtmlId(elem.id) match
-      case `BtnDemo` =>
-        services.DemoManager.startDemoInPageMode { () =>
-          comps.Navbar.openTourneyView(services.TourneyDB.tourney)
-        }
-      case `BtnOption1` =>
-        Global.isLocalMode = false
-        Global.isDemoMode = false
-        services.TourneyDB.tourney = shared.model.Tourney.default.copy(wpId = 0)
-        services.TourneyDB.version = 1
-        Global.currentSelection = shared.model.Selection()
-        loadPage(TourneyNew.name, "")
-      case `BtnOption2` =>
-        Global.isLocalMode = false
-        Global.isDemoMode = false
-        services.TourneyDB.tourney = shared.model.Tourney.default.copy(wpId = 0)
-        services.TourneyDB.version = 1
-        Global.currentSelection = shared.model.Selection()
-        comps.Navbar.doQuickStart()
+      case `BtnDemo`    => StartManager.start(StartKind.Demo)
+      case `BtnOption1` => StartManager.start(StartKind.Tourney)
+      case `BtnOption2` => StartManager.start(StartKind.Competition)
       case _ => debug(s"PureView handleEvent: ${elem.id}")

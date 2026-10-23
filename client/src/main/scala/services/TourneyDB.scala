@@ -97,8 +97,11 @@ object TourneyDB extends ComWrapper with Debouncer:
 
   /**
    * Creates a new tournament post on the server (or saves into the current host page in 'pure' mode).
+   *
+   * @param t The tournament to create.
+   * @param overwrite True to refill an existing cloud tournament with the same slug instead of failing with 'tourney_already_exists'.
    */
-  def apiCreate(t: Tourney): Future[Either[AppError, String]] =
+  def apiCreate(t: Tourney, overwrite: Boolean = false): Future[Either[AppError, String]] =
     if (base.Global.isDemoMode || base.Global.isLocalMode) then
       t.wpId = 999999
       base.Global.isLocalMode = true
@@ -106,7 +109,8 @@ object TourneyDB extends ComWrapper with Debouncer:
       org.scalajs.dom.window.localStorage.setItem("App.demo_tourney", write(req))
       Future.successful(Right("demo-slug"))
     else
-      val params = if (!Global.fws && Global.hostPageId > 0) List("pageId" -> Global.hostPageId.toString) else List()
+      val pageParams = if (!Global.fws && Global.hostPageId > 0) List("pageId" -> Global.hostPageId.toString) else List()
+      val params = if (overwrite) pageParams :+ ("overwrite" -> "1") else pageParams
       ajaxPost[Tourney, TourneyCreateResponse](routeCreate, params, t, host = Global.homeUrl).map {
         case Right(res) =>
           t.wpId = res.pageId

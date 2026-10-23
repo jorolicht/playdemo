@@ -229,6 +229,11 @@ object Global:
   var isHomePage: Boolean = false
   /** True, wenn der Benutzer Schreibrechte auf die einbettende Seite bzw. das Turnier hat (von WordPress ermittelt). */
   var canEditPage: Boolean = false
+  /**
+   * True, wenn der Play-Server aufgerufen werden darf: nur bei Full Web Site und wenn das
+   * Turnier nicht lokal im Browser gespeichert ist (kein Lokal- oder Demo-Modus).
+   */
+  def usePlayServer: Boolean = fws && !isLocalMode && !isDemoMode
   def isViewMode: Boolean = activePageName == "TourneyWelcome" || activePageName == "CompetitionWelcome"
   var activePageName: String = ""
   def isTourneyPage(pageName: String): Boolean = 
@@ -309,6 +314,14 @@ object Global:
         isAdminOrMaster || isTourneyAdminOfThis || isPageEditor
       case None => false
     }
+
+  /**
+   * True, wenn der angemeldete Benutzer neue Turniere in der Cloud anlegen darf.
+   * Entspricht dem WordPress-Recht 'edit_posts', das der Server beim Anlegen prüft
+   * (Abonnenten haben es nicht).
+   */
+  def canCreateTourney: Boolean =
+    user.exists(_.roles.exists(r => List("administrator", "editor", "author", "contributor", "tourney_admin", "tourney_master").contains(r)))
 
   def formatDateTime(dateTimeStr: String): String = {
     val formatCode = currentAci.dateFormat

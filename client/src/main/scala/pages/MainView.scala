@@ -383,7 +383,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
       case `BtnDemo` =>
-        comps.Navbar.doStartDemo()
+        services.StartManager.start(services.StartKind.Demo)
       case `BtnCloseNews` =>
         addClass(gE(NewsBarId), "d-none")
       case `BtnLoadLast` | `StatusTourney` =>
@@ -402,31 +402,9 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
             render()
           case _ => debug("Delete local tourney cancelled")
         }
-      case `BtnOption1` => 
-        dialogs.DlgStartTourney.show().map {
-          case true =>
-            services.DemoManager.startLocalMode { () =>
-              if (Global.user.isDefined) {
-                services.TourneyDB.tourney.wpId = 0
-                Global.isLocalMode = false
-              }
-              loadPage(TourneyNew.name, "")
-            }
-          case false =>
-            debug("Start full tournament cancelled")
-        }
-      case `BtnOption2` => 
-        dialogs.DlgStartCompetition.show().map {
-          case true =>
-            services.DemoManager.startLocalMode { () =>
-              if (Global.user.isDefined) {
-                services.TourneyDB.tourney.wpId = 0
-                Global.isLocalMode = false
-              }
-              comps.Navbar.doQuickStart()
-            }
-          case false =>
-            debug("Start competition cancelled")
-        }
+      case `BtnOption1` =>
+        services.StartManager.start(services.StartKind.Tourney)
+      case `BtnOption2` =>
+        services.StartManager.start(services.StartKind.Competition)
       case `BtnSearch` => loadPage(MainSearch.name, "")
       case _ => debug(s"MainView handleEvent: ${elem.id}")

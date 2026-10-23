@@ -8,6 +8,7 @@ import shared.BoxButton
 import shared.PageNameTyp
 import base.{Global, Logging}
 import base.Messages.gM
+import shared.basic.AppError
 
 object DemoManager extends ComWrapper {
 
@@ -92,14 +93,15 @@ object DemoManager extends ComWrapper {
   }
 
   /**
-   * Loads the pre-populated demo tournament and saves it directly into the current WordPress page
-   * (used in 'pure' mode). Sets isLocalMode and isDemoMode to false, synchronizes all demo data
-   * (basic, clubs, players, competitions, stages) to the server page, and invokes proceedAction.
+   * Loads the pre-populated demo tournament and saves it on the server: with Full Web Site as a
+   * new cloud tournament, embedded (fws=false) into the current WordPress page.
+   * Sets isLocalMode and isDemoMode to false and synchronizes all demo data
+   * (basic, clubs, players, competitions, stages) to the server.
    *
-   * @param proceedAction Callback invoked after the demo tournament is saved to the page.
-   * @return A Future containing true if the demo tournament was saved to the page, false otherwise.
+   * @param overwrite True to overwrite an existing cloud demo tournament with the same slug.
+   * @return A Future with Right(()) when saved, or Left(AppError), e.g. 'tourney_already_exists'.
    */
-  def startDemoInPageMode(proceedAction: () => Unit = () => ()): Future[Boolean] = {
+  def startDemoOnServer(overwrite: Boolean = false): Future[Either[AppError, Unit]] = {
     val filename = "demo_tourney.json"
     val url = s"${Global.dataUrl}$filename"
     val timestamp = new scala.scalajs.js.Date().getTime().toLong
@@ -122,33 +124,32 @@ object DemoManager extends ComWrapper {
             if (!payload.tourney.tourney.name.startsWith(prefix)) {
               payload.tourney.tourney.name = prefix + payload.tourney.tourney.name
             }
-            AdminManager.importTourney(write(payload)).map {
+            AdminManager.importTourney(write(payload), overwrite).map {
               case Right(slug) =>
                 Global.isLocalMode = false
                 Global.isDemoMode = false
                 Global.tourneySlug = slug
                 Global.pageId = TourneyDB.tourney.wpId
                 Global.currentSelection = shared.model.Selection(Some(TourneyDB.tourney))
-                proceedAction()
-                true
+                Right(())
               case Left(err) =>
-                Logging.error(s"Failed to save demo tournament to page: ${err.msgCode}")
-                false
+                Logging.error(s"Failed to save demo tournament on server: ${err.msgCode}")
+                Left(err)
             }
           } catch {
             case ex: Exception =>
-              Logging.error(s"Failed to parse demo payload for page mode: ${ex.getMessage}")
-              Future.successful(false)
+              Logging.error(s"Failed to parse demo payload: ${ex.getMessage}")
+              Future.successful(Left(AppError("demo.load.failed", ex.getMessage)))
           }
         }
       } else {
         Logging.error(s"Failed to fetch demo data: ${response.statusText}")
-        Future.successful(false)
+        Future.successful(Left(AppError("demo.load.failed", response.statusText)))
       }
     }.recover {
       case ex: Exception =>
-        Logging.error(s"Error starting demo in page mode: ${ex.getMessage}")
-        false
+        Logging.error(s"Error starting demo on server: ${ex.getMessage}")
+        Left(AppError("demo.load.failed", ex.getMessage))
     }
   }
 

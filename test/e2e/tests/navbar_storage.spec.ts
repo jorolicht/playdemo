@@ -188,7 +188,11 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
 
   test('TC-NB-04b [👤]: "Turnier in die Cloud verschieben" ist AKTIV wenn User angemeldet ist und lokales Turnier aktiv ist', async ({ page }) => {
     // Intercept user endpoint to simulate logged-in organizer
+    // Logged-in state is simulated only after the local demo was started
+    // (a logged-in user creates new tournaments in the cloud, see StartManager)
+    let loggedIn = false;
     await page.route('**/wp-json/tourney/v1/user', async (route) => {
+      if (!loggedIn) { await route.continue(); return; }
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -207,6 +211,11 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
 
     // Start Demo to have an active local tournament
     await mainPage.startDemo();
+    await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
+
+    // Now simulate login and reload: the local tournament stays active
+    loggedIn = true;
+    await page.reload();
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
 
     const offlineDropdown = page.locator('#offlineDropdown');
@@ -525,7 +534,11 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
 
   test('TC-NB-12 [👤]: "Turnier in die Cloud verschieben" verschiebt lokales Turnier erfolgreich in die Cloud', async ({ page }) => {
     // Intercept user endpoint
+    // Logged-in state is simulated only after the local demo was started
+    // (a logged-in user creates new tournaments in the cloud, see StartManager)
+    let loggedIn = false;
     await page.route('**/wp-json/tourney/v1/user', async (route) => {
+      if (!loggedIn) { await route.continue(); return; }
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -573,6 +586,11 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
 
     // Start Demo to have an active local tournament
     await mainPage.startDemo();
+    await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
+
+    // Now simulate login and reload: the local tournament stays active
+    loggedIn = true;
+    await page.reload();
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
 
     // Handle confirm dialog and success alert

@@ -108,8 +108,17 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
     await expect(searchPage.inputTitle).toBeVisible();
   });
 
-  test('TC-MV-03 [🌐]: Klick auf "Ganzes Turnier" zeigt DlgStartTourney (Titel, Text, Buttons) und erlaubt Starten & Abbrechen', async ({ page }) => {
+  test('TC-MV-03 [🌐]: Klick auf "Ganzes Turnier" zeigt bei vorhandenem lokalen Turnier DlgStartTourney (Titel, Text, Buttons) und erlaubt Starten & Abbrechen', async ({ page }) => {
     const mainView = new MainViewPage(page);
+    await mainView.goto();
+
+    // Precondition: a local tournament is stored -> confirmation dialog is shown
+    await page.evaluate(() => {
+      window.localStorage.setItem('App.demo_tourney', JSON.stringify({
+        version: 1,
+        tourney: { wpId: 999999, name: 'Vorhandenes lokales Turnier', ident: 'LOCAL' }
+      }));
+    });
     await mainView.goto();
 
     // 1. Click Option1 -> Modal opens
@@ -170,8 +179,17 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
     await expect(page.locator('body')).toBeVisible();
   });
 
-  test('TC-MV-08 [🌐]: Klick auf "Wettbewerb starten" zeigt DlgStartCompetition (Titel, Text, Buttons) und erlaubt Starten & Abbrechen', async ({ page }) => {
+  test('TC-MV-08 [🌐]: Klick auf "Wettbewerb starten" zeigt bei vorhandenem lokalen Turnier DlgStartCompetition (Titel, Text, Buttons) und erlaubt Starten & Abbrechen', async ({ page }) => {
     const mainView = new MainViewPage(page);
+    await mainView.goto();
+
+    // Precondition: a local tournament is stored -> confirmation dialog is shown
+    await page.evaluate(() => {
+      window.localStorage.setItem('App.demo_tourney', JSON.stringify({
+        version: 1,
+        tourney: { wpId: 999999, name: 'Vorhandenes lokales Turnier', ident: 'LOCAL' }
+      }));
+    });
     await mainView.goto();
 
     // 1. Click Option2 -> Modal opens
@@ -198,6 +216,28 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
     // 5. Verify CompetitionNew page is shown (quickstart competition creation form)
     await expect(page.locator('input[id*="CompetitionNew_CompNameId"]')).toBeVisible({ timeout: 7000 });
     await expect(page.locator('button[id*="CompetitionNew_BtnSave"]')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('TC-MV-03c [🌐]: Klick auf "Ganzes Turnier" öffnet TourneyNew direkt ohne Dialog, wenn kein lokales Turnier vorhanden ist', async ({ page }) => {
+    const mainView = new MainViewPage(page);
+    await mainView.goto();
+    await page.evaluate(() => window.localStorage.removeItem('App.demo_tourney'));
+    await mainView.goto();
+
+    await mainView.clickOption1(false);
+    await expect(page.locator('#tn-name')).toBeVisible({ timeout: 7000 });
+    await expect(mainView.dlgStartTourneyModal).not.toBeVisible();
+  });
+
+  test('TC-MV-08c [🌐]: Klick auf "Wettbewerb starten" öffnet CompetitionNew direkt ohne Dialog, wenn kein lokales Turnier vorhanden ist', async ({ page }) => {
+    const mainView = new MainViewPage(page);
+    await mainView.goto();
+    await page.evaluate(() => window.localStorage.removeItem('App.demo_tourney'));
+    await mainView.goto();
+
+    await mainView.clickOption2(false);
+    await expect(page.locator('input[id*="CompetitionNew_CompNameId"]')).toBeVisible({ timeout: 7000 });
+    await expect(mainView.dlgStartCompetitionModal).not.toBeVisible();
   });
 
   test('TC-MV-08b [🌐]: Schnellstart über CompetitionNew erstellt Wettbewerb und navigiert zu CompetitionInfo', async ({ page }) => {

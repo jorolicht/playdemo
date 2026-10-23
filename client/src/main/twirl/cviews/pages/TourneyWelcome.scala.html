@@ -212,7 +212,7 @@
                                     </div>
                                 }
                             </div>
-                            @if(queryStr.nonEmpty) {
+                            @if(queryStr.nonEmpty && base.Global.usePlayServer) {
                                 <div class="col-md-5">
                                     <div class="position-relative rounded-3 overflow-hidden border shadow-sm" style="max-height: 180px;">
                                         @defining(if (base.Global.playUrl.nonEmpty) base.Global.playUrl.trim.stripSuffix("/") else "/srv") { playBase =>

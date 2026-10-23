@@ -257,6 +257,8 @@ object StageScoreSheet extends BasePage with JsWrapper:
     }
 
   private def generateAllQRCodes(stage: Stage): Unit =
+    // Schiedsrichter-Eingabe läuft über den Play-Server; ohne ihn keine QR-Codes
+    if (!Global.usePlayServer) return
     val t = services.TourneyDB.tourney
     val comp = t.competitions.filter(_ != null).find(_.id == stage.coId).get
     val slugName = t.slug.split('/').lastOption.getOrElse(t.slug)

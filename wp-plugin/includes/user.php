@@ -292,8 +292,11 @@ function tourney_add_custom_user_profile_fields( $user ) {
     </table>
     <?php
 }
-add_action( 'show_user_profile', 'tourney_add_custom_user_profile_fields' );
-add_action( 'edit_user_profile', 'tourney_add_custom_user_profile_fields' );
+// Zusätzliche Profil-Informationen (UserProfile) nur bei Full Web Site
+if ( TOURNEY_FWS ) {
+    add_action( 'show_user_profile', 'tourney_add_custom_user_profile_fields' );
+    add_action( 'edit_user_profile', 'tourney_add_custom_user_profile_fields' );
+}
 
 /**
  * Saves the custom user profile fields.
@@ -325,8 +328,10 @@ function ucfe_save_custom_user_profile_fields( $user_id ) {
         tourney_update_user_profile( $user_id, $profile );
     }
 }
-add_action( 'personal_options_update', 'ucfe_save_custom_user_profile_fields' );
-add_action( 'edit_user_profile_update', 'ucfe_save_custom_user_profile_fields' );
+if ( TOURNEY_FWS ) {
+    add_action( 'personal_options_update', 'ucfe_save_custom_user_profile_fields' );
+    add_action( 'edit_user_profile_update', 'ucfe_save_custom_user_profile_fields' );
+}
 
 /**
  * Function to retrieve the custom field for display outside the admin.
@@ -473,4 +478,6 @@ function tourney_assign_unmatched_purchases_on_register( $user_id ) {
         update_user_meta( $user_id, 'payhip_last_purchase_date', current_time( 'mysql' ) );
     }
 }
-add_action( 'user_register', 'tourney_assign_unmatched_purchases_on_register' );
+if ( TOURNEY_FWS ) {
+    add_action( 'user_register', 'tourney_assign_unmatched_purchases_on_register' );
+}

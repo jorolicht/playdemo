@@ -133,11 +133,11 @@ export class MainViewPage {
 
   /**
    * Clicks Option 1 (New Tournament) and optionally confirms the DlgStartTourney modal.
+   * The modal only appears if a local tournament is already stored (anonymous user).
    */
   async clickOption1(confirm: boolean = false) {
     await this.btnOption1.click();
-    if (confirm) {
-      await this.btnStartTourneyApply.waitFor({ state: 'visible', timeout: 5000 });
+    if (confirm && await this.dlgStartTourneyModal.waitFor({ state: 'visible', timeout: 1500 }).then(() => true, () => false)) {
       await this.btnStartTourneyApply.click();
       await expect(this.dlgStartTourneyModal).not.toBeVisible({ timeout: 7000 });
     }
@@ -155,8 +155,7 @@ export class MainViewPage {
    */
   async clickOption2(confirm: boolean = false) {
     await this.btnOption2.click();
-    if (confirm) {
-      await this.btnStartCompetitionApply.waitFor({ state: 'visible', timeout: 5000 });
+    if (confirm && await this.dlgStartCompetitionModal.waitFor({ state: 'visible', timeout: 1500 }).then(() => true, () => false)) {
       await this.btnStartCompetitionApply.click();
       await expect(this.dlgStartCompetitionModal).not.toBeVisible({ timeout: 7000 });
     }

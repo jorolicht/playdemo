@@ -102,29 +102,10 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     }
 
   /**
-   * Starts a demo tournament in local mode.
-   * Displays confirmation dialog informing the user that the active local tournament will be deleted,
-   * but only if an existing local tournament is actually present in storage or memory.
+   * Starts a demo tournament (cloud, local or in the current page, see StartManager).
    */
-  def doStartDemo(): Unit = {
-    def launch(): Unit = {
-      services.DemoManager.startDemoInLocalMode { () =>
-        base.Global.currentSelection = shared.model.Selection(Some(services.TourneyDB.tourney))
-        comps.ContextHeader.render()
-        comps.Navbar.render()
-        pages.loadPage(shared.PageNameTyp("TourneyInfo"), "")
-      }
-    }
-
-    if (services.TourneyDB.hasLocalTourney) {
-      dialogs.DlgStartDemo.show().map {
-        case true => launch()
-        case false => debug("Start demo cancelled")
-      }
-    } else {
-      launch()
-    }
-  }
+  def doStartDemo(): Unit =
+    services.StartManager.start(services.StartKind.Demo)
 
   /**
    * Exports the current tournament data to a local JSON file.

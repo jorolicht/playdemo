@@ -281,7 +281,7 @@ test.describe('UseCase 5.3: Turnier- & Wettbewerbserstellung mit Datum-Validieru
     await expect(infoPage.compTable.locator('tbody tr')).toHaveCount(1);
   });
 
-  test('TC-TI-12 [👤]: UseCase TourneyNew: Button "ERSTELLEN" öffnet Auswahldialog (lokal vs Cloud), wobei Cloud für nicht angemeldete User ausgegraut ist', async ({ page }) => {
+  test('TC-TI-12 [👤]: UseCase TourneyNew: Button "ERSTELLEN" legt das Turnier für nicht angemeldete User ohne Auswahldialog lokal im Browser an', async ({ page }) => {
     await mainPage.goto();
 
     // Start TourneyNew via Option1 (startFullTourney)
@@ -296,7 +296,7 @@ test.describe('UseCase 5.3: Turnier- & Wettbewerbserstellung mit Datum-Validieru
     const now = new Date();
     const start = new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000);
     const end = new Date(start.getTime() + 2 * 24 * 60 * 60 * 1000);
-    const tourneyName = `ModeDialog Test ${Date.now()}`;
+    const tourneyName = `Local Create Test ${Date.now()}`;
 
     await newPage.fillForm({
       name: tourneyName,
@@ -306,34 +306,12 @@ test.describe('UseCase 5.3: Turnier- & Wettbewerbserstellung mit Datum-Validieru
       endDate: formatDate(end),
     });
 
-    // 2. Click "ERSTELLEN" to trigger mode dialog
+    // 2. Click "ERSTELLEN": no target selection dialog, navigation to TourneyInfo
     await newPage.btnCreate.click();
-
-    // 3. Verify DlgTourneyNewMode modal appears
-    await expect(newPage.dlgModeModal).toBeVisible({ timeout: 5000 });
-
-    // 4. Verify Local radio is checked and Cloud radio is disabled for anonymous user
-    await expect(newPage.dlgRadioLocal).toBeChecked();
-    await expect(newPage.dlgRadioCloud).toBeDisabled();
-    await expect(newPage.dlgModeModal).toContainText(/Turnier lokal erstellen|Create tournament locally/);
-    await expect(newPage.dlgModeModal).toContainText(/Turnier in Cloud erstellen|Create tournament in Cloud/);
-    await expect(newPage.dlgModeModal).toContainText(/Anmeldung erforderlich|Login required/);
-
-    // 5. Test Cancel: modal closes, form data remains
-    await newPage.dlgModeCancel.click();
-    await expect(newPage.dlgModeModal).not.toBeVisible({ timeout: 3000 });
-    await expect(newPage.inputName).toHaveValue(tourneyName);
-
-    // 6. Click ERSTELLEN again and confirm with Apply
-    await newPage.btnCreate.click();
-    await expect(newPage.dlgModeModal).toBeVisible();
-    await newPage.dlgModeApply.click();
-
-    // 7. Verify navigation to TourneyInfo
     await expect(page.locator('.card-header h3')).toBeVisible({ timeout: 7000 });
     await expect(page.locator('body')).toContainText(tourneyName);
 
-    // Verify storage slug is "local"
+    // 3. Verify storage slug is "local"
     const storageSlug = await page.evaluate(() => sessionStorage.getItem('tourney_slug') || localStorage.getItem('tourney_slug'));
     expect(storageSlug).toBe('local');
   });
@@ -377,8 +355,7 @@ test.describe('UseCase 5.3: Turnier- & Wettbewerbserstellung mit Datum-Validieru
     await newPage.inputName.fill(updatedName);
     await btnSaveSubmit.click();
 
-    // 5. Verify DlgTourneyNewMode modal did NOT appear and updates are saved directly
-    await expect(newPage.dlgModeModal).not.toBeVisible();
+    // 5. Verify updates are saved directly
     await expect(page.locator('.card-header h3')).toBeVisible({ timeout: 7000 });
     await expect(page.locator('body')).toContainText(updatedName);
   });
