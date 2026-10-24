@@ -128,30 +128,40 @@ object ResultList extends BasePage with JsWrapper:
             else comp.pants1Stage.filter(_.place._1 > 0).sortBy(_.place._1).toSeq
 
           case StageData.KnockoutStage(_) =>
-            val rankedFromComp = comp.pants1Stage.filter(_.place._1 > 0).sortBy(_.place._1).toSeq
-            if (rankedFromComp.nonEmpty) rankedFromComp
-            else {
-              val finishedMatches = stage.matches.filter(_.finished)
-              if (finishedMatches.nonEmpty) {
-                val lastRound = finishedMatches.map(_.round).maxOption.getOrElse(1)
-                val finalMatch = finishedMatches.find(_.round == lastRound)
-                val pList = scala.collection.mutable.ListBuffer[Pant]()
-
-                finalMatch.foreach { m =>
-                  val winnerSno = if (m.sets._1 > m.sets._2) m.stNoA else m.stNoB
-                  val loserSno  = if (m.sets._1 > m.sets._2) m.stNoB else m.stNoA
-
-                  comp.pants1Stage.find(_.id == winnerSno).foreach(p => pList += p.copy(place = (1, 0)))
-                  comp.pants1Stage.find(_.id == loserSno).foreach(p => pList += p.copy(place = (2, 0)))
-                }
-                pList.toSeq
-              } else Seq.empty
-            }
+            getKoRanking(comp, stage)
         }
 
       case None =>
         comp.pants1Stage.filter(_.place._1 > 0).sortBy(_.place._1).toSeq
     }
+
+  /**
+   * Computes the placements of a knockout stage from its finished matches.
+   * Rounds count down (first round = highest number, final = 1, match for 3rd place = 0):
+   * final winner 1, final loser 2, match for 3rd place 3/4 (otherwise both semi-final losers 3),
+   * loser of round r >= 2 shares place 2^(r-1)+1 (3, 5, 9, ...). Participants still in the
+   * draw are not ranked yet.
+   *
+   * @param comp The competition containing the participants.
+   * @param stage The knockout stage.
+   * @return Ranked participants sorted by place.
+   */
+  private def getKoRanking(comp: Competition, stage: Stage): Seq[Pant] =
+    val finished = stage.matches.filter(_.finished)
+    val thirdPlayed = finished.exists(_.round == 0)
+    val places = finished.flatMap { m =>
+      val (winner, loser) = if (m.sets._1 > m.sets._2) (m.stNoA, m.stNoB) else (m.stNoB, m.stNoA)
+      m.round match {
+        case 0                => Seq(winner -> 3, loser -> 4)
+        case 1                => Seq(winner -> 1, loser -> 2)
+        case 2 if thirdPlayed => Seq.empty
+        case r                => Seq(loser -> ((1 << (r - 1)) + 1))
+      }
+    }.filter { case (sno, _) => !sno.isBye && !sno.isNN }
+
+    places.flatMap { case (sno, place) =>
+      comp.pants1Stage.find(_.id == sno).map(_.copy(place = (place, 0)))
+    }.sortBy(_.place._1).toSeq
 
   def render(param: String = ""): Boolean = 
     val allComps = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
