@@ -24,6 +24,11 @@ trait Debouncer:
     })
 
   /**
+   * True if an action is scheduled but not yet executed.
+   */
+  def hasPending: Boolean = pendingAction.isDefined
+
+  /**
    * Immediately cancels any currently running timer.
    */
   def cancelSync(): Unit =

@@ -57,12 +57,16 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     // expose addon Console.start function, only if addon is included, otherwise dummy function
     dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
 
-    dom.window.addEventListener("beforeunload", (e: dom.Event) => {
-      services.StageDB.flushSync()
-      services.CompetitionDB.flushSync()
-      services.ClubDB.flushSync()
-      services.PlayerDB.flushSync()
-      services.TourneyDB.flushSync()
+    // Ausstehende Änderungen sofort schreiben. Server-Requests sind asynchron und werden beim
+    // Entladen der Seite abgebrochen, daher den Browser-Dialog "Seite verlassen?" anzeigen,
+    // damit die Seite offen bleibt, bis der Sync abgeschlossen ist (lokal/Demo schreibt synchron).
+    dom.window.addEventListener("beforeunload", (e: dom.BeforeUnloadEvent) => {
+      val dbs = List(services.StageDB, services.CompetitionDB, services.ClubDB, services.PlayerDB, services.TourneyDB)
+      if (!Global.isDemoMode && !Global.isLocalMode && dbs.exists(_.hasPending)) {
+        e.preventDefault()
+        e.returnValue = ""
+      }
+      dbs.foreach(_.flushSync())
     })
 
     Messages.initMsg(effectiveVersion, Global.dataUrl, Global.lang).map {
