@@ -11,10 +11,15 @@ def getDockerDir(base: File, env: String): File = {
   else base / "docker" / "dev"
 }
 
+/**
+ * Liest einen Wert aus der Umgebung bzw. aus server/docker/<env>/.env (inkl. ${VAR}-Interpolation).
+ *
+ * @param base Projekt-Wurzelverzeichnis
+ */
 def getEnvValue(base: File, key: String, defaultVal: String): String = {
   sys.env.get(key).orElse {
     val env = getAppEnv
-    val envFile = getDockerDir(base, env) / ".env"
+    val envFile = getDockerDir(base / "server", env) / ".env"
     if (envFile.exists()) {
       val lines = IO.readLines(envFile)
       val envMap = lines.flatMap { line =>
