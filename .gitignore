@@ -43,6 +43,7 @@ server/docker/dev/registry/
 server/docker/dev/wordpress/
 server/docker/dev/certs/
 server/docker/dev/backups/
+server/docker/dev/downloads/*.zip
 
 server/docker/prod/.env
 server/docker/prod/.env_turnier-service.info
@@ -54,6 +55,7 @@ server/docker/prod/playsrv/stage
 server/docker/prod/certs
 server/docker/prod/backups
 server/docker/prod/registry
+server/docker/prod/downloads/*.zip
 server/docker/shuttle/
 
 server/env/dev.env

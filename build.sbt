@@ -41,8 +41,8 @@ def getEnvValue(base: File, key: String, defaultVal: String): String = {
 val includeAddon: Boolean  = true // always include addon for now, can be disabled later if needed
 val projectRootDir         = file(".")
 val appOrganization        = getEnvValue(projectRootDir, "APP_ORGANIZATION", "org.jorolicht")
-val appVersion             = getEnvValue(projectRootDir, "APP_VERSION", "1.0.3")
-val appDate                = getEnvValue(projectRootDir, "APP_DATE", "2026-08-30")
+val appVersion             = getEnvValue(projectRootDir, "APP_VERSION", "1.0.4")
+val appDate                = getEnvValue(projectRootDir, "APP_DATE", "2026-10-25")
 val appMaintainer          = getEnvValue(projectRootDir, "APP_MAINTAINER", "Robert Lichtenegger <robert.lichtenegger@gmail.com>")
 // Plugin-Variante: true = Full Web Site (Header/Footer + pages), false = eingebettet (ohne Header/Footer und pages)
 val fws: Boolean           = getEnvValue(projectRootDir, "APP_FWS", "true").trim.toLowerCase == "true"
@@ -86,7 +86,8 @@ val dockerPushImages   = taskKey[Unit]("Pushes playsrv-image, wp-cli-image, and 
 lazy val root = (project in file("."))
   .aggregate(server, client, shared.jvm, shared.js)
   .settings(
-    packageWpPlugin := (server / packageWpPlugin).value
+    packageWpPlugin := (server / packageWpPlugin).value,
+    publishWpPlugin := (server / publishWpPlugin).value
   )
 
 val genMsgFiles = taskKey[Unit]("Generate Message Files")  
@@ -94,6 +95,7 @@ val convertMessagesToJson = taskKey[Seq[File]]("Converts message files to JSON")
 
 lazy val syncClientWpFiles = taskKey[Unit]("Copies main.js and main.js.map to wordpress")
 val packageWpPlugin = taskKey[File]("Generates an installable WordPress plugin ZIP archive with SemVer version (tourney-<version>.zip)")
+val publishWpPlugin = taskKey[File]("Copies the plugin ZIP (APP_FWS=false only) into the public download area server/docker/<env>/downloads (tourney-embed-<version>.zip and tourney-embed-latest.zip)")
 
 lazy val server = project
   .settings(
@@ -394,6 +396,28 @@ lazy val server = project
 
       versionedZip
     },
+    publishWpPlugin := Def.taskDyn {
+      // Nur die Plugin-Variante (APP_FWS=false) gehört in den öffentlichen Download-Bereich
+      // (Service "downloads", URL /downloads/); taskDyn, damit bei fws=true gar nicht erst gepackt wird
+      if (fws) Def.task[File] {
+        throw new sbt.internal.util.MessageOnlyException("publishWpPlugin: Download-Bereich nur für die Plugin-Variante, bitte mit APP_FWS=false aufrufen")
+      } else Def.task[File] {
+        val versionedZip = packageWpPlugin.value
+        val log = streams.value.log
+        val downloadDir = getDockerDir(baseDirectory.value, getAppEnv) / "downloads"
+        val latestZip = downloadDir / "tourney-embed-latest.zip"
+
+        IO.createDirectory(downloadDir)
+        IO.copyFile(versionedZip, downloadDir / versionedZip.getName)
+        IO.copyFile(versionedZip, latestZip)
+
+        log.info(s"Published plugin to download area ${downloadDir.getAbsolutePath}:")
+        log.info(s"  - /downloads/${versionedZip.getName}")
+        log.info(s"  - /downloads/${latestZip.getName}")
+
+        latestZip
+      }
+    }.value,
     Universal / dist := {
       val zipFile = (Universal / packageBin).value
 
@@ -645,4 +669,5 @@ def buildMsg = Command.command("buildMsg") { state =>
 
 addCommandAlias("packageWp", "packageWpPlugin")
 addCommandAlias("packagePlugin", "packageWpPlugin")
+addCommandAlias("publishWp", "publishWpPlugin")
 

@@ -180,6 +180,27 @@ services:
       - proxy
       - backend
 
+  # Öffentlicher Download-Bereich (Plugin-ZIPs), befüllt durch "sbt publishWpPlugin"
+  downloads:
+    image: nginx:alpine
+    container_name: downloads-instance
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - ./downloads:/usr/share/nginx/html/downloads:ro
+      - ./downloads.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.downloads.entrypoints=websecure"
+      # Reagiert auf alle Hosts; längere Regel hat Vorrang vor WordPress (PathPrefix `/`)
+      - "traefik.http.routers.downloads.rule=PathPrefix(`/downloads`)"
+      - "traefik.http.routers.downloads.tls=true"
+      - "traefik.http.services.downloads.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy"
+    networks:
+      - proxy
+
   mailcatcher:
     image: sj26/mailcatcher:latest
     container_name: mailcatcher-instance

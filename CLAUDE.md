@@ -23,6 +23,7 @@ sbt startet automatisch im Projekt `server` (`Global / onLoad`).
 - `sbt run` – Play Dev-Server
 - `sbt buildMsg` – Nachrichtendateien neu erzeugen (`genMsgFiles` → `convertMessagesToJson`)
 - `sbt packageWpPlugin` (Alias `packageWp`) – installierbares ZIP `target/wordpress/tourney-<version>.zip`
+- `sbt publishWpPlugin` (Alias `publishWp`, nur mit `APP_FWS=false`) – Plugin-ZIP zusätzlich in den öffentlichen Download-Bereich `server/docker/<env>/downloads/` (`tourney-embed-<version>.zip` + `tourney-embed-latest.zip`), ausgeliefert vom Service `downloads` (nginx) unter `/downloads/`
 - `sbt stage` / `sbt dist` – Play-Distribution, wird nach `server/docker/<env>/playsrv/` kopiert
 - `sbt dockerBuildImages` / `dockerPushImages` – Images `jorolich/{playsrv,wp-cli,wp-gmp}-image` (linux/amd64)
 
