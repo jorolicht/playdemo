@@ -233,7 +233,7 @@ object StageScoreSheet extends BasePage with JsWrapper:
         ("", s"Runde $round")
       case StageFormat.KO =>
         val round = m.asInstanceOf[MEntryKo].round
-        val nameStr = if (round > 0) gM(s"competition.koRound.$round") else ""
+        val nameStr = if (round > 0) gM(s"StageInput.round.$round") else ""
         (nameStr, "")
       case StageFormat.SW =>
         ("", s"Runde ${m.round}")
@@ -357,7 +357,7 @@ object StageScoreSheet extends BasePage with JsWrapper:
               ("", s"Runde $round")
             case StageFormat.KO =>
               val round = m.asInstanceOf[MEntryKo].round
-              val nameStr = if (round > 0) gM(s"competition.koRound.$round") else ""
+              val nameStr = if (round > 0) gM(s"StageInput.round.$round") else ""
               (nameStr, "")
             case _ =>
               ("", "")

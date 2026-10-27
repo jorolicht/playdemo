@@ -41,7 +41,7 @@
       s"Runde $round"
     case StageFormat.KO =>
       val round = m.asInstanceOf[MEntryKo].round
-      if (round > 0) gM(s"competition.koRound.$round") else s"Runde $round"
+      if (round > 0) gM(s"StageInput.round.$round") else s"Runde $round"
     case StageFormat.SW =>
       s"Runde ${m.round}"
     case _ =>
@@ -144,7 +144,7 @@
           if (base.Global.lang == "de") s"Runde $round" else s"Round $round"
         case StageFormat.KO =>
           val round = m.asInstanceOf[MEntryKo].round
-          if (round > 0) gM(s"competition.koRound.$round") else s"Runde $round"
+          if (round > 0) gM(s"StageInput.round.$round") else s"Runde $round"
         case StageFormat.SW =>
           if (base.Global.lang == "de") s"Runde ${m.round}" else s"Round ${m.round}"
         case _ =>
