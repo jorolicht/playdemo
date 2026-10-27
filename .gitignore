@@ -61,7 +61,6 @@ server/docker/shuttle/
 server/env/dev.env
 server/env/prod.env
 
-
 wp-plugin/data
 wp-plugin/font
 wp-plugin/js
@@ -87,3 +86,10 @@ shared/.jvm
 .~*
 *~
 *.orig
+
+# Env-Dateien mit Zugangsdaten nie einchecken (nur Vorlagen *.env.example ohne echte Werte)
+.env
+.env.*
+.env_*
+*.env
+!.env.example
