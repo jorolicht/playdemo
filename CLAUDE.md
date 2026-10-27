@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `server/docker/dev` – Docker-Setup der Development-Umgebung, `server/docker/prod` – Produktiv-Umgebung
 - `test/` – Shell-/curl-Testskripte für die WordPress-API (`test/API`, `test/tourney`, `test/admin`, `test/misc`, `test/payhip`) sowie Playwright E2E-Tests (`test/e2e`)
 - `site/content` – statische Seiten, werden nach `wp-plugin/pages` kopiert
-- `doc/` – Projektdoku (u. a. `doc/build.md`: ausführliche Beschreibung aller sbt-Tasks)
+- `doc/` – lokale Notizen (nicht im Git, per `.gitignore` ausgeschlossen; u. a. `doc/build.md`: ausführliche Beschreibung aller sbt-Tasks); die Projektdoku steht in `README.md`
 
 ## Build & Befehle
 
