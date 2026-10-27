@@ -3,7 +3,8 @@
  * make_video.mjs - Erzeugt das Werbevideo (Demo-Turnier) als out/promo.mp4.
  *
  * Ablauf:
- *   1. Sprechertexte aus narration.json mit macOS 'say' vertonen (out/voice/*.wav, durations.json)
+ *   1. Sprechertexte aus narration.json vertonen (out/voice/*.wav, durations.json):
+ *      engine "azure" (Azure Speech, z. B. de-DE-KatjaNeural) oder "say" (macOS-Systemstimme)
  *   2. Aufnahme mit Playwright (promo.spec.ts) -> out/raw.webm, out/timeline.json
  *   3. Musik: MUSIC=<datei> oder synthetischer Platzhalter-Jingle
  *   4. Mischen mit ffmpeg: Sprache zeitgenau, Musik mit Ducking (sidechaincompress), H.264/AAC
@@ -12,17 +13,21 @@
  *   node video/make_video.mjs                 # alles
  *   MUSIC=track.mp3 node video/make_video.mjs # eigene, lizenzfreie Musik
  *   SKIP_RECORD=1 node video/make_video.mjs   # nur neu mischen (vorhandene Aufnahme)
+ *   TTS_ENGINE=say node video/make_video.mjs  # Engine aus narration.json überschreiben
  *
- * Voraussetzungen: macOS 'say', ffmpeg/ffprobe im PATH, laufende Umgebung unter WP_URL (test/e2e/.env).
+ * Voraussetzungen: ffmpeg/ffprobe im PATH, laufende Umgebung unter WP_URL (test/e2e/.env);
+ * für Azure AZURE_SPEECH_KEY und AZURE_SPEECH_REGION (Umgebung oder test/e2e/.env), für say macOS.
  */
 import { execFileSync, spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(DIR, 'out');
 const VOICE = path.join(OUT, 'voice');
+dotenv.config({ path: path.join(DIR, '..', '.env'), quiet: true });
 
 /** Führt ein Programm aus und bricht bei Fehler mit dessen Ausgabe ab. */
 function run(cmd, args, opts = {}) {
@@ -34,7 +39,9 @@ function duration(file) {
   return parseFloat(run('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', file]));
 }
 
-for (const tool of ['say', 'ffmpeg', 'ffprobe']) {
+const narration = JSON.parse(fs.readFileSync(path.join(DIR, 'narration.json'), 'utf-8'));
+const engine = process.env.TTS_ENGINE || narration.engine;
+for (const tool of engine === 'say' ? ['say', 'ffmpeg', 'ffprobe'] : ['ffmpeg', 'ffprobe']) {
   if (spawnSync('which', [tool]).status !== 0) {
     console.error(`❌ ${tool} nicht gefunden (ffmpeg: brew install ffmpeg)`);
     process.exit(1);
@@ -43,14 +50,43 @@ for (const tool of ['say', 'ffmpeg', 'ffprobe']) {
 fs.mkdirSync(VOICE, { recursive: true });
 
 // --- 1. Sprache -----------------------------------------------------------------------------
-const narration = JSON.parse(fs.readFileSync(path.join(DIR, 'narration.json'), 'utf-8'));
+/** Vertont einen Text mit Azure Speech (REST) und speichert ihn als WAV (48 kHz, mono). */
+async function azureTts(text, file) {
+  const { AZURE_SPEECH_KEY: key, AZURE_SPEECH_REGION: region } = process.env;
+  if (!key || !region) {
+    console.error('❌ AZURE_SPEECH_KEY und AZURE_SPEECH_REGION fehlen (test/e2e/.env oder Umgebung)');
+    process.exit(1);
+  }
+  const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const { voice, rate } = narration.azure;
+  const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="de-DE">` +
+    `<voice name="${voice}"><prosody rate="${rate}">${esc(text)}</prosody></voice></speak>`;
+  const res = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+    method: 'POST',
+    headers: {
+      'Ocp-Apim-Subscription-Key': key,
+      'Content-Type': 'application/ssml+xml',
+      'X-Microsoft-OutputFormat': 'riff-48khz-16bit-mono-pcm',
+      'User-Agent': 'tourney-promo-video',
+    },
+    body: ssml,
+  });
+  if (!res.ok) {
+    console.error(`❌ Azure Speech: HTTP ${res.status} ${await res.text()}`);
+    process.exit(1);
+  }
+  fs.writeFileSync(file, Buffer.from(await res.arrayBuffer()));
+}
+
+console.log(`🗣  Sprachausgabe: ${engine === 'say' ? `say ${narration.say.voice}` : `Azure ${narration.azure.voice}`}`);
 const durations = {};
 for (const seg of narration.segments) {
-  const aiff = path.join(VOICE, `${seg.id}.aiff`);
+  const raw = path.join(VOICE, `${seg.id}.${engine === 'say' ? 'aiff' : 'raw.wav'}`);
   const wav = path.join(VOICE, `${seg.id}.wav`);
-  run('say', ['-v', narration.voice, '-r', String(narration.rate), '-o', aiff, seg.text]);
-  run('ffmpeg', ['-y', '-v', 'error', '-i', aiff, '-ar', '48000', '-ac', '2', wav]);
-  fs.rmSync(aiff);
+  if (engine === 'say') run('say', ['-v', narration.say.voice, '-r', String(narration.say.rate), '-o', raw, seg.text]);
+  else await azureTts(seg.text, raw);
+  run('ffmpeg', ['-y', '-v', 'error', '-i', raw, '-ar', '48000', '-ac', '2', wav]);
+  fs.rmSync(raw);
   durations[seg.id] = duration(wav);
   console.log(`🎙  ${seg.id.padEnd(12)} ${durations[seg.id].toFixed(1)} s`);
 }
@@ -106,7 +142,7 @@ filters.push(
   '[music][side]sidechaincompress=threshold=0.05:ratio=4:attack=40:release=600[ducked]',
   // Lautheit für Web/Social Media: -16 LUFS, True Peak -1,5 dB
   '[ducked][voice]amix=inputs=2:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000[a]',
-  `[0:v]fps=30,format=yuv420p,fade=in:st=0:d=0.6,fade=out:st=${len - 1}:d=1[v]`,
+  `[0:v]fps=30,scale=1920:1080:flags=lanczos,format=yuv420p,fade=in:st=0:d=0.6,fade=out:st=${len - 1}:d=1[v]`,
 );
 const mp4 = path.join(OUT, 'promo.mp4');
 console.log('🎚  Mischen ...');

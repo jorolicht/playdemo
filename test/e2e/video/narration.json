@@ -1,6 +1,7 @@
 {
-  "voice": "Anna",
-  "rate": 172,
+  "engine": "azure",
+  "azure": { "voice": "de-DE-KatjaNeural", "rate": "+0%" },
+  "say": { "voice": "Anna", "rate": 172 },
   "segments": [
     { "id": "start",       "text": "Turnier-Service: die moderne Turnierverwaltung für Tischtennis. Turniere anlegen, Spieler und Vereine verwalten, Wettbewerbe auslosen und Ergebnisse live erfassen. Direkt im Browser, oder eingebettet in Ihre WordPress-Seite. Starten wir die Demo." },
     { "id": "tourney",     "text": "Die Turnierinfo zeigt die Eckdaten des Turniers und alle Wettbewerbe, mit Spielklasse, Spielstärke und aktuellem Status, von der Konfiguration bis zum laufenden Spielbetrieb. Wir öffnen die S-Klasse Herren Einzel." },

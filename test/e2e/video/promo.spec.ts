@@ -50,8 +50,8 @@ test('Werbevideo Demo-Turnier', async ({ browser }, testInfo) => {
     ignoreHTTPSErrors: true,
     locale: 'de-DE',
     viewport: { width: 1280, height: 720 },
-    deviceScaleFactor: 1.5,
-    recordVideo: { dir: path.join(OUT, 'raw'), size: { width: 1920, height: 1080 } },
+    // Videogröße = Viewport: Playwright skaliert nicht hoch (sonst grauer Rand); make_video.mjs skaliert auf 1920x1080
+    recordVideo: { dir: path.join(OUT, 'raw'), size: { width: 1280, height: 720 } },
   });
   await context.addInitScript(cursorScript);
   const page = await context.newPage();
@@ -141,11 +141,13 @@ test('Werbevideo Demo-Turnier', async ({ browser }, testInfo) => {
   const tab = (name: string) => page.locator('.nav-tabs a', { hasText: name });
   await expect(tab('Eingabe')).toBeVisible({ timeout: 15000 });
   await pause(600);
+  // Reiter im Takt der Aufzählung zeigen: Einleitung ca. 30 %, dann je Reiter ein gleicher Anteil
+  const tabsMs = durations['tabs'] * 1000;
   n = narrate('tabs');
-  await pause(1700);
+  await pause(tabsMs * 0.3);
   for (const name of ['Administration', 'Auslosung', 'Eingabe', 'Ergebnisse', 'Schiri']) {
     await moveTo(tab(name), 12);
-    await pause(550);
+    await pause(tabsMs * 0.12);
   }
   await n;
   await click(tab('Eingabe'));
