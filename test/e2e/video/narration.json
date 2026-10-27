@@ -1,0 +1,15 @@
+{
+  "voice": "Anna",
+  "rate": 172,
+  "segments": [
+    { "id": "start",       "text": "Turnier-Service: die moderne Turnierverwaltung für Tischtennis. Turniere anlegen, Spieler und Vereine verwalten, Wettbewerbe auslosen und Ergebnisse live erfassen. Direkt im Browser, oder eingebettet in Ihre WordPress-Seite. Starten wir die Demo." },
+    { "id": "tourney",     "text": "Die Turnierinfo zeigt die Eckdaten des Turniers und alle Wettbewerbe, mit Spielklasse, Spielstärke und aktuellem Status, von der Konfiguration bis zum laufenden Spielbetrieb. Wir öffnen die S-Klasse Herren Einzel." },
+    { "id": "competition", "text": "Ein Wettbewerb besteht aus einer oder mehreren Phasen, die sich verketten lassen. Zum Beispiel eine Vorrunde, jeder gegen jeden, und eine anschließende K.o.-Endrunde. Sehen wir uns die Endrunde an." },
+    { "id": "tabs",        "text": "Jede Phase hat fünf Reiter: Administration, Auslosung, Eingabe, Ergebnisse und Schiri." },
+    { "id": "table",       "text": "In der Eingabe wird dem Spiel ein Tisch zugewiesen. Damit startet das Spiel, und die laufende Spielzeit wird angezeigt." },
+    { "id": "result",      "text": "Nach dem Spiel werden die Sätze eingetragen und gespeichert." },
+    { "id": "demo",        "text": "Für die Demo füllen wir alle übrigen Spiele mit einem Klick aus." },
+    { "id": "ko",          "text": "Unter Ergebnisse wächst der K.o.-Baum automatisch mit, Runde für Runde, bis zum Sieger." },
+    { "id": "schiri",      "text": "Und für den Spielbetrieb: Schiedsrichterzettel mit QR-Code. Damit tragen die Spieler ihr Ergebnis selbst per Smartphone ein. Turnier-Service: Turniere einfach organisieren." }
+  ]
+}
