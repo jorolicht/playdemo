@@ -182,7 +182,7 @@ services:
 
   # Öffentlicher Download-Bereich (Plugin-ZIPs), befüllt durch "sbt publishWpPlugin"
   downloads:
-    image: nginx:alpine
+    image: nginx:1.31.8-alpine
     container_name: downloads-instance
     restart: unless-stopped
     expose:

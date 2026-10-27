@@ -3,7 +3,7 @@ name: ${APP_NAME}
 services:
   # Reverse Proxy (Traefik), der den HTTPS-Traffic (Port 443) verwaltet
   reverse-proxy:
-    image: traefik:latest
+    image: traefik:v3.6.2
     restart: unless-stopped
     command:
       - "--log.level=INFO"
@@ -193,7 +193,7 @@ services:
 
   # Öffentlicher Download-Bereich (Plugin-ZIPs), befüllt durch "sbt publishWpPlugin"
   downloads:
-    image: nginx:alpine
+    image: nginx:1.31.8-alpine
     container_name: downloads-instance
     restart: unless-stopped
     expose:
