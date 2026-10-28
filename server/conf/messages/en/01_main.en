@@ -489,6 +489,7 @@ stageLayout.tabScoresheet                           = Scoresheet
 stageLayout.tabCertificate                          = Certificate
 
 footer.realizedWith                                 = Realized with Scala.js & WordPress.
+footer.followUs                                     = Follow us on {0}
 
 tourneyNotice.comingSoonTitle                       = A tournament will be published here soon
 tourneyNotice.comingSoonInfo                        = There is no tournament available on this page yet. Please check back later.

@@ -493,6 +493,7 @@ stageLayout.tabScoresheet                           = Schiri
 stageLayout.tabCertificate                          = Urkunde
 
 footer.realizedWith                                 = Realisiert mit Scala.js & WordPress.
+footer.followUs                                     = Folgen Sie uns auf {0}
 
 tourneyNotice.comingSoonTitle                       = Hier wird bald ein Turnier veröffentlicht
 tourneyNotice.comingSoonInfo                        = Auf dieser Seite ist noch kein Turnier verfügbar. Bitte schauen Sie später noch einmal vorbei.

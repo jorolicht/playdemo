@@ -246,6 +246,10 @@ object Global:
   var hostPageId = 0
   var wpNonce   = ""
   var turnstileSitekey = ""
+  /** Social-Media-Links für den Footer (aus .env über data-Attribute; leer = Button ausgeblendet). */
+  var socialFacebook  = ""
+  var socialX         = ""
+  var socialInstagram = ""
   var currentAci: shared.model.ACI = shared.model.ACI()
 
   var authMode: AuthMode = AuthMode.Nonce

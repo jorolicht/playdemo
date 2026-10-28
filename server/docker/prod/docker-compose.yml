@@ -44,6 +44,10 @@ services:
       WORDPRESS_DB_NAME: ${DB_NAME}
       TURNSTILE_SITEKEY: ${TURNSTILE_SITEKEY}
       TURNSTILE_SECRET: ${TURNSTILE_SECRET}
+      # Social-Media-Links im Footer (leer = Button ausgeblendet)
+      SOCIAL_FACEBOOK_URL: ${SOCIAL_FACEBOOK_URL:-}
+      SOCIAL_X_URL: ${SOCIAL_X_URL:-}
+      SOCIAL_INSTAGRAM_URL: ${SOCIAL_INSTAGRAM_URL:-}
       WORDPRESS_CONFIG_EXTRA: |
         define( 'WP_HOME', "${WP_URL}" );
         define( 'WP_SITEURL', "${WP_URL}" );

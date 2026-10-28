@@ -163,6 +163,7 @@ Wichtige Variablen:
 | `WP_ADMIN_*` | WordPress-Administrator bei der Erstinstallation |
 | `PLAY_*` | Play-Server (Port, Secret, Mailer) |
 | `TURNSTILE_SITEKEY`, `TURNSTILE_SECRET` | Cloudflare Turnstile (Spam-Schutz der Anmeldung) |
+| `SOCIAL_FACEBOOK_URL`, `SOCIAL_X_URL`, `SOCIAL_INSTAGRAM_URL` | Social-Media-Buttons im Footer (vollständige URL; leer = Button ausgeblendet) |
 
 Steuerung beim Build:
 

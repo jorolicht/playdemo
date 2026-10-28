@@ -39,6 +39,9 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     Global.pageId   = getData(gE(ParamId), "pageid", 0)
     Global.hostPageId = Global.pageId
     Global.turnstileSitekey = getData(gE(ParamId), "turnstilesitekey", "")
+    Global.socialFacebook   = getData(gE(ParamId), "socialfacebook", "")
+    Global.socialX          = getData(gE(ParamId), "socialx", "")
+    Global.socialInstagram  = getData(gE(ParamId), "socialinstagram", "")
     Global.fws         = getData(gE(ParamId), "fws", 1) == 1
     Global.isHomePage  = getData(gE(ParamId), "ishome", 0) == 1
     Global.canEditPage = getData(gE(ParamId), "canedit", 0) == 1
