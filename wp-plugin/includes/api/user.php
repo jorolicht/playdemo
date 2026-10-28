@@ -4,6 +4,25 @@ require_once plugin_dir_path(__FILE__) . '../../vendor/autoload.php';
 
 use Firebase\JWT\JWT;
 
+/**
+ * Hält $_COOKIE in der laufenden Anfrage synchron mit den gerade gesetzten Anmelde-Cookies.
+ * wp_create_nonce() berechnet den Nonce mit dem Sitzungs-Token aus $_COOKIE; ohne diesen Abgleich
+ * wäre der in der Login-Antwort gelieferte Nonce ungültig (rest_cookie_invalid_nonce).
+ *
+ * @param string $logged_in_cookie Wert des neuen logged_in-Cookies.
+ */
+add_action('set_logged_in_cookie', function ($logged_in_cookie) {
+    $_COOKIE[LOGGED_IN_COOKIE] = $logged_in_cookie;
+});
+
+/**
+ * Entfernt beim Abmelden das logged_in-Cookie auch aus $_COOKIE der laufenden Anfrage,
+ * damit der in der Logout-Antwort gelieferte Nonce für den anonymen Benutzer gilt.
+ */
+add_action('clear_auth_cookie', function () {
+    unset($_COOKIE[LOGGED_IN_COOKIE]);
+});
+
 // Registrierung des API-Endpunkts
 // Permalink Einstellungen auf Beiträge setzen, damit die REST API funktioniert
 add_action('rest_api_init', function () {

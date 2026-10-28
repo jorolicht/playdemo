@@ -221,7 +221,7 @@ function pd_webauthn_login_process($request) {
         wp_set_current_user($userId);
         wp_set_auth_cookie($userId, true);
 
-        return ['status' => 'success', 'message' => 'Login erfolgreich.'];
+        return ['status' => 'success', 'message' => 'Login erfolgreich.', 'nonce' => wp_create_nonce('wp_rest')];
     } catch (\Exception $e) {
         return new WP_Error('login_failed', $e->getMessage(), ['status' => 403]);
     }

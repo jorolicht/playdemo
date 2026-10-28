@@ -169,4 +169,50 @@ test.describe('UseCase 11: Automatische Benutzer-Registrierung via Mailcatcher (
     await expect(page.locator('.verify-account-view')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('text=vom Administrator geprüft')).toBeVisible();
   });
+
+  test('TC-REG-05 [🌐]: Passwortlose Registrierung mit Passkey nach An- und Abmelden im selben Tab (gültiger Nonce)', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Virtueller WebAuthn-Authenticator nur in Chromium (CDP)');
+    const adminUser = process.env.TOURNEY_ADMIN_USER;
+    const adminPassword = process.env.TOURNEY_ADMIN_PASSWORD;
+    test.skip(!adminUser || !adminPassword, 'TOURNEY_ADMIN_USER/TOURNEY_ADMIN_PASSWORD nicht gesetzt');
+
+    const dialogs: string[] = [];
+    page.on('dialog', dialog => { dialogs.push(dialog.message()); });
+
+    // Virtueller Authenticator beantwortet navigator.credentials.create() automatisch
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('WebAuthn.enable');
+    await cdp.send('WebAuthn.addVirtualAuthenticator', {
+      options: {
+        protocol: 'ctap2', transport: 'internal', hasResidentKey: true,
+        hasUserVerification: true, isUserVerified: true, automaticPresenceSimulation: true,
+      },
+    });
+
+    // 1. An- und abmelden ohne Neuladen: der Client übernimmt die Nonces aus den Login-/Logout-Antworten
+    await loginPage.goto();
+    await loginPage.login(adminUser!, adminPassword!);
+    await expect(loginPage.successAlert).toBeVisible({ timeout: 10000 });
+    const navLogout = page.locator('#Navbar_DoLogoutId');
+    await expect(navLogout).toBeAttached({ timeout: 10000 });
+    await navLogout.dispatchEvent('click'); // Abmelden über das Benutzermenü der Navbar
+    await expect(page.locator('#Navbar_DoLogoutId')).toHaveCount(0, { timeout: 10000 });
+
+    // 2. Im selben Tab zur Registrierung wechseln und passwortlos registrieren
+    await page.evaluate(() => (window as any).appLoadPage('UserRegistration', ''));
+    await expect(regPage.emailInput).toBeVisible({ timeout: 10000 });
+    const testEmail = `testpasskey_${Date.now()}@example.com`;
+    await regPage.register({ email: testEmail, isAdmin: false });
+    await expect(regPage.successView).toBeVisible({ timeout: 15000 });
+
+    // 3. Kein Fehlerdialog (vorher: "Fehler beim Registrieren des Passkeys: ... rest_cookie_invalid_nonce")
+    expect(dialogs.filter(m => m.includes('Fehler'))).toEqual([]);
+
+    // 4. Passkey ist beim neuen Benutzer gespeichert
+    const mail = await MailcatcherHelper.waitForMessage(testEmail, 15000);
+    const uid = MailcatcherHelper.extractVerificationUrl(mail.plainBody)!.match(/uid=(\d+)/)![1];
+    createdUserIds.push(uid);
+    const keys = execSync(`docker exec wp-cli-instance wp user meta get ${uid} pd_webauthn_keys --path=/var/www/html --allow-root`).toString();
+    expect(keys.trim()).not.toBe('');
+  });
 });

@@ -95,7 +95,10 @@ object WebAuthnService extends JsWrapper with ComWrapper:
                     hdrs = Map("Content-Type" -> "application/json"),
                     host = Global.homeUrl
                 ).map {
-                    case Right(success) => Right(success.getOrElse("message", "Login erfolgreich."))
+                    case Right(success) =>
+                      // Nonce gilt nur für den angemeldeten Benutzer, daher übernehmen
+                      success.get("nonce").foreach(n => base.Global.wpNonce = n)
+                      Right(success.getOrElse("message", "Login erfolgreich."))
                     case Left(err)      => Left(err)
                 }
             }

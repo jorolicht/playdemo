@@ -91,9 +91,10 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
               val registerData = services.WebAuthnService.transformCreateResponse(credential) + ("user_id" -> userId)
 
               ajaxPost[Map[String, String], Map[String, String]](
-                "/wp-json/tourney/v1/auth/webauthn/register-public", 
-                List(), 
-                registerData, 
+                "/wp-json/tourney/v1/auth/webauthn/register-public",
+                List(),
+                registerData,
+                hdrs = Map("Content-Type" -> "application/json"), // anonymer Endpunkt: ohne X-WP-Nonce
                 host = Global.homeUrl
               ).map {
                 case Right(_) => 
