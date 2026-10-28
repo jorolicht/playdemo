@@ -105,7 +105,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
         Global.user.foreach(_.hasPasskey = true)
         dom.window.alert(msg)
         render()
-      case Left(err)  => dom.window.alert(s"Passkey konnte nicht hinzugefügt werden: ${err.msg}")
+      case Left(err)  => dialogs.DlgMsgbox.showError(err, "Passkey konnte nicht hinzugefügt werden")
     }
 
   private def doPasskeyDelete(): Unit =
@@ -122,7 +122,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
             dom.window.alert("Passkey erfolgreich gelöscht.")
             render()
           case Left(err) =>
-            dom.window.alert(s"Fehler beim Löschen des Passkeys: ${err.msg}")
+            dialogs.DlgMsgbox.showError(err, "Fehler beim Löschen des Passkeys")
         }
       case _ => // do nothing
     }

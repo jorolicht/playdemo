@@ -117,21 +117,20 @@ object CompetitionNew extends BasePage with JsWrapper with services.ComWrapper:
                 loadPage(PageNameTyp("CompetitionInfo"), "")
               }
             case Left(err) =>
-              dom.window.alert(s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}")
+              dialogs.DlgMsgbox.showError(err, "Fehler beim Erstellen des Wettbewerbs")
               Future.successful(())
           }
         case Left(err) =>
-          val errMsg = if (err.is("tourney_already_exists")) {
+          if (err.is("tourney_already_exists")) {
             val inputEl = gE(CompNameId).asInstanceOf[dom.html.Input]
             inputEl.classList.add("is-invalid")
             inputEl.oninput = { (_: dom.Event) =>
               inputEl.classList.remove("is-invalid")
             }
-            gM("error.competition_already_exists")
+            dom.window.alert(gM("error.competition_already_exists"))
           } else {
-            s"Fehler beim Erstellen des Wettbewerbs: ${err.msgCode}"
+            dialogs.DlgMsgbox.showError(err, "Fehler beim Erstellen des Wettbewerbs")
           }
-          dom.window.alert(errMsg)
           Future.successful(())
       }
     }

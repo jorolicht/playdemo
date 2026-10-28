@@ -89,14 +89,13 @@ object TourneyInfo extends BasePage with JsWrapper:
                 render() // Re-render page
               case Left(err) => 
                 error(s"Failed to add competition: ${err.msgCode}")
-                val errMsg = if (err.is("competition.date.outside.tourney")) {
-                  base.Messages.gM("dlg.comp.errDate")
+                if (err.is("competition.date.outside.tourney")) {
+                  dom.window.alert(base.Messages.gM("dlg.comp.errDate"))
                 } else if (err.is("error.competition_already_exists") || err.is("competition.alreadyExists")) {
-                  base.Messages.gM("error.competition_already_exists")
+                  dom.window.alert(base.Messages.gM("error.competition_already_exists"))
                 } else {
-                  s"Fehler beim Hinzufügen des Wettbewerbs: ${err.msgCode}"
+                  dialogs.DlgMsgbox.showError(err, "Fehler beim Hinzufügen des Wettbewerbs")
                 }
-                dom.window.alert(errMsg)
             }
           case Left(_) => debug("Add competition cancelled")
         }
@@ -115,7 +114,7 @@ object TourneyInfo extends BasePage with JsWrapper:
                 loadPage(MainView.name, "")
               case Left(err) =>
                 error(s"Löschen fehlgeschlagen: ${err.msgCode}")
-                dom.window.alert(s"Fehler beim Löschen des Turniers: ${err.msgCode}")
+                dialogs.DlgMsgbox.showError(err, "Fehler beim Löschen des Turniers")
             }
           case _ => debug("Delete cancelled")
         }

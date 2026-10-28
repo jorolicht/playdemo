@@ -134,7 +134,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
                   dom.window.alert("Homepage-Einstellungen erfolgreich gespeichert.")
                   render()
                 case Left(err) =>
-                  dom.window.alert(s"Fehler beim Speichern: ${err.msgCode}")
+                  dialogs.DlgMsgbox.showError(err, "Fehler beim Speichern")
               }
             }
           }
@@ -162,7 +162,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
                 case Right(_) =>
                   render()
                 case Left(err) =>
-                  dom.window.alert(s"Fehler beim Speichern: ${err.msgCode}")
+                  dialogs.DlgMsgbox.showError(err, "Fehler beim Speichern")
               }
             }
           }
@@ -180,7 +180,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
                   dom.window.alert("Einstellungen erfolgreich gespeichert.")
                   render()
                 case Left(err) =>
-                  dom.window.alert(s"Fehler beim Speichern: ${err.msgCode}")
+                  dialogs.DlgMsgbox.showError(err, "Fehler beim Speichern")
               }
             }
           }
@@ -201,7 +201,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
                     fileInput.value = "" // reset
                     loadPage(TourneyInfo.name, "")
                   case Left(err) =>
-                    dom.window.alert(s"Fehler beim Import: ${err.msgCode}")
+                    dialogs.DlgMsgbox.showError(err, "Fehler beim Import")
                     fileInput.value = "" // reset
                 }
               }

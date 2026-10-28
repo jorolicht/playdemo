@@ -1,10 +1,8 @@
-
-
 @import cviews.helper.html.*
 @import dialogs.DlgMsgbox.*
 @import shared.BoxButton
 
-@(title: String, body: String, btns: List[BoxButton])
+@(title: String, body: String, btns: List[BoxButton], details: Option[(String, String)] = None)
 
 <!-- Modal -->
 <div @id(ModalId)  class="modal fade" tabindex="-1">
@@ -16,8 +14,15 @@
       </div>
       <div class="modal-body">
         <p @id(BodyId) style="white-space: pre-wrap;">@body</p>
+        @for((code, callStack) <- details) {
+          <div @id(DetailsId) class="d-none small font-monospace bg-light border rounded p-2" style="white-space: pre-wrap; word-break: break-all;">@gM("msgbox.code") @code
+@gM("msgbox.callStack") @callStack</div>
+        }
       </div>
       <div class="modal-footer">
+        @if(details.isDefined) {
+          <button @id(DetailsBtnId) type="button" class="btn btn-outline-secondary btn-xs box-btn">@gM("msgbox.details")</button>
+        }
         @for(btn <- btns) {
           <button @id(btn.getId) type="button" class="btn btn-outline-secondary btn-xs box-btn">@gM(btn.msgCode)</button>
         }
@@ -25,4 +30,3 @@
     </div>
   </div>
 </div>
-  

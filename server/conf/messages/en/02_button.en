@@ -11,6 +11,7 @@ btn.retry     = RETRY
 btn.ignore    = Skip
 btn.yes       = YES
 btn.no        = NO
+btn.close     = CLOSE
 btn.acceptresult = Accept Result
 btn.demomode   = Demo Mode
 btn.localmode  = Local Mode

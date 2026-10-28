@@ -167,12 +167,11 @@ object CompetitionInfo extends BasePage with JsWrapper:
                   render()
                 case Left(err) =>
                   error(s"Failed to update competition: ${err.msgCode}")
-                  val errMsg = if (err.is("error.competition_already_exists") || err.is("competition.alreadyExists")) {
-                    base.Messages.gM("error.competition_already_exists")
+                  if (err.is("error.competition_already_exists") || err.is("competition.alreadyExists")) {
+                    dom.window.alert(base.Messages.gM("error.competition_already_exists"))
                   } else {
-                    s"Fehler beim Aktualisieren des Wettbewerbs: ${err.msgCode}"
+                    dialogs.DlgMsgbox.showError(err, "Fehler beim Aktualisieren des Wettbewerbs")
                   }
-                  dom.window.alert(errMsg)
               }
             case Left(_) => debug("Edit competition cancelled")
           }
@@ -197,7 +196,7 @@ object CompetitionInfo extends BasePage with JsWrapper:
                   loadPage(MainView.name, "")
                 case Left(err) =>
                   error(s"Fehler beim Löschen des Wettbewerbs: ${err.msgCode}")
-                  dom.window.alert(s"Fehler beim Löschen des Wettbewerbs: ${err.msgCode}")
+                  dialogs.DlgMsgbox.showError(err, "Fehler beim Löschen des Wettbewerbs")
               }
             case _ => debug("Delete competition cancelled")
           }

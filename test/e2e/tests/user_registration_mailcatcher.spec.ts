@@ -207,6 +207,7 @@ test.describe('UseCase 11: Automatische Benutzer-Registrierung via Mailcatcher (
 
     // 3. Kein Fehlerdialog (vorher: "Fehler beim Registrieren des Passkeys: ... rest_cookie_invalid_nonce")
     expect(dialogs.filter(m => m.includes('Fehler'))).toEqual([]);
+    await expect(page.locator('#DlgMsgbox_ModalId')).toHaveCount(0); // Fehlerdialog (DlgMsgbox.showError)
 
     // 4. Passkey ist beim neuen Benutzer gespeichert
     const mail = await MailcatcherHelper.waitForMessage(testEmail, 15000);

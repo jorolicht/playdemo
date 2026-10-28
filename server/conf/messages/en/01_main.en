@@ -503,3 +503,9 @@ startNew.overwriteCloud                             = The demo tournament is alr
 startNew.demoFailedTitle                            = Demo tournament
 startNew.demoFailed                                 = The demo tournament could not be created ({0}).
 startNew.noCreateRights                             = Your user account is not allowed to create new tournaments, competitions or demo tournaments.
+
+# Meldungsdialog: Fehleranzeige (DlgMsgbox.showError)
+msgbox.errorTitle                                   = Error
+msgbox.details                                      = Details
+msgbox.code                                         = Code:
+msgbox.callStack                                    = CallStack:

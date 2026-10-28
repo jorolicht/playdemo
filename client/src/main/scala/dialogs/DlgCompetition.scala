@@ -211,7 +211,7 @@ object DlgCompetition extends BaseDialog with JsWrapper:
                 dom.window.alert(base.Messages.gM("error.competition_already_exists"))
               case Left(err) =>
                 gE(ApplyId).asInstanceOf[dom.html.Button].disabled = false
-                dom.window.alert(s"Fehler: ${err.msgCode}")
+                dialogs.DlgMsgbox.showError(err)
             }
           case None =>
             if (!p.isCompleted) p.success(Right(DlgCompResult(comp)))

@@ -83,7 +83,7 @@ object StageDraw extends BasePage with JsWrapper:
                   Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
                   render()
                 case Left(err) =>
-                  dom.window.alert(s"Fehler beim Speichern der Paarung: ${err.msgCode}")
+                  dialogs.DlgMsgbox.showError(err, "Fehler beim Speichern der Paarung")
               }
             }
           case _ =>
@@ -255,7 +255,7 @@ object StageDraw extends BasePage with JsWrapper:
                   Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
                   render()
                 case Left(err) =>
-                  dom.window.alert(s"Fehler beim Speichern der Setzung: ${err.msgCode}")
+                  dialogs.DlgMsgbox.showError(err, "Fehler beim Speichern der Setzung")
               }
             }
           }

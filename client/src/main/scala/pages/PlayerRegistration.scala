@@ -268,7 +268,7 @@ object PlayerRegistration extends BasePage with JsWrapper:
                 }
                 
               case Left(err) =>
-                dom.window.alert(s"Fehler beim Hinzufügen des Spielers: ${err.msgCode}")
+                dialogs.DlgMsgbox.showError(err, "Fehler beim Hinzufügen des Spielers")
             }
           case _ => debug("Add Single cancelled")
         }

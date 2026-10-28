@@ -120,7 +120,7 @@ object MainSearch extends BasePage with JsWrapper with ComWrapper with Debouncer
             }
           case Left(err) => 
             error(s"Failed to initialize tournament $tourneyId: ${err.msgCode}")
-            dom.window.alert(s"Fehler beim Laden des Turniers: ${err.msgCode}")
+            dialogs.DlgMsgbox.showError(err, "Fehler beim Laden des Turniers")
         }
       case _ => 
         debug(s"MainSearch handleEvent: ${elem.id}")

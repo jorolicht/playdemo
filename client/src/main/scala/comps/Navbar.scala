@@ -220,7 +220,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
                     dom.window.alert("Cloud-Import erfolgreich! Das Turnier wurde erstellt und geladen.")
                     openTourneyView(TourneyDB.tourney)
                   case Left(err) =>
-                    dom.window.alert(s"Fehler beim Cloud-Import: ${err.msgCode}")
+                    dialogs.DlgMsgbox.showError(err, "Fehler beim Cloud-Import")
                 }
               }
             }
@@ -300,7 +300,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
         Global.currentSelection = Selection(Some(currentTourney))
         Global.isLocalMode = true
         comps.Navbar.render()
-        dom.window.alert(s"${gM("navbar.moveToCloudError")}: ${err.msgCode}")
+        dialogs.DlgMsgbox.showError(err, gM("navbar.moveToCloudError"))
     }
   }
 
@@ -348,7 +348,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
           case Right(_) =>
             openTourneyView(TourneyDB.tourney)
           case Left(err) =>
-            dom.window.alert(s"Fehler beim Laden des lokalen Turniers: ${err.msgCode}")
+            dialogs.DlgMsgbox.showError(err, "Fehler beim Laden des lokalen Turniers")
         }
       }
     }
@@ -380,7 +380,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
           case Right(_) =>
             openTourneyView(TourneyDB.tourney)
           case Left(err) =>
-            dom.window.alert(s"Fehler beim Laden des lokalen Turniers: ${err.msgCode}")
+            dialogs.DlgMsgbox.showError(err, "Fehler beim Laden des lokalen Turniers")
         }
       }
     } else {
@@ -414,7 +414,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
               if (err.is("forbidden") || err.is("unauthorized") || err.msgCode.toLowerCase.contains("permission")) {
                 dom.window.alert(gM("navbar.reloadNoPermission"))
               } else {
-                dom.window.alert(s"Fehler beim Laden des Turniers: ${err.msgCode}")
+                dialogs.DlgMsgbox.showError(err, "Fehler beim Laden des Turniers")
               }
           }
         }

@@ -507,3 +507,9 @@ startNew.overwriteCloud                             = Das Demo-Turnier ist berei
 startNew.demoFailedTitle                            = Demo-Turnier
 startNew.demoFailed                                 = Das Demo-Turnier konnte nicht angelegt werden ({0}).
 startNew.noCreateRights                             = Ihr Benutzerkonto hat keine Berechtigung, neue Turniere, Wettbewerbe oder Demo-Turniere anzulegen.
+
+# Meldungsdialog: Fehleranzeige (DlgMsgbox.showError)
+msgbox.errorTitle                                   = Fehler
+msgbox.details                                      = Details
+msgbox.code                                         = Code:
+msgbox.callStack                                    = CallStack:

@@ -100,7 +100,7 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
                 case Right(_) => 
                   loadPage(RegistrationSuccess.name, "")
                 case Left(err) => 
-                  dom.window.alert(s"Fehler beim Registrieren des Passkeys: ${err.msg}")
+                  dialogs.DlgMsgbox.showError(err, "Fehler beim Registrieren des Passkeys")
                   loadPage(RegistrationSuccess.name, "")
               }
             }.recover {
@@ -117,6 +117,6 @@ object UserRegistration extends BasePage with JsWrapper with services.ComWrapper
           Future.successful(loadPage(RegistrationSuccess.name, ""))
         }
       case Left(err) => 
-        dom.window.alert(s"Fehler: ${err}")
+        dialogs.DlgMsgbox.showError(err)
         Future.successful(())
     }
