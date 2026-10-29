@@ -3,13 +3,59 @@ import fs from 'fs';
 import path from 'path';
 
 /**
- * Nimmt das Werbevideo (Demo-Turnier) auf. Wird von make_video.sh gestartet, das vorher die
- * Sprachdateien erzeugt (out/voice/durations.json) und danach Video, Sprache und Musik mischt.
- * Ergebnis: out/raw.webm und out/timeline.json (Startzeiten der Sprechertexte relativ zum Videobeginn).
+ * Nimmt das Werbevideo (Demo-Turnier) auf. Wird von make_video.mjs gestartet, das vorher die
+ * Sprachdateien erzeugt (<out>/voice/durations.json) und danach Video, Sprache und Musik mischt.
+ * Ergebnis: <out>/raw.webm und <out>/timeline.json (Startzeiten der Sprechertexte und Untertitel
+ * relativ zum Videobeginn).
+ *
+ * Varianten (PROMO_VARIANT): "landscape" (Standard, 16:9, out/) und "reel" (9:16 für Instagram,
+ * out/reel/, mit eingeblendeten Untertiteln).
  */
 
-const OUT = path.resolve(__dirname, 'out');
+const VARIANTS = {
+  landscape: { viewport: { width: 1280, height: 720 }, narration: 'narration.json', out: 'out', subtitles: false },
+  reel: { viewport: { width: 720, height: 1280 }, narration: 'narration_reel.json', out: 'out/reel', subtitles: true },
+};
+const variant = VARIANTS[(process.env.PROMO_VARIANT || 'landscape') as keyof typeof VARIANTS];
+const OUT = path.resolve(__dirname, variant.out);
 const durations: Record<string, number> = JSON.parse(fs.readFileSync(path.join(OUT, 'voice', 'durations.json'), 'utf-8'));
+const texts: Record<string, string> = Object.fromEntries(
+  JSON.parse(fs.readFileSync(path.join(__dirname, variant.narration), 'utf-8')).segments.map((s: any) => [s.id, s.text]));
+
+/** Zerlegt einen Sprechertext in kurze Untertitel-Zeilen (an Wortgrenzen, max. ca. 34 Zeichen). */
+function captionChunks(text: string, maxLen = 34): string[] {
+  const chunks: string[] = [];
+  let line = '';
+  for (const word of text.split(/\s+/)) {
+    if (line && (line + ' ' + word).length > maxLen) { chunks.push(line); line = word; }
+    else line = line ? `${line} ${word}` : word;
+    if (/[.?!:]$/.test(word)) { chunks.push(line); line = ''; } // Satzende beendet die Zeile
+  }
+  if (line) chunks.push(line);
+  return chunks;
+}
+
+/** Untertitel-Einblendung im Seitenrahmen (unteres Drittel, oberhalb der Instagram-Bedienelemente). */
+const captionScript = () => {
+  const install = () => {
+    if (document.getElementById('__promo_caption')) return;
+    const style = document.createElement('style');
+    style.textContent = `
+      #__promo_caption { position: fixed; left: 50%; bottom: 23%; transform: translateX(-50%); z-index: 2147483645;
+        pointer-events: none; max-width: 76%; text-align: center; font: 700 30px/1.3 Arial, Helvetica, sans-serif;
+        color: #fff; background: rgba(15, 23, 42, .78); padding: 10px 18px; border-radius: 12px; display: none; }`;
+    document.head.appendChild(style);
+    const el = document.createElement('div');
+    el.id = '__promo_caption';
+    document.documentElement.appendChild(el);
+    (window as any).__promoCaption = (text: string) => {
+      el.textContent = text;
+      el.style.display = text ? 'block' : 'none';
+    };
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
+  else install();
+};
 
 /** Sichtbarer Mauszeiger mit Klick-Effekt, da Playwright den echten Cursor nicht aufzeichnet. */
 const cursorScript = () => {
@@ -49,26 +95,50 @@ test('Werbevideo Demo-Turnier', async ({ browser }, testInfo) => {
     baseURL: testInfo.project.use.baseURL,
     ignoreHTTPSErrors: true,
     locale: 'de-DE',
-    viewport: { width: 1280, height: 720 },
-    // Videogröße = Viewport: Playwright skaliert nicht hoch (sonst grauer Rand); make_video.mjs skaliert auf 1920x1080
-    recordVideo: { dir: path.join(OUT, 'raw'), size: { width: 1280, height: 720 } },
+    viewport: variant.viewport,
+    // Videogröße = Viewport: Playwright skaliert nicht hoch (sonst grauer Rand); make_video.mjs skaliert hoch
+    recordVideo: { dir: path.join(OUT, 'raw'), size: variant.viewport },
   });
   await context.addInitScript(cursorScript);
+  if (variant.subtitles) await context.addInitScript(captionScript);
   const page = await context.newPage();
   const t0 = Date.now(); // Videoaufnahme beginnt mit dem Öffnen der Seite
   const segments: { id: string; startMs: number }[] = [];
+  const captions: { startMs: number; endMs: number; text: string }[] = [];
 
-  /** Startet einen Sprechertext (Zeitstempel für das Mischen) und liefert ein Promise, das nach seiner Dauer erfüllt ist. */
+  /**
+   * Startet einen Sprechertext (Zeitstempel für das Mischen) und liefert ein Promise, das nach seiner Dauer erfüllt ist.
+   * In der Variante "reel" laufen die Untertitel zeitgleich mit (Dauer je Zeile anteilig zur Zeichenzahl).
+   */
   const narrate = (id: string): Promise<void> => {
-    segments.push({ id, startMs: Date.now() - t0 });
-    return page.waitForTimeout(durations[id] * 1000);
+    const startMs = Date.now() - t0;
+    segments.push({ id, startMs });
+    const totalMs = durations[id] * 1000;
+    if (variant.subtitles) {
+      const chunks = captionChunks(texts[id]);
+      const chars = chunks.reduce((n, c) => n + c.length, 0);
+      let offset = 0;
+      const plan = chunks.map(text => {
+        const ms = totalMs * text.length / chars;
+        const item = { at: offset, ms, text };
+        captions.push({ startMs: startMs + offset, endMs: startMs + offset + ms, text });
+        offset += ms;
+        return item;
+      });
+      page.evaluate(({ plan, totalMs }) => {
+        const show = (window as any).__promoCaption;
+        plan.forEach(p => setTimeout(() => show(p.text), p.at));
+        setTimeout(() => show(''), totalMs);
+      }, { plan, totalMs }).catch(() => {});
+    }
+    return page.waitForTimeout(totalMs);
   };
   const pause = (ms: number) => page.waitForTimeout(ms);
 
   /** Bewegt den Mauszeiger gleichmäßig auf die Mitte des Elements. */
   const moveTo = async (loc: Locator, steps = 25) => {
     const box = await loc.boundingBox();
-    if (!box) throw new Error(`moveTo: Element nicht sichtbar: ${loc}`);
+    if (!box) return; // z. B. im Hochformat eingeklappte Navigation: Zeiger bleibt stehen
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps });
   };
   const click = async (loc: Locator) => {
@@ -221,11 +291,32 @@ test('Werbevideo Demo-Turnier', async ({ browser }, testInfo) => {
   await pause(3500);
   await scrollBy(250);
   await n;
+  if (variant.subtitles) {
+    // Reel: Abschlusskarte mit Name und Adresse (auch als Titelbild nutzbar)
+    await page.evaluate(() => {
+      const card = document.createElement('div');
+      card.id = '__promo_endcard';
+      card.style.cssText = 'position:fixed; inset:0; z-index:2147483646; display:flex; flex-direction:column; ' +
+        'align-items:center; justify-content:center; gap:18px; text-align:center; color:#fff; ' +
+        'background:linear-gradient(160deg,#336699,#1e3a5f); font-family:Arial,Helvetica,sans-serif; ' +
+        'opacity:0; transition:opacity .6s ease;';
+      card.innerHTML =
+        '<div style="font-size:84px">🏓</div>' +
+        '<div style="font-size:56px; font-weight:800">TurnierService</div>' +
+        '<div style="font-size:30px; max-width:80%; line-height:1.35">Tischtennis-Turniere einfach im Browser organisieren</div>' +
+        '<div style="margin-top:34px; font-size:38px; font-weight:700; color:#1e293b; background:#f59e0b; ' +
+        'padding:16px 30px; border-radius:16px">turnier-service.info</div>' +
+        '<div style="font-size:24px; color:#dbeafe">Lokal dauerhaft kostenlos</div>';
+      document.documentElement.appendChild(card);
+      document.getElementById('__promo_cursor')?.remove(); // kein Mauszeiger auf der Karte
+      requestAnimationFrame(() => { card.style.opacity = '1'; });
+    });
+  }
   await pause(3000); // Outro-Musik
 
   const endMs = Date.now() - t0;
   const video = page.video()!;
   await context.close();
   await video.saveAs(path.join(OUT, 'raw.webm'));
-  fs.writeFileSync(path.join(OUT, 'timeline.json'), JSON.stringify({ trimStartMs, endMs, segments }, null, 2));
+  fs.writeFileSync(path.join(OUT, 'timeline.json'), JSON.stringify({ trimStartMs, endMs, segments, captions }, null, 2));
 });

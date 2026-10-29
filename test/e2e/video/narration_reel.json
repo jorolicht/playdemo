@@ -1,0 +1,16 @@
+{
+  "engine": "azure",
+  "azure": { "voice": "de-DE-KatjaNeural", "rate": "+5%" },
+  "say": { "voice": "Anna", "rate": 180 },
+  "segments": [
+    { "id": "start",       "text": "Tischtennis-Turnier geplant? Mit TurnierService organisierst du es direkt im Browser, ohne Installation. Lokal sogar dauerhaft kostenlos. Starten wir die Demo." },
+    { "id": "tourney",     "text": "Die Turnierinfo zeigt alle Wettbewerbe mit ihrem aktuellen Status. Wir öffnen die S-Klasse Herren Einzel." },
+    { "id": "competition", "text": "K.o.-System, Gruppen und Schweizer System kombinierst du frei zu Phasen. Hier: eine Vorrunde jeder gegen jeden, danach die K.o.-Endrunde." },
+    { "id": "tabs",        "text": "Jede Phase hat fünf Reiter: Administration, Auslosung, Eingabe, Ergebnisse und Schiri." },
+    { "id": "table",       "text": "Tisch zuweisen, und das Spiel läuft, mit Spielzeit." },
+    { "id": "result",      "text": "Sätze eintragen, speichern, fertig." },
+    { "id": "demo",        "text": "Für die Demo füllen wir den Rest mit einem Klick." },
+    { "id": "ko",          "text": "Der K.o.-Baum wächst automatisch mit, bis zum Sieger." },
+    { "id": "schiri",      "text": "In der Cloud tragen Spieler ihr Ergebnis per QR-Code selbst ein, live auf dem Hallenmonitor. Teste es jetzt kostenlos auf turnier-service.info." }
+  ]
+}

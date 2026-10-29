@@ -14,6 +14,8 @@
  *   MUSIC=track.mp3 node video/make_video.mjs # eigene, lizenzfreie Musik
  *   SKIP_RECORD=1 node video/make_video.mjs   # nur neu mischen (vorhandene Aufnahme)
  *   TTS_ENGINE=say node video/make_video.mjs  # Engine aus narration.json überschreiben
+ *   PROMO_VARIANT=reel node video/make_video.mjs  # Instagram-Reel 9:16 mit Untertiteln (out/reel/,
+ *                                                 # Texte aus narration_reel.json, zusätzlich subtitles.srt)
  *
  * Voraussetzungen: ffmpeg/ffprobe im PATH, laufende Umgebung unter WP_URL (test/e2e/.env);
  * für Azure AZURE_SPEECH_KEY und AZURE_SPEECH_REGION (Umgebung oder test/e2e/.env), für say macOS.
@@ -25,7 +27,18 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
-const OUT = path.join(DIR, 'out');
+// Varianten: Querformat (Standard) und Instagram-Reel (Hochformat, Untertitel im Bild)
+const VARIANTS = {
+  landscape: { narration: 'narration.json', out: 'out', size: '1920:1080' },
+  reel: { narration: 'narration_reel.json', out: 'out/reel', size: '1080:1920' },
+};
+const variantName = process.env.PROMO_VARIANT || 'landscape';
+const variant = VARIANTS[variantName];
+if (!variant) {
+  console.error(`❌ Unbekannte PROMO_VARIANT "${variantName}" (erlaubt: ${Object.keys(VARIANTS).join(', ')})`);
+  process.exit(1);
+}
+const OUT = path.join(DIR, variant.out);
 const VOICE = path.join(OUT, 'voice');
 dotenv.config({ path: path.join(DIR, '..', '.env'), quiet: true });
 
@@ -39,7 +52,7 @@ function duration(file) {
   return parseFloat(run('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', file]));
 }
 
-const narration = JSON.parse(fs.readFileSync(path.join(DIR, 'narration.json'), 'utf-8'));
+const narration = JSON.parse(fs.readFileSync(path.join(DIR, variant.narration), 'utf-8'));
 const engine = process.env.TTS_ENGINE || narration.engine;
 for (const tool of engine === 'say' ? ['say', 'ffmpeg', 'ffprobe'] : ['ffmpeg', 'ffprobe']) {
   if (spawnSync('which', [tool]).status !== 0) {
@@ -96,7 +109,7 @@ fs.writeFileSync(path.join(VOICE, 'durations.json'), JSON.stringify(durations, n
 if (!process.env.SKIP_RECORD) {
   console.log('🎬 Aufnahme mit Playwright ...');
   const res = spawnSync('npx', ['playwright', 'test', '-c', path.join(DIR, 'playwright.video.config.ts')],
-    { cwd: path.join(DIR, '..'), stdio: 'inherit' });
+    { cwd: path.join(DIR, '..'), stdio: 'inherit', env: { ...process.env, PROMO_VARIANT: variantName } });
   if (res.status !== 0) process.exit(res.status ?? 1);
 }
 const timeline = JSON.parse(fs.readFileSync(path.join(OUT, 'timeline.json'), 'utf-8'));
@@ -142,8 +155,18 @@ filters.push(
   '[music][side]sidechaincompress=threshold=0.05:ratio=4:attack=40:release=600[ducked]',
   // Lautheit für Web/Social Media: -16 LUFS, True Peak -1,5 dB
   '[ducked][voice]amix=inputs=2:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000[a]',
-  `[0:v]fps=30,scale=1920:1080:flags=lanczos,format=yuv420p,fade=in:st=0:d=0.6,fade=out:st=${len - 1}:d=1[v]`,
+  `[0:v]fps=30,scale=${variant.size}:flags=lanczos,format=yuv420p,fade=in:st=0:d=0.6,fade=out:st=${len - 1}:d=1[v]`,
 );
+// Untertitel als SRT (im Reel bereits ins Bild eingeblendet; für Plattformen mit eigener Untertitelspur)
+if (timeline.captions?.length) {
+  const ts = (ms) => {
+    const t = Math.max(0, Math.round(ms - timeline.trimStartMs));
+    const p = (n, w = 2) => String(n).padStart(w, '0');
+    return `${p(Math.floor(t / 3600000))}:${p(Math.floor(t / 60000) % 60)}:${p(Math.floor(t / 1000) % 60)},${p(t % 1000, 3)}`;
+  };
+  const srt = timeline.captions.map((c, i) => `${i + 1}\n${ts(c.startMs)} --> ${ts(c.endMs)}\n${c.text}\n`).join('\n');
+  fs.writeFileSync(path.join(OUT, 'subtitles.srt'), srt);
+}
 const mp4 = path.join(OUT, 'promo.mp4');
 console.log('🎚  Mischen ...');
 run('ffmpeg', ['-y', '-v', 'error', ...inputs, '-filter_complex', filters.join(';'),

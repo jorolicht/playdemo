@@ -17,13 +17,13 @@ err00013.auth.google                                = Fehler bei Google-Authenti
 err00014.auth.token.invalid                         = Fehler Google-Token ungültig
 err00015.login.invalid                              = E-Mail / Passwort ungültig
 
-err00050.wordpress.notfound.parse                   = No post found for slug {0} or ID could not be parsed
-err00051.wordpress.api.non.ok                       = WordPress API returned status {0} for slug {1}
-err00052.wordpress.network.unexpected               = Network or unexpected error: {0}
-err00053.wordpress.response.invalid                 = WordPress API return invalid, JSON format expected {0} {1}
-err00054.wordpress.data.notfound                    = WordPress API return no post data: {0} {1}
-err00055.wordpress.notallowed                       = WordPress API call not allowed, missing/wrong authentication/autorization
-err00056.wordpress.error                            = WordPress error status: {0} response: {1}
+err00050.wordpress.notfound.parse                   = Kein Beitrag zum Slug {0} gefunden oder ID nicht lesbar
+err00051.wordpress.api.non.ok                       = WordPress-API meldet Status {0} für Slug {1}
+err00052.wordpress.network.unexpected               = Netzwerk- oder unerwarteter Fehler: {0}
+err00053.wordpress.response.invalid                 = Ungültige Antwort der WordPress-API, JSON-Format erwartet: {0} {1}
+err00054.wordpress.data.notfound                    = WordPress-API liefert keine Beitragsdaten: {0} {1}
+err00055.wordpress.notallowed                       = Aufruf der WordPress-API nicht erlaubt, Anmeldung oder Berechtigung fehlt bzw. ist falsch
+err00056.wordpress.error                            = WordPress-Fehler, Status: {0} Antwort: {1}
 
 error.tourney_already_exists                        = Ein Turnier mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen.
 error.competition_already_exists                    = Ein Wettbewerb mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen.
