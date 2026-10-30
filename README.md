@@ -229,7 +229,15 @@ data-Attribute übergeben.
 [tourney page="login"]        Anmeldung
 [tourney page="register"]     Registrierung
 [tourney page="verify"]       E-Mail-Bestätigung
+[tourney_stats]               Nutzungsstatistik (nur Administratoren)
 ```
+
+**Nutzungsstatistik:** Der Client meldet Homepage-Aufrufe (einmal pro Browsersitzung) und Klicks auf „Demo“, „Turnier
+anlegen“ und „Wettbewerb starten“ per `navigator.sendBeacon` an `POST tourney/v1/stats-hit?e=home|demo|tourney|comp`
+(`includes/api/stats.php`). Gespeichert werden nur Tageszähler in der Tabelle `{prefix}tourney_stats`, ohne IP-Adressen;
+Bots und mehr als 30 Meldungen pro IP und Minute werden ignoriert. Auswertung: private Seite (z. B. „Statistik“) mit dem
+Shortcode `[tourney_stats]`, Umschaltung pro Tag (30 Tage) / pro Woche (12 ISO-Wochen). Seiten mit diesem Shortcode
+werden auch in der Website-Variante im Theme dargestellt.
 
 **Varianten** (Build-Variable `APP_FWS`, erzeugt `includes/config.php` mit `TOURNEY_FWS`):
 

@@ -266,3 +266,13 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-TI-TREE-01 [👤]:** In der Wettbewerbsliste steht vor jedem Wettbewerb mit Stages ein Tree Node Glyph (TNG). Klick klappt die Stages (mit eigenem TNG, Format und Status) auf; Klick auf den TNG einer Stage zeigt deren Reiter (Administration, Auslosung, Eingabe, Ergebnisse, Schiri, ggf. Urkunde). Klick auf einen Reiter wählt Wettbewerb und Stage aus und öffnet die zugehörige Stage-Seite mit aktivem Reiter.
 - [x] **TC-TI-TREE-02 [👤]:** Erneuter Klick auf den TNG eines Wettbewerbs klappt dessen Stages wieder zu.
 
+---
+
+## 18. UseCase: Nutzungsstatistik (`stats-hit`, Shortcode `[tourney_stats]`)
+
+### 18.1 Anonymer Nutzer (🌐) & Administrator (👑)
+- [x] **TC-STAT-01 [🌐]:** Der Aufruf der Homepage wird einmal pro Browsersitzung gemeldet (`stats-hit?e=home`), Neuladen meldet nicht erneut, eine neue Sitzung wieder.
+- [x] **TC-STAT-02 [🌐]:** Klicks auf „Demo“, „Turnier anlegen“ und „Wettbewerb starten“ werden gemeldet (`demo`, `tourney`, `comp`) und erhöhen den Tageszähler.
+- [x] **TC-STAT-03 [🌐]:** Unbekannte Ereignisse und Bot-User-Agents werden ignoriert (Antwort immer 204).
+- [x] **TC-STAT-04 [👑]:** Shortcode `[tourney_stats]` zeigt Tageswerte (30 Tage) und Wochenwerte (12 ISO-Wochen) mit Summenzeile, nur für Administratoren.
+- [x] **TC-STAT-05 [👑]:** Eine private WordPress-Seite mit `[tourney_stats]` wird auch in der Website-Variante im Theme angezeigt (nicht als App); anonym ist sie nicht sichtbar.

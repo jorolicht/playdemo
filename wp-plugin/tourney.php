@@ -132,6 +132,7 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/api/tourney.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/competition.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/stage.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/json.php';
+require_once TOURNEY_PLUGIN_PATH . 'includes/api/stats.php';
 // Payhip-Webhook (Kauf von Turnier-Kontingent) nur bei Full Web Site
 if (TOURNEY_FWS) {
     require_once TOURNEY_PLUGIN_PATH . 'includes/api/payhip.php';
@@ -300,12 +301,14 @@ add_filter( 'single_template_hierarchy', 'tourney_pure_mode_page_hierarchy' );
  * 2. Das leere Template erzwingen, bei Full Web Site (TOURNEY_FWS = true) für alle Frontend-Seiten:
  *    es erscheinen keine WordPress-Header/-Footer, nur die vom Scala.js-Client erzeugten.
  *    Eingebettet (TOURNEY_FWS = false) bleiben Theme-Header und -Footer erhalten.
+ *    Ausnahme: Seiten mit dem Shortcode [tourney_stats] (Statistik) nutzen das Theme-Template.
  *
  * @param string $template Pfad des von WordPress gewählten Templates.
- * @return string Unverändertes Template im eingebetteten Betrieb.
+ * @return string Unverändertes Template im eingebetteten Betrieb bzw. auf der Statistik-Seite.
  */
 function tourney_force_blank_template( $template ) {
-    if ( TOURNEY_FWS ) {
+    $post = is_singular() ? get_queried_object() : null;
+    if ( TOURNEY_FWS && !( $post instanceof WP_Post && has_shortcode( $post->post_content, 'tourney_stats' ) ) ) {
         tourney_render_direct_blank_page();
         exit;
     }

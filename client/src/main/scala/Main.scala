@@ -184,7 +184,10 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       case "register" => pages.loadPage(pages.UserRegistration.name, "")
       case "verify"   => pages.loadPage(pages.VerifyAccount.name, "")
       case _ =>
-        if (Global.fws && Global.isHomePage && tourneyParam.isEmpty) pages.loadPage(pages.MainView.name, "")
+        if (Global.fws && Global.isHomePage && tourneyParam.isEmpty) {
+          services.Stats.trackOncePerSession("home")
+          pages.loadPage(pages.MainView.name, "")
+        }
         else if (Global.fws) openPageTourney(if (tourneyParam.nonEmpty) tourneyParam else Global.pageId)
         else if (isTourneyPost && Global.hostPageId > 0) openPageTourney(Global.hostPageId)
         else showNoTourney()

@@ -35,6 +35,10 @@ object StartManager extends ComWrapper:
    * @param kind Demo-Turnier, Turnier oder Wettbewerb (Schnellstart).
    */
   def start(kind: StartKind): Unit =
+    Stats.track(kind match
+      case StartKind.Demo        => "demo"
+      case StartKind.Tourney     => "tourney"
+      case StartKind.Competition => "comp")
     if (!Global.fws) startInPage(kind)
     else if (Global.user.isDefined) startInCloud(kind)
     else startLocal(kind)
