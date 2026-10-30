@@ -3,7 +3,7 @@
 @import cviews.helper.html.*
 @import pages.Stage.StageResult.*
 
-@(stage: Stage, groups: Seq[Group])
+@(stage: Stage, groups: Seq[Group], cert: Boolean = false)
 
 <div class="card shadow-sm">
     <div class="card-body">
@@ -35,7 +35,7 @@
                                         @defining(bls._1 - bls._2) { diff =>
                                             <tr>
                                                 <td class="ps-2 fw-bold text-center">@{idx + 1}.</td>
-                                                <td>@p.name</td>
+                                                <td>@p.name@if(cert && p.place._1 > 0) {@CertBtn(stage, p.name, p.place._1.toString)}</td>
                                                 <td class="text-center">@pts._1:@pts._2</td>
                                                 <td class="text-center">@sts._1:@sts._2</td>
                                                 <td class="text-center">@bls._1:@bls._2</td>
@@ -56,9 +56,11 @@
             <button class="btn btn-outline-primary">
                 <i class="bi bi-printer me-1"></i>@gM("+btn_print")
             </button>
+            @if(!cert) {
             <button class="btn btn-primary" @id(NextStageBtn, "onclick")>
                 @gM("+btn_next") <i class="bi bi-arrow-right ms-1"></i>
             </button>
+            }
         </div>
     </div>
 </div>

@@ -486,7 +486,8 @@ stageLayout.tabDraw                                 = Draw
 stageLayout.tabInput                                = Input
 stageLayout.tabResult                               = Results
 stageLayout.tabScoresheet                           = Scoresheet
-stageLayout.tabCertificate                          = Certificate
+stageLayout.tabCertificate                          = Certificates
+stageLayout.showCertificate                         = Show certificate
 
 footer.realizedWith                                 = Realized with Scala.js & WordPress.
 footer.followUs                                     = Follow us on {0}

@@ -3,7 +3,7 @@
 @import cviews.helper.html.*
 @import pages.Stage.StageResult.*
 
-@(stage: Stage, swissState: SwissSys)
+@(stage: Stage, swissState: SwissSys, cert: Boolean = false)
 
 @compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
 @isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
@@ -137,7 +137,7 @@
                                         @defining(findPant(sp.sno)) { p =>
                                             <tr>
                                                 <td class="ps-3 fw-bold text-center">@{idx + 1}.</td>
-                                                <td class="fw-bold">@p.name</td>
+                                                <td class="fw-bold">@p.name@if(cert) {@CertBtn(stage, p.name, (idx + 1).toString)}</td>
                                                 <td class="text-center">@w : @l</td>
                                                 <td class="text-center">@sw : @sl</td>
                                                 <td class="text-center fw-bold text-primary">@bh</td>
@@ -168,9 +168,11 @@
                     <button class="btn btn-outline-primary" onclick="window.print()">
                         <i class="bi bi-printer me-1"></i>@gM("+btn_print")
                     </button>
+                    @if(!cert) {
                     <button class="btn btn-success px-4 fw-bold" @id(NextStageBtn, "onclick")>
                         @gM("StageDraw.btn_start_round", (maxRound + 1).toString) <i class="bi bi-play-circle ms-1"></i>
                     </button>
+                    }
                 </div>
             }
         }

@@ -490,7 +490,8 @@ stageLayout.tabDraw                                 = Auslosung
 stageLayout.tabInput                                = Eingabe
 stageLayout.tabResult                               = Ergebnisse
 stageLayout.tabScoresheet                           = Schiri
-stageLayout.tabCertificate                          = Urkunde
+stageLayout.tabCertificate                          = Urkunden
+stageLayout.showCertificate                         = Urkunde anzeigen
 
 footer.realizedWith                                 = Realisiert mit Scala.js & WordPress.
 footer.followUs                                     = Folgen Sie uns auf {0}

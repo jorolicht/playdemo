@@ -3,7 +3,7 @@
 @import cviews.helper.html.*
 @import pages.Stage.StageResult.*
 
-@(stage: Stage)
+@(stage: Stage, cert: Boolean = false)
 
 @compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
 @pants = @{ compOpt.map(_.pants1Stage.toSeq).getOrElse(Seq.empty) }
@@ -28,6 +28,22 @@
 }
 
 @thirdPlaceOpt = @{ koMatches.find(_.round == 0) }
+
+@* Endplatzierung eines Spielers, die in diesem Spiel feststeht (Finale 1/2, Spiel um Platz 3 3/4,
+   Verlierer der Runde r: 2^(r-1)+1; Halbfinal-Verlierer nur ohne Spiel um Platz 3) *@
+@koPlace(m: MEntryKo, sno: SNO) = @{
+  if (!m.finished || sno.isBye || sno.isNN) None
+  else {
+    val isWinner = (sno == m.stNoA) == (m.sets._1 > m.sets._2)
+    m.round match {
+      case 1 => Some(if (isWinner) "1" else "2")
+      case 0 => Some(if (isWinner) "3" else "4")
+      case 2 if thirdPlaceOpt.isDefined => None
+      case r if !isWinner => Some(((1 << (r - 1)) + 1).toString)
+      case _ => None
+    }
+  }
+}
 
 @getRoundName(roundNo: Int) = @{
     roundNo match {
@@ -77,6 +93,7 @@
                         <span class="bracket-player-club">@getPlayerClub(m.stNoA)</span>
                     }
                 </div>
+                <span class="ms-auto">@if(cert) {@for(rank <- koPlace(m, m.stNoA)) {@CertBtn(stage, getPlayerName(m.stNoA), rank)}}</span>
                 <span class="bracket-player-score">@{if(m.finished || m.status == MEntry.MS_RUN) m.sets._1.toString else "-"}</span>
             </div>
             <div class="bracket-player-row @{if(m.finished && m.sets._2 > m.sets._1) "winner" else if(m.finished) "loser" else ""}">
@@ -86,6 +103,7 @@
                         <span class="bracket-player-club">@getPlayerClub(m.stNoB)</span>
                     }
                 </div>
+                <span class="ms-auto">@if(cert) {@for(rank <- koPlace(m, m.stNoB)) {@CertBtn(stage, getPlayerName(m.stNoB), rank)}}</span>
                 <span class="bracket-player-score">@{if(m.finished || m.status == MEntry.MS_RUN) m.sets._2.toString else "-"}</span>
             </div>
         </div>
@@ -143,9 +161,11 @@
             <button class="btn btn-outline-primary">
                 <i class="bi bi-printer me-1"></i>@gM("+btn_print")
             </button>
+            @if(!cert) {
             <button class="btn btn-primary" @id(NextStageBtn, "onclick")>
                 @gM("+btn_next") <i class="bi bi-arrow-right ms-1"></i>
             </button>
+            }
         </div>
     </div>
 </div>

@@ -38,7 +38,7 @@ object StageResult extends BasePage with JsWrapper:
         loadPage(CompetitionInfo.name, "")
         false
 
-  private def initSlidingWindow(): Unit =
+  def initSlidingWindow(): Unit =
     currentStartIndex = 0
     val wrapper = dom.document.getElementById("tournamentWrapper").asInstanceOf[dom.html.Div]
     val container = dom.document.getElementById("tournamentContainer").asInstanceOf[dom.html.Div]

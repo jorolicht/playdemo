@@ -1,0 +1,16 @@
+@*
+ * Button "Urkunde" für einen Spieler im Reiter Urkunden (gleiche Ansicht wie Ergebnisse).
+ * Öffnet die Seite Certificate mit dem Parameter "<Name>|<Wettbewerb>|<Platz>".
+ *@
+@import shared.model.*
+@import base.Messages.gM
+
+@(stage: Stage, name: String, rank: String)
+
+@defining(services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId).map(_.name).getOrElse("")) { compName =>
+  @defining(s"$name|$compName|$rank".replace("\\", "\\\\").replace("'", "\\'")) { param =>
+    <button class="btn btn-sm btn-outline-primary py-0 px-1 ms-2 cert-btn" title="@gM("stageLayout.showCertificate")" onclick="appLoadPage('Certificate', '@param')">
+        <i class="bi bi-award-fill"></i>
+    </button>
+  }
+}

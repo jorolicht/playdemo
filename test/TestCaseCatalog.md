@@ -276,3 +276,11 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-STAT-03 [🌐]:** Unbekannte Ereignisse und Bot-User-Agents werden ignoriert (Antwort immer 204).
 - [x] **TC-STAT-04 [👑]:** Shortcode `[tourney_stats]` zeigt Tageswerte (30 Tage) und Wochenwerte (12 ISO-Wochen) mit Summenzeile, nur für Administratoren.
 - [x] **TC-STAT-05 [👑]:** Eine private WordPress-Seite mit `[tourney_stats]` wird auch in der Website-Variante im Theme angezeigt (nicht als App); anonym ist sie nicht sichtbar.
+
+---
+
+## 19. UseCase: Stage-Reiter Urkunden (`StageCertificate`)
+
+### 19.1 Turnierverwalter (👤)
+- [x] **TC-CERT-TAB-01 [👤]:** Der Reiter „Urkunden“ (nur bei der Urkunden-Stage) zeigt dieselbe Ansicht wie „Ergebnisse“; bei Jeder gegen Jeden hat jede Zeile mit Platzierung einen Urkunden-Button, der die Urkunde mit Name und Platz öffnet. Der Button „Nächste Stage“ fehlt.
+- [x] **TC-CERT-TAB-02 [👤]:** K.o.-System: Turnierbaum wie unter „Ergebnisse“; Urkunden-Buttons nur bei Spielern, deren Endplatzierung im Spiel feststeht (Finale 1/2, Spiel um Platz 3 3/4, sonst Verlierer der Runde).
