@@ -56,7 +56,9 @@ test.describe('UseCase 8: Phasen-Verwaltung & Auslosung (StageAdmin & StageDraw)
     await mainView.startDemo();
 
     // 1. Select first competition from TourneyInfo
-    const compCell = page.locator('table tbody tr td.fw-bold').first();
+    // Wettbewerb ohne Stages wählen ("S-Klasse Herren Einzel" hat in den Demo-Daten schon Vorrunde und Endrunde;
+    // eine weitere Stage verlangt im Dialog eine Vorgänger-Stage)
+    const compCell = page.locator('tr', { hasText: 'B-Klasse Damen Einzel' }).locator('span[onclick^="appLoadPage"]');
     await expect(compCell).toBeVisible({ timeout: 5000 });
     await compCell.click();
 

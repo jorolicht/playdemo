@@ -98,7 +98,7 @@ test.describe('UseCase 5.4: Lokaler Modus - Export- und Verlassen-Dialog (DlgExp
     await expect(infoPage.cardHeaderTitle).toBeVisible();
   });
 
-  test('TC-EXP-02 [👤]: Klick auf Speichern/Verlassen im lokalen Modus öffnet Dialog "Turnier verlassen" mit 2 Buttons (ABBRECHEN / VERLASSEN)', async ({ page }) => {
+  test('TC-EXP-02 [👤]: Klick auf Speichern/Verlassen im lokalen Modus speichert, zeigt den Speicherort an und führt zur Startseite', async ({ page }) => {
     await mainPage.goto();
 
     // 1. Enter Local Mode via Option 1
@@ -126,39 +126,23 @@ test.describe('UseCase 5.4: Lokaler Modus - Export- und Verlassen-Dialog (DlgExp
     await expect(infoPage.btnSaveLeave).toBeVisible();
     await infoPage.btnSaveLeave.click();
 
-    // 3. Verify DlgExportTourney modal appears in leave mode:
-    // - Title: "Turnier verlassen"
-    // - Text: "Das aktuelle Turnier wird in der Cloud bzw. lokal gespeichert."
-    // - Exactly 2 buttons: "ABBRECHEN" and "VERLASSEN"
-    // - No filename input field
-    await expect(infoPage.dlgExportModal).toBeVisible({ timeout: 5000 });
-    await expect(infoPage.dlgExportTitle).toHaveText(/Turnier verlassen|Leave tournament/i);
-    await expect(infoPage.dlgExportPrompt).toHaveText(/Das aktuelle Turnier wird in der Cloud bzw. lokal gespeichert\.|The current tournament will be saved in the cloud or locally\./i);
-    await expect(infoPage.inputExportFilename).not.toBeVisible();
-
-    const footerButtons = infoPage.dlgExportModal.locator('.modal-footer button');
-    await expect(footerButtons).toHaveCount(2);
-    await expect(infoPage.btnExportCancel).toHaveText(/ABBRECHEN|CANCEL/i);
-    await expect(infoPage.btnExportApply).toHaveText(/VERLASSEN|LEAVE/i);
-
-    // 4. Test cancel: click cancel and verify modal closes, staying on TourneyInfo
-    await infoPage.btnExportCancel.click();
-    await expect(infoPage.dlgExportModal).not.toBeVisible({ timeout: 3000 });
-    await expect(infoPage.cardHeaderTitle).toBeVisible();
-
-    // 5. Open dialog again and click "VERLASSEN" without download
-    await infoPage.btnSaveLeave.click();
-    await expect(infoPage.dlgExportModal).toBeVisible();
-
+    // 3. Seit 07f0d57: kein Dialog "Turnier verlassen" mehr, sondern Speichern und Hinweis auf den Speicherort
+    //    (DlgMsgbox "Speichern & Verlassen" mit "Speicherort: lokal im Browser" und nur OK); kein Datei-Download
     let downloadTriggered = false;
     const downloadListener = () => { downloadTriggered = true; };
     page.on('download', downloadListener);
 
-    await infoPage.btnExportApply.click();
+    const msgbox = page.locator('#DlgMsgbox_ModalId');
+    await expect(msgbox).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('#DlgMsgbox_TitleId')).toHaveText(/Speichern & Verlassen|Save & Leave/);
+    await expect(page.locator('#DlgMsgbox_BodyId')).toHaveText(/Speicherort: "lokal" im Browser|Storage location: "local" in browser/);
+    await expect(infoPage.dlgExportModal).not.toBeVisible();
+    const buttons = msgbox.locator('.modal-footer button');
+    await expect(buttons).toHaveCount(1);
 
-    // Verify modal closes
-    await expect(infoPage.dlgExportModal).not.toBeVisible({ timeout: 3000 });
-    // Verify navigation redirected away from TourneyInfo to MainView
+    // 4. OK führt zur Startseite
+    await buttons.first().click();
+    await expect(msgbox).not.toBeVisible({ timeout: 3000 });
     await expect(infoPage.cardHeaderTitle).not.toBeVisible({ timeout: 7000 });
     await expect(page.locator('.hero-section').first()).toBeVisible({ timeout: 7000 });
 
