@@ -9,11 +9,11 @@
             </div>
             <div class="col-md-8 text-md-end">
                 <ul class="list-inline mb-0">
-                    <li class="list-inline-item me-3"><a href="javascript:appLoadPage('MainView', 'impressum')" class="text-decoration-none text-muted small">@gM("footer.impressum")</a></li>
-                    <li class="list-inline-item me-3"><a href="javascript:appLoadPage('MainView', 'privacy')" class="text-decoration-none text-muted small">@gM("footer.privacy")</a></li>
-                    <li class="list-inline-item me-3"><a href="javascript:appLoadPage('MainView', 'contact')" class="text-decoration-none text-muted small">@gM("footer.contact")</a></li>
-                    <li class="list-inline-item me-3"><a href="javascript:appLoadPage('MainView', 'gtc')" class="text-decoration-none text-muted small">@gM("footer.gtc")</a></li>
-                    <li class="list-inline-item"><a href="javascript:appLoadPage('MainView', 'history')" class="text-decoration-none text-muted small">@gM("footer.history")</a></li>
+                    <li class="list-inline-item me-3"><a href="@pages.MainView.staticUrl("impressum")" onclick="appLoadPage('MainView', 'impressum'); return false;" class="text-decoration-none text-muted small">@gM("footer.impressum")</a></li>
+                    <li class="list-inline-item me-3"><a href="@pages.MainView.staticUrl("privacy")" onclick="appLoadPage('MainView', 'privacy'); return false;" class="text-decoration-none text-muted small">@gM("footer.privacy")</a></li>
+                    <li class="list-inline-item me-3"><a href="@pages.MainView.staticUrl("contact")" onclick="appLoadPage('MainView', 'contact'); return false;" class="text-decoration-none text-muted small">@gM("footer.contact")</a></li>
+                    <li class="list-inline-item me-3"><a href="@pages.MainView.staticUrl("gtc")" onclick="appLoadPage('MainView', 'gtc'); return false;" class="text-decoration-none text-muted small">@gM("footer.gtc")</a></li>
+                    <li class="list-inline-item"><a href="@pages.MainView.staticUrl("history")" onclick="appLoadPage('MainView', 'history'); return false;" class="text-decoration-none text-muted small">@gM("footer.history")</a></li>
                 </ul>
                 @* Social-Media-Buttons: nur Netzwerke mit konfiguriertem Link (.env SOCIAL_*_URL) *@
                 @defining(Seq(

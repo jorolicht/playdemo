@@ -84,6 +84,7 @@ private def doLoadPageInternal(targetPage: PageName, targetParam: String, withSi
       if success then
         if withSidebar then Sidebar.setNavLink(targetPage.value)
         savePageState(targetPage, targetParam)
+        syncUrl(targetPage, targetParam)
         comps.Navbar.render()
       else   
         error(s"loadPage -> page:${targetPage} param:${targetParam}")
@@ -92,9 +93,30 @@ private def doLoadPageInternal(targetPage: PageName, targetParam: String, withSi
     if pagesMap(targetPage).render(targetParam) then
       if withSidebar then Sidebar.setNavLink(targetPage.value)
       savePageState(targetPage, targetParam)
+      syncUrl(targetPage, targetParam)
       comps.Navbar.render()
     else   
       error(s"loadPage -> page:${targetPage} param:${targetParam}")
+
+/**
+ * Führt die Adresszeile für statische Seiten nach (nur Website-Variante): /preise/ beim Öffnen der Seite,
+ * zurück auf die Startseite beim Wechsel von einer statischen Seite zu einer anderen Seite.
+ * Zurück/Vor im Browser behandelt der popstate-Listener in Main.
+ *
+ * @param pageName Geladene Seite.
+ * @param param    Seitenparameter.
+ */
+private def syncUrl(pageName: PageName, param: String): Unit =
+  if (base.Global.fws) {
+    val path = org.scalajs.dom.window.location.pathname
+    val target =
+      if (pageName == MainView.name && MainView.isStaticPage(param)) Some(MainView.staticUrl(param))
+      else if (MainView.staticPageOfPath(path).isDefined) Some(MainView.staticUrl(""))
+      else None
+    target.filter(url => new org.scalajs.dom.URL(url).pathname != path).foreach { url =>
+      org.scalajs.dom.window.history.pushState(null, "", url)
+    }
+  }
 
 private def savePageState(pageName: PageName, param: String): Unit =
   if (pageName.value == "Goodbye") return

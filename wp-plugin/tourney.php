@@ -135,6 +135,7 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/api/json.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/stats.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/seo.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/home-static.php';
+require_once TOURNEY_PLUGIN_PATH . 'includes/static-pages.php';
 // Payhip-Webhook (Kauf von Turnier-Kontingent) nur bei Full Web Site
 if (TOURNEY_FWS) {
     require_once TOURNEY_PLUGIN_PATH . 'includes/api/payhip.php';
@@ -181,6 +182,12 @@ function tourney_render($atts) {
     $logLevel  = isset($_GET['logLevel']) ? $_GET['logLevel'] : 'debug';
     $tourney   = isset($_GET['tourney']) ? sanitize_title($_GET['tourney']) : '';
     $isHome    = is_front_page();
+
+    // Statische Seite (/impressum/, /preise/ …, includes/static-pages.php): Client öffnet sie über data-page
+    $staticPage = TOURNEY_FWS ? tourney_static_current() : null;
+    if ($staticPage) {
+        $atts['page'] = 'static:' . $staticPage['page'];
+    }
 
     // Check request URI path to see if a tournament permalink URL was called (e.g. /tourney/organizer/slug/)
     $uriPath  = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
@@ -236,8 +243,12 @@ function tourney_render($atts) {
     $wrapperClass = TOURNEY_FWS ? 'd-flex flex-column min-vh-100' : 'd-flex flex-column';
     $output .= '<div id="Main_AppWrapper" class="' . esc_attr($wrapperClass) . '">';
     $output .= '   <div id="Main_ContentId" class="flex-grow-1">';
-    // Startseite der Website-Variante: Inhalt schon im HTML (SEO), der Client ersetzt ihn beim Start
-    $homeHtml = (TOURNEY_FWS && $isHome && $tourney === '' && empty($atts['page'])) ? tourney_home_static_html() : '';
+    // Startseite bzw. statische Seiten der Website-Variante: Inhalt schon im HTML (SEO), der Client ersetzt ihn beim Start
+    if ($staticPage) {
+        $homeHtml = tourney_static_html($staticPage);
+    } else {
+        $homeHtml = (TOURNEY_FWS && $isHome && $tourney === '' && empty($atts['page'])) ? tourney_home_static_html() : '';
+    }
     $output .= $homeHtml !== '' ? $homeHtml : '      <div class="d-flex mt-5 justify-content-center"><span>Wird geladen...</span></div>';
     $output .= '   </div>';
     $output .= '   <span id="Main_FooterId"></span>';

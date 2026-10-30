@@ -95,7 +95,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm sticky-top">
         <div class="container-fluid">
             <!-- Logo und Titel -->
-            <a class="navbar-brand d-flex align-items-center navbar-brand-large" href="javascript:appLoadPage('MainView', '')">
+            <a class="navbar-brand d-flex align-items-center navbar-brand-large" href="@pages.MainView.staticUrl("")" onclick="appLoadPage('MainView', ''); return false;">
                 <img src="@{Global.imgUrl}logo.png" alt="@gM("navbar.logoAlt")" width="70" height="47" class="d-inline-block align-text-top me-2">
                 <span class="fw-bold">@gM("navbar.brand")</span>
             </a>
@@ -109,18 +109,18 @@
                 <!-- Linke Seite -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainView', 'functions')">@gM("navbar.functions")</a>
+                        <a class="nav-link nav-link-bold" href="@pages.MainView.staticUrl("functions")" onclick="appLoadPage('MainView', 'functions'); return false;">@gM("navbar.functions")</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link nav-link-bold" href="javascript:appLoadPage('MainView', 'pricing')">@gM("navbar.pricing")</a>
+                        <a class="nav-link nav-link-bold" href="@pages.MainView.staticUrl("pricing")" onclick="appLoadPage('MainView', 'pricing'); return false;">@gM("navbar.pricing")</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle nav-link-bold" href="#" id="navbarTools" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             @gM("navbar.tools")
                         </a>
                         <ul class="dropdown-menu shadow" aria-labelledby="navbarTools">
-                            <li><a class="dropdown-item" href="javascript:appLoadPage('MainView', 'plugin')">@gM("navbar.wordpressPlugin")</a></li>
-                            <li><a class="dropdown-item" href="javascript:appLoadPage('MainView', 'excel')">@gM("navbar.excelTemplate")</a></li>
+                            <li><a class="dropdown-item" href="@pages.MainView.staticUrl("plugin")" onclick="appLoadPage('MainView', 'plugin'); return false;">@gM("navbar.wordpressPlugin")</a></li>
+                            <li><a class="dropdown-item" href="@pages.MainView.staticUrl("excel")" onclick="appLoadPage('MainView', 'excel'); return false;">@gM("navbar.excelTemplate")</a></li>
                         </ul>
                     </li>
                 </ul>

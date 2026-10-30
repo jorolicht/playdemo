@@ -114,7 +114,13 @@ function tourney_seo_head() {
     $desc  = TOURNEY_SEO_HOME_DESCRIPTION;
     $jsonld = [];
 
-    if (is_singular('tourney')) {
+    $static = tourney_static_current();
+    if ($static) {
+        // Statische Seite (includes/static-pages.php): WordPress gibt dafür keine Canonical-URL aus
+        $url  = home_url('/' . $static['slug'] . '/');
+        $desc = $static['desc'];
+        echo '<link rel="canonical" href="' . esc_url($url) . '" />' . "\n";
+    } elseif (is_singular('tourney')) {
         $t     = tourney_seo_tourney_data(get_queried_object_id());
         $type  = 'article';
         $date  = $t['start'] && $t['end'] && $t['start'] !== $t['end'] ? $t['start'] . ' – ' . $t['end'] : $t['start'];

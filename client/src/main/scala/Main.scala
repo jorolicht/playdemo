@@ -60,6 +60,15 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     // expose addon Console.start function, only if addon is included, otherwise dummy function
     dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
 
+    // Zurück/Vor im Browser zwischen statischen Seiten (/preise/ …) und Startseite (URLs setzt pages.syncUrl)
+    if (Global.fws) dom.window.addEventListener("popstate", (_: dom.PopStateEvent) => {
+      val path = dom.window.location.pathname
+      pages.MainView.staticPageOfPath(path) match
+        case Some(page) => pages.loadPage(pages.MainView.name, page)
+        case None if path == new dom.URL(pages.MainView.staticUrl("")).pathname => pages.loadPage(pages.MainView.name, "")
+        case None => dom.window.location.reload()
+    })
+
     // Ausstehende Änderungen sofort schreiben. Server-Requests sind asynchron und werden beim
     // Entladen der Seite abgebrochen, daher den Browser-Dialog "Seite verlassen?" anzeigen,
     // damit die Seite offen bleibt, bis der Sync abgeschlossen ist (lokal/Demo schreibt synchron).
@@ -115,7 +124,9 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
         // Full Web Site: Wiederherstellung nur auf der Homepage; eingebettet: nur Bearbeitungsseiten für Schreibberechtigte
         val restoreAllowed = if (Global.fws) Global.isHomePage && tourneyParam.isEmpty
                              else Global.canEditPage && lastPage != null && Global.isTourneyPage(lastPage) && lastPage != "TourneyWelcome" && lastPage != "CompetitionWelcome"
-        val canRestore = startPage.isEmpty &&
+        // Statische Seiten haben eine eigene URL; auf der Startseite nicht wiederherstellen
+        val lastIsStatic = lastPage == pages.MainView.name.value && pages.MainView.isStaticPage(lastParam)
+        val canRestore = startPage.isEmpty && !lastIsStatic &&
                          restoreAllowed &&
                          lastWpPageId != null && 
                          lastWpPageId == Global.pageId.toString && 
@@ -183,6 +194,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       case "login"    => pages.loadPage(pages.UserLogin.name, "")
       case "register" => pages.loadPage(pages.UserRegistration.name, "")
       case "verify"   => pages.loadPage(pages.VerifyAccount.name, "")
+      case s if s.startsWith("static:") => pages.loadPage(pages.MainView.name, s.stripPrefix("static:"))
       case _ =>
         if (Global.fws && Global.isHomePage && tourneyParam.isEmpty) {
           services.Stats.trackOncePerSession("home")

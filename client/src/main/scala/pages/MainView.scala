@@ -32,6 +32,58 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
   /** HTML-ID for the close button ('x') in the news bar. */
   val BtnCloseNews:  HtmlId = genId(name)
   
+  /**
+   * Statische Seiten (site/content) mit eigener URL in der Website-Variante: Dateiname -> URL-Slug.
+   * Gegenstück zu TOURNEY_STATIC_PAGES in wp-plugin/includes/static-pages.php (Rewrite-Regel, Server-HTML).
+   */
+  val StaticSlugs: Map[String, String] = Map(
+    "funktionen" -> "funktionen", "pricing" -> "preise", "excel" -> "excel", "plugin" -> "plugin",
+    "history" -> "historie", "impressum" -> "impressum", "privacy" -> "datenschutz", "contact" -> "kontakt", "gtc" -> "agb")
+
+  /**
+   * Normalisiert einen Seitenparameter (deutsch/englisch, z. B. "preise", "functions") auf den Dateinamen in pages/.
+   *
+   * @param param Seitenparameter von appLoadPage('MainView', param).
+   * @return Dateiname ohne Endung und Sprachsuffix.
+   */
+  def staticBaseName(param: String): String = param.toLowerCase match {
+    case "functions" | "funktionen"           => "funktionen"
+    case "agb" | "gtc"                        => "gtc"
+    case "privacy" | "dataprotection" | "datenschutz" => "privacy"
+    case "impressum" | "imprint"              => "impressum"
+    case "contact" | "kontakt"                => "contact"
+    case "pricing" | "preise"                 => "pricing"
+    case "history" | "historie"               => "history"
+    case other                                => other
+  }
+
+  /**
+   * Prüft, ob der Parameter eine statische Seite mit eigener URL bezeichnet.
+   *
+   * @param param Seitenparameter.
+   * @return True für statische Seiten.
+   */
+  def isStaticPage(param: String): Boolean = StaticSlugs.contains(staticBaseName(param))
+
+  /**
+   * URL einer statischen Seite, z. B. https://turnier-service.info/preise/ (für href und history.pushState).
+   *
+   * @param param Seitenparameter.
+   * @return Absolute URL; für unbekannte Seiten die Startseite.
+   */
+  def staticUrl(param: String): String =
+    s"${Global.homeUrl.stripSuffix("/")}/${StaticSlugs.get(staticBaseName(param)).map(_ + "/").getOrElse("")}"
+
+  /**
+   * Ermittelt die statische Seite zu einem URL-Pfad (z. B. "/preise/" -> "pricing").
+   *
+   * @param path URL-Pfad (location.pathname).
+   * @return Dateiname der Seite oder None.
+   */
+  def staticPageOfPath(path: String): Option[String] =
+    val slug = path.stripPrefix(new dom.URL(staticUrl("")).pathname).stripSuffix("/")
+    StaticSlugs.collectFirst { case (page, s) if s == slug => page }
+
   /** Models for standard WordPress REST API response parsing. */
   case class WpContent(rendered: String) derives ReadWriter
   case class WpTitle(rendered: String) derives ReadWriter
@@ -181,9 +233,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
       // 1. Loading State
       setMain(cviews.pages.MainView.html.Loading(param))
 
-      val knownStaticPages = Set("pricing", "preise", "funktionen", "functions", "gtc", "agb", "dataprotection", "privacy", "impressum", "imprint", "contact", "kontakt", "excel", "plugin", "history", "historie")
-
-      if (knownStaticPages.contains(param.toLowerCase)) {
+      if (isStaticPage(param)) {
         loadStaticPageFallback(param)
       } else {
         // 2. Fetch WordPress Page Content by ID or Slug
@@ -309,16 +359,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
    * @param param The page slug or identifier.
    */
   private def loadStaticPageFallback(param: String): Unit =
-    val baseName = param.toLowerCase match {
-      case "functions" | "funktionen"           => "funktionen"
-      case "agb" | "gtc"                        => "gtc"
-      case "privacy" | "dataprotection"         => "privacy"
-      case "impressum" | "imprint"              => "impressum"
-      case "contact" | "kontakt"                => "contact"
-      case "pricing" | "preise"                 => "pricing"
-      case "history" | "historie"               => "history"
-      case other                                => other
-    }
+    val baseName = staticBaseName(param)
     val langSuffix = if (Global.lang == "en") "_en" else ""
     val staticName = s"$baseName$langSuffix"
 

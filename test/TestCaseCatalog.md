@@ -295,3 +295,12 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-SEO-03 [🌐]:** Keine Benutzer-Sitemap; `/?author=N` und `/author/<name>/` leiten auf die Startseite um, ohne den Anmeldenamen zu verraten; `/wp-json/wp/v2/users` ist für anonyme Besucher nicht verfügbar.
 - [x] **TC-SEO-04 [🌐]:** Turnierseiten haben einen Titel und eine Beschreibung aus den Turnierdaten (Name, Datum, Veranstalter, Wettbewerbe).
 - [x] **TC-SEO-05 [🌐]:** Die Startseite liefert Überschrift (`<h1>`) und die vier Karten schon im Server-HTML (statt „Wird geladen…“, Texte aus `msgs_de.json`); nach dem Start ersetzt der Client den Inhalt vollständig (keine Platzhalter-Buttons, genau eine `<h1>`).
+
+---
+
+## 21. Statische Seiten mit eigener URL (`includes/static-pages.php`)
+
+### 21.1 Anonymer Nutzer / Crawler (🌐)
+- [x] **TC-STATIC-01 [🌐]:** `/funktionen/`, `/preise/`, `/excel/`, `/plugin/`, `/historie/`, `/impressum/`, `/datenschutz/`, `/kontakt/` und `/agb/` liefern Status 200, genau einen passenden `<title>`, eine Canonical-URL, eine Meta-Description und den Seiteninhalt (mit `<h1>`) im Server-HTML; alle stehen in `wp-sitemap-tourneystatic-1.xml`. Unbekannte URLs liefern weiterhin 404.
+- [x] **TC-STATIC-02 [🌐]:** Ein direkter Aufruf (z. B. `/preise/`) öffnet die Seite in der App; die Adresse bleibt erhalten.
+- [x] **TC-STATIC-03 [🌐]:** Footer- und Navbar-Links haben echte URLs (`href="/impressum/"`); ein Klick bleibt in der App (kein Neuladen) und setzt die Adresszeile; Zurück führt zur Startseite, Vor wieder zur Seite; der Breadcrumb „Startseite“ setzt die Adresse auf `/`.

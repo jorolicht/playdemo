@@ -239,6 +239,12 @@ Bots und mehr als 30 Meldungen pro IP und Minute werden ignoriert. Auswertung: p
 Shortcode `[tourney_stats]`, Umschaltung pro Tag (30 Tage) / pro Woche (12 ISO-Wochen). Seiten mit diesem Shortcode
 werden auch in der Website-Variante im Theme dargestellt.
 
+**Statische Seiten:** In der Website-Variante haben die Seiten aus `site/content` eigene URLs (`/funktionen/`, `/preise/`,
+`/excel/`, `/plugin/`, `/historie/`, `/impressum/`, `/datenschutz/`, `/kontakt/`, `/agb/`). Eine Rewrite-Regel in
+`includes/static-pages.php` liefert den Inhalt schon im Server-HTML (SEO) und eine eigene Sitemap; der Client öffnet die
+Seite über `data-page="static:<seite>"` und führt die Adresszeile per `history.pushState` nach. Neue Seite: Datei in
+`site/content` anlegen, Eintrag in `TOURNEY_STATIC_PAGES` (PHP) und `MainView.StaticSlugs` (Scala).
+
 **Varianten** (Build-Variable `APP_FWS`, erzeugt `includes/config.php` mit `TOURNEY_FWS`):
 
 | | Website (`APP_FWS=true`) | Plugin zum Einbetten (`APP_FWS=false`) |
