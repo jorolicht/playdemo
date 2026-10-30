@@ -59,4 +59,19 @@ test.describe('SEO (Server-HTML)', () => {
     expect(html).toContain('property="og:type" content="article"');
     expect(html).toMatch(/<meta name="description" content="[^"]{20,}"/);
   });
+
+  test('TC-SEO-05 [🌐]: Startseite liefert ihren Inhalt im Server-HTML, der Client ersetzt ihn beim Start', async ({ request, page }) => {
+    // Ohne JavaScript: Überschrift und Karten der Startseite stehen bereits im HTML
+    const html = await (await request.get('/')).text();
+    const content = html.slice(html.indexOf('id="Main_ContentId"'), html.indexOf('id="Main_FooterId"'));
+    expect(content).toMatch(/<h1[^>]*>[^<]{5,}<\/h1>/);
+    expect((content.match(/<h3 /g) || []).length).toBe(4);
+    expect(content).not.toContain('Wird geladen');
+
+    // Mit JavaScript: vollständige Startseite, Platzhalter-Buttons ersetzt, genau eine Überschrift
+    await page.goto('/');
+    await expect(page.locator('#MainView_BtnDemo')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('#Main_ContentId span.btn.disabled')).toHaveCount(0);
+    await expect(page.locator('#Main_ContentId h1')).toHaveCount(1);
+  });
 });

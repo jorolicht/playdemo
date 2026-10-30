@@ -134,6 +134,7 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/api/stage.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/json.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/stats.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/seo.php';
+require_once TOURNEY_PLUGIN_PATH . 'includes/home-static.php';
 // Payhip-Webhook (Kauf von Turnier-Kontingent) nur bei Full Web Site
 if (TOURNEY_FWS) {
     require_once TOURNEY_PLUGIN_PATH . 'includes/api/payhip.php';
@@ -235,7 +236,9 @@ function tourney_render($atts) {
     $wrapperClass = TOURNEY_FWS ? 'd-flex flex-column min-vh-100' : 'd-flex flex-column';
     $output .= '<div id="Main_AppWrapper" class="' . esc_attr($wrapperClass) . '">';
     $output .= '   <div id="Main_ContentId" class="flex-grow-1">';
-    $output .= '      <div class="d-flex mt-5 justify-content-center"><span>Wird geladen...</span></div>';
+    // Startseite der Website-Variante: Inhalt schon im HTML (SEO), der Client ersetzt ihn beim Start
+    $homeHtml = (TOURNEY_FWS && $isHome && $tourney === '' && empty($atts['page'])) ? tourney_home_static_html() : '';
+    $output .= $homeHtml !== '' ? $homeHtml : '      <div class="d-flex mt-5 justify-content-center"><span>Wird geladen...</span></div>';
     $output .= '   </div>';
     $output .= '   <span id="Main_FooterId"></span>';
     $output .= '</div>';

@@ -294,3 +294,4 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-SEO-02 [🌐]:** Login, Registrierung, Verifizierung und Vorlagen-Seiten haben `noindex` und erscheinen nicht in der Sitemap.
 - [x] **TC-SEO-03 [🌐]:** Keine Benutzer-Sitemap; `/?author=N` und `/author/<name>/` leiten auf die Startseite um, ohne den Anmeldenamen zu verraten; `/wp-json/wp/v2/users` ist für anonyme Besucher nicht verfügbar.
 - [x] **TC-SEO-04 [🌐]:** Turnierseiten haben einen Titel und eine Beschreibung aus den Turnierdaten (Name, Datum, Veranstalter, Wettbewerbe).
+- [x] **TC-SEO-05 [🌐]:** Die Startseite liefert Überschrift (`<h1>`) und die vier Karten schon im Server-HTML (statt „Wird geladen…“, Texte aus `msgs_de.json`); nach dem Start ersetzt der Client den Inhalt vollständig (keine Platzhalter-Buttons, genau eine `<h1>`).

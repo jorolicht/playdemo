@@ -213,7 +213,7 @@ tourneyAdmin.mbActionCol                            = Action
 ###
 # MainView Landing
 ###
-mainView.heroTitle                                  = Welcome to Tournament Management
+mainView.heroTitle                                  = Organize table tennis tournaments easily in your browser
 mainView.heroSubtitle                               = Professional organization for your sports events – fast, simple, and clear.
 mainView.heroDesc                                   = Efficiently manage your tournaments and competitions in one central place. From the first participant to the award ceremony, we support you every step of the way.
 mainView.demoTitle                                  = Demo

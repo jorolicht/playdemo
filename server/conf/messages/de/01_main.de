@@ -213,7 +213,7 @@ tourneyAdmin.mbActionCol                            = Aktion
 ###
 # MainView Landing
 ###
-mainView.heroTitle                                  = Willkommen zur Turnierverwaltung
+mainView.heroTitle                                  = Tischtennis-Turniere einfach im Browser organisieren
 mainView.heroSubtitle                               = Professionelle Organisation für Ihre sportlichen Events – schnell, einfach und übersichtlich.
 mainView.heroDesc                                   = Verwalten Sie Ihre Turniere und Wettbewerbe effizient an einem zentralen Ort. Vom ersten Teilnehmer bis zur Siegerehrung unterstützen wir Sie bei jedem Schritt.
 mainView.demoTitle                                  = Demo
