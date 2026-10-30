@@ -257,3 +257,12 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-IB-02 [🌐]:** XSS & HTML-Injektionen (`<script>alert(1)</script>`). Maskierung von Script-Payloads und HTML-Attributen in Eingabefeldern.
 - [x] **TC-IB-03 [🌐]:** Unicode, Emojis & Sonderzeichen (`äöüß`, `🏆`, `@#$&*()!`). Korrekte Verarbeitung und Anzeige von Unicode-Zeichenketten.
 - [x] **TC-IB-04 [🌐]:** Dateivalidierung beim Spielerimport (`setInputFiles()`). Überprüfung der Validierungslogik bei ungültigen Dateiformaten.
+
+---
+
+## 17. UseCase: Turnierübersicht als Baum (`TourneyInfo`)
+
+### 17.1 Turnierverwalter (👤)
+- [x] **TC-TI-TREE-01 [👤]:** In der Wettbewerbsliste steht vor jedem Wettbewerb mit Stages ein Tree Node Glyph (TNG). Klick klappt die Stages (mit eigenem TNG, Format und Status) auf; Klick auf den TNG einer Stage zeigt deren Reiter (Administration, Auslosung, Eingabe, Ergebnisse, Schiri, ggf. Urkunde). Klick auf einen Reiter wählt Wettbewerb und Stage aus und öffnet die zugehörige Stage-Seite mit aktivem Reiter.
+- [x] **TC-TI-TREE-02 [👤]:** Erneuter Klick auf den TNG eines Wettbewerbs klappt dessen Stages wieder zu.
+

@@ -4,7 +4,10 @@
 @import pages.TourneyInfo.*
 @import base.Messages.gM
 
-@(tourney: Tourney, competitions: Seq[Competition])
+@(tourney: Tourney, competitions: Seq[Competition], stagesByComp: Map[Int, Seq[Stage]], openComps: Set[Int], openStages: Set[Int])
+
+@* Tree Node Glyph: Pfeil rechts (zugeklappt) bzw. unten (aufgeklappt) *@
+@tng(open: Boolean) = {<i class="bi @{if (open) "bi-caret-down-fill" else "bi-caret-right-fill"} text-secondary"></i>}
 
 @startDateFormatted = @{
   if (tourney.startDate != 0) tourney.getStartDate(base.Global.lang, 1) else ""
@@ -113,7 +116,16 @@
                         @competitions.zipWithIndex.map { case (c, i) =>
                             <tr class="cursor-pointer">
                                 <td>@(i + 1)</td>
-                                <td class="fw-bold" onclick="appLoadPage('CompetitionInfo', '@c.id.value')">@c.name</td>
+                                <td class="fw-bold">
+                                    @defining(stagesByComp.getOrElse(c.id.value, Seq.empty)) { stages =>
+                                        @if(stages.nonEmpty) {
+                                            <span class="me-1" role="button" @id(TngComp, "onclick", c.id.value.toString)>@tng(openComps.contains(c.id.value))</span>
+                                        } else {
+                                            <span class="me-1 invisible">@tng(false)</span>
+                                        }
+                                    }
+                                    <span onclick="appLoadPage('CompetitionInfo', '@c.id.value')">@c.name</span>
+                                </td>
                                 <td><span class="badge bg-light text-dark border">@gM(c.typ.msgCode)</span></td>
                                 <td>@{c.lowLevel.getOrElse(0)} - @{c.upperLevel.getOrElse("∞")}</td>
                                 <td>
@@ -135,6 +147,34 @@
                                     </div>
                                 </td>
                             </tr>
+                            @if(openComps.contains(c.id.value)) {
+                                @stagesByComp.getOrElse(c.id.value, Seq.empty).map { st =>
+                                    <tr class="table-light">
+                                        <td></td>
+                                        <td colspan="5" class="ps-4">
+                                            <span class="me-1" role="button" @id(TngStage, "onclick", st.id.value.toString)>@tng(openStages.contains(st.id.value))</span>
+                                            <span class="fw-semibold">@st.name</span>
+                                            <span class="badge bg-light text-dark border ms-2">@gM(st.stageConfig.msgCode)</span>
+                                            <span class="badge ms-1 @{st.status match {
+                                                case StageStatus.CFG => "bg-secondary"
+                                                case StageStatus.AUS => "bg-info text-dark"
+                                                case StageStatus.EIN => "bg-warning text-dark"
+                                                case StageStatus.FIN => "bg-success"
+                                                case _ => "bg-light text-dark"
+                                            }}">@gM(st.status.msgCode)</span>
+                                            @if(openStages.contains(st.id.value)) {
+                                                <div class="d-flex flex-wrap gap-1 mt-2 ps-4">
+                                                    @StageTabs.filter(t => t._1 != "StageCertificate" || st.certificate).map { case (page, icon, msg) =>
+                                                        <button class="btn btn-outline-primary btn-sm" @id(BtnStageTab, "onclick", s"${st.id.value}-$page")>
+                                                            <i class="bi @icon me-1"></i>@gM(msg)
+                                                        </button>
+                                                    }
+                                                </div>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
                         }
                     </tbody>
                 </table>

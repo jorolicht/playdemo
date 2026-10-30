@@ -18,6 +18,22 @@ object TourneyInfo extends BasePage with JsWrapper:
   val BtnDeleteTourney: HtmlId = genId(name)
   val BtnSaveLeave:     HtmlId = genId(name)
   val BtnAddComp:       HtmlId = genId(name)
+  val TngComp:          HtmlId = genId(name)
+  val TngStage:         HtmlId = genId(name)
+  val BtnStageTab:      HtmlId = genId(name)
+
+  /** Stage-Reiter im Baum der Wettbewerbsliste: (Seitenname, Bootstrap-Icon, Message-Key), wie in StageLayout. */
+  val StageTabs: Seq[(String, String, String)] = Seq(
+    ("StageAdmin",       "bi-gear",                 "stageLayout.tabAdmin"),
+    ("StageDraw",        "bi-shuffle",              "stageLayout.tabDraw"),
+    ("StageInput",       "bi-input-cursor-text",    "stageLayout.tabInput"),
+    ("StageResult",      "bi-bar-chart-line",       "stageLayout.tabResult"),
+    ("StageScoreSheet",  "bi-file-earmark-text",    "stageLayout.tabScoresheet"),
+    ("StageCertificate", "bi-award",                "stageLayout.tabCertificate"))
+
+  /** Aufgeklappte Wettbewerbe (CompId) und Stages (StageId) im Baum der Wettbewerbsliste. */
+  private val openComps  = scala.collection.mutable.Set[Int]()
+  private val openStages = scala.collection.mutable.Set[Int]()
 
   /**
    * Renders the tournament overview page.
@@ -49,7 +65,9 @@ object TourneyInfo extends BasePage with JsWrapper:
         // Get real competitions from DB
         val compList = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
 
-        setMain(cviews.pages.html.TourneyInfo(tourney, compList))
+        val stagesByComp = services.StageDB.stages.toSeq.filter(s => s != null && !s.deleted).groupBy(_.coId.value)
+
+        setMain(cviews.pages.html.TourneyInfo(tourney, compList, stagesByComp, openComps.toSet, openStages.toSet))
         true
       }
     } else {
@@ -142,4 +160,27 @@ object TourneyInfo extends BasePage with JsWrapper:
             loadPage(MainView.name, "")
           }
         }
+
+      case id if id.id.startsWith(TngComp.id + "-") =>
+        val coId = elem.id.substring(TngComp.id.length + 1).toInt
+        if (!openComps.remove(coId)) openComps += coId
+        render()
+
+      case id if id.id.startsWith(TngStage.id + "-") =>
+        val stageId = elem.id.substring(TngStage.id.length + 1).toInt
+        if (!openStages.remove(stageId)) openStages += stageId
+        render()
+
+      // Suffix "<StageId>-<Seitenname>": Wettbewerb und Stage auswählen, dann Reiter-Seite laden
+      case id if id.id.startsWith(BtnStageTab.id + "-") =>
+        elem.id.substring(BtnStageTab.id.length + 1).split("-", 2) match
+          case Array(sId, page) =>
+            services.StageDB.stages.find(s => s != null && s.id.value == sId.toInt).foreach { stage =>
+              val comp = services.CompetitionDB.competitions.find(c => c != null && c.id == stage.coId)
+              Global.currentSelection = Global.currentSelection.copy(competition = comp, stage = Some(stage))
+              comps.ContextHeader.render()
+              loadPage(PageNameTyp(page), "")
+            }
+          case _ =>
+
       case _ =>
