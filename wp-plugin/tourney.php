@@ -133,6 +133,7 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/api/competition.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/stage.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/json.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/stats.php';
+require_once TOURNEY_PLUGIN_PATH . 'includes/seo.php';
 // Payhip-Webhook (Kauf von Turnier-Kontingent) nur bei Full Web Site
 if (TOURNEY_FWS) {
     require_once TOURNEY_PLUGIN_PATH . 'includes/api/payhip.php';
@@ -341,7 +342,6 @@ function tourney_render_direct_blank_page() {
     <head>
         <meta charset="<?php bloginfo( 'charset' ); ?>">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title><?php wp_title('|', true, 'right'); ?></title>
         <?php 
         // Lädt Header-Metas und CSS-Dateien
         wp_head(); 

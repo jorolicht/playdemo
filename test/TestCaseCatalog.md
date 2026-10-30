@@ -284,3 +284,13 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 ### 19.1 Turnierverwalter (👤)
 - [x] **TC-CERT-TAB-01 [👤]:** Der Reiter „Urkunden“ (nur bei der Urkunden-Stage) zeigt dieselbe Ansicht wie „Ergebnisse“; bei Jeder gegen Jeden hat jede Zeile mit Platzierung einen Urkunden-Button, der die Urkunde mit Name und Platz öffnet. Der Button „Nächste Stage“ fehlt.
 - [x] **TC-CERT-TAB-02 [👤]:** K.o.-System: Turnierbaum wie unter „Ergebnisse“; Urkunden-Buttons nur bei Spielern, deren Endplatzierung im Spiel feststeht (Finale 1/2, Spiel um Platz 3 3/4, sonst Verlierer der Runde).
+
+---
+
+## 20. SEO der Website-Variante (`includes/seo.php`)
+
+### 20.1 Anonymer Nutzer / Crawler (🌐)
+- [x] **TC-SEO-01 [🌐]:** Startseite liefert im Server-HTML genau einen `<title>`, eine Meta-Description, Open-Graph- und Twitter-Card-Tags (Vorschaubild `img/og-image.jpg` erreichbar) sowie JSON-LD `WebApplication` und `Organization`.
+- [x] **TC-SEO-02 [🌐]:** Login, Registrierung, Verifizierung und Vorlagen-Seiten haben `noindex` und erscheinen nicht in der Sitemap.
+- [x] **TC-SEO-03 [🌐]:** Keine Benutzer-Sitemap; `/?author=N` und `/author/<name>/` leiten auf die Startseite um, ohne den Anmeldenamen zu verraten; `/wp-json/wp/v2/users` ist für anonyme Besucher nicht verfügbar.
+- [x] **TC-SEO-04 [🌐]:** Turnierseiten haben einen Titel und eine Beschreibung aus den Turnierdaten (Name, Datum, Veranstalter, Wettbewerbe).
