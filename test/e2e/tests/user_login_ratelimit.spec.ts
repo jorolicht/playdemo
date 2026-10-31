@@ -55,10 +55,23 @@ test.describe('UseCase 11: E-Mail/Passwort-Login & Rate-Limiting (UserLogin)', (
   });
 
   test('TC-AU-04 [🌐]: Fehllogin-Handling & Dynamisches Captcha / Rate-Limiting', async ({ page }) => {
+    // Fehlerdialog zeigt nur den Fehlertext; Code und CallStack erst über "Details"
+    const dlg = page.locator('#DlgMsgbox_ModalId');
+    const body = dlg.locator('#DlgMsgbox_BodyId');
     await loginPage.login('wrong@beispiel.de', 'wrongpass1');
-    await expect(loginPage.errorAlert).toBeVisible();
+    await expect(dlg).toBeVisible({ timeout: 10000 });
+    await expect(body).toHaveText('E-Mail-Adresse oder Passwort ungültig.');
+    await expect(body).not.toContainText('AppError');
+    await expect(dlg.locator('#DlgMsgbox_DetailsId')).toBeHidden();
+    await dlg.locator('#DlgMsgbox_DetailsBtnId').click();
+    await expect(dlg.locator('#DlgMsgbox_DetailsId')).toContainText('Code: login_failed');
+    await dlg.locator('.modal-footer button').last().click();
+    await expect(dlg).toBeHidden();
+    // Backdrop blendet noch aus und würde den nächsten Klick abfangen
+    await expect(page.locator('.modal-backdrop')).toHaveCount(0);
 
     await loginPage.login('wrong@beispiel.de', 'wrongpass2');
-    await expect(loginPage.errorAlert).toBeVisible();
+    await expect(dlg).toBeVisible({ timeout: 10000 });
+    await expect(body).toHaveText('E-Mail-Adresse oder Passwort ungültig.');
   });
 });

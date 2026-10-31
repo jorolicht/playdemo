@@ -156,7 +156,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
           dom.window.location.href = Global.homeUrl
         }, 2000)
       case Left(err) =>
-        showError(s"Passkey Login fehlgeschlagen: ${err.msg}")
+        dialogs.DlgMsgbox.showError(err, "Passkey Login fehlgeschlagen")
     }
 
   private def doLogin(): Unit =
@@ -204,8 +204,8 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
           dom.window.location.href = Global.homeUrl
         }, 2000)
       case Left(err) => 
-        val msg = if (err.msg != null && err.msg.nonEmpty) err.msg else "E-Mail-Adresse oder Passwort ungültig."
-        showError(msg)
+        // Nur der Fehlertext; Code und CallStack über "Details" im Fehlerdialog
+        dialogs.DlgMsgbox.showError(err)
 
         // Dynamisches Risk-Based Captcha aktivieren bei Fehllogins
         if (Global.turnstileSitekey.nonEmpty) {
