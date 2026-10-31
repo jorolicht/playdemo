@@ -4,7 +4,7 @@ FROM eclipse-temurin:21-jdk AS mainstage
 ARG DEMON_USER=robert
 ARG DEMON_USERID=501
 ARG APP_ENVIRONMENT=production
-ARG APP_VERSION=1.0.4
+ARG APP_VERSION=1.0.5
 ARG APP_HOME=/app
 ARG PLAY_WP_URL=http://backend:80
 ARG PLAY_WP_CPT=tourney

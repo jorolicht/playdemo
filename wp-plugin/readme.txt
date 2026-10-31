@@ -5,7 +5,7 @@ Tags: tournament, table tennis, sports, scalajs, playframework
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,14 @@ Das Plugin verwendet Semantic Versioning (SemVer) `MAJOR.MINOR.PATCH`. Datenbank
 Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel (`filemtime`) oder der aktuellen Plugin-Version versioniert, sodass Browser-Caches nach Updates sofort invalidiert werden.
 
 == Changelog ==
+
+= 1.0.5 =
+* Turnier-Info: Wettbewerbsliste als Baum mit Stages und direkt anklickbaren Stage-Reitern.
+* Neuer Stage-Reiter „Urkunden“ (Ergebnisansicht mit Urkunden-Button pro Spieler).
+* Fehlerdialog mit Details (Code, CallStack) statt Browser-Alert.
+* Gültige REST-Nonces nach Login/Logout und Passkey-Registrierung.
+* Website-Variante: Startseite und statische Seiten serverseitig im HTML, eigene URLs, englische Fassung unter /en/ (hreflang, Sprachumschalter), SEO-Head-Tags und Sitemap.
+* Website-Variante: Social-Media-Links im Footer, anonyme Nutzungsstatistik mit Shortcode [tourney_stats].
 
 = 1.0.4 =
 * Zwei Varianten: Website-Version und einbettbares Plugin (tourney-embed) ohne Verwaltungs-, Konfigurator- und Payhip-Funktionen.
