@@ -304,3 +304,13 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-STATIC-01 [🌐]:** `/funktionen/`, `/preise/`, `/excel/`, `/plugin/`, `/historie/`, `/impressum/`, `/datenschutz/`, `/kontakt/` und `/agb/` liefern Status 200, genau einen passenden `<title>`, eine Canonical-URL, eine Meta-Description und den Seiteninhalt (mit `<h1>`) im Server-HTML; alle stehen in `wp-sitemap-tourneystatic-1.xml`. Unbekannte URLs liefern weiterhin 404.
 - [x] **TC-STATIC-02 [🌐]:** Ein direkter Aufruf (z. B. `/preise/`) öffnet die Seite in der App; die Adresse bleibt erhalten.
 - [x] **TC-STATIC-03 [🌐]:** Footer- und Navbar-Links haben echte URLs (`href="/impressum/"`); ein Klick bleibt in der App (kein Neuladen) und setzt die Adresszeile; Zurück führt zur Startseite, Vor wieder zur Seite; der Breadcrumb „Startseite“ setzt die Adresse auf `/`.
+
+---
+
+## 22. Sprachfassungen (`includes/lang.php`)
+
+### 22.1 Anonymer Nutzer / Crawler (🌐)
+- [x] **TC-LANG-01 [🌐]:** `/en/` und `/en/features/`, `/en/pricing/`, `/en/excel/`, `/en/plugin/`, `/en/history/`, `/en/imprint/`, `/en/privacy/`, `/en/contact/`, `/en/terms/` liefern Status 200 mit `<html lang="en-GB">`, englischem Inhalt, Canonical-URL, `og:locale en_GB` und gegenseitigen `hreflang`-Verweisen (de, en, x-default = de); die englischen URLs stehen in der Sitemap. Deutsche Slugs unter `/en/` liefern 404.
+- [x] **TC-LANG-02 [🌐]:** Der Besuch einer `/en/`-URL merkt Englisch (localStorage `tourney_lang`); deutsche URLs zeigen trotzdem Deutsch (mit Hinweis auf die englische Fassung); Seiten ohne Sprach-URL (z. B. Login, Turnierseiten) nutzen die gemerkte Sprache, sonst die Browsersprache.
+- [x] **TC-LANG-03 [🌐]:** Der Sprachumschalter DE | EN in der Navbar führt zur Gegenstück-URL (`/impressum/` ↔ `/en/imprint/`) und merkt die Wahl.
+- [x] **TC-LANG-04 [🌐]:** Englischsprachige Besucher ohne gemerkte Wahl sehen auf deutschen Seiten den Hinweis „This page is also available in English“ (Link auf die englische Fassung); Schließen merkt Deutsch ohne Neuladen. Deutschsprachige Besucher sehen keinen Hinweis.

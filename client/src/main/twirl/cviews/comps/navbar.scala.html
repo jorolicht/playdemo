@@ -127,6 +127,16 @@
 
                 <!-- Rechte Seite: User / Login -->
                 <ul class="navbar-nav align-items-center">
+                    @if(Global.fws) {
+                    <!-- Sprachumschalter: Gegenstück-URL (/preise/ <-> /en/pricing/), Wahl wird gemerkt -->
+                    <li class="nav-item me-3 small text-nowrap" id="Navbar_LangSwitch">
+                        @for((lang, label) <- Seq("de" -> "DE", "en" -> "EN")) {
+                            @if(lang == "en") {<span class="text-white-50">|</span>}
+                            <a class="text-decoration-none @if(Global.lang == lang){text-white fw-bold}else{text-white-50}" hreflang="@lang"
+                               href="@pages.MainView.langSwitchUrl(lang)" onclick="appSwitchLang('@lang'); return false;">@label</a>
+                        }
+                    </li>
+                    }
                     <li class="nav-item dropdown me-3">
                         <a class="nav-link dropdown-toggle d-flex align-items-center nav-link-bold text-white" href="#" id="offlineDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-folder2-open me-1"></i>
@@ -182,4 +192,11 @@
             </div>
         </div>
     </nav>
+    @if(Global.showLangHint) {
+    <!-- Hinweis für englischsprachige Besucher einer deutschen Seite (bewusst englisch) -->
+    <div class="bg-light border-bottom small py-1 px-3 d-flex justify-content-center align-items-center gap-2" id="Navbar_LangHint">
+        <span>This page is also available in <a href="@pages.MainView.langSwitchUrl("en")" hreflang="en" onclick="appSwitchLang('en'); return false;">English</a>.</span>
+        <button type="button" class="btn-close" style="font-size: 0.6rem;" aria-label="Close" onclick="appSwitchLang('de')"></button>
+    </div>
+    }
 }

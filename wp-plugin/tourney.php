@@ -136,6 +136,7 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/api/stats.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/seo.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/home-static.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/static-pages.php';
+require_once TOURNEY_PLUGIN_PATH . 'includes/lang.php';
 // Payhip-Webhook (Kauf von Turnier-Kontingent) nur bei Full Web Site
 if (TOURNEY_FWS) {
     require_once TOURNEY_PLUGIN_PATH . 'includes/api/payhip.php';
@@ -181,13 +182,23 @@ function tourney_render($atts) {
     // URL Parameter 
     $logLevel  = isset($_GET['logLevel']) ? $_GET['logLevel'] : 'debug';
     $tourney   = isset($_GET['tourney']) ? sanitize_title($_GET['tourney']) : '';
-    $isHome    = is_front_page();
+    $isHome    = is_front_page() || (TOURNEY_FWS && tourney_is_en_home());
 
     // Statische Seite (/impressum/, /preise/ …, includes/static-pages.php): Client öffnet sie über data-page
     $staticPage = TOURNEY_FWS ? tourney_static_current() : null;
     if ($staticPage) {
         $atts['page'] = 'static:' . $staticPage['page'];
+        $pageId = 0;
+        $post   = null;
+        $slug   = '';
+    } elseif ($isHome && !is_front_page()) {
+        // Englische Startseite /en/: wie die Startseite behandeln (Seitenzustand, Statistik)
+        $pageId = (int) get_option('page_on_front');
+        $post   = get_post($pageId);
+        $slug   = $post ? $post->post_name : '';
     }
+    // Sprache aus der URL für Startseite und statische Seiten (includes/lang.php), sonst entscheidet der Client
+    $pageLang = (TOURNEY_FWS && ($isHome || $staticPage)) ? tourney_lang() : '';
 
     // Check request URI path to see if a tournament permalink URL was called (e.g. /tourney/organizer/slug/)
     $uriPath  = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
@@ -235,6 +246,7 @@ function tourney_render($atts) {
         data-socialinstagram="' . esc_url(getenv('SOCIAL_INSTAGRAM_URL') ?: '') . '"
         data-fws="' . (TOURNEY_FWS ? '1' : '0') . '"
         data-ishome="' . ($isHome ? '1' : '0') . '"
+        data-lang="' . esc_attr($pageLang) . '"
         data-canedit="' . ($canEdit ? '1' : '0') . '"
     ></span>';   
    

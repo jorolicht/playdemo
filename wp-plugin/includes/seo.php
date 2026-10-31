@@ -15,8 +15,17 @@
 /** Seiten-Slugs, die nicht in Suchmaschinen erscheinen sollen (inkl. Unterseiten). */
 const TOURNEY_SEO_NOINDEX_SLUGS = ['login', 'registration', 'verification', 'template', 'statistik'];
 
-/** Beschreibung der Startseite (Meta-Description, Open Graph, JSON-LD). */
-const TOURNEY_SEO_HOME_DESCRIPTION = 'Tischtennis-Turniere einfach im Browser organisieren: K.o.-System, Gruppen und Schweizer System frei kombinierbar, lokal dauerhaft kostenlos, in der Cloud mit Spieler-Self-Service und Live-Anzeige.';
+/** Beschreibung der Startseite je Sprache (Meta-Description, Open Graph, JSON-LD). */
+const TOURNEY_SEO_HOME_DESCRIPTION = [
+    'de' => 'Tischtennis-Turniere einfach im Browser organisieren: K.o.-System, Gruppen und Schweizer System frei kombinierbar, lokal dauerhaft kostenlos, in der Cloud mit Spieler-Self-Service und Live-Anzeige.',
+    'en' => 'Organize table tennis tournaments easily in your browser: knockout, groups and Swiss system freely combinable, free forever locally, in the cloud with player self-service and live display.',
+];
+
+/** Titel der Startseite je Sprache (wie mainView.heroTitle). */
+const TOURNEY_SEO_HOME_TITLE = [
+    'de' => 'Tischtennis-Turniere einfach im Browser organisieren',
+    'en' => 'Organize table tennis tournaments easily in your browser',
+];
 
 /**
  * Liefert die IDs aller Seiten, die nicht indexiert werden sollen (TOURNEY_SEO_NOINDEX_SLUGS samt Unterseiten).
@@ -79,8 +88,8 @@ function tourney_seo_tourney_data($post_id) {
  * @return array Angepasste Titelbestandteile.
  */
 function tourney_seo_title_parts($parts) {
-    if (is_front_page()) {
-        $parts = ['title' => 'Tischtennis-Turniere einfach im Browser organisieren', 'site' => get_bloginfo('name')];
+    if (is_front_page() || tourney_is_en_home()) {
+        $parts = ['title' => TOURNEY_SEO_HOME_TITLE[tourney_lang()], 'site' => get_bloginfo('name')];
     }
     return $parts;
 }
@@ -111,13 +120,14 @@ function tourney_seo_head() {
     $url   = is_singular() ? get_permalink() : home_url('/');
     $title = wp_get_document_title();
     $type  = 'website';
-    $desc  = TOURNEY_SEO_HOME_DESCRIPTION;
+    $lang  = tourney_lang();
+    $desc  = TOURNEY_SEO_HOME_DESCRIPTION[$lang];
     $jsonld = [];
 
     $static = tourney_static_current();
     if ($static) {
         // Statische Seite (includes/static-pages.php): WordPress gibt dafür keine Canonical-URL aus
-        $url  = home_url('/' . $static['slug'] . '/');
+        $url  = tourney_static_url($static['de'], $static['lang']);
         $desc = $static['desc'];
         echo '<link rel="canonical" href="' . esc_url($url) . '" />' . "\n";
     } elseif (is_singular('tourney')) {
@@ -129,14 +139,19 @@ function tourney_seo_head() {
             $desc .= ' Wettbewerbe: ' . implode(', ', $t['competitions']) . '.';
         }
         $desc .= ' Auslosung und Ergebnisse live bei TurnierService.';
-    } elseif (is_front_page()) {
+    } elseif (is_front_page() || tourney_is_en_home()) {
+        if (tourney_is_en_home()) {
+            // Englische Startseite (includes/lang.php): kein WordPress-Beitrag, daher eigene Canonical-URL
+            $url = home_url('/en/');
+            echo '<link rel="canonical" href="' . esc_url($url) . '" />' . "\n";
+        }
         $sameAs = array_values(array_filter([getenv('SOCIAL_FACEBOOK_URL'), getenv('SOCIAL_X_URL'), getenv('SOCIAL_INSTAGRAM_URL')]));
         $jsonld[] = [
             '@context'            => 'https://schema.org',
             '@type'               => 'WebApplication',
             'name'                => 'TurnierService',
-            'url'                 => home_url('/'),
-            'description'         => TOURNEY_SEO_HOME_DESCRIPTION,
+            'url'                 => $url,
+            'description'         => $desc,
             'applicationCategory' => 'SportsApplication',
             'operatingSystem'     => 'Web',
             'inLanguage'          => ['de', 'en'],
@@ -159,7 +174,7 @@ function tourney_seo_head() {
         ['name', 'description', $desc],
         ['property', 'og:type', $type],
         ['property', 'og:site_name', $site],
-        ['property', 'og:locale', 'de_DE'],
+        ['property', 'og:locale', $lang === 'en' ? 'en_GB' : 'de_DE'],
         ['property', 'og:title', $title],
         ['property', 'og:description', $desc],
         ['property', 'og:url', $url],

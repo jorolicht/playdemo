@@ -33,12 +33,13 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
   val BtnCloseNews:  HtmlId = genId(name)
   
   /**
-   * Statische Seiten (site/content) mit eigener URL in der Website-Variante: Dateiname -> URL-Slug.
-   * Gegenstück zu TOURNEY_STATIC_PAGES in wp-plugin/includes/static-pages.php (Rewrite-Regel, Server-HTML).
+   * Statische Seiten (site/content) mit eigener URL in der Website-Variante: Dateiname -> (deutscher, englischer Slug),
+   * z. B. /preise/ bzw. /en/pricing/. Gegenstück zu TOURNEY_STATIC_PAGES in wp-plugin/includes/static-pages.php.
    */
-  val StaticSlugs: Map[String, String] = Map(
-    "funktionen" -> "funktionen", "pricing" -> "preise", "excel" -> "excel", "plugin" -> "plugin",
-    "history" -> "historie", "impressum" -> "impressum", "privacy" -> "datenschutz", "contact" -> "kontakt", "gtc" -> "agb")
+  val StaticSlugs: Map[String, (String, String)] = Map(
+    "funktionen" -> ("funktionen", "features"), "pricing" -> ("preise", "pricing"), "excel" -> ("excel", "excel"),
+    "plugin" -> ("plugin", "plugin"), "history" -> ("historie", "history"), "impressum" -> ("impressum", "imprint"),
+    "privacy" -> ("datenschutz", "privacy"), "contact" -> ("kontakt", "contact"), "gtc" -> ("agb", "terms"))
 
   /**
    * Normalisiert einen Seitenparameter (deutsch/englisch, z. B. "preise", "functions") auf den Dateinamen in pages/.
@@ -66,23 +67,72 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
   def isStaticPage(param: String): Boolean = StaticSlugs.contains(staticBaseName(param))
 
   /**
-   * URL einer statischen Seite, z. B. https://turnier-service.info/preise/ (für href und history.pushState).
+   * URL einer statischen Seite in einer Sprache, z. B. https://turnier-service.info/preise/ bzw. …/en/pricing/.
    *
-   * @param param Seitenparameter.
-   * @return Absolute URL; für unbekannte Seiten die Startseite.
+   * @param param Seitenparameter; leer bzw. unbekannt für die Startseite (/ bzw. /en/).
+   * @param lang  Sprache ("en" für die englische Fassung, sonst deutsch).
+   * @return Absolute URL.
    */
-  def staticUrl(param: String): String =
-    s"${Global.homeUrl.stripSuffix("/")}/${StaticSlugs.get(staticBaseName(param)).map(_ + "/").getOrElse("")}"
+  def staticUrlFor(param: String, lang: String): String =
+    val prefix = if (lang == "en") "en/" else ""
+    val slug = StaticSlugs.get(staticBaseName(param)).map((de, en) => (if (lang == "en") en else de) + "/").getOrElse("")
+    s"${Global.homeUrl.stripSuffix("/")}/$prefix$slug"
 
   /**
-   * Ermittelt die statische Seite zu einem URL-Pfad (z. B. "/preise/" -> "pricing").
+   * URL einer statischen Seite in der aktuellen Sprache (für href und history.pushState).
+   *
+   * @param param Seitenparameter; leer für die Startseite.
+   * @return Absolute URL.
+   */
+  def staticUrl(param: String): String = staticUrlFor(param, Global.lang)
+
+  /**
+   * Ermittelt die statische Seite zu einem URL-Pfad (z. B. "/preise/" oder "/en/pricing/" -> "pricing").
    *
    * @param path URL-Pfad (location.pathname).
    * @return Dateiname der Seite oder None.
    */
   def staticPageOfPath(path: String): Option[String] =
-    val slug = path.stripPrefix(new dom.URL(staticUrl("")).pathname).stripSuffix("/")
-    StaticSlugs.collectFirst { case (page, s) if s == slug => page }
+    val rel = path.stripPrefix(new dom.URL(staticUrlFor("", "de")).pathname).stripSuffix("/")
+    if (rel.startsWith("en/")) StaticSlugs.collectFirst { case (page, (_, en)) if en == rel.stripPrefix("en/") => page }
+    else StaticSlugs.collectFirst { case (page, (de, _)) if de == rel => page }
+
+  /**
+   * Prüft, ob ein URL-Pfad eine Startseite ist (/ oder /en/).
+   *
+   * @param path URL-Pfad.
+   * @return True für die deutsche oder englische Startseite.
+   */
+  def isHomePath(path: String): Boolean =
+    Seq("de", "en").exists(lang => new dom.URL(staticUrlFor("", lang)).pathname == path)
+
+  /**
+   * URL der aktuellen Seite in einer anderen Sprache: Gegenstück der statischen Seite bzw. Startseite,
+   * sonst die aktuelle URL (App-Seiten haben keine Sprach-URL).
+   *
+   * @param lang Zielsprache.
+   * @return Absolute URL.
+   */
+  def langSwitchUrl(lang: String): String =
+    val path = dom.window.location.pathname
+    staticPageOfPath(path) match
+      case Some(page)                => staticUrlFor(page, lang)
+      case None if isHomePath(path)  => staticUrlFor("", lang)
+      case None                      => dom.window.location.href
+
+  /**
+   * Wechselt die Sprache: merkt sie im localStorage und lädt die Seite in der Zielsprache neu
+   * (die Texte werden beim Start geladen). Ist die Seite schon in der Zielsprache, wird nur der Hinweis ausgeblendet.
+   *
+   * @param lang Zielsprache ("de" oder "en").
+   */
+  def switchLang(lang: String): Unit =
+    try dom.window.localStorage.setItem(Global.LangStorageKey, lang) catch { case _: Throwable => () }
+    Global.showLangHint = false
+    if (lang == Global.lang) comps.Navbar.render()
+    else
+      val target = langSwitchUrl(lang)
+      if (target == dom.window.location.href) dom.window.location.reload() else dom.window.location.assign(target)
 
   /** Models for standard WordPress REST API response parsing. */
   case class WpContent(rendered: String) derives ReadWriter

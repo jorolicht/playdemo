@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Eigene URLs für die statischen Seiten der Website-Variante (TOURNEY_FWS = true), z. B. /impressum/ oder /preise/.
+ * Eigene URLs für die statischen Seiten der Website-Variante (TOURNEY_FWS = true), z. B. /impressum/ oder /preise/,
+ * englisch unter /en/imprint/ bzw. /en/pricing/ (Sprache siehe includes/lang.php).
  *
  * Eine Rewrite-Regel bildet die Slugs auf die Query-Variable tourney_static ab, ohne WordPress-Seiten anzulegen.
  * Der Inhalt kommt aus pages/<datei>.html (kopiert aus site/content) und steht schon im Server-HTML (SEO);
@@ -9,36 +10,80 @@
  * Die Zuordnung Seitenname -> Slug im Client steht in pages.MainView.StaticSlugs.
  */
 
-/** Slug => Datei in pages/ (ohne .html), Seitenname im Client (MainView-Parameter), Titel und Beschreibung. */
+/**
+ * Deutscher Slug => Datei in pages/ (ohne .html; englisch mit Suffix _en), Seitenname im Client (MainView-Parameter),
+ * Titel und Beschreibung sowie englischer Slug (/en/<slug>/), Titel und Beschreibung.
+ */
 const TOURNEY_STATIC_PAGES = [
     'funktionen'  => ['file' => 'funktionen', 'page' => 'funktionen', 'title' => 'Funktionen & Features',
-                      'desc' => 'Alle Funktionen von TurnierService: K.o.-System, Gruppen, Jeder gegen Jeden und Schweizer System, Ergebniseingabe per QR-Code, Live-Anzeige und Urkunden.'],
+                      'desc' => 'Alle Funktionen von TurnierService: K.o.-System, Gruppen, Jeder gegen Jeden und Schweizer System, Ergebniseingabe per QR-Code, Live-Anzeige und Urkunden.',
+                      'en' => ['slug' => 'features', 'title' => 'Features & Functions',
+                               'desc' => 'All features of TurnierService: knockout, groups, round robin and Swiss system, result entry via QR code, live display and certificates.']],
     'preise'      => ['file' => 'pricing', 'page' => 'pricing', 'title' => 'Support & Kosten',
-                      'desc' => 'Kosten und Support von TurnierService: lokal im Browser dauerhaft kostenlos, Cloud-Turniere mit Spieler-Self-Service und Live-Anzeige.'],
+                      'desc' => 'Kosten und Support von TurnierService: lokal im Browser dauerhaft kostenlos, Cloud-Turniere mit Spieler-Self-Service und Live-Anzeige.',
+                      'en' => ['slug' => 'pricing', 'title' => 'Support & Pricing',
+                               'desc' => 'Pricing and support of TurnierService: free forever when used locally in the browser, cloud tournaments with player self-service and live display.']],
     'excel'       => ['file' => 'excel', 'page' => 'excel', 'title' => 'Excel-Downloads & Software',
-                      'desc' => 'Excel-Vorlagen und Software-Downloads für die Turnierorganisation im Tischtennis.'],
+                      'desc' => 'Excel-Vorlagen und Software-Downloads für die Turnierorganisation im Tischtennis.',
+                      'en' => ['slug' => 'excel', 'title' => 'Excel Downloads & Software',
+                               'desc' => 'Excel templates and software downloads for organizing table tennis tournaments.']],
     'plugin'      => ['file' => 'plugin', 'page' => 'plugin', 'title' => 'WordPress Plugin',
-                      'desc' => 'Das WordPress-Plugin von TurnierService: Turniere direkt in die eigene Vereinswebsite einbetten.'],
+                      'desc' => 'Das WordPress-Plugin von TurnierService: Turniere direkt in die eigene Vereinswebsite einbetten.',
+                      'en' => ['slug' => 'plugin', 'title' => 'WordPress Plugin',
+                               'desc' => 'The TurnierService WordPress plugin: embed tournaments directly into your club website.']],
     'historie'    => ['file' => 'history', 'page' => 'history', 'title' => 'Versionshistorie',
-                      'desc' => 'Versionshistorie von TurnierService: neue Funktionen und Verbesserungen aller Versionen.'],
+                      'desc' => 'Versionshistorie von TurnierService: neue Funktionen und Verbesserungen aller Versionen.',
+                      'en' => ['slug' => 'history', 'title' => 'Version History',
+                               'desc' => 'Version history of TurnierService: new features and improvements in every release.']],
     'impressum'   => ['file' => 'impressum', 'page' => 'impressum', 'title' => 'Impressum',
-                      'desc' => 'Impressum und Anbieterkennzeichnung von TurnierService.'],
+                      'desc' => 'Impressum und Anbieterkennzeichnung von TurnierService.',
+                      'en' => ['slug' => 'imprint', 'title' => 'Imprint',
+                               'desc' => 'Imprint and legal notice of TurnierService.']],
     'datenschutz' => ['file' => 'privacy', 'page' => 'privacy', 'title' => 'Datenschutzerklärung',
-                      'desc' => 'Datenschutzerklärung von TurnierService: welche Daten verarbeitet werden und welche Rechte Sie haben.'],
+                      'desc' => 'Datenschutzerklärung von TurnierService: welche Daten verarbeitet werden und welche Rechte Sie haben.',
+                      'en' => ['slug' => 'privacy', 'title' => 'Privacy Policy',
+                               'desc' => 'Privacy policy of TurnierService: which data is processed and what rights you have.']],
     'kontakt'     => ['file' => 'contact', 'page' => 'contact', 'title' => 'Kontakt',
-                      'desc' => 'Kontakt zu TurnierService: Fragen, Support und Feedback zur Turniersoftware.'],
+                      'desc' => 'Kontakt zu TurnierService: Fragen, Support und Feedback zur Turniersoftware.',
+                      'en' => ['slug' => 'contact', 'title' => 'Contact',
+                               'desc' => 'Contact TurnierService: questions, support and feedback on the tournament software.']],
     'agb'         => ['file' => 'gtc', 'page' => 'gtc', 'title' => 'Allgemeine Geschäftsbedingungen',
-                      'desc' => 'Allgemeine Geschäftsbedingungen (AGB) von TurnierService.'],
+                      'desc' => 'Allgemeine Geschäftsbedingungen (AGB) von TurnierService.',
+                      'en' => ['slug' => 'terms', 'title' => 'Terms and Conditions',
+                               'desc' => 'Terms and conditions of TurnierService.']],
 ];
 
 /**
- * Liefert die statische Seite der aktuellen Anfrage.
+ * Liefert die statische Seite der aktuellen Anfrage in der Sprache der URL.
  *
- * @return array|null Eintrag aus TOURNEY_STATIC_PAGES ergänzt um 'slug', oder null.
+ * @return array|null Eintrag aus TOURNEY_STATIC_PAGES mit Titel/Beschreibung/Datei der Sprache, ergänzt um
+ *                    'slug' (Slug der URL), 'de' (deutscher Slug) und 'lang', oder null.
  */
 function tourney_static_current() {
     $slug = get_query_var('tourney_static');
-    return ($slug && isset(TOURNEY_STATIC_PAGES[$slug])) ? TOURNEY_STATIC_PAGES[$slug] + ['slug' => $slug] : null;
+    if (!$slug) {
+        return null;
+    }
+    if (tourney_lang() === 'en') {
+        foreach (TOURNEY_STATIC_PAGES as $de => $page) {
+            if ($page['en']['slug'] === $slug) {
+                return array_merge($page, $page['en'], ['de' => $de, 'lang' => 'en', 'file' => $page['file'] . '_en']);
+            }
+        }
+        return null;
+    }
+    return isset(TOURNEY_STATIC_PAGES[$slug]) ? TOURNEY_STATIC_PAGES[$slug] + ['slug' => $slug, 'de' => $slug, 'lang' => 'de'] : null;
+}
+
+/**
+ * URL einer statischen Seite in einer Sprache.
+ *
+ * @param string $de   Deutscher Slug (Schlüssel in TOURNEY_STATIC_PAGES).
+ * @param string $lang 'de' oder 'en'.
+ * @return string Absolute URL, z. B. https://…/impressum/ bzw. https://…/en/imprint/.
+ */
+function tourney_static_url($de, $lang) {
+    return $lang === 'en' ? home_url('/en/' . TOURNEY_STATIC_PAGES[$de]['en']['slug'] . '/') : home_url("/$de/");
 }
 
 /**
@@ -48,11 +93,13 @@ function tourney_static_current() {
  * @return void
  */
 function tourney_static_rewrite() {
-    $slugs = implode('|', array_keys(TOURNEY_STATIC_PAGES));
+    $slugs   = implode('|', array_keys(TOURNEY_STATIC_PAGES));
+    $enSlugs = implode('|', array_map(fn($page) => $page['en']['slug'], TOURNEY_STATIC_PAGES));
     add_rewrite_rule("^($slugs)/?$", 'index.php?tourney_static=$matches[1]', 'top');
-    if (get_option('tourney_static_rules') !== $slugs) {
+    add_rewrite_rule("^en/($enSlugs)/?$", 'index.php?tourney_lang=en&tourney_static=$matches[1]', 'top');
+    if (get_option('tourney_static_rules') !== "$slugs;$enSlugs") {
         flush_rewrite_rules(false);
-        update_option('tourney_static_rules', $slugs);
+        update_option('tourney_static_rules', "$slugs;$enSlugs");
     }
 }
 
@@ -112,12 +159,14 @@ function tourney_static_sitemap() {
         public function get_url_list($page_num, $object_subtype = '') {
             $list = [];
             foreach (TOURNEY_STATIC_PAGES as $slug => $page) {
-                $file  = TOURNEY_PLUGIN_PATH . 'pages/' . $page['file'] . '.html';
-                $entry = ['loc' => home_url("/$slug/")];
-                if (file_exists($file)) {
-                    $entry['lastmod'] = gmdate('c', filemtime($file));
+                foreach (['de' => '', 'en' => '_en'] as $lang => $suffix) {
+                    $file  = TOURNEY_PLUGIN_PATH . 'pages/' . $page['file'] . $suffix . '.html';
+                    $entry = ['loc' => tourney_static_url($slug, $lang)];
+                    if (file_exists($file)) {
+                        $entry['lastmod'] = gmdate('c', filemtime($file));
+                    }
+                    $list[] = $entry;
                 }
-                $list[] = $entry;
             }
             return $list;
         }

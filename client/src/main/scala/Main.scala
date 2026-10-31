@@ -45,7 +45,13 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     Global.fws         = getData(gE(ParamId), "fws", 1) == 1
     Global.isHomePage  = getData(gE(ParamId), "ishome", 0) == 1
     Global.canEditPage = getData(gE(ParamId), "canedit", 0) == 1
-    Global.lang     = dom.window.navigator.language.take(2)
+    // Sprache: aus der URL (data-lang, /en/… bzw. deutsche Seite), sonst die gemerkte Wahl, sonst die Browsersprache
+    val pageLang   = getData(gE(ParamId), "lang", "")
+    val storedLang = try Option(dom.window.localStorage.getItem(Global.LangStorageKey)).getOrElse("") catch { case _: Throwable => "" }
+    val browserLang = dom.window.navigator.language.take(2)
+    Global.lang = if (pageLang.nonEmpty) pageLang else if (storedLang.nonEmpty) storedLang else browserLang
+    if (pageLang == "en") try dom.window.localStorage.setItem(Global.LangStorageKey, "en") catch { case _: Throwable => () }
+    Global.showLangHint = Global.fws && pageLang == "de" && storedLang != "de" && browserLang != "de"
     Logging.setLogLevel(logLevel.toLowerCase())
 
     val slugAttr  = getData(gE(ParamId), "slug", "")
@@ -57,6 +63,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
     dom.window.asInstanceOf[js.Dynamic].appLoadPage = (pageName: String, param: String) => appLoadPage(pageName, param)
     dom.window.asInstanceOf[js.Dynamic].appEvent    = (elem: HTMLElement, event: dom.Event) => appEvent(elem, event)
+    dom.window.asInstanceOf[js.Dynamic].appSwitchLang = (lang: String) => pages.MainView.switchLang(lang)
     // expose addon Console.start function, only if addon is included, otherwise dummy function
     dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
 
@@ -65,7 +72,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       val path = dom.window.location.pathname
       pages.MainView.staticPageOfPath(path) match
         case Some(page) => pages.loadPage(pages.MainView.name, page)
-        case None if path == new dom.URL(pages.MainView.staticUrl("")).pathname => pages.loadPage(pages.MainView.name, "")
+        case None if pages.MainView.isHomePath(path) => pages.loadPage(pages.MainView.name, "")
         case None => dom.window.location.reload()
     })
 

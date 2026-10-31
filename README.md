@@ -245,6 +245,12 @@ werden auch in der Website-Variante im Theme dargestellt.
 Seite über `data-page="static:<seite>"` und führt die Adresszeile per `history.pushState` nach. Neue Seite: Datei in
 `site/content` anlegen, Eintrag in `TOURNEY_STATIC_PAGES` (PHP) und `MainView.StaticSlugs` (Scala).
 
+**Sprachfassungen:** Deutsch unter `/…`, Englisch unter `/en/…` (`/en/`, `/en/features/`, `/en/imprint/` …), ebenfalls
+per Rewrite-Regel (`includes/lang.php`), mit `<html lang>`, `hreflang`-Verweisen und englischen Titeln. Die Sprache
+kommt aus der URL (`data-lang`); auf Seiten ohne Sprach-URL (Turnierseiten, Login) gilt die gemerkte Wahl
+(localStorage `tourney_lang`, gesetzt durch den Umschalter DE | EN oder den Besuch einer `/en/`-URL), sonst die
+Browsersprache. Englischsprachige Besucher deutscher Seiten sehen einen Hinweis auf die englische Fassung.
+
 **Varianten** (Build-Variable `APP_FWS`, erzeugt `includes/config.php` mit `TOURNEY_FWS`):
 
 | | Website (`APP_FWS=true`) | Plugin zum Einbetten (`APP_FWS=false`) |

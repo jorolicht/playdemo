@@ -7,19 +7,19 @@
  * MainView (Überschrift, Beschreibung, die vier Karten). Der Scala.js-Client ersetzt den Inhalt von #Main_ContentId
  * beim Start wie bisher durch die vollständige Startseite (client/src/main/twirl/cviews/pages/MainView/Base.scala.html).
  *
- * Die Texte stammen aus derselben Quelle wie im Client (data/msgs_de.json, erzeugt aus server/conf/messages/de),
+ * Die Texte stammen aus derselben Quelle wie im Client (data/msgs_de.json bzw. msgs_en.json für /en/),
  * damit Server- und Client-Inhalt übereinstimmen (kein Cloaking).
  */
 
 /**
- * Liest die deutschen Client-Texte (einmal pro Anfrage).
+ * Liest die Client-Texte in der Sprache der URL (einmal pro Anfrage; /en/ englisch, sonst deutsch).
  *
  * @return array<string,string> Message-Key => Text; leer, wenn die Datei fehlt.
  */
 function tourney_home_static_msgs() {
     static $msgs = null;
     if ($msgs === null) {
-        $file = TOURNEY_PLUGIN_PATH . 'data/msgs_de.json';
+        $file = TOURNEY_PLUGIN_PATH . 'data/msgs_' . tourney_lang() . '.json';
         $msgs = file_exists($file) ? (json_decode(file_get_contents($file), true) ?: []) : [];
     }
     return $msgs;

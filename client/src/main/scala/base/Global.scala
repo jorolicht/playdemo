@@ -227,6 +227,10 @@ object Global:
   var fws: Boolean = true
   /** True, wenn die einbettende WordPress-Seite die Homepage ist. */
   var isHomePage: Boolean = false
+  /** localStorage-Schlüssel der gewählten Sprache (gesetzt beim Umschalten oder beim Besuch einer /en/-URL). */
+  val LangStorageKey = "tourney_lang"
+  /** True, wenn englischsprachigen Besuchern einer deutschen Seite der Hinweis auf die englische Fassung angezeigt wird. */
+  var showLangHint: Boolean = false
   /** True, wenn der Benutzer Schreibrechte auf die einbettende Seite bzw. das Turnier hat (von WordPress ermittelt). */
   var canEditPage: Boolean = false
   /**
