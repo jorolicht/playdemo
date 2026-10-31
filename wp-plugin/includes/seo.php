@@ -12,8 +12,8 @@
  * <head>, Sitemap, Autorenarchive oder REST-API).
  */
 
-/** Seiten-Slugs, die nicht in Suchmaschinen erscheinen sollen (inkl. Unterseiten). */
-const TOURNEY_SEO_NOINDEX_SLUGS = ['login', 'registration', 'verification', 'template', 'statistik'];
+/** Seiten-Slugs, die nicht in Suchmaschinen erscheinen sollen (inkl. Unterseiten; 'registrierung' ist der Slug auf prod). */
+const TOURNEY_SEO_NOINDEX_SLUGS = ['login', 'registration', 'registrierung', 'verification', 'template', 'statistik'];
 
 /** Beschreibung der Startseite je Sprache (Meta-Description, Open Graph, JSON-LD). */
 const TOURNEY_SEO_HOME_DESCRIPTION = [
