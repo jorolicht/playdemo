@@ -331,7 +331,8 @@ lazy val server = project
       // 4. Verzeichnisse kopieren
       IO.copyDirectory(wpPluginDir / "includes", stageTourneyDir / "includes")
       writeWpConfig(stageTourneyDir)
-      if (fws) IO.copyDirectory(wpPluginDir / "pages", stageTourneyDir / "pages")
+      // pages direkt aus site/content, da wp-plugin/pages erst bei sbt compile aktualisiert wird
+      if (fws) IO.copyDirectory(rootDir / "site" / "content", stageTourneyDir / "pages")
       if ((wpPluginDir / "img").exists()) {
         IO.copyDirectory(wpPluginDir / "img", stageTourneyDir / "img")
       }
