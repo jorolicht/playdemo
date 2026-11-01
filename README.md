@@ -383,7 +383,9 @@ Entwicklungsumgebung.
    docker cp tourney-<version>.zip wp-cli-instance:/tmp/
    docker exec wp-cli-instance wp plugin install /tmp/tourney-<version>.zip --force --activate \
        --allow-root --path=/var/www/html
-   sudo chown -R 33:33 wp_data/wp-content/plugins/tourney
+   # wp-cli läuft als root: danach das ganze WordPress-Verzeichnis an www-data (33) zurückgeben, sonst scheitern
+   # Plugin- und Core-Updates im WordPress-Admin ("Verzeichnis konnte nicht erstellt werden", "Dateien konnten nicht kopiert werden")
+   docker exec wp-cli-instance chown -R 33:33 /var/www/html
    ```
 
 Der **Download-Bereich** (`/downloads/`) wird von einem eigenen nginx-Container ausgeliefert und enthält nur die
