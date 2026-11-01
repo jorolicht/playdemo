@@ -280,17 +280,21 @@ add_shortcode('tourney', 'tourney_render');
 
 /**
  * Konfiguriert PHPMailer für MailCatcher im Docker-Netzwerk.
+ * Nur in der Dev-Umgebung (TOURNEY_MAILCATCHER in wp-config.php, gesetzt über server/docker/dev/docker-compose.yml);
+ * sonst bleibt der Mailversand (z. B. WP Mail SMTP) unverändert.
  *
  * @param PHPMailer $phpmailer Das PHPMailer-Instanz-Objekt.
  */
-add_action('phpmailer_init', function($phpmailer) {
-    $phpmailer->isSMTP();
-    $phpmailer->Host = 'mailcatcher'; // Hostname im Docker-Netzwerk
-    $phpmailer->Port = 1025;
-    $phpmailer->SMTPAuth = false;
-    $phpmailer->SMTPSecure = '';
-    $phpmailer->SMTPAutoTLS = false;
-}, 99999);
+if (defined('TOURNEY_MAILCATCHER') && TOURNEY_MAILCATCHER) {
+    add_action('phpmailer_init', function($phpmailer) {
+        $phpmailer->isSMTP();
+        $phpmailer->Host = 'mailcatcher'; // Hostname im Docker-Netzwerk
+        $phpmailer->Port = 1025;
+        $phpmailer->SMTPAuth = false;
+        $phpmailer->SMTPSecure = '';
+        $phpmailer->SMTPAutoTLS = false;
+    }, 99999);
+}
 
 /**
  * Verhindert, dass WordPress den [tourney] Shortcode in <p>-Tags einschließt,
