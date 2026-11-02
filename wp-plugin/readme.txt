@@ -5,7 +5,7 @@ Tags: tournament, table tennis, sports, scalajs, playframework
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,10 @@ Das Plugin verwendet Semantic Versioning (SemVer) `MAJOR.MINOR.PATCH`. Datenbank
 Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel (`filemtime`) oder der aktuellen Plugin-Version versioniert, sodass Browser-Caches nach Updates sofort invalidiert werden.
 
 == Changelog ==
+
+= 1.0.8 =
+* Startseite (Website-Variante): neue Farben für Symbole und Buttons, Fußzeile direkt unter dem Inhalt.
+* Kontakt-Seite: E-Mail-Adresse info@turnier-service.org.
 
 = 1.0.7 =
 * Korrektur: Die MailCatcher-Umleitung (phpmailer_init) greift nur noch mit TOURNEY_MAILCATCHER (Dev-Umgebung). Seit 1.0.4 wurden alle WordPress-Mails an mailcatcher:1025 umgeleitet.
