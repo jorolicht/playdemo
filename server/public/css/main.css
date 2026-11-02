@@ -455,3 +455,17 @@ td.boto {
 .blink-btn-red {
   animation: referee-blink 1.5s infinite !important;
 }
+/* MainView (Startseite) */
+/* Footer folgt direkt dem Inhalt, statt am unteren Fensterrand zu kleben */
+#Main_ContentId:has(> .main-multi-landing) { flex-grow: 0 !important; }
+#Main_AppWrapper:has(.main-multi-landing) .footer { margin-top: 0 !important; }
+
+/* Farben der vier Karten: Icon und Button; Textfarbe nach Kontrast */
+.mv-demo    { background-color: #E6CA83; color: #212529; }
+.mv-tourney { background-color: #4A607A; color: #fff; }
+.mv-quick   { background-color: #A3B8CC; color: #212529; }
+.mv-search  { background-color: #8A9A86; color: #212529; }
+.btn-mv-demo    { --bs-btn-bg: #E6CA83; --bs-btn-border-color: #E6CA83; --bs-btn-color: #212529; --bs-btn-hover-bg: #D9BA6A; --bs-btn-hover-border-color: #D9BA6A; --bs-btn-hover-color: #212529; --bs-btn-active-bg: #CFAF5C; --bs-btn-active-border-color: #CFAF5C; --bs-btn-active-color: #212529; }
+.btn-mv-tourney { --bs-btn-bg: #4A607A; --bs-btn-border-color: #4A607A; --bs-btn-color: #fff; --bs-btn-hover-bg: #3E5167; --bs-btn-hover-border-color: #3E5167; --bs-btn-hover-color: #fff; --bs-btn-active-bg: #364759; --bs-btn-active-border-color: #364759; --bs-btn-active-color: #fff; }
+.btn-mv-quick   { --bs-btn-bg: #A3B8CC; --bs-btn-border-color: #A3B8CC; --bs-btn-color: #212529; --bs-btn-hover-bg: #8FA7BE; --bs-btn-hover-border-color: #8FA7BE; --bs-btn-hover-color: #212529; --bs-btn-active-bg: #8299B2; --bs-btn-active-border-color: #8299B2; --bs-btn-active-color: #212529; }
+.btn-mv-search  { --bs-btn-bg: #8A9A86; --bs-btn-border-color: #8A9A86; --bs-btn-color: #212529; --bs-btn-hover-bg: #788975; --bs-btn-hover-border-color: #788975; --bs-btn-hover-color: #212529; --bs-btn-active-bg: #6D7D6A; --bs-btn-active-border-color: #6D7D6A; --bs-btn-active-color: #212529; }

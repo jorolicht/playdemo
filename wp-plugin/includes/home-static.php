@@ -39,10 +39,10 @@ function tourney_home_static_html() {
 
     // Karten wie in Base.scala.html: [Titel, Beschreibung, Button, Icon, Farbklassen Icon, Button-Klasse]
     $cards = [
-        ['mainView.demoTitle',       'mainView.demoDesc',       'mainView.demoBtn',       'bi-play-circle',      'bg-warning text-dark', 'btn-warning text-dark'],
-        ['mainView.newTourneyTitle', 'mainView.newTourneyDesc', 'mainView.newTourneyBtn', 'bi-trophy',           'bg-primary text-white', 'btn-primary'],
-        ['mainView.quickStartTitle', 'mainView.quickStartDesc', 'mainView.quickStartBtn', 'bi-lightning-charge', 'bg-success text-white', 'btn-success'],
-        ['mainView.searchTitle',     'mainView.searchDesc',     'mainView.searchBtn',     'bi-search',           'bg-info text-white',    'btn-info text-white'],
+        ['mainView.demoTitle',       'mainView.demoDesc',       'mainView.demoBtn',       'bi-play-circle',      'mv-demo',    'btn-mv-demo'],
+        ['mainView.newTourneyTitle', 'mainView.newTourneyDesc', 'mainView.newTourneyBtn', 'bi-trophy',           'mv-tourney', 'btn-mv-tourney'],
+        ['mainView.quickStartTitle', 'mainView.quickStartDesc', 'mainView.quickStartBtn', 'bi-lightning-charge', 'mv-quick',   'btn-mv-quick'],
+        ['mainView.searchTitle',     'mainView.searchDesc',     'mainView.searchBtn',     'bi-search',           'mv-search',  'btn-mv-search'],
     ];
 
     $html  = '<div class="main-multi-landing">';
@@ -52,7 +52,7 @@ function tourney_home_static_html() {
     $html .= '<p class="lead mb-1 fs-6">' . $t('mainView.heroSubtitle') . '</p>';
     $html .= '<p class="small opacity-75 mx-auto mb-0" style="max-width:600px;">' . $t('mainView.heroDesc') . '</p>';
     $html .= '</div></div>';
-    $html .= '<div class="container mt-4 pb-5"><div class="row g-4 justify-content-center">';
+    $html .= '<div class="container mt-4 pb-4"><div class="row g-4 justify-content-center">';
     foreach ($cards as [$title, $desc, $btn, $icon, $iconClass, $btnClass]) {
         $html .= '<div class="col-lg-3 col-md-6"><div class="card h-100 border-0 shadow"><div class="card-body text-center p-4 d-flex flex-column">';
         $html .= '<div class="' . $iconClass . ' bg-gradient mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width:60px;height:60px;"><i class="bi ' . $icon . ' fs-3"></i></div>';
