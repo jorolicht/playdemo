@@ -58,6 +58,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     val postType  = getData(gE(ParamId), "posttype", "")
     val startPage = getData(gE(ParamId), "page", "").toLowerCase()
     val effectiveTourney = if (tourney.nonEmpty) tourney else if (postType == "tourney") slugAttr else ""
+    Global.isApp = Global.fws && startPage == "app"
 
     println(s"startApp -> dataUrl:${Global.dataUrl} version:${effectiveVersion} lang:${Global.lang} fws:${Global.fws} home:${Global.isHomePage} canEdit:${Global.canEditPage} page:${startPage} PageId:${Global.pageId} tourney:${effectiveTourney} logLevel:${logLevel} turnstile:${Global.turnstileSitekey}")
 
@@ -98,7 +99,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
    * Lädt die Benutzerinformationen, rendert Navbar/Footer und stellt den letzten Seitenzustand
    * wieder her oder wählt die Startseite (siehe runDefaultRouting).
    *
-   * @param startPage     Optionale Startseite aus dem Shortcode-Attribut page (login, register, verify)
+   * @param startPage     Optionale Startseite aus dem Shortcode-Attribut page (login, register, verify) bzw. "app" (Offline-App /app/)
    * @param tourneyParam  Optionaler Turnier-Slug (URL-Parameter, Permalink oder CPT-Slug)
    * @param isTourneyPost True, wenn die einbettende Seite ein CPT 'tourney' ist
    */
@@ -192,7 +193,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
    *  - eingebettet, CPT 'tourney' mit Turnier: Edit- bzw. View-Modus
    *  - eingebettet, ohne Turnier: PureView (Schreibrecht) bzw. Hinweisseite
    *
-   * @param startPage     Optionale Startseite aus dem Shortcode-Attribut page (login, register, verify)
+   * @param startPage     Optionale Startseite aus dem Shortcode-Attribut page (login, register, verify) bzw. "app" (Offline-App /app/)
    * @param tourneyParam  Optionaler Turnier-Slug
    * @param isTourneyPost True, wenn die einbettende Seite ein CPT 'tourney' ist
    */
@@ -201,6 +202,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       case "login"    => pages.loadPage(pages.UserLogin.name, "")
       case "register" => pages.loadPage(pages.UserRegistration.name, "")
       case "verify"   => pages.loadPage(pages.VerifyAccount.name, "")
+      case "app"      => pages.loadPage(pages.AppView.name, "")
       case s if s.startsWith("static:") => pages.loadPage(pages.MainView.name, s.stripPrefix("static:"))
       case _ =>
         if (Global.fws && Global.isHomePage && tourneyParam.isEmpty) {

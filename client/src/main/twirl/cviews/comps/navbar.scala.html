@@ -121,6 +121,8 @@
                         <ul class="dropdown-menu shadow" aria-labelledby="navbarTools">
                             <li><a class="dropdown-item" href="@pages.MainView.staticUrl("plugin")" onclick="appLoadPage('MainView', 'plugin'); return false;">@gM("navbar.wordpressPlugin")</a></li>
                             <li><a class="dropdown-item" href="@pages.MainView.staticUrl("excel")" onclick="appLoadPage('MainView', 'excel'); return false;">@gM("navbar.excelTemplate")</a></li>
+                            <!-- Offline-App: echte Navigation, der Service Worker gilt nur unter /app/ -->
+                            <li><a class="dropdown-item" href="@{Global.homeUrl}/app/">@gM("navbar.offlineApp")</a></li>
                         </ul>
                     </li>
                 </ul>

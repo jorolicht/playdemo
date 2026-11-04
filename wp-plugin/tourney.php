@@ -142,6 +142,10 @@ if (TOURNEY_FWS) {
     require_once TOURNEY_PLUGIN_PATH . 'includes/api/payhip.php';
 }
 require_once TOURNEY_PLUGIN_PATH . 'includes/helpers.php';
+// Offline-App /app/ (Progressive Web App, lokale Turniere) nur bei Full Web Site
+if (TOURNEY_FWS) {
+    require_once TOURNEY_PLUGIN_PATH . 'includes/pwa.php';
+}
 
 
 /**
@@ -188,6 +192,13 @@ function tourney_render($atts) {
     $staticPage = TOURNEY_FWS ? tourney_static_current() : null;
     if ($staticPage) {
         $atts['page'] = 'static:' . $staticPage['page'];
+        $pageId = 0;
+        $post   = null;
+        $slug   = '';
+    } elseif (TOURNEY_FWS && tourney_is_app()) {
+        // Offline-App /app/ (includes/pwa.php): Client öffnet pages.AppView
+        $atts['page'] = 'app';
+        $isHome = false;
         $pageId = 0;
         $post   = null;
         $slug   = '';

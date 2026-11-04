@@ -233,6 +233,8 @@ object Global:
   var showLangHint: Boolean = false
   /** True, wenn der Benutzer Schreibrechte auf die einbettende Seite bzw. das Turnier hat (von WordPress ermittelt). */
   var canEditPage: Boolean = false
+  /** True in der Offline-App /app/ (Website-Variante): neue Turniere werden immer lokal im Browser angelegt. */
+  var isApp: Boolean = false
   /**
    * True, wenn der Play-Server aufgerufen werden darf: nur bei Full Web Site und wenn das
    * Turnier nicht lokal im Browser gespeichert ist (kein Lokal- oder Demo-Modus).

@@ -40,7 +40,7 @@ object StartManager extends ComWrapper:
       case StartKind.Tourney     => "tourney"
       case StartKind.Competition => "comp")
     if (!Global.fws) startInPage(kind)
-    else if (Global.user.isDefined) startInCloud(kind)
+    else if (Global.user.isDefined && !Global.isApp) startInCloud(kind)
     else startLocal(kind)
 
   /** fws=false: Anlage in der aktuellen WordPress-Seite. */
@@ -72,7 +72,7 @@ object StartManager extends ComWrapper:
       case _ => openCreatePage(kind)
     }
 
-  /** fws=true und nicht angemeldet: Anlage lokal im Browser. */
+  /** fws=true und nicht angemeldet bzw. in der Offline-App (Global.isApp): Anlage lokal im Browser. */
   private def startLocal(kind: StartKind): Unit =
     val confirmed =
       if (!TourneyDB.hasLocalTourney) Future.successful(true)

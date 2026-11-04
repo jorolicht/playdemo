@@ -260,9 +260,17 @@ Browsersprache. Englischsprachige Besucher deutscher Seiten sehen einen Hinweis 
 | Statische Seiten (`pages/`) | ja | nein |
 | Verwaltung, Konfigurator, Payhip | ja | nein |
 | Play-Server-Dienste | ja | nein |
+| Offline-App `/app/` (PWA) | ja | nein |
 
 Welche Startseite erscheint, hängt von der Variante, davon, ob es die Homepage ist (`data-ishome`), und vom Schreibrecht auf
 die Seite ab (`data-canedit`).
+
+**Offline-App** (nur `APP_FWS=true`, Menü Tools → Offline-App): Die Seite `/app/` (`includes/pwa.php`, Client
+`pages.AppView`) ist als Progressive Web App installierbar und funktioniert nach dem ersten Besuch ohne Netz. Dort werden
+Turniere immer lokal im Browser angelegt (`Global.isApp`), auch für angemeldete Benutzer. Gesichert wird per JSON-Export
+(Ablage). Der Service Worker (`includes/pwa-sw.js`, Scope `/app/`) und das Manifest werden von PHP ausgeliefert
+(`?tourney_pwa=sw|manifest`), Icons: `img/pwa-{192,512}.png`. Die Caches tragen `TOURNEY_VERSION` im Namen und werden bei einer
+neuen Plugin-Version ersetzt. Voraussetzung ist HTTPS (bzw. localhost).
 
 **Slug-Struktur** der Turnierdaten in WordPress:
 
