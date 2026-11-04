@@ -5,7 +5,7 @@ Tags: tournament, table tennis, sports, scalajs, playframework
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
-Stable tag: 1.0.8
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,10 @@ Das Plugin verwendet Semantic Versioning (SemVer) `MAJOR.MINOR.PATCH`. Datenbank
 Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel (`filemtime`) oder der aktuellen Plugin-Version versioniert, sodass Browser-Caches nach Updates sofort invalidiert werden.
 
 == Changelog ==
+
+= 1.1.0 =
+* Website-Variante: neue Offline-App (Menü Tools → Offline-App, Seite /app/), als Progressive Web App installierbar; lokale Turniere ohne Internet, Sicherung per JSON-Export.
+* Eingebettetes Plugin: keine funktionalen Änderungen.
 
 = 1.0.8 =
 * Startseite (Website-Variante): neue Farben für Symbole und Buttons, Fußzeile direkt unter dem Inhalt.
