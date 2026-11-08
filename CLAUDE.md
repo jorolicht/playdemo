@@ -31,7 +31,9 @@ sbt startet automatisch im Projekt `server` (`Global / onLoad`).
 
 **Plugin-Variante:** `APP_FWS=true|false` (Default `true`). Daraus wird `includes/config.php` mit `TOURNEY_FWS` erzeugt. Bei `false` gibt es keine Plugin-Header/-Footer und kein `pages/`, das ZIP heißt `tourney-embed-<version>.zip`. Die Startseite wird aus `fws`, Homepage (`data-ishome`) und Schreibrecht auf die Seite (`data-canedit`, PHP `tourney_user_can_edit_post`) bestimmt (`Main.runDefaultRouting`). Das Shortcode-Attribut `mode` gibt es nicht mehr; `[tourney page="login|register|verify"]` öffnet eine bestimmte Seite.
 
-**Voraussetzung:** externes Tool `msgConverter` muss im `PATH` liegen (wird von `convertMessagesToJson` aufgerufen).
+**Voraussetzung:** externes Tool `msgConverter` muss im `PATH` liegen (wird von `convertMessagesToJson` aufgerufen); für `packageWp`/`publishWp` außerdem Node.js mit `npx` (Minimierung von `main.js` mit terser, abschaltbar mit `APP_MINIFY=false`).
+
+**Diagnose-Konsole (`addon`):** wird nur mit `APP_ADDON=true` eingebunden; Default an bei `APP_ENV=dev`, sonst aus (Release-ZIP ohne Konsole).
 
 **Dev-Umgebung starten:** `server/docker/dev/start.sh` (bzw. `stop.sh`) – WordPress, Play-Server (`playsrv`, Port 9500), MySQL via docker compose.
 

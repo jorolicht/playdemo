@@ -134,7 +134,7 @@ unter `server/docker/*/wp_data/.../plugins/tourney`.
 | sbt 1.9+ | Build |
 | Docker mit Docker Compose v2 | Entwicklungs- und Produktivumgebung |
 | `msgConverter` im `PATH` | Umwandlung der Übersetzungsdateien in JSON (`convertMessagesToJson`) |
-| Node.js 20+ und npm | Playwright-Tests |
+| Node.js 20+ und npm | Playwright-Tests; `npx` für die Minimierung von `main.js` im Plugin-ZIP (terser) |
 | ffmpeg (optional) | Werbevideo |
 
 ---
@@ -171,6 +171,8 @@ Steuerung beim Build:
 |---|---|---|
 | `APP_ENV` (bzw. `-Dapp.env`) | `dev`, `prod` (Standard: `prod`) | Ziel-Docker-Verzeichnis und `.env` |
 | `APP_FWS` | `true` (Standard), `false` | Plugin-Variante, siehe [WordPress-Plugin](#wordpress-plugin) |
+| `APP_ADDON` | `true`, `false` (Standard: `true` bei `APP_ENV=dev`, sonst `false`) | Diagnose-Konsole (`client/src/main/scala/addon`, Aufruf über das © im Footer) in den Client einbinden |
+| `APP_MINIFY` | `true` (Standard), `false` | `main.js` im Plugin-ZIP (`packageWp`, `publishWp`) mit terser minimieren; die Source-Map zeigt weiter auf die Scala-Quellen |
 
 ---
 
@@ -183,7 +185,7 @@ sbt startet automatisch im Projekt `server`.
 | `sbt compile` | Kompiliert den Server, linkt den Client (`fastLinkJS` + `fullLinkJS`) und kopiert JS/CSS/PHP/Seiten/Daten nach `wp-plugin/` und ins Docker-Plugin-Verzeichnis |
 | `sbt run` | Play-Dev-Server |
 | `sbt buildMsg` | Übersetzungsdateien neu erzeugen (`genMsgFiles` → `convertMessagesToJson`) |
-| `sbt packageWp` | Installierbares Plugin-ZIP `target/wordpress/tourney-<version>.zip` (bei `APP_FWS=false`: `tourney-embed-<version>.zip`) |
+| `sbt packageWp` | Installierbares Plugin-ZIP `target/wordpress/tourney-<version>.zip` (bei `APP_FWS=false`: `tourney-embed-<version>.zip`); `main.js` aus `fullLinkJS`, minimiert, mit `APP_ENV=prod` ohne Diagnose-Konsole |
 | `sbt publishWp` | Nur mit `APP_FWS=false`: Plugin-ZIP in den öffentlichen Download-Bereich `server/docker/<env>/downloads/` (`tourney-embed-<version>.zip` und `tourney-embed-latest.zip`) |
 | `sbt stage` / `sbt dist` | Play-Distribution, wird nach `server/docker/<env>/playsrv/` kopiert |
 | `sbt dockerBuildImages` / `sbt dockerPushImages` | Images `jorolich/{playsrv,wp-cli,wp-gmp}-image` für linux/amd64 bauen bzw. pushen |

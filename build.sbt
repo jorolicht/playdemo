@@ -43,14 +43,42 @@ def getEnvValue(base: File, key: String, defaultVal: String): String = {
   }.getOrElse(defaultVal)
 }
 
-val includeAddon: Boolean  = true // always include addon for now, can be disabled later if needed
 val projectRootDir         = file(".")
+// Diagnose-Konsole (client/src/main/scala/addon) einbinden: APP_ADDON=true|false, Default an mit APP_ENV=dev, sonst aus
+val includeAddon: Boolean  = getEnvValue(projectRootDir, "APP_ADDON", if (getAppEnv == "dev") "true" else "false").trim.toLowerCase == "true"
+// main.js im Plugin-ZIP (packageWp/publishWp) mit terser minimieren: APP_MINIFY=true|false, Default an
+val minifyJs: Boolean      = getEnvValue(projectRootDir, "APP_MINIFY", "true").trim.toLowerCase == "true"
+// terser-Version für die Minimierung (über npx, wird beim ersten Aufruf geladen; Voraussetzung: Node.js/npx im PATH)
+val terserVersion          = "5.31.0"
 val appOrganization        = getEnvValue(projectRootDir, "APP_ORGANIZATION", "org.jorolicht")
 val appVersion             = getEnvValue(projectRootDir, "APP_VERSION", "1.1.0")
 val appDate                = getEnvValue(projectRootDir, "APP_DATE", "2026-11-04")
 val appMaintainer          = getEnvValue(projectRootDir, "APP_MAINTAINER", "Robert Lichtenegger <robert.lichtenegger@gmail.com>")
 // Plugin-Variante: true = Full Web Site (Header/Footer + pages), false = eingebettet (ohne Header/Footer und pages)
 val fws: Boolean           = getEnvValue(projectRootDir, "APP_FWS", "true").trim.toLowerCase == "true"
+
+/**
+ * Minimiert die von Scala.js (fullLinkJS) erzeugte main.js im Verzeichnis jsDir mit terser.
+ * Die Source-Map wird weitergeführt und zeigt weiterhin auf die .scala-Quellen.
+ *
+ * @param jsDir Verzeichnis mit main.js (und optional main.js.map)
+ * @param log   sbt-Logger
+ */
+def minifyMainJs(jsDir: File, log: Logger): Unit = {
+  val js      = jsDir / "main.js"
+  val map     = jsDir / "main.js.map"
+  val tmpJs   = jsDir / "main.min.js"
+  val tmpMap  = jsDir / "main.min.js.map"
+  val before  = js.length
+  val mapArgs = if (map.exists) Seq("--source-map", "content='main.js.map',url='main.js.map'") else Seq()
+  val cmd     = Seq("npx", "--yes", s"terser@$terserVersion", "main.js", "--module", "--compress", "--mangle") ++ mapArgs ++ Seq("-o", tmpJs.getName)
+  val exit    = Process(cmd, jsDir).!(ProcessLogger(line => log.info(line), line => log.warn(line)))
+  if (exit != 0 || !tmpJs.exists)
+    throw new sbt.internal.util.MessageOnlyException(s"Minimierung von main.js fehlgeschlagen (exit $exit): ${cmd.mkString(" ")}")
+  IO.move(tmpJs, js)
+  if (tmpMap.exists) IO.move(tmpMap, map)
+  log.info(s"main.js minimiert (terser $terserVersion): ${before / 1024} KB -> ${js.length / 1024} KB")
+}
 
 /**
  * Schreibt die Plugin-Konfiguration includes/config.php mit der Konstante TOURNEY_FWS.
@@ -360,6 +388,8 @@ lazy val server = project
       val stageJsDir = stageTourneyDir / "js"
       IO.createDirectory(stageJsDir)
       IO.copyDirectory(clientOptDir, stageJsDir)
+      if (minifyJs) minifyMainJs(stageJsDir, log)
+      log.info(s"Client: Diagnose-Konsole ${if (includeAddon) "enthalten" else "nicht enthalten"} (APP_ADDON), minimiert: $minifyJs (APP_MINIFY)")
 
       // 7. Übersetzungen (JSON) einbinden
       val stageDataDir = stageTourneyDir / "data"

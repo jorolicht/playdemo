@@ -33,7 +33,8 @@
                     }
                 }
                 <div class="mt-2 text-muted" style="font-size: 0.75rem;">
-                    <a href="javascript:startConsole()" class="text-decoration-none text-muted">&copy;</a> 2026 TurnierService. @gM("footer.realizedWith")
+                    @* Diagnose-Konsole nur, wenn das Addon im Build enthalten ist (APP_ADDON) *@
+                    @if(addon.Console.enabled) {<a href="javascript:startConsole()" class="text-decoration-none text-muted">&copy;</a>} else {&copy;} 2026 TurnierService. @gM("footer.realizedWith")
                 </div>
             </div>
         </div>
