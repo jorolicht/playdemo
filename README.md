@@ -23,6 +23,7 @@ Twirl-Templates und gemeinsam genutzter Domänencode.
 - [WordPress-Plugin](#wordpress-plugin)
 - [Client-Architektur](#client-architektur)
 - [REST-API und Play-Server](#rest-api-und-play-server)
+- [Wertungssystem](#wertungssystem)
 - [Internationalisierung](#internationalisierung)
 - [Tests](#tests)
 - [Werbevideo](#werbevideo)
@@ -111,7 +112,8 @@ Einbindung von Scala.js in Play über [sbt-web-scalajs](https://github.com/vmuni
 │   └── src/main/
 │       ├── scala/            pages/, comps/, dialogs/, services/, base/, addon/
 │       └── twirl/cviews/     Twirl-Templates (pages, comps, dialogs)
-├── shared/                   Gemeinsamer Code (model/, format/), crossProject CrossType.Pure
+├── shared/                   Gemeinsamer Code (model/, format/, sport/), crossProject CrossType.Pure
+│   └── sports/               Wertungssysteme der Sportarten (JSON, z. B. tt.json)
 ├── wp-plugin/                WordPress-Plugin "tourney" (tourney.php, includes/, css/, ...)
 ├── site/content/             Statische Seiten (werden nach wp-plugin/pages kopiert)
 └── test/
@@ -326,6 +328,21 @@ Schreibende Aufrufe verlangen Schreibrecht auf den jeweiligen Post (`tourney_api
 | `/referee`, `/referee/submit` | Ergebnis-Selbsteingabe (QR-Code auf dem Schiedsrichterzettel) |
 | `/matchboard/*`, `/ws/:slug`, `/helper/send2sse` | Live-Anzeige über WebSocket/SSE |
 | `/wp/post` | WordPress-Proxy |
+
+---
+
+## Wertungssystem
+
+Wie gezählt, gewonnen und gewertet wird, beschreibt je Sportart eine JSON-Datei in `shared/sports/` (heute nur `tt.json`).
+Sie enthält die Wertungsstufen von unten nach oben (TT: Ball → Satz bis 11 mit 2 Vorsprung → Spiel mit 3 Gewinnsätzen),
+Varianten, Formate, Tabellenpunkte und Entscheidungskriterien sowie die Namen auf Deutsch und Englisch. Beim Übersetzen
+bettet ein sbt-Sourcegenerator die Dateien als `shared.sport.SportFiles` ein, sodass Client und Server dieselbe
+Konfiguration ohne Nachladen nutzen. Modell und Auswertung stehen in `shared/sport/SportConfig.scala`, der Zugriff läuft
+über `Sports.get(id)` bzw. `Sports.default`.
+
+Die Prüfung der Ergebnisse (`StageHelper`, `MEntry.validSets`), die Schnelleingabe der Sätze im Client und die Sortierung der
+Gruppentabelle (`Group.calc`) verwenden diese Konfiguration. `Stage.noWinSets` überschreibt weiterhin die Gewinnsätze
+der Spielstufe. Gespeichert werden Ergebnisse unverändert im bisherigen Format.
 
 ---
 

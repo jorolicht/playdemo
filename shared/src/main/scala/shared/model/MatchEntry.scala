@@ -74,7 +74,7 @@ sealed trait MEntry {
   
   def countable = (status == MEntry.MS_FIN) 
 
-  def validSets(): Boolean = ((sets._1 == winSets & sets._2 < winSets) | (sets._1 < winSets & sets._2 == winSets))
+  def validSets(): Boolean = shared.format.StageHelper.validSets(sets, winSets)
 
   def reset(resetPantA: Boolean=false, resetPantB: Boolean=false):MEntry = { 
     if (resetPantA) setPantA(SNO.nn)
@@ -100,18 +100,7 @@ sealed trait MEntry {
     else SNO.nn
   }
 
-  def getBallFromStr(b: String):(Int,Int) = {
-    if      (b == "")              (-1,-1)  
-    else if (b == "+0" | b == "0") (11,0) 
-    else if (b == "-0")            (0,11)  
-    else b.toIntOption.getOrElse(0) match {  
-      case a if   10 to 500 contains a => (a+2, a)
-      case b if    1 to   9 contains b => (11, b)
-      case c if   -9 to  -1 contains c => (-c, 11)
-      case d if -500 to -10 contains d => (-d, 2 - d) 
-      case _                           => (-1,-1)
-    }
-  }
+  def getBallFromStr(b: String):(Int,Int) = shared.format.StageHelper.getBallFromStr(b)
 
   def getBalls: Array[(Int,Int)] = {
     val ballsArr = new scala.collection.mutable.ArrayBuffer[(Int,Int)]()

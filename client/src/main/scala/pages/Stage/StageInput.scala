@@ -465,27 +465,10 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     }
 
   /**
-   * Helper to parse TT results.
-   * e.g. -5 stands for 5:11, 10 stands for 12:10.
+   * Liest die Schnelleingabe eines Satzes laut Wertungssystem der Sportart.
+   * Tischtennis: -5 steht für 5:11, 10 für 12:10.
    */
-  private def parseSetInput(input: String): Option[(Int, Int)] =
-    val trimmed = input.trim
-    if (trimmed.isEmpty) None
-    else
-      try
-        if (trimmed == "-0") {
-          Some((0, 11))
-        } else if (trimmed.startsWith("-")) {
-          val value = trimmed.substring(1).toInt
-          if (value >= 9) Some((value, value + 2))
-          else Some((value, 11))
-        } else {
-          val value = trimmed.toInt
-          if (value >= 9) Some((value + 2, value))
-          else Some((11, value))
-        }
-      catch
-        case _: NumberFormatException => None
+  private def parseSetInput(input: String): Option[(Int, Int)] = StageHelper.setLevel.parseShort(input)
 
   /**
    * Recalculates match status for all matches in the stage, setting them to
@@ -924,13 +907,7 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
               if (pts.length == 2) {
                 val aPoints = pts(0)
                 val bPoints = pts(1)
-                val shortForm = if (aPoints > bPoints) {
-                  bPoints.toString
-                } else {
-                  if (aPoints == 0 && bPoints == 11) "-0"
-                  else s"-$aPoints"
-                }
-                el.value = shortForm
+                el.value = StageHelper.setLevel.formatShort((aPoints, bPoints))
               } else {
                 el.value = ""
               }

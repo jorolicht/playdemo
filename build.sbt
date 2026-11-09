@@ -677,6 +677,31 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
        )
        Seq(file)
      },
+     // Wertungssysteme der Sportarten (shared/sports/*.json) als Quelltext einbetten,
+     // damit Client (Scala.js) und Server dieselbe Konfiguration synchron lesen.
+     Compile / sourceGenerators += Def.task {
+       val srcDir = baseDirectory.value / ".." / "sports"
+       val file   = (Compile / sourceManaged).value / "shared" / "sport" / "SportFiles.scala"
+       val jsons  = (srcDir * "*.json").get.sortBy(_.getName)
+       val q3     = "\"\"\""
+       val entries = jsons.map { f =>
+         val content = IO.read(f)
+         require(!content.contains(q3), s"${f.getName} must not contain triple quotes")
+         s"""    "${f.getName}" -> ${q3}${content}${q3}"""
+       }
+       val header =
+         """package shared.sport
+           |
+           |/**
+           | * Automatisch generiert aus shared/sports: Dateiname -> JSON-Inhalt.
+           | */
+           |object SportFiles:
+           |  val files: Seq[(String, String)] = Seq(
+           |""".stripMargin
+       IO.write(file, header + entries.mkString(",\n") + "\n  )\n")
+       Seq(file)
+     },
+     watchSources ++= ((baseDirectory.value / ".." / "sports") * "*.json").get,
      libraryDependencies ++= Seq(
        "com.lihaoyi" %%% "upickle" % "3.3.1",
        "com.lihaoyi" %% "upickle" % "3.3.1",

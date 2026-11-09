@@ -5,6 +5,7 @@ import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
 import shared.model.*
 import shared.basic.{AppError, Log}
 import StageHelper.*
+import shared.sport.Sports
 
 case class GroupConfig(id: Int, name: String, size: Int, quali: Int, pos: Int)
 
@@ -79,10 +80,9 @@ case class Group(
   /**
    * Berechnet die Platzierungen (Rankings) der Teilnehmer in dieser Gruppe.
    *
-   * Die Platzierung wird lexikografisch anhand folgender Kriterien ermittelt:
-   * 1. Punktdifferenz (höchste Priorität)
-   * 2. Satzdifferenz (mittlere Priorität)
-   * 3. Balldifferenz (niedrigste Priorität)
+   * Die Platzierung wird lexikografisch anhand der Entscheidungskriterien der Sportart
+   * (`standings.tieBreakers`) ermittelt, bei Tischtennis Spiel-, Satz- und Balldifferenz.
+   * Teilnehmer, die in allen Kriterien gleich sind, erhalten denselben Platz.
    *
    * Die errechneten Platzierungen werden direkt in das `place`-Feld jedes
    * Teilnehmers (`Pant`) eingetragen.
@@ -110,27 +110,52 @@ case class Group(
             (acc1 + entry.ballDiff._1, acc2 + entry.ballDiff._2)
           }
 
-        var tmpPos = Array.ofDim[(Int, Long)](size)
+        val cfg = Sports.default
         for i <- 0 until size do
           balls(i)  = sumBallDiffs(i)
           sets(i)   = sumSets(i)
           points(i) = sumPoints(i)
-          
-          // Gewichtungsbasierte Formel zur Sortierung nach Punkten, Sätzen und Bällen
-          val score = (balls(i)._1 - balls(i)._2) + 2000L +
-                      ((sets(i)._1 - sets(i)._2) + 50) * 10000L +
-                      ((points(i)._1 - points(i)._2) + 50) * 10000000L
-          tmpPos(i) = (i, score)
 
-        // Absteigend nach Score sortieren
-        tmpPos = tmpPos.sortBy(_._2).reverse
-        
-        var cnt = 1 
-        pants(tmpPos(0)._1).place = (cnt, 0)
-        for i <- 1 until size do 
-          if tmpPos(i)._2 < tmpPos(i-1)._2 then cnt = cnt + 1
-          pants(tmpPos(i)._1).place = (cnt, 0)
-      
+        // Tabellenpunkte eines Teilnehmers laut Konfiguration
+        def tablePoints(pos: Int): Int =
+          results(pos).filter(_.valid).map { e =>
+            val outcome = Integer.signum(e.points._1 - e.points._2)
+            cfg.standings.tablePoints(e.sets, outcome)._1
+          }.sum
+
+        // Wertepaar (gewonnen, verloren) einer Stufe: 0 = Spiel, 1 = Satz, 2 = Ball
+        def byLevel(pos: Int, level: String): Option[(Int, Int)] =
+          cfg.depthBelowMatch(level).collect {
+            case 0 => points(pos)
+            case 1 => sets(pos)
+            case 2 => balls(pos)
+          }
+
+        def ratio(v: (Int, Int)): Double =
+          if v._2 != 0 then v._1.toDouble / v._2
+          else if v._1 == 0 then 0.0 else Double.PositiveInfinity
+
+        // Sortierschlüssel je Teilnehmer: ein Wert je Entscheidungskriterium (größer = besser)
+        def key(pos: Int): Seq[Double] = cfg.standings.tieBreakers.flatMap { tb =>
+          tb.split(':') match
+            case Array("points")       => Some(tablePoints(pos).toDouble)
+            case Array("diff",  level) => byLevel(pos, level).map(v => (v._1 - v._2).toDouble)
+            case Array("sum",   level) => byLevel(pos, level).map(_._1.toDouble)
+            case Array("ratio", level) => byLevel(pos, level).map(ratio)
+            case _                     => None   // z. B. headToHead: noch nicht umgesetzt
+        }
+
+        def better(x: Seq[Double], y: Seq[Double]): Boolean =
+          x.zip(y).find(p => p._1 != p._2).exists(p => p._1 > p._2)
+
+        val ranked = (0 until size).map(i => (i, key(i))).sortWith((x, y) => better(x._2, y._2))
+
+        var cnt = 1
+        pants(ranked(0)._1).place = (cnt, 0)
+        for i <- 1 until size do
+          if ranked(i)._2 != ranked(i - 1)._2 then cnt = cnt + 1
+          pants(ranked(i)._1).place = (cnt, 0)
+
       Right(())
     catch
       case e: Throwable =>
