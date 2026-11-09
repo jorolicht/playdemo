@@ -366,7 +366,10 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
 
     val sessionLocal = org.scalajs.dom.window.sessionStorage.getItem("tourney_is_local_mode") == "true"
     val localLocal = org.scalajs.dom.window.localStorage.getItem("tourney_is_local_mode") == "true"
-    val isLocal = sessionLocal || localLocal || Global.isLocalMode
+    // Dieselbe Erkennung wie auf der Startseite (Slug "local" oder gespeichertes lokales Turnier ohne Cloud-Slug),
+    // sonst landet ein dort angebotenes lokales Turnier ohne gesetztes Flag im Cloud-Zweig (Anmeldung erforderlich).
+    val lastIsLocal = pages.MainView.getLastTourneyInfo().exists(_.isLocal)
+    val isLocal = sessionLocal || localLocal || Global.isLocalMode || lastIsLocal
 
     if (isLocal) {
       val jsStr = dom.window.localStorage.getItem("App.demo_tourney")
