@@ -153,14 +153,85 @@ object Variant:
   given rw: RW[Variant] = macroRW
 
 /**
- * Wettbewerbsformat (heute `CompTyp`): Einzel, Doppel, Mannschaft. Die Begegnung wird erst mit den Mannschaften
- * ausgewertet und bleibt hier unverarbeitet.
+ * Ein Spiel innerhalb einer Begegnung.
+ *
+ * @param type single oder double
+ * @param home Position der Heimmannschaft
+ * @param away Position der Gastmannschaft
+ */
+case class EncounterGame(`type`: String, home: String, away: String):
+  /** true bei einem Doppel. */
+  def isDouble: Boolean = `type` == "double"
+
+object EncounterGame:
+  given rw: RW[EncounterGame] = macroRW
+
+/**
+ * Spielsystem einer Begegnung zweier Mannschaften.
+ *
+ * @param level          Wertungsstufe der Begegnung (über der Spielstufe)
+ * @param variants       Spielweisen (z. B. "bis 2 Siege", "alle Spiele"), überschreiben die Stufe `level`
+ * @param defaultVariant Spielweise, wenn die Stage keine wählt
+ * @param teamSize       Anzahl der Stammspieler (für die Mannschaftswertung)
+ * @param maxPlayers     größte Anzahl gemeldeter Spieler einschließlich Ersatz
+ * @param positions      Positionen je Seite ("home", "away")
+ * @param games          geordnete Spielfolge
+ */
+case class EncounterCfg(
+  level:          Level,
+  variants:       Map[String, Variant]      = Map(),
+  defaultVariant: String                    = "",
+  teamSize:       Int                       = 2,
+  maxPlayers:     Int                       = 2,
+  positions:      Map[String, Seq[String]]  = Map(),
+  games:          Seq[EncounterGame]        = Seq()
+):
+  /** Positionen der Heimmannschaft (side 0) bzw. Gastmannschaft (side 1). */
+  def sidePositions(side: Int): Seq[String] = positions.getOrElse(if side == 0 then "home" else "away", Seq())
+
+  /** Position einer Seite in einem Spiel. */
+  def gamePos(game: EncounterGame, side: Int): String = if side == 0 then game.home else game.away
+
+  /**
+   * true, wenn eine Position mit einem Doppel besetzt wird.
+   *
+   * @param side 0 = Heim, 1 = Gast
+   * @param pos  Position
+   */
+  def isDoublePos(side: Int, pos: String): Boolean = games.exists(g => g.isDouble && gamePos(g, side) == pos)
+
+  /**
+   * Stufe der Begegnung in einer Spielweise.
+   *
+   * @param variant Kennung der Spielweise, leer = `defaultVariant`
+   * @return Stufe mit den Parametern der Spielweise
+   */
+  def levelFor(variant: String): Level =
+    val v = if variant.isEmpty then defaultVariant else variant
+    variants.get(v).flatMap(_.overrides.get(level.id)) match
+      case Some(ov: ujson.Obj) =>
+        val js = writeJs(level)
+        ov.value.foreach { case (k, x) => js(k) = x }
+        read[Level](js)
+      case _ => level
+
+object EncounterCfg:
+  given rw: RW[EncounterCfg] = macroRW
+
+/**
+ * Wettbewerbsformat (heute `CompTyp`): Einzel, Doppel, Mannschaft.
  *
  * @param type      single, double oder team
  * @param name      Namen je Sprache
- * @param encounter Spielsystem bei Mannschaften (noch nicht ausgewertet)
+ * @param encounter Spielsystem bei Mannschaften
+ * @param standings abweichende Tabelle für dieses Format
  */
-case class Format(`type`: String, name: Names = Map(), encounter: Option[ujson.Value] = None)
+case class Format(
+  `type`:    String,
+  name:      Names                = Map(),
+  encounter: Option[EncounterCfg] = None,
+  standings: Option[Standings]    = None
+)
 
 object Format:
   given rw: RW[Format] = macroRW
@@ -304,6 +375,33 @@ case class SportConfig(
   def withToWin(toWin: Int): SportConfig =
     if matchLevel.toWin == toWin then this
     else copy(levels = levels.map(lv => if lv.id == matchLevelId then lv.copy(toWin = toWin) else lv))
+
+  /**
+   * Spielsystem der Begegnung eines Formats.
+   *
+   * @param formatId Kennung des Formats (z. B. "team2")
+   * @return Spielsystem, None bei Formaten ohne Begegnung
+   */
+  def encounter(formatId: String): Option[EncounterCfg] = formats.get(formatId).flatMap(_.encounter)
+
+  /**
+   * Konfiguration aus Sicht eines Formats: Bei Mannschaften wird die Begegnung als oberste Stufe angehängt und ist
+   * dann die Stufe, auf die sich Tabelle und Ergebnis eines Eintrags im Spielplan beziehen.
+   *
+   * @param formatId Kennung des Formats
+   * @param variant  Spielweise der Begegnung, leer = Standard
+   * @return Konfiguration des Formats, unverändert bei Formaten ohne Begegnung
+   */
+  def forFormat(formatId: String, variant: String = ""): SportConfig =
+    formats.get(formatId) match
+      case Some(f) =>
+        val withStandings = f.standings.map(s => copy(standings = s)).getOrElse(this)
+        f.encounter match
+          case Some(enc) =>
+            val lv = enc.levelFor(variant).copy(unit = matchLevelId)
+            withStandings.copy(levels = levels :+ lv, matchLevelId = lv.id)
+          case None => withStandings
+      case None => this
 
 object SportConfig:
   given rw: RW[SportConfig] = macroRW

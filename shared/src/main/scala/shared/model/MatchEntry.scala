@@ -472,6 +472,7 @@ object MEntry {
   val MS_FIN   =  2   // finished with winner
   val MS_FIX   =  3   // finished with fixed winner (bye ...)
   val MS_DRAW  =  4   // finished with no winner
+  val MS_SKIP  =  5   // not played, encounter already decided (team competitions)
   val MS_UNKN  = 99   // finished with no winner or error
 
   // list of player currently playing in (coId, stageId, gameNo)
@@ -486,6 +487,7 @@ object MEntry {
     case MS_FIN    => "FIN"
     case MS_FIX    => "FIX"    
     case MS_DRAW   => "DRAW"
+    case MS_SKIP   => "SKIP"
     case MS_UNKN   => "UNKN"
     case _         => "ERROR"
   }

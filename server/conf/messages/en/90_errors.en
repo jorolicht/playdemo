@@ -29,3 +29,12 @@ err00056.wordpress.error                            = WordPress error status: {0
 error.tourney_already_exists                        = A tournament with this name already exists. Please choose a different name.
 error.competition_already_exists                    = A competition with this name already exists. Please choose a different name.
 
+
+err0260.lineup.player.not.in.team                   = The player is not a member of the team.
+err0261.lineup.invalid.double                       = A doubles pair needs two different players.
+err0262.lineup.invalid.single                       = A player can only play one singles match.
+err0263.encounter.no.team.competition               = The competition is not played with ties.
+err0264.encounter.team.not.found                    = Team {0} not found.
+err0265.encounter.game.not.found                    = Match {0} of the tie not found.
+err0266.encounter.game.not.playable                 = Match {0} cannot be entered (line-up missing, walkover or not played).
+err0267.encounter.game.invalid.result               = Invalid result for match {0}.

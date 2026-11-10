@@ -29,6 +29,15 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
   val BtnStartNextRound: HtmlId = genId(name)
   val BtnDemoScores:     HtmlId = genId(name)
 
+  // Mannschaften: Aufstellung (Suffix gameNo_side), Auf-/Zuklappen (gameNo), Spiel speichern/löschen (gameNo_no)
+  val LineupBtn:   HtmlId = genId(name)
+  val TngBtn:      HtmlId = genId(name)
+  val TeamSaveBtn: HtmlId = genId(name)
+  val TeamDelBtn:  HtmlId = genId(name)
+
+  /** Aufgeklappte Begegnungen (Stage-Id, Spielnummer), bleibt beim Neuzeichnen erhalten. */
+  var expanded: Set[(Int, Int)] = Set()
+
   def render(param: String = ""): Boolean = 
     Global.currentSelection.stage match
       case Some(r) => 
@@ -73,6 +82,17 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         startNextSwissRound()
       case `BtnDemoScores` =>
         setRandomScores()
+      case id if id.id.startsWith(LineupBtn.id + "-") =>
+        val Array(gameNo, side) = elem.id.substring(LineupBtn.id.length + 1).split('_').map(_.toInt)
+        editLineup(gameNo, side)
+      case id if id.id.startsWith(TngBtn.id + "-") =>
+        toggleEncounter(elem.id.substring(TngBtn.id.length + 1).toInt)
+      case id if id.id.startsWith(TeamSaveBtn.id + "-") =>
+        val Array(gameNo, no) = elem.id.substring(TeamSaveBtn.id.length + 1).split('_').map(_.toInt)
+        saveSubGame(gameNo, no)
+      case id if id.id.startsWith(TeamDelBtn.id + "-") =>
+        val Array(gameNo, no) = elem.id.substring(TeamDelBtn.id.length + 1).split('_').map(_.toInt)
+        deleteSubGame(gameNo, no)
       case _ =>
 
   /**
@@ -84,6 +104,7 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     else if (sno.isBye) gM("+bye")
     else
       pants.find(_.id == sno) match
+        case Some(p) if sno.isTeam => p.name
         case Some(p) =>
           if (sno.isDouble) {
             val (id1, id2) = sno.doubleId
@@ -101,6 +122,211 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
           }
         case None =>
           sno.toString
+
+  /**
+   * Name eines Spielers bzw. Doppels in einem Spiel einer Begegnung (Startnummer aus der Aufstellung).
+   *
+   * @param sno Startnummer: Einzel, Doppel oder `[0]` für eine nicht besetzte Position
+   * @return Nachname, "Nachname/Nachname" oder Hinweis "fehlt"
+   */
+  def formatPlayerSno(sno: SNO): String =
+    val players = services.TourneyDB.tourney.players
+    def last(id: PlayerId) = players.find(_.id == id).map(_.lastName).getOrElse(s"[${id.value}]")
+    if (sno.isNN) gM("+player_missing")
+    else if (sno.isDouble) { val (a, b) = sno.doubleId; s"${last(a)}/${last(b)}" }
+    else players.find(_.id == sno.singleId).map(_.displayName).getOrElse(sno.toString)
+
+  /** Wettbewerb und Spielsystem, wenn die gewählte Stage zu einem Mannschaftswettbewerb gehört. */
+  private def teamContext: Option[(Stage, Competition, shared.sport.EncounterCfg)] =
+    for
+      stage <- Global.currentSelection.stage
+      comp  <- Global.currentSelection.competition
+      cfg   <- TeamEncounter.config(comp.typ)
+    yield (stage, comp, cfg)
+
+  /** true, wenn Ergebnisse der Stage geändert werden dürfen. */
+  private def canEdit(stage: Stage, comp: Competition): Boolean =
+    comp.status != CompStatus.FIN && stage.status == StageStatus.EIN && base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+
+  /**
+   * Speichert die Stage nach einer Änderung an einer Begegnung und zeichnet die Seite neu.
+   *
+   * @param stage Stage
+   * @param res   Ergebnis der Änderung
+   */
+  private def saveTeamChange(stage: Stage, res: Either[AppError, List[Int]]): Unit =
+    res match
+      case Left(err) => DlgMsgbox.showError(err, gM("+team_error"))
+      case Right(_) =>
+        services.TourneyDB.tourney.updateStage(stage) match
+          case Right(updated) =>
+            Global.currentSelection = Global.currentSelection.copy(stage = Some(updated))
+            render()
+          case Left(err) => error(s"StageInput: Failed to save encounter: ${err.msgCode}")
+
+  /**
+   * Klappt die Spiele einer Begegnung auf oder zu.
+   *
+   * @param gameNo Spielnummer der Begegnung
+   */
+  def toggleEncounter(gameNo: Int): Unit =
+    Global.currentSelection.stage.foreach { stage =>
+      val key = (stage.id.value, gameNo)
+      val open = !expanded.contains(key)
+      expanded = if (open) expanded + key else expanded - key
+      val row  = dom.document.getElementById(s"enc-sub-$gameNo")
+      val icon = dom.document.getElementById(s"tng-icon-$gameNo")
+      if (row != null) { if (open) row.classList.remove("d-none") else row.classList.add("d-none") }
+      if (icon != null) icon.setAttribute("class", if (open) "bi bi-caret-down-fill" else "bi bi-caret-right-fill")
+    }
+
+  /**
+   * Öffnet die Aufstellung einer Mannschaft und erzeugt danach die Spiele der Begegnung neu.
+   *
+   * @param gameNo Spielnummer der Begegnung
+   * @param side   0 = Mannschaft A, 1 = Mannschaft B
+   */
+  def editLineup(gameNo: Int, side: Int): Unit =
+    teamContext.foreach { case (stage, comp, cfg) =>
+      if (canEdit(stage, comp)) {
+        val m    = stage.getMatch(gameNo)
+        val sno  = if (side == 0) m.stNoA else m.stNoB
+        val enc  = stage.encounters.find(_.gameNo == gameNo)
+        comp.teams.find(_.id == sno.teamId).foreach { team =>
+          dialogs.DlgLineup.show(cfg, side, team, services.TourneyDB.tourney.players.toSeq, enc.map(_.lineup(side)).getOrElse(Lineup())).map {
+            case Right(lineup) =>
+              expanded = expanded + ((stage.id.value, gameNo))
+              saveTeamChange(stage, TeamEncounter.setLineup(stage, comp, gameNo, side, lineup))
+            case Left(_) => ()
+          }
+        }
+      }
+    }
+
+  /**
+   * Liest die Satzeingaben eines Spiels einer Begegnung.
+   *
+   * @param gameNo Spielnummer der Begegnung
+   * @param no     Nummer des Spiels in der Begegnung
+   * @param winSets Gewinnsätze
+   * @return (gültig und entschieden, Satzstand, Ergebnis in Schnelleingabe)
+   */
+  private def readSubInputs(gameNo: Int, no: Int, winSets: Int): (Boolean, (Int, Int), String) =
+    val inputs = (1 to winSets * 2 - 1).map { setNo =>
+      val el = dom.document.getElementById(s"tin_${gameNo}_${no}_$setNo").asInstanceOf[dom.html.Input]
+      if (el != null) el.value.trim else ""
+    }.filter(_.nonEmpty)
+    val parsed = inputs.map(parseSetInput)
+    var (a, b) = (0, 0)
+    var decidedAt = -1
+    parsed.zipWithIndex.foreach { case (r, i) =>
+      r.foreach { case (x, y) => if (decidedAt < 0) { if (x > y) a += 1 else b += 1; if (a == winSets || b == winSets) decidedAt = i } }
+    }
+    val ok = parsed.forall(_.isDefined) && decidedAt == inputs.length - 1
+    (ok, (a, b), inputs.mkString("·"))
+
+  /**
+   * Prüft die Eingaben eines Spiels einer Begegnung und schaltet den Speichern-Button.
+   *
+   * @param stage  Stage
+   * @param gameNo Spielnummer der Begegnung
+   * @param no     Nummer des Spiels
+   */
+  private def checkSubValidity(stage: Stage, gameNo: Int, no: Int): Unit =
+    val (ok, (a, b), result) = readSubInputs(gameNo, no, stage.noWinSets)
+    val stored  = stage.encounters.find(_.gameNo == gameNo).flatMap(_.games.find(_.no == no)).map(_.result).getOrElse("")
+    val saveBtn = dom.document.getElementById(s"${TeamSaveBtn.id}-${gameNo}_$no").asInstanceOf[dom.html.Button]
+    val badge   = dom.document.getElementById(s"tsets_${gameNo}_$no").asInstanceOf[dom.html.Element]
+    if (saveBtn != null) saveBtn.disabled = !(ok && result != stored)
+    if (badge != null) {
+      badge.textContent = if (a + b > 0) s"$a:$b" else ""
+      badge.className = if (ok) "badge bg-success text-white" else "badge bg-light text-dark border"
+    }
+
+  /**
+   * Speichert das Ergebnis eines Spiels einer Begegnung.
+   *
+   * @param gameNo Spielnummer der Begegnung
+   * @param no     Nummer des Spiels
+   */
+  def saveSubGame(gameNo: Int, no: Int): Unit =
+    teamContext.foreach { case (stage, comp, _) =>
+      if (canEdit(stage, comp)) {
+        val (ok, sets, result) = readSubInputs(gameNo, no, stage.noWinSets)
+        if (ok) {
+          val m = stage.getMatch(gameNo)
+          if (m.startTime == null || m.startTime.trim.isEmpty) m.startTime = nowTimestamp()
+          val res = TeamEncounter.inputGame(stage, comp.typ, gameNo, no, sets, result)
+          if (stage.getMatch(gameNo).finished) {
+            stage.getMatch(gameNo).endTime = nowTimestamp()
+            sendMatchboardUpdate("finish", m.playfield, m, stage)
+          }
+          saveTeamChange(stage, res)
+        }
+      }
+    }
+
+  /**
+   * Löscht das Ergebnis eines Spiels einer Begegnung.
+   *
+   * @param gameNo Spielnummer der Begegnung
+   * @param no     Nummer des Spiels
+   */
+  def deleteSubGame(gameNo: Int, no: Int): Unit =
+    teamContext.foreach { case (stage, comp, _) =>
+      if (canEdit(stage, comp)) saveTeamChange(stage, TeamEncounter.inputGame(stage, comp.typ, gameNo, no, (0, 0), ""))
+    }
+
+  /**
+   * Standardaufstellung für Demo-Ergebnisse: Stammspieler in die Einzel, die ersten beiden ins Doppel.
+   *
+   * @param cfg  Spielsystem
+   * @param side 0 = Heim, 1 = Gast
+   * @param team Mannschaft
+   */
+  private def defaultLineup(cfg: shared.sport.EncounterCfg, side: Int, team: Team): Lineup =
+    val singles = cfg.sidePositions(side).filterNot(cfg.isDoublePos(side, _))
+    val doubles = cfg.sidePositions(side).filter(cfg.isDoublePos(side, _))
+    Lineup((singles.zip(team.players).map { case (pos, id) => pos -> Seq(id) } ++
+            doubles.map(pos => pos -> team.players.take(2))).toMap)
+
+  /**
+   * Trägt zufällige Ergebnisse in offene Begegnungen ein (Demo).
+   *
+   * @param stage Stage
+   * @param comp  Wettbewerb
+   * @param cfg   Spielsystem
+   * @param roundOpt nur diese Runde
+   * @return true, wenn mindestens eine Begegnung geändert wurde
+   */
+  private def setRandomTeamScores(stage: Stage, comp: Competition, cfg: shared.sport.EncounterCfg, roundOpt: Option[Int]): Boolean =
+    var changed = false
+    stage.matches.filter(m => m != null && !m.finished && m.stNoA.isTeam && m.stNoB.isTeam && roundOpt.forall(_ == m.round)).foreach { m =>
+      for (side <- 0 to 1) {
+        val done = stage.encounters.find(_.gameNo == m.gameNo).exists(_.lineup(side).done)
+        if (!done) {
+          val sno = if (side == 0) m.stNoA else m.stNoB
+          comp.teams.find(_.id == sno.teamId).foreach { t =>
+            TeamEncounter.setLineup(stage, comp, m.gameNo, side, defaultLineup(cfg, side, t))
+          }
+        }
+      }
+      stage.encounters.find(_.gameNo == m.gameNo).foreach { e =>
+        e.games.filter(_.status == MEntry.MS_READY).map(_.no).foreach { no =>
+          if (e.games.find(_.no == no).exists(_.status == MEntry.MS_READY)) {
+            val (sets, result) = generateRandomMatchResult(if (stage.noWinSets > 0) stage.noWinSets else 3)
+            TeamEncounter.inputGame(stage, comp.typ, m.gameNo, no, sets, result)
+            changed = true
+          }
+        }
+      }
+      if (stage.getMatch(m.gameNo).finished) {
+        val fm = stage.getMatch(m.gameNo)
+        if (fm.startTime == null || fm.startTime.trim.isEmpty) fm.startTime = nowTimestamp()
+        fm.endTime = nowTimestamp()
+      }
+    }
+    changed
 
   /**
    * Prints the referee sheets (Schiedsrichterzettel) for the specified round.
@@ -214,7 +440,10 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
             stage.matches.find(_.gameNo == gameNo).foreach { m =>
               sendMatchboardUpdate("finish", m.playfield, m, stage)
             }
-            stage.resetMatch(gameNo) match {
+            val reset =
+              if (TeamEncounter.isTeam(comp.typ)) TeamEncounter.clearResults(stage, comp.typ, gameNo)
+              else stage.resetMatch(gameNo)
+            reset match {
               case Left(err) => error(s"StageInput: resetMatch failed: ${err.msgCode}")
               case Right(triggered) =>
                 services.TourneyDB.tourney.updateStage(stage) match {
@@ -330,12 +559,14 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         debug("StageInput: Cannot generate demo scores because stage is not in EIN status, competition is finalized, or user has no write access.")
       } else {
         val winSets = if (stage.noWinSets > 0) stage.noWinSets else 3
+        val teamCfg = compOpt.flatMap(c => TeamEncounter.config(c.typ).map(cfg => (c, cfg)))
         var changed = true
         var loopCount = 0
         while (changed && loopCount < 50) {
           changed = false
           loopCount += 1
-          val unplayed = stage.matches.filter(m =>
+          teamCfg.foreach { case (c, cfg) => changed = setRandomTeamScores(stage, c, cfg, roundOpt) }
+          val unplayed = if (teamCfg.isDefined) ArrayBuffer.empty[MEntry] else stage.matches.filter(m =>
             m != null && !m.finished && m.result.trim.isEmpty &&
             m.status != MEntry.MS_FIX &&
             !m.stNoA.isNN && !m.stNoB.isNN &&
@@ -388,6 +619,15 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     // Run validation on load for all matches
     stage.matches.foreach { m =>
       checkMatchValidity(m.gameNo, stage.noWinSets)
+    }
+
+    // Mannschaften: Satzeingaben der Spiele einer Begegnung
+    val teamInputs = dom.document.querySelectorAll(".team-set-input")
+    for (i <- 0 until teamInputs.length) {
+      val inputEl = teamInputs.item(i).asInstanceOf[dom.html.Input]
+      val gameNo  = inputEl.getAttribute("data-game").toInt
+      val no      = inputEl.getAttribute("data-sub").toInt
+      inputEl.oninput = (_: dom.Event) => checkSubValidity(stage, gameNo, no)
     }
     
     // Attach event listeners for table number input
@@ -528,7 +768,7 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
                     }
                   }
                 }
-                val (setsA, setsB) = if (m.stNoA.isBye) (0, m.winSets) else (m.winSets, 0)
+                val (setsA, setsB) = StageHelper.byeSets(m.winSets, m.stNoA.isBye)
                 m.setSets((setsA, setsB))
                 m.setResult("")
                 MEntry.MS_FIX

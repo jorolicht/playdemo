@@ -263,7 +263,7 @@ object SwissSys:
         val sno2 = if (id2 == -1) SNO.bye(state.swPants.length) else state.swPants(id2).sno
         val isBye = sno1.isBye || sno2.isBye
         val (status, sets) = if (isBye) {
-          val setsVal = if (sno1.isBye) (0, noWinSets) else (noWinSets, 0)
+          val setsVal = StageHelper.byeSets(noWinSets, sno1.isBye)
           (MEntry.MS_FIX, setsVal)
         } else {
           (MEntry.MS_READY, (0, 0))

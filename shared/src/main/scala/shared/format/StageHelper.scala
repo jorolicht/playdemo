@@ -12,12 +12,26 @@ import shared.sport.{ Level, Sports }
 object StageHelper {
 
   /**
-   * Spielstufe der Standard-Sportart mit der Anzahl der Gewinnsätze der Stage.
+   * Spielstufe der Standard-Sportart mit der Anzahl der Gewinnsätze der Stage. Eine negative Anzahl steht bei
+   * Mannschaften für "alle n Spiele" (siehe [[TeamEncounter.winSetsCode]]).
    *
-   * @param noSets number of winning sets required (`Stage.noWinSets`)
+   * @param noSets number of winning sets required (`Stage.noWinSets` bzw. `MEntry.winSets`)
    * @return match level of the sport configuration
    */
-  def matchLevel(noSets: Int): Level = Sports.default.withToWin(noSets).matchLevel
+  def matchLevel(noSets: Int): Level =
+    if noSets < 0 then TeamEncounter.levelFromCode(noSets)
+    else Sports.default.withToWin(noSets).matchLevel
+
+  /**
+   * Stand bei einem Freilos: Der Gegner des Freiloses gewinnt mit der nötigen Anzahl.
+   *
+   * @param winSets `winSets` des Eintrags
+   * @param aIsBye  true, wenn Seite A das Freilos ist
+   * @return Stand (A, B)
+   */
+  def byeSets(winSets: Int, aIsBye: Boolean): (Int, Int) =
+    val n = math.abs(winSets)
+    if aIsBye then (0, n) else (n, 0)
 
   /** Satzstufe (eine Ebene unter dem Spiel) der Standard-Sportart. */
   def setLevel: Level = Sports.default.levelBelowMatch(1).get

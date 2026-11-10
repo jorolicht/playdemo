@@ -10,6 +10,15 @@
 @isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
 @disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || stage.status != StageStatus.EIN) "disabled" else "" }
 @disabledTrashNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || (stage.status != StageStatus.EIN && stage.status != StageStatus.FIN)) "disabled" else "" }
+@teamCfg = @{ compOpt.flatMap(c => TeamEncounter.config(c.typ)) }
+
+@anyTable(roundNo: Int, title: String, roundMatches: Seq[(MEntry, String, String)]) = {
+    @if(teamCfg.isDefined) {
+        @cviews.pages.Stage.html.StageInputTeam(stage, teamCfg.get, roundNo, title, roundMatches, disabledNoAccess == "disabled", disabledTrashNoAccess == "disabled")
+    } else {
+        @matchTable(roundNo, title, roundMatches)
+    }
+}
 
 @matchTable(roundNo: Int, title: String, roundMatches: Seq[(MEntry, String, String)]) = {
     <div class="round-section border rounded mb-4 shadow-sm overflow-hidden" id="round-section-@roundNo">
@@ -204,7 +213,7 @@
                                  aria-labelledby="round@r-tab">
                                 
                                 @* Match table for round r *@
-                                @matchTable(r, gM("StageDraw.round_tab_title", r.toString), matches.filter(_._1.round == r))
+                                @anyTable(r, gM("StageDraw.round_tab_title", r.toString), matches.filter(_._1.round == r))
                             </div>
                         }
                     </div>
@@ -245,7 +254,7 @@
                     }
                 }) { roundSections =>
                     @roundSections.map { case (roundNo, title, roundMatches, _) =>
-                        @matchTable(roundNo, title, roundMatches)
+                        @anyTable(roundNo, title, roundMatches)
                     }
                 }
             }

@@ -241,10 +241,10 @@ object SingleElimination {
               case (false, false) => MEntryKo.init(coId, coTyp, stageId, stageFormat, pantA, pantB, gameNo, r, m, "", "", MEntry.MS_READY, (0,0), noWinSets)
               case (false, true)  =>
                 byeCount = byeCount + 1
-                MEntryKo.init(coId, coTyp, stageId, stageFormat, pantA, pantB, gameNo, r, m, "", "", MEntry.MS_FIX, (noWinSets, 0), noWinSets, result = "")
+                MEntryKo.init(coId, coTyp, stageId, stageFormat, pantA, pantB, gameNo, r, m, "", "", MEntry.MS_FIX, StageHelper.byeSets(noWinSets, false), noWinSets, result = "")
               case (true, false)  =>
                 byeCount = byeCount + 1
-                MEntryKo.init(coId, coTyp, stageId, stageFormat, pantA, pantB, gameNo, r, m, "", "", MEntry.MS_FIX, (0, noWinSets), noWinSets, result = "")
+                MEntryKo.init(coId, coTyp, stageId, stageFormat, pantA, pantB, gameNo, r, m, "", "", MEntry.MS_FIX, StageHelper.byeSets(noWinSets, true), noWinSets, result = "")
               case (true, true)   =>
                 err = shared.basic.AppError("initKoMatches_invalid_ko_match", "both players are bye")
                 MEntryKo.init(coId, coTyp, stageId, stageFormat, pantA, pantB, gameNo, r, m, "", "", MEntry.MS_UNKN, (0,0), noWinSets)
@@ -310,7 +310,7 @@ object SingleElimination {
               val bReady = m.stNoB != SNO.nn
               val targetStatus = if (aReady && bReady) {
                 if (m.stNoA.isBye || m.stNoB.isBye) {
-                  val (setsA, setsB) = if (m.stNoA.isBye) (0, m.winSets) else (m.winSets, 0)
+                  val (setsA, setsB) = StageHelper.byeSets(m.winSets, m.stNoA.isBye)
                   m.setSets((setsA, setsB))
                   m.setResult("")
                   MEntry.MS_FIX

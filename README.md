@@ -344,6 +344,15 @@ Die Prüfung der Ergebnisse (`StageHelper`, `MEntry.validSets`), die Schnelleing
 Gruppentabelle (`Group.calc`) verwenden diese Konfiguration. `Stage.noWinSets` überschreibt weiterhin die Gewinnsätze
 der Spielstufe. Gespeichert werden Ergebnisse unverändert im bisherigen Format.
 
+**Mannschaften** (heute `team2`): Das Format beschreibt unter `encounter` die Begegnung zweier Mannschaften, also
+Positionen, Spielfolge (2 Einzel, 1 Doppel), Kadergröße (2 Stammspieler + 1 Ersatz) und die Spielweisen „bis 2 Siege“
+(`bestOf`, das Doppel entfällt bei 2:0) und „alle Spiele“ (`fixed`). Die Spielweise wird je Stage gewählt
+(`Stage.encVariant`). Mannschaften liegen im Wettbewerb (`Competition.teams`, Startnummer `[T<id>]`) und werden auf der
+Seite „Mannschaften“ angelegt. Ein Eintrag im Spielplan ist die Begegnung, ihr `sets` ist der Stand (gewonnene Spiele).
+Aufstellung und Einzelspiele stehen in `Stage.encounters` (Logik: `shared.format.TeamEncounter`). Unbesetzte Positionen
+und nicht angetretene Mannschaften werden als verloren gewertet. Die Gruppentabelle sortiert nach Begegnungen, Spielen,
+Sätzen und Bällen.
+
 ---
 
 ## Internationalisierung

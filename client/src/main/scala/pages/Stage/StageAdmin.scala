@@ -203,8 +203,10 @@ object StageAdmin extends BasePage with JsWrapper:
               stage.size = 0
               stage.noPlayers = 0
               stage.noWinSets = 3
+              stage.encVariant = ""
               stage.data = StageData.GroupsStage(ArrayBuffer.empty)
               stage.matches.clear()
+              stage.encounters.clear()
               
               services.TourneyDB.tourney.updateStage(stage) match {
                 case Right(updatedStage) =>
@@ -438,6 +440,8 @@ object StageAdmin extends BasePage with JsWrapper:
         // Read configuration from UI
         val setsSelect = dom.document.getElementById("rnd-sets").asInstanceOf[dom.html.Select]
         if (setsSelect != null) r.noWinSets = setsSelect.value.toInt
+        val encSelect = dom.document.getElementById("rnd-enc-variant").asInstanceOf[dom.html.Select]
+        if (encSelect != null) r.encVariant = encSelect.value
         
         // Get selected participants
         val checks = dom.document.querySelectorAll(".player-draw-check")

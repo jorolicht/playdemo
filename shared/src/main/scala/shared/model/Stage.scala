@@ -236,6 +236,8 @@ object StageData:
  * @param deleted Soft delete flag.
  * @param version Optimistic locking version.
  * @param matches ArrayBuffer of matches assigned to this stage.
+ * @param encVariant Spielweise der Begegnungen bei Mannschaften (z. B. "firstTo2", "all"), leer = Standard des Formats.
+ * @param encounters Begegnungen (Aufstellung und Einzelspiele) je Spielnummer bei Mannschaften.
  */
 case class Stage(
   id:                   StageId,
@@ -254,7 +256,9 @@ case class Stage(
   var deleted:          Boolean = false,
   var certificate:      Boolean = false,
   var version:          Int = 0,
-  val matches:          ArrayBuffer[MEntry] = ArrayBuffer.empty
+  val matches:          ArrayBuffer[MEntry] = ArrayBuffer.empty,
+  var encVariant:       String = "",
+  val encounters:       ArrayBuffer[Encounter] = ArrayBuffer.empty
 ):
 
   // -----------------------------
@@ -316,6 +320,7 @@ case class Stage(
    */
   def resetMatches(): Either[shared.basic.AppError, Unit] = 
     for i <- 0 until matches.length do matches(i).reset()
+    encounters.clear()
     data match
       case StageData.GroupsStage(groups) => resetGrMatches(groups)
       case StageData.RoundRobinStage(rr) => resetRrMatches(rr)
@@ -352,9 +357,10 @@ case class Stage(
   /* Initializes matches stage based on the current state and competition type. */
 
   private def initGrMatches(groups: ArrayBuffer[Group], coTyp: CompTyp, round: Int = 1): Either[shared.basic.AppError, Boolean] =
-    import shared.format.Groups
+    import shared.format.{ Groups, TeamEncounter }
     matches.clear()
-    Groups.initGrMatches(coId, coTyp, id, stageConfig.format, noWinSets, groups) match
+    encounters.clear()
+    Groups.initGrMatches(coId, coTyp, id, stageConfig.format, TeamEncounter.matchWinSets(this, coTyp), groups) match
       case Right(grMatches) =>
         matches ++= grMatches
         Right(true)
@@ -363,9 +369,10 @@ case class Stage(
 
 
   private def initKoMatches(ko: KoStage, coTyp: CompTyp, round: Int = 1): Either[shared.basic.AppError, Boolean] =
-    import shared.format.SingleElimination
+    import shared.format.{ SingleElimination, TeamEncounter }
     matches.clear()
-    SingleElimination.initKoMatches(coId, coTyp, id, stageConfig.format, noWinSets, ko) match
+    encounters.clear()
+    SingleElimination.initKoMatches(coId, coTyp, id, stageConfig.format, TeamEncounter.matchWinSets(this, coTyp), ko) match
       case Right(koMatches) =>
         matches ++= koMatches
         Right(true)
@@ -378,9 +385,9 @@ case class Stage(
 
 
   private def initSwMatches(sw: SwissSys, coTyp: CompTyp, round: Int = 1): Either[shared.basic.AppError, Boolean] =
-    SwissSys.initSwMatches(coId, coTyp, id, stageConfig.format, noWinSets, round, sw) match
+    SwissSys.initSwMatches(coId, coTyp, id, stageConfig.format, shared.format.TeamEncounter.matchWinSets(this, coTyp), round, sw) match
       case Right(swMatches) =>
-        if round == 1 then matches.clear() // Clear matches only for the first round
+        if round == 1 then { matches.clear(); encounters.clear() } // Clear matches only for the first round
         matches ++= swMatches
         Right(true)
       case Left(err) =>
@@ -456,7 +463,7 @@ case class Stage(
             
             // Check if this next match is now a bye match
             if (nmWin.stNoA.isBye || nmWin.stNoB.isBye) {
-              val (setsA, setsB) = if (nmWin.stNoA.isBye) (0, nmWin.winSets) else (nmWin.winSets, 0)
+              val (setsA, setsB) = shared.format.StageHelper.byeSets(nmWin.winSets, nmWin.stNoA.isBye)
               nmWin.setSets((setsA, setsB))
               nmWin.setResult("")
               nmWin.setStatus(MEntry.MS_FIX)
@@ -477,7 +484,7 @@ case class Stage(
 
             // Check if this next match is now a bye match
             if (nmLoo.stNoA.isBye || nmLoo.stNoB.isBye) {
-              val (setsA, setsB) = if (nmLoo.stNoA.isBye) (0, nmLoo.winSets) else (nmLoo.winSets, 0)
+              val (setsA, setsB) = shared.format.StageHelper.byeSets(nmLoo.winSets, nmLoo.stNoA.isBye)
               nmLoo.setSets((setsA, setsB))
               nmLoo.setResult("")
               nmLoo.setStatus(MEntry.MS_FIX)
@@ -526,6 +533,8 @@ case class Stage(
       if (m.status == MEntry.MS_FIX && !resetPantA && !resetPantB) {
         return Right(List())
       }
+      // Mannschaft ausgetauscht: Aufstellung und Spiele der Begegnung gelten nicht mehr
+      if (resetPantA || resetPantB) encounters.filterInPlace(_.gameNo != gameNo)
       m.reset(resetPantA, resetPantB)
 
       m.stageFormat match {
@@ -599,13 +608,16 @@ case class Stage(
         println(s"ERROR setModel index out of range ${m.gameNo}")
       }
 
+      // Mannschaften: Summe der Sätze und Bälle aus den Spielen der Begegnung
+      val totals = encounters.find(_.gameNo == m.gameNo).map(e => shared.format.TeamEncounter.totals(e, noWinSets))
+
       m.stageFormat match {
         case StageFormat.GR | StageFormat.RR  =>
           val mtch = m.asInstanceOf[MEntryGr]
           data match {
             case StageData.GroupsStage(groups) =>
               if (mtch.grId > 0 && mtch.grId <= groups.length) {
-                groups(mtch.grId - 1).setMatch(mtch) match {
+                groups(mtch.grId - 1).setMatch(mtch, totals) match {
                   case Left(err) => println(s"ERROR setModel: group match: ${err.toString}")
                   case Right(res) => if (res) groups(mtch.grId - 1).calc() match {
                     case Left(err) => println(s"ERROR setModel: calc failed: ${err.toString}")
@@ -619,7 +631,7 @@ case class Stage(
               }
             case StageData.RoundRobinStage(rrGroup) =>
               if (mtch.grId == 1) {
-                rrGroup.setMatch(mtch) match {
+                rrGroup.setMatch(mtch, totals) match {
                   case Left(err) => println(s"ERROR setModel: rr match: ${err.toString}")
                   case Right(res) => if (res) rrGroup.calc() match {
                     case Left(err) => println(s"ERROR setModel: calc failed: ${err.toString}")
