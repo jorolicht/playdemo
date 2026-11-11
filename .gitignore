@@ -94,3 +94,6 @@ shared/.jvm
 .env_*
 *.env
 !.env.example
+
+# lokale Projekt-Archive
+*.tar.gz

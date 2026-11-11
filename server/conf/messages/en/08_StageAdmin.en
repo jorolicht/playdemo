@@ -35,3 +35,7 @@ StageAdmin.name_header_team = Team
 StageAdmin.ttr_header_team = Avg. TTR
 StageAdmin.no_players_team = No teams registered in competition.
 StageAdmin.footer_info_team = {0} teams available. Only active teams take part in the draw.
+StageAdmin.scoring_label = Scoring system
+StageAdmin.scoring_hint = Version of the scoring rules of this competition; can only be changed before the first draw.
+StageAdmin.scoring_version = version {0}
+StageAdmin.scoring_unknown = unknown, the latest version is used

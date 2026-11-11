@@ -35,3 +35,7 @@ StageAdmin.name_header_team = Mannschaft
 StageAdmin.ttr_header_team = Ø TTR
 StageAdmin.no_players_team = Keine Mannschaften im Wettbewerb gemeldet.
 StageAdmin.footer_info_team = {0} Mannschaften verfügbar. Nur aktivierte Mannschaften nehmen an der Auslosung teil.
+StageAdmin.scoring_label = Wertungssystem
+StageAdmin.scoring_hint = Version der Wertungsregeln dieses Wettbewerbs; nur vor der ersten Auslosung änderbar.
+StageAdmin.scoring_version = Version {0}
+StageAdmin.scoring_unknown = unbekannt, gerechnet wird mit der neuesten Version

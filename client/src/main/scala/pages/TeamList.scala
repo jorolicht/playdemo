@@ -50,7 +50,7 @@ object TeamList extends BasePage with JsWrapper:
   private def teamComps: Seq[(Competition, EncounterCfg)] =
     services.TourneyDB.tourney.competitions.toSeq
       .filter(c => c != null && !c.deleted)
-      .flatMap(c => TeamEncounter.config(c.typ).map(cfg => (c, cfg)))
+      .flatMap(c => TeamEncounter.configFor(c).map(cfg => (c, cfg)))
 
   /**
    * Rendert die Seite.
@@ -105,7 +105,7 @@ object TeamList extends BasePage with JsWrapper:
    * @param onDone wird nach erfolgreichem Speichern aufgerufen
    */
   def addTeam(comp: Competition, onDone: () => Unit): Unit =
-    TeamEncounter.config(comp.typ).foreach(cfg => editTeam(comp, cfg, None, onDone))
+    TeamEncounter.configFor(comp).foreach(cfg => editTeam(comp, cfg, None, onDone))
 
   /**
    * Legt eine Mannschaft an oder ändert sie und aktualisiert den zugehörigen Teilnehmer des Wettbewerbs.

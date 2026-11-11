@@ -1,5 +1,6 @@
 package shared.model
 
+import shared.sport.Sports
 import shared.basic.Pickle.*
 import scala.collection.mutable.{ ArrayBuffer, Map, Set, Stack }
 import shared.format.*
@@ -270,6 +271,9 @@ case class Stage(
   // -----------------------------
   // Derived counters (safer)
   // -----------------------------
+  /** Wertungssystem (Schlüssel, z. B. "tt_001") des Wettbewerbs dieser Stage, siehe [[Stage.scoringOf]]. */
+  def scoring: String = Stage.scoringOf(coId)
+
   def mFinished: Int = matches.count(_.finished)
   def mTotal: Int    = matches.length
   def mFix: Int      = matches.count(_.status == MEntry.MS_FIX)
@@ -305,7 +309,7 @@ case class Stage(
    * @param round Die zu initialisierende Runde (standardmäßig 1).
    * @return Left(AppError) im Fehlerfall oder Right(()) bei Erfolg.
    */
-  def initMatches(coTyp: CompTyp, round: Int = 1): Either[shared.basic.AppError, Unit] =
+  def initMatches(coTyp: CompTyp, round: Int = 1): Either[shared.basic.AppError, Unit] = Sports.using(scoring):
     val res = data match
       case StageData.GroupsStage(groups) => initGrMatches(groups, coTyp, round)
       case StageData.RoundRobinStage(rr) => initRrMatches(rr, coTyp, round)
@@ -318,7 +322,7 @@ case class Stage(
    *
    * @return Left(AppError) bei Berechnungsfehlern oder Right(()) bei Erfolg.
    */
-  def resetMatches(): Either[shared.basic.AppError, Unit] = 
+  def resetMatches(): Either[shared.basic.AppError, Unit] = Sports.using(scoring):
     for i <- 0 until matches.length do matches(i).reset()
     encounters.clear()
     data match
@@ -418,7 +422,7 @@ case class Stage(
     }
 
   // inputMatch - set match result, info, playfield ....
-  def inputMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String): Either[shared.basic.AppError, List[Int]] = {
+  def inputMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String): Either[shared.basic.AppError, List[Int]] = Sports.using(scoring) {
     try {
       val m = getMatch(gameNo)
       m.setSets(sets)
@@ -433,7 +437,7 @@ case class Stage(
   }  
 
   // propMatch
-  def propMatch(gameNo: Int): List[Int] = 
+  def propMatch(gameNo: Int): List[Int] = Sports.using(scoring):
     try {
       val triggerList = scala.collection.mutable.ListBuffer[Int](gameNo)
       val m = getMatch(gameNo)
@@ -504,7 +508,7 @@ case class Stage(
     } catch { case _: Throwable => println("ERROR propMatch exception"); List() }  
 
   // resetMatchesPropagate
-  def resetMatchesPropagate(): Either[shared.basic.AppError, List[Int]] = 
+  def resetMatchesPropagate(): Either[shared.basic.AppError, List[Int]] = Sports.using(scoring):
     try {
       var error = shared.basic.AppError.dummy
       val triggerList = scala.collection.mutable.ListBuffer[Int]()
@@ -525,7 +529,7 @@ case class Stage(
     } catch { case _: Throwable => Left(shared.basic.AppError("err0229.svc.resetMatches.failed")) }
 
   // resetMatch
-  def resetMatch(gameNo: Int, resetPantA: Boolean = false, resetPantB: Boolean = false): Either[shared.basic.AppError, List[Int]] = 
+  def resetMatch(gameNo: Int, resetPantA: Boolean = false, resetPantB: Boolean = false): Either[shared.basic.AppError, List[Int]] = Sports.using(scoring):
     try {
       var error = shared.basic.AppError.dummy
       val triggerList = scala.collection.mutable.ListBuffer[Int](gameNo)
@@ -600,7 +604,7 @@ case class Stage(
   }
 
   // setModel enter result into the corresponding model 
-  def setModel(m: MEntry): Unit = {  
+  def setModel(m: MEntry): Unit = Sports.using(scoring) {
     try {
       if (m.gameNo - 1 >= 0 && m.gameNo - 1 < matches.length) {
         matches(m.gameNo - 1) = m 
@@ -664,4 +668,11 @@ case class Stage(
 
 object Stage:
   given rw: ReadWriter[Stage] = macroRW
+
+  /**
+   * Liefert das Wertungssystem eines Wettbewerbs (`Competition.scoring`); wird vom Client beim Start gesetzt, da die
+   * Stage ihren Wettbewerb nicht kennt. Die rechnenden Methoden der Stage laufen damit im Kontext dieses
+   * Wertungssystems (`Sports.using`). Default "" = Wertungssystem der Wettbewerbe ohne Eintrag.
+   */
+  var scoringOf: CompId => String = _ => ""
   // def dummy: Stage = Stage(StageId(0), CompId(0), "", StageConfig.UNKN, StageStatus.UNKN, false, 0, 0)

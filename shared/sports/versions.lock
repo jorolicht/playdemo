@@ -1,0 +1,3 @@
+# Veröffentlichte Wertungssysteme: <datei> <sha256>. Diese Dateien dürfen nicht mehr geändert werden.
+# Neue Regeln = neue Datei (z. B. tt_002.json), danach 'sbt lockSports'.
+tt_001.json 7cce8f7078eb528ed2e906f42e7b10336598b7d41c815143f1c733991f72322a

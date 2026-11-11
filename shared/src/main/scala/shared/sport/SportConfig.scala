@@ -284,10 +284,11 @@ object Standings:
 /**
  * Sportart.
  *
- * @param id   Kennung (z. B. "TT")
- * @param name Namen je Sprache
+ * @param id      Kennung (z. B. "TT")
+ * @param version Version des Wertungssystems (Teil des Dateinamens, z. B. 1 in `tt_001.json`)
+ * @param name    Namen je Sprache
  */
-case class Sport(id: String, name: Names = Map())
+case class Sport(id: String, version: Int = 0, name: Names = Map())
 
 object Sport:
   given rw: RW[Sport] = macroRW

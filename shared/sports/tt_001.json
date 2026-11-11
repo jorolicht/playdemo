@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "sport": {
     "id": "TT",
+    "version": 1,
     "name": { "de": { "one": "Tischtennis" }, "en": { "one": "Table Tennis" } }
   },
   "levels": [

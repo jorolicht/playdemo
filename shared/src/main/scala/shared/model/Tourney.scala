@@ -120,7 +120,8 @@ case class Tourney(
         cttInfo = None,
         pants1Stage = ArrayBuffer(),
         deleted = false,
-        version = 1
+        version = 1,
+        scoring = shared.sport.Sports.latestKey()  // neue Wettbewerbe: neueste Version des Wertungssystems
       )
       competitions(index) = c
       addDirtyCompetition(c)

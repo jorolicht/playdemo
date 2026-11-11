@@ -47,6 +47,19 @@ object StageAdmin extends BasePage with JsWrapper:
   val RadTop:          HtmlId = genId(name)
   val RadBottom:       HtmlId = genId(name)
   val BtnAddPlayer:    HtmlId = genId(name)
+  /** Auswahl des Wertungssystems (Version) des Wettbewerbs. */
+  val SelScoring:      HtmlId = genId(name)
+
+  /**
+   * Darf das Wertungssystem eines Wettbewerbs noch geändert werden? Nur in der Konfiguration, solange keine Stage
+   * ausgelost ist; danach bleibt die Version fest, damit sich bestehende Ergebnisse nicht ändern.
+   *
+   * @param comp Wettbewerb
+   * @return true, wenn änderbar
+   */
+  def scoringChangeable(comp: Competition): Boolean =
+    comp.status == CompStatus.CFG &&
+      services.TourneyDB.tourney.stages.forall(s => s == null || s.coId != comp.id || s.status == StageStatus.CFG)
   val BtnSortSelected: HtmlId = genId(name)
 
   var currentFilterOption: String = "ALL"
@@ -302,6 +315,17 @@ object StageAdmin extends BasePage with JsWrapper:
           }
         }
         render()
+
+      case `SelScoring` =>
+        val key = elem.asInstanceOf[dom.html.Select].value
+        Global.currentSelection.competition
+          .flatMap(c => services.TourneyDB.tourney.competitions.find(x => x != null && x.id == c.id))
+          .filter(scoringChangeable)
+          .foreach { comp =>
+            comp.scoring = key
+            services.TourneyDB.tourney.updateCompetition(comp)
+            render()
+          }
 
       case `BtnAddPlayer` =>
         val tourney = services.TourneyDB.tourney

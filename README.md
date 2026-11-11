@@ -113,7 +113,7 @@ Einbindung von Scala.js in Play über [sbt-web-scalajs](https://github.com/vmuni
 │       ├── scala/            pages/, comps/, dialogs/, services/, base/, addon/
 │       └── twirl/cviews/     Twirl-Templates (pages, comps, dialogs)
 ├── shared/                   Gemeinsamer Code (model/, format/, sport/), crossProject CrossType.Pure
-│   └── sports/               Wertungssysteme der Sportarten (JSON, z. B. tt.json)
+│   └── sports/               Wertungssysteme der Sportarten, versioniert (JSON, z. B. tt_001.json)
 ├── wp-plugin/                WordPress-Plugin "tourney" (tourney.php, includes/, css/, ...)
 ├── site/content/             Statische Seiten (werden nach wp-plugin/pages kopiert)
 └── test/
@@ -333,12 +333,34 @@ Schreibende Aufrufe verlangen Schreibrecht auf den jeweiligen Post (`tourney_api
 
 ## Wertungssystem
 
-Wie gezählt, gewonnen und gewertet wird, beschreibt je Sportart eine JSON-Datei in `shared/sports/` (heute nur `tt.json`).
-Sie enthält die Wertungsstufen von unten nach oben (TT: Ball → Satz bis 11 mit 2 Vorsprung → Spiel mit 3 Gewinnsätzen),
-Varianten, Formate, Tabellenpunkte und Entscheidungskriterien sowie die Namen auf Deutsch und Englisch. Beim Übersetzen
-bettet ein sbt-Sourcegenerator die Dateien als `shared.sport.SportFiles` ein, sodass Client und Server dieselbe
-Konfiguration ohne Nachladen nutzen. Modell und Auswertung stehen in `shared/sport/SportConfig.scala`, der Zugriff läuft
-über `Sports.get(id)` bzw. `Sports.default`.
+Wie gezählt, gewonnen und gewertet wird, beschreibt je Sportart und Version eine JSON-Datei in `shared/sports/`
+(`<sport>_<nnn>.json`, heute `tt_001.json`). Sie enthält die Wertungsstufen von unten nach oben (TT: Ball → Satz bis 11
+mit 2 Vorsprung → Spiel mit 3 Gewinnsätzen), Varianten, Formate, Tabellenpunkte und Entscheidungskriterien sowie die Namen
+auf Deutsch und Englisch. `sport.id` und `sport.version` in der Datei müssen zum Dateinamen passen. Modell und Auswertung
+stehen in `shared/sport/SportConfig.scala`, die Verwaltung in `shared/sport/Sports.scala`.
+
+**Versionen:** Jeder Wettbewerb speichert sein Wertungssystem (`Competition.scoring`, z. B. `"tt_001"`) und wird immer
+danach gewertet; Wettbewerbe ohne Eintrag (vor Einführung der Versionen angelegt) gelten als `tt_001`. Neue Wettbewerbe
+erhalten die neueste Version. In der Stage-Administration lässt sich die Version wechseln, solange der Wettbewerb in der
+Konfiguration ist und keine Stage ausgelost wurde. Ist eine Version unbekannt (z. B. Turnier aus einer neueren
+Installation), wird mit der neuesten Version derselben Sportart gerechnet und das protokolliert.
+
+**Neue Regeln = neue Datei:** Eine veröffentlichte Version wird nie geändert. `shared/sports/versions.lock` enthält die
+SHA-256-Prüfsummen der veröffentlichten Dateien; ändert oder entfernt man eine davon, bricht der Build ab. Für neue Regeln
+die letzte Datei kopieren (z. B. `tt_002.json`, `"version": 2`), anpassen und testen (bis dahin meldet der Build
+„Entwurf“), dann mit `sbt lockSports` veröffentlichen. Neue Felder im Dateiformat brauchen Defaults, damit ältere Versionen
+lesbar bleiben; ändert der Code die Bedeutung eines Eintrags, muss das Verhalten für ältere Versionen erhalten bleiben.
+
+**Kontext:** Gerechnet wird im Wertungssystem des Wettbewerbs. Die rechnenden Methoden von `Stage` und `TeamEncounter`
+laufen in `Sports.using(stage.scoring)`; `Stage.scoringOf` (vom Client gesetzt) liefert dazu das Wertungssystem des
+Wettbewerbs. Ohne Kontext gilt `Sports.fallbackKey`, im Client der ausgewählte Wettbewerb (`base.SportData`).
+
+**Einbetten und Laden zur Laufzeit:** Ein sbt-Sourcegenerator bettet alle Dateien als `shared.sport.SportFiles` ein
+(prüft dabei `versions.lock`). Zusätzlich kopieren `syncClientWpFiles` und `packageWpPlugin` sie als
+`data/sport_<sport>_<nnn>.json` ins Plugin und schreiben den Index `data/sport_index.json`. Beim Start lädt der Client
+(`base.SportData`) alle im Index genannten Versionen, die nicht eingebettet sind; so lässt sich eine neue Version im
+installierten Plugin ergänzen (Datei + Eintrag im Index), ohne neu zu übersetzen. Eingebettete Versionen lassen sich zur
+Laufzeit nicht überschreiben. Die Offline-App cacht die Dateien mit den übrigen `data/*.json`.
 
 Die Prüfung der Ergebnisse (`StageHelper`, `MEntry.validSets`), die Schnelleingabe der Sätze im Client und die Sortierung der
 Gruppentabelle (`Group.calc`) verwenden diese Konfiguration. `Stage.noWinSets` überschreibt weiterhin die Gewinnsätze

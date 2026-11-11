@@ -130,7 +130,7 @@ case class Group(
             (acc1 + entry.level3._1, acc2 + entry.level3._2)
           }
 
-        val cfg = Sports.default.forFormat(format)
+        val cfg = Sports.current.forFormat(format)
         if level3.length != size then level3 = Array.fill(size)((0, 0))
         for i <- 0 until size do
           balls(i)  = sumBallDiffs(i)

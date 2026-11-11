@@ -89,7 +89,10 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
       dbs.foreach(_.flushSync())
     })
 
-    Messages.initMsg(effectiveVersion, Global.dataUrl, Global.lang).map {
+    // Nachrichten und Wertungssysteme (data/sport_*.json) laden, danach die App starten
+    Messages.initMsg(effectiveVersion, Global.dataUrl, Global.lang)
+      .flatMap(ok => SportData.init(Global.dataUrl).map(_ => ok))
+      .map {
       case true  => initApp(startPage, effectiveTourney, postType == "tourney")
       case false => println("Main program failed to initialize")  
     }

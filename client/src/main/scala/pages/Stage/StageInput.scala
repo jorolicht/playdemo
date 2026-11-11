@@ -141,7 +141,7 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     for
       stage <- Global.currentSelection.stage
       comp  <- Global.currentSelection.competition
-      cfg   <- TeamEncounter.config(comp.typ)
+      cfg   <- TeamEncounter.configFor(comp)
     yield (stage, comp, cfg)
 
   /** true, wenn Ergebnisse der Stage geändert werden dürfen. */
@@ -559,7 +559,7 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         debug("StageInput: Cannot generate demo scores because stage is not in EIN status, competition is finalized, or user has no write access.")
       } else {
         val winSets = if (stage.noWinSets > 0) stage.noWinSets else 3
-        val teamCfg = compOpt.flatMap(c => TeamEncounter.config(c.typ).map(cfg => (c, cfg)))
+        val teamCfg = compOpt.flatMap(c => TeamEncounter.configFor(c).map(cfg => (c, cfg)))
         var changed = true
         var loopCount = 0
         while (changed && loopCount < 50) {

@@ -162,7 +162,8 @@ case class Competition(
   var deleted:          Boolean = false,
   var version:          Int = 0,
   var cttSNO2Ident:     Map[SNO, String] = Map.empty,
-  val teams:            ArrayBuffer[Team] = ArrayBuffer()
+  val teams:            ArrayBuffer[Team] = ArrayBuffer(),
+  var scoring:          String = ""
 ):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
 
@@ -188,6 +189,8 @@ object Competition:
         if (comp.cttSNO2Ident == null) {
           comp.cttSNO2Ident = Map.empty
         }
+        // Wertungssystem (Schlüssel, z. B. "tt_001"); leer = vor Einführung der Versionen angelegt (Sports.LegacyKey)
+        if (comp.scoring == null) comp.scoring = ""
         if (comp.teams == null) comp.copy(teams = ArrayBuffer()) else comp
       },
       macroRW[Competition]

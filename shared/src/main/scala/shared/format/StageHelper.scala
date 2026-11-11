@@ -12,7 +12,7 @@ import shared.sport.{ Level, Sports }
 object StageHelper {
 
   /**
-   * Spielstufe der Standard-Sportart mit der Anzahl der Gewinnsätze der Stage. Eine negative Anzahl steht bei
+   * Spielstufe des aktuellen Wertungssystems ([[Sports.current]]) mit der Anzahl der Gewinnsätze der Stage. Eine negative Anzahl steht bei
    * Mannschaften für "alle n Spiele" (siehe [[TeamEncounter.winSetsCode]]).
    *
    * @param noSets number of winning sets required (`Stage.noWinSets` bzw. `MEntry.winSets`)
@@ -20,7 +20,7 @@ object StageHelper {
    */
   def matchLevel(noSets: Int): Level =
     if noSets < 0 then TeamEncounter.levelFromCode(noSets)
-    else Sports.default.withToWin(noSets).matchLevel
+    else Sports.current.withToWin(noSets).matchLevel
 
   /**
    * Stand bei einem Freilos: Der Gegner des Freiloses gewinnt mit der nötigen Anzahl.
@@ -33,8 +33,8 @@ object StageHelper {
     val n = math.abs(winSets)
     if aIsBye then (0, n) else (n, 0)
 
-  /** Satzstufe (eine Ebene unter dem Spiel) der Standard-Sportart. */
-  def setLevel: Level = Sports.default.levelBelowMatch(1).get
+  /** Satzstufe (eine Ebene unter dem Spiel) des aktuellen Wertungssystems ([[Sports.current]]). */
+  def setLevel: Level = Sports.current.levelBelowMatch(1).get
 
   /**
    * Inverts a ball score representation (e.g. swaps positive/negative sign).

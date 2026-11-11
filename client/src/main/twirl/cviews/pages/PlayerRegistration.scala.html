@@ -6,7 +6,7 @@
 @(selection: Selection, competitions: Seq[Competition], participants: Seq[Pant], sortCol: String, sortAsc: Boolean)
 
 @teamOf(p: Pant) = @{ if (p.id.isTeam) selection.competition.flatMap(_.teams.find(_.id == p.id.teamId)) else None }
-@teamSize = @{ selection.competition.flatMap(c => shared.format.TeamEncounter.config(c.typ)).map(_.teamSize).getOrElse(0) }
+@teamSize = @{ selection.competition.flatMap(c => shared.format.TeamEncounter.configFor(c)).map(_.teamSize).getOrElse(0) }
 
 <div class="container mt-4">
     <div class="card shadow-sm mb-4 border-warning">

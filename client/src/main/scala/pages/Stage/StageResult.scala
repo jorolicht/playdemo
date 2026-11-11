@@ -20,8 +20,8 @@ object StageResult extends BasePage with JsWrapper:
    */
   def levelHeader(g: shared.format.Group, depth: Int, default: String): String =
     import shared.sport.{ Sports, localized }
-    if Sports.default.encounter(g.format).isEmpty then default
-    else Sports.default.forFormat(g.format).levelBelowMatch(depth).map(_.name.localized(Global.lang).other).getOrElse(default)
+    if Sports.current.encounter(g.format).isEmpty then default
+    else Sports.current.forFormat(g.format).levelBelowMatch(depth).map(_.name.localized(Global.lang).other).getOrElse(default)
   val NextStageBtn:   HtmlId = genId(name)
 
   private var currentStartIndex: Int = 0

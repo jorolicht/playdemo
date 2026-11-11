@@ -153,7 +153,7 @@ lazy val server = project
 
       stageDir
     },
-    commands ++= Seq(hello, buildMsg),
+    commands ++= Seq(hello, buildMsg, lockSports),
     genMsgFiles := {
       val msgFileDe = baseDirectory.value  / "conf" / "messages.de"
       val msgFileEn = baseDirectory.value  / "conf" / "messages.en"
@@ -319,6 +319,7 @@ lazy val server = project
       if ((wpPluginDir / "readme.txt").exists()) {
         IO.copyFile(wpPluginDir / "readme.txt", dockerWpPluginDir / "readme.txt")
       }
+      copySportFiles(baseDirectory.value / "..")
       if ((wpPluginDir / "data").exists()) {
         IO.copyDirectory(wpPluginDir / "data", dockerWpPluginDir / "data")
         IO.copyDirectory(wpPluginDir / "data", baseDirectory.value / ".." / "server" / "public" / "data")
@@ -391,7 +392,8 @@ lazy val server = project
       if (minifyJs) minifyMainJs(stageJsDir, log)
       log.info(s"Client: Diagnose-Konsole ${if (includeAddon) "enthalten" else "nicht enthalten"} (APP_ADDON), minimiert: $minifyJs (APP_MINIFY)")
 
-      // 7. Übersetzungen (JSON) einbinden
+      // 7. Übersetzungen und Wertungssysteme (JSON) einbinden
+      copySportFiles(rootDir)
       val stageDataDir = stageTourneyDir / "data"
       IO.createDirectory(stageDataDir)
       if ((wpPluginDir / "data").exists()) {
@@ -683,6 +685,7 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
        val srcDir = baseDirectory.value / ".." / "sports"
        val file   = (Compile / sourceManaged).value / "shared" / "sport" / "SportFiles.scala"
        val jsons  = (srcDir * "*.json").get.sortBy(_.getName)
+       checkSportLock(srcDir, streams.value.log)
        val q3     = "\"\"\""
        val entries = jsons.map { f =>
          val content = IO.read(f)
@@ -702,6 +705,7 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
        Seq(file)
      },
      watchSources ++= ((baseDirectory.value / ".." / "sports") * "*.json").get,
+     watchSources += baseDirectory.value / ".." / "sports" / "versions.lock",
      libraryDependencies ++= Seq(
        "com.lihaoyi" %%% "upickle" % "3.3.1",
        "com.lihaoyi" %% "upickle" % "3.3.1",
@@ -714,6 +718,78 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
   .jsConfigure(_.enablePlugins(ScalaJSWeb))
 
 Global / onLoad := (Global / onLoad).value.andThen(state => "project server" :: state)
+
+/**
+ * Kopiert die Wertungssysteme `shared/sports/<sport>_<nnn>.json` nach `wp-plugin/data/sport_<sport>_<nnn>.json` und
+ * schreibt den Index `wp-plugin/data/sport_index.json` (alle Dateinamen). Der Client ergänzt damit zur Laufzeit
+ * Versionen, die nicht eingebettet sind (base.SportData).
+ *
+ * @param rootDir Projekt-Wurzelverzeichnis
+ */
+def copySportFiles(rootDir: File): Unit = {
+  val dataDir = rootDir / "wp-plugin" / "data"
+  IO.createDirectory(dataDir)
+  val jsons = ((rootDir / "shared" / "sports") * "*.json").get.sortBy(_.getName)
+  jsons.foreach(f => IO.copyFile(f, dataDir / s"sport_${f.getName}"))
+  IO.write(dataDir / "sport_index.json", jsons.map(f => "\"" + f.getName + "\"").mkString("[", ",", "]"))
+}
+
+/** SHA-256 einer Datei als Hex-Text. */
+def sha256(f: File): String =
+  java.security.MessageDigest.getInstance("SHA-256").digest(IO.readBytes(f)).map("%02x".format(_)).mkString
+
+/**
+ * Liest `shared/sports/versions.lock` (Zeilen "<datei> <sha256>", # = Kommentar).
+ *
+ * @param srcDir Verzeichnis `shared/sports`
+ * @return Dateiname -> Prüfsumme
+ */
+def readSportLock(srcDir: File): Map[String, String] = {
+  val lock = srcDir / "versions.lock"
+  if (!lock.exists) Map.empty
+  else IO.readLines(lock).map(_.trim).filter(l => l.nonEmpty && !l.startsWith("#")).map { l =>
+    val parts = l.split("\\s+")
+    parts(0) -> parts(1)
+  }.toMap
+}
+
+/**
+ * Prüft, dass veröffentlichte Wertungssysteme unverändert sind: Jede Datei in `versions.lock` muss existieren und
+ * dieselbe Prüfsumme haben, sonst bricht der Build ab (Regeländerung = neue Version anlegen). Dateien ohne Eintrag
+ * gelten als Entwurf (Warnung); `sbt lockSports` veröffentlicht sie.
+ *
+ * @param srcDir Verzeichnis `shared/sports`
+ * @param log    Logger
+ */
+def checkSportLock(srcDir: File, log: Logger): Unit = {
+  val locked = readSportLock(srcDir)
+  locked.foreach { case (name, hash) =>
+    val f = srcDir / name
+    if (!f.exists) sys.error(s"shared/sports/$name ist veröffentlicht (versions.lock) und darf nicht entfernt werden")
+    if (sha256(f) != hash)
+      sys.error(s"shared/sports/$name ist veröffentlicht (versions.lock) und darf nicht geändert werden - neue Version anlegen")
+  }
+  (srcDir * "*.json").get.map(_.getName).filterNot(locked.contains).sorted.foreach { n =>
+    log.warn(s"shared/sports/$n ist noch nicht veröffentlicht (Entwurf) - mit 'sbt lockSports' festschreiben")
+  }
+}
+
+/** Befehl `lockSports`: trägt alle noch nicht veröffentlichten Wertungssysteme in `shared/sports/versions.lock` ein. */
+def lockSports = Command.command("lockSports") { state =>
+  val srcDir = file("shared") / "sports"
+  val locked = readSportLock(srcDir)
+  val added  = (srcDir * "*.json").get.sortBy(_.getName).filterNot(f => locked.contains(f.getName))
+  if (added.isEmpty) println("lockSports: keine neuen Versionen")
+  else {
+    val lock   = srcDir / "versions.lock"
+    val header = if (lock.exists) "" else
+      "# Veröffentlichte Wertungssysteme: <datei> <sha256>. Diese Dateien dürfen nicht mehr geändert werden.\n" +
+      "# Neue Regeln = neue Datei (z. B. tt_002.json), danach 'sbt lockSports'.\n"
+    IO.append(lock, header + added.map(f => s"${f.getName} ${sha256(f)}\n").mkString)
+    added.foreach(f => println(s"lockSports: ${f.getName} veröffentlicht"))
+  }
+  state
+}
 
 def hello = Command.command("hello") { state =>
   println(s"Hello")

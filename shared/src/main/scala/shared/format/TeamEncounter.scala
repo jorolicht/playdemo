@@ -18,15 +18,23 @@ import shared.sport.{ EncounterCfg, Level, Sports }
 object TeamEncounter:
 
   /**
-   * Spielsystem eines Wettbewerbstyps.
+   * Spielsystem eines Wettbewerbstyps im aktuellen Wertungssystem ([[Sports.current]]).
    *
    * @param coTyp Wettbewerbstyp
    * @return Spielsystem, None wenn der Typ keine Begegnungen kennt
    */
-  def config(coTyp: CompTyp): Option[EncounterCfg] = Sports.default.encounter(coTyp.formatId)
+  def config(coTyp: CompTyp): Option[EncounterCfg] = Sports.current.encounter(coTyp.formatId)
 
-  /** true, wenn der Wettbewerbstyp mit Begegnungen gespielt wird. */
-  def isTeam(coTyp: CompTyp): Boolean = config(coTyp).isDefined
+  /**
+   * Spielsystem eines Wettbewerbs nach seinem Wertungssystem (`Competition.scoring`).
+   *
+   * @param comp Wettbewerb
+   * @return Spielsystem, None wenn der Wettbewerb keine Begegnungen kennt
+   */
+  def configFor(comp: Competition): Option[EncounterCfg] = Sports.get(comp.scoring).encounter(comp.typ.formatId)
+
+  /** true, wenn der Wettbewerbstyp in einem Wertungssystem mit Begegnungen gespielt wird (versionsunabhängig). */
+  def isTeam(coTyp: CompTyp): Boolean = Sports.all.values.exists(_.encounter(coTyp.formatId).isDefined)
 
   /**
    * Kennzahl `winSets` eines Begegnungseintrags aus der Stufe der Begegnung.
@@ -53,7 +61,7 @@ object TeamEncounter:
    * @param stage Stage
    * @param coTyp Wettbewerbstyp
    */
-  def matchWinSets(stage: Stage, coTyp: CompTyp): Int =
+  def matchWinSets(stage: Stage, coTyp: CompTyp): Int = Sports.using(stage.scoring):
     config(coTyp).map(c => winSetsCode(c.levelFor(stage.encVariant))).getOrElse(stage.noWinSets)
 
   /**
@@ -171,7 +179,7 @@ object TeamEncounter:
    * @param enc    Begegnung
    * @return betroffene Spielnummern
    */
-  def update(stage: Stage, coTyp: CompTyp, enc: Encounter): Either[AppError, List[Int]] =
+  def update(stage: Stage, coTyp: CompTyp, enc: Encounter): Either[AppError, List[Int]] = Sports.using(stage.scoring):
     config(coTyp) match
       case None => Left(AppError("err0263.encounter.no.team.competition"))
       case Some(cfg) =>
@@ -198,7 +206,7 @@ object TeamEncounter:
    * @param lineup neue Aufstellung (wird als abgegeben markiert)
    * @return betroffene Spielnummern
    */
-  def setLineup(stage: Stage, comp: Competition, gameNo: Int, side: Int, lineup: Lineup): Either[AppError, List[Int]] =
+  def setLineup(stage: Stage, comp: Competition, gameNo: Int, side: Int, lineup: Lineup): Either[AppError, List[Int]] = Sports.using(stage.scoring):
     config(comp.typ) match
       case None => Left(AppError("err0263.encounter.no.team.competition"))
       case Some(cfg) =>
@@ -226,7 +234,7 @@ object TeamEncounter:
    * @param result Satzergebnisse in Schnelleingabe ("·"-getrennt)
    * @return betroffene Spielnummern
    */
-  def inputGame(stage: Stage, coTyp: CompTyp, gameNo: Int, no: Int, sets: (Int, Int), result: String): Either[AppError, List[Int]] =
+  def inputGame(stage: Stage, coTyp: CompTyp, gameNo: Int, no: Int, sets: (Int, Int), result: String): Either[AppError, List[Int]] = Sports.using(stage.scoring):
     stage.encounters.find(_.gameNo == gameNo).flatMap(e => e.games.find(_.no == no).map(g => (e, g))) match
       case None => Left(AppError("err0265.encounter.game.not.found", s"$gameNo/$no"))
       case Some((enc, g)) =>
@@ -249,7 +257,7 @@ object TeamEncounter:
    * @param gameNo Spielnummer der Begegnung
    * @return betroffene Spielnummern
    */
-  def clearResults(stage: Stage, coTyp: CompTyp, gameNo: Int): Either[AppError, List[Int]] =
+  def clearResults(stage: Stage, coTyp: CompTyp, gameNo: Int): Either[AppError, List[Int]] = Sports.using(stage.scoring):
     stage.encounters.find(_.gameNo == gameNo) match
       case None => stage.resetMatch(gameNo)
       case Some(enc) =>
