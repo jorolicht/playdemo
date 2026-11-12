@@ -35,6 +35,27 @@ object DlgExportTourney extends BaseDialog with JsWrapper:
   def render(param: String = ""): Boolean = true
 
   /**
+   * Link des Turniers in der Cloud (WordPress-Seite), None bei lokal gespeicherten Turnieren (lokaler Modus,
+   * Demo, `wpId` 999999 oder ohne Slug).
+   *
+   * @param tourney Turnier
+   * @return z. B. Some("https://turnier-service.info/tourney/ttc-musterstadt/20300401-meisterschaft/")
+   */
+  def cloudLink(tourney: Tourney): Option[String] =
+    val slug = Option(tourney.slug).getOrElse("").trim.stripPrefix("/").stripSuffix("/")
+    if Global.isLocalMode || Global.isDemoMode || tourney.wpId == 999999 || slug.isEmpty || slug == "local" then None
+    else Some(s"${Global.homeUrl.stripSuffix("/")}/$slug/")
+
+  /**
+   * Maskiert Text für die Ausgabe in HTML (Inhalt und Attribute).
+   *
+   * @param s Text
+   * @return maskierter Text
+   */
+  def escapeHtml(s: String): String =
+    s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;")
+
+  /**
    * Shows the tournament export dialog.
    *
    * @param tourney The tournament to export.
@@ -45,7 +66,7 @@ object DlgExportTourney extends BaseDialog with JsWrapper:
     val p = Promise[Option[String]]()
     val defaultFilename = services.TourneyDB.defaultExportFilename(tourney)
 
-    setHtml(getOrCreateDiv(LoadId), cviews.dialogs.html.DlgExportTourney(defaultFilename, saveAndLeave))
+    setHtml(getOrCreateDiv(LoadId), cviews.dialogs.html.DlgExportTourney(defaultFilename, saveAndLeave, cloudLink(tourney)))
     val modalElem = gE(ModalId)
     modal = Modal(modalElem)
 
