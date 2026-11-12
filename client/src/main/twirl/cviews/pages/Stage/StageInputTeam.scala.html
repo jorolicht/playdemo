@@ -1,0 +1,208 @@
+@import shared.model.*
+@import shared.format.*
+@import shared.sport.EncounterCfg
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+@import pages.Stage.StageInput.*
+
+@(stage: Stage, cfg: EncounterCfg, roundNo: Int, title: String, roundMatches: Seq[(MEntry, String, String)], noAccess: Boolean, noTrashAccess: Boolean)
+
+@isGroup = @{ !stage.isKoStage && stage.stageConfig.format == StageFormat.GR }
+@noSetCols = @{ stage.noWinSets * 2 - 1 }
+
+@lineupBtn(m: MEntry, side: Int, enc: Option[Encounter]) = {
+    @defining(enc.exists(_.lineup(side).done)) { done =>
+        @defining(noAccess || m.stNoA.isNN || m.stNoB.isNN || m.stNoA.isBye || m.stNoB.isBye || m.status == MEntry.MS_FIX) { dis =>
+            <button class="btn btn-sm @if(done){btn-outline-success}else{btn-outline-secondary} ms-2 py-0 d-print-none"
+                    title="@gM("+lineup")"
+                    @id(LineupBtn, "onclick", s"${m.gameNo}_$side")
+                    @if(dis){disabled}>
+                <i class="bi @if(done){bi-person-check}else{bi-person-lines-fill}"></i>
+            </button>
+        }
+    }
+}
+
+@startBtn(m: MEntry, enc: Option[Encounter], disabledRow: Boolean) = {
+    @defining(enc.exists(TeamEncounter.isStarted)) { started =>
+        @defining(enc.exists(e => e.lineupA.done && e.lineupB.done)) { lineupsDone =>
+            @if(started) {
+                <span class="badge bg-success-subtle text-success border" title="@gM("+started")"><i class="bi bi-play-fill"></i></span>
+            } else {
+                <button class="btn btn-sm @if(lineupsDone){btn-success}else{btn-outline-secondary} py-0 d-print-none"
+                        title="@gM("+start_hint")"
+                        @id(TeamStartBtn, "onclick", m.gameNo.toString)
+                        @if(disabledRow || !lineupsDone){disabled}>
+                    @gM("+start")
+                </button>
+            }
+        }
+    }
+}
+
+@gameStatus(e: Encounter, g: SubGame) = @{
+    g.status match {
+        case MEntry.MS_BLOCK if e.lineupA.done && e.lineupB.done && !TeamEncounter.isStarted(e) => gM("+game_not_started")
+        case MEntry.MS_BLOCK => gM("+game_blocked")
+        case MEntry.MS_SKIP  => gM("+game_skipped")
+        case MEntry.MS_FIX   => gM("+game_walkover")
+        case _               => ""
+    }
+}
+
+<div class="round-section border rounded mb-4 shadow-sm overflow-hidden" id="round-section-@roundNo">
+    <div class="bg-light p-3 d-flex justify-content-between align-items-center border-bottom">
+        <h6 class="mb-0 fw-bold text-primary">@title</h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0 text-nowrap">
+            <thead class="table-light small">
+                <tr>
+                    <th style="width: 40px;"></th>
+                    @if(isGroup) { <th style="width: 70px;" class="text-center">@gM("+group")</th> }
+                    <th class="text-end" style="width: 260px;">@gM("+team_a")</th>
+                    <th style="width: 80px;" class="text-center"></th>
+                    <th class="text-start" style="width: 260px;">@gM("+team_b")</th>
+                    <th style="width: 60px;" class="text-center">@gM("+no")</th>
+                    <th style="width: 80px;" class="text-center">@gM("+table")</th>
+                    @for(i <- 1 to noSetCols) {
+                        <th style="width: 50px;" class="text-center">@gM("+set_no", i.toString)</th>
+                    }
+                    <th style="width: 90px;" class="text-center">@gM("+result")</th>
+                    <th style="width: 120px;" class="text-center d-print-none">@gM("+actions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @roundMatches.map { case (m, nameA, nameB) =>
+                    @defining(stage.encounters.find(_.gameNo == m.gameNo)) { enc =>
+                    @defining(noAccess || m.stNoA.isNN || m.stNoB.isNN || m.stNoA.isBye || m.stNoB.isBye || m.status == MEntry.MS_FIX) { disabledRow =>
+                    @defining(expanded.contains((stage.id.value, m.gameNo))) { isOpen =>
+                        @* Begegnung: Mannschaften, Start, Gesamtergebnis, Löschen *@
+                        <tr id="row-@m.gameNo" class="table-group-divider">
+                            <td class="text-center">
+                                @if(enc.exists(_.games.nonEmpty)) {
+                                    <button class="btn btn-link btn-sm p-0 text-secondary" @id(TngBtn, "onclick", m.gameNo.toString) title="@gM("+toggle_games")">
+                                        <i class="bi @if(isOpen){bi-caret-down-fill}else{bi-caret-right-fill}" id="tng-icon-@m.gameNo"></i>
+                                    </button>
+                                }
+                            </td>
+                            @if(isGroup) {
+                                <td class="text-center fw-bold text-secondary">
+                                    @{ m match { case gr: MEntryGr => StageHelper.cvrt2ExcelCol(gr.grId); case _ => "-" } }
+                                </td>
+                            }
+                            <td class="text-end">
+                                <span id="nameA-@m.gameNo" class="fw-bold player-name-display">@nameA</span>
+                                @lineupBtn(m, 0, enc)
+                            </td>
+                            <td class="text-center">@startBtn(m, enc, disabledRow)</td>
+                            <td class="text-start">
+                                <span id="nameB-@m.gameNo" class="fw-bold player-name-display">@nameB</span>
+                                @lineupBtn(m, 1, enc)
+                            </td>
+                            <td></td>
+                            <td></td>
+                            @* Gesamtergebnis aller gewerteten Einzel und Doppel: "Sätze 12:9  Spiele 3:2" *@
+                            @defining(enc.map(e => TeamEncounter.preview(stage, cfg, e)).getOrElse((0, 0))) { score =>
+                            @defining(if (m.finished) m.sets else score) { games =>
+                            @defining(enc.map(e => TeamEncounter.totals(e, stage.noWinSets)._1).getOrElse((0, 0))) { setTotal =>
+                                <td colspan="@noSetCols" class="text-center">
+                                    @if(setTotal != (0, 0) || games != (0, 0)) {
+                                        <span class="text-muted small">@gM("+total_sets")</span>
+                                        <span id="tsetsum_@m.gameNo" class="fw-bold ms-1 me-3">@{setTotal._1}:@{setTotal._2}</span>
+                                        <span class="text-muted small">@gM("+total_games")</span>
+                                        <span id="tgamesum_@m.gameNo" class="fw-bold ms-1">@{games._1}:@{games._2}</span>
+                                    }
+                                </td>
+                                <td class="text-center fw-bold">
+                                    <span id="sets_@m.gameNo" class="badge @if(m.finished){bg-success text-white}else{bg-light text-dark border} fs-6"
+                                          title="@gM("+total_games")">
+                                        @{ if (games != (0, 0) || m.finished) s"${games._1}:${games._2}" else "" }
+                                    </span>
+                                </td>
+                            }
+                            }
+                            }
+                            <td class="text-center d-print-none">
+                                <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" @id(TeamSchiriBtn, "onclick", m.gameNo.toString) title="@gM("+print_sheets")"
+                                        @if(m.stNoA.isNN || m.stNoB.isNN || m.stNoA.isBye || m.stNoB.isBye){disabled}>
+                                    <i class="bi bi-printer"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" @id(DeleteMatchBtn, "onclick", m.gameNo.toString)
+                                        @if(noTrashAccess || disabledRow || !enc.exists(TeamEncounter.isStarted)){disabled}>
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                </div>
+                            </td>
+                        </tr>
+                        @* Einzel und Doppel der Begegnung *@
+                        @enc.filter(_.games.nonEmpty).map { e =>
+                            @e.games.map { g =>
+                                @defining(cfg.games.lift(g.no - 1)) { gc =>
+                                @defining(noAccess || !(g.status == MEntry.MS_READY || g.status == MEntry.MS_FIN)) { disabledSub =>
+                                @defining(if (g.result.trim.isEmpty) Array.empty[String] else g.result.split("·")) { setInputs =>
+                                    <tr class="enc-sub-@m.gameNo bg-light-subtle @if(!isOpen){d-none} @if(g.status == MEntry.MS_SKIP){text-muted}">
+                                        <td></td>
+                                        @if(isGroup) { <td></td> }
+                                        <td class="text-end">
+                                            <span class="small text-muted me-1">@gc.map(_.home)</span>
+                                            @formatPlayerSno(g.snoA)
+                                        </td>
+                                        <td class="text-center small text-muted">
+                                            @if(g.double){@gM("+double")}else{@gM("+single")}
+                                        </td>
+                                        <td class="text-start">
+                                            @formatPlayerSno(g.snoB)
+                                            <span class="small text-muted ms-1">@gc.map(_.away)</span>
+                                        </td>
+                                        <td class="text-center text-muted small">@{m.gameNo}.@{g.no}</td>
+                                        <td class="text-center">
+                                            <input type="text" id="ttab_@{m.gameNo}_@{g.no}"
+                                                   class="form-control form-control-sm text-center team-table-input"
+                                                   style="width: 2.5rem; display: inline-block;" maxlength="2"
+                                                   value="@g.playfield" data-game="@m.gameNo" data-sub="@g.no" @if(disabledSub){disabled} />
+                                        </td>
+                                        @for(setIdx <- 1 to noSetCols) {
+                                            <td class="text-center">
+                                                <input type="text" id="tin_@{m.gameNo}_@{g.no}_@{setIdx}"
+                                                       class="form-control form-control-sm text-center font-ballInput team-set-input"
+                                                       style="width: 2.5rem; display: inline-block;" maxlength="3"
+                                                       value="@{if (setIdx <= setInputs.length) setInputs(setIdx - 1) else ""}"
+                                                       data-game="@m.gameNo" data-sub="@g.no" @if(disabledSub){disabled} />
+                                            </td>
+                                        }
+                                        <td class="text-center">
+                                            <span id="tsets_@{m.gameNo}_@{g.no}" class="badge @if(g.decided){bg-success text-white}else{bg-light text-dark border}">
+                                                @{ if (g.decided) s"${g.sets._1}:${g.sets._2}" else "" }
+                                            </span>
+                                            <div class="small text-muted">@gameStatus(e, g)</div>
+                                        </td>
+                                        <td class="text-center d-print-none">
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-info" @id(TeamInfoBtn, "onclick", s"${m.gameNo}_${g.no}") title="@gM("+info")">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" @id(TeamDelBtn, "onclick", s"${m.gameNo}_${g.no}")
+                                                        @if(noTrashAccess || g.status != MEntry.MS_FIN){disabled}>
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                                <button class="btn btn-success" @id(TeamSaveBtn, "onclick", s"${m.gameNo}_${g.no}") disabled>
+                                                    <i class="bi bi-check-lg"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                                }
+                                }
+                            }
+                        }
+                    }
+                    }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -138,10 +138,12 @@
                                         <button class="btn btn-outline-primary" onclick="appLoadPage('CompetitionInfo', '@c.id.value')">
                                             <i class="bi bi-eye"></i>
                                         </button>
-                                        <button class="btn btn-outline-secondary" @if(!base.Global.hasTourneyAccess(tourney)){disabled}>
+                                        <button class="btn btn-outline-secondary" @id(BtnEditComp, "onclick", c.id.value.toString) title="@gM("btn.edit")"
+                                                @if(!base.Global.hasTourneyAccess(tourney) || c.status == CompStatus.FIN){disabled}>
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <button class="btn btn-outline-danger" @if(!base.Global.hasTourneyAccess(tourney)){disabled}>
+                                        <button class="btn btn-outline-danger" @id(BtnDeleteComp, "onclick", c.id.value.toString) title="@gM("btn.delete")"
+                                                @if(!base.Global.hasTourneyAccess(tourney) || c.status == CompStatus.FIN){disabled}>
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>

@@ -257,6 +257,7 @@ contextHeader.selectStage                           = Select Stage
 contextHeader.registration                          = Registration
 contextHeader.welcome                               = Welcome
 contextHeader.participants                          = Participants
+contextHeader.teams                                 = Teams
 contextHeader.results                               = Results
 contextHeader.allResults                             = All Results
 contextHeader.infoAnzeige                            = Info

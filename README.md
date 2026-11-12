@@ -23,6 +23,7 @@ Twirl-Templates und gemeinsam genutzter Domänencode.
 - [WordPress-Plugin](#wordpress-plugin)
 - [Client-Architektur](#client-architektur)
 - [REST-API und Play-Server](#rest-api-und-play-server)
+- [Wertungssystem](#wertungssystem)
 - [Internationalisierung](#internationalisierung)
 - [Tests](#tests)
 - [Werbevideo](#werbevideo)
@@ -111,7 +112,8 @@ Einbindung von Scala.js in Play über [sbt-web-scalajs](https://github.com/vmuni
 │   └── src/main/
 │       ├── scala/            pages/, comps/, dialogs/, services/, base/, addon/
 │       └── twirl/cviews/     Twirl-Templates (pages, comps, dialogs)
-├── shared/                   Gemeinsamer Code (model/, format/), crossProject CrossType.Pure
+├── shared/                   Gemeinsamer Code (model/, format/, sport/), crossProject CrossType.Pure
+│   └── sports/               Wertungssysteme der Sportarten, versioniert (JSON, z. B. tt_001.json)
 ├── wp-plugin/                WordPress-Plugin "tourney" (tourney.php, includes/, css/, ...)
 ├── site/content/             Statische Seiten (werden nach wp-plugin/pages kopiert)
 └── test/
@@ -326,6 +328,61 @@ Schreibende Aufrufe verlangen Schreibrecht auf den jeweiligen Post (`tourney_api
 | `/referee`, `/referee/submit` | Ergebnis-Selbsteingabe (QR-Code auf dem Schiedsrichterzettel) |
 | `/matchboard/*`, `/ws/:slug`, `/helper/send2sse` | Live-Anzeige über WebSocket/SSE |
 | `/wp/post` | WordPress-Proxy |
+
+---
+
+## Wertungssystem
+
+Wie gezählt, gewonnen und gewertet wird, beschreibt je Sportart und Version eine JSON-Datei in `shared/sports/`
+(`<sport>_<nnn>.json`, heute `tt_001.json`). Sie enthält die Wertungsstufen von unten nach oben (TT: Ball → Satz bis 11
+mit 2 Vorsprung → Spiel mit 3 Gewinnsätzen), Varianten, Formate, Tabellenpunkte und Entscheidungskriterien sowie die Namen
+auf Deutsch und Englisch. `sport.id` und `sport.version` in der Datei müssen zum Dateinamen passen. Modell und Auswertung
+stehen in `shared/sport/SportConfig.scala`, die Verwaltung in `shared/sport/Sports.scala`.
+
+**Versionen:** Jeder Wettbewerb speichert sein Wertungssystem (`Competition.scoring`, z. B. `"tt_001"`) und wird immer
+danach gewertet; Wettbewerbe ohne Eintrag (vor Einführung der Versionen angelegt) gelten als `tt_001`. Neue Wettbewerbe
+erhalten die neueste Version. In der Stage-Administration lässt sich die Version wechseln, solange der Wettbewerb in der
+Konfiguration ist und keine Stage ausgelost wurde. Ist eine Version unbekannt (z. B. Turnier aus einer neueren
+Installation), wird mit der neuesten Version derselben Sportart gerechnet und das protokolliert.
+
+**Neue Regeln = neue Datei:** Eine veröffentlichte Version wird nie geändert. `shared/sports/versions.lock` enthält die
+SHA-256-Prüfsummen der veröffentlichten Dateien; ändert oder entfernt man eine davon, bricht der Build ab. Für neue Regeln
+die letzte Datei kopieren (z. B. `tt_002.json`, `"version": 2`), anpassen und testen (bis dahin meldet der Build
+„Entwurf“), dann mit `sbt lockSports` veröffentlichen. Neue Felder im Dateiformat brauchen Defaults, damit ältere Versionen
+lesbar bleiben; ändert der Code die Bedeutung eines Eintrags, muss das Verhalten für ältere Versionen erhalten bleiben.
+
+**Kontext:** Gerechnet wird im Wertungssystem des Wettbewerbs. Die rechnenden Methoden von `Stage` und `TeamEncounter`
+laufen in `Sports.using(stage.scoring)`; `Stage.scoringOf` (vom Client gesetzt) liefert dazu das Wertungssystem des
+Wettbewerbs. Ohne Kontext gilt `Sports.fallbackKey`, im Client der ausgewählte Wettbewerb (`base.SportData`).
+
+**Einbetten und Laden zur Laufzeit:** Ein sbt-Sourcegenerator bettet alle Dateien als `shared.sport.SportFiles` ein
+(prüft dabei `versions.lock`). Zusätzlich kopieren `syncClientWpFiles` und `packageWpPlugin` sie als
+`data/sport_<sport>_<nnn>.json` ins Plugin und schreiben den Index `data/sport_index.json`. Beim Start lädt der Client
+(`base.SportData`) alle im Index genannten Versionen, die nicht eingebettet sind; so lässt sich eine neue Version im
+installierten Plugin ergänzen (Datei + Eintrag im Index), ohne neu zu übersetzen. Eingebettete Versionen lassen sich zur
+Laufzeit nicht überschreiben. Die Offline-App cacht die Dateien mit den übrigen `data/*.json`.
+
+Die Prüfung der Ergebnisse (`StageHelper`, `MEntry.validSets`), die Schnelleingabe der Sätze im Client und die Sortierung der
+Gruppentabelle (`Group.calc`) verwenden diese Konfiguration. `Stage.noWinSets` überschreibt weiterhin die Gewinnsätze
+der Spielstufe. Gespeichert werden Ergebnisse unverändert im bisherigen Format.
+
+**Mannschaften** (`team2`, `team3`): Ein Mannschaftsformat enthält eine Liste wählbarer Spielsysteme (`systems`,
+Standard `defaultSystem`) und die Kadergröße für alle Systeme (`teamSize` Stammspieler, `maxPlayers` einschließlich
+Ersatz). Ein System hat Kennung, Name und Beschreibung (de/en), Positionen je Seite, die Spielfolge (Einzel/Doppel,
+optional `decider` = Entscheidungsspiel nur bei Gleichstand) und die Stufe der Begegnung mit Optionen (`variants`,
+z. B. „bis 3 Punkte“/„alle Spiele“ oder „Unentschieden“/„Entscheidungsdoppel“). `tt_002` enthält für 2er-Mannschaften
+Bundessystem (Werner-Scheffler), Swaythling-Cup (modifiziert) und Quick-Cup, für 3er-Mannschaften den Corbillon-Cup;
+`tt_001` kennt nur ein System (`encounter`, Kennung `default`). System und Option werden je Stage in der Administration
+gewählt (`Stage.encSystem`, `Stage.encVariant`); der Info-Button öffnet die Seite „Spielsysteme“ (`pages.SystemInfo`) mit
+Beschreibung, Spielfolge und Optionen. In K.-o.-Runden gibt es kein Unentschieden: eine Option mit Unentschieden spielt
+dort das Entscheidungsspiel.
+
+Mannschaften liegen im Wettbewerb (`Competition.teams`, Startnummer `[T<id>]`) und werden in der Anmeldung angelegt. Ein
+Eintrag im Spielplan ist die Begegnung, ihr `sets` ist der Stand (gewonnene Spiele), ihr `winSets` kodiert die Stufe
+(`TeamEncounter.winSetsCode`: positiv = bis n Punkte, negativ = alle n Spiele, +100 Unentschieden, +200
+Entscheidungsspiel). Aufstellung und Einzelspiele stehen in `Stage.encounters` (Logik: `shared.format.TeamEncounter`).
+Unbesetzte Positionen und nicht angetretene Mannschaften werden als verloren gewertet. Die Gruppentabelle sortiert nach
+Begegnungen, Spielen, Sätzen und Bällen; ein Unentschieden bringt die Punkte für Unentschieden.
 
 ---
 

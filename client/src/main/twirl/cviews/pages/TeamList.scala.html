@@ -1,0 +1,87 @@
+@import shared.model.*
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+@import pages.TeamList.*
+
+@(sections: Seq[CompSection])
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="h5 mb-0"><i class="bi bi-diagram-2 me-2"></i>@gM("+title")</h3>
+        <button class="btn btn-sm btn-outline-primary" @id(BtnAddPlayer, "onclick")
+                @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
+            <i class="bi bi-person-plus me-1"></i>@gM("+add_player")
+        </button>
+    </div>
+
+    @if(sections.isEmpty) {
+        <div class="text-center py-5 text-muted">@gM("+no_competitions")</div>
+    }
+
+    @sections.map { sec =>
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold">@sec.comp.name</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary rounded-pill">@sec.rows.length @gM("+teams_suffix")</span>
+                    <button class="btn btn-sm btn-light" @id(BtnAddTeam, "onclick", sec.comp.id.value.toString) @if(sec.locked){disabled}>
+                        <i class="bi bi-plus-lg me-1"></i>@gM("+add_team")
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr class="small text-muted text-uppercase">
+                                <th class="ps-3" style="width: 70px;">@gM("+no_header")</th>
+                                <th>@gM("+name_header")</th>
+                                <th>@gM("+club_header")</th>
+                                <th>@gM("+players_header")</th>
+                                <th class="text-center" style="width: 80px;">@gM("+ttr_header")</th>
+                                <th class="text-end pe-3" style="width: 90px;">@gM("+action_header")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(sec.rows.isEmpty) {
+                                <tr><td colspan="6" class="text-center py-4 text-muted">@gM("+no_teams")</td></tr>
+                            }
+                            @sec.rows.map { row =>
+                                <tr>
+                                    <td class="ps-3 text-muted">@row.team.sno.startId</td>
+                                    <td class="fw-bold">@row.team.name</td>
+                                    <td>@row.clubName</td>
+                                    <td>
+                                        @row.players.zipWithIndex.map { case (pName, i) =>
+                                            @if(i < sec.cfg.teamSize) {
+                                                <span class="badge bg-primary me-1">@pName</span>
+                                            } else {
+                                                <span class="badge bg-secondary me-1" title="@gM("+reserve")">@pName (@gM("+reserve_short"))</span>
+                                            }
+                                        }
+                                        @if(row.players.length < sec.cfg.teamSize) {
+                                            <span class="badge bg-warning text-dark">@gM("+incomplete")</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">@if(row.rating > 0){@row.rating}else{-}</td>
+                                    <td class="text-end pe-3 text-nowrap">
+                                        <button class="btn btn-link btn-sm p-0 me-2" title="@gM("+edit_team")"
+                                                @id(BtnEditTeam, "onclick", s"${sec.comp.id.value}_${row.team.id}")
+                                                @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney)){disabled}>
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-link btn-sm text-danger p-0" title="@gM("+delete_title")"
+                                                @id(BtnDeleteTeam, "onclick", s"${sec.comp.id.value}_${row.team.id}")
+                                                @if(sec.locked){disabled}>
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

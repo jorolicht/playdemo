@@ -2,9 +2,10 @@
 @import shared.format.*
 @import shared.format.StageHelper
 @import pages.Stage.StageScoreSheet.*
+@import pages.Stage.TeamSheet
 @import cviews.helper.html.*
 
-@(stage: Stage, mList: Seq[(MEntry, String, String, String, String, String, String)], activeSectionIdParam: Option[Int] = None)
+@(stage: Stage, mList: Seq[(MEntry, String, String, String, String, String, String)], activeSectionIdParam: Option[Int] = None, team: Seq[TeamSheet] = Seq(), teamTitle: String = "")
 
 @compName = @{ services.TourneyDB.tourney.competitions.filter(_ != null).find(_.id == stage.coId).map(_.name).getOrElse(stage.name) }
 @comp = @{ services.TourneyDB.tourney.competitions.filter(_ != null).find(_.id == stage.coId).get }
@@ -49,19 +50,20 @@
   }
 }
 
-@* Referee Single Card content (Grid elements) *@
-@refereeCardContent(m: MEntry, idx: Int, nameA: String, nameB: String, clubA: String, clubB: String, info1: String, info2: String) = {
+@* Referee Single Card content (Grid elements); QR-Code/Link nur mit qrGameNo (Eintrag im Spielplan) *@
+@refereeCardContent(gameNoLabel: String, playfield: String, qrGameNo: Option[Int], nameA: String, nameB: String, clubA: String, clubB: String, info1: String, info2: String) = {
   <div class="RefereeTrnyName">@services.TourneyDB.tourney.name</div>
   <div class="RefereeCompName"><h6>@compName - @gM(comp.typ.msgCode)</h6></div>
   <div class="RefereeCompInfo1 text-muted small">@info1</div>
   <div class="RefereeCompInfo2 text-muted small">@info2</div>
-  <div class="RefereeTableInfo1 fw-bold">@{msg("tableInfo1")} @{m.playfield}</div>
+  <div class="RefereeTableInfo1 fw-bold">@{msg("tableInfo1")} @playfield</div>
   <div class="RefereeTableInfo2">@{msg("tableInfo2")}</div>
-  <div class="RefereeGameNo fw-bold">@m.gameNo</div>
+  <div class="RefereeGameNo fw-bold">@gameNoLabel</div>
   <div class="RefereeLabelGameNo small text-muted">@{msg("gameNo")}</div>
   <div class="RefereeDateTime small">@comp.startDate</div>
+ @qrGameNo.map { qrNo =>
   <div class="RefereeQRCode mt-2" 
-       data-game-no="@m.gameNo" 
+       data-game-no="@qrNo" 
        data-name-a="@nameA" 
        data-name-b="@nameB"
        data-info-1="@info1"
@@ -75,6 +77,7 @@
       Link
     </a>
   </div>
+ }
   <div class="RefereePlayer1 fw-bold px-1 text-wrap text-center" style="font-size: 0.85rem; line-height: 1.1;">@nameA</div>
   <div class="RefereePlayer2 fw-bold px-1 text-wrap text-center" style="font-size: 0.85rem; line-height: 1.1;">@nameB</div>
   <div class="RefereeLabelSet">&nbsp;</div>
@@ -154,6 +157,7 @@
   }
 }
 
+@if(teamTitle.isEmpty) {
 <div class="scoresheet-view">
     <!-- Header action bar (Screen only) -->
     <div class="d-print-none mb-4 p-3 bg-light border rounded shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -191,7 +195,7 @@
                             <div class="position-relative">
                                 <!-- Card itself -->
                                 <div class="refereeGrid shadow-sm border rounded">
-                                    @refereeCardContent(m, idx + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                    @refereeCardContent(m.gameNo.toString, m.playfield, Some(m.gameNo), nameA, nameB, clubA, clubB, info1, info2)
                                 </div>
                             </div>
                         </div>
@@ -207,7 +211,7 @@
                     @if(!(m.stNoA.isBye || m.stNoB.isBye)) {
                         <div id="printable-card-single-@m.gameNo" class="referee-single-card-container">
                             <div class="refereeGrid mx-auto">
-                                @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                @refereeCardContent(m.gameNo.toString, m.playfield, Some(m.gameNo), nameA, nameB, clubA, clubB, info1, info2)
                             </div>
                         </div>
                     }
@@ -223,7 +227,7 @@
                                         @if(idx <= printableRoundMatches.length) {
                                             @defining(printableRoundMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                                 <div class="refereeGrid col-auto px-0">
-                                                    @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                                    @refereeCardContent(m.gameNo.toString, m.playfield, Some(m.gameNo), nameA, nameB, clubA, clubB, info1, info2)
                                                 </div>
                                             }
                                         }
@@ -232,7 +236,7 @@
                                         @if(idx <= printableRoundMatches.length) {
                                             @defining(printableRoundMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                                 <div class="refereeGrid col-auto px-0">
-                                                    @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                                    @refereeCardContent(m.gameNo.toString, m.playfield, Some(m.gameNo), nameA, nameB, clubA, clubB, info1, info2)
                                                 </div>
                                             }
                                         }
@@ -244,7 +248,7 @@
                                         @if(idx <= printableRoundMatches.length) {
                                             @defining(printableRoundMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                                 <div class="refereeGrid col-auto px-0">
-                                                    @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                                    @refereeCardContent(m.gameNo.toString, m.playfield, Some(m.gameNo), nameA, nameB, clubA, clubB, info1, info2)
                                                 </div>
                                             }
                                         }
@@ -253,7 +257,7 @@
                                         @if(idx <= printableRoundMatches.length) {
                                             @defining(printableRoundMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                                 <div class="refereeGrid col-auto px-0">
-                                                    @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                                    @refereeCardContent(m.gameNo.toString, m.playfield, Some(m.gameNo), nameA, nameB, clubA, clubB, info1, info2)
                                                 </div>
                                             }
                                         }
@@ -274,7 +278,7 @@
                                 @if(idx <= activeMatches.length) {
                                     @defining(activeMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                         <div class="refereeGrid col-auto px-0">
-                                            @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                            @refereeCardContent(m.gameNo.toString, m.playfield, Some(m.gameNo), nameA, nameB, clubA, clubB, info1, info2)
                                         </div>
                                     }
                                 }
@@ -283,7 +287,7 @@
                                 @if(idx <= activeMatches.length) {
                                     @defining(activeMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                         <div class="refereeGrid col-auto px-0">
-                                            @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                            @refereeCardContent(m.gameNo.toString, m.playfield, Some(m.gameNo), nameA, nameB, clubA, clubB, info1, info2)
                                         </div>
                                     }
                                 }
@@ -295,7 +299,7 @@
                                 @if(idx <= activeMatches.length) {
                                     @defining(activeMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                         <div class="refereeGrid col-auto px-0">
-                                            @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                            @refereeCardContent(m.gameNo.toString, m.playfield, Some(m.gameNo), nameA, nameB, clubA, clubB, info1, info2)
                                         </div>
                                     }
                                 }
@@ -304,7 +308,7 @@
                                 @if(idx <= activeMatches.length) {
                                     @defining(activeMatches(idx - 1)) { case (m, nameA, nameB, clubA, clubB, info1, info2) =>
                                         <div class="refereeGrid col-auto px-0">
-                                            @refereeCardContent(m, mList.indexOf((m, nameA, nameB, clubA, clubB, info1, info2)) + 1, nameA, nameB, clubA, clubB, info1, info2)
+                                            @refereeCardContent(m.gameNo.toString, m.playfield, Some(m.gameNo), nameA, nameB, clubA, clubB, info1, info2)
                                         </div>
                                     }
                                 }
@@ -315,6 +319,59 @@
             </div>
         }
     }
+} else {
+<div class="scoresheet-view">
+    @* Mannschaften: ein Zettel je Einzel/Doppel, nach Begegnung gruppiert; Druck 4 pro Seite *@
+    <div class="d-print-none mb-4 p-3 bg-light border rounded shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h5 class="mb-1 text-secondary fw-bold">
+                <i class="bi bi-printer me-2"></i>@{if(base.Global.lang == "de") s"Schiedsrichterzettel für $teamTitle" else s"Referee Scoresheets for $teamTitle"}
+            </h5>
+            <div class="small text-muted">@{if(base.Global.lang == "de") s"${team.length} Zettel (je Einzel/Doppel)" else s"${team.length} sheets (one per singles/doubles)"}</div>
+        </div>
+        <button class="btn btn-primary px-4 fw-bold shadow-sm" onclick="window.print()" @if(team.isEmpty){disabled}>
+            <i class="bi bi-printer-fill me-1"></i>@{if(base.Global.lang == "de") "Drucken (4 pro Seite)" else "Print (4 per page)"}
+        </button>
+    </div>
+    @if(team.isEmpty) {
+        <div class="text-center py-5 text-muted d-print-none">
+            @{if(base.Global.lang == "de") "Keine Spiele für diesen Wettbewerb vorhanden." else "No matches available for this competition."}
+        </div>
+    }
+    @team.map(_.encounterNo).distinct.map { encNo =>
+        @defining(team.filter(_.encounterNo == encNo)) { sheets =>
+            <h6 class="fw-bold text-primary border-bottom pb-1 mb-3 d-print-none">
+                @{if(base.Global.lang == "de") s"Begegnung $encNo" else s"Tie $encNo"}: @sheets.head.encounter
+            </h6>
+            <div class="row row-cols-1 row-cols-md-2 g-4 justify-content-center d-print-none mb-5">
+                @sheets.map { t =>
+                    <div class="col d-flex justify-content-center">
+                        <div class="refereeGrid shadow-sm border rounded">
+                            @refereeCardContent(t.label, t.playfield, None, t.nameA, t.nameB, t.clubA, t.clubB, t.info1, t.info2)
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+<div id="scoresheet-print-area" class="d-none">
+    @team.grouped(4).map { page =>
+        <div class="printarea-referee py-2">
+            @page.grouped(2).zipWithIndex.map { case (row, r) =>
+                @if(r == 1) { <div class="row border-bottom-0 border-secondary mx-0" style="height: 20px;"></div> }
+                <div class="row justify-content-between @if(r == 0){mb-4}else{mt-4} mx-0">
+                    @row.map { t =>
+                        <div class="refereeGrid col-auto px-0">
+                            @refereeCardContent(t.label, t.playfield, None, t.nameA, t.nameB, t.clubA, t.clubB, t.info1, t.info2)
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+}
 
 <style>
     @@media print {

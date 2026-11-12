@@ -1,0 +1,62 @@
+@import shared.model.*
+@import dialogs.DlgTeam.*
+@import cviews.helper.html.*
+
+@(title: String, team: Option[Team], clubName: String, players: Seq[Player], clubs: Seq[Club], teamSize: Int, maxPlayers: Int)
+
+@playerLabel(p: Player) = @{
+    val club = clubs.find(_.id.toInt == p.clubId).map(_.name).getOrElse("")
+    val ttr  = p.meta.ttr.map(t => s", $t").getOrElse("")
+    s"${p.displayName} ($club$ttr)"
+}
+
+<div class="modal fade" @id(ModalId) tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">@title</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" @id(CloseId)></button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="return false;">
+                    <div class="mb-3">
+                        <label @forAttr(InputNameId) class="form-label small fw-bold">@gM("DlgTeam.name")</label>
+                        <input type="text" class="form-control" @id(InputNameId) value="@team.map(_.name).getOrElse("")" required>
+                    </div>
+                    <div class="mb-3">
+                        <label @forAttr(InputClubId) class="form-label small fw-bold">@gM("DlgTeam.club")</label>
+                        <input type="text" class="form-control" @id(InputClubId) list="@ClubListId.id" value="@clubName">
+                        <datalist @id(ClubListId)>
+                            @clubs.map { c => <option value="@c.name"> }
+                        </datalist>
+                    </div>
+                    @for(i <- 1 to maxPlayers) {
+                        @defining(team.flatMap(_.players.lift(i - 1)).map(_.value).getOrElse(0)) { selected =>
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold" for="@{SelPlayerId.id}-@i">
+                                    @if(i <= teamSize) { @gM("DlgTeam.player", i.toString) } else { @gM("DlgTeam.reserve") }
+                                </label>
+                                <div class="input-group">
+                                    <select class="form-select" @id(SelPlayerId, "", i.toString)>
+                                        <option value="0">-</option>
+                                        @players.map { p =>
+                                            <option value="@p.id.value" @if(p.id.value == selected){selected}>@playerLabel(p)</option>
+                                        }
+                                    </select>
+                                    <button type="button" class="btn btn-outline-primary" @id(BtnNewPlayerId, "", i.toString) title="@gM("DlgTeam.new_player")">
+                                        <i class="bi bi-person-plus me-1"></i>@gM("DlgTeam.new_player")
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    }
+                    <div class="form-text">@gM("DlgTeam.hint")</div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>@gM("DlgTeam.cancel")</button>
+                <button type="button" class="btn btn-primary" @id(ApplyId)>@gM("DlgTeam.save")</button>
+            </div>
+        </div>
+    </div>
+</div>

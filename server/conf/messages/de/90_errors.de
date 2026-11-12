@@ -28,3 +28,14 @@ err00056.wordpress.error                            = WordPress-Fehler, Status: 
 error.tourney_already_exists                        = Ein Turnier mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen.
 error.competition_already_exists                    = Ein Wettbewerb mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen.
 
+
+err0260.lineup.player.not.in.team                   = Der Spieler gehört nicht zur Mannschaft.
+err0261.lineup.invalid.double                       = Ein Doppel braucht zwei verschiedene Spieler.
+err0262.lineup.invalid.single                       = Ein Spieler kann nur ein Einzel spielen.
+err0263.encounter.no.team.competition               = Der Wettbewerb wird nicht mit Begegnungen gespielt.
+err0264.encounter.team.not.found                    = Mannschaft {0} nicht gefunden.
+err0265.encounter.game.not.found                    = Spiel {0} der Begegnung nicht gefunden.
+err0266.encounter.game.not.playable                 = Spiel {0} kann nicht eingegeben werden (Aufstellung fehlt, kampflos oder entfällt).
+err0267.encounter.game.invalid.result               = Ungültiges Ergebnis für Spiel {0}.
+err0268.encounter.lineup.missing                    = Begegnung {0} kann erst nach Abgabe beider Aufstellungen gestartet werden.
+err0269.encounter.started                           = Begegnung {0} ist gestartet, die Aufstellung kann nicht mehr geändert werden.

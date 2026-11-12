@@ -3,11 +3,19 @@
 @import cviews.helper.html.*
 @import pages.Stage.StageAdmin.*
 @import shared.utils.DrawRules.ModeOption
+@import shared.sport.localized
 
 @(stage: Stage, participants: Seq[Pant], modes: Seq[ModeOption])
 
 @compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
 @isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
+@encCfg = @{ compOpt.flatMap(c => shared.format.TeamEncounter.configFor(c, stage.encSystem)) }
+@encSystems = @{ compOpt.map(c => shared.format.TeamEncounter.systemsFor(c)).getOrElse(Seq()) }
+@scoringKey = @{ compOpt.map(c => shared.sport.Sports.resolveKey(c.scoring)).getOrElse("") }
+@scoringLocked = @{ !compOpt.exists(scoringChangeable) || !base.Global.hasTourneyAccess(services.TourneyDB.tourney) }
+
+@isTeam = @{ encCfg.isDefined }
+@tM(key: String, args: String*) = @{ if (isTeam) gM(key + "_team", args*) else gM(key, args*) }
 
 @disabledIfAus = @{ if(stage.status != StageStatus.CFG || !base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin) "disabled" else "" }
 @disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin) "disabled" else "" }
@@ -82,14 +90,46 @@
                         <option value="4" @{if(stage.noWinSets == 4) "selected" else ""}>@gM("+best_of_7")</option>
                     </select>
                 </div>
+                @encCfg.map { cfg =>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">@gM("+system_label")</label>
+                        <div class="input-group">
+                            <select class="form-select" id="rnd-enc-system" @id(SelEncSystem, "onchange") @disabledIfAus>
+                                @encSystems.map { sys =>
+                                    <option value="@sys.id" @if(sys.id == cfg.id){selected}>@sys.name.localized(base.Global.lang).one</option>
+                                }
+                            </select>
+                            <button class="btn btn-outline-secondary" type="button" @id(BtnSystemInfo, "onclick") title="@gM("+system_info")">
+                                <i class="bi bi-info-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">@gM("+encounter_label")</label>
+                        <select class="form-select" id="rnd-enc-variant" @disabledIfAus>
+                            @Html(variantOptionsHtml(cfg, stage.encVariant))
+                        </select>
+                    </div>
+                }
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">@gM("+scoring_label")</label>
+                    <select class="form-select" @id(SelScoring, "onchange") title="@gM("+scoring_hint")" @if(scoringLocked){disabled}>
+                        @if(!shared.sport.Sports.isKnown(scoringKey)) {
+                            <option value="@scoringKey" selected>@scoringKey (@gM("+scoring_unknown"))</option>
+                        }
+                        @shared.sport.Sports.keys().map { k =>
+                            <option value="@k" @if(k == scoringKey){selected}>@k (@gM("+scoring_version", shared.sport.Sports.get(k).sport.version.toString))</option>
+                        }
+                    </select>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- SECTION 3: PLAYER -->
+    <!-- SECTION 3: PLAYER / TEAMS -->
     <div class="card shadow-sm">
         <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h5 class="mb-0 small text-uppercase fw-bold text-muted"><i class="bi bi-person-check me-2"></i>@gM("+players_title")</h5>
+            <h5 class="mb-0 small text-uppercase fw-bold text-muted"><i class="bi @if(isTeam){bi-people}else{bi-person-check} me-2"></i>@tM("+players_title")</h5>
             <div class="d-flex align-items-center flex-wrap gap-3">
                 @if(stage.prefId.isDefined) {
                     <!-- Radio Button Group for Predecessor filtering -->
@@ -114,16 +154,20 @@
                         </div>
                     </div>
                     
+                    @if(!isTeam) {
                     <button class="btn btn-outline-secondary btn-sm fw-bold" @id(BtnAddDummy, "onclick") @disabledIfAus>
                         <i class="bi bi-plus-circle me-1"></i>@gM("+btn_add_dummy")
                     </button>
                     <button class="btn btn-outline-primary btn-sm fw-bold" @id(BtnAddPlayer, "onclick") @disabledIfAus>
                         <i class="bi bi-person-plus me-1"></i>@gM("+btn_add_player")
                     </button>
+                    }
                 } else {
+                    @if(!isTeam) {
                     <button class="btn btn-outline-secondary btn-sm fw-bold" @id(BtnAddDummy, "onclick") @disabledIfAus>
                         <i class="bi bi-plus-circle me-1"></i>@gM("+btn_add_dummy")
                     </button>
+                    }
                     <button class="btn btn-outline-primary btn-sm fw-bold" @id(ChkBoxAll, "onclick") @disabledIfAus>
                         <i class="bi bi-check2-all me-1"></i>@gM("+btn_select_all")
                     </button>
@@ -140,17 +184,17 @@
                                     <i class="bi bi-arrow-down-up"></i>
                                 </button>
                             </th>
-                            <th>@gM("+name_header")</th>
+                            <th>@tM("+name_header")</th>
                             <th>@gM("+club_header")</th>
                             @if(stage.prefId.isDefined) {
                                 <th>@gM("+prev_stage")</th>
                             }
-                            <th class="text-center" style="width: 80px;">@gM("+ttr_header")</th>
+                            <th class="text-center" style="width: 80px;">@tM("+ttr_header")</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if(participants.isEmpty) {
-                            <tr><td colspan="@{if(stage.prefId.isDefined) 5 else 4}" class="text-center py-4 text-muted">@gM("+no_players")</td></tr>
+                            <tr><td colspan="@{if(stage.prefId.isDefined) 5 else 4}" class="text-center py-4 text-muted">@tM("+no_players")</td></tr>
                         }
                         @participants.map { p =>
                             <tr class="cursor-pointer @{if(p.status == PantStatus.PLAY) "table-success" else ""}">
@@ -170,7 +214,7 @@
             </div>
         </div>
         <div class="card-footer bg-white py-2 small text-muted">
-            <i class="bi bi-info-circle me-1"></i> @gM("+footer_info", participants.length.toString)
+            <i class="bi bi-info-circle me-1"></i> @tM("+footer_info", participants.length.toString)
         </div>
     </div>
 </div>

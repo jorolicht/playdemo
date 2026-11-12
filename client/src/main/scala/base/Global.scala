@@ -245,7 +245,7 @@ object Global:
   def isTourneyPage(pageName: String): Boolean = 
     Set(
       "TourneyInfo", "TourneyWelcome", "TourneyAdmin", "CompetitionInfo", "CompetitionWelcome", "PlayerRegistration", 
-      "PlayerList", "ResultList", "StageAdmin", "StageDraw", 
+      "PlayerList", "TeamList", "SystemInfo", "ResultList", "StageAdmin", "StageDraw", 
       "StageInput", "StageResult", "StageScoreSheet", "StageCertificate", "Certificate"
     ).contains(pageName)
   var pageId  = 0

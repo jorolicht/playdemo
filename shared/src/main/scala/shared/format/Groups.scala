@@ -5,19 +5,31 @@ import shared.basic.Pickle.{ReadWriter => RW, macroRW, *}
 import shared.model.*
 import shared.basic.{AppError, Log}
 import StageHelper.*
+import shared.sport.Sports
 
 case class GroupConfig(id: Int, name: String, size: Int, quali: Int, pos: Int)
 
+/**
+ * Ergebnis eines Gruppenspiels aus Sicht einer Seite.
+ *
+ * @param valid    Ergebnis gewertet
+ * @param points   Sieg/Niederlage (1:0, 0:1)
+ * @param sets     Sätze (bei Mannschaften: gewonnene Spiele)
+ * @param ballDiff Bälle (bei Mannschaften: Sätze)
+ * @param balls    Satzergebnisse in Schnelleingabe
+ * @param level3   vierte Ebene, nur bei Mannschaften: Bälle
+ */
 case class GroupEntry(
   var valid:    Boolean, 
   var points:   (Int,Int), 
   var sets:     (Int,Int), 
   var ballDiff: (Int,Int),
-  var balls:    Array[String]
+  var balls:    Array[String],
+  var level3:   (Int,Int) = (0,0)
 ) {
   
   def toResultEntry(pos: (Int, Int), sno: (String, String)) =  ResultEntry(valid, pos, sno, sets, balls)
-  def invert = new GroupEntry(valid,(points._2,points._1),(sets._2,sets._1),(ballDiff._2,ballDiff._1),balls.map(invBall(_)))
+  def invert = new GroupEntry(valid,(points._2,points._1),(sets._2,sets._1),(ballDiff._2,ballDiff._1),balls.map(invBall(_)),(level3._2,level3._1))
 }
 
 object GroupEntry {
@@ -50,6 +62,8 @@ object GroupEntry {
  * @param fillCnt count of players currently filled in the group
  * @param avgRating average rating of the group
  * @param occu helper map for tracking player associations
+ * @param format Format im Wertungssystem (z. B. "team2"), leer = Standard der Sportart
+ * @param level3 vierte Ebene je Teilnehmer, nur bei Mannschaften (Bälle)
  */
 case class Group(
   grId: Int,
@@ -65,7 +79,9 @@ case class Group(
   var drawPos: Int = 0,
   var fillCnt: Int = 0,
   var avgRating: Int = 0,
-  var occu: Map[String, Int] = Map[String, Int]().withDefaultValue(0)
+  var occu: Map[String, Int] = Map[String, Int]().withDefaultValue(0),
+  var format: String = "",
+  var level3: Array[(Int, Int)] = Array()
 ):
   // add participant
   def addPant(pant: Pant, avgPantRating: Int) = {
@@ -79,10 +95,9 @@ case class Group(
   /**
    * Berechnet die Platzierungen (Rankings) der Teilnehmer in dieser Gruppe.
    *
-   * Die Platzierung wird lexikografisch anhand folgender Kriterien ermittelt:
-   * 1. Punktdifferenz (höchste Priorität)
-   * 2. Satzdifferenz (mittlere Priorität)
-   * 3. Balldifferenz (niedrigste Priorität)
+   * Die Platzierung wird lexikografisch anhand der Entscheidungskriterien der Sportart
+   * (`standings.tieBreakers`) ermittelt, bei Tischtennis Spiel-, Satz- und Balldifferenz.
+   * Teilnehmer, die in allen Kriterien gleich sind, erhalten denselben Platz.
    *
    * Die errechneten Platzierungen werden direkt in das `place`-Feld jedes
    * Teilnehmers (`Pant`) eingetragen.
@@ -110,27 +125,61 @@ case class Group(
             (acc1 + entry.ballDiff._1, acc2 + entry.ballDiff._2)
           }
 
-        var tmpPos = Array.ofDim[(Int, Long)](size)
+        def sumLevel3(pos: Int): (Int, Int) =
+          results(pos).filter(_.valid).foldLeft((0, 0)) { case ((acc1, acc2), entry) =>
+            (acc1 + entry.level3._1, acc2 + entry.level3._2)
+          }
+
+        val cfg = Sports.current.forFormat(format)
+        if level3.length != size then level3 = Array.fill(size)((0, 0))
         for i <- 0 until size do
           balls(i)  = sumBallDiffs(i)
           sets(i)   = sumSets(i)
           points(i) = sumPoints(i)
-          
-          // Gewichtungsbasierte Formel zur Sortierung nach Punkten, Sätzen und Bällen
-          val score = (balls(i)._1 - balls(i)._2) + 2000L +
-                      ((sets(i)._1 - sets(i)._2) + 50) * 10000L +
-                      ((points(i)._1 - points(i)._2) + 50) * 10000000L
-          tmpPos(i) = (i, score)
+          level3(i) = sumLevel3(i)
 
-        // Absteigend nach Score sortieren
-        tmpPos = tmpPos.sortBy(_._2).reverse
-        
-        var cnt = 1 
-        pants(tmpPos(0)._1).place = (cnt, 0)
-        for i <- 1 until size do 
-          if tmpPos(i)._2 < tmpPos(i-1)._2 then cnt = cnt + 1
-          pants(tmpPos(i)._1).place = (cnt, 0)
-      
+        // Tabellenpunkte eines Teilnehmers laut Konfiguration
+        def tablePoints(pos: Int): Int =
+          results(pos).filter(_.valid).map { e =>
+            val outcome = Integer.signum(e.points._1 - e.points._2)
+            cfg.standings.tablePoints(e.sets, outcome)._1
+          }.sum
+
+        // Wertepaar (gewonnen, verloren) einer Stufe: 0 = Spiel, 1 = Satz, 2 = Ball
+        // (bei Mannschaften: 0 = Begegnung, 1 = Spiel, 2 = Satz, 3 = Ball)
+        def byLevel(pos: Int, level: String): Option[(Int, Int)] =
+          cfg.depthBelowMatch(level).collect {
+            case 0 => points(pos)
+            case 1 => sets(pos)
+            case 2 => balls(pos)
+            case 3 => level3(pos)
+          }
+
+        def ratio(v: (Int, Int)): Double =
+          if v._2 != 0 then v._1.toDouble / v._2
+          else if v._1 == 0 then 0.0 else Double.PositiveInfinity
+
+        // Sortierschlüssel je Teilnehmer: ein Wert je Entscheidungskriterium (größer = besser)
+        def key(pos: Int): Seq[Double] = cfg.standings.tieBreakers.flatMap { tb =>
+          tb.split(':') match
+            case Array("points")       => Some(tablePoints(pos).toDouble)
+            case Array("diff",  level) => byLevel(pos, level).map(v => (v._1 - v._2).toDouble)
+            case Array("sum",   level) => byLevel(pos, level).map(_._1.toDouble)
+            case Array("ratio", level) => byLevel(pos, level).map(ratio)
+            case _                     => None   // z. B. headToHead: noch nicht umgesetzt
+        }
+
+        def better(x: Seq[Double], y: Seq[Double]): Boolean =
+          x.zip(y).find(p => p._1 != p._2).exists(p => p._1 > p._2)
+
+        val ranked = (0 until size).map(i => (i, key(i))).sortWith((x, y) => better(x._2, y._2))
+
+        var cnt = 1
+        pants(ranked(0)._1).place = (cnt, 0)
+        for i <- 1 until size do
+          if ranked(i)._2 != ranked(i - 1)._2 then cnt = cnt + 1
+          pants(ranked(i)._1).place = (cnt, 0)
+
       Right(())
     catch
       case e: Throwable =>
@@ -173,10 +222,11 @@ case class Group(
    * wird der Eintrag zurückgesetzt.
    *
    * @param m Der einzutragende Match-Eintrag (MEntryGr).
+   * @param totals bei Mannschaften: Summe der Sätze und Bälle aller Spiele der Begegnung
    * @return Left(AppError) im Fehlerfall oder Right(Boolean) zur Bestätigung (true bei
    *         erfolgreicher Eintragung/Rücksetzung, false bei ungültigen Eingabedaten).
    */
-  def setMatch(m: MEntryGr): Either[AppError, Boolean] =
+  def setMatch(m: MEntryGr, totals: Option[((Int, Int), (Int, Int))] = None): Either[AppError, Boolean] =
     import shared.model.MEntry.*
 
     try
@@ -189,7 +239,8 @@ case class Group(
         results(m.wgw._1 - 1)(m.wgw._2 - 1).balls    = balls
         results(m.wgw._1 - 1)(m.wgw._2 - 1).sets     = m.sets
         results(m.wgw._1 - 1)(m.wgw._2 - 1).points   = getPoints(m.sets, noWinSets)
-        results(m.wgw._1 - 1)(m.wgw._2 - 1).ballDiff = getBalls(balls, noWinSets)
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).ballDiff = totals.map(_._1).getOrElse(getBalls(balls, noWinSets))
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).level3   = totals.map(_._2).getOrElse((0, 0))
         results(m.wgw._2 - 1)(m.wgw._1 - 1)          = results(m.wgw._1 - 1)(m.wgw._2 - 1).invert
         Right(true)
       else if m.result == "" && m.sets == (0, 0) then
@@ -198,6 +249,7 @@ case class Group(
         results(m.wgw._1 - 1)(m.wgw._2 - 1).sets     = (0, 0)
         results(m.wgw._1 - 1)(m.wgw._2 - 1).points   = (0, 0)
         results(m.wgw._1 - 1)(m.wgw._2 - 1).ballDiff = (0, 0)
+        results(m.wgw._1 - 1)(m.wgw._2 - 1).level3   = (0, 0)
         results(m.wgw._2 - 1)(m.wgw._1 - 1)          = results(m.wgw._1 - 1)(m.wgw._2 - 1).invert
         Right(true)
       else
@@ -238,11 +290,14 @@ object Group {
  */
 object Groups:
   def draw(stage: Stage, coTyp: CompTyp, cfg: StageConfig, selectedPants: Seq[Pant], drawOption: DrawOption = DrawOption.Unknown, customGroupCount: Option[Int] = None): StageData.GroupsStage = {
-    drawOption match {
-      case DrawOption.GrpStart    => draw_GrpStart(cfg, selectedPants, stage.noWinSets, customGroupCount)
-      case DrawOption.GrpAfterGrp => draw_GrpAfterGrp(cfg, selectedPants, stage.noWinSets, customGroupCount)
+    val winSets = TeamEncounter.matchWinSets(stage, coTyp)
+    val res: StageData.GroupsStage = drawOption match {
+      case DrawOption.GrpStart    => draw_GrpStart(cfg, selectedPants, winSets, customGroupCount)
+      case DrawOption.GrpAfterGrp => draw_GrpAfterGrp(cfg, selectedPants, winSets, customGroupCount)
       case _                      => StageData.GroupsStage(ArrayBuffer.empty[Group])
     }
+    res.groups.foreach(_.format = coTyp.formatId)
+    res
   }
 
 

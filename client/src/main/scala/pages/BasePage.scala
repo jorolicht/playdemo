@@ -16,7 +16,7 @@ val pagesMap = List(Auth, Console, PgError,
                     ChatExample, Goodbye, RegistrationSuccess,
                     ViewOrganizer, MainView, PureView, AppView, TourneyNotice, TourneyNew, CompetitionNew, TourneyInfo, TourneyWelcome, TourneyAdmin, Mockup, CompetitionInfo, CompetitionWelcome,
                     PlayerRegistration, UserRegistration, UserLogin, VerifyAccount, StageAdmin, StageDraw, StageInput, StageResult, StageScoreSheet, StageCertificate, 
-                    PlayerList, ResultList, Certificate, MainSearch, Management)
+                    PlayerList, TeamList, SystemInfo, ResultList, Certificate, MainSearch, Management)
                     .map(pg => pg.name -> pg).toMap              
 
 

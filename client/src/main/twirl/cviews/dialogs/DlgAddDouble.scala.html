@@ -15,7 +15,12 @@
                 <form @id(FormId) onsubmit="return false;">
                     <div class="mb-3">
                         <label @forAttr(InputP1Id) class="form-label small fw-bold">1. Spieler</label>
-                        <input type="text" class="form-control" @id(InputP1Id) list="@Plist1Id.id" placeholder="Suche Name, Vorname..." required>
+                        <div class="input-group">
+                            <input type="text" class="form-control" @id(InputP1Id) list="@Plist1Id.id" placeholder="Suche Name, Vorname..." required>
+                            <button type="button" class="btn btn-outline-primary" @id(BtnNewP1Id) title="@gM("DlgAddDouble.new_player")">
+                                <i class="bi bi-person-plus me-1"></i>@gM("DlgAddDouble.new_player")
+                            </button>
+                        </div>
                         <datalist @id(Plist1Id)>
                             @players.map { p =>
                                 <option value="@p.lastName, @p.firstName [@{clubs.find(_.id.toInt == p.clubId).map(_.name).getOrElse("?")}]" data-id="@p.id">
@@ -25,7 +30,12 @@
 
                     <div class="mb-3">
                         <label @forAttr(InputP2Id) class="form-label small fw-bold">2. Spieler</label>
-                        <input type="text" class="form-control" @id(InputP2Id) list="@Plist2Id.id" placeholder="Suche Name, Vorname..." required>
+                        <div class="input-group">
+                            <input type="text" class="form-control" @id(InputP2Id) list="@Plist2Id.id" placeholder="Suche Name, Vorname..." required>
+                            <button type="button" class="btn btn-outline-primary" @id(BtnNewP2Id) title="@gM("DlgAddDouble.new_player")">
+                                <i class="bi bi-person-plus me-1"></i>@gM("DlgAddDouble.new_player")
+                            </button>
+                        </div>
                         <datalist @id(Plist2Id)>
                             @players.map { p =>
                                 <option value="@p.lastName, @p.firstName [@{clubs.find(_.id.toInt == p.clubId).map(_.name).getOrElse("?")}]" data-id="@p.id">

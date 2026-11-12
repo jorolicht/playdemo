@@ -18,6 +18,8 @@ DlgStageStart.err_exists = Ein Wettbewerbsabschnitt mit diesem Namen existiert b
 DlgStageStart.err_pref = Bitte wählen Sie einen vorherigen Wettbewerbsabschnitt aus.
 
 DlgAddSingle.title = Teilnehmer hinzufügen
+DlgAddSingle.title_player = Spieler neu anlegen
+DlgAddDouble.new_player = Spieler neu anlegen
 DlgAddSingle.lastname = Nachname
 DlgAddSingle.firstname = Vorname
 DlgAddSingle.club = Verein
@@ -35,3 +37,26 @@ DlgAddSingle.email = E-Mail
 DlgAddSingle.whatsapp = WhatsApp-Nummer
 
 
+DlgCsvInfo.title = CSV-Format für den Upload
+DlgCsvInfo.file_title = Datei
+DlgCsvInfo.file_1 = Textdatei mit Endung .csv, Zeichensatz UTF-8 (z. B. „CSV UTF-8“ beim Speichern in Excel).
+DlgCsvInfo.file_2 = Trennzeichen Semikolon (;) oder Komma (,), es wird an der ersten Zeile erkannt.
+DlgCsvInfo.file_3 = Die erste Zeile ist immer die Kopfzeile mit den Spaltennamen und wird nicht importiert.
+DlgCsvInfo.cols_title = Spalten
+DlgCsvInfo.col_header = Spaltenname
+DlgCsvInfo.col_alt = alternativ
+DlgCsvInfo.col_content = Inhalt
+DlgCsvInfo.col_first = Vorname des Spielers (Pflicht)
+DlgCsvInfo.col_last = Nachname des Spielers (Pflicht)
+DlgCsvInfo.col_club = Verein (Pflicht); unbekannte Vereine werden angelegt
+DlgCsvInfo.col_ttr = TTR-Wert als ganze Zahl (optional, darf leer bleiben)
+DlgCsvInfo.cols_hint = Groß-/Kleinschreibung der Spaltennamen ist egal, die Reihenfolge beliebig. Werden die Spaltennamen nicht erkannt, gilt die Reihenfolge Vorname, Nachname, Verein, TTR. Weitere Spalten werden ignoriert.
+DlgCsvInfo.example_title = Beispiel
+DlgCsvInfo.proc_title = Verarbeitung
+DlgCsvInfo.proc_1 = Zeilen ohne Vorname, Nachname oder Verein werden übersprungen.
+DlgCsvInfo.proc_2 = Gibt es im Turnier schon einen Spieler mit gleichem Vor- und Nachnamen, wird er nicht neu angelegt; ein angegebener TTR-Wert wird übernommen.
+DlgCsvInfo.proc_3 = Trennzeichen innerhalb eines Werts (z. B. Komma im Vereinsnamen bei Komma-Trennung) und Anführungszeichen werden nicht unterstützt.
+DlgCsvInfo.mode_single = Einzel: Die Spieler werden im Turnier angelegt und im Wettbewerb gemeldet (noch nicht aktiv). Die Teilnahme wird danach über das Häkchen „Teilnahme“ gesetzt.
+DlgCsvInfo.mode_double = Doppel/Mixed: Die Spieler werden nur im Turnier angelegt. Die Doppel werden danach über „+ Doppel hinzufügen“ gebildet.
+DlgCsvInfo.mode_team = Mannschaft: Die Spieler werden nur im Turnier angelegt. Die Mannschaften werden danach über „+ Mannschaft hinzufügen“ gebildet.
+DlgCsvInfo.ok = Verstanden

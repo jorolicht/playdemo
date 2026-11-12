@@ -1,0 +1,55 @@
+@import shared.model.*
+@import shared.sport.EncounterCfg
+@import dialogs.DlgLineup.*
+@import cviews.helper.html.*
+
+@(cfg: EncounterCfg, side: Int, team: Team, roster: Seq[Player], current: Lineup, readOnly: Boolean)
+
+@playerSelect(pos: String, idx: Int) = {
+    @defining(current.players.getOrElse(pos, Seq()).lift(idx - 1).map(_.value).getOrElse(0)) { sel =>
+        <select class="form-select form-select-sm" id="@selId(pos, idx)" @if(readOnly){disabled}>
+            <option value="0">@gM("DlgLineup.missing")</option>
+            @roster.map { p =>
+                <option value="@p.id.value" @if(p.id.value == sel){selected}>@p.displayName</option>
+            }
+        </select>
+    }
+}
+
+<div class="modal fade" @id(ModalId) tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">@gM("DlgLineup.title", team.name)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" @id(CloseId)></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-sm align-middle mb-2">
+                    <tbody>
+                        @cfg.sidePositions(side).map { pos =>
+                            <tr>
+                                <td class="fw-bold" style="width: 4rem;">@pos</td>
+                                <td class="small text-muted" style="width: 5rem;">
+                                    @if(cfg.isDoublePos(side, pos)) { @gM("DlgLineup.double") } else { @gM("DlgLineup.single") }
+                                </td>
+                                <td>
+                                    @playerSelect(pos, 1)
+                                    @if(cfg.isDoublePos(side, pos)) { <div class="mt-1">@playerSelect(pos, 2)</div> }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if(readOnly) {
+                    <div class="alert alert-warning small py-2 mb-0">@gM("DlgLineup.started")</div>
+                } else {
+                    <div class="form-text">@gM("DlgLineup.hint")</div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>@gM("DlgLineup.cancel")</button>
+                <button type="button" class="btn btn-primary" @id(ApplyId) @if(readOnly){disabled}>@gM("DlgLineup.save")</button>
+            </div>
+        </div>
+    </div>
+</div>

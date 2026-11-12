@@ -257,6 +257,7 @@ contextHeader.selectStage                           = Selektiere Stage
 contextHeader.registration                          = Anmeldung
 contextHeader.welcome                               = Willkommen
 contextHeader.participants                          = Spieler
+contextHeader.teams                                 = Mannschaften
 contextHeader.results                               = Ergebnisse
 contextHeader.allResults                             = Alle Ergebnisse
 contextHeader.infoAnzeige                            = InfoAnzeige

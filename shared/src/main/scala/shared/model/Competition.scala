@@ -35,6 +35,9 @@ enum CompTyp(val id: Int):
 
   def msgCode: String = s"CompTyp.${this.toString}"
 
+  /** Kennung des Formats im Wertungssystem der Sportart (`formats` in `shared/sports`). */
+  def formatId: String = this.toString.toLowerCase
+
   def equalsTo(compareWith: CompTyp*): Boolean =
     compareWith.contains(this)
 
@@ -158,7 +161,9 @@ case class Competition(
   val pants1Stage:      ArrayBuffer[Pant] = ArrayBuffer(),
   var deleted:          Boolean = false,
   var version:          Int = 0,
-  var cttSNO2Ident:     Map[SNO, String] = Map.empty
+  var cttSNO2Ident:     Map[SNO, String] = Map.empty,
+  val teams:            ArrayBuffer[Team] = ArrayBuffer(),
+  var scoring:          String = ""
 ):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
 
@@ -184,7 +189,9 @@ object Competition:
         if (comp.cttSNO2Ident == null) {
           comp.cttSNO2Ident = Map.empty
         }
-        comp
+        // Wertungssystem (Schlüssel, z. B. "tt_001"); leer = vor Einführung der Versionen angelegt (Sports.LegacyKey)
+        if (comp.scoring == null) comp.scoring = ""
+        if (comp.teams == null) comp.copy(teams = ArrayBuffer()) else comp
       },
       macroRW[Competition]
     )

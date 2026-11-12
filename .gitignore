@@ -94,3 +94,9 @@ shared/.jvm
 .env_*
 *.env
 !.env.example
+
+# lokale Projekt-Archive
+*.tar.gz
+
+# Codex-Anweisungen (lokal)
+AGENTS.md

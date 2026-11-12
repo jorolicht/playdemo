@@ -18,6 +18,8 @@ DlgStageStart.err_exists = A stage with this name already exists in this competi
 DlgStageStart.err_pref = Please select a predecessor stage.
 
 DlgAddSingle.title = Add Participant
+DlgAddSingle.title_player = Add New Player
+DlgAddDouble.new_player = Add New Player
 DlgAddSingle.lastname = Last Name
 DlgAddSingle.firstname = First Name
 DlgAddSingle.club = Club
@@ -35,3 +37,26 @@ DlgAddSingle.email = Email
 DlgAddSingle.whatsapp = WhatsApp Number
 
 
+DlgCsvInfo.title = CSV Format for Upload
+DlgCsvInfo.file_title = File
+DlgCsvInfo.file_1 = Text file with extension .csv, encoding UTF-8 (e.g. "CSV UTF-8" when saving in Excel).
+DlgCsvInfo.file_2 = Separator semicolon (;) or comma (,), detected from the first line.
+DlgCsvInfo.file_3 = The first line is always the header with the column names and is not imported.
+DlgCsvInfo.cols_title = Columns
+DlgCsvInfo.col_header = Column name
+DlgCsvInfo.col_alt = alternative
+DlgCsvInfo.col_content = Content
+DlgCsvInfo.col_first = First name of the player (required)
+DlgCsvInfo.col_last = Last name of the player (required)
+DlgCsvInfo.col_club = Club (required); unknown clubs are created
+DlgCsvInfo.col_ttr = TTR rating as integer (optional, may be empty)
+DlgCsvInfo.cols_hint = Column names are case-insensitive and may be in any order. If the column names are not recognized, the order first name, last name, club, TTR applies. Additional columns are ignored.
+DlgCsvInfo.example_title = Example
+DlgCsvInfo.proc_title = Processing
+DlgCsvInfo.proc_1 = Lines without first name, last name or club are skipped.
+DlgCsvInfo.proc_2 = If the tournament already has a player with the same first and last name, no new player is created; a given TTR value is applied.
+DlgCsvInfo.proc_3 = Separators inside a value (e.g. a comma in the club name with comma separation) and quotation marks are not supported.
+DlgCsvInfo.mode_single = Single: The players are created in the tournament and registered in the competition (not yet active). Participation is then set with the "Active" checkbox.
+DlgCsvInfo.mode_double = Double/Mixed: The players are only created in the tournament. Doubles are then formed with "+ Add Double".
+DlgCsvInfo.mode_team = Team: The players are only created in the tournament. Teams are then formed with "+ Add Team".
+DlgCsvInfo.ok = Got it

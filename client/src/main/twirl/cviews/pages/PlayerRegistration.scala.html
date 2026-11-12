@@ -5,6 +5,9 @@
 
 @(selection: Selection, competitions: Seq[Competition], participants: Seq[Pant], sortCol: String, sortAsc: Boolean)
 
+@teamOf(p: Pant) = @{ if (p.id.isTeam) selection.competition.flatMap(_.teams.find(_.id == p.id.teamId)) else None }
+@teamSize = @{ selection.competition.flatMap(c => shared.format.TeamEncounter.configFor(c)).map(_.teamSize).getOrElse(0) }
+
 <div class="container mt-4">
     <div class="card shadow-sm mb-4 border-warning">
         <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
@@ -23,9 +26,12 @@
                             <i class="bi bi-file-earmark-spreadsheet me-1"></i>
                             @gM("+csv_upload")
                         </button>
+                        <button class="btn btn-outline-dark btn-sm" @id(BtnCsvInfo, "onclick") title="@gM("+csv_info")">
+                            <i class="bi bi-info-circle"></i>
+                        </button>
                         <button class="btn btn-dark btn-sm fw-bold" @id(BtnAddParticipant, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isLocked){disabled}>
                             <i class="bi bi-plus-lg me-1"></i>
-                            @if(selection.competition.exists(c => c.typ == CompTyp.DOUBLE || c.typ == CompTyp.MIXED)) { @gM("+add_double") } else { @gM("+add_single") }
+                            @if(selection.competition.exists(c => shared.format.TeamEncounter.isTeam(c.typ))) { @gM("+add_team") } else if(selection.competition.exists(c => c.typ == CompTyp.DOUBLE || c.typ == CompTyp.MIXED)) { @gM("+add_double") } else { @gM("+add_single") }
                         </button>
                     }
                 }
@@ -40,7 +46,7 @@
                             <span class="text-muted small me-2">@gM("+status")</span>
                             @selection.competition.map { c =>
                                 <span class="badge @if(c.status == CompStatus.RUN){bg-warning}else{bg-secondary}">@gM(c.status.msgCode)</span>
-                                <span class="ms-3 text-muted small me-2">@gM("+participants")</span>
+                                <span class="ms-3 text-muted small me-2">@gM(if (shared.format.TeamEncounter.isTeam(c.typ)) "+participants_team" else if (c.typ == CompTyp.DOUBLE || c.typ == CompTyp.MIXED) "+participants_double" else "+participants")</span>
                                 <span class="fw-bold text-primary">@participants.count(_.active) / @participants.length</span>
                             }.getOrElse {
                                 <span class="text-muted small italic">@gM("+no_comp_selected")</span>
@@ -65,7 +71,7 @@
                             <span class="text-muted small me-2">@gM("+status")</span>
                             @selection.competition.map { c =>
                                 <span class="badge @if(c.status == CompStatus.RUN){bg-warning}else{bg-secondary}">@gM(c.status.msgCode)</span>
-                                <span class="ms-3 text-muted small me-2">@gM("+participants")</span>
+                                <span class="ms-3 text-muted small me-2">@gM(if (shared.format.TeamEncounter.isTeam(c.typ)) "+participants_team" else if (c.typ == CompTyp.DOUBLE || c.typ == CompTyp.MIXED) "+participants_double" else "+participants")</span>
                                 <span class="fw-bold text-primary">@participants.count(_.active) / @participants.length</span>
                             }.getOrElse {
                                 <span class="text-muted small italic">@gM("+no_comp_selected")</span>
@@ -127,7 +133,14 @@
                                 @participants.map { p =>
                                     <tr class="@if(!p.active){text-muted opacity-75}">
                                         <td class="ps-3">@p.id.startId</td>
-                                        <td class="fw-bold">@p.name</td>
+                                        <td class="fw-bold">
+                                            @if(p.id.isTeam) {
+                                                <button class="btn btn-link btn-sm p-0 me-1 text-secondary" @id(BtnTeamTng, "onclick", p.id.teamId.toString) title="@gM("+toggle_team_players")">
+                                                    <i class="bi @if(expandedTeams.contains(p.id.teamId)){bi-caret-down-fill}else{bi-caret-right-fill}" id="team-tng-icon-@p.id.teamId"></i>
+                                                </button>
+                                            }
+                                            @p.name
+                                        </td>
                                         <td>@p.club</td>
                                         <td class="text-center">@p.rating</td>
                                         @if(!isDoubleComp) {
@@ -150,6 +163,32 @@
                                             </td>
                                         }
                                     </tr>
+                                    @teamOf(p).map { t =>
+                                        @defining(if (expandedTeams.contains(t.id)) s"team-players-${t.id} small" else s"team-players-${t.id} small d-none") { rowCls =>
+                                            @if(t.players.isEmpty) {
+                                                <tr class="@rowCls">
+                                                    <td></td>
+                                                    <td colspan="6" class="ps-4 text-muted">@gM("+no_team_players")</td>
+                                                </tr>
+                                            }
+                                            @t.players.zipWithIndex.map { case (pid, i) =>
+                                                @defining(services.TourneyDB.tourney.players.find(_.id == pid)) { plOpt =>
+                                                    <tr class="@rowCls">
+                                                        <td></td>
+                                                        <td class="ps-4">
+                                                            <i class="bi bi-person me-1 text-muted"></i>@plOpt.map(_.displayName).getOrElse(s"[${pid.value}]")
+                                                            @if(i >= teamSize) { <span class="badge bg-secondary ms-1">@gM("+reserve_short")</span> }
+                                                        </td>
+                                                        <td>@plOpt.flatMap(pl => services.TourneyDB.tourney.clubs.find(_.id.toInt == pl.clubId)).map(_.name).getOrElse("")</td>
+                                                        <td class="text-center">@plOpt.flatMap(_.meta.ttr).map(_.toString).getOrElse("-")</td>
+                                                        <td class="text-center">@plOpt.flatMap(_.birthYear).map(_.toString).getOrElse("")</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             </tbody>
                         </table>

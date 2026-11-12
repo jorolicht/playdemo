@@ -1,0 +1,57 @@
+@import shared.model.*
+@import dialogs.DlgCsvInfo.*
+@import cviews.helper.html.*
+
+@(typ: CompTyp)
+
+<div class="modal fade" @id(ModalId) tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i>@gM("DlgCsvInfo.title")</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" @id(CloseId)></button>
+            </div>
+            <div class="modal-body small">
+                <h6 class="fw-bold">@gM("DlgCsvInfo.file_title")</h6>
+                <ul>
+                    <li>@gM("DlgCsvInfo.file_1")</li>
+                    <li>@gM("DlgCsvInfo.file_2")</li>
+                    <li>@gM("DlgCsvInfo.file_3")</li>
+                </ul>
+
+                <h6 class="fw-bold">@gM("DlgCsvInfo.cols_title")</h6>
+                <table class="table table-sm table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr><th>@gM("DlgCsvInfo.col_header")</th><th>@gM("DlgCsvInfo.col_alt")</th><th>@gM("DlgCsvInfo.col_content")</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>Vorname</code></td><td><code>First Name</code></td><td>@gM("DlgCsvInfo.col_first")</td></tr>
+                        <tr><td><code>Nachname</code></td><td><code>Last Name</code></td><td>@gM("DlgCsvInfo.col_last")</td></tr>
+                        <tr><td><code>Verein</code></td><td><code>Club</code></td><td>@gM("DlgCsvInfo.col_club")</td></tr>
+                        <tr><td><code>TTR</code></td><td></td><td>@gM("DlgCsvInfo.col_ttr")</td></tr>
+                    </tbody>
+                </table>
+                <p class="text-muted">@gM("DlgCsvInfo.cols_hint")</p>
+
+                <h6 class="fw-bold">@gM("DlgCsvInfo.example_title")</h6>
+<pre class="bg-light border rounded p-2 mb-3"><code>Vorname;Nachname;Verein;TTR
+Max;Müller;TTC Blau-Weiß;1520
+Anna;Schmidt;TSV Grün;1385
+Peter;Maier;TTC Blau-Weiß;</code></pre>
+
+                <h6 class="fw-bold">@gM("DlgCsvInfo.proc_title")</h6>
+                <ul>
+                    <li>@gM("DlgCsvInfo.proc_1")</li>
+                    <li>@gM("DlgCsvInfo.proc_2")</li>
+                    <li>@gM("DlgCsvInfo.proc_3")</li>
+                </ul>
+                <div class="alert alert-info py-2 mb-0">
+                    <i class="bi bi-arrow-right-circle me-1"></i>@gM(modeKey(typ))
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @id(OkId)>@gM("DlgCsvInfo.ok")</button>
+            </div>
+        </div>
+    </div>
+</div>

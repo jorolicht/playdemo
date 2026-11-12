@@ -1,0 +1,45 @@
+###
+# Teams: page TeamList, dialogs DlgTeam and DlgLineup
+###
+TeamList.title = Teams
+TeamList.add_player = Add player
+TeamList.no_competitions = No team competitions available.
+TeamList.teams_suffix = teams
+TeamList.add_team = Add team
+TeamList.edit_team = Edit team
+TeamList.no_header = No.
+TeamList.name_header = Team
+TeamList.club_header = Club
+TeamList.players_header = Players
+TeamList.ttr_header = Avg. TTR
+TeamList.action_header = Action
+TeamList.no_teams = No teams yet.
+TeamList.reserve = Reserve player
+TeamList.reserve_short = reserve
+TeamList.incomplete = incomplete
+TeamList.delete_title = Delete team
+TeamList.confirm_delete = Do you really want to delete the team '{0}'?
+TeamList.err_player_in_other_team = A player is already in another team of this competition.
+TeamList.err_save = Error while saving
+
+DlgTeam.name = Team name
+DlgTeam.club = Club
+DlgTeam.player = Player {0}
+DlgTeam.reserve = Reserve player
+DlgTeam.new_player = Add New Player
+DlgTeam.hint = The regular players determine the average rating for the draw. The reserve player can be put in the line-up of any tie.
+DlgTeam.cancel = Cancel
+DlgTeam.save = Save
+DlgTeam.err_name = Please enter a team name.
+DlgTeam.err_duplicate = A player can only be listed once in a team.
+
+DlgLineup.title = Line-up: {0}
+DlgLineup.missing = – missing –
+DlgLineup.single = Singles
+DlgLineup.double = Doubles
+DlgLineup.hint = Empty positions count as lost. If all positions stay empty, the team did not show up.
+DlgLineup.started = The tie has started, the line-up can no longer be changed.
+DlgLineup.cancel = Cancel
+DlgLineup.save = Apply
+DlgLineup.err_single = A player can only play one singles match.
+DlgLineup.err_double = A doubles pair needs two different players.

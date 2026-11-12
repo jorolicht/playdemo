@@ -9,6 +9,19 @@ import scala.scalajs.js
 
 object StageResult extends BasePage with JsWrapper:
   def name = PageNameTyp("StageResult")
+
+  /**
+   * Spaltenüberschrift einer Ebene der Gruppentabelle. Bei Mannschaften stammt sie aus dem Wertungssystem
+   * (0 = Begegnungen, 1 = Spiele, 2 = Sätze), sonst gilt der bisherige Text.
+   *
+   * @param g       Gruppe
+   * @param depth   Abstand zur obersten Ebene
+   * @param default bisheriger Text
+   */
+  def levelHeader(g: shared.format.Group, depth: Int, default: String): String =
+    import shared.sport.{ Sports, localized }
+    if Sports.current.encounter(g.format).isEmpty then default
+    else Sports.current.forFormat(g.format).levelBelowMatch(depth).map(_.name.localized(Global.lang).other).getOrElse(default)
   val NextStageBtn:   HtmlId = genId(name)
   /**
    * Name des Wettbewerbs eines Wettbewerbsabschnitts (Überschrift der Druckausgabe).

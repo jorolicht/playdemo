@@ -3,12 +3,38 @@ package shared.format
 import scala.collection.mutable.{ ArrayBuffer }
 import shared.model.*
 import shared.basic.*
+import shared.sport.{ Level, Sports }
 
 /**
  * Helper object providing utility methods for validating, parsing, and calculating
  * scores, sets, and points for a stage's matches.
  */
 object StageHelper {
+
+  /**
+   * Spielstufe des aktuellen Wertungssystems ([[Sports.current]]) mit der Anzahl der Gewinnsätze der Stage. Eine negative Anzahl steht bei
+   * Mannschaften für "alle n Spiele" (siehe [[TeamEncounter.winSetsCode]]).
+   *
+   * @param noSets number of winning sets required (`Stage.noWinSets` bzw. `MEntry.winSets`)
+   * @return match level of the sport configuration
+   */
+  def matchLevel(noSets: Int): Level =
+    if noSets < 0 then TeamEncounter.levelFromCode(noSets)
+    else Sports.current.withToWin(noSets).matchLevel
+
+  /**
+   * Stand bei einem Freilos: Der Gegner des Freiloses gewinnt mit der nötigen Anzahl.
+   *
+   * @param winSets `winSets` des Eintrags
+   * @param aIsBye  true, wenn Seite A das Freilos ist
+   * @return Stand (A, B)
+   */
+  def byeSets(winSets: Int, aIsBye: Boolean): (Int, Int) =
+    val n = if winSets < 0 then TeamEncounter.levelFromCode(winSets).count else winSets
+    if aIsBye then (0, n) else (n, 0)
+
+  /** Satzstufe (eine Ebene unter dem Spiel) des aktuellen Wertungssystems ([[Sports.current]]). */
+  def setLevel: Level = Sports.current.levelBelowMatch(1).get
 
   /**
    * Inverts a ball score representation (e.g. swaps positive/negative sign).
@@ -24,18 +50,7 @@ object StageHelper {
    * @param b the ball score string
    * @return a tuple containing points for player A and player B
    */
-  def getBallFromStr(b: String): (Int, Int) = {
-    if      (b == "")              (-1,-1)  
-    else if (b == "+0" | b == "0") (11,0) 
-    else if (b == "-0")            (0,11)  
-    else b.toIntOption.getOrElse(0) match {  
-      case a if   10 to 500 contains a => (a+2, a)
-      case b if    1 to   9 contains b => (11, b)
-      case c if   -9 to  -1 contains c => (-c, 11)
-      case d if -500 to -10 contains d => (-d, 2 - d) 
-      case _                           => (-1,-1)
-    }
-  }
+  def getBallFromStr(b: String): (Int, Int) = setLevel.parseShort(b).getOrElse((-1, -1))
 
   /**
    * Calculates the total sum of ball points won by each player in a match.
@@ -66,9 +81,7 @@ object StageHelper {
    * @param noSets number of winning sets required
    * @return true if the sets score is valid, false otherwise
    */
-  def validSets(sets: (Int, Int), noSets: Int): Boolean = {
-    (sets._1 == noSets & sets._2 < noSets) | (sets._1 < noSets & sets._2 == noSets)
-  } 
+  def validSets(sets: (Int, Int), noSets: Int): Boolean = matchLevel(noSets).isValid(sets)
 
   /**
    * Checks if the given ball points tuple represents a valid set outcome.
@@ -76,11 +89,7 @@ object StageHelper {
    * @param balls a tuple containing points in a set (Player A, Player B)
    * @return true if the ball points represent a valid set outcome, false otherwise
    */
-  def validBalls(balls: (Int, Int)): Boolean =  
-    ( balls._1 >= (balls._2 + 2) & balls._1 == 11 & balls._2 >=0 ) |
-    ( balls._1 == (balls._2 + 2) & balls._1 >  11)                 |
-    ( balls._2 >= (balls._1 + 2) & balls._2 == 11 & balls._1 >=0 ) |
-    ( balls._2 == (balls._1 + 2) & balls._2 >  11) 
+  def validBalls(balls: (Int, Int)): Boolean = setLevel.isValid(balls)
 
   /**
    * Determines the set score outcome (1,0 or 0,1) for a single set based on ball points.
@@ -131,11 +140,11 @@ object StageHelper {
    * @param noSets number of winning sets required
    * @return a tuple representing points won (1,0 or 0,1 or 0,0)
    */
-  def getPoints(sets: (Int, Int), noSets: Int): (Int, Int) = {
-    if      (sets._1 == noSets & sets._2 < noSets) { (1,0) }
-    else if (sets._2 == noSets & sets._1 < noSets) { (0,1) } 
-    else                                           { (0,0) }
-  } 
+  def getPoints(sets: (Int, Int), noSets: Int): (Int, Int) =
+    matchLevel(noSets).outcome(sets) match
+      case 1  => (1, 0)
+      case -1 => (0, 1)
+      case _  => (0, 0)
 
   def convertToExcelColumn(num: Int): String = {
     if (num < 1) return "" // Wenn die Eingabezahl kleiner als 1 ist, geben wir einen leeren String zurück    

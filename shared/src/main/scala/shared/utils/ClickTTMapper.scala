@@ -57,6 +57,7 @@ object ClickTTMapper:
           activ = true,
           webRegister = false,
           lowLevel = cttComp.ttrFrom,
+          scoring = shared.sport.Sports.latestKey(),
           upperLevel = cttComp.ttrTo,
           cttInfo = Some(CompCTT(
             ageGroup = cttComp.ageGroup,
