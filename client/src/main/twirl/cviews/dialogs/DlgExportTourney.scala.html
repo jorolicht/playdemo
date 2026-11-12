@@ -3,7 +3,7 @@
 @import dialogs.DlgExportTourney.*
 @import base.Messages.gM
 
-@(defaultFilename: String, saveAndLeave: Boolean)
+@(defaultFilename: String, saveAndLeave: Boolean, cloudLink: Option[String])
 
 <div class="modal fade" @id(ModalId) tabindex="-1" @ariaLabelledBy(TitleId) aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -20,7 +20,14 @@
             </div>
             <div class="modal-body p-4">
                 <p class="text-secondary mb-3">
-                    @if(saveAndLeave) { @gM("dlg.exportTourney.promptLeave") } else { @gM("dlg.exportTourney.promptExport") }
+                    @if(saveAndLeave) {
+                        @cloudLink match {
+                            case Some(url) => {
+                                @Html(gM("dlg.exportTourney.promptLeaveCloud", s"""<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(url)}</a>"""))
+                            }
+                            case None => { @gM("dlg.exportTourney.promptLeaveLocal") }
+                        }
+                    } else { @gM("dlg.exportTourney.promptExport") }
                 </p>
                 @if(!saveAndLeave) {
                     <div class="mb-3">
