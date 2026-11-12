@@ -333,7 +333,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
                 }
                 
                 if (listHtml.isEmpty) {
-                  listContainer.innerHTML = "<div class='text-muted small'>Keine aktiven Wettbewerbsphasen (Stages) gefunden.</div>"
+                  listContainer.innerHTML = "<div class='text-muted small'>Keine aktiven Wettbewerbsabschnitte (Stages) gefunden.</div>"
                 } else {
                   listContainer.innerHTML = listHtml.toString()
                 }

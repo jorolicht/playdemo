@@ -1,7 +1,7 @@
 # TurnierService (Tourney)
 
 Webanwendung zur Organisation von **Tischtennis-Turnieren**: Turniere und Wettbewerbe anlegen, Spieler und Vereine verwalten,
-Wettbewerbsphasen auslosen, Ergebnisse live erfassen und Urkunden drucken. Die Anwendung läuft als Single-Page-App im Browser
+Wettbewerbsabschnitte auslosen, Ergebnisse live erfassen und Urkunden drucken. Die Anwendung läuft als Single-Page-App im Browser
 und wird über ein **WordPress-Plugin** ausgeliefert, entweder als eigenständige Website oder eingebettet in eine bestehende
 WordPress-Seite.
 
@@ -38,7 +38,7 @@ Twirl-Templates und gemeinsam genutzter Domänencode.
 - **Turniere** anlegen und verwalten (Name, Datum, Veranstalter, Sportart), Demo-Turnier zum Ausprobieren
 - **Wettbewerbe** (Einzel/Doppel) mit Spielstärke-Grenzen (TTR) und Statusverlauf von der Konfiguration bis zum Abschluss
 - **Spieler und Vereine** verwalten, Anmeldung durch Veranstalter oder öffentliche Selbstanmeldung (mit Cloudflare Turnstile)
-- **Wettbewerbsphasen**, die sich verketten lassen: Jeder gegen jeden, Gruppen, K.o.-System, Schweizer System
+- **Wettbewerbsabschnitte**, die sich verketten lassen: Jeder gegen jeden, Gruppen, K.o.-System, Schweizer System
 - **Auslosung**, **Ergebniseingabe** mit Tischvergabe und laufender Spielzeit, **Ergebnisse** (Tabellen, K.o.-Baum)
 - **Schiedsrichterzettel** mit QR-Code zur Ergebnis-Selbsteingabe per Smartphone
 - **Ergebnisliste und Urkunden** auf Basis einer frei wählbaren Urkundenphase

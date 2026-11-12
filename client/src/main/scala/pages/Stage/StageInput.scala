@@ -636,7 +636,7 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     ((aWins, bWins), setInputs.mkString("·"))
 
   /**
-   * Trägt zufällige Spielergebnisse für noch ungespielte, spielbereite Begegnungen der aktuellen Phase ein.
+   * Trägt zufällige Spielergebnisse für noch ungespielte, spielbereite Begegnungen des aktuellen Abschnitts ein.
    * Propagiert Sieger bei K.o.-Systemen automatisch in Folgerunden und wiederholt die Vergabe,
    * bis alle determinierten Spiele abgeschlossen sind. Aktualisiert die Spieldatenbank und rendert die Seite neu.
    *

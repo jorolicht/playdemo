@@ -13,7 +13,7 @@ export class StageAdminPage {
     this.selectSystem = page.locator('select[id*="SelectSystem"]');
     this.inputNoGroups = page.locator('input[id*="InputNoGroups"]');
     this.btnStartDraw = page.locator('button:has-text("Auslosung"), button[id*="BtnDraw"]');
-    this.btnStartStage = page.locator('button:has-text("Phase"), button[id*="BtnStart"]');
+    this.btnStartStage = page.locator('button:has-text("Abschnitt"), button[id*="BtnStart"]');
     this.roundsTable = page.locator('table');
   }
 

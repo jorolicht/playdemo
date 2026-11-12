@@ -16,7 +16,7 @@ test.describe('UseCase 6: Wettbewerbsverwaltung (CompetitionInfo)', () => {
       await expect(page.locator('body')).toBeVisible();
     });
 
-    test('TC-CI-02 [👤]: Phasen starten Button löst Auslosungs-Assistent aus', async ({ page }) => {
+    test('TC-CI-02 [👤]: Abschnitt starten Button löst Auslosungs-Assistent aus', async ({ page }) => {
       if (await compInfoPage.btnStartStage.count() > 0 && await compInfoPage.btnStartStage.isVisible()) {
         await compInfoPage.btnStartStage.click();
         await page.waitForTimeout(500);

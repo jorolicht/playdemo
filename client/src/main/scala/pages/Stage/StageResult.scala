@@ -24,9 +24,9 @@ object StageResult extends BasePage with JsWrapper:
     else Sports.current.forFormat(g.format).levelBelowMatch(depth).map(_.name.localized(Global.lang).other).getOrElse(default)
   val NextStageBtn:   HtmlId = genId(name)
   /**
-   * Name des Wettbewerbs einer Wettbewerbsphase (Überschrift der Druckausgabe).
+   * Name des Wettbewerbs eines Wettbewerbsabschnitts (Überschrift der Druckausgabe).
    *
-   * @param stage Wettbewerbsphase
+   * @param stage Wettbewerbsabschnitt
    * @return Name, leer wenn der Wettbewerb fehlt
    */
   def compName(stage: Stage): String =

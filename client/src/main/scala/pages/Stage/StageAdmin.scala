@@ -614,10 +614,10 @@ object StageAdmin extends BasePage with JsWrapper:
     }
 
   /**
-   * Liefert alle Gruppen einer Phase, sowohl für Gruppen-Phasen als auch für Rundenturniere (RoundRobin).
+   * Liefert alle Gruppen eines Abschnitts, sowohl für Gruppen-Abschnitte als auch für Rundenturniere (RoundRobin).
    *
-   * @param stage Die Phase, aus der die Gruppen extrahiert werden sollen.
-   * @return Eine Sequenz aller Gruppen der Phase.
+   * @param stage Der Abschnitt, aus dem die Gruppen extrahiert werden sollen.
+   * @return Eine Sequenz aller Gruppen des Abschnitts.
    */
   def getStageGroups(stage: Stage): Seq[Group] =
     stage.data match
@@ -628,9 +628,9 @@ object StageAdmin extends BasePage with JsWrapper:
   /**
    * Stellt sicher, dass die Platzierungen (places) innerhalb einer Gruppe berechnet sind.
    * Falls noch keine Platzierungen ermittelt wurden (place._1 == 0), werden fertige Spiele
-   * aus der Phase in die Gruppe eingetragen und die Gruppenberechnung (calc) ausgeführt.
+   * aus dem Abschnitt in die Gruppe eingetragen und die Gruppenberechnung (calc) ausgeführt.
    *
-   * @param prevStage Die vorangegangene Phase, die die Matches enthält.
+   * @param prevStage Der vorangegangene Abschnitt, der die Matches enthält.
    * @param g Die zu überprüfende und ggf. zu berechnende Gruppe.
    */
   def ensureGroupCalculated(prevStage: Stage, g: Group): Unit =
@@ -645,10 +645,10 @@ object StageAdmin extends BasePage with JsWrapper:
     }
 
   /**
-   * Ermittelt, ob ein Teilnehmer in der vorangegangenen Phase zur oberen Hälfte gehört.
+   * Ermittelt, ob ein Teilnehmer im vorangegangenen Abschnitt zur oberen Hälfte gehört.
    * Dies wird anhand der Platzierung in der Gruppe oder im Rundenturnier bestimmt.
    *
-   * @param prevStage Die vorangegangene Phase.
+   * @param prevStage Der vorangegangene Abschnitt.
    * @param sno Die Startnummer (SNO) des Teilnehmers.
    * @return true, falls der Teilnehmer zur oberen Hälfte gehört, sonst false.
    */
@@ -665,10 +665,10 @@ object StageAdmin extends BasePage with JsWrapper:
     } else false
 
   /**
-   * Ermittelt, ob ein Teilnehmer in der vorangegangenen Phase zur unteren Hälfte gehört.
+   * Ermittelt, ob ein Teilnehmer im vorangegangenen Abschnitt zur unteren Hälfte gehört.
    * Dies wird anhand der Platzierung in der Gruppe oder im Rundenturnier bestimmt.
    *
-   * @param prevStage Die vorangegangene Phase.
+   * @param prevStage Der vorangegangene Abschnitt.
    * @param sno Die Startnummer (SNO) des Teilnehmers.
    * @return true, falls der Teilnehmer zur unteren Hälfte gehört, sonst false.
    */
@@ -685,10 +685,10 @@ object StageAdmin extends BasePage with JsWrapper:
     } else false
 
   /**
-   * Erzeugt eine lesbare Beschreibung des Ergebnisses eines Teilnehmers in der vorherigen Phase
+   * Erzeugt eine lesbare Beschreibung des Ergebnisses eines Teilnehmers im vorherigen Abschnitt
    * zur Anzeige in der Administrationstabelle (z. B. "Gruppe A, PLATZ 1" oder "Jeder gegen Jeden, PLATZ 1").
    *
-   * @param stage Die aktuelle Phase (zur Ermittlung der Vorgänger-Phase).
+   * @param stage Der aktuelle Abschnitt (zur Ermittlung des vorherigen Abschnitts).
    * @param sno Die Startnummer (SNO) des Teilnehmers.
    * @return Textuelle Beschreibung des Vorrunden-Ergebnisses oder "-" falls nicht verfügbar.
    */
