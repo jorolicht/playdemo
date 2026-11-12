@@ -97,3 +97,6 @@ shared/.jvm
 
 # lokale Projekt-Archive
 *.tar.gz
+
+# Codex-Anweisungen (lokal)
+AGENTS.md
