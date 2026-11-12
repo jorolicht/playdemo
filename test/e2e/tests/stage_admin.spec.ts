@@ -3,7 +3,7 @@ import { StageAdminPage } from '../pages/StageAdminPage';
 import { MainViewPage } from '../pages/MainViewPage';
 import { StageInputPage } from '../pages/StageInputPage';
 
-test.describe('UseCase 8: Phasen-Verwaltung & Auslosung (StageAdmin & StageDraw)', () => {
+test.describe('UseCase 8: Abschnitts-Verwaltung & Auslosung (StageAdmin & StageDraw)', () => {
   let stageAdminPage: StageAdminPage;
 
   test.beforeEach(async ({ page }) => {
@@ -42,7 +42,7 @@ test.describe('UseCase 8: Phasen-Verwaltung & Auslosung (StageAdmin & StageDraw)
     await expect(page.locator('body')).toBeVisible();
   });
 
-  test('TC-SA-05 [👤]: Phase starten (Freigabe der Ergebniseingabe)', async ({ page }) => {
+  test('TC-SA-05 [👤]: Abschnitt starten (Freigabe der Ergebniseingabe)', async ({ page }) => {
     if (await stageAdminPage.btnStartStage.count() > 0 && await stageAdminPage.btnStartStage.isVisible()) {
       await stageAdminPage.btnStartStage.click();
       await page.waitForTimeout(500);
@@ -50,7 +50,7 @@ test.describe('UseCase 8: Phasen-Verwaltung & Auslosung (StageAdmin & StageDraw)
     await expect(page.locator('body')).toBeVisible();
   });
 
-  test('TC-SA-06 [👤]: Vorherige Phase Round Robin - Filter Obere Hälfte / Untere Hälfte / Alle und prev_stage Spalte', async ({ page }) => {
+  test('TC-SA-06 [👤]: Vorheriger Abschnitt Round Robin - Filter Obere Hälfte / Untere Hälfte / Alle und prev_stage Spalte', async ({ page }) => {
     const mainView = new MainViewPage(page);
     await mainView.goto();
     await mainView.startDemo();
@@ -114,7 +114,7 @@ test.describe('UseCase 8: Phasen-Verwaltung & Auslosung (StageAdmin & StageDraw)
     }
 
     // 7. Click NextStageBtn to start follower stage
-    const nextStageBtn = page.locator('button[id*="NextStageBtn"], button:has-text("Nächste Phase")').first();
+    const nextStageBtn = page.locator('button[id*="NextStageBtn"], button:has-text("Nächsten Wettbewerbsabschnitt")').first();
     await expect(nextStageBtn).toBeVisible({ timeout: 5000 });
     await nextStageBtn.click();
 
@@ -135,7 +135,7 @@ test.describe('UseCase 8: Phasen-Verwaltung & Auslosung (StageAdmin & StageDraw)
     await expect(radBottom).toBeVisible({ timeout: 5000 });
 
     // Verify prev_stage column exists in table header
-    const prevStageHeader = page.locator('th:has-text("Vorherige Phase"), th:has-text("Previous Stage")');
+    const prevStageHeader = page.locator('th:has-text("Vorheriger Abschnitt"), th:has-text("Previous Stage")');
     await expect(prevStageHeader).toBeVisible();
 
     // Verify cell contents show "Jeder gegen Jeden, PLATZ"

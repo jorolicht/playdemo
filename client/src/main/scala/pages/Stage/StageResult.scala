@@ -11,9 +11,9 @@ object StageResult extends BasePage with JsWrapper:
   def name = PageNameTyp("StageResult")
   val NextStageBtn:   HtmlId = genId(name)
   /**
-   * Name des Wettbewerbs einer Wettbewerbsphase (Überschrift der Druckausgabe).
+   * Name des Wettbewerbs eines Wettbewerbsabschnitts (Überschrift der Druckausgabe).
    *
-   * @param stage Wettbewerbsphase
+   * @param stage Wettbewerbsabschnitt
    * @return Name, leer wenn der Wettbewerb fehlt
    */
   def compName(stage: Stage): String =

@@ -1,13 +1,13 @@
-StageResult.title = Ergebnisse der Wettbewerbsphase / Tabellen: {0}
-StageResult.title_rr = Ergebnisse der Wettbewerbsphase / Tabelle: {0}
-StageResult.no_results = Keine Ergebnisse für diese Wettbewerbsphase verfügbar.
+StageResult.title = Ergebnisse des Wettbewerbsabschnitts / Tabellen: {0}
+StageResult.title_rr = Ergebnisse des Wettbewerbsabschnitts / Tabelle: {0}
+StageResult.no_results = Keine Ergebnisse für diesen Wettbewerbsabschnitt verfügbar.
 StageResult.table_title = Tabelle {0}
 StageResult.rank_header = Platz
 StageResult.name_header = Name
 StageResult.matches_header = Spiele
 StageResult.sets_header = Sätze
 StageResult.btn_print = Tabelle drucken
-StageResult.btn_next = Nächste Wettbewerbsphase vorbereiten
+StageResult.btn_next = Nächsten Wettbewerbsabschnitt vorbereiten
 StageResult.tbd = NOCH OFFEN
 StageResult.bye = Freilos
 StageResult.round_3rd = Spiel um Platz 3

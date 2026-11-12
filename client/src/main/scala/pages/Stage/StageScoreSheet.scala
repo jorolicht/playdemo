@@ -197,7 +197,7 @@ object StageScoreSheet extends BasePage with JsWrapper:
    * damit der Zettel ohne Namen gedruckt und manuell beschriftet werden kann.
    *
    * @param sno Startnummer (SNO) des Spielers.
-   * @param pants Liste der Teilnehmer der Phase.
+   * @param pants Liste der Teilnehmer des Abschnitts.
    * @return Tupel aus (Name, Verein, TTR-Rating).
    */
   def getPlayerInfo(sno: SNO, pants: Seq[Pant]): (String, String, String) =
