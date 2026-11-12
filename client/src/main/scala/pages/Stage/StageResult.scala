@@ -248,7 +248,8 @@ object StageResult extends BasePage with JsWrapper:
 
   /**
    * Finalisiert nach Rückfrage den ausgewählten Wettbewerb (Status FIN, wie "Finalisieren" in der
-   * Wettbewerbsübersicht) und zeigt die Ergebnisse erneut an.
+   * Wettbewerbsübersicht). Der aktuelle Wettbewerbsabschnitt wird vorher als Urkunden-Abschnitt markiert;
+   * anschließend wird die Wettbewerbsübersicht (CompetitionInfo) angezeigt.
    */
   private def finalizeCompetition(): Unit =
     import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -256,11 +257,13 @@ object StageResult extends BasePage with JsWrapper:
     Global.currentSelection.competition.filter(_ => canFinalize).foreach { comp =>
       dialogs.DlgMsgbox.show(gM("+finalize_confirm", comp.name), gM("+btn_finalize"), List(BoxButton.Yes, BoxButton.No)).map {
         case BoxButton.Yes =>
+          // vor dem Finalisieren: danach lassen sich die Abschnitte nicht mehr ändern
+          Global.currentSelection.stage.foreach(st => CompetitionInfo.setCertificateStage(st.id))
           services.TourneyDB.tourney.updateCompetition(comp.copy(status = CompStatus.FIN, version = comp.version + 1)) match
             case Right(c) =>
               Global.currentSelection = Global.currentSelection.copy(competition = Some(c))
               comps.ContextHeader.render()
-              render()
+              loadPage(CompetitionInfo.name, "")
             case Left(err) => error(s"Failed to finalize competition: ${err.msgCode}")
         case _ => debug("StageResult: finalize cancelled")
       }

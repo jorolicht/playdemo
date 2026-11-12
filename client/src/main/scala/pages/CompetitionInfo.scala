@@ -263,6 +263,17 @@ object CompetitionInfo extends BasePage with JsWrapper:
         debug(s"CompetitionInfo handleEvent: ${elem.id}")
 
   private def handleCertificateChange(stageId: StageId, value: Boolean): Unit =
+    setCertificateStage(stageId, value)
+    render()
+
+  /**
+   * Markiert einen Wettbewerbsabschnitt des ausgewählten Wettbewerbs als maßgeblich für die Urkunden
+   * (Radio-Button "stage-certificate-radio"); alle anderen Abschnitte des Wettbewerbs verlieren die Markierung.
+   *
+   * @param stageId Wettbewerbsabschnitt
+   * @param value   true = markieren, false = Markierung entfernen
+   */
+  def setCertificateStage(stageId: StageId, value: Boolean = true): Unit =
     val stages = services.TourneyDB.tourney.stages
     Global.currentSelection.competition.foreach { comp =>
       stages.zipWithIndex.foreach { case (s, idx) =>
@@ -282,7 +293,6 @@ object CompetitionInfo extends BasePage with JsWrapper:
         }
       }
     }
-    render()
 
   private def handleDeleteStage(stageId: StageId): Unit =
     import shared.BoxButton
