@@ -5,9 +5,9 @@ import { MainViewPage } from '../pages/MainViewPage';
  * Demo tourney, competition 1 "S-Klasse Herren Einzel": stage 3 Vorrunde (round robin, finished)
  * and stage 4 Endrunde (knockout, only one quarter-final played: Bert, Ali lost 2:3).
  */
-test.describe('Ergebnisliste: Urkundenphase über Radio-Button in CompetitionInfo wählen', () => {
+test.describe('Ergebnisliste: Urkundenabschnitt über Radio-Button in CompetitionInfo wählen', () => {
 
-  test('TC-RL-01 [👤]: Auswahl der Urkundenphase ändert das Ranking in der Ergebnisliste', async ({ page }) => {
+  test('TC-RL-01 [👤]: Auswahl der Urkundenabschnitt ändert das Ranking in der Ergebnisliste', async ({ page }) => {
     const mainView = new MainViewPage(page);
     await mainView.goto();
     await mainView.startDemo();

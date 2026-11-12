@@ -13,7 +13,7 @@ export class CompetitionInfoPage {
   constructor(page: Page) {
     this.page = page;
     this.cardHeaderTitle = page.locator('.card-header h3');
-    this.btnStartStage = page.locator('button[id*="BtnStartStage"], button:has-text("Austragungsphase")');
+    this.btnStartStage = page.locator('button[id*="BtnStartStage"], button:has-text("Wettbewerbsabschnitt")');
     this.btnEditComp = page.locator('button[id*="BtnEditComp"]');
     this.btnToggleStatus = page.locator('button[id*="BtnToggleStatus"]');
     this.btnDeleteComp = page.locator('button[id*="BtnDeleteComp"]');

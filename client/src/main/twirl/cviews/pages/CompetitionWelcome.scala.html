@@ -46,7 +46,7 @@
     <!-- Stages / Rounds Section -->
     <div class="card shadow-sm border-info mb-4">
         <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
-            <h4 class="h5 mb-0 fw-bold"><i class="bi bi-layers me-2"></i>Austragungsphasen & Runden</h4>
+            <h4 class="h5 mb-0 fw-bold"><i class="bi bi-layers me-2"></i>Wettbewerbsabschnitte & Runden</h4>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -62,7 +62,7 @@
                     </thead>
                     <tbody>
                         @if(stages.isEmpty) {
-                            <tr><td colspan="5" class="text-center py-4 text-muted">Noch keine Austragungsphasen gestartet.</td></tr>
+                            <tr><td colspan="5" class="text-center py-4 text-muted">Noch keine Wettbewerbsabschnitte gestartet.</td></tr>
                         }
                         @stages.map { r =>
                             <tr>
