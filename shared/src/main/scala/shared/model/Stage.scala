@@ -239,6 +239,7 @@ object StageData:
  * @param matches ArrayBuffer of matches assigned to this stage.
  * @param encVariant Spielweise der Begegnungen bei Mannschaften (z. B. "firstTo2", "all"), leer = Standard des Formats.
  * @param encounters Begegnungen (Aufstellung und Einzelspiele) je Spielnummer bei Mannschaften.
+ * @param encSystem Spielsystem der Begegnungen bei Mannschaften (z. B. "bundes"), leer = Standard des Formats.
  */
 case class Stage(
   id:                   StageId,
@@ -259,7 +260,8 @@ case class Stage(
   var version:          Int = 0,
   val matches:          ArrayBuffer[MEntry] = ArrayBuffer.empty,
   var encVariant:       String = "",
-  val encounters:       ArrayBuffer[Encounter] = ArrayBuffer.empty
+  val encounters:       ArrayBuffer[Encounter] = ArrayBuffer.empty,
+  var encSystem:        String = ""
 ):
 
   // -----------------------------

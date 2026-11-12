@@ -9,8 +9,9 @@ import shared.sport.{ EncounterCfg, Level, Sports }
  * Begegnungen bei Mannschaftswettbewerben: Aufstellung, Spielfolge (Einzel/Doppel) und Stand der Begegnung.
  *
  * Ein Eintrag im Spielplan (`MEntry`) steht für die Begegnung zweier Mannschaften. Sein `sets` ist der Stand der
- * Begegnung (gewonnene Spiele), sein `winSets` kodiert die Spielweise: positiv = "bis n Siege" (`bestOf`),
- * negativ = "alle n Spiele" (`fixed`). Aufstellungen und Einzelspiele liegen in `Stage.encounters`.
+ * Begegnung (gewonnene Spiele), sein `winSets` kodiert die Spielweise (siehe [[winSetsCode]]). Das Spielsystem
+ * wählt die Stage (`Stage.encSystem`, Spielweise `Stage.encVariant`). Aufstellungen und Einzelspiele liegen in
+ * `Stage.encounters`.
  *
  * Wertung: Fehlt ein Spieler in der Aufstellung, ist das betroffene Spiel für diese Seite verloren. Gibt eine
  * Mannschaft eine leere Aufstellung ab (nicht angetreten), verliert sie alle Spiele.
@@ -20,30 +21,53 @@ object TeamEncounter:
   /**
    * Spielsystem eines Wettbewerbstyps im aktuellen Wertungssystem ([[Sports.current]]).
    *
-   * @param coTyp Wettbewerbstyp
+   * @param coTyp  Wettbewerbstyp
+   * @param system Kennung des Systems (`Stage.encSystem`), leer = Standard des Formats
    * @return Spielsystem, None wenn der Typ keine Begegnungen kennt
    */
-  def config(coTyp: CompTyp): Option[EncounterCfg] = Sports.current.encounter(coTyp.formatId)
+  def config(coTyp: CompTyp, system: String = ""): Option[EncounterCfg] = Sports.current.encounter(coTyp.formatId, system)
 
   /**
-   * Spielsystem eines Wettbewerbs nach seinem Wertungssystem (`Competition.scoring`).
+   * Spielsystem eines Wettbewerbs nach seinem Wertungssystem (`Competition.scoring`). Kadergröße (`teamSize`,
+   * `maxPlayers`) ist für alle Systeme eines Formats gleich.
    *
-   * @param comp Wettbewerb
+   * @param comp   Wettbewerb
+   * @param system Kennung des Systems, leer = Standard des Formats
    * @return Spielsystem, None wenn der Wettbewerb keine Begegnungen kennt
    */
-  def configFor(comp: Competition): Option[EncounterCfg] = Sports.get(comp.scoring).encounter(comp.typ.formatId)
+  def configFor(comp: Competition, system: String = ""): Option[EncounterCfg] =
+    Sports.get(comp.scoring).encounter(comp.typ.formatId, system)
+
+  /**
+   * Alle Spielsysteme eines Wettbewerbs.
+   *
+   * @param comp Wettbewerb
+   * @return Systeme, leer bei Wettbewerben ohne Begegnungen
+   */
+  def systemsFor(comp: Competition): Seq[EncounterCfg] = Sports.get(comp.scoring).systems(comp.typ.formatId)
 
   /** true, wenn der Wettbewerbstyp in einem Wertungssystem mit Begegnungen gespielt wird (versionsunabhängig). */
   def isTeam(coTyp: CompTyp): Boolean = Sports.all.values.exists(_.encounter(coTyp.formatId).isDefined)
 
+  /** Kennzahl-Zuschlag bei `fixed` mit Unentschieden. */
+  private val DrawFlag    = 100
+  /** Kennzahl-Zuschlag bei `fixed` mit Entscheidungsspiel. */
+  private val DeciderFlag = 200
+
   /**
    * Kennzahl `winSets` eines Begegnungseintrags aus der Stufe der Begegnung.
    *
+   *  - `bestOf`: `toWin` (positiv, z. B. 2 = bis 2 Siege)
+   *  - `fixed`:  `-(count + 100 bei Unentschieden + 200 bei Entscheidungsspiel)`, z. B. -3 = alle 3 Spiele,
+   *    -104 = 4 Spiele mit Unentschieden, -204 = 4 Spiele mit Entscheidungsspiel
+   *
    * @param level Stufe der Begegnung
-   * @return `toWin` bei `bestOf`, `-count` bei `fixed`
+   * @return Kennzahl
    */
   def winSetsCode(level: Level): Int =
-    if level.kind == Level.Fixed then -level.count else level.toWin
+    if level.kind == Level.Fixed then
+      -(level.count + (if level.allowDraw then DrawFlag else 0) + (if level.decider then DeciderFlag else 0))
+    else level.toWin
 
   /**
    * Stufe der Begegnung aus der Kennzahl `winSets` (Umkehrung von [[winSetsCode]]).
@@ -52,7 +76,10 @@ object TeamEncounter:
    * @return Stufe `fixed` bei negativer Kennzahl, sonst `bestOf`
    */
   def levelFromCode(code: Int): Level =
-    if code < 0 then Level("encounter", Level.Fixed, count = -code)
+    if code < 0 then
+      val c = -code
+      Level("encounter", Level.Fixed, count = c % DrawFlag,
+            allowDraw = (c / DrawFlag) % 2 == 1, decider = c / DeciderFlag >= 1)
     else Level("encounter", Level.BestOf, toWin = code)
 
   /**
@@ -62,7 +89,36 @@ object TeamEncounter:
    * @param coTyp Wettbewerbstyp
    */
   def matchWinSets(stage: Stage, coTyp: CompTyp): Int = Sports.using(stage.scoring):
-    config(coTyp).map(c => winSetsCode(c.levelFor(stage.encVariant))).getOrElse(stage.noWinSets)
+    config(coTyp, stage.encSystem).map(c => winSetsCode(levelOf(stage, c))).getOrElse(stage.noWinSets)
+
+  /**
+   * Stufe der Begegnung einer Stage (Spielweise der Stage, in K.-o.-Runden ohne Unentschieden).
+   *
+   * @param stage Stage
+   * @param cfg   Spielsystem
+   * @return Stufe der Begegnung
+   */
+  def levelOf(stage: Stage, cfg: EncounterCfg): Level = cfg.levelFor(stage.encVariant, stage.isKoStage)
+
+  /**
+   * Nummern der Entscheidungsspiele eines Systems.
+   *
+   * @param cfg Spielsystem
+   * @return laufende Nummern (1 …) der Spiele mit `decider`
+   */
+  def deciderNos(cfg: EncounterCfg): Set[Int] =
+    cfg.games.zipWithIndex.collect { case (g, i) if g.decider => i + 1 }.toSet
+
+  /**
+   * Stand einer Begegnung für die Anzeige, ohne die Begegnung zu verändern.
+   *
+   * @param stage Stage
+   * @param cfg   Spielsystem
+   * @param enc   Begegnung
+   * @return Stand (Siege A, Siege B)
+   */
+  def preview(stage: Stage, cfg: EncounterCfg, enc: Encounter): (Int, Int) =
+    evaluate(enc.copy(games = enc.games.map(_.copy())), levelOf(stage, cfg), stage.noWinSets, deciderNos(cfg))
 
   /**
    * Begegnung einer Spielnummer, wird bei Bedarf angelegt.
@@ -112,30 +168,49 @@ object TeamEncounter:
       val snoB = enc.lineupB.sno(g.away, g.isDouble)
       enc.games.find(_.no == i + 1) match
         case Some(old) if old.snoA == snoA && old.snoB == snoB => old
-        case _ => SubGame(i + 1, g.isDouble, snoA, snoB)
+        case old => SubGame(i + 1, g.isDouble, snoA, snoB, playfield = old.map(_.playfield).getOrElse(""))
     }
     enc.games.clear()
     enc.games ++= newGames
 
   /**
+   * Ist die Begegnung gestartet? Begegnungen aus der Zeit vor dem Start-Button gelten als gestartet, sobald ein
+   * Spiel gespielt ist.
+   *
+   * @param enc Begegnung
+   * @return true, wenn Ergebnisse eingegeben werden dürfen (sofern beide Aufstellungen abgegeben sind)
+   */
+  def isStarted(enc: Encounter): Boolean = enc.started || enc.games.exists(_.status == MEntry.MS_FIN)
+
+  /**
    * Berechnet Status der Spiele und Stand der Begegnung.
    *
-   *  - vor Abgabe beider Aufstellungen sind alle Spiele blockiert
+   *  - vor Abgabe beider Aufstellungen und vor dem Start ([[isStarted]]) sind alle Spiele blockiert
    *  - fehlt ein Spieler, gewinnt die andere Seite kampflos; fehlen beide, zählt das Spiel für niemanden
    *  - ist die Begegnung bei "bis n Siege" entschieden, entfallen die restlichen Spiele
+   *  - ein Entscheidungsspiel wird nur bei Gleichstand nach allen übrigen Spielen gespielt und nur, wenn die Stufe
+   *    es erlaubt (`decider`); bis die übrigen Spiele gewertet sind, ist es blockiert
    *
    * @param enc      Begegnung
    * @param level    Stufe der Begegnung
    * @param noWinSets Gewinnsätze eines Spiels
    * @return Stand der Begegnung (Siege A, Siege B)
    */
-  def evaluate(enc: Encounter, level: Level, noWinSets: Int): (Int, Int) =
-    val ready = enc.lineupA.done && enc.lineupB.done
+  def evaluate(enc: Encounter, level: Level, noWinSets: Int, deciders: Set[Int] = Set()): (Int, Int) =
+    val ready = enc.lineupA.done && enc.lineupB.done && isStarted(enc)
     var a = 0
     var b = 0
     enc.games.foreach { g =>
       val alreadyDecided = level.kind == Level.BestOf && level.isValid((a, b))
+      val isDecider      = deciders.contains(g.no)
+      val othersDone     = enc.games.filterNot(x => deciders.contains(x.no)).forall(x => x.decided || x.status == MEntry.MS_SKIP)
       if !ready then
+        g.status = MEntry.MS_BLOCK
+      else if isDecider && (!level.decider || (othersDone && a != b)) then
+        g.sets = (0, 0); g.result = ""
+        g.status = MEntry.MS_SKIP
+      else if isDecider && !othersDone then
+        g.sets = (0, 0); g.result = ""
         g.status = MEntry.MS_BLOCK
       else if alreadyDecided then
         g.status = MEntry.MS_SKIP
@@ -180,11 +255,11 @@ object TeamEncounter:
    * @return betroffene Spielnummern
    */
   def update(stage: Stage, coTyp: CompTyp, enc: Encounter): Either[AppError, List[Int]] = Sports.using(stage.scoring):
-    config(coTyp) match
+    config(coTyp, stage.encSystem) match
       case None => Left(AppError("err0263.encounter.no.team.competition"))
       case Some(cfg) =>
-        val level = cfg.levelFor(stage.encVariant)
-        val score = evaluate(enc, level, stage.noWinSets)
+        val level = levelOf(stage, cfg)
+        val score = evaluate(enc, level, stage.noWinSets, deciderNos(cfg))
         val m     = stage.getMatch(enc.gameNo)
         if level.isValid(score) then
           stage.inputMatch(enc.gameNo, score, "", m.info, m.playfield)
@@ -197,7 +272,8 @@ object TeamEncounter:
         else Right(List(enc.gameNo))
 
   /**
-   * Setzt die Aufstellung einer Seite und erzeugt die Spiele neu.
+   * Setzt die Aufstellung einer Seite und erzeugt die Spiele neu. Nach dem Start der Begegnung ([[isStarted]]) ist
+   * die Aufstellung nicht mehr änderbar.
    *
    * @param stage  Stage
    * @param comp   Wettbewerb
@@ -207,7 +283,7 @@ object TeamEncounter:
    * @return betroffene Spielnummern
    */
   def setLineup(stage: Stage, comp: Competition, gameNo: Int, side: Int, lineup: Lineup): Either[AppError, List[Int]] = Sports.using(stage.scoring):
-    config(comp.typ) match
+    config(comp.typ, stage.encSystem) match
       case None => Left(AppError("err0263.encounter.no.team.competition"))
       case Some(cfg) =>
         val m   = stage.getMatch(gameNo)
@@ -217,11 +293,28 @@ object TeamEncounter:
           case Some(team) =>
             validateLineup(cfg, side, lineup, team).flatMap { _ =>
               val enc = getOrCreate(stage, gameNo)
-              val done = lineup.copy(done = true)
-              if side == 0 then enc.lineupA = done else enc.lineupB = done
-              rebuild(enc, cfg)
-              update(stage, comp.typ, enc)
+              if isStarted(enc) then Left(AppError("err0269.encounter.started", gameNo.toString))
+              else
+                val done = lineup.copy(done = true)
+                if side == 0 then enc.lineupA = done else enc.lineupB = done
+                rebuild(enc, cfg)
+                update(stage, comp.typ, enc)
             }
+
+  /**
+   * Startet eine Begegnung: Danach sind die Eingaben der Spiele möglich. Beide Aufstellungen müssen abgegeben sein.
+   *
+   * @param stage  Stage
+   * @param coTyp  Wettbewerbstyp
+   * @param gameNo Spielnummer der Begegnung
+   * @return betroffene Spielnummern
+   */
+  def start(stage: Stage, coTyp: CompTyp, gameNo: Int): Either[AppError, List[Int]] = Sports.using(stage.scoring):
+    stage.encounters.find(_.gameNo == gameNo) match
+      case Some(enc) if enc.lineupA.done && enc.lineupB.done =>
+        enc.started = true
+        update(stage, coTyp, enc)
+      case _ => Left(AppError("err0268.encounter.lineup.missing", gameNo.toString))
 
   /**
    * Trägt das Ergebnis eines Spiels ein (leeres Ergebnis setzt es zurück).
@@ -250,7 +343,8 @@ object TeamEncounter:
           update(stage, coTyp, enc)
 
   /**
-   * Löscht alle gespielten Ergebnisse einer Begegnung. Aufstellungen und kampflose Wertungen bleiben.
+   * Löscht alle gespielten Ergebnisse einer Begegnung und nimmt den Start zurück: Die Aufstellungen bleiben, können
+   * aber wieder geändert werden; danach muss die Begegnung neu gestartet werden.
    *
    * @param stage  Stage
    * @param coTyp  Wettbewerbstyp
@@ -262,4 +356,5 @@ object TeamEncounter:
       case None => stage.resetMatch(gameNo)
       case Some(enc) =>
         enc.games.foreach { g => if g.status == MEntry.MS_FIN then { g.sets = (0, 0); g.result = ""; g.status = MEntry.MS_READY } }
-        update(stage, coTyp, enc)
+        enc.started = false
+        update(stage, coTyp, enc).map { res => stage.getMatch(gameNo).startTime = ""; res }

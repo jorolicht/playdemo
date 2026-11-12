@@ -40,7 +40,7 @@ extension (names: Names)
  *  - `fixed`:  genau `count` Einheiten werden gespielt, Sieger nach Summe
  *  - `sum`:    Sieger nach Summe der Einheiten
  *
- * Nicht modellierte Felder des Entwurfs (`deciding`, `tieBreak`, `decider`, `periods`, `display`) werden beim Lesen
+ * Nicht modellierte Felder des Entwurfs (`deciding`, `tieBreak`, `periods`, `display`) werden beim Lesen
  * ignoriert.
  *
  * @param id        Kennung der Stufe
@@ -53,6 +53,8 @@ extension (names: Names)
  * @param toWin     `bestOf`: Anzahl der nötigen Gewinneinheiten
  * @param count     `fixed`: Anzahl der gespielten Einheiten
  * @param allowDraw `fixed`/`sum`: Unentschieden möglich
+ * @param decider   `fixed`: bei Gleichstand nach `count` Einheiten entscheidet eine weitere Einheit
+ *                  (Begegnung: Entscheidungsspiel, siehe [[EncounterGame.decider]])
  */
 case class Level(
   id:        String,
@@ -64,7 +66,8 @@ case class Level(
   cap:       Option[Int]  = None,
   toWin:     Int          = 0,
   count:     Int          = 0,
-  allowDraw: Boolean      = false
+  allowDraw: Boolean      = false,
+  decider:   Boolean      = false
 ):
 
   /**
@@ -83,7 +86,9 @@ case class Level(
         (hi > target && hi - lo == winBy && cap.forall(hi <= _)) ||
         cap.exists(c => hi == c && lo == c - 1)
       case Level.BestOf => (a == toWin && b < toWin) || (b == toWin && a < toWin)
-      case Level.Fixed  => a + b == count && (allowDraw || a != b)
+      case Level.Fixed  =>
+        (a + b == count && (allowDraw || a != b)) ||
+        (decider && a + b == count + 1 && math.abs(a - b) == 1)
       case Level.Sum    => allowDraw || a != b
       case _            => false
 
@@ -155,11 +160,13 @@ object Variant:
 /**
  * Ein Spiel innerhalb einer Begegnung.
  *
- * @param type single oder double
- * @param home Position der Heimmannschaft
- * @param away Position der Gastmannschaft
+ * @param type    single oder double
+ * @param home    Position der Heimmannschaft
+ * @param away    Position der Gastmannschaft
+ * @param decider Entscheidungsspiel: nur bei Gleichstand nach allen übrigen Spielen und nur, wenn die Stufe der
+ *                Begegnung `decider` erlaubt; sonst entfällt es
  */
-case class EncounterGame(`type`: String, home: String, away: String):
+case class EncounterGame(`type`: String, home: String, away: String, decider: Boolean = false):
   /** true bei einem Doppel. */
   def isDouble: Boolean = `type` == "double"
 
@@ -169,6 +176,9 @@ object EncounterGame:
 /**
  * Spielsystem einer Begegnung zweier Mannschaften.
  *
+ * @param id             Kennung des Systems innerhalb des Formats (z. B. "bundes")
+ * @param name           Name je Sprache
+ * @param description    Beschreibung je Sprache (Absätze durch Leerzeile getrennt)
  * @param level          Wertungsstufe der Begegnung (über der Spielstufe)
  * @param variants       Spielweisen (z. B. "bis 2 Siege", "alle Spiele"), überschreiben die Stufe `level`
  * @param defaultVariant Spielweise, wenn die Stage keine wählt
@@ -178,7 +188,10 @@ object EncounterGame:
  * @param games          geordnete Spielfolge
  */
 case class EncounterCfg(
-  level:          Level,
+  id:             String                    = "",
+  name:           Names                     = Map(),
+  description:    Map[String, String]       = Map(),
+  level:          Level                     = Level("encounter", Level.BestOf),
   variants:       Map[String, Variant]      = Map(),
   defaultVariant: String                    = "",
   teamSize:       Int                       = 2,
@@ -200,20 +213,35 @@ case class EncounterCfg(
    */
   def isDoublePos(side: Int, pos: String): Boolean = games.exists(g => g.isDouble && gamePos(g, side) == pos)
 
+  /** true, wenn das System ein Entscheidungsspiel kennt. */
+  def hasDecider: Boolean = games.exists(_.decider)
+
+  /**
+   * Beschreibung in einer Sprache (Rückfall "en", dann "de").
+   *
+   * @param lang Sprachkürzel
+   * @return Text, leer wenn keine Beschreibung vorhanden ist
+   */
+  def descriptionIn(lang: String): String =
+    description.get(lang).orElse(description.get("en")).orElse(description.get("de")).getOrElse("")
+
   /**
    * Stufe der Begegnung in einer Spielweise.
    *
    * @param variant Kennung der Spielweise, leer = `defaultVariant`
+   * @param ko      true in K.-o.-Runden: dort gibt es kein Unentschieden, ein mögliches Unentschieden wird durch das
+   *                Entscheidungsspiel aufgelöst
    * @return Stufe mit den Parametern der Spielweise
    */
-  def levelFor(variant: String): Level =
-    val v = if variant.isEmpty then defaultVariant else variant
-    variants.get(v).flatMap(_.overrides.get(level.id)) match
+  def levelFor(variant: String, ko: Boolean = false): Level =
+    val v = if variant.isEmpty || !variants.contains(variant) then defaultVariant else variant
+    val lv = variants.get(v).flatMap(_.overrides.get(level.id)) match
       case Some(ov: ujson.Obj) =>
         val js = writeJs(level)
         ov.value.foreach { case (k, x) => js(k) = x }
         read[Level](js)
       case _ => level
+    if ko && lv.allowDraw then lv.copy(allowDraw = false, decider = hasDecider) else lv
 
 object EncounterCfg:
   given rw: RW[EncounterCfg] = macroRW
@@ -221,17 +249,43 @@ object EncounterCfg:
 /**
  * Wettbewerbsformat (heute `CompTyp`): Einzel, Doppel, Mannschaft.
  *
- * @param type      single, double oder team
- * @param name      Namen je Sprache
- * @param encounter Spielsystem bei Mannschaften
- * @param standings abweichende Tabelle für dieses Format
+ * @param type          single, double oder team
+ * @param name          Namen je Sprache
+ * @param encounter     ein einzelnes Spielsystem bei Mannschaften (Dateien vor Einführung von `systems`)
+ * @param systems       wählbare Spielsysteme bei Mannschaften (Auswahl je Stage)
+ * @param defaultSystem System, wenn die Stage keines wählt (leer = erstes)
+ * @param teamSize      Anzahl der Stammspieler einer Mannschaft (gilt für alle Systeme)
+ * @param maxPlayers    größte Anzahl gemeldeter Spieler einschließlich Ersatz (gilt für alle Systeme)
+ * @param standings     abweichende Tabelle für dieses Format
  */
 case class Format(
-  `type`:    String,
-  name:      Names                = Map(),
-  encounter: Option[EncounterCfg] = None,
-  standings: Option[Standings]    = None
-)
+  `type`:        String,
+  name:          Names                = Map(),
+  encounter:     Option[EncounterCfg] = None,
+  systems:       Seq[EncounterCfg]    = Seq(),
+  defaultSystem: String               = "",
+  teamSize:      Option[Int]          = None,
+  maxPlayers:    Option[Int]          = None,
+  standings:     Option[Standings]    = None
+):
+  /**
+   * Alle Spielsysteme; ein einzelnes `encounter` erhält die Kennung "default". Kadergröße des Formats wird
+   * übernommen.
+   */
+  def systemList: Seq[EncounterCfg] =
+    (systems ++ encounter.map(e => if e.id.isEmpty then e.copy(id = "default") else e)).map { e =>
+      e.copy(teamSize = teamSize.getOrElse(e.teamSize), maxPlayers = maxPlayers.getOrElse(e.maxPlayers))
+    }
+
+  /**
+   * Spielsystem nach Kennung.
+   *
+   * @param id Kennung, leer oder unbekannt = Standard (`defaultSystem` bzw. erstes)
+   * @return Spielsystem, None ohne Systeme
+   */
+  def system(id: String): Option[EncounterCfg] =
+    val all = systemList
+    all.find(_.id == id).orElse(all.find(_.id == defaultSystem)).orElse(all.headOption)
 
 object Format:
   given rw: RW[Format] = macroRW
@@ -381,9 +435,19 @@ case class SportConfig(
    * Spielsystem der Begegnung eines Formats.
    *
    * @param formatId Kennung des Formats (z. B. "team2")
+   * @param system   Kennung des Systems, leer = Standard des Formats
    * @return Spielsystem, None bei Formaten ohne Begegnung
    */
-  def encounter(formatId: String): Option[EncounterCfg] = formats.get(formatId).flatMap(_.encounter)
+  def encounter(formatId: String, system: String = ""): Option[EncounterCfg] =
+    formats.get(formatId).flatMap(_.system(system))
+
+  /**
+   * Alle Spielsysteme eines Formats.
+   *
+   * @param formatId Kennung des Formats
+   * @return Systeme, leer bei Formaten ohne Begegnung
+   */
+  def systems(formatId: String): Seq[EncounterCfg] = formats.get(formatId).map(_.systemList).getOrElse(Seq())
 
   /**
    * Konfiguration aus Sicht eines Formats: Bei Mannschaften wird die Begegnung als oberste Stufe angehängt und ist
@@ -391,13 +455,14 @@ case class SportConfig(
    *
    * @param formatId Kennung des Formats
    * @param variant  Spielweise der Begegnung, leer = Standard
+   * @param system   Spielsystem der Begegnung, leer = Standard
    * @return Konfiguration des Formats, unverändert bei Formaten ohne Begegnung
    */
-  def forFormat(formatId: String, variant: String = ""): SportConfig =
+  def forFormat(formatId: String, variant: String = "", system: String = ""): SportConfig =
     formats.get(formatId) match
       case Some(f) =>
         val withStandings = f.standings.map(s => copy(standings = s)).getOrElse(this)
-        f.encounter match
+        f.system(system) match
           case Some(enc) =>
             val lv = enc.levelFor(variant).copy(unit = matchLevelId)
             withStandings.copy(levels = levels :+ lv, matchLevelId = lv.id)

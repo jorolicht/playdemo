@@ -72,6 +72,7 @@ object Lineup:
  * @param sets   Satzstand
  * @param result Satzergebnisse in Schnelleingabe, getrennt durch "·"
  * @param status Status wie bei [[MEntry]] (MS_BLOCK, MS_READY, MS_FIN, MS_FIX, MS_SKIP)
+ * @param playfield Tisch des Spiels
  */
 case class SubGame(
   no:         Int,
@@ -80,7 +81,8 @@ case class SubGame(
   var snoB:   SNO,
   var sets:   (Int, Int) = (0, 0),
   var result: String     = "",
-  var status: Int        = MEntry.MS_BLOCK
+  var status: Int        = MEntry.MS_BLOCK,
+  var playfield: String  = ""
 ):
   /** true, wenn das Spiel gewertet ist (gespielt oder kampflos). */
   def decided: Boolean = status == MEntry.MS_FIN || status == MEntry.MS_FIX
@@ -97,12 +99,14 @@ object SubGame:
  * @param lineupA Aufstellung der Mannschaft A
  * @param lineupB Aufstellung der Mannschaft B
  * @param games   Spiele der Begegnung
+ * @param started true, sobald die Begegnung gestartet ist (erst dann sind Eingaben möglich)
  */
 case class Encounter(
   gameNo:      Int,
   var lineupA: Lineup                 = Lineup(),
   var lineupB: Lineup                 = Lineup(),
-  games:       ArrayBuffer[SubGame]   = ArrayBuffer.empty
+  games:       ArrayBuffer[SubGame]   = ArrayBuffer.empty,
+  var started: Boolean                = false
 ):
   /** Aufstellung einer Seite (0 = A, 1 = B). */
   def lineup(side: Int): Lineup = if side == 0 then lineupA else lineupB

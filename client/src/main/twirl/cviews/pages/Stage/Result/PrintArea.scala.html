@@ -1,0 +1,37 @@
+@*
+ * Druckbereich des Reiters "Ergebnisse": Beim Drucken erscheint nur dieser Bereich (ohne Navigation, Kopfzeilen,
+ * Reiter und Buttons), mit einer Überschrift aus Wettbewerb und Wettbewerbsphase.
+ *
+ * @param stage   Wettbewerbsphase
+ * @param content Ergebnisansicht (Tabelle, Gruppen, Turnierbaum ...)
+ *@
+@import shared.model.*
+@import pages.Stage.StageResult.*
+
+@(stage: Stage)(content: Html)
+
+<div id="stage-result-print">
+    <div class="d-none d-print-block mb-3 border-bottom pb-2">
+        <h3 class="h4 mb-1">@compName(stage)</h3>
+        <div class="h5 text-secondary mb-0">@stage.name</div>
+    </div>
+    @content
+</div>
+
+<style>
+    @@media print {
+        /* Alles außer dem Druckbereich ausblenden (unabhängig vom WordPress-Theme) */
+        body * { visibility: hidden !important; }
+        #stage-result-print, #stage-result-print * { visibility: visible !important; }
+        #stage-result-print {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+        }
+        #stage-result-print .d-print-none { display: none !important; }
+        #stage-result-print .card,
+        #stage-result-print .shadow-sm { border: none !important; box-shadow: none !important; }
+        #stage-result-print tr { page-break-inside: avoid; }
+    }
+</style>

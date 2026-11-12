@@ -366,14 +366,23 @@ Die Prüfung der Ergebnisse (`StageHelper`, `MEntry.validSets`), die Schnelleing
 Gruppentabelle (`Group.calc`) verwenden diese Konfiguration. `Stage.noWinSets` überschreibt weiterhin die Gewinnsätze
 der Spielstufe. Gespeichert werden Ergebnisse unverändert im bisherigen Format.
 
-**Mannschaften** (heute `team2`): Das Format beschreibt unter `encounter` die Begegnung zweier Mannschaften, also
-Positionen, Spielfolge (2 Einzel, 1 Doppel), Kadergröße (2 Stammspieler + 1 Ersatz) und die Spielweisen „bis 2 Siege“
-(`bestOf`, das Doppel entfällt bei 2:0) und „alle Spiele“ (`fixed`). Die Spielweise wird je Stage gewählt
-(`Stage.encVariant`). Mannschaften liegen im Wettbewerb (`Competition.teams`, Startnummer `[T<id>]`) und werden auf der
-Seite „Mannschaften“ angelegt. Ein Eintrag im Spielplan ist die Begegnung, ihr `sets` ist der Stand (gewonnene Spiele).
-Aufstellung und Einzelspiele stehen in `Stage.encounters` (Logik: `shared.format.TeamEncounter`). Unbesetzte Positionen
-und nicht angetretene Mannschaften werden als verloren gewertet. Die Gruppentabelle sortiert nach Begegnungen, Spielen,
-Sätzen und Bällen.
+**Mannschaften** (`team2`, `team3`): Ein Mannschaftsformat enthält eine Liste wählbarer Spielsysteme (`systems`,
+Standard `defaultSystem`) und die Kadergröße für alle Systeme (`teamSize` Stammspieler, `maxPlayers` einschließlich
+Ersatz). Ein System hat Kennung, Name und Beschreibung (de/en), Positionen je Seite, die Spielfolge (Einzel/Doppel,
+optional `decider` = Entscheidungsspiel nur bei Gleichstand) und die Stufe der Begegnung mit Optionen (`variants`,
+z. B. „bis 3 Punkte“/„alle Spiele“ oder „Unentschieden“/„Entscheidungsdoppel“). `tt_002` enthält für 2er-Mannschaften
+Bundessystem (Werner-Scheffler), Swaythling-Cup (modifiziert) und Quick-Cup, für 3er-Mannschaften den Corbillon-Cup;
+`tt_001` kennt nur ein System (`encounter`, Kennung `default`). System und Option werden je Stage in der Administration
+gewählt (`Stage.encSystem`, `Stage.encVariant`); der Info-Button öffnet die Seite „Spielsysteme“ (`pages.SystemInfo`) mit
+Beschreibung, Spielfolge und Optionen. In K.-o.-Runden gibt es kein Unentschieden: eine Option mit Unentschieden spielt
+dort das Entscheidungsspiel.
+
+Mannschaften liegen im Wettbewerb (`Competition.teams`, Startnummer `[T<id>]`) und werden in der Anmeldung angelegt. Ein
+Eintrag im Spielplan ist die Begegnung, ihr `sets` ist der Stand (gewonnene Spiele), ihr `winSets` kodiert die Stufe
+(`TeamEncounter.winSetsCode`: positiv = bis n Punkte, negativ = alle n Spiele, +100 Unentschieden, +200
+Entscheidungsspiel). Aufstellung und Einzelspiele stehen in `Stage.encounters` (Logik: `shared.format.TeamEncounter`).
+Unbesetzte Positionen und nicht angetretene Mannschaften werden als verloren gewertet. Die Gruppentabelle sortiert nach
+Begegnungen, Spielen, Sätzen und Bällen; ein Unentschieden bringt die Punkte für Unentschieden.
 
 ---
 

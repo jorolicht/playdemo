@@ -1,0 +1,646 @@
+{
+  "schemaVersion": 1,
+  "sport": {
+    "id": "TT",
+    "version": 2,
+    "name": {
+      "de": {
+        "one": "Tischtennis"
+      },
+      "en": {
+        "one": "Table Tennis"
+      }
+    }
+  },
+  "levels": [
+    {
+      "id": "ball",
+      "kind": "atomic",
+      "name": {
+        "de": {
+          "one": "Ball",
+          "other": "Bälle",
+          "short": "B"
+        },
+        "en": {
+          "one": "Point",
+          "other": "Points",
+          "short": "P"
+        }
+      }
+    },
+    {
+      "id": "set",
+      "kind": "race",
+      "unit": "ball",
+      "target": 11,
+      "winBy": 2,
+      "cap": null,
+      "name": {
+        "de": {
+          "one": "Satz",
+          "other": "Sätze",
+          "short": "S"
+        },
+        "en": {
+          "one": "Game",
+          "other": "Games",
+          "short": "G"
+        }
+      }
+    },
+    {
+      "id": "match",
+      "kind": "bestOf",
+      "unit": "set",
+      "toWin": 3,
+      "name": {
+        "de": {
+          "one": "Spiel",
+          "other": "Spiele",
+          "short": "Sp"
+        },
+        "en": {
+          "one": "Match",
+          "other": "Matches",
+          "short": "M"
+        }
+      }
+    }
+  ],
+  "match": "match",
+  "variants": {
+    "bo5": {
+      "name": {
+        "de": {
+          "one": "3 Gewinnsätze"
+        },
+        "en": {
+          "one": "Best of 5"
+        }
+      },
+      "override": {
+        "match": {
+          "toWin": 3
+        }
+      }
+    },
+    "bo7": {
+      "name": {
+        "de": {
+          "one": "4 Gewinnsätze"
+        },
+        "en": {
+          "one": "Best of 7"
+        }
+      },
+      "override": {
+        "match": {
+          "toWin": 4
+        }
+      }
+    },
+    "bo3": {
+      "name": {
+        "de": {
+          "one": "2 Gewinnsätze"
+        },
+        "en": {
+          "one": "Best of 3"
+        }
+      },
+      "override": {
+        "match": {
+          "toWin": 2
+        }
+      }
+    }
+  },
+  "formats": {
+    "single": {
+      "type": "single",
+      "name": {
+        "de": {
+          "one": "Einzel"
+        },
+        "en": {
+          "one": "Singles"
+        }
+      }
+    },
+    "double": {
+      "type": "double",
+      "name": {
+        "de": {
+          "one": "Doppel"
+        },
+        "en": {
+          "one": "Doubles"
+        }
+      }
+    },
+    "mixed": {
+      "type": "double",
+      "name": {
+        "de": {
+          "one": "Mixed"
+        },
+        "en": {
+          "one": "Mixed Doubles"
+        }
+      }
+    },
+    "team2": {
+      "type": "team",
+      "name": {
+        "de": {
+          "one": "2er-Mannschaft"
+        },
+        "en": {
+          "one": "Team of 2"
+        }
+      },
+      "teamSize": 2,
+      "maxPlayers": 3,
+      "defaultSystem": "bundes",
+      "systems": [
+        {
+          "id": "bundes",
+          "name": {
+            "de": {
+              "one": "Bundessystem (Werner-Scheffler)"
+            },
+            "en": {
+              "one": "Federal system (Werner Scheffler)"
+            }
+          },
+          "description": {
+            "de": "Das im offiziellen Spielbetrieb am weitesten verbreitete System für 2er-Mannschaften (z. B. in Verbands- und Pokalspielen). Es sorgt für eine faire Lastenverteilung und garantiert mehrere Spiele.\n\nJede Mannschaft stellt 2 Spieler (A1, A2 gegen B1, B2). Gespielt werden 4 Einzel und 1 Doppel; das Doppel ist das dritte Spiel.\n\nEs wird gespielt, bis eine Mannschaft 3 Punkte erreicht hat. Die Begegnung kann also nach 3, 4 oder 5 Spielen beendet sein.",
+            "en": "The most widely used system for teams of two in official play (e.g. league and cup matches). It spreads the load fairly and guarantees several matches.\n\nEach team fields 2 players (A1, A2 against B1, B2). 4 singles and 1 doubles are played; the doubles is the third match.\n\nPlay continues until one team has 3 points, so the tie can end after 3, 4 or 5 matches."
+          },
+          "level": {
+            "id": "encounter",
+            "kind": "bestOf",
+            "toWin": 3,
+            "unit": "match",
+            "name": {
+              "de": {
+                "one": "Begegnung",
+                "other": "Begegnungen",
+                "short": "Bg"
+              },
+              "en": {
+                "one": "Tie",
+                "other": "Ties",
+                "short": "T"
+              }
+            }
+          },
+          "variants": {
+            "firstTo3": {
+              "name": {
+                "de": {
+                  "one": "Bis 3 Punkte"
+                },
+                "en": {
+                  "one": "First to 3 points"
+                }
+              },
+              "override": {}
+            },
+            "all": {
+              "name": {
+                "de": {
+                  "one": "Alle 5 Spiele"
+                },
+                "en": {
+                  "one": "Play all 5 matches"
+                }
+              },
+              "override": {
+                "encounter": {
+                  "kind": "fixed",
+                  "count": 5
+                }
+              }
+            }
+          },
+          "defaultVariant": "firstTo3",
+          "positions": {
+            "home": [
+              "A1",
+              "A2",
+              "D"
+            ],
+            "away": [
+              "B1",
+              "B2",
+              "D"
+            ]
+          },
+          "games": [
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B1"
+            },
+            {
+              "type": "double",
+              "home": "D",
+              "away": "D"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B2"
+            }
+          ]
+        },
+        {
+          "id": "swaythling",
+          "name": {
+            "de": {
+              "one": "Swaythling-Cup (modifiziert)"
+            },
+            "en": {
+              "one": "Swaythling Cup (modified)"
+            }
+          },
+          "description": {
+            "de": "Wird häufig in speziellen Spielklassen oder Pokalformen genutzt, bei denen der Fokus auf den direkten Duellen liegt oder Zeit gespart werden muss.\n\nJede Mannschaft stellt 2 Spieler. Gespielt werden 4 Einzel im Modus jeder gegen jeden, kein Doppel.\n\nEndet die Begegnung 2:2, gibt es je nach Option ein Unentschieden oder es wird ein Entscheidungsdoppel angehängt. In K.-o.-Runden wird immer das Entscheidungsdoppel gespielt.",
+            "en": "Often used in special leagues or cup formats that focus on the individual duels or need to save time.\n\nEach team fields 2 players. 4 singles are played, everyone against everyone, no doubles.\n\nIf the tie ends 2:2, it is a draw or a deciding doubles is added, depending on the option. In knockout rounds the deciding doubles is always played."
+          },
+          "level": {
+            "id": "encounter",
+            "kind": "fixed",
+            "count": 4,
+            "allowDraw": true,
+            "unit": "match",
+            "name": {
+              "de": {
+                "one": "Begegnung",
+                "other": "Begegnungen",
+                "short": "Bg"
+              },
+              "en": {
+                "one": "Tie",
+                "other": "Ties",
+                "short": "T"
+              }
+            }
+          },
+          "variants": {
+            "draw": {
+              "name": {
+                "de": {
+                  "one": "Unentschieden bei 2:2"
+                },
+                "en": {
+                  "one": "Draw at 2:2"
+                }
+              },
+              "override": {}
+            },
+            "decider": {
+              "name": {
+                "de": {
+                  "one": "Entscheidungsdoppel bei 2:2"
+                },
+                "en": {
+                  "one": "Deciding doubles at 2:2"
+                }
+              },
+              "override": {
+                "encounter": {
+                  "allowDraw": false,
+                  "decider": true
+                }
+              }
+            }
+          },
+          "defaultVariant": "draw",
+          "positions": {
+            "home": [
+              "A1",
+              "A2",
+              "D"
+            ],
+            "away": [
+              "B1",
+              "B2",
+              "D"
+            ]
+          },
+          "games": [
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B1"
+            },
+            {
+              "type": "double",
+              "home": "D",
+              "away": "D",
+              "decider": true
+            }
+          ]
+        },
+        {
+          "id": "quick",
+          "name": {
+            "de": {
+              "one": "Quick-Cup (3-Punkte-System)"
+            },
+            "en": {
+              "one": "Quick Cup (3-point system)"
+            }
+          },
+          "description": {
+            "de": "Kurzformat für Turniere, Stadtmeisterschaften oder kompakte Hobbyligen, bei denen viele Begegnungen in kurzer Zeit gespielt werden müssen.\n\nJede Mannschaft stellt 2 Spieler. Gespielt werden 2 Einzel und 1 Doppel.\n\nDie Begegnung geht über höchstens 3 Spiele: Wer zuerst 2 Punkte hat, gewinnt die Begegnung.",
+            "en": "Short format for tournaments, city championships or compact hobby leagues where many ties have to be played in a short time.\n\nEach team fields 2 players. 2 singles and 1 doubles are played.\n\nThe tie lasts at most 3 matches: the first team to reach 2 points wins."
+          },
+          "level": {
+            "id": "encounter",
+            "kind": "bestOf",
+            "toWin": 2,
+            "unit": "match",
+            "name": {
+              "de": {
+                "one": "Begegnung",
+                "other": "Begegnungen",
+                "short": "Bg"
+              },
+              "en": {
+                "one": "Tie",
+                "other": "Ties",
+                "short": "T"
+              }
+            }
+          },
+          "variants": {
+            "firstTo2": {
+              "name": {
+                "de": {
+                  "one": "Bis 2 Punkte"
+                },
+                "en": {
+                  "one": "First to 2 points"
+                }
+              },
+              "override": {}
+            },
+            "all": {
+              "name": {
+                "de": {
+                  "one": "Alle 3 Spiele"
+                },
+                "en": {
+                  "one": "Play all 3 matches"
+                }
+              },
+              "override": {
+                "encounter": {
+                  "kind": "fixed",
+                  "count": 3
+                }
+              }
+            }
+          },
+          "defaultVariant": "firstTo2",
+          "positions": {
+            "home": [
+              "A1",
+              "A2",
+              "D"
+            ],
+            "away": [
+              "B1",
+              "B2",
+              "D"
+            ]
+          },
+          "games": [
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B2"
+            },
+            {
+              "type": "double",
+              "home": "D",
+              "away": "D"
+            }
+          ]
+        }
+      ],
+      "standings": {
+        "points": {
+          "win": 2,
+          "draw": 1,
+          "loss": 0
+        },
+        "tieBreakers": [
+          "diff:encounter",
+          "diff:match",
+          "diff:set",
+          "diff:ball"
+        ]
+      }
+    },
+    "team3": {
+      "type": "team",
+      "name": {
+        "de": {
+          "one": "3er-Mannschaft"
+        },
+        "en": {
+          "one": "Team of 3"
+        }
+      },
+      "teamSize": 3,
+      "maxPlayers": 3,
+      "defaultSystem": "corbillon",
+      "systems": [
+        {
+          "id": "corbillon",
+          "name": {
+            "de": {
+              "one": "Corbillon-Cup"
+            },
+            "en": {
+              "one": "Corbillon Cup"
+            }
+          },
+          "description": {
+            "de": "Eines der traditionsreichsten Systeme im Mannschaftsspielbetrieb, besonders im Damentischtennis und im Pokalspielbetrieb.\n\nJede Mannschaft meldet 3 Spieler (A1, A2, A3 bzw. B1, B2, B3). Die Einzel bestreiten 2 Spieler, im Doppel kann der dritte Spieler eingesetzt werden (z. B. A2/A3 oder A1/A3, je nach Aufstellung). Gespielt werden 4 Einzel und 1 Doppel; das Doppel ist das dritte Spiel.\n\nEs wird gespielt, bis eine Mannschaft 3 Punkte erreicht hat. Die Begegnung kann nach dem Doppel (3:0) oder nach dem 4. bzw. 5. Spiel (3:1 oder 3:2) beendet sein.",
+            "en": "One of the most traditional systems in team play, especially in women's table tennis and cup competitions.\n\nEach team registers 3 players (A1, A2, A3 or B1, B2, B3). Two players play the singles, the third player can be used in the doubles (e.g. A2/A3 or A1/A3, depending on the lineup). 4 singles and 1 doubles are played; the doubles is the third match.\n\nPlay continues until one team has 3 points, so the tie can end after the doubles (3:0) or after the 4th or 5th match (3:1 or 3:2)."
+          },
+          "level": {
+            "id": "encounter",
+            "kind": "bestOf",
+            "toWin": 3,
+            "unit": "match",
+            "name": {
+              "de": {
+                "one": "Begegnung",
+                "other": "Begegnungen",
+                "short": "Bg"
+              },
+              "en": {
+                "one": "Tie",
+                "other": "Ties",
+                "short": "T"
+              }
+            }
+          },
+          "variants": {
+            "firstTo3": {
+              "name": {
+                "de": {
+                  "one": "Bis 3 Punkte"
+                },
+                "en": {
+                  "one": "First to 3 points"
+                }
+              },
+              "override": {}
+            },
+            "all": {
+              "name": {
+                "de": {
+                  "one": "Alle 5 Spiele"
+                },
+                "en": {
+                  "one": "Play all 5 matches"
+                }
+              },
+              "override": {
+                "encounter": {
+                  "kind": "fixed",
+                  "count": 5
+                }
+              }
+            }
+          },
+          "defaultVariant": "firstTo3",
+          "positions": {
+            "home": [
+              "A1",
+              "A2",
+              "D"
+            ],
+            "away": [
+              "B1",
+              "B2",
+              "D"
+            ]
+          },
+          "games": [
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B1"
+            },
+            {
+              "type": "double",
+              "home": "D",
+              "away": "D"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B2"
+            }
+          ]
+        }
+      ],
+      "standings": {
+        "points": {
+          "win": 2,
+          "draw": 1,
+          "loss": 0
+        },
+        "tieBreakers": [
+          "diff:encounter",
+          "diff:match",
+          "diff:set",
+          "diff:ball"
+        ]
+      }
+    },
+    "team4": {
+      "type": "team",
+      "name": {
+        "de": {
+          "one": "4er-Mannschaft"
+        },
+        "en": {
+          "one": "Team of 4"
+        }
+      }
+    },
+    "team6": {
+      "type": "team",
+      "name": {
+        "de": {
+          "one": "6er-Mannschaft"
+        },
+        "en": {
+          "one": "Team of 6"
+        }
+      }
+    }
+  },
+  "standings": {
+    "points": {
+      "win": 2,
+      "draw": 1,
+      "loss": 0
+    },
+    "tieBreakers": [
+      "diff:match",
+      "diff:set",
+      "diff:ball"
+    ]
+  }
+}

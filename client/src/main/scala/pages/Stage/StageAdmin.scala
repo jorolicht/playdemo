@@ -49,6 +49,25 @@ object StageAdmin extends BasePage with JsWrapper:
   val BtnAddPlayer:    HtmlId = genId(name)
   /** Auswahl des Wertungssystems (Version) des Wettbewerbs. */
   val SelScoring:      HtmlId = genId(name)
+  /** Auswahl des Spielsystems der Begegnungen (Mannschaften). */
+  val SelEncSystem:    HtmlId = genId(name)
+  /** Info-Button zum gewählten Spielsystem (öffnet die Seite [[pages.SystemInfo]]). */
+  val BtnSystemInfo:   HtmlId = genId(name)
+
+  /**
+   * Optionen (Spielweisen) eines Spielsystems als `<option>`-Elemente; Standard-Spielweise zuerst.
+   *
+   * @param cfg      Spielsystem
+   * @param selected gewählte Spielweise (leer oder unbekannt = Standard)
+   * @return HTML der Optionen
+   */
+  def variantOptionsHtml(cfg: shared.sport.EncounterCfg, selected: String): String =
+    import shared.sport.localized
+    val sel = if cfg.variants.contains(selected) then selected else cfg.defaultVariant
+    cfg.variants.toSeq.sortBy(_._1 != cfg.defaultVariant).map { case (vId, v) =>
+      val label = v.name.localized(Global.lang).one.replace("&", "&amp;").replace("<", "&lt;")
+      s"""<option value="$vId"${if vId == sel then " selected" else ""}>$label</option>"""
+    }.mkString
 
   /**
    * Darf das Wertungssystem eines Wettbewerbs noch geändert werden? Nur in der Konfiguration, solange keine Stage
@@ -217,6 +236,7 @@ object StageAdmin extends BasePage with JsWrapper:
               stage.noPlayers = 0
               stage.noWinSets = 3
               stage.encVariant = ""
+              stage.encSystem = ""
               stage.data = StageData.GroupsStage(ArrayBuffer.empty)
               stage.matches.clear()
               stage.encounters.clear()
@@ -315,6 +335,20 @@ object StageAdmin extends BasePage with JsWrapper:
           }
         }
         render()
+
+      case `SelEncSystem` =>
+        // Optionen des neu gewählten Systems anzeigen; übernommen wird die Auswahl bei der Auslosung
+        val sysId = elem.asInstanceOf[dom.html.Select].value
+        for
+          comp <- Global.currentSelection.competition
+          cfg  <- TeamEncounter.configFor(comp, sysId)
+          sel  <- Option(dom.document.getElementById("rnd-enc-variant"))
+        do sel.innerHTML = variantOptionsHtml(cfg, "")
+
+      case `BtnSystemInfo` =>
+        for comp <- Global.currentSelection.competition do
+          val sysId = Option(dom.document.getElementById("rnd-enc-system")).map(_.asInstanceOf[dom.html.Select].value).getOrElse("")
+          loadPage(pages.SystemInfo.name, pages.SystemInfo.param(comp, sysId))
 
       case `SelScoring` =>
         val key = elem.asInstanceOf[dom.html.Select].value
@@ -464,6 +498,8 @@ object StageAdmin extends BasePage with JsWrapper:
         // Read configuration from UI
         val setsSelect = dom.document.getElementById("rnd-sets").asInstanceOf[dom.html.Select]
         if (setsSelect != null) r.noWinSets = setsSelect.value.toInt
+        val sysSelect = dom.document.getElementById("rnd-enc-system").asInstanceOf[dom.html.Select]
+        if (sysSelect != null) r.encSystem = sysSelect.value
         val encSelect = dom.document.getElementById("rnd-enc-variant").asInstanceOf[dom.html.Select]
         if (encSelect != null) r.encVariant = encSelect.value
         

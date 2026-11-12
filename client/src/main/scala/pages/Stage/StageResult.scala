@@ -23,6 +23,26 @@ object StageResult extends BasePage with JsWrapper:
     if Sports.current.encounter(g.format).isEmpty then default
     else Sports.current.forFormat(g.format).levelBelowMatch(depth).map(_.name.localized(Global.lang).other).getOrElse(default)
   val NextStageBtn:   HtmlId = genId(name)
+  /**
+   * Name des Wettbewerbs einer Wettbewerbsphase (Überschrift der Druckausgabe).
+   *
+   * @param stage Wettbewerbsphase
+   * @return Name, leer wenn der Wettbewerb fehlt
+   */
+  def compName(stage: Stage): String =
+    services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId).map(_.name).getOrElse("")
+
+  /** Button "Wettbewerb finalisieren" (Jeder-gegen-Jeden, KO-Runde, Schweizer System). */
+  val FinalizeCompBtn: HtmlId = genId(name)
+
+  /**
+   * Darf der ausgewählte Wettbewerb finalisiert werden? Nur laufende Wettbewerbe mit Schreibrecht.
+   *
+   * @return true, wenn der Button aktiv ist
+   */
+  def canFinalize: Boolean =
+    Global.currentSelection.competition.exists(_.status == CompStatus.RUN) &&
+      base.Global.hasTourneyAccess(services.TourneyDB.tourney)
 
   private var currentStartIndex: Int = 0
   private var resizeListener: Option[js.Function1[dom.Event, Unit]] = None
@@ -34,17 +54,17 @@ object StageResult extends BasePage with JsWrapper:
         comps.ContextHeader.render()
         stage.data match
           case StageData.GroupsStage(groups) => 
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.Groups(stage, groups.toSeq)))
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.Groups(stage, groups.toSeq))))
             true
           case StageData.KnockoutStage(ko) => 
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.SingleElimination(stage)))
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.SingleElimination(stage))))
             initSlidingWindow()
             true
           case StageData.SwissStage(sw) => 
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.SwissSystem(stage, sw)))
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.SwissSystem(stage, sw))))
             true
           case StageData.RoundRobinStage(rr) => 
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.RoundRobin(stage, Seq(rr))))
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.RoundRobin(stage, Seq(rr)))))
             true
       case None => 
         debug("StageResult: No stage selected, redirecting to Competition Info")
@@ -236,7 +256,28 @@ object StageResult extends BasePage with JsWrapper:
             case _ => debug("Start stage cancelled")
           }
         }
+      case `FinalizeCompBtn` => finalizeCompetition()
       case _ =>
+
+  /**
+   * Finalisiert nach Rückfrage den ausgewählten Wettbewerb (Status FIN, wie "Finalisieren" in der
+   * Wettbewerbsübersicht) und zeigt die Ergebnisse erneut an.
+   */
+  private def finalizeCompetition(): Unit =
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+    import shared.BoxButton
+    Global.currentSelection.competition.filter(_ => canFinalize).foreach { comp =>
+      dialogs.DlgMsgbox.show(gM("+finalize_confirm", comp.name), gM("+btn_finalize"), List(BoxButton.Yes, BoxButton.No)).map {
+        case BoxButton.Yes =>
+          services.TourneyDB.tourney.updateCompetition(comp.copy(status = CompStatus.FIN, version = comp.version + 1)) match
+            case Right(c) =>
+              Global.currentSelection = Global.currentSelection.copy(competition = Some(c))
+              comps.ContextHeader.render()
+              render()
+            case Left(err) => error(s"Failed to finalize competition: ${err.msgCode}")
+        case _ => debug("StageResult: finalize cancelled")
+      }
+    }
 
   /**
    * Startet die nachfolgende Runde für das Schweizer System (Swiss Stage) aus der Ergebnisansicht.

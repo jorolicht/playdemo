@@ -52,14 +52,20 @@
             }
         </div>
 
-        <div class="mt-4 pt-3 border-top d-flex justify-content-between">
+        <div class="mt-4 pt-3 border-top d-flex justify-content-between d-print-none">
             <button class="btn btn-outline-primary" onclick="window.print()">
                 <i class="bi bi-printer me-1"></i>@gM("+btn_print")
             </button>
             @if(!cert) {
-            <button class="btn btn-primary" @id(NextStageBtn, "onclick")>
-                @gM("+btn_next") <i class="bi bi-arrow-right ms-1"></i>
-            </button>
+            <div class="d-flex">
+                <button class="btn btn-primary" @id(NextStageBtn, "onclick")>
+                    @gM("+btn_next") <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+                <span class="text-muted mx-2 align-self-center">@gM("+or")</span>
+                <button class="btn btn-outline-success" @id(FinalizeCompBtn, "onclick") @if(!canFinalize){disabled}>
+                    <i class="bi bi-lock me-1"></i>@gM("+btn_finalize")
+                </button>
+            </div>
             }
         </div>
     </div>

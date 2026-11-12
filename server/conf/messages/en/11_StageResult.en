@@ -24,3 +24,6 @@ StageResult.status_running = Running
 StageResult.status_ready = Ready
 StageResult.group_rr_name = Round Robin Group
 StageResult.status_open = Open
+StageResult.or = or
+StageResult.btn_finalize = Finalize Competition
+StageResult.finalize_confirm = Finalize competition "{0}"? No further changes are possible afterwards (reactivate via the competition overview).

@@ -21,6 +21,10 @@ object TourneyInfo extends BasePage with JsWrapper:
   val TngComp:          HtmlId = genId(name)
   val TngStage:         HtmlId = genId(name)
   val BtnStageTab:      HtmlId = genId(name)
+  /** Button "Bearbeiten" eines Wettbewerbs in der Wettbewerbsliste, Suffix = Wettbewerbs-Id. */
+  val BtnEditComp:      HtmlId = genId(name)
+  /** Button "Löschen" eines Wettbewerbs in der Wettbewerbsliste, Suffix = Wettbewerbs-Id. */
+  val BtnDeleteComp:    HtmlId = genId(name)
 
   /** Stage-Reiter im Baum der Wettbewerbsliste: (Seitenname, Bootstrap-Icon, Message-Key), wie in StageLayout. */
   val StageTabs: Seq[(String, String, String)] = Seq(
@@ -74,6 +78,60 @@ object TourneyInfo extends BasePage with JsWrapper:
       debug("TourneyInfo: No tournament found, redirecting to Home")
       loadPage(MainView.name, "")
       false
+    }
+
+  /**
+   * Wettbewerb des Turniers zu einer Id aus dem Element-Suffix.
+   *
+   * @param idStr Wettbewerbs-Id als Text
+   * @return Wettbewerb, None wenn nicht vorhanden oder gelöscht
+   */
+  private def compOf(idStr: String): Option[Competition] =
+    idStr.toIntOption.flatMap(i => services.TourneyDB.tourney.competitions.find(c => c != null && !c.deleted && c.id == CompId(i)))
+
+  /**
+   * Bearbeitet einen Wettbewerb im Dialog (wie auf der Seite Wettbewerb-Info) und zeigt die Liste neu an.
+   *
+   * @param c Wettbewerb
+   */
+  private def editComp(c: Competition): Unit =
+    dialogs.DlgCompetition.show(c.category, Some(c)).map {
+      case Right(res) =>
+        services.TourneyDB.tourney.updateCompetition(res.competition) match {
+          case Right(newComp) =>
+            if (Global.currentSelection.competition.exists(_.id == newComp.id))
+              Global.currentSelection = Global.currentSelection.copy(competition = Some(newComp))
+            comps.ContextHeader.render()
+            render()
+          case Left(err) =>
+            error(s"Failed to update competition: ${err.msgCode}")
+            if (err.is("error.competition_already_exists") || err.is("competition.alreadyExists"))
+              dom.window.alert(base.Messages.gM("error.competition_already_exists"))
+            else dialogs.DlgMsgbox.showError(err, "Fehler beim Aktualisieren des Wettbewerbs")
+        }
+      case Left(_) => debug("Edit competition cancelled")
+    }
+
+  /**
+   * Löscht einen Wettbewerb nach Rückfrage (wie auf der Seite Wettbewerb-Info) und zeigt die Liste neu an.
+   *
+   * @param c Wettbewerb
+   */
+  private def deleteComp(c: Competition): Unit =
+    import shared.BoxButton
+    DlgMsgbox.show(s"Möchten Sie den Wettbewerb '${c.name}' wirklich löschen?", "Wettbewerb löschen", List(BoxButton.Yes, BoxButton.No)).map {
+      case BoxButton.Yes =>
+        services.TourneyDB.tourney.deleteCompetition(c.id) match {
+          case Right(_) =>
+            if (Global.currentSelection.competition.exists(_.id == c.id))
+              Global.currentSelection = Global.currentSelection.copy(competition = None, stage = None)
+            comps.ContextHeader.render()
+            render()
+          case Left(err) =>
+            error(s"Failed to delete competition: ${err.msgCode}")
+            dialogs.DlgMsgbox.showError(err, "Fehler beim Löschen des Wettbewerbs")
+        }
+      case _ => debug("Delete competition cancelled")
     }
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
@@ -160,6 +218,12 @@ object TourneyInfo extends BasePage with JsWrapper:
             loadPage(MainView.name, "")
           }
         }
+
+      case id if id.id.startsWith(BtnEditComp.id + "-") =>
+        compOf(id.id.substring(BtnEditComp.id.length + 1)).foreach(editComp)
+
+      case id if id.id.startsWith(BtnDeleteComp.id + "-") =>
+        compOf(id.id.substring(BtnDeleteComp.id.length + 1)).foreach(deleteComp)
 
       case id if id.id.startsWith(TngComp.id + "-") =>
         val coId = elem.id.substring(TngComp.id.length + 1).toInt

@@ -29,11 +29,15 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
   val BtnStartNextRound: HtmlId = genId(name)
   val BtnDemoScores:     HtmlId = genId(name)
 
-  // Mannschaften: Aufstellung (Suffix gameNo_side), Auf-/Zuklappen (gameNo), Spiel speichern/löschen (gameNo_no)
-  val LineupBtn:   HtmlId = genId(name)
-  val TngBtn:      HtmlId = genId(name)
-  val TeamSaveBtn: HtmlId = genId(name)
-  val TeamDelBtn:  HtmlId = genId(name)
+  // Mannschaften: Aufstellung (Suffix gameNo_side), Auf-/Zuklappen und Start (gameNo),
+  // Spiel speichern/löschen/Info (gameNo_no)
+  val LineupBtn:    HtmlId = genId(name)
+  val TngBtn:       HtmlId = genId(name)
+  val TeamStartBtn: HtmlId = genId(name)
+  val TeamSaveBtn:  HtmlId = genId(name)
+  val TeamDelBtn:   HtmlId = genId(name)
+  val TeamInfoBtn:  HtmlId = genId(name)
+  val TeamSchiriBtn: HtmlId = genId(name)
 
   /** Aufgeklappte Begegnungen (Stage-Id, Spielnummer), bleibt beim Neuzeichnen erhalten. */
   var expanded: Set[(Int, Int)] = Set()
@@ -87,6 +91,13 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         editLineup(gameNo, side)
       case id if id.id.startsWith(TngBtn.id + "-") =>
         toggleEncounter(elem.id.substring(TngBtn.id.length + 1).toInt)
+      case id if id.id.startsWith(TeamStartBtn.id + "-") =>
+        startEncounter(elem.id.substring(TeamStartBtn.id.length + 1).toInt)
+      case id if id.id.startsWith(TeamSchiriBtn.id + "-") =>
+        loadPage(PageNameTyp("StageScoreSheet"), s"team_${elem.id.substring(TeamSchiriBtn.id.length + 1)}")
+      case id if id.id.startsWith(TeamInfoBtn.id + "-") =>
+        val Array(gameNo, no) = elem.id.substring(TeamInfoBtn.id.length + 1).split('_').map(_.toInt)
+        showSubGameInfo(gameNo, no)
       case id if id.id.startsWith(TeamSaveBtn.id + "-") =>
         val Array(gameNo, no) = elem.id.substring(TeamSaveBtn.id.length + 1).split('_').map(_.toInt)
         saveSubGame(gameNo, no)
@@ -141,12 +152,20 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     for
       stage <- Global.currentSelection.stage
       comp  <- Global.currentSelection.competition
-      cfg   <- TeamEncounter.configFor(comp)
+      cfg   <- TeamEncounter.configFor(comp, stage.encSystem)
     yield (stage, comp, cfg)
 
   /** true, wenn Ergebnisse der Stage geändert werden dürfen. */
   private def canEdit(stage: Stage, comp: Competition): Boolean =
     comp.status != CompStatus.FIN && stage.status == StageStatus.EIN && base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+
+  /**
+   * true, wenn Ergebnisse der Stage gelöscht werden dürfen; anders als bei der Eingabe auch in einer beendeten Stage
+   * (wie bei Einzelspielen, siehe [[deleteMatchResult]]).
+   */
+  private def canDelete(stage: Stage, comp: Competition): Boolean =
+    comp.status != CompStatus.FIN && (stage.status == StageStatus.EIN || stage.status == StageStatus.FIN) &&
+      base.Global.hasTourneyAccess(services.TourneyDB.tourney)
 
   /**
    * Speichert die Stage nach einer Änderung an einer Begegnung und zeichnet die Seite neu.
@@ -174,9 +193,12 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
       val key = (stage.id.value, gameNo)
       val open = !expanded.contains(key)
       expanded = if (open) expanded + key else expanded - key
-      val row  = dom.document.getElementById(s"enc-sub-$gameNo")
+      val rows = dom.document.querySelectorAll(s".enc-sub-$gameNo")
       val icon = dom.document.getElementById(s"tng-icon-$gameNo")
-      if (row != null) { if (open) row.classList.remove("d-none") else row.classList.add("d-none") }
+      for (i <- 0 until rows.length) {
+        val row = rows.item(i).asInstanceOf[dom.Element]
+        if (open) row.classList.remove("d-none") else row.classList.add("d-none")
+      }
       if (icon != null) icon.setAttribute("class", if (open) "bi bi-caret-down-fill" else "bi bi-caret-right-fill")
     }
 
@@ -193,12 +215,79 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         val sno  = if (side == 0) m.stNoA else m.stNoB
         val enc  = stage.encounters.find(_.gameNo == gameNo)
         comp.teams.find(_.id == sno.teamId).foreach { team =>
-          dialogs.DlgLineup.show(cfg, side, team, services.TourneyDB.tourney.players.toSeq, enc.map(_.lineup(side)).getOrElse(Lineup())).map {
+          dialogs.DlgLineup.show(cfg, side, team, services.TourneyDB.tourney.players.toSeq, enc.map(_.lineup(side)).getOrElse(Lineup()),
+                                  readOnly = enc.exists(TeamEncounter.isStarted)).map {
             case Right(lineup) =>
               expanded = expanded + ((stage.id.value, gameNo))
               saveTeamChange(stage, TeamEncounter.setLineup(stage, comp, gameNo, side, lineup))
             case Left(_) => ()
           }
+        }
+      }
+    }
+
+  /**
+   * Startet eine Begegnung (beide Aufstellungen abgegeben); danach sind die Eingaben der Einzel und Doppel möglich.
+   *
+   * @param gameNo Spielnummer der Begegnung
+   */
+  def startEncounter(gameNo: Int): Unit =
+    teamContext.foreach { case (stage, comp, _) =>
+      if (canEdit(stage, comp)) {
+        val m = stage.getMatch(gameNo)
+        if (m.startTime == null || m.startTime.trim.isEmpty) m.startTime = nowTimestamp()
+        expanded = expanded + ((stage.id.value, gameNo))
+        saveTeamChange(stage, TeamEncounter.start(stage, comp.typ, gameNo))
+      }
+    }
+
+  /**
+   * Zeigt die Informationen zu einem Spiel (Einzel/Doppel) einer Begegnung.
+   *
+   * @param gameNo Spielnummer der Begegnung
+   * @param no     Nummer des Spiels in der Begegnung
+   */
+  def showSubGameInfo(gameNo: Int, no: Int): Unit =
+    teamContext.foreach { case (stage, comp, cfg) =>
+      stage.encounters.find(_.gameNo == gameNo).flatMap(_.games.find(_.no == no)).foreach { g =>
+        val m     = stage.getMatch(gameNo)
+        val pants = comp.pants1Stage.toSeq
+        val pos   = cfg.games.lift(no - 1).map(c => s" (${c.home}–${c.away})").getOrElse("")
+        val status = g.status match
+          case MEntry.MS_BLOCK => gM("+game_blocked")
+          case MEntry.MS_SKIP  => gM("+game_skipped")
+          case MEntry.MS_FIX   => gM("+game_walkover")
+          case MEntry.MS_FIN   => "Beendet"
+          case _               => "Bereit"
+        def orDash(s: String) = if (s == null || s.trim.isEmpty) "-" else s
+        val body =
+          s"""Spiel-Nr:       $gameNo.$no
+             |Wettbewerb:     ${comp.name}
+             |Begegnung:      ${formatSnoName(m.stNoA, pants)}  vs  ${formatSnoName(m.stNoB, pants)}
+             |Spiel:          ${if (g.double) gM("+double") else gM("+single")}$pos
+             |Paarung:        ${formatPlayerSno(g.snoA)}  vs  ${formatPlayerSno(g.snoB)}
+             |Tisch:          ${orDash(g.playfield)}
+             |Status:         $status
+             |Sätze:          ${g.sets._1}:${g.sets._2} (Satzstände: ${orDash(g.result.replace("·", ", "))})""".stripMargin
+        DlgMsgbox.show(body, gM("+sub_info_title", s"$gameNo.$no"), List(shared.BoxButton.Ok))
+      }
+    }
+
+  /**
+   * Speichert den Tisch eines Spiels einer Begegnung (ohne Neuzeichnen).
+   *
+   * @param gameNo Spielnummer der Begegnung
+   * @param no     Nummer des Spiels
+   * @param table  Tisch
+   */
+  private def updateSubGameTable(gameNo: Int, no: Int, table: String): Unit =
+    teamContext.foreach { case (stage, comp, _) =>
+      if (canEdit(stage, comp)) {
+        stage.encounters.find(_.gameNo == gameNo).flatMap(_.games.find(_.no == no)).foreach { g =>
+          g.playfield = table
+          services.TourneyDB.tourney.updateStage(stage) match
+            case Right(updated) => Global.currentSelection = Global.currentSelection.copy(stage = Some(updated))
+            case Left(err)      => error(s"StageInput: Failed to save table: ${err.msgCode}")
         }
       }
     }
@@ -274,7 +363,8 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
    */
   def deleteSubGame(gameNo: Int, no: Int): Unit =
     teamContext.foreach { case (stage, comp, _) =>
-      if (canEdit(stage, comp)) saveTeamChange(stage, TeamEncounter.inputGame(stage, comp.typ, gameNo, no, (0, 0), ""))
+      if (canDelete(stage, comp)) saveTeamChange(stage, TeamEncounter.inputGame(stage, comp.typ, gameNo, no, (0, 0), ""))
+      else debug(s"StageInput: delete of game $gameNo.$no not allowed (stage ${stage.status}, competition ${comp.status})")
     }
 
   /**
@@ -311,6 +401,8 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
           }
         }
       }
+      if (stage.encounters.find(_.gameNo == m.gameNo).exists(e => !TeamEncounter.isStarted(e)))
+        TeamEncounter.start(stage, comp.typ, m.gameNo)
       stage.encounters.find(_.gameNo == m.gameNo).foreach { e =>
         e.games.filter(_.status == MEntry.MS_READY).map(_.no).foreach { no =>
           if (e.games.find(_.no == no).exists(_.status == MEntry.MS_READY)) {
@@ -431,9 +523,10 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         import dialogs.DlgMsgbox
         import shared.BoxButton
 
+        val isTeam = TeamEncounter.isTeam(comp.typ)
         DlgMsgbox.show(
-          "Möchten Sie das Ergebnis dieses Spiels wirklich löschen?",
-          "Spielergebnis löschen",
+          if (isTeam) gM("+delete_team_confirm") else "Möchten Sie das Ergebnis dieses Spiels wirklich löschen?",
+          if (isTeam) gM("+delete_team_title") else "Spielergebnis löschen",
           List(BoxButton.Yes, BoxButton.No)
         ).map {
           case BoxButton.Yes =>
@@ -559,7 +652,7 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         debug("StageInput: Cannot generate demo scores because stage is not in EIN status, competition is finalized, or user has no write access.")
       } else {
         val winSets = if (stage.noWinSets > 0) stage.noWinSets else 3
-        val teamCfg = compOpt.flatMap(c => TeamEncounter.configFor(c).map(cfg => (c, cfg)))
+        val teamCfg = compOpt.flatMap(c => TeamEncounter.configFor(c, stage.encSystem).map(cfg => (c, cfg)))
         var changed = true
         var loopCount = 0
         while (changed && loopCount < 50) {
@@ -628,6 +721,13 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
       val gameNo  = inputEl.getAttribute("data-game").toInt
       val no      = inputEl.getAttribute("data-sub").toInt
       inputEl.oninput = (_: dom.Event) => checkSubValidity(stage, gameNo, no)
+    }
+    val teamTables = dom.document.querySelectorAll(".team-table-input")
+    for (i <- 0 until teamTables.length) {
+      val tInput = teamTables.item(i).asInstanceOf[dom.html.Input]
+      val gameNo = tInput.getAttribute("data-game").toInt
+      val no     = tInput.getAttribute("data-sub").toInt
+      tInput.onchange = (_: dom.Event) => updateSubGameTable(gameNo, no, tInput.value.trim)
     }
     
     // Attach event listeners for table number input
@@ -899,8 +999,12 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
           if (el != null) el.disabled = rowDisabled
         }
 
+        // Löschen ist auch in einer beendeten Stage erlaubt (wie in deleteMatchResult)
+        val noTrashAccess = !base.Global.hasTourneyAccess(services.TourneyDB.tourney) ||
+                            comp.exists(_.status == CompStatus.FIN) ||
+                            (stage.status != StageStatus.EIN && stage.status != StageStatus.FIN)
         val deleteBtn = dom.document.getElementById(s"${DeleteMatchBtn.id}-${m.gameNo}").asInstanceOf[dom.html.Button]
-        if (deleteBtn != null) deleteBtn.disabled = rowDisabled
+        if (deleteBtn != null) deleteBtn.disabled = noTrashAccess || isBlocked
 
         val saveBtn = dom.document.getElementById(s"${SaveMatchBtn.id}-${m.gameNo}").asInstanceOf[dom.html.Button]
         if (saveBtn != null && rowDisabled) saveBtn.disabled = true

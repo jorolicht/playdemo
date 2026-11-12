@@ -9,7 +9,8 @@
 
 @compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
 @isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
-@encCfg = @{ compOpt.flatMap(c => shared.format.TeamEncounter.configFor(c)) }
+@encCfg = @{ compOpt.flatMap(c => shared.format.TeamEncounter.configFor(c, stage.encSystem)) }
+@encSystems = @{ compOpt.map(c => shared.format.TeamEncounter.systemsFor(c)).getOrElse(Seq()) }
 @scoringKey = @{ compOpt.map(c => shared.sport.Sports.resolveKey(c.scoring)).getOrElse("") }
 @scoringLocked = @{ !compOpt.exists(scoringChangeable) || !base.Global.hasTourneyAccess(services.TourneyDB.tourney) }
 
@@ -91,11 +92,22 @@
                 </div>
                 @encCfg.map { cfg =>
                     <div class="col-md-4">
+                        <label class="form-label fw-bold">@gM("+system_label")</label>
+                        <div class="input-group">
+                            <select class="form-select" id="rnd-enc-system" @id(SelEncSystem, "onchange") @disabledIfAus>
+                                @encSystems.map { sys =>
+                                    <option value="@sys.id" @if(sys.id == cfg.id){selected}>@sys.name.localized(base.Global.lang).one</option>
+                                }
+                            </select>
+                            <button class="btn btn-outline-secondary" type="button" @id(BtnSystemInfo, "onclick") title="@gM("+system_info")">
+                                <i class="bi bi-info-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
                         <label class="form-label fw-bold">@gM("+encounter_label")</label>
                         <select class="form-select" id="rnd-enc-variant" @disabledIfAus>
-                            @cfg.variants.toSeq.sortBy(_._1 != cfg.defaultVariant).map { case (vId, v) =>
-                                <option value="@vId" @{if(stage.encVariant == vId || (stage.encVariant.isEmpty && vId == cfg.defaultVariant)) "selected" else ""}>@v.name.localized(base.Global.lang).one</option>
-                            }
+                            @Html(variantOptionsHtml(cfg, stage.encVariant))
                         </select>
                     </div>
                 }

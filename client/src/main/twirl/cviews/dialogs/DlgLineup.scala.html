@@ -3,11 +3,11 @@
 @import dialogs.DlgLineup.*
 @import cviews.helper.html.*
 
-@(cfg: EncounterCfg, side: Int, team: Team, roster: Seq[Player], current: Lineup)
+@(cfg: EncounterCfg, side: Int, team: Team, roster: Seq[Player], current: Lineup, readOnly: Boolean)
 
 @playerSelect(pos: String, idx: Int) = {
     @defining(current.players.getOrElse(pos, Seq()).lift(idx - 1).map(_.value).getOrElse(0)) { sel =>
-        <select class="form-select form-select-sm" id="@selId(pos, idx)">
+        <select class="form-select form-select-sm" id="@selId(pos, idx)" @if(readOnly){disabled}>
             <option value="0">@gM("DlgLineup.missing")</option>
             @roster.map { p =>
                 <option value="@p.id.value" @if(p.id.value == sel){selected}>@p.displayName</option>
@@ -40,11 +40,15 @@
                         }
                     </tbody>
                 </table>
-                <div class="form-text">@gM("DlgLineup.hint")</div>
+                @if(readOnly) {
+                    <div class="alert alert-warning small py-2 mb-0">@gM("DlgLineup.started")</div>
+                } else {
+                    <div class="form-text">@gM("DlgLineup.hint")</div>
+                }
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>@gM("DlgLineup.cancel")</button>
-                <button type="button" class="btn btn-primary" @id(ApplyId)>@gM("DlgLineup.save")</button>
+                <button type="button" class="btn btn-primary" @id(ApplyId) @if(readOnly){disabled}>@gM("DlgLineup.save")</button>
             </div>
         </div>
     </div>

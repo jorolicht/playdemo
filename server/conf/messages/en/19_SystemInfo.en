@@ -1,0 +1,19 @@
+# Info page team systems
+SystemInfo.title = Team Systems
+SystemInfo.scoring = Scoring system {0}
+SystemInfo.back = Back
+SystemInfo.intro = The team system and its option are chosen per stage in the administration. In the order of play A stands for the first, B for the second team; the positions are filled in the lineup of each tie.
+SystemInfo.none = This scoring system contains no team systems.
+SystemInfo.roster = {0} regular players, squad up to {1} players
+SystemInfo.selected = selected
+SystemInfo.order = Order of play
+SystemInfo.options = Options
+SystemInfo.default = default
+SystemInfo.single = Singles
+SystemInfo.double = Doubles
+SystemInfo.decider_game = deciding match, only if tied
+SystemInfo.rule_best_of = Play continues until one team has {0} points.
+SystemInfo.rule_all = All {0} matches are played.
+SystemInfo.rule_draw = If tied, the tie ends in a draw.
+SystemInfo.rule_decider = If tied, the deciding match decides.
+SystemInfo.ko_hint = There are no draws in knockout rounds; the deciding match is played there.

@@ -38,6 +38,7 @@ DlgLineup.missing = – missing –
 DlgLineup.single = Singles
 DlgLineup.double = Doubles
 DlgLineup.hint = Empty positions count as lost. If all positions stay empty, the team did not show up.
+DlgLineup.started = The tie has started, the line-up can no longer be changed.
 DlgLineup.cancel = Cancel
 DlgLineup.save = Apply
 DlgLineup.err_single = A player can only play one singles match.

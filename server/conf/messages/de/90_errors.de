@@ -37,3 +37,5 @@ err0264.encounter.team.not.found                    = Mannschaft {0} nicht gefun
 err0265.encounter.game.not.found                    = Spiel {0} der Begegnung nicht gefunden.
 err0266.encounter.game.not.playable                 = Spiel {0} kann nicht eingegeben werden (Aufstellung fehlt, kampflos oder entfällt).
 err0267.encounter.game.invalid.result               = Ungültiges Ergebnis für Spiel {0}.
+err0268.encounter.lineup.missing                    = Begegnung {0} kann erst nach Abgabe beider Aufstellungen gestartet werden.
+err0269.encounter.started                           = Begegnung {0} ist gestartet, die Aufstellung kann nicht mehr geändert werden.

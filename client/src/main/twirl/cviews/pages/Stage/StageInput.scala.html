@@ -10,7 +10,7 @@
 @isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
 @disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || stage.status != StageStatus.EIN) "disabled" else "" }
 @disabledTrashNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || (stage.status != StageStatus.EIN && stage.status != StageStatus.FIN)) "disabled" else "" }
-@teamCfg = @{ compOpt.flatMap(c => TeamEncounter.configFor(c)) }
+@teamCfg = @{ compOpt.flatMap(c => TeamEncounter.configFor(c, stage.encSystem)) }
 
 @anyTable(roundNo: Int, title: String, roundMatches: Seq[(MEntry, String, String)]) = {
     @if(teamCfg.isDefined) {
