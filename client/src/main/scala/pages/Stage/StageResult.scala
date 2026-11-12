@@ -10,6 +10,15 @@ import scala.scalajs.js
 object StageResult extends BasePage with JsWrapper:
   def name = PageNameTyp("StageResult")
   val NextStageBtn:   HtmlId = genId(name)
+  /**
+   * Name des Wettbewerbs einer Wettbewerbsphase (Überschrift der Druckausgabe).
+   *
+   * @param stage Wettbewerbsphase
+   * @return Name, leer wenn der Wettbewerb fehlt
+   */
+  def compName(stage: Stage): String =
+    services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId).map(_.name).getOrElse("")
+
   /** Button "Wettbewerb finalisieren" (Jeder-gegen-Jeden, KO-Runde, Schweizer System). */
   val FinalizeCompBtn: HtmlId = genId(name)
 
@@ -32,17 +41,17 @@ object StageResult extends BasePage with JsWrapper:
         comps.ContextHeader.render()
         stage.data match
           case StageData.GroupsStage(groups) => 
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.Groups(stage, groups.toSeq)))
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.Groups(stage, groups.toSeq))))
             true
           case StageData.KnockoutStage(ko) => 
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.SingleElimination(stage)))
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.SingleElimination(stage))))
             initSlidingWindow()
             true
           case StageData.SwissStage(sw) => 
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.SwissSystem(stage, sw)))
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.SwissSystem(stage, sw))))
             true
           case StageData.RoundRobinStage(rr) => 
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.RoundRobin(stage, Seq(rr))))
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.RoundRobin(stage, Seq(rr)))))
             true
       case None => 
         debug("StageResult: No stage selected, redirecting to Competition Info")
