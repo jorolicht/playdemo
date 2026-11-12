@@ -10,6 +10,17 @@ import scala.scalajs.js
 object StageResult extends BasePage with JsWrapper:
   def name = PageNameTyp("StageResult")
   val NextStageBtn:   HtmlId = genId(name)
+  /** Button "Wettbewerb finalisieren" (Jeder-gegen-Jeden, KO-Runde, Schweizer System). */
+  val FinalizeCompBtn: HtmlId = genId(name)
+
+  /**
+   * Darf der ausgewählte Wettbewerb finalisiert werden? Nur laufende Wettbewerbe mit Schreibrecht.
+   *
+   * @return true, wenn der Button aktiv ist
+   */
+  def canFinalize: Boolean =
+    Global.currentSelection.competition.exists(_.status == CompStatus.RUN) &&
+      base.Global.hasTourneyAccess(services.TourneyDB.tourney)
 
   private var currentStartIndex: Int = 0
   private var resizeListener: Option[js.Function1[dom.Event, Unit]] = None
@@ -223,7 +234,28 @@ object StageResult extends BasePage with JsWrapper:
             case _ => debug("Start stage cancelled")
           }
         }
+      case `FinalizeCompBtn` => finalizeCompetition()
       case _ =>
+
+  /**
+   * Finalisiert nach Rückfrage den ausgewählten Wettbewerb (Status FIN, wie "Finalisieren" in der
+   * Wettbewerbsübersicht) und zeigt die Ergebnisse erneut an.
+   */
+  private def finalizeCompetition(): Unit =
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+    import shared.BoxButton
+    Global.currentSelection.competition.filter(_ => canFinalize).foreach { comp =>
+      dialogs.DlgMsgbox.show(gM("+finalize_confirm", comp.name), gM("+btn_finalize"), List(BoxButton.Yes, BoxButton.No)).map {
+        case BoxButton.Yes =>
+          services.TourneyDB.tourney.updateCompetition(comp.copy(status = CompStatus.FIN, version = comp.version + 1)) match
+            case Right(c) =>
+              Global.currentSelection = Global.currentSelection.copy(competition = Some(c))
+              comps.ContextHeader.render()
+              render()
+            case Left(err) => error(s"Failed to finalize competition: ${err.msgCode}")
+        case _ => debug("StageResult: finalize cancelled")
+      }
+    }
 
   /**
    * Startet die nachfolgende Runde für das Schweizer System (Swiss Stage) aus der Ergebnisansicht.

@@ -169,9 +169,15 @@
                         <i class="bi bi-printer me-1"></i>@gM("+btn_print")
                     </button>
                     @if(!cert) {
-                    <button class="btn btn-success px-4 fw-bold" @id(NextStageBtn, "onclick")>
-                        @gM("StageDraw.btn_start_round", (maxRound + 1).toString) <i class="bi bi-play-circle ms-1"></i>
-                    </button>
+                    <div class="d-flex">
+                        <button class="btn btn-success px-4 fw-bold" @id(NextStageBtn, "onclick")>
+                            @gM("StageDraw.btn_start_round", (maxRound + 1).toString) <i class="bi bi-play-circle ms-1"></i>
+                        </button>
+                        <span class="text-muted mx-2 align-self-center">@gM("+or")</span>
+                        <button class="btn btn-outline-success" @id(FinalizeCompBtn, "onclick") @if(!canFinalize){disabled}>
+                            <i class="bi bi-lock me-1"></i>@gM("+btn_finalize")
+                        </button>
+                    </div>
                     }
                 </div>
             }
