@@ -19,7 +19,7 @@ test.describe('UseCase 4: Öffentliche Wettbewerbsseite (CompetitionWelcome)', (
     await expect(page.locator('body')).toBeVisible();
   });
 
-  test('TC-CW-02 [🌐]: Phasentabelle gelistet', async ({ page }) => {
+  test('TC-CW-02 [🌐]: Abschnittstabelle gelistet', async ({ page }) => {
     if (await page.locator('table').count() > 0) {
       await expect(page.locator('table').first()).toBeVisible();
     } else {

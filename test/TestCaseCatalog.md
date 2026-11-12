@@ -90,7 +90,7 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 
 ### 4.1 Anonymer Besucher (🌐)
 - [x] **TC-CW-01 [🌐]:** Aufrufen von `CompetitionWelcome` mit einer Wettbewerbs-ID. Name, Sportart, Modus, TTR-Bereich und Status werden angezeigt.
-- [x] **TC-CW-02 [🌐]:** Überprüfung der Phasentabelle. Laufende und beendete Austragungsphasen werden gelistet.
+- [x] **TC-CW-02 [🌐]:** Überprüfung der Abschnittstabelle. Laufende und beendete Wettbewerbsabschnitte werden gelistet.
 - [x] **TC-CW-03 [🌐]:** Klick auf „Ergebnisse / Runden anzeigen“. Die Ergebnisse des jeweiligen Abschnitts werden schreibgeschützt geöffnet (`StageAdmin` im View-Modus).
 - [x] **TC-CW-04 [🌐]:** Überprüfung der Teilnehmerliste. Namen, Vereine, TTR-Werte und Jahrgänge werden angezeigt. Klick auf Spaltenheader sortiert die Liste.
 - [x] **TC-CW-05 [🌐]:** Klick auf den Button „Turnier-Übersicht“. Führt zurück zu `TourneyWelcome`.
@@ -125,7 +125,7 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 
 ### 6.1 Turnierverwalter (👤)
 - [x] **TC-CI-01 [👤]:** Aufrufen von `CompetitionInfo`. Zeigt Wettbewerbs-Details, Abschnittsübersicht und die Teilnehmer-Akkordeon-Tabelle.
-- [x] **TC-CI-02 [👤]:** Klick auf „Austragungsphase starten“. Öffnet den Auslosungs-Assistenten (`StageAdmin` / `StageDraw`).
+- [x] **TC-CI-02 [👤]:** Klick auf „Wettbewerbsabschnitt starten“. Öffnet den Auslosungs-Assistenten (`StageAdmin` / `StageDraw`).
 - [x] **TC-CI-03 [👤]:** Klick auf „Wettbewerb bearbeiten“. Erlaubt die Anpassung von TTR-Limits, Altersklassen und Spieltischen.
 - [x] **TC-CI-04 [👤]:** Auswahl der Urkunden-Radiobuttons für einen Abschnitt. Markiert den Abschnitt als maßgeblich für den Urkundendruck.
 - [x] **TC-CI-05 [👤]:** Klick auf „Wettbewerb beenden“. Der Status wechselt auf Beendet und Bearbeitungsaktionen werden gesperrt.

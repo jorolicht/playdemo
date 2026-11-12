@@ -88,7 +88,7 @@ test.describe('UseCase 9: Ergebniseingabe & Live-Scores (StageInput & StageResul
     await compCell.click();
 
     // 3. Start a new stage from CompetitionInfo
-    const btnStartStage = page.locator('button[id*="BtnStartStage"], button:has-text("Austragungsphase")');
+    const btnStartStage = page.locator('button[id*="BtnStartStage"], button:has-text("Wettbewerbsabschnitt")');
     await expect(btnStartStage).toBeVisible({ timeout: 5000 });
     await btnStartStage.click();
 
@@ -164,7 +164,7 @@ test.describe('UseCase 9: Ergebniseingabe & Live-Scores (StageInput & StageResul
     await compCell.click();
 
     // 3. Start a new stage from CompetitionInfo
-    const btnStartStage = page.locator('button[id*="BtnStartStage"], button:has-text("Austragungsphase")');
+    const btnStartStage = page.locator('button[id*="BtnStartStage"], button:has-text("Wettbewerbsabschnitt")');
     await expect(btnStartStage).toBeVisible({ timeout: 5000 });
     await btnStartStage.click();
 
@@ -239,7 +239,7 @@ test.describe('UseCase 9: Ergebniseingabe & Live-Scores (StageInput & StageResul
     await compCell.click();
 
     // 3. Start a new stage from CompetitionInfo
-    const btnStartStage = page.locator('button[id*="BtnStartStage"], button:has-text("Austragungsphase")');
+    const btnStartStage = page.locator('button[id*="BtnStartStage"], button:has-text("Wettbewerbsabschnitt")');
     await expect(btnStartStage).toBeVisible({ timeout: 5000 });
     await btnStartStage.click();
 

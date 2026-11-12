@@ -40,7 +40,7 @@ Twirl-Templates und gemeinsam genutzter Domänencode.
 - **Wettbewerbsabschnitte**, die sich verketten lassen: Jeder gegen jeden, Gruppen, K.o.-System, Schweizer System
 - **Auslosung**, **Ergebniseingabe** mit Tischvergabe und laufender Spielzeit, **Ergebnisse** (Tabellen, K.o.-Baum)
 - **Schiedsrichterzettel** mit QR-Code zur Ergebnis-Selbsteingabe per Smartphone
-- **Ergebnisliste und Urkunden** auf Basis einer frei wählbaren Urkundenphase
+- **Ergebnisliste und Urkunden** auf Basis eines frei wählbaren Urkundenabschnitts
 - **Matchboard** (Live-Anzeige) über WebSockets/SSE
 - **Import** von Click-TT-Daten
 - Speicherung in der **Cloud** (WordPress) oder **lokal** im Browser
