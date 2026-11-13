@@ -433,6 +433,7 @@ dlg.comp.btnCreate                                  = Create
 dlg.comp.errName                                    = Please enter a valid name.
 dlg.comp.errDate                                    = The competition date must be within the tournament period.
 dlg.comp.titleEdit                                  = Edit Competition
+dlg.comp.locked                                     = The competition has started (a stage has been created). Only name, start and TTR from/to can still be changed.
 btn.save                                            = Save
 
 ###
