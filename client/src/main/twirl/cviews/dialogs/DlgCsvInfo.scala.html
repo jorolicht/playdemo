@@ -32,6 +32,10 @@
                         <tr><td><code>Jahrgang</code></td><td><code>Birth Year</code></td><td>@gM("DlgCsvInfo.col_year")</td></tr>
                         <tr><td><code>EMail</code></td><td><code>E-Mail</code></td><td>@gM("DlgCsvInfo.col_email")</td></tr>
                         <tr><td><code>WhatsApp</code></td><td></td><td>@gM("DlgCsvInfo.col_whatsapp")</td></tr>
+                        @if(shared.format.TeamEncounter.isTeam(typ)) {
+                            <tr><td><code>Mannschaft</code></td><td><code>Team</code></td><td>@gM("DlgCsvInfo.col_team")</td></tr>
+                            <tr><td><code>Mannschaftsverein</code></td><td><code>Team Club</code></td><td>@gM("DlgCsvInfo.col_team_club")</td></tr>
+                        }
                     </tbody>
                 </table>
                 <p class="text-muted">@gM("DlgCsvInfo.cols_hint")</p>
@@ -41,6 +45,15 @@
 Max;Müller;TTC Blau-Weiß;1520;1985;max.mueller@@example.com;+49 170 1234567
 Anna;Schmidt;TSV Grün;1385;2001;;
 Peter;Maier;TTC Blau-Weiß;;;;</code></pre>
+                @if(shared.format.TeamEncounter.isTeam(typ)) {
+                    <h6 class="fw-bold">@gM("DlgCsvInfo.example_team_title")</h6>
+<pre class="bg-light border rounded p-2 mb-3"><code>Vorname;Nachname;Verein;TTR;Mannschaft;Mannschaftsverein
+Ada;Kahn;TV Traktor Leipzig;1792;FC-Bayern-Fans;TTC Freising Allstars
+Addi;Tion;Torpedo Moskau;1864;FC-Bayern-Fans;
+Hans;Wurst;FC Bayern;1992;FC-Bayern-Fans;
+Max;Müller;TSV Grün;1520;Die Netzroller;TSV Grün
+Anna;Schmidt;TSV Grün;1385;Die Netzroller;</code></pre>
+                }
 
                 <h6 class="fw-bold">@gM("DlgCsvInfo.proc_title")</h6>
                 <ul>

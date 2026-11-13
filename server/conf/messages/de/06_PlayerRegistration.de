@@ -34,3 +34,6 @@ PlayerRegistration.delete_double_title = Doppel löschen
 PlayerRegistration.delete_double_question = Doppel „{0}“ löschen?\nDie Spieler bleiben im Turnier.
 PlayerRegistration.delete_team_title = Mannschaft löschen
 PlayerRegistration.delete_team_question = Mannschaft „{0}“ löschen?\nDie Spieler bleiben im Turnier.
+PlayerRegistration.csv_team_errors_title = CSV-Import: Mannschaften
+PlayerRegistration.csv_team_too_many = Mannschaft „{0}“ nicht übernommen: {1} Spieler, erlaubt sind höchstens {2}.
+PlayerRegistration.csv_team_in_other = Mannschaft „{0}“ nicht übernommen: ein Spieler gehört schon zu einer anderen Mannschaft.

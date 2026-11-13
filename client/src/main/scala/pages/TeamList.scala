@@ -128,34 +128,51 @@ object TeamList extends BasePage with JsWrapper:
         if res.players.exists(usedElsewhere.contains) then
           dom.window.alert(gM("TeamList.err_player_in_other_team"))
         else
-          val clubId =
-            if res.clubName.isEmpty then 0
-            else tourney.clubs.find(_.name.equalsIgnoreCase(res.clubName)).map(_.id.toInt)
-                   .orElse(tourney.addClub(res.clubName, checkSimilarity = false).toOption.map(_.id.toInt)).getOrElse(0)
-          val t = team.getOrElse {
-            val nt = Team(comp.teams.map(_.id).maxOption.getOrElse(0) + 1, res.name)
-            comp.teams += nt
-            nt
-          }
-          t.name    = res.name
-          t.clubId  = clubId
-          t.players = res.players
-          val pant = Pant(
-            id     = t.sno,
-            name   = t.name,
-            club   = res.clubName,
-            rating = t.rating(cfg.teamSize, tourney.players.toSeq),
-            active = true,
-            status = PantStatus.PLAY
-          )
-          val idx = comp.pants1Stage.indexWhere(_.id == t.sno)
-          if idx >= 0 then comp.pants1Stage(idx) = pant.copy(status = comp.pants1Stage(idx).status, active = comp.pants1Stage(idx).active)
-          else comp.pants1Stage += pant
-          tourney.updateCompetition(comp) match
+          saveTeam(comp, cfg, team, res.name, res.clubName, res.players) match
             case Left(err) => dialogs.DlgMsgbox.showError(err, gM("TeamList.err_save"))
             case Right(_)  => onDone()
       case Left(_) => ()
     }
+
+  /**
+   * Legt eine Mannschaft an oder ändert sie, legt einen unbekannten Verein an und aktualisiert den zugehörigen
+   * Teilnehmer des Wettbewerbs (Dialog und CSV-Import).
+   *
+   * @param comp     Wettbewerb
+   * @param cfg      Spielsystem (Stammspieler für die Wertung)
+   * @param team     bestehende Mannschaft, None = neu
+   * @param name     Name der Mannschaft
+   * @param clubName Verein der Mannschaft (leer = ohne Verein)
+   * @param players  Spieler in der Reihenfolge der Positionen
+   * @return gespeicherte Mannschaft oder Fehler
+   */
+  def saveTeam(comp: Competition, cfg: EncounterCfg, team: Option[Team], name: String, clubName: String,
+               players: Seq[PlayerId]): Either[shared.basic.AppError, Team] =
+    val tourney = services.TourneyDB.tourney
+    val clubId =
+      if clubName.isEmpty then 0
+      else tourney.clubs.find(_.name.equalsIgnoreCase(clubName)).map(_.id.toInt)
+             .orElse(tourney.addClub(clubName, checkSimilarity = false).toOption.map(_.id.toInt)).getOrElse(0)
+    val t = team.getOrElse {
+      val nt = Team(comp.teams.map(_.id).maxOption.getOrElse(0) + 1, name)
+      comp.teams += nt
+      nt
+    }
+    t.name    = name
+    t.clubId  = clubId
+    t.players = players
+    val pant = Pant(
+      id     = t.sno,
+      name   = t.name,
+      club   = clubName,
+      rating = t.rating(cfg.teamSize, tourney.players.toSeq),
+      active = true,
+      status = PantStatus.PLAY
+    )
+    val idx = comp.pants1Stage.indexWhere(_.id == t.sno)
+    if idx >= 0 then comp.pants1Stage(idx) = pant.copy(status = comp.pants1Stage(idx).status, active = comp.pants1Stage(idx).active)
+    else comp.pants1Stage += pant
+    tourney.updateCompetition(comp).map(_ => t)
 
   /**
    * Löscht eine Mannschaft nach Rückfrage samt Meldung im Wettbewerb.

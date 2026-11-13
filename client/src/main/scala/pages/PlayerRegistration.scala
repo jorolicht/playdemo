@@ -345,6 +345,36 @@ object PlayerRegistration extends BasePage with JsWrapper:
     }
 
   /**
+   * Bildet nach dem CSV-Import die Mannschaften: alle Zeilen mit gleichem Mannschaftsnamen gehören zu einer Mannschaft,
+   * die Reihenfolge der Zeilen ergibt die Positionen (Stammspieler, dann Ersatz). Eine vorhandene Mannschaft gleichen
+   * Namens wird ersetzt. Mannschaften mit zu vielen Spielern oder mit Spielern einer anderen Mannschaft des
+   * Wettbewerbs werden nicht übernommen.
+   *
+   * @param comp Mannschaftswettbewerb
+   * @param rows (Mannschaft, Mannschaftsverein, Spieler) in der Reihenfolge der Datei
+   * @return Fehlertexte der nicht übernommenen Mannschaften
+   */
+  private def importTeams(comp: Competition, rows: Seq[(String, String, PlayerId)]): Seq[String] =
+    shared.format.TeamEncounter.configFor(comp) match
+      case None => Seq()
+      case Some(cfg) =>
+        val names = rows.map(_._1).distinctBy(_.toLowerCase)
+        names.flatMap { name =>
+          val group    = rows.filter(_._1.equalsIgnoreCase(name))
+          val players  = group.map(_._3).distinct
+          val clubName = group.map(_._2).find(_.nonEmpty).getOrElse("")
+          val existing = comp.teams.find(_.name.equalsIgnoreCase(name))
+          val inOther  = comp.teams.filterNot(t => existing.exists(_.id == t.id)).flatMap(_.players).toSet
+          if (players.size > cfg.maxPlayers)
+            Some(gM("PlayerRegistration.csv_team_too_many", name, players.size.toString, cfg.maxPlayers.toString))
+          else if (players.exists(inOther.contains))
+            Some(gM("PlayerRegistration.csv_team_in_other", name))
+          else TeamList.saveTeam(comp, cfg, existing, name, clubName, players) match
+            case Right(_)  => None
+            case Left(err) => Some(s"${name}: ${gM(err.msgCode)}")
+        }
+
+  /**
    * Handles uploading a CSV file containing player data.
    * - For SINGLE competition: Players are added to tourney.players (if new) and added as inactive participants (PantStatus.REGI) to pants1Stage.
    * - For DOUBLE or MIXED competition: Players are added to tourney.players only (if new) and NOT added to pants1Stage.
@@ -387,10 +417,13 @@ object PlayerRegistration extends BasePage with JsWrapper:
               val yIdx = cols.indexWhere(Set("jahrgang", "geburtsjahr", "birth year", "year of birth").contains)
               val eIdx = cols.indexWhere(Set("email", "e-mail").contains)
               val wIdx = cols.indexWhere(Set("whatsapp", "whats app").contains)
+              val mIdx  = cols.indexWhere(Set("mannschaft", "team").contains)
+              val mcIdx = cols.indexWhere(Set("mannschaftsverein", "team club").contains)
               val curYear = new scala.scalajs.js.Date().getFullYear().toInt
 
               case class CsvPlayer(firstName: String, lastName: String, clubName: String, ttr: Option[Int],
-                                   birthYear: Option[Int], email: Option[String], whatsApp: Option[String])
+                                   birthYear: Option[Int], email: Option[String], whatsApp: Option[String],
+                                   team: String, teamClub: String)
               
               val csvPlayers = lines.tail.flatMap { line =>
                 val parts = line.split(sep).map(_.trim)
@@ -408,14 +441,22 @@ object PlayerRegistration extends BasePage with JsWrapper:
                   val wa    = opt(wIdx)
 
                   if (fn.nonEmpty && ln.nonEmpty && cn.nonEmpty) {
-                    Some(CsvPlayer(fn, ln, cn, ttrVal, year, email, wa))
+                    Some(CsvPlayer(fn, ln, cn, ttrVal, year, email, wa, opt(mIdx).getOrElse(""), opt(mcIdx).getOrElse("")))
                   } else None
                 } else None
               }
               
+              // importierte Spieler mit ihrer Mannschaft (für die Mannschaftsbildung am Ende)
+              val imported = scala.collection.mutable.ArrayBuffer[(CsvPlayer, PlayerId)]()
+
               def importNext(index: Int): Future[Unit] = {
                 if (index >= csvPlayers.length) {
+                  val errors =
+                    if (mIdx >= 0 && shared.format.TeamEncounter.isTeam(c.typ))
+                      importTeams(c, imported.toSeq.collect { case (cp, id) if cp.team.nonEmpty => (cp.team, cp.teamClub, id) })
+                    else Seq()
                   render()
+                  if (errors.nonEmpty) DlgMsgbox.show(errors.mkString("\n"), gM("PlayerRegistration.csv_team_errors_title"), List(BoxButton.Ok))
                   Future.successful(())
                 } else {
                   val p = csvPlayers(index)
@@ -456,6 +497,7 @@ object PlayerRegistration extends BasePage with JsWrapper:
 
                   playerRes match {
                     case Right(importedPlayer) =>
+                      imported += ((p, importedPlayer.id))
                       // For SINGLE competition, add to pants1Stage as inactive (PantStatus.REGI)
                       if (isSingleComp) {
                         val singleSno = SNO.single(importedPlayer.id)

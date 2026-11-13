@@ -34,3 +34,6 @@ PlayerRegistration.delete_double_title = Delete Double
 PlayerRegistration.delete_double_question = Delete double "{0}"?\nThe players remain in the tournament.
 PlayerRegistration.delete_team_title = Delete Team
 PlayerRegistration.delete_team_question = Delete team "{0}"?\nThe players remain in the tournament.
+PlayerRegistration.csv_team_errors_title = CSV import: teams
+PlayerRegistration.csv_team_too_many = Team "{0}" not imported: {1} players, at most {2} allowed.
+PlayerRegistration.csv_team_in_other = Team "{0}" not imported: a player already belongs to another team.
