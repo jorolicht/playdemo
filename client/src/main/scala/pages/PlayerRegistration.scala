@@ -383,8 +383,14 @@ object PlayerRegistration extends BasePage with JsWrapper:
               val nIdx = if (idxNachname >= 0) idxNachname else 1
               val cIdx = if (idxVerein >= 0) idxVerein else 2
               val tIdx = if (idxTtr >= 0) idxTtr else 3
-              
-              case class CsvPlayer(firstName: String, lastName: String, clubName: String, ttr: Option[Int])
+              // optionale Spalten nur über den Spaltennamen
+              val yIdx = cols.indexWhere(Set("jahrgang", "geburtsjahr", "birth year", "year of birth").contains)
+              val eIdx = cols.indexWhere(Set("email", "e-mail").contains)
+              val wIdx = cols.indexWhere(Set("whatsapp", "whats app").contains)
+              val curYear = new scala.scalajs.js.Date().getFullYear().toInt
+
+              case class CsvPlayer(firstName: String, lastName: String, clubName: String, ttr: Option[Int],
+                                   birthYear: Option[Int], email: Option[String], whatsApp: Option[String])
               
               val csvPlayers = lines.tail.flatMap { line =>
                 val parts = line.split(sep).map(_.trim)
@@ -396,8 +402,13 @@ object PlayerRegistration extends BasePage with JsWrapper:
                     try Some(parts(tIdx).toInt) catch { case _: Exception => None }
                   } else None
                   
+                  def opt(i: Int): Option[String] = if (i >= 0 && parts.length > i && parts(i).nonEmpty) Some(parts(i)) else None
+                  val year  = opt(yIdx).flatMap(_.toIntOption).filter(y => y >= 1900 && y <= curYear)
+                  val email = opt(eIdx).filter(_.contains("@"))
+                  val wa    = opt(wIdx)
+
                   if (fn.nonEmpty && ln.nonEmpty && cn.nonEmpty) {
-                    Some(CsvPlayer(fn, ln, cn, ttrVal))
+                    Some(CsvPlayer(fn, ln, cn, ttrVal, year, email, wa))
                   } else None
                 } else None
               }
@@ -415,6 +426,9 @@ object PlayerRegistration extends BasePage with JsWrapper:
                   val playerRes: Either[AppError, Player] = existingPlayerOpt match {
                     case Some(player) =>
                       val updatedPlayer = player.copy(
+                        birthYear = p.birthYear.orElse(player.birthYear),
+                        email     = p.email.orElse(player.email),
+                        whatsApp  = p.whatsApp.orElse(player.whatsApp),
                         meta = player.meta.copy(ttr = p.ttr.orElse(player.meta.ttr))
                       )
                       tourney.updatePlayer(updatedPlayer)
@@ -427,9 +441,9 @@ object PlayerRegistration extends BasePage with JsWrapper:
                         firstName = p.firstName,
                         lastName = p.lastName,
                         clubId = club.id.toInt,
-                        birthYear = None,
-                        email = None,
-                        whatsApp = None,
+                        birthYear = p.birthYear,
+                        email = p.email,
+                        whatsApp = p.whatsApp,
                         doSync = true
                       ).map { player =>
                         val updatedPlayer = player.copy(
