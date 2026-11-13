@@ -50,3 +50,4 @@ StageInput.game_not_started = noch nicht gestartet
 StageInput.sub_info_title = Spiel-Information (Spiel {0})
 StageInput.delete_team_title = Begegnung zurücksetzen
 StageInput.delete_team_confirm = Sollen alle Ergebnisse der Einzel und Doppel dieser Begegnung gelöscht werden? Die Aufstellungen können danach wieder geändert werden, die Begegnung muss neu gestartet werden.
+StageInput.tiebreak = Entscheidung über Sätze/Bälle

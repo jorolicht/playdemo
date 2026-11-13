@@ -15,5 +15,6 @@ SystemInfo.decider_game = Entscheidungsspiel, nur bei Gleichstand
 SystemInfo.rule_best_of = Gespielt wird, bis eine Mannschaft {0} Punkte hat.
 SystemInfo.rule_all = Alle {0} Spiele werden gespielt.
 SystemInfo.rule_draw = Bei Gleichstand endet die Begegnung unentschieden.
+SystemInfo.rule_draw_at = Steht es nach allen Spielen {0}:{0}, endet die Begegnung unentschieden.
 SystemInfo.rule_decider = Bei Gleichstand entscheidet das Entscheidungsspiel.
 SystemInfo.ko_hint = In K.-o.-Runden gibt es kein Unentschieden, dort wird das Entscheidungsspiel gespielt.

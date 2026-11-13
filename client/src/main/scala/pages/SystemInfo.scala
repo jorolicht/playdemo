@@ -46,7 +46,9 @@ object SystemInfo extends BasePage with JsWrapper:
    * @return Beschreibung des Spielendes
    */
   def endRule(lv: Level): String =
-    if lv.kind == Level.BestOf then gM("SystemInfo.rule_best_of", lv.toWin.toString)
+    if lv.kind == Level.BestOf then
+      val base = gM("SystemInfo.rule_best_of", lv.toWin.toString)
+      if lv.allowDraw then s"$base ${gM("SystemInfo.rule_draw_at", (lv.toWin - 1).toString)}" else base
     else
       val base = gM("SystemInfo.rule_all", lv.count.toString)
       if lv.allowDraw then s"$base ${gM("SystemInfo.rule_draw")}"

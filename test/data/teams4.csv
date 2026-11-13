@@ -1,0 +1,65 @@
+Vorname;Nachname;Verein;TTR;Jahrgang;EMail;WhatsApp;Mannschaft;Mannschaftsverein
+Udo;Smash;TuS Zelluloid;1410;1980;;;Die Vorhand-Viecher;TuS Zelluloid
+Hugo;Schnitt;TuS Zelluloid;1164;1962;hugo.schnitt@example.com;;Die Vorhand-Viecher;
+Anna;Tischkante;TuS Zelluloid;1285;1957;anna.tischkante@example.com;+4915100066959;Die Vorhand-Viecher;
+Zenzi;Noppe;TTV Noppen-Power;1460;1987;zenzi.noppe@example.com;+4915100085574;Die Vorhand-Viecher;
+Olaf;Rückhand;TTC Schmetterball;1416;2006;olaf.rueckhand@example.com;+4915100097900;Ping-Pong-Pinguine;TTC Schmetterball
+Sepp;Noppe;TTC Schmetterball;1635;1997;sepp.noppe@example.com;;Ping-Pong-Pinguine;
+Dieter;Netzroller;TTC Schmetterball;1213;2001;dieter.netzroller@example.com;;Ping-Pong-Pinguine;
+Lotte;Belag;TTC Schmetterball;1317;1980;lotte.belag@example.com;;Ping-Pong-Pinguine;
+Bodo;Schlägerholz;DJK Topspin 08;1631;1979;;;Smash-Mouth;DJK Topspin 08
+Susi;Seitenschnitt;DJK Topspin 08;1304;1980;susi.seitenschnitt@example.com;+4915100010053;Smash-Mouth;
+Ida;Doppelfehler;DJK Topspin 08;1552;1992;ida.doppelfehler@example.com;;Smash-Mouth;
+Uschi;Penholder;DJK Topspin 08;1495;1968;uschi.penholder@example.com;+4915100032241;Smash-Mouth;
+Uschi;Aufschlag;TuS Zelluloid;1474;1994;uschi.aufschlag@example.com;+4915100040784;Die Schnittmenge;TuS Zelluloid
+Kuno;Zelluloid;TuS Zelluloid;1251;1964;;+4915100042092;Die Schnittmenge;
+Theo;Langlang;TuS Zelluloid;1543;1959;theo.langlang@example.com;+4915100092544;Die Schnittmenge;
+Elli;Bananenflip;TTV Noppen-Power;1403;1980;elli.bananenflip@example.com;+4915100095990;Die Schnittmenge;
+Yvonne;Kantenball;DJK Topspin 08;1240;2006;yvonne.kantenball@example.com;;Ballwechsel-Brüder;SV Kantenball
+Bert;Chopper;SV Kantenball;1277;2009;;+4915100027477;Ballwechsel-Brüder;
+Anna;Plastikball;SV Kantenball;1436;1993;anna.plastikball@example.com;+4915100068008;Ballwechsel-Brüder;
+Willi;Satzball;Post SV Schupfgold;1368;2008;willi.satzball@example.com;;Ballwechsel-Brüder;
+Frieda;Chopper;FC Plastikball;1380;1971;;;Flip-Flops;TSV Netzroller
+Ida;Tischkante;TSV Netzroller;1548;1988;ida.tischkante@example.com;+4915100041358;Flip-Flops;
+Bodo;Belag;TSV Netzroller;1296;1970;;+4915100051904;Flip-Flops;
+Carla;Linkshänder;TSV Netzroller;1227;1969;carla.linkshaender@example.com;+4915100030028;Flip-Flops;
+Nele;Shakehand;SV Kantenball;1319;1989;nele.shakehand@example.com;+4915100018161;Die Konterbande;SV Kantenball
+Vroni;Vorhand;SV Kantenball;1613;2004;;+4915100012560;Die Konterbande;
+Kuno;Penholder;TTV Noppen-Power;1394;1955;kuno.penholder@example.com;;Die Konterbande;
+Egon;Konter;SV Kantenball;1606;2008;egon.konter@example.com;+4915100081582;Die Konterbande;
+Lotte;Kantenball;DJK Topspin 08;1289;1982;lotte.kantenball@example.com;+4915100060968;Spin-Doktoren;DJK Topspin 08
+Kuno;Schupf;DJK Topspin 08;1357;2001;;+4915100071261;Spin-Doktoren;
+Fritz;Bananenflip;Post SV Schupfgold;1163;1980;fritz.bananenflip@example.com;+4915100096900;Spin-Doktoren;
+Wanda;Rückhand;DJK Topspin 08;1219;2010;wanda.rueckhand@example.com;+4915100016590;Spin-Doktoren;
+Hugo;Aufschlag;SC Rückhand Rasant;1317;1976;hugo.aufschlag@example.com;;Die Netzwerker;SC Rückhand Rasant
+Xaver;Bananenflip;TTV Noppen-Power;1279;2008;xaver.bananenflip@example.com;+4915100012540;Die Netzwerker;
+Wanda;Zitterhand;SC Rückhand Rasant;1637;1977;wanda.zitterhand@example.com;+4915100018993;Die Netzwerker;
+Vroni;Zitterhand;SC Rückhand Rasant;1536;1956;vroni.zitterhand@example.com;;Die Netzwerker;
+Bodo;Kantenball;TTC Schmetterball;1272;1963;bodo.kantenball@example.com;+4915100024993;Block-Party;TTC Schmetterball
+Udo;Matchball;TTC Schmetterball;1508;1971;udo.matchball@example.com;;Block-Party;
+Vroni;Rückhand;TTC Schmetterball;1532;2000;;+4915100031465;Block-Party;
+Egon;Linkshänder;TTC Schmetterball;1163;1974;egon.linkshaender@example.com;+4915100059192;Block-Party;
+Sepp;Unterschnitt;DJK Topspin 08;1503;2008;sepp.unterschnitt@example.com;;Seitenschnitt-Sirenen;DJK Topspin 08
+Zenzi;Schlägerholz;SpVgg Satzball;1562;1962;zenzi.schlaegerholz@example.com;;Seitenschnitt-Sirenen;
+Egon;Flip;DJK Topspin 08;1422;1982;egon.flip@example.com;;Seitenschnitt-Sirenen;
+Olaf;Flip;DJK Topspin 08;1156;2009;olaf.flip@example.com;+4915100074251;Seitenschnitt-Sirenen;
+Lotte;Plastikball;SC Rückhand Rasant;1574;1984;lotte.plastikball@example.com;;Die Plattenleger;SC Rückhand Rasant
+Hugo;Smash;TuS Zelluloid;1465;2006;hugo.smash@example.com;;Die Plattenleger;
+Vroni;Seitenschnitt;SC Rückhand Rasant;1572;2001;;+4915100052245;Die Plattenleger;
+Xaver;Vorhand;SV Kantenball;1292;2011;xaver.vorhand@example.com;+4915100070910;Die Plattenleger;
+Susi;Doppelfehler;TTV Noppen-Power;1403;2009;susi.doppelfehler@example.com;+4915100073904;Holz-vor-der-Hütte;TTV Noppen-Power
+Frieda;Schlägerholz;SC Rückhand Rasant;1293;2011;frieda.schlaegerholz@example.com;+4915100046211;Holz-vor-der-Hütte;
+Wanda;Chopper;TTV Noppen-Power;1247;1960;wanda.chopper@example.com;+4915100063271;Holz-vor-der-Hütte;
+Jupp;Tischkante;FC Plastikball;1480;2000;jupp.tischkante@example.com;+4915100012260;Holz-vor-der-Hütte;
+Bert;Aufschlag;DJK Topspin 08;1274;1974;bert.aufschlag@example.com;;Belag-Banditen;DJK Topspin 08
+Gustl;Schnitt;DJK Topspin 08;1326;1982;gustl.schnitt@example.com;;Belag-Banditen;
+Igor;Chopper;DJK Topspin 08;1382;1972;igor.chopper@example.com;+4915100040217;Belag-Banditen;
+Lutz;Kurzkurz;DJK Topspin 08;1211;2002;lutz.kurzkurz@example.com;+4915100034267;Belag-Banditen;
+Hugo;Block;FC Plastikball;1451;2003;;+4915100047093;Die Doppelfehler;FC Plastikball
+Bert;Penholder;TuS Zelluloid;1266;1978;bert.penholder@example.com;+4915100011854;Die Doppelfehler;
+Frieda;Topspin;FC Plastikball;1173;1958;frieda.topspin@example.com;+4915100026551;Die Doppelfehler;
+Theo;Konter;SV Kantenball;1596;1955;theo.konter@example.com;+4915100071524;Die Doppelfehler;
+Yvonne;Langlang;SC Rückhand Rasant;1176;1971;yvonne.langlang@example.com;;Matchball-Mafia;SC Rückhand Rasant
+Igor;Schmetterling;TTV Noppen-Power;1401;1959;igor.schmetterling@example.com;+4915100099974;Matchball-Mafia;
+Frieda;Netzroller;SC Rückhand Rasant;1438;1974;frieda.netzroller@example.com;+4915100042530;Matchball-Mafia;
+Willi;Flip;SpVgg Satzball;1455;2005;willi.flip@example.com;;Matchball-Mafia;

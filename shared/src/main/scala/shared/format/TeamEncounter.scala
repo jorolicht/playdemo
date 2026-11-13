@@ -53,11 +53,14 @@ object TeamEncounter:
   private val DrawFlag    = 100
   /** Kennzahl-Zuschlag bei `fixed` mit Entscheidungsspiel. */
   private val DeciderFlag = 200
+  /** Kennzahl-Zuschlag bei `bestOf` mit Unentschieden (zusammen mit [[DrawFlag]]). */
+  private val BestOfFlag  = 1000
 
   /**
    * Kennzahl `winSets` eines Begegnungseintrags aus der Stufe der Begegnung.
    *
-   *  - `bestOf`: `toWin` (positiv, z. B. 2 = bis 2 Siege)
+   *  - `bestOf`: `toWin` (positiv, z. B. 2 = bis 2 Siege); mit Unentschieden `-(1000 + 100 + toWin)`,
+   *    z. B. -1108 = bis 8 Punkte, 7:7 unentschieden
    *  - `fixed`:  `-(count + 100 bei Unentschieden + 200 bei Entscheidungsspiel)`, z. B. -3 = alle 3 Spiele,
    *    -104 = 4 Spiele mit Unentschieden, -204 = 4 Spiele mit Entscheidungsspiel
    *
@@ -67,6 +70,7 @@ object TeamEncounter:
   def winSetsCode(level: Level): Int =
     if level.kind == Level.Fixed then
       -(level.count + (if level.allowDraw then DrawFlag else 0) + (if level.decider then DeciderFlag else 0))
+    else if level.allowDraw then -(BestOfFlag + DrawFlag + level.toWin)
     else level.toWin
 
   /**
@@ -76,7 +80,9 @@ object TeamEncounter:
    * @return Stufe `fixed` bei negativer Kennzahl, sonst `bestOf`
    */
   def levelFromCode(code: Int): Level =
-    if code < 0 then
+    if code <= -BestOfFlag then
+      Level("encounter", Level.BestOf, toWin = -code % DrawFlag, allowDraw = true)
+    else if code < 0 then
       val c = -code
       Level("encounter", Level.Fixed, count = c % DrawFlag,
             allowDraw = (c / DrawFlag) % 2 == 1, decider = c / DeciderFlag >= 1)
@@ -263,6 +269,8 @@ object TeamEncounter:
         val m     = stage.getMatch(enc.gameNo)
         if level.isValid(score) then
           stage.inputMatch(enc.gameNo, score, "", m.info, m.playfield)
+        else if stage.isKoStage && cfg.levelFor(stage.encVariant).allowDraw && koTieBreak(enc, level, score, stage.noWinSets).nonEmpty then
+          stage.inputMatch(enc.gameNo, score, koTieBreak(enc, level, score, stage.noWinSets).get, m.info, m.playfield)
         else if m.finished then
           val (info, playfield) = (m.info, m.playfield)
           val res = stage.resetMatch(enc.gameNo)
@@ -270,6 +278,26 @@ object TeamEncounter:
           m.setPlayfield(playfield)
           res
         else Right(List(enc.gameNo))
+
+  /**
+   * Entscheidung einer Begegnung "bis n Punkte", die in der K.-o.-Runde nach allen Spielen (n-1):(n-1) steht
+   * (z. B. 7:7 bei der 4er-Mannschaft): zuerst die Satzdifferenz, dann die Balldifferenz aller gewerteten Spiele.
+   *
+   * @param enc       Begegnung
+   * @param level     Stufe der Begegnung (K.-o., ohne Unentschieden)
+   * @param score     Stand nach Punkten
+   * @param noWinSets Gewinnsätze eines Spiels
+   * @return [[MEntry.TieBreakA]] bzw. [[MEntry.TieBreakB]], None wenn kein Gleichstand nach allen Spielen vorliegt
+   *         oder auch Sätze und Bälle gleich sind
+   */
+  def koTieBreak(enc: Encounter, level: Level, score: (Int, Int), noWinSets: Int): Option[String] =
+    val allPlayed = enc.games.forall(g => g.decided || g.status == MEntry.MS_SKIP)
+    if level.kind != Level.BestOf || score != (level.toWin - 1, level.toWin - 1) || !allPlayed then None
+    else
+      val ((sa, sb), (ba, bb)) = totals(enc, noWinSets)
+      if sa != sb then Some(if sa > sb then MEntry.TieBreakA else MEntry.TieBreakB)
+      else if ba != bb then Some(if ba > bb then MEntry.TieBreakA else MEntry.TieBreakB)
+      else None
 
   /**
    * Setzt die Aufstellung einer Seite und erzeugt die Spiele neu. Nach dem Start der Begegnung ([[isStarted]]) ist

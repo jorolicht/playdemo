@@ -119,6 +119,9 @@
                                           title="@gM("+total_games")">
                                         @{ if (games != (0, 0) || m.finished) s"${games._1}:${games._2}" else "" }
                                     </span>
+                                    @if(m.finished && m.tieBreakWinner != 0) {
+                                        <div class="small text-muted">@gM("+tiebreak")</div>
+                                    }
                                 </td>
                             }
                             }

@@ -30,7 +30,11 @@ object StageHelper {
    * @return Stand (A, B)
    */
   def byeSets(winSets: Int, aIsBye: Boolean): (Int, Int) =
-    val n = if winSets < 0 then TeamEncounter.levelFromCode(winSets).count else winSets
+    val n =
+      if winSets >= 0 then winSets
+      else
+        val lv = TeamEncounter.levelFromCode(winSets)
+        if lv.kind == shared.sport.Level.BestOf then lv.toWin else lv.count
     if aIsBye then (0, n) else (n, 0)
 
   /** Satzstufe (eine Ebene unter dem Spiel) des aktuellen Wertungssystems ([[Sports.current]]). */

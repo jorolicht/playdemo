@@ -1,0 +1,46 @@
+Vorname;Nachname;Verein;TTR;Jahrgang;EMail;WhatsApp;Mannschaft;Mannschaftsverein
+Vroni;Unterschnitt;SC Rückhand Rasant;1307;1978;;;Die Netzroller;SC Rückhand Rasant
+Cleo;Smash;SC Rückhand Rasant;1279;1970;;;Die Netzroller;
+Addi;Ballonball;SC Rückhand Rasant;1498;2007;addi.ballonball@example.com;+4915100079822;Die Netzroller;
+Hugo;Matchball;TSV Netzroller;1734;1990;;+4915100079163;Kantenkönige;TSV Netzroller
+Gustl;Bananenflip;TSV Netzroller;1358;1989;gustl.bananenflip@example.com;;Kantenkönige;
+Frieda;Ballwechsel;TTV Noppen-Power;1593;1996;frieda.ballwechsel@example.com;+4915100077839;Kantenkönige;
+Dieter;Bananenflip;DJK Topspin 08;1423;1956;dieter.bananenflip@example.com;+4915100040161;Schupf-Gang;DJK Topspin 08
+Zenzi;Schmetterling;DJK Topspin 08;1612;1995;;+4915100018834;Schupf-Gang;
+Carla;Kurzkurz;SV Kantenball;1513;1970;carla.kurzkurz@example.com;+4915100073624;Schupf-Gang;
+Wanda;Schlägerholz;SpVgg Satzball;1545;1985;;+4915100071993;Topspin-Tornados;TSV Netzroller
+Susi;Topspin;TSV Netzroller;1299;1997;susi.topspin@example.com;+4915100065519;Topspin-Tornados;
+Bodo;Chopper;TTC Schmetterball;1594;1996;bodo.chopper@example.com;;Topspin-Tornados;
+Trudi;Plastikball;SV Kantenball;1377;1967;trudi.plastikball@example.com;+4915100068800;Die Ballonfahrer;TTV Noppen-Power
+Moritz;Topspin;TTV Noppen-Power;1486;1970;moritz.topspin@example.com;;Die Ballonfahrer;
+Addi;Kurzkurz;Post SV Schupfgold;1300;1958;addi.kurzkurz@example.com;;Die Ballonfahrer;
+Addi;Ballwechsel;DJK Topspin 08;1335;1981;;+4915100038016;Rückhand-Rebellen;TTC Schmetterball
+Carla;Lob;TSV Netzroller;1444;1955;carla.lob@example.com;;Rückhand-Rebellen;
+Frieda;Ballonball;FC Plastikball;1396;1982;frieda.ballonball@example.com;;Rückhand-Rebellen;
+Gustl;Block;Post SV Schupfgold;1499;1964;;+4915100038534;Plastikbomber;Post SV Schupfgold
+Rudi;Linkshänder;Post SV Schupfgold;1527;1958;rudi.linkshaender@example.com;;Plastikbomber;
+Udo;Block;Post SV Schupfgold;1507;2009;;+4915100017455;Plastikbomber;
+Addi;Noppe;SV Kantenball;1554;1959;addi.noppe@example.com;;Satzball-Sammler;SV Kantenball
+Susi;Bananenflip;SV Kantenball;1705;1991;susi.bananenflip@example.com;+4915100087924;Satzball-Sammler;
+Fritz;Lob;SV Kantenball;1586;1992;;+4915100051467;Satzball-Sammler;
+Yvonne;Linkshänder;DJK Topspin 08;1410;1970;yvonne.linkshaender@example.com;+4915100027154;Die Aufschlag-Asse;DJK Topspin 08
+Vroni;Chopper;DJK Topspin 08;1411;2003;vroni.chopper@example.com;;Die Aufschlag-Asse;
+Xaver;Schmetterling;DJK Topspin 08;1538;1961;xaver.schmetterling@example.com;+4915100037938;Die Aufschlag-Asse;
+Mia;Zitterhand;SV Kantenball;1700;1970;mia.zitterhand@example.com;+4915100030676;Zelluloid-Zombies;TSV Netzroller
+Frieda;Belag;TSV Netzroller;1404;1994;;;Zelluloid-Zombies;
+Nele;Belag;TSV Netzroller;1591;2007;nele.belag@example.com;+4915100096951;Zelluloid-Zombies;
+Trudi;Noppe;TSV Netzroller;1705;1961;trudi.noppe@example.com;;Noppen-Ninjas;TSV Netzroller
+Hugo;Kurzkurz;TSV Netzroller;1357;2000;;+4915100093130;Noppen-Ninjas;
+Ada;Unterschnitt;TSV Netzroller;1378;2012;ada.unterschnitt@example.com;;Noppen-Ninjas;
+Egon;Kantenball;TTC Schmetterball;1251;1976;egon.kantenball@example.com;;Die Schmetterlinge;TTV Noppen-Power
+Xaver;Ballwechsel;TTV Noppen-Power;1629;1983;xaver.ballwechsel@example.com;+4915100066057;Die Schmetterlinge;
+Moritz;Schnitt;TTV Noppen-Power;1733;2011;moritz.schnitt@example.com;;Die Schmetterlinge;
+Karla;Smash;SpVgg Satzball;1532;1964;karla.smash@example.com;+4915100015482;Kurz-kurz-Kollektiv;TTC Schmetterball
+Dora;Langlang;TTC Schmetterball;1710;1977;dora.langlang@example.com;+4915100042706;Kurz-kurz-Kollektiv;
+Frieda;Block;TTC Schmetterball;1536;2011;;;Kurz-kurz-Kollektiv;
+Karla;Vorhand;DJK Topspin 08;1692;1965;;;Tischkanten-Treffer;TSV Netzroller
+Carla;Konter;TTC Schmetterball;1341;2002;carla.konter@example.com;;Tischkanten-Treffer;
+Lotte;Satzball;TSV Netzroller;1592;2010;lotte.satzball@example.com;;Tischkanten-Treffer;
+Carla;Noppe;SV Kantenball;1445;2010;carla.noppe@example.com;+4915100071694;Die Lob-Lobby;TSV Netzroller
+Kuno;Ballonball;FC Plastikball;1429;1974;;;Die Lob-Lobby;
+Karla;Zelluloid;TSV Netzroller;1587;1967;;+4915100046517;Die Lob-Lobby;

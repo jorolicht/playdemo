@@ -15,5 +15,6 @@ SystemInfo.decider_game = deciding match, only if tied
 SystemInfo.rule_best_of = Play continues until one team has {0} points.
 SystemInfo.rule_all = All {0} matches are played.
 SystemInfo.rule_draw = If tied, the tie ends in a draw.
+SystemInfo.rule_draw_at = If it is {0}:{0} after all matches, the tie ends in a draw.
 SystemInfo.rule_decider = If tied, the deciding match decides.
 SystemInfo.ko_hint = There are no draws in knockout rounds; the deciding match is played there.

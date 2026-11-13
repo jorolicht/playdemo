@@ -592,6 +592,234 @@
               "away": "B2"
             }
           ]
+        },
+        {
+          "id": "eckardt",
+          "name": {
+            "de": {
+              "one": "Eckardt-Pokal"
+            },
+            "en": {
+              "one": "Eckardt Cup"
+            }
+          },
+          "description": {
+            "de": "Pokalsystem für 3er-Mannschaften.\n\nJede Mannschaft meldet 3 Spieler (A1–A3 bzw. B1–B3) und ein Doppel. Gespielt werden höchstens 6 Einzel und 1 Doppel; das Doppel ist das vierte Spiel.\n\nEs wird gespielt, bis eine Mannschaft 4 Punkte erreicht hat (Spielabbruch nach dem 4. Punkt).",
+            "en": "Cup system for teams of 3.\n\nEach team registers 3 players (A1–A3 or B1–B3) and one doubles pair. At most 6 singles and 1 doubles are played; the doubles is the fourth match.\n\nPlay continues until one team has 4 points."
+          },
+          "level": {
+            "id": "encounter",
+            "kind": "bestOf",
+            "toWin": 4,
+            "unit": "match",
+            "name": {
+              "de": {
+                "one": "Begegnung",
+                "other": "Begegnungen",
+                "short": "Bg"
+              },
+              "en": {
+                "one": "Tie",
+                "other": "Ties",
+                "short": "T"
+              }
+            }
+          },
+          "variants": {
+            "firstTo4": {
+              "name": {
+                "de": {
+                  "one": "Bis 4 Punkte"
+                },
+                "en": {
+                  "one": "First to 4 points"
+                }
+              },
+              "override": {}
+            },
+            "all": {
+              "name": {
+                "de": {
+                  "one": "Alle 7 Spiele"
+                },
+                "en": {
+                  "one": "Play all 7 matches"
+                }
+              },
+              "override": {
+                "encounter": {
+                  "kind": "fixed",
+                  "count": 7
+                }
+              }
+            }
+          },
+          "defaultVariant": "firstTo4",
+          "positions": {
+            "home": [
+              "A1",
+              "A2",
+              "A3",
+              "D"
+            ],
+            "away": [
+              "B1",
+              "B2",
+              "B3",
+              "D"
+            ]
+          },
+          "games": [
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A3",
+              "away": "B3"
+            },
+            {
+              "type": "double",
+              "home": "D",
+              "away": "D"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A3",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B3"
+            }
+          ]
+        },
+        {
+          "id": "braunschweig3",
+          "name": {
+            "de": {
+              "one": "Braunschweiger System (3er)"
+            },
+            "en": {
+              "one": "Braunschweig system (3 players)"
+            }
+          },
+          "description": {
+            "de": "Braunschweiger System für zwei 3er-Mannschaften.\n\nJede Mannschaft meldet 3 Spieler (A1–A3 bzw. B1–B3) und ein Doppel. Gespielt werden 1 Doppel und 9 Einzel, jeder Spieler spielt gegen jeden Spieler der anderen Mannschaft.\n\nEs werden immer alle 10 Spiele ausgetragen; bei 5:5 endet die Begegnung unentschieden.",
+            "en": "Braunschweig system for two teams of 3.\n\nEach team registers 3 players (A1–A3 or B1–B3) and one doubles pair. 1 doubles and 9 singles are played; every player meets every player of the other team.\n\nAll 10 matches are always played; at 5:5 the tie ends in a draw."
+          },
+          "level": {
+            "id": "encounter",
+            "kind": "fixed",
+            "count": 10,
+            "allowDraw": true,
+            "unit": "match",
+            "name": {
+              "de": {
+                "one": "Begegnung",
+                "other": "Begegnungen",
+                "short": "Bg"
+              },
+              "en": {
+                "one": "Tie",
+                "other": "Ties",
+                "short": "T"
+              }
+            }
+          },
+          "variants": {
+            "all": {
+              "name": {
+                "de": {
+                  "one": "Alle 10 Spiele"
+                },
+                "en": {
+                  "one": "Play all 10 matches"
+                }
+              },
+              "override": {}
+            }
+          },
+          "defaultVariant": "all",
+          "positions": {
+            "home": [
+              "A1",
+              "A2",
+              "A3",
+              "D"
+            ],
+            "away": [
+              "B1",
+              "B2",
+              "B3",
+              "D"
+            ]
+          },
+          "games": [
+            {
+              "type": "double",
+              "home": "D",
+              "away": "D"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A3",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B3"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A3",
+              "away": "B3"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A3",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B3"
+            }
+          ]
         }
       ],
       "standings": {
@@ -617,6 +845,280 @@
         "en": {
           "one": "Team of 4"
         }
+      },
+      "teamSize": 4,
+      "maxPlayers": 4,
+      "defaultSystem": "paarkreuz4",
+      "systems": [
+        {
+          "id": "paarkreuz4",
+          "name": {
+            "de": {
+              "one": "4er-Mannschaft (Paarkreuz)"
+            },
+            "en": {
+              "one": "Team of 4 (pair cross)"
+            }
+          },
+          "description": {
+            "de": "Mannschaftssystem für 4er-Mannschaften im Verbandsspielbetrieb.\n\nJede Mannschaft meldet 4 Spieler (A1–A4 bzw. B1–B4) und 2 Doppel. Gespielt werden 2 Doppel und bis zu 12 Einzel: erst die Paarkreuze (1/2 und 3/4) über Kreuz, dann direkt, dann paarkreuzübergreifend.\n\nEs wird gespielt, bis eine Mannschaft 8 Punkte erreicht hat (Spielabbruch nach dem 8. Punkt); bei 7:7 endet die Begegnung unentschieden.",
+            "en": "Team system for teams of 4 in league play.\n\nEach team registers 4 players (A1–A4 or B1–B4) and 2 doubles pairs. 2 doubles and up to 12 singles are played: first crosswise within the pairs (1/2 and 3/4), then directly, then across pairs.\n\nPlay continues until one team has 8 points; at 7:7 the tie ends in a draw."
+          },
+          "level": {
+            "id": "encounter",
+            "kind": "bestOf",
+            "toWin": 8,
+            "allowDraw": true,
+            "unit": "match",
+            "name": {
+              "de": {
+                "one": "Begegnung",
+                "other": "Begegnungen",
+                "short": "Bg"
+              },
+              "en": {
+                "one": "Tie",
+                "other": "Ties",
+                "short": "T"
+              }
+            }
+          },
+          "variants": {
+            "firstTo8": {
+              "name": {
+                "de": {
+                  "one": "Bis 8 Punkte"
+                },
+                "en": {
+                  "one": "First to 8 points"
+                }
+              },
+              "override": {}
+            }
+          },
+          "defaultVariant": "firstTo8",
+          "positions": {
+            "home": [
+              "A1",
+              "A2",
+              "A3",
+              "A4",
+              "D1",
+              "D2"
+            ],
+            "away": [
+              "B1",
+              "B2",
+              "B3",
+              "B4",
+              "D1",
+              "D2"
+            ]
+          },
+          "games": [
+            {
+              "type": "double",
+              "home": "D1",
+              "away": "D1"
+            },
+            {
+              "type": "double",
+              "home": "D2",
+              "away": "D2"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A3",
+              "away": "B4"
+            },
+            {
+              "type": "single",
+              "home": "A4",
+              "away": "B3"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A3",
+              "away": "B3"
+            },
+            {
+              "type": "single",
+              "home": "A4",
+              "away": "B4"
+            },
+            {
+              "type": "single",
+              "home": "A3",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B3"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B4"
+            },
+            {
+              "type": "single",
+              "home": "A4",
+              "away": "B2"
+            }
+          ]
+        },
+        {
+          "id": "braunschweig4",
+          "name": {
+            "de": {
+              "one": "Braunschweiger System (4er)"
+            },
+            "en": {
+              "one": "Braunschweig system (4 players)"
+            }
+          },
+          "description": {
+            "de": "Braunschweiger System für zwei 4er-Mannschaften.\n\nJede Mannschaft meldet 4 Spieler (A1–A4 bzw. B1–B4) und 2 Doppel. Gespielt werden 2 Doppel und 8 Einzel (erst direkt 1–1 bis 4–4, dann über Kreuz in den Paarkreuzen).\n\nEs werden immer alle 10 Spiele ausgetragen; bei 5:5 endet die Begegnung unentschieden.",
+            "en": "Braunschweig system for two teams of 4.\n\nEach team registers 4 players (A1–A4 or B1–B4) and 2 doubles pairs. 2 doubles and 8 singles are played (first directly 1–1 to 4–4, then crosswise within the pairs).\n\nAll 10 matches are always played; at 5:5 the tie ends in a draw."
+          },
+          "level": {
+            "id": "encounter",
+            "kind": "fixed",
+            "count": 10,
+            "allowDraw": true,
+            "unit": "match",
+            "name": {
+              "de": {
+                "one": "Begegnung",
+                "other": "Begegnungen",
+                "short": "Bg"
+              },
+              "en": {
+                "one": "Tie",
+                "other": "Ties",
+                "short": "T"
+              }
+            }
+          },
+          "variants": {
+            "all": {
+              "name": {
+                "de": {
+                  "one": "Alle 10 Spiele"
+                },
+                "en": {
+                  "one": "Play all 10 matches"
+                }
+              },
+              "override": {}
+            }
+          },
+          "defaultVariant": "all",
+          "positions": {
+            "home": [
+              "A1",
+              "A2",
+              "A3",
+              "A4",
+              "D1",
+              "D2"
+            ],
+            "away": [
+              "B1",
+              "B2",
+              "B3",
+              "B4",
+              "D1",
+              "D2"
+            ]
+          },
+          "games": [
+            {
+              "type": "double",
+              "home": "D1",
+              "away": "D1"
+            },
+            {
+              "type": "double",
+              "home": "D2",
+              "away": "D2"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A3",
+              "away": "B3"
+            },
+            {
+              "type": "single",
+              "home": "A4",
+              "away": "B4"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A3",
+              "away": "B4"
+            },
+            {
+              "type": "single",
+              "home": "A4",
+              "away": "B3"
+            }
+          ]
+        }
+      ],
+      "standings": {
+        "points": {
+          "win": 2,
+          "draw": 1,
+          "loss": 0
+        },
+        "tieBreakers": [
+          "diff:encounter",
+          "diff:match",
+          "diff:set",
+          "diff:ball"
+        ]
       }
     },
     "team6": {
@@ -628,6 +1130,178 @@
         "en": {
           "one": "Team of 6"
         }
+      },
+      "teamSize": 6,
+      "maxPlayers": 6,
+      "defaultSystem": "paarkreuz6",
+      "systems": [
+        {
+          "id": "paarkreuz6",
+          "name": {
+            "de": {
+              "one": "6er-Paarkreuz"
+            },
+            "en": {
+              "one": "Pair cross (6 players)"
+            }
+          },
+          "description": {
+            "de": "Paarkreuz-System für 6er-Mannschaften im Verbandsspielbetrieb.\n\nJede Mannschaft meldet 6 Spieler (A1–A6 bzw. B1–B6) und 3 Doppel. Gespielt werden 3 Eingangsdoppel, 12 Einzel in den Paarkreuzen (1/2, 3/4, 5/6; erst über Kreuz, dann direkt) und ein Schlussdoppel.\n\nEs wird gespielt, bis eine Mannschaft 9 Punkte erreicht hat (Spielabbruch nach dem 9. Punkt); bei 8:8 endet die Begegnung unentschieden.",
+            "en": "Pair cross system for teams of 6 in league play.\n\nEach team registers 6 players (A1–A6 or B1–B6) and 3 doubles pairs. 3 opening doubles, 12 singles within the pairs (1/2, 3/4, 5/6; first crosswise, then directly) and a final doubles are played.\n\nPlay continues until one team has 9 points; at 8:8 the tie ends in a draw."
+          },
+          "level": {
+            "id": "encounter",
+            "kind": "bestOf",
+            "toWin": 9,
+            "allowDraw": true,
+            "unit": "match",
+            "name": {
+              "de": {
+                "one": "Begegnung",
+                "other": "Begegnungen",
+                "short": "Bg"
+              },
+              "en": {
+                "one": "Tie",
+                "other": "Ties",
+                "short": "T"
+              }
+            }
+          },
+          "variants": {
+            "firstTo9": {
+              "name": {
+                "de": {
+                  "one": "Bis 9 Punkte"
+                },
+                "en": {
+                  "one": "First to 9 points"
+                }
+              },
+              "override": {}
+            }
+          },
+          "defaultVariant": "firstTo9",
+          "positions": {
+            "home": [
+              "A1",
+              "A2",
+              "A3",
+              "A4",
+              "A5",
+              "A6",
+              "D1",
+              "D2",
+              "D3"
+            ],
+            "away": [
+              "B1",
+              "B2",
+              "B3",
+              "B4",
+              "B5",
+              "B6",
+              "D1",
+              "D2",
+              "D3"
+            ]
+          },
+          "games": [
+            {
+              "type": "double",
+              "home": "D1",
+              "away": "D2"
+            },
+            {
+              "type": "double",
+              "home": "D2",
+              "away": "D1"
+            },
+            {
+              "type": "double",
+              "home": "D3",
+              "away": "D3"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A3",
+              "away": "B4"
+            },
+            {
+              "type": "single",
+              "home": "A4",
+              "away": "B3"
+            },
+            {
+              "type": "single",
+              "home": "A5",
+              "away": "B6"
+            },
+            {
+              "type": "single",
+              "home": "A6",
+              "away": "B5"
+            },
+            {
+              "type": "single",
+              "home": "A1",
+              "away": "B1"
+            },
+            {
+              "type": "single",
+              "home": "A2",
+              "away": "B2"
+            },
+            {
+              "type": "single",
+              "home": "A3",
+              "away": "B3"
+            },
+            {
+              "type": "single",
+              "home": "A4",
+              "away": "B4"
+            },
+            {
+              "type": "single",
+              "home": "A5",
+              "away": "B5"
+            },
+            {
+              "type": "single",
+              "home": "A6",
+              "away": "B6"
+            },
+            {
+              "type": "double",
+              "home": "D1",
+              "away": "D1"
+            }
+          ]
+        }
+      ],
+      "standings": {
+        "points": {
+          "win": 2,
+          "draw": 1,
+          "loss": 0
+        },
+        "tieBreakers": [
+          "diff:encounter",
+          "diff:match",
+          "diff:set",
+          "diff:ball"
+        ]
       }
     }
   },

@@ -50,3 +50,4 @@ StageInput.game_not_started = not started yet
 StageInput.sub_info_title = Match information (match {0})
 StageInput.delete_team_title = Reset tie
 StageInput.delete_team_confirm = Delete the results of all singles and doubles of this tie? The line-ups can then be changed again and the tie has to be restarted.
+StageInput.tiebreak = Decided on sets/points

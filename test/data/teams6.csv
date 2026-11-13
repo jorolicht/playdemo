@@ -1,0 +1,61 @@
+Vorname;Nachname;Verein;TTR;Jahrgang;EMail;WhatsApp;Mannschaft;Mannschaftsverein
+Rudi;Seitenschnitt;TTV Noppen-Power;1276;1974;;;Die Tischtennis-Titanen;TTV Noppen-Power
+Lutz;Noppe;TTV Noppen-Power;1367;1958;lutz.noppe@example.com;;Die Tischtennis-Titanen;
+Vroni;Zelluloid;DJK Topspin 08;1370;1968;vroni.zelluloid@example.com;+4915100020641;Die Tischtennis-Titanen;
+Olaf;Netzroller;TTV Noppen-Power;1088;1965;olaf.netzroller@example.com;+4915100069048;Die Tischtennis-Titanen;
+Dora;Rückhand;TTV Noppen-Power;1066;1969;dora.rueckhand@example.com;+4915100047056;Die Tischtennis-Titanen;
+Hugo;Kantenball;TTV Noppen-Power;1401;1969;hugo.kantenball@example.com;;Die Tischtennis-Titanen;
+Hanna;Schnitt;SpVgg Satzball;1528;1967;hanna.schnitt@example.com;+4915100081376;Schläger-Schwestern & Co;SpVgg Satzball
+Sepp;Matchball;SpVgg Satzball;1186;2007;sepp.matchball@example.com;+4915100017816;Schläger-Schwestern & Co;
+Hanna;Chopper;SpVgg Satzball;1433;2007;hanna.chopper@example.com;+4915100047828;Schläger-Schwestern & Co;
+Trudi;Konter;SpVgg Satzball;1205;1999;trudi.konter@example.com;+4915100045683;Schläger-Schwestern & Co;
+Moritz;Unterschnitt;SpVgg Satzball;1091;1993;moritz.unterschnitt@example.com;+4915100066626;Schläger-Schwestern & Co;
+Trudi;Schupf;SpVgg Satzball;1063;1960;;+4915100098381;Schläger-Schwestern & Co;
+Lutz;Ballwechsel;SpVgg Satzball;1060;2003;lutz.ballwechsel@example.com;;Die Ballverliebten;SpVgg Satzball
+Kuno;Plastikball;SpVgg Satzball;1437;1966;kuno.plastikball@example.com;+4915100095394;Die Ballverliebten;
+Dieter;Zitterhand;SpVgg Satzball;1349;1982;dieter.zitterhand@example.com;;Die Ballverliebten;
+Rudi;Abwehrmauer;SpVgg Satzball;1228;1981;rudi.abwehrmauer@example.com;+4915100097835;Die Ballverliebten;
+Rudi;Kantenball;SpVgg Satzball;1260;1999;;+4915100096846;Die Ballverliebten;
+Carla;Aufschlag;Post SV Schupfgold;1068;1984;carla.aufschlag@example.com;+4915100043082;Die Ballverliebten;
+Anna;Doppelfehler;TTC Schmetterball;1386;2010;anna.doppelfehler@example.com;+4915100064165;Chopper-Chaoten;TTV Noppen-Power
+Cleo;Block;TTV Noppen-Power;1368;2003;cleo.block@example.com;+4915100067939;Chopper-Chaoten;
+Dora;Ballwechsel;TTV Noppen-Power;1331;1963;dora.ballwechsel@example.com;;Chopper-Chaoten;
+Uschi;Ballwechsel;TTV Noppen-Power;1112;1956;uschi.ballwechsel@example.com;;Chopper-Chaoten;
+Egon;Netzroller;TTV Noppen-Power;1131;1974;egon.netzroller@example.com;+4915100082384;Chopper-Chaoten;
+Wanda;Ballwechsel;TTV Noppen-Power;1480;1962;wanda.ballwechsel@example.com;+4915100025396;Chopper-Chaoten;
+Trudi;Bananenflip;TSV Netzroller;1416;1973;trudi.bananenflip@example.com;+4915100045838;Abwehr-Allianz;TSV Netzroller
+Bert;Satzball;TSV Netzroller;1291;1970;bert.satzball@example.com;+4915100028958;Abwehr-Allianz;
+Lotte;Schmetterling;Post SV Schupfgold;1432;2011;lotte.schmetterling@example.com;+4915100019150;Abwehr-Allianz;
+Lotte;Ballwechsel;TTV Noppen-Power;1224;2005;lotte.ballwechsel@example.com;+4915100010336;Abwehr-Allianz;
+Trudi;Schmetterling;TSV Netzroller;1350;1992;trudi.schmetterling@example.com;;Abwehr-Allianz;
+Olaf;Satzball;TSV Netzroller;1325;1985;olaf.satzball@example.com;+4915100082340;Abwehr-Allianz;
+Sepp;Netzroller;TTV Noppen-Power;1214;2010;sepp.netzroller@example.com;+4915100041300;Die Penholder-Posse;TTV Noppen-Power
+Hanna;Flip;TTV Noppen-Power;1447;1981;hanna.flip@example.com;+4915100071993;Die Penholder-Posse;
+Susi;Schlägerholz;TTV Noppen-Power;1389;2005;;;Die Penholder-Posse;
+Ada;Matchball;TTV Noppen-Power;1068;1963;ada.matchball@example.com;+4915100087356;Die Penholder-Posse;
+Zenzi;Topspin;TTV Noppen-Power;1482;1983;zenzi.topspin@example.com;+4915100069890;Die Penholder-Posse;
+Cleo;Noppe;TTV Noppen-Power;1495;1996;cleo.noppe@example.com;;Die Penholder-Posse;
+Wanda;Shakehand;TuS Zelluloid;1404;1980;;;Shakehand-Schickeria;TuS Zelluloid
+Sepp;Belag;Post SV Schupfgold;1244;1975;;;Shakehand-Schickeria;
+Vroni;Tischkante;TuS Zelluloid;1327;1957;vroni.tischkante@example.com;;Shakehand-Schickeria;
+Ida;Ballwechsel;TuS Zelluloid;1197;1969;ida.ballwechsel@example.com;;Shakehand-Schickeria;
+Moritz;Linkshänder;TuS Zelluloid;1374;2000;moritz.linkshaender@example.com;;Shakehand-Schickeria;
+Dora;Abwehrmauer;TuS Zelluloid;1512;1956;dora.abwehrmauer@example.com;+4915100017355;Shakehand-Schickeria;
+Nele;Kurzkurz;SC Rückhand Rasant;1175;1988;nele.kurzkurz@example.com;+4915100099364;Die Netzbeschmutzer;SC Rückhand Rasant
+Ada;Aufschlag;SC Rückhand Rasant;1090;1994;ada.aufschlag@example.com;;Die Netzbeschmutzer;
+Zenzi;Kantenball;SC Rückhand Rasant;1517;1992;zenzi.kantenball@example.com;+4915100070443;Die Netzbeschmutzer;
+Yvonne;Bananenflip;SC Rückhand Rasant;1391;1955;yvonne.bananenflip@example.com;;Die Netzbeschmutzer;
+Hanna;Abwehrmauer;SC Rückhand Rasant;1329;1965;;+4915100055293;Die Netzbeschmutzer;
+Rudi;Schlägerholz;SC Rückhand Rasant;1542;1982;rudi.schlaegerholz@example.com;;Die Netzbeschmutzer;
+Elli;Vorhand;TuS Zelluloid;1246;2009;elli.vorhand@example.com;+4915100041091;Linkshänder-Liga;TuS Zelluloid
+Rudi;Zitterhand;TuS Zelluloid;1201;1999;rudi.zitterhand@example.com;+4915100096275;Linkshänder-Liga;
+Cleo;Schnitt;TuS Zelluloid;1492;1998;;;Linkshänder-Liga;
+Uschi;Zelluloid;FC Plastikball;1476;2012;uschi.zelluloid@example.com;;Linkshänder-Liga;
+Ida;Abwehrmauer;TuS Zelluloid;1460;1977;ida.abwehrmauer@example.com;+4915100034920;Linkshänder-Liga;
+Vroni;Smash;TuS Zelluloid;1419;2004;;;Linkshänder-Liga;
+Lotte;Konter;TTC Schmetterball;1208;2005;lotte.konter@example.com;+4915100085965;Zitterhand-Zirkus;SV Kantenball
+Egon;Aufschlag;SV Kantenball;1515;1973;egon.aufschlag@example.com;+4915100064460;Zitterhand-Zirkus;
+Sepp;Doppelfehler;SV Kantenball;1326;2011;sepp.doppelfehler@example.com;;Zitterhand-Zirkus;
+Sepp;Aufschlag;TSV Netzroller;1181;2007;;;Zitterhand-Zirkus;
+Ada;Schnitt;SV Kantenball;1495;1976;ada.schnitt@example.com;;Zitterhand-Zirkus;
+Udo;Kantenball;SV Kantenball;1436;1969;udo.kantenball@example.com;;Zitterhand-Zirkus;

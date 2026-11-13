@@ -52,7 +52,8 @@ extension (names: Names)
  * @param cap       `race`: Obergrenze, bei der der nächste Punkt entscheidet
  * @param toWin     `bestOf`: Anzahl der nötigen Gewinneinheiten
  * @param count     `fixed`: Anzahl der gespielten Einheiten
- * @param allowDraw `fixed`/`sum`: Unentschieden möglich
+ * @param allowDraw `fixed`/`sum`: Unentschieden möglich; `bestOf`: Unentschieden bei (toWin-1):(toWin-1), wenn alle
+ *                  Einheiten gespielt sind (z. B. 7:7 bei 14 Spielen bis 8 Punkte)
  * @param decider   `fixed`: bei Gleichstand nach `count` Einheiten entscheidet eine weitere Einheit
  *                  (Begegnung: Entscheidungsspiel, siehe [[EncounterGame.decider]])
  */
@@ -85,7 +86,8 @@ case class Level(
         (hi == target && lo <= target - winBy) ||
         (hi > target && hi - lo == winBy && cap.forall(hi <= _)) ||
         cap.exists(c => hi == c && lo == c - 1)
-      case Level.BestOf => (a == toWin && b < toWin) || (b == toWin && a < toWin)
+      case Level.BestOf =>
+        (a == toWin && b < toWin) || (b == toWin && a < toWin) || (allowDraw && a == toWin - 1 && b == toWin - 1)
       case Level.Fixed  =>
         (a + b == count && (allowDraw || a != b)) ||
         (decider && a + b == count + 1 && math.abs(a - b) == 1)
