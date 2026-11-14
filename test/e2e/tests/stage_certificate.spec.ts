@@ -9,7 +9,7 @@ import { test, expect, Page } from '@playwright/test';
 async function openCertificateTab(page: Page, stageIndex: number) {
   await page.goto('/');
   await page.locator('#MainView_BtnDemo').click();
-  await page.locator('td', { hasText: 'S-Klasse Herren Einzel' }).first().locator('span[onclick^="appLoadPage"]').click();
+  await page.locator('td', { hasText: 'S-Klasse Herren Einzel' }).first().locator('.comp-link').click();
   const radio = page.locator('input[name="stage-certificate-radio"]').nth(stageIndex);
   await expect(radio).toBeVisible({ timeout: 15000 });
   if (!(await radio.isChecked())) await radio.click();

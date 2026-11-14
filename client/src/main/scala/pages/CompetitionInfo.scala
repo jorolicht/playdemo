@@ -32,6 +32,21 @@ object CompetitionInfo extends BasePage with JsWrapper:
   val BtnDeleteStage:    HtmlId = genId(name)
   /** Radio button to update stage certificate configuration. */
   val RadioCert:         HtmlId = genId(name)
+  /** Tree Node Glyph einer Stage in der Stage-Liste (klappt die Stage-Reiter auf), Suffix = Stage-Id. */
+  val TngStage:          HtmlId = genId(name)
+  /** Reiter einer aufgeklappten Stage, Suffix = "<Stage-Id>-<Seitenname>". */
+  val BtnStageTab:       HtmlId = genId(name)
+
+  /** Aufgeklappte Stages (StageId) der Stage-Liste. */
+  private val openStages = scala.collection.mutable.Set[Int]()
+
+  /**
+   * Ist eine Stage in der Stage-Liste aufgeklappt?
+   *
+   * @param stageId Stage-Id
+   * @return true, wenn die Stage-Reiter angezeigt werden
+   */
+  def isStageOpen(stageId: Int): Boolean = openStages.contains(stageId)
 
   // Header IDs for sorting
   val IdHeaderSno:       HtmlId = genId(name)
@@ -252,6 +267,21 @@ object CompetitionInfo extends BasePage with JsWrapper:
       case id if id.id.startsWith(BtnDeleteStage.id) =>
         val stageId = StageId(elem.id.substring(BtnDeleteStage.id.length + 1).toInt)
         handleDeleteStage(stageId)
+
+      case id if id.id.startsWith(TngStage.id + "-") =>
+        val stageId = elem.id.substring(TngStage.id.length + 1).toInt
+        if (!openStages.remove(stageId)) openStages += stageId
+        render()
+
+      case id if id.id.startsWith(BtnStageTab.id + "-") =>
+        elem.id.substring(BtnStageTab.id.length + 1).split("-", 2) match
+          case Array(sId, page) =>
+            services.TourneyDB.tourney.stages.find(s => s != null && s.id.value == sId.toInt).foreach { stage =>
+              Global.currentSelection = Global.currentSelection.copy(stage = Some(stage))
+              comps.ContextHeader.render()
+              loadPage(PageNameTyp(page), "")
+            }
+          case _ =>
 
       case id if id.id.startsWith(RadioCert.id) =>
         val stageId = StageId(elem.id.substring(RadioCert.id.length + 1).toInt)
