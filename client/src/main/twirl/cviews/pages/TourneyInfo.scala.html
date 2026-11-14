@@ -124,7 +124,8 @@
                                             <span class="me-1 invisible">@tng(false)</span>
                                         }
                                     }
-                                    <span onclick="appLoadPage('CompetitionInfo', '@c.id.value')">@c.name</span>
+                                    @* als Button umrandet, damit erkennbar ist, dass der Name die Wettbewerbsübersicht öffnet *@
+                                    <button type="button" class="btn btn-outline-primary btn-sm fw-bold comp-link" onclick="appLoadPage('CompetitionInfo', '@c.id.value')">@c.name</button>
                                 </td>
                                 <td><span class="badge bg-light text-dark border">@gM(c.typ.msgCode)</span></td>
                                 <td>@{c.lowLevel.getOrElse(0)} - @{c.upperLevel.getOrElse("∞")}</td>
@@ -156,7 +157,10 @@
                                         <td colspan="5" class="ps-4">
                                             <span class="me-1" role="button" @id(TngStage, "onclick", st.id.value.toString)>@tng(openStages.contains(st.id.value))</span>
                                             <span class="fw-semibold">@st.name</span>
-                                            <span class="badge bg-light text-dark border ms-2">@gM(st.stageConfig.msgCode)</span>
+                                            @* Spielmodus erst nach der Auswahl anzeigen (sonst doppelt "Konfiguration" mit dem Status) *@
+                                            @if(st.stageConfig != StageConfig.CFG && st.stageConfig != StageConfig.UNKN) {
+                                                <span class="badge bg-light text-dark border ms-2">@gM(st.stageConfig.msgCode)</span>
+                                            }
                                             <span class="badge ms-1 @{st.status match {
                                                 case StageStatus.CFG => "bg-secondary"
                                                 case StageStatus.AUS => "bg-info text-dark"

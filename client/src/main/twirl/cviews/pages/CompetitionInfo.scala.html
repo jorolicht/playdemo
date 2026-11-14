@@ -78,7 +78,10 @@
                         }
                         @stages.map { r =>
                             <tr>
-                                <td class="ps-3 fw-bold">@r.name</td>
+                                <td class="ps-3 fw-bold">
+                                    <span class="me-1" role="button" @id(TngStage, "onclick", r.id.value.toString)><i class="bi @{if (isStageOpen(r.id.value)) "bi-caret-down-fill" else "bi-caret-right-fill"} text-secondary"></i></span>
+                                    @r.name
+                                </td>
                                 <td>@r.noPlayers</td>
                                 <td>@r.getNoRounds</td>
                                 <td>
@@ -109,6 +112,20 @@
                                     </div>
                                 </td>
                             </tr>
+                            @* Stage-Reiter der aufgeklappten Stage (wie im Stage-Untermenü) *@
+                            @if(isStageOpen(r.id.value)) {
+                                <tr class="table-light">
+                                    <td colspan="6" class="ps-5">
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @pages.TourneyInfo.StageTabs.filter(t => t._1 != "StageCertificate" || r.certificate).map { case (page, icon, msg) =>
+                                                <button class="btn btn-outline-primary btn-sm" @id(BtnStageTab, "onclick", s"${r.id.value}-$page")>
+                                                    <i class="bi @icon me-1"></i>@gM(msg)
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>

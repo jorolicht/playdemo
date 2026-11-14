@@ -58,7 +58,7 @@ test.describe('UseCase 8: Abschnitts-Verwaltung & Auslosung (StageAdmin & StageD
     // 1. Select first competition from TourneyInfo
     // Wettbewerb ohne Stages wählen ("S-Klasse Herren Einzel" hat in den Demo-Daten schon Vorrunde und Endrunde;
     // eine weitere Stage verlangt im Dialog eine Vorgänger-Stage)
-    const compCell = page.locator('tr', { hasText: 'B-Klasse Damen Einzel' }).locator('span[onclick^="appLoadPage"]');
+    const compCell = page.locator('tr', { hasText: 'B-Klasse Damen Einzel' }).locator('.comp-link');
     await expect(compCell).toBeVisible({ timeout: 5000 });
     await compCell.click();
 
