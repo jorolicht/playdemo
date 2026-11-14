@@ -62,10 +62,10 @@ test.describe('UseCase 5.4: Lokaler Modus - Export- und Verlassen-Dialog (DlgExp
     // 3. Verify DlgExportTourney modal opens
     await expect(infoPage.dlgExportModal).toBeVisible({ timeout: 5000 });
 
-    // 4. Verify default filename prefill pattern: tourney_<safeName>_<startDate>_export.json
+    // 4. Verify default filename prefill pattern: <safeName>_<startDate>.json (no "tourney_" prefix, no "_export" suffix)
     const expectedDateStr = startDateStr.replace(/-/g, '');
     const filenameVal = await infoPage.inputExportFilename.inputValue();
-    expect(filenameVal).toContain('tourney_ExportTest');
+    expect(filenameVal).toMatch(/^ExportTest_\d+_\d{8}\.json$/);
     expect(filenameVal).toContain(expectedDateStr);
     expect(filenameVal).toMatch(/\.json$/);
 
@@ -92,7 +92,7 @@ test.describe('UseCase 5.4: Lokaler Modus - Export- und Verlassen-Dialog (DlgExp
       infoPage.btnExportApply.click(),
     ]);
 
-    expect(download.suggestedFilename()).toContain('tourney_ExportTest');
+    expect(download.suggestedFilename()).toMatch(/^ExportTest_\d+_\d{8}\.json$/);
     expect(download.suggestedFilename()).toMatch(/\.json$/);
     await expect(infoPage.dlgExportModal).not.toBeVisible({ timeout: 3000 });
     await expect(infoPage.cardHeaderTitle).toBeVisible();
@@ -150,7 +150,7 @@ test.describe('UseCase 5.4: Lokaler Modus - Export- und Verlassen-Dialog (DlgExp
     expect(downloadTriggered).toBe(false);
   });
 
-  test('TC-EXP-03 [👤]: Verlassen der Turnierseite über Logo/Home im lokalen Modus öffnet Dialog "Turnier verlassen" und erlaubt Verlassen', async ({ page }) => {
+  test('TC-EXP-03 [👤]: Verlassen der Turnierseite über Logo, Menü oder Footer speichert das lokale Turnier automatisch ohne Dialog "Turnier verlassen"', async ({ page }) => {
     await mainPage.goto();
 
     // 1. Enter Local Mode via Option 1
@@ -174,28 +174,26 @@ test.describe('UseCase 5.4: Lokaler Modus - Export- und Verlassen-Dialog (DlgExp
     await newPage.save();
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 7000 });
 
-    // 2. Click Logo / Brand in Navbar to navigate away to MainView
-    const brandLink = page.locator('a.navbar-brand');
-    await brandLink.click();
-
-    // 3. Verify DlgExportTourney modal opens with leave prompt and 2 buttons
-    await expect(infoPage.dlgExportModal).toBeVisible({ timeout: 5000 });
-    await expect(infoPage.dlgExportTitle).toHaveText(/Turnier verlassen|Leave tournament/i);
-    await expect(infoPage.dlgExportPrompt).toHaveText(/Das aktuelle Turnier wird lokal gespeichert\.|The current tournament will be saved locally\./i);
-    await expect(infoPage.inputExportFilename).not.toBeVisible();
-
-    const footerButtons = infoPage.dlgExportModal.locator('.modal-footer button');
-    await expect(footerButtons).toHaveCount(2);
-    await expect(infoPage.btnExportCancel).toHaveText(/ABBRECHEN|CANCEL/i);
-    await expect(infoPage.btnExportApply).toHaveText(/VERLASSEN|LEAVE/i);
-
-    // 4. Click "VERLASSEN"
-    await infoPage.btnExportApply.click();
-
-    // 5. Verify successful navigation away from tourney without download
-    await expect(infoPage.dlgExportModal).not.toBeVisible({ timeout: 3000 });
-    await expect(infoPage.cardHeaderTitle).not.toBeVisible({ timeout: 7000 });
+    // 2. Click Logo / Brand in Navbar: leaves without dialog, the tournament is saved automatically
+    await page.locator('a.navbar-brand').click();
     await expect(page.locator('.hero-section').first()).toBeVisible({ timeout: 7000 });
+    await expect(infoPage.dlgExportModal).not.toBeVisible();
+    await expect(infoPage.cardHeaderTitle).not.toBeVisible();
+    expect(await page.evaluate(() => window.localStorage.getItem('App.demo_tourney'))).toContain(tourneyName);
+
+    // 3. Reopen via "Meine Turniere" and leave via the menu item "Funktionen" and the footer link "Impressum"
+    for (const leave of [
+      () => page.locator('.navbar a.nav-link', { hasText: /Funktionen|Features/ }).first().click(),
+      () => page.locator('footer a', { hasText: /Impressum|Imprint/ }).first().click(),
+    ]) {
+      await page.locator('#myTourneysDropdown').click();
+      await page.locator('a.recent-tourney:has(i.bi-laptop)').click();
+      await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 7000 });
+      await leave();
+      await expect(infoPage.cardHeaderTitle).not.toBeVisible({ timeout: 7000 });
+      await expect(infoPage.dlgExportModal).not.toBeVisible();
+    }
+    expect(await page.evaluate(() => window.localStorage.getItem('App.demo_tourney'))).toContain(tourneyName);
   });
 
   test('TC-EXP-04 [👤]: Beim Export mit bereits existierendem Dateinamen erscheint eine Überschreiben-Warnung und erfordert Bestätigung', async ({ page }) => {

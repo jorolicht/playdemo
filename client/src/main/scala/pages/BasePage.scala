@@ -58,15 +58,12 @@ def loadPage(pageName: PageName, param: String, withSidebar: Boolean = true, asy
                            !isEditingCurrentTourney &&
                            targetPage.value != base.Global.activePageName
     if (isLeavingTourney) {
-      val tourney = base.Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
-      dialogs.DlgExportTourney.show(tourney, saveAndLeave = true).map {
-        case Some(_) =>
-          services.TourneyDB.sync().map { _ =>
-            base.Global.currentSelection = shared.model.Selection()
-            base.Global.clearSessionTourneyState()
-            doLoadPageInternal(targetPage, targetParam, withSidebar, async)
-          }
-        case None => // User cancelled, stay on current page
+      // Verlassen ohne Rückfrage (z. B. "Funktionen", Impressum): das Turnier wird automatisch gespeichert
+      // (lokal im Browser bzw. in der Cloud) und geschlossen; über "Meine Turniere" lässt es sich wieder öffnen.
+      services.TourneyDB.sync().map { _ =>
+        base.Global.currentSelection = shared.model.Selection()
+        base.Global.clearSessionTourneyState()
+        doLoadPageInternal(targetPage, targetParam, withSidebar, async)
       }
     } else {
       doLoadPageInternal(targetPage, targetParam, withSidebar, async)

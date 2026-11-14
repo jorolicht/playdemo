@@ -81,6 +81,77 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
 
 
   /**
+   * Wechselt zu einem anderen Turnier ohne Rückfrage: ein geöffnetes Turnier wird synchronisiert und geschlossen,
+   * danach folgt `action` (z. B. Laden eines Cloud-Turniers bzw. des lokalen Turniers).
+   *
+   * @param action Laden des neuen Turniers
+   */
+  private def switchTourney(action: () => Unit): Unit =
+    import shared.model.Selection
+    val closed =
+      if (base.Global.currentSelection.tourney.isDefined) services.TourneyDB.sync().map(_ => ())
+      else Future.successful(())
+    closed.foreach { _ =>
+      base.Global.currentSelection = Selection()
+      base.Global.clearSessionTourneyState()
+      comps.ContextHeader.hide()
+      action()
+    }
+
+  /**
+   * Lädt ein Turnier, das das lokal im Browser gespeicherte Turnier ersetzt (Datei öffnen bzw. Datei aus "Meine
+   * Turniere"). Gibt es ein lokales Turnier, fragt der Dialog "Turnier laden", ob es vorher in eine Datei exportiert
+   * werden soll (Abbrechen / Ja, vorher speichern / Nein, überschreiben).
+   *
+   * @param action Laden des neuen Turniers
+   */
+  private def confirmOverwriteLocal(action: () => Unit): Unit =
+    import shared.BoxButton
+    services.RecentTourneys.localTourneyName match
+      case None => switchTourney(action)
+      case Some(localName) =>
+        dialogs.DlgMsgbox.show(
+          gM("navbar.loadOverwritePrompt", localName),
+          gM("navbar.loadOverwriteTitle"),
+          List(BoxButton.Cancel, BoxButton.Yes, BoxButton.No),
+          labels = Map(
+            BoxButton.Cancel -> gM("navbar.loadOverwriteCancel"),
+            BoxButton.Yes    -> gM("navbar.loadOverwriteSave"),
+            BoxButton.No     -> gM("navbar.loadOverwriteReplace"))
+        ).map {
+          case BoxButton.Yes => exportLocalTourney(() => switchTourney(action))
+          case BoxButton.No  => switchTourney(action)
+          case _             => debug("Load tourney cancelled")
+        }
+
+  /**
+   * Exportiert das lokale Turnier in eine Datei (Dialog mit Dateiname) und fährt danach mit `next` fort; bricht der
+   * Benutzer den Export ab, wird nichts geladen. Ist das lokale Turnier nicht geöffnet, wird es zuvor aus dem Browser
+   * gelesen (ein geöffnetes Cloud-Turnier wird dazu synchronisiert und geschlossen).
+   *
+   * @param next Fortsetzung nach dem Export
+   */
+  private def exportLocalTourney(next: () => Unit): Unit =
+    import base.Global
+    import services.TourneyDB
+    def doExport(t: shared.model.Tourney): Unit =
+      dialogs.DlgExportTourney.show(t, saveAndLeave = false).map {
+        case Some(fileName) if fileName.nonEmpty =>
+          TourneyDB.triggerExportDownload(fileName, t)
+          next()
+        case _ => debug("Export of local tourney cancelled, nothing loaded")
+      }
+    if (Global.isLocalMode && Global.currentSelection.tourney.isDefined) doExport(Global.currentSelection.tourney.get)
+    else switchTourney { () =>
+      Global.isLocalMode = true
+      Global.isDemoMode = false
+      TourneyDB.init(999999).map {
+        case Right(_)  => doExport(TourneyDB.tourney)
+        case Left(err) => dialogs.DlgMsgbox.showError(err, "Fehler beim Laden des lokalen Turniers")
+      }
+    }
+
+  /**
    * Starts a quick competition workflow by navigating to CompetitionNew.
    */
   def doQuickStart(): Unit =
@@ -176,7 +247,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
         case _: Exception => read[Tourney](jsonString)
       }
 
-      confirmLeave { () =>
+      confirmOverwriteLocal { () =>
         // Set Local Mode
         Global.isLocalMode = true
         Global.isDemoMode = false
@@ -214,7 +285,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     import services.RecentTourneys
     entry.kind match
       case RecentTourneys.Local => doLoadLocalTourney()
-      case RecentTourneys.Cloud => confirmLeave(() => loadCloudTourney(entry.key))
+      case RecentTourneys.Cloud => switchTourney(() => loadCloudTourney(entry.key))
       case _ =>
         RecentTourneys.FileCache.get(entry.key).foreach {
           case Some(json) => importTourneyJson(json, entry.key)
@@ -383,7 +454,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     if (jsStr == null || jsStr.trim.isEmpty) {
       dom.window.alert("Kein lokal gespeichertes Turnier vorhanden.")
     } else {
-      confirmLeave { () =>
+      switchTourney { () =>
         Global.isLocalMode = true
         Global.isDemoMode = false
         TourneyDB.init(999999).map {
