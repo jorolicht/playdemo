@@ -441,6 +441,7 @@ object TourneyDB extends ComWrapper with Debouncer:
     org.scalajs.dom.URL.revokeObjectURL(url)
 
     addExportedFilename(finalFilename)
+    RecentTourneys.touchFile(finalFilename, t.name, jsonString)
   }
 
   /**

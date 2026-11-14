@@ -276,7 +276,7 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
     }
   });
 
-  test('TC-MV-11a [🌐]: Status-Zeile wird NICHT angezeigt, wenn keine Speicherschlüssel für ein letztes Turnier existieren', async ({ page }) => {
+  test('TC-MV-11a [🌐]: Keine Status-Zeile; "Meine Turniere" ist leer, wenn keine Speicherschlüssel für ein letztes Turnier existieren', async ({ page }) => {
     const mainView = new MainViewPage(page);
     await mainView.goto();
 
@@ -286,12 +286,15 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
     });
     await mainView.goto();
 
-    // Verify status bar is NOT visible
-    await expect(mainView.statusTourneyBar).not.toBeVisible();
+    // Status line no longer exists; "Meine Turniere" lists no tournament
+    await expect(mainView.statusTourneyBar).toHaveCount(0);
     await expect(page.locator('.hero-section').first()).toBeVisible();
+    await mainView.myTourneysMenu.click();
+    await expect(page.locator('a.recent-tourney')).toHaveCount(0);
+    await expect(mainView.myTourneysList).toContainText(/Noch keine Turniere verwendet|No tournaments used yet/);
   });
 
-  test('TC-MV-11b [🌐]: Status-Zeile zeigt lokales Turnier an, wenn App.demo_tourney in localStorage existiert, und Klick auf Laden öffnet TourneyInfo', async ({ page }) => {
+  test('TC-MV-11b [🌐]: "Meine Turniere" zeigt lokales Turnier an, wenn App.demo_tourney in localStorage existiert, und Klick öffnet TourneyInfo', async ({ page }) => {
     const mainView = new MainViewPage(page);
     const infoPage = new TourneyInfoPage(page);
     await mainView.goto();
@@ -326,14 +329,12 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
 
     await mainView.goto();
 
-    // 1. Verify status bar is visible before hero-section
-    await expect(mainView.statusTourneyBar).toBeVisible();
-    await expect(mainView.statusTourneyName).toHaveText(localTourneyName);
-    await expect(mainView.statusTourneyBar.locator('.badge')).toHaveText(/Lokal|Local/i);
+    // 1. "Meine Turniere" lists the local tournament
+    await mainView.myTourneysMenu.click();
+    await expect(mainView.recentLocal).toHaveText(new RegExp(`(lokal im Browser|local in the browser) \\(${localTourneyName}\\)`));
 
-    // 2. Click load button in status bar
-    await expect(mainView.btnStatusLoadLast).toBeVisible();
-    await mainView.btnStatusLoadLast.click();
+    // 2. Click the entry
+    await mainView.recentLocal.click();
 
     // 3. Verify navigation to TourneyInfo and tournament name is loaded
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
@@ -342,7 +343,7 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
     expect(await tourneyNameElem.innerText()).toContain(localTourneyName);
   });
 
-  test('TC-MV-11c [🌐]: Status-Zeile zeigt Cloud-Turnier an, wenn tourney_slug und tourney_name existieren', async ({ page }) => {
+  test('TC-MV-11c [🌐]: "Meine Turniere" zeigt Cloud-Turnier an, wenn tourney_slug und tourney_name existieren', async ({ page }) => {
     const mainView = new MainViewPage(page);
     await mainView.goto();
 
@@ -359,14 +360,12 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
 
     await mainView.goto();
 
-    // Verify status bar is visible with Cloud badge and tournament name
-    await expect(mainView.statusTourneyBar).toBeVisible();
-    await expect(mainView.statusTourneyName).toHaveText(cloudTourneyName);
-    await expect(mainView.statusTourneyBar.locator('.badge')).toHaveText(/Cloud/i);
-    await expect(mainView.btnStatusLoadLast).toBeVisible();
+    // Verify cloud entry with tournament name
+    await mainView.myTourneysMenu.click();
+    await expect(mainView.recentCloud).toHaveText(new RegExp(`(in der Cloud|in the cloud) \\(${cloudTourneyName}\\)`));
   });
 
-  test('TC-MV-11d [🌐]: Status-Zeile zeigt Cloud-Slug an, wenn nur tourney_slug ohne separaten Namen gespeichert ist', async ({ page }) => {
+  test('TC-MV-11d [🌐]: "Meine Turniere" zeigt Cloud-Slug an, wenn nur tourney_slug ohne separaten Namen gespeichert ist', async ({ page }) => {
     const mainView = new MainViewPage(page);
     await mainView.goto();
 
@@ -384,13 +383,12 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
 
     await mainView.goto();
 
-    // Verify status bar is visible with Cloud badge and fallback slug as name
-    await expect(mainView.statusTourneyBar).toBeVisible();
-    await expect(mainView.statusTourneyName).toHaveText(cloudSlug);
-    await expect(mainView.statusTourneyBar.locator('.badge')).toHaveText(/Cloud/i);
+    // Verify cloud entry with fallback slug as name
+    await mainView.myTourneysMenu.click();
+    await expect(mainView.recentCloud).toHaveText(new RegExp(`(in der Cloud|in the cloud) \\(${cloudSlug}\\)`));
   });
 
-  test('TC-MV-11e [🌐]: Status-Zeile zeigt "Letzter Wettbewerb" an, wenn ident == "SIMPLE", und Klick auf Laden öffnet CompetitionInfo', async ({ page }) => {
+  test('TC-MV-11e [🌐]: "Meine Turniere" zeigt SIMPLE-Wettbewerb als lokales Turnier, Klick öffnet CompetitionInfo', async ({ page }) => {
     const mainView = new MainViewPage(page);
     await mainView.goto();
 
@@ -436,15 +434,12 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
 
     await mainView.goto();
 
-    // 1. Verify status bar is visible and shows "Letzter Wettbewerb" (or "Last Competition")
-    await expect(mainView.statusTourneyBar).toBeVisible();
-    await expect(mainView.statusTourneyName).toHaveText(compName);
-    await expect(mainView.statusTourneyLabel).toHaveText(/Letzter Wettbewerb|Last Competition/);
-    await expect(mainView.statusTourneyIcon).toHaveClass(/bi-lightning-charge-fill/);
+    // 1. "Meine Turniere" lists the local competition
+    await mainView.myTourneysMenu.click();
+    await expect(mainView.recentLocal).toContainText(compName);
 
-    // 2. Click load button
-    await expect(mainView.btnStatusLoadLast).toBeVisible();
-    await mainView.btnStatusLoadLast.click();
+    // 2. Click the entry
+    await mainView.recentLocal.click();
 
     // 3. Verify navigation to CompetitionInfo (not TourneyInfo)
     await expect(page.locator('.card-header:has-text("Wettbewerb"), .card-header:has-text("Competition")').first()).toBeVisible({ timeout: 10000 });
@@ -497,8 +492,8 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
 
     await mainView.goto();
 
-    // 1. Click load button to load the simple tournament into memory
-    await mainView.btnStatusLoadLast.click();
+    // 1. Load the simple tournament into memory via "Meine Turniere"
+    await mainView.openRecentLocal();
     await expect(page.locator('.card-header:has-text("Wettbewerb"), .card-header:has-text("Competition")').first()).toBeVisible({ timeout: 10000 });
 
     // 2. Now attempt to navigate to TourneyInfo directly via appLoadPage
@@ -563,14 +558,10 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
 
     await mainView.goto();
 
-    // Verify status bar is visible
-    await expect(mainView.statusTourneyBar).toBeVisible();
-    await expect(mainView.statusTourneyName).toHaveText(compName);
-    await expect(mainView.statusTourneyLabel).toHaveText(/Letzter Wettbewerb|Last Competition/);
-
-    // Click load button
-    await expect(mainView.btnStatusLoadLast).toBeVisible();
-    await mainView.btnStatusLoadLast.click();
+    // Verify entry in "Meine Turniere" and click it
+    await mainView.myTourneysMenu.click();
+    await expect(mainView.recentLocal).toContainText(compName);
+    await mainView.recentLocal.click();
 
     // Verify leave dialog ("Turnier verlassen" / DlgExportTourney) does NOT appear
     await expect(page.locator('#DlgExportTourney')).not.toBeVisible();

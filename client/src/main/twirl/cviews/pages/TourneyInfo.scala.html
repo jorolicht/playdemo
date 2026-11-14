@@ -157,10 +157,7 @@
                                         <td colspan="5" class="ps-4">
                                             <span class="me-1" role="button" @id(TngStage, "onclick", st.id.value.toString)>@tng(openStages.contains(st.id.value))</span>
                                             <span class="fw-semibold">@st.name</span>
-                                            @* Spielmodus erst nach der Auswahl anzeigen (sonst doppelt "Konfiguration" mit dem Status) *@
-                                            @if(st.stageConfig != StageConfig.CFG && st.stageConfig != StageConfig.UNKN) {
-                                                <span class="badge bg-light text-dark border ms-2">@gM(st.stageConfig.msgCode)</span>
-                                            }
+                                            <span class="badge bg-light text-dark border ms-2">@gM(st.stageConfig.msgCode)</span>
                                             <span class="badge ms-1 @{st.status match {
                                                 case StageStatus.CFG => "bg-secondary"
                                                 case StageStatus.AUS => "bg-info text-dark"

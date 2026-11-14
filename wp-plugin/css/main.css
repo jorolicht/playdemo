@@ -469,3 +469,9 @@ td.boto {
 .btn-mv-tourney { --bs-btn-bg: #4A607A; --bs-btn-border-color: #4A607A; --bs-btn-color: #fff; --bs-btn-hover-bg: #3E5167; --bs-btn-hover-border-color: #3E5167; --bs-btn-hover-color: #fff; --bs-btn-active-bg: #364759; --bs-btn-active-border-color: #364759; --bs-btn-active-color: #fff; }
 .btn-mv-quick   { --bs-btn-bg: #A3B8CC; --bs-btn-border-color: #A3B8CC; --bs-btn-color: #212529; --bs-btn-hover-bg: #8FA7BE; --bs-btn-hover-border-color: #8FA7BE; --bs-btn-hover-color: #212529; --bs-btn-active-bg: #8299B2; --bs-btn-active-border-color: #8299B2; --bs-btn-active-color: #212529; }
 .btn-mv-search  { --bs-btn-bg: #8A9A86; --bs-btn-border-color: #8A9A86; --bs-btn-color: #212529; --bs-btn-hover-bg: #788975; --bs-btn-hover-border-color: #788975; --bs-btn-hover-color: #212529; --bs-btn-active-bg: #6D7D6A; --bs-btn-active-border-color: #6D7D6A; --bs-btn-active-color: #212529; }
+
+/* Inaktive Menüeinträge (z. B. "Meine Turniere"): helleres Grau für Text und Symbol */
+.dropdown-item.disabled,
+.dropdown-item.disabled i {
+  color: #b5bcc3 !important;
+}

@@ -21,8 +21,8 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
   val ImportLocalId:      HtmlId = genId(name)
   val ImportCloudId:      HtmlId = genId(name)
   val LoadLocalTourneyId: HtmlId = genId(name)
-  /** HTML-ID for dropdown menu item "Letztes Turnier laden" */
-  val LoadLastTourneyId:  HtmlId = genId(name)
+  /** Eintrag der Liste "Meine Turniere", Suffix = Index in [[services.RecentTourneys.list]]. */
+  val RecentId:           HtmlId = genId(name)
   val MoveToCloudId:      HtmlId = genId(name)
   val ReloadTourneyId:    HtmlId = genId(name)
   val ExitOfflineId:      HtmlId = genId(name)
@@ -53,7 +53,8 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
       case `ImportCloudId`      => doCloudImport()
       case `MoveToCloudId`      => doMoveToCloud()
       case `LoadLocalTourneyId` => doLoadLocalTourney()
-      case `LoadLastTourneyId`  => doReloadTourney()
+      case id if id.id.startsWith(RecentId.id + "-") =>
+        services.RecentTourneys.list.lift(elem.id.substring(RecentId.id.length + 1).toInt).foreach(openRecent)
       case `ReloadTourneyId`    => doReloadTourney()
       case `ExitOfflineId`      => doExitOffline()
       case _                    => debug(s"event -> unknown event for elem:${elem.id} with event:${event.`type`}")
@@ -119,6 +120,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
       dialogs.DlgExportTourney.show(tourney, saveAndLeave = false).map {
         case Some(filename) if filename.nonEmpty =>
           TourneyDB.triggerExportDownload(filename, tourney)
+          render()   // neue Datei in "Meine Turniere"
         case _ =>
           debug("Local export cancelled")
       }
@@ -145,47 +147,81 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
         if (fileInput.files.length > 0) {
           val file = fileInput.files(0)
           val reader = new dom.FileReader()
-          reader.onload = (e: dom.Event) => {
-            val jsonString = reader.result.asInstanceOf[String]
-            try {
-              val tourneyData = try {
-                read[DemoPayload](jsonString).tourney.tourney
-              } catch {
-                case _: Exception => read[Tourney](jsonString)
-              }
-              
-              confirmLeave { () =>
-                // Set Local Mode
-                Global.isLocalMode = true
-                Global.isDemoMode = false
-                
-                // Restore Tourney
-                TourneyDB.tourney = tourneyData
-                TourneyDB.tourney.wpId = 999999
-                TourneyDB.version = 1
-                TourneyDB.addExportedFilename(file.name)
-                
-                // Force sync to local storage
-                TourneyDB.sync()
-                ClubDB.sync(TourneyDB.tourney.clubs.toSeq)
-                PlayerDB.sync(TourneyDB.tourney.players.toSeq)
-                CompetitionDB.sync(TourneyDB.tourney.competitions.filter(_ != null).toSeq)
-                StageDB.sync(TourneyDB.tourney.stages.filter(_ != null).toSeq)
-                
-                dom.window.alert("Import erfolgreich! Das lokale Turnier wird nun geladen.")
-                openTourneyView(TourneyDB.tourney)
-              }
-            } catch {
-              case ex: Exception =>
-                dom.window.alert(s"Fehler beim Importieren der Datei: ${ex.getMessage}")
-            }
-          }
+          reader.onload = (e: dom.Event) => importTourneyJson(reader.result.asInstanceOf[String], file.name)
           reader.readAsText(file)
         }
       }
       fileInput.click()
     }
   }
+
+  /**
+   * Lädt ein Turnier aus dem Inhalt einer JSON-Datei als lokales Turnier in den Browser (nach Rückfrage zum Verlassen
+   * des aktuellen Turniers) und vermerkt die Datei in "Meine Turniere".
+   *
+   * @param jsonString Inhalt der Datei (Format des Exports bzw. reines Turnier)
+   * @param fileName   Dateiname
+   */
+  private def importTourneyJson(jsonString: String, fileName: String): Unit = {
+    import services.*
+    import base.Global
+    import services.DemoManager.DemoPayload
+    import shared.basic.Pickle.*
+    import shared.model.Tourney
+
+    try {
+      val tourneyData = try {
+        read[DemoPayload](jsonString).tourney.tourney
+      } catch {
+        case _: Exception => read[Tourney](jsonString)
+      }
+
+      confirmLeave { () =>
+        // Set Local Mode
+        Global.isLocalMode = true
+        Global.isDemoMode = false
+
+        // Restore Tourney
+        TourneyDB.tourney = tourneyData
+        TourneyDB.tourney.wpId = 999999
+        TourneyDB.version = 1
+        TourneyDB.addExportedFilename(fileName)
+        RecentTourneys.touchFile(fileName, tourneyData.name, jsonString)
+
+        // Force sync to local storage
+        TourneyDB.sync()
+        ClubDB.sync(TourneyDB.tourney.clubs.toSeq)
+        PlayerDB.sync(TourneyDB.tourney.players.toSeq)
+        CompetitionDB.sync(TourneyDB.tourney.competitions.filter(_ != null).toSeq)
+        StageDB.sync(TourneyDB.tourney.stages.filter(_ != null).toSeq)
+
+        dom.window.alert("Import erfolgreich! Das lokale Turnier wird nun geladen.")
+        openTourneyView(TourneyDB.tourney)
+      }
+    } catch {
+      case ex: Exception =>
+        dom.window.alert(s"Fehler beim Importieren der Datei: ${ex.getMessage}")
+    }
+  }
+
+  /**
+   * Öffnet einen Eintrag aus "Meine Turniere": das lokale Turnier, die Kopie einer Datei (fehlt sie, folgt die
+   * Dateiauswahl) bzw. ein Cloud-Turnier.
+   *
+   * @param entry Eintrag
+   */
+  private def openRecent(entry: services.RecentTourney): Unit =
+    import services.RecentTourneys
+    entry.kind match
+      case RecentTourneys.Local => doLoadLocalTourney()
+      case RecentTourneys.Cloud => confirmLeave(() => loadCloudTourney(entry.key))
+      case _ =>
+        RecentTourneys.FileCache.get(entry.key).foreach {
+          case Some(json) => importTourneyJson(json, entry.key)
+          case None =>
+            dom.window.alert(gM("navbar.recentFileMissing", entry.key))
+            doLocalImport()
+        }
 
   /**
    * Prompts the user to select a JSON file to import to the server / cloud backend.
@@ -313,6 +349,12 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
    */
   def openTourneyView(tourney: shared.model.Tourney): Unit = {
     import shared.model.Selection
+    import services.RecentTourneys
+    // "Meine Turniere": lokales bzw. Cloud-Turnier vermerken (Demo nicht)
+    if (!base.Global.isDemoMode) {
+      if (base.Global.isLocalMode) RecentTourneys.touch(RecentTourneys.Local, "local", tourney.name)
+      else if (tourney.slug.nonEmpty && tourney.slug != "local") RecentTourneys.touch(RecentTourneys.Cloud, tourney.slug, tourney.name)
+    }
     if (tourney.ident == "SIMPLE") {
       val comp = services.CompetitionDB.competitions.find(c => c != null && !c.deleted)
         .orElse(tourney.competitions.find(c => c != null && !c.deleted))
@@ -350,6 +392,40 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
           case Left(err) =>
             dialogs.DlgMsgbox.showError(err, "Fehler beim Laden des lokalen Turniers")
         }
+      }
+    }
+  }
+
+  /**
+   * Lädt ein Cloud-Turnier und öffnet es; ohne Anmeldung bzw. Berechtigung erscheint ein Hinweis.
+   *
+   * @param slug Slug des Turniers
+   */
+  private def loadCloudTourney(slug: String): Unit = {
+    import base.Global
+    import services.*
+
+    if (Global.user.isEmpty) {
+      dom.window.alert(gM("navbar.reloadLoginRequired"))
+      pages.loadPage(shared.PageNameTyp("UserLogin"), "")
+    } else {
+      TourneyDB.init(slug).map {
+        case Right(_) =>
+          val t = TourneyDB.tourney
+          if (!Global.hasTourneyAccess(t)) {
+            dom.window.alert(gM("navbar.reloadNoPermission"))
+          } else {
+            Global.isLocalMode = false
+            Global.isDemoMode = false
+            Global.tourneySlug = t.slug
+            openTourneyView(t)
+          }
+        case Left(err) =>
+          if (err.is("forbidden") || err.is("unauthorized") || err.msgCode.toLowerCase.contains("permission")) {
+            dom.window.alert(gM("navbar.reloadNoPermission"))
+          } else {
+            dialogs.DlgMsgbox.showError(err, "Fehler beim Laden des Turniers")
+          }
       }
     }
   }
@@ -402,24 +478,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
         if (slug.isEmpty) {
           dom.window.alert(gM("navbar.reloadNoSlug"))
         } else {
-          TourneyDB.init(slug).map {
-            case Right(_) =>
-              val t = TourneyDB.tourney
-              if (!Global.hasTourneyAccess(t)) {
-                dom.window.alert(gM("navbar.reloadNoPermission"))
-              } else {
-                Global.isLocalMode = false
-                Global.isDemoMode = false
-                Global.tourneySlug = t.slug
-                openTourneyView(t)
-              }
-            case Left(err) =>
-              if (err.is("forbidden") || err.is("unauthorized") || err.msgCode.toLowerCase.contains("permission")) {
-                dom.window.alert(gM("navbar.reloadNoPermission"))
-              } else {
-                dialogs.DlgMsgbox.showError(err, "Fehler beim Laden des Turniers")
-              }
-          }
+          loadCloudTourney(slug)
         }
       }
     }

@@ -100,9 +100,7 @@ test.describe('UseCase 6: Wettbewerbsverwaltung (CompetitionInfo)', () => {
       }, samplePayload);
 
       await mainView.goto();
-      await expect(mainView.statusTourneyBar).toBeVisible();
-      await expect(mainView.btnStatusLoadLast).toBeVisible();
-      await mainView.btnStatusLoadLast.click();
+      await mainView.openRecentLocal();
 
       await expect(compInfoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
       await expect(page.locator('body')).toContainText(compName);
@@ -180,9 +178,7 @@ test.describe('UseCase 6: Wettbewerbsverwaltung (CompetitionInfo)', () => {
       }, samplePayload);
 
       await mainView.goto();
-      await expect(mainView.statusTourneyBar).toBeVisible();
-      await expect(mainView.btnStatusLoadLast).toBeVisible();
-      await mainView.btnStatusLoadLast.click();
+      await mainView.openRecentLocal();
 
       await expect(compInfoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
       await expect(page.locator('body')).toContainText(compName);
@@ -363,9 +359,7 @@ test.describe('UseCase 6: Wettbewerbsverwaltung (CompetitionInfo)', () => {
       }, { name: compName, slug: cloudSlug });
 
       await mainView.goto();
-      await expect(mainView.statusTourneyBar).toBeVisible();
-      await expect(mainView.btnStatusLoadLast).toBeVisible();
-      await mainView.btnStatusLoadLast.click();
+      await mainView.openRecentCloud();
 
       await expect(compInfoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
       await expect(page.locator('body')).toContainText(compName);
@@ -462,9 +456,7 @@ test.describe('UseCase 6: Wettbewerbsverwaltung (CompetitionInfo)', () => {
       }, samplePayload);
 
       await mainView.goto();
-      await expect(mainView.statusTourneyBar).toBeVisible();
-      await expect(mainView.btnStatusLoadLast).toBeVisible();
-      await mainView.btnStatusLoadLast.click();
+      await mainView.openRecentLocal();
 
       await expect(compInfoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
 

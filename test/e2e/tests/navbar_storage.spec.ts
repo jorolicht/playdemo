@@ -4,7 +4,7 @@ import path from 'path';
 import { MainViewPage } from '../pages/MainViewPage';
 import { TourneyInfoPage } from '../pages/TourneyInfoPage';
 
-test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => {
+test.describe('UseCase 1.4: Main Navbar - Demo-Button & Meine Turniere', () => {
   let mainPage: MainViewPage;
   let infoPage: TourneyInfoPage;
 
@@ -13,7 +13,7 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
     infoPage = new TourneyInfoPage(page);
   });
 
-  test('TC-NB-01 [🌐]: Navbar zeigt Ablage-Dropdown und RELOAD, kein Demo-Button, kein altes Start-Menü, kein Lokaler-Modus Badge', async ({ page }) => {
+  test('TC-NB-01 [🌐]: Navbar zeigt "Meine Turniere" als erstes Menü, keine Ablage, kein RELOAD, kein Demo-Button, kein altes Start-Menü, kein Lokaler-Modus Badge', async ({ page }) => {
     await mainPage.goto();
 
     // 1. Verify Demo button is NOT present in navbar
@@ -29,37 +29,31 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
     const reloadBtn = page.locator('.navbar button[id*="ReloadTourneyId"], .navbar .btn-navbar-reload');
     await expect(reloadBtn).not.toBeVisible();
 
-    // 4. Verify "Ablage" / "Storage" dropdown exists
-    const offlineDropdown = page.locator('#offlineDropdown');
-    await expect(offlineDropdown).toBeVisible();
-    await expect(offlineDropdown).toHaveText(/Ablage|Storage/);
+    // 4. "Meine Turniere" is the first item of the left menu, "Ablage" is gone
+    const myMenu = page.locator('#myTourneysDropdown');
+    await expect(myMenu).toBeVisible();
+    await expect(myMenu).toHaveText(/Meine Turniere|My Tournaments/);
+    await expect(page.locator('#navbarMain ul.navbar-nav.me-auto > li').first().locator('#myTourneysDropdown')).toHaveCount(1);
+    await expect(page.locator('#myTourneysMenu')).toHaveCount(0);
 
-    // 5. Open "Ablage" dropdown and check the 4 items
-    await offlineDropdown.click();
+    // 5. Open "Meine Turniere": no recent tournaments yet, then Öffnen / Export Datei / Export Cloud
+    await myMenu.click();
+    await expect(page.locator('a.recent-tourney')).toHaveCount(0);
+    await expect(page.locator('ul[aria-labelledby="myTourneysDropdown"]')).toContainText(/Noch keine Turniere verwendet|No tournaments used yet/);
 
-    const loadLastItem = page.locator('a[id*="LoadLastTourneyId"], a.dropdown-item-load-last');
-    const exportItem = page.locator('a[id*="ExportLocalId"]');
     const importLocalItem = page.locator('a[id*="ImportLocalId"]');
+    const exportItem = page.locator('a[id*="ExportLocalId"]');
     const moveCloudItem = page.locator('a[id*="MoveToCloudId"], a.dropdown-item-move-cloud');
-
-    // Item 1: "Letztes Turnier laden" in red color (text-danger)
-    await expect(loadLastItem).toBeVisible();
-    await expect(loadLastItem).toHaveText(/Letztes Turnier laden|Load last tournament/);
-    await expect(loadLastItem).toHaveClass(/text-danger/);
-
-    // Item 2: "Turnier exportieren in Datei (JSON)"
-    await expect(exportItem).toBeVisible();
-    await expect(exportItem).toHaveText(/Turnier exportieren in Datei \(JSON\)|Export tournament to file \(JSON\)/);
-
-    // Item 3: "Turnier von Datei (JSON) laden."
-    await expect(importLocalItem).toBeVisible();
-    await expect(importLocalItem).toHaveText(/Turnier von Datei \(JSON\) laden|Load tournament from file \(JSON\)/);
-
-    // Item 4: "Turnier in die Cloud verschieben"
-    await expect(moveCloudItem).toBeVisible();
-    await expect(moveCloudItem).toHaveText(/Turnier in die Cloud verschieben|Move tournament to the cloud/);
+    await expect(importLocalItem).toHaveText(/Öffnen\/Archiv|Open\/Archive/);
+    await expect(importLocalItem.locator('i.bi-folder2-open')).toHaveCount(1);
+    await expect(exportItem).toHaveText(/Lokales Turnier exportieren in Datei|Export local tournament to file/);
+    // without a loaded local tournament both exports are greyed out
+    await expect(exportItem).toHaveClass(/disabled/);
+    await expect(exportItem).toHaveAttribute('aria-disabled', 'true');
+    await expect(moveCloudItem).toHaveText(/Turnier exportieren in Cloud|Export tournament to cloud/);
 
     // Old items should not exist
+    await expect(page.locator('a[id*="LoadLastTourneyId"], a.dropdown-item-load-last')).toHaveCount(0);
     await expect(page.locator('a[id*="ImportCloudId"]')).not.toBeVisible();
     await expect(page.locator('a[id*="LoadLocalTourneyId"]')).not.toBeVisible();
   });
@@ -137,9 +131,9 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
   test('TC-NB-03 [🌐]: "Turnier in die Cloud verschieben" ist ausgegraut (disabled) wenn User nicht angemeldet ist', async ({ page }) => {
     await mainPage.goto();
 
-    const offlineDropdown = page.locator('#offlineDropdown');
-    await expect(offlineDropdown).toBeVisible();
-    await offlineDropdown.click();
+    const myTourneysMenu = page.locator('#myTourneysDropdown');
+    await expect(myTourneysMenu).toBeVisible();
+    await myTourneysMenu.click();
 
     const moveCloudItem = page.locator('a[id*="MoveToCloudId"], a.dropdown-item-move-cloud');
     await expect(moveCloudItem).toBeVisible();
@@ -175,9 +169,9 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
       window.sessionStorage.setItem('tourney_slug', 'cloud-tourney');
     });
 
-    const offlineDropdown = page.locator('#offlineDropdown');
-    await expect(offlineDropdown).toBeVisible();
-    await offlineDropdown.click();
+    const myTourneysMenu = page.locator('#myTourneysDropdown');
+    await expect(myTourneysMenu).toBeVisible();
+    await myTourneysMenu.click();
 
     const moveCloudItem = page.locator('a[id*="MoveToCloudId"], a.dropdown-item-move-cloud');
     await expect(moveCloudItem).toBeVisible();
@@ -218,9 +212,9 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
     await page.reload();
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
 
-    const offlineDropdown = page.locator('#offlineDropdown');
-    await expect(offlineDropdown).toBeVisible();
-    await offlineDropdown.click();
+    const myTourneysMenu = page.locator('#myTourneysDropdown');
+    await expect(myTourneysMenu).toBeVisible();
+    await myTourneysMenu.click();
 
     const moveCloudItem = page.locator('a[id*="MoveToCloudId"], a.dropdown-item-move-cloud');
     await expect(moveCloudItem).toBeVisible();
@@ -243,9 +237,9 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
       await dialog.accept();
     });
 
-    const offlineDropdown = page.locator('#offlineDropdown');
-    await expect(offlineDropdown).toBeVisible();
-    await offlineDropdown.click();
+    const myTourneysMenu = page.locator('#myTourneysDropdown');
+    await expect(myTourneysMenu).toBeVisible();
+    await myTourneysMenu.click();
 
     // Intercept file chooser triggered by clicking ImportLocalId
     const [fileChooser] = await Promise.all([
@@ -275,6 +269,11 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
     // Verify tourney_slug = "local" on import
     const slugVal = await page.evaluate(() => window.localStorage.getItem('tourney_slug'));
     expect(slugVal).toBe('local');
+
+    // "Meine Turniere" now lists the local tournament and the opened file
+    await page.locator('#myTourneysDropdown').click();
+    await expect(page.locator('a.recent-tourney:has(i.bi-laptop)')).toContainText('Importiertes Testturnier');
+    await expect(page.locator('a.recent-tourney:has(i.bi-file-earmark-text)')).toHaveText('import_test.json');
   });
 
   test('TC-NB-06 [🌐]: Speicherschlüssel tourney_slug wird entsprechend tourney_is_local_mode gesetzt (local vs <slug>)', async ({ page }) => {
@@ -315,7 +314,7 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
     expect(storageState.sessionSlug).toBe('test-turnier-2026');
   });
 
-  test('TC-NB-07 [🌐]: RELOAD-Button ist aus Navbar entfernt; "Letztes Turnier laden" im Ablage-Dropdown lädt lokales Turnier in TourneyInfo', async ({ page }) => {
+  test('TC-NB-07 [🌐]: RELOAD-Button ist aus Navbar entfernt; Eintrag "lokal im Browser" in "Meine Turniere" lädt lokales Turnier in TourneyInfo', async ({ page }) => {
     await mainPage.goto();
 
     // 1. Verify RELOAD button is NOT present in navbar
@@ -333,16 +332,13 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
       window.localStorage.setItem('tourney_slug', 'local');
       window.sessionStorage.setItem('tourney_slug', 'local');
     }, demoRaw);
+    await mainPage.goto();
 
-    // 3. Open Ablage dropdown and click "Letztes Turnier laden" (red menu item)
-    const offlineDropdown = page.locator('#offlineDropdown');
-    await expect(offlineDropdown).toBeVisible();
-    await offlineDropdown.click();
-
-    const loadLastItem = page.locator('a[id*="LoadLastTourneyId"], a.dropdown-item-load-last');
-    await expect(loadLastItem).toBeVisible();
-    await expect(loadLastItem).toHaveClass(/text-danger/);
-    await loadLastItem.click();
+    // 3. Open "Meine Turniere" and click the local entry
+    await page.locator('#myTourneysDropdown').click();
+    const localItem = page.locator('a.recent-tourney:has(i.bi-laptop)');
+    await expect(localItem).toHaveText(/(lokal im Browser|local in the browser) \(Reloaded Local Tourney\)/);
+    await localItem.click();
 
     // 4. Verify navigation to TourneyInfo and loaded tournament name
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
@@ -351,36 +347,24 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
     expect(await tourneyNameElem.innerText()).toContain('Reloaded Local Tourney');
   });
 
-  test('TC-NB-08 [🌐]: "Letztes Turnier laden" im lokalen Modus ohne gespeichertes Turnier zeigt Hinweisdialog', async ({ page }) => {
+  test('TC-NB-08 [🌐]: Ohne lokal gespeichertes Turnier zeigt "Meine Turniere" keinen Eintrag "lokal im Browser"', async ({ page }) => {
     await mainPage.goto();
 
     await page.evaluate(() => {
       window.localStorage.removeItem('App.demo_tourney');
+      window.localStorage.removeItem('App.recent_tourneys');
       window.localStorage.setItem('tourney_is_local_mode', 'true');
       window.sessionStorage.setItem('tourney_is_local_mode', 'true');
       window.localStorage.setItem('tourney_slug', 'local');
       window.sessionStorage.setItem('tourney_slug', 'local');
     });
+    await mainPage.goto();
 
-    let dialogMessage = '';
-    page.once('dialog', async (dialog) => {
-      dialogMessage = dialog.message();
-      await dialog.accept();
-    });
-
-    const offlineDropdown = page.locator('#offlineDropdown');
-    await expect(offlineDropdown).toBeVisible();
-    await offlineDropdown.click();
-
-    const loadLastItem = page.locator('a[id*="LoadLastTourneyId"], a.dropdown-item-load-last');
-    await expect(loadLastItem).toBeVisible();
-    await loadLastItem.click();
-
-    await page.waitForTimeout(500);
-    expect(dialogMessage).toContain('Kein lokal gespeichertes Turnier vorhanden');
+    await page.locator('#myTourneysDropdown').click();
+    await expect(page.locator('a.recent-tourney:has(i.bi-laptop)')).toHaveCount(0);
   });
 
-  test('TC-NB-09 [🌐]: "Letztes Turnier laden" im Cloud-Modus (tourney_is_local_mode = false) ohne Login zeigt Hinweis und leitet zu UserLogin', async ({ page }) => {
+  test('TC-NB-09 [🌐]: Cloud-Eintrag in "Meine Turniere" ohne Login zeigt Hinweis und leitet zu UserLogin', async ({ page }) => {
     await mainPage.goto();
 
     await page.evaluate(() => {
@@ -396,13 +380,15 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
       await dialog.accept();
     });
 
-    const offlineDropdown = page.locator('#offlineDropdown');
-    await expect(offlineDropdown).toBeVisible();
-    await offlineDropdown.click();
+    // Cloud entry (from the stored tourney_slug) appears after reload of the navbar
+    await mainPage.goto();
+    const myTourneysMenu = page.locator('#myTourneysDropdown');
+    await expect(myTourneysMenu).toBeVisible();
+    await myTourneysMenu.click();
 
-    const loadLastItem = page.locator('a[id*="LoadLastTourneyId"], a.dropdown-item-load-last');
-    await expect(loadLastItem).toBeVisible();
-    await loadLastItem.click();
+    const cloudItem = page.locator('a.recent-tourney:has(i.bi-cloud)');
+    await expect(cloudItem).toBeVisible();
+    await cloudItem.click();
 
     await page.waitForTimeout(500);
     expect(dialogMessage).toMatch(/Anmeldung erforderlich|Login is required/);
@@ -411,7 +397,7 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
     await expect(page.locator('input[type="email"]').first()).toBeVisible({ timeout: 5000 });
   });
 
-  test('TC-NB-10 [👤]: "Letztes Turnier laden" im Cloud-Modus mit angemeldetem Benutzer ohne gespeicherten tourney_slug zeigt Hinweis', async ({ page }) => {
+  test('TC-NB-10 [👤]: Ohne gespeicherten tourney_slug zeigt "Meine Turniere" keinen Cloud-Eintrag', async ({ page }) => {
     // Intercept user endpoint to simulate logged-in admin
     await page.route('**/wp-json/tourney/v1/user', async (route) => {
       await route.fulfill({
@@ -436,26 +422,13 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
       window.localStorage.removeItem('tourney_slug');
       window.sessionStorage.removeItem('tourney_slug');
     });
+    await mainPage.goto();
 
-    let dialogMessage = '';
-    page.once('dialog', async (dialog) => {
-      dialogMessage = dialog.message();
-      await dialog.accept();
-    });
-
-    const offlineDropdown = page.locator('#offlineDropdown');
-    await expect(offlineDropdown).toBeVisible();
-    await offlineDropdown.click();
-
-    const loadLastItem = page.locator('a[id*="LoadLastTourneyId"], a.dropdown-item-load-last');
-    await expect(loadLastItem).toBeVisible();
-    await loadLastItem.click();
-
-    await page.waitForTimeout(500);
-    expect(dialogMessage).toMatch(/Kein Turnier-Slug gespeichert|No tournament slug stored/);
+    await page.locator('#myTourneysDropdown').click();
+    await expect(page.locator('a.recent-tourney:has(i.bi-cloud)')).toHaveCount(0);
   });
 
-  test('TC-NB-11 [👤]: "Letztes Turnier laden" im Cloud-Modus mit angemeldetem Benutzer ohne Rechte für das Turnier zeigt Berechtigungsfehler', async ({ page }) => {
+  test('TC-NB-11 [👤]: Cloud-Eintrag in "Meine Turniere" mit angemeldetem Benutzer ohne Rechte für das Turnier zeigt Berechtigungsfehler', async ({ page }) => {
     // Intercept user endpoint to simulate logged-in regular subscriber
     await page.route('**/wp-json/tourney/v1/user', async (route) => {
       await route.fulfill({
@@ -520,13 +493,15 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
       await dialog.accept();
     });
 
-    const offlineDropdown = page.locator('#offlineDropdown');
-    await expect(offlineDropdown).toBeVisible();
-    await offlineDropdown.click();
+    // Cloud entry (from the stored tourney_slug) appears after reload of the navbar
+    await mainPage.goto();
+    const myTourneysMenu = page.locator('#myTourneysDropdown');
+    await expect(myTourneysMenu).toBeVisible();
+    await myTourneysMenu.click();
 
-    const loadLastItem = page.locator('a[id*="LoadLastTourneyId"], a.dropdown-item-load-last');
-    await expect(loadLastItem).toBeVisible();
-    await loadLastItem.click();
+    const cloudItem = page.locator('a.recent-tourney:has(i.bi-cloud)');
+    await expect(cloudItem).toBeVisible();
+    await cloudItem.click();
 
     await page.waitForTimeout(500);
     expect(dialogMessage).toMatch(/keine Berechtigung|permission/i);
@@ -598,9 +573,9 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Ablage-Dropdown', () => 
       await dialog.accept();
     });
 
-    const offlineDropdown = page.locator('#offlineDropdown');
-    await expect(offlineDropdown).toBeVisible();
-    await offlineDropdown.click();
+    const myTourneysMenu = page.locator('#myTourneysDropdown');
+    await expect(myTourneysMenu).toBeVisible();
+    await myTourneysMenu.click();
 
     const moveCloudItem = page.locator('a[id*="MoveToCloudId"], a.dropdown-item-move-cloud');
     await expect(moveCloudItem).toBeVisible();

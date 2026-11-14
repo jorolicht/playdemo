@@ -56,11 +56,14 @@ export class MainViewPage {
   readonly btnOption1: Locator;
   readonly btnOption2: Locator;
   readonly btnSearch: Locator;
+  /** Frühere Statuszeile "Letztes Turnier" (entfallen, nur noch für Negativ-Prüfungen). */
   readonly statusTourneyBar: Locator;
-  readonly statusTourneyLabel: Locator;
-  readonly statusTourneyIcon: Locator;
-  readonly statusTourneyName: Locator;
-  readonly btnStatusLoadLast: Locator;
+  /** Dropdown "Meine Turniere" in der Navbar und seine Einträge. */
+  readonly myTourneysMenu: Locator;
+  readonly myTourneysList: Locator;
+  readonly recentLocal: Locator;
+  readonly recentCloud: Locator;
+  readonly recentFiles: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -71,10 +74,11 @@ export class MainViewPage {
     this.btnOption2 = page.locator('#MainView_BtnOption2');
     this.btnSearch = page.locator('#MainView_BtnSearch');
     this.statusTourneyBar = page.locator('#MainView_StatusTourney');
-    this.statusTourneyLabel = page.locator('#MainView_StatusTourney span.fw-semibold');
-    this.statusTourneyIcon = page.locator('#MainView_StatusTourney .container i.bi').first();
-    this.statusTourneyName = page.locator('#MainView_StatusTourneyName');
-    this.btnStatusLoadLast = page.locator('#MainView_BtnLoadLast');
+    this.myTourneysMenu = page.locator('#myTourneysDropdown');
+    this.myTourneysList = page.locator('ul[aria-labelledby="myTourneysDropdown"]');
+    this.recentLocal = page.locator('a.recent-tourney:has(i.bi-laptop)');
+    this.recentCloud = page.locator('a.recent-tourney:has(i.bi-cloud)');
+    this.recentFiles = page.locator('a.recent-tourney:has(i.bi-file-earmark-text)');
 
     // Header & Navigation
     this.brandLogo = page.locator('.navbar-brand');
@@ -188,6 +192,22 @@ export class MainViewPage {
   /**
    * Starts a demo tournament by clicking the Demo button and confirming the DlgStartDemo modal if present.
    */
+  /**
+   * Öffnet "Meine Turniere" und klickt den Eintrag des lokal im Browser gespeicherten Turniers.
+   */
+  async openRecentLocal() {
+    await this.myTourneysMenu.click();
+    await this.recentLocal.click();
+  }
+
+  /**
+   * Öffnet "Meine Turniere" und klickt den (ersten) Eintrag eines Cloud-Turniers.
+   */
+  async openRecentCloud() {
+    await this.myTourneysMenu.click();
+    await this.recentCloud.first().click();
+  }
+
   async startDemo() {
     await this.btnDemo.first().click();
     if (await this.dlgStartDemoModal.isVisible({ timeout: 1500 }).catch(() => false)) {

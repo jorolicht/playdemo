@@ -272,7 +272,7 @@ die Seite ab (`data-canedit`).
 **Offline-App** (nur `APP_FWS=true`, Menü Tools → Offline-App): Die Seite `/app/` (`includes/pwa.php`, Client
 `pages.AppView`) ist als Progressive Web App installierbar und funktioniert nach dem ersten Besuch ohne Netz. Dort werden
 Turniere immer lokal im Browser angelegt (`Global.isApp`), auch für angemeldete Benutzer. Gesichert wird per JSON-Export
-(Ablage). Der Service Worker (`includes/pwa-sw.js`, Scope `/app/`) und das Manifest werden von PHP ausgeliefert
+(Meine Turniere → Turnier exportieren in Datei). Der Service Worker (`includes/pwa-sw.js`, Scope `/app/`) und das Manifest werden von PHP ausgeliefert
 (`?tourney_pwa=sw|manifest`), Icons: `img/pwa-{192,512}.png`. Die Caches tragen `TOURNEY_VERSION` im Namen und werden bei einer
 neuen Plugin-Version ersetzt. Voraussetzung ist HTTPS (bzw. localhost).
 
