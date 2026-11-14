@@ -50,7 +50,7 @@ async function openCloudCompetition(page: Page): Promise<string[]> {
 
   const mainView = new MainViewPage(page);
   await mainView.goto();
-  await mainView.btnStatusLoadLast.click();
+  await mainView.openRecentCloud();
   await expect(new CompetitionInfoPage(page).cardHeaderTitle).toBeVisible({ timeout: 10000 });
   return syncBodies;
 }

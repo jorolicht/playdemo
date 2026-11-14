@@ -51,9 +51,9 @@ test.describe('UseCase 5.4: Lokaler Modus - Export- und Verlassen-Dialog (DlgExp
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 7000 });
 
     // 2. Open "Lokal-Optionen" dropdown and click "Turnier exportieren (JSON)"
-    const offlineDropdown = page.locator('#offlineDropdown');
-    await expect(offlineDropdown).toBeVisible();
-    await offlineDropdown.click();
+    const myTourneysMenu = page.locator('#myTourneysDropdown');
+    await expect(myTourneysMenu).toBeVisible();
+    await myTourneysMenu.click();
 
     const exportMenuItem = page.locator('a[id*="ExportLocalId"]');
     await expect(exportMenuItem).toBeVisible();
@@ -83,7 +83,7 @@ test.describe('UseCase 5.4: Lokaler Modus - Export- und Verlassen-Dialog (DlgExp
     await expect(infoPage.cardHeaderTitle).toBeVisible();
 
     // 7. Test successful download trigger
-    await offlineDropdown.click();
+    await myTourneysMenu.click();
     await exportMenuItem.click();
     await expect(infoPage.dlgExportModal).toBeVisible();
 
@@ -181,7 +181,7 @@ test.describe('UseCase 5.4: Lokaler Modus - Export- und Verlassen-Dialog (DlgExp
     // 3. Verify DlgExportTourney modal opens with leave prompt and 2 buttons
     await expect(infoPage.dlgExportModal).toBeVisible({ timeout: 5000 });
     await expect(infoPage.dlgExportTitle).toHaveText(/Turnier verlassen|Leave tournament/i);
-    await expect(infoPage.dlgExportPrompt).toHaveText(/Das aktuelle Turnier wird in der Cloud bzw. lokal gespeichert\.|The current tournament will be saved in the cloud or locally\./i);
+    await expect(infoPage.dlgExportPrompt).toHaveText(/Das aktuelle Turnier wird lokal gespeichert\.|The current tournament will be saved locally\./i);
     await expect(infoPage.inputExportFilename).not.toBeVisible();
 
     const footerButtons = infoPage.dlgExportModal.locator('.modal-footer button');
@@ -222,11 +222,11 @@ test.describe('UseCase 5.4: Lokaler Modus - Export- und Verlassen-Dialog (DlgExp
     await newPage.save();
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 7000 });
 
-    const offlineDropdown = page.locator('#offlineDropdown');
+    const myTourneysMenu = page.locator('#myTourneysDropdown');
     const exportMenuItem = page.locator('a[id*="ExportLocalId"]');
 
     // 2. Perform first export
-    await offlineDropdown.click();
+    await myTourneysMenu.click();
     await exportMenuItem.click();
     await expect(infoPage.dlgExportModal).toBeVisible({ timeout: 5000 });
     const originalFilename = await infoPage.inputExportFilename.inputValue();
@@ -239,7 +239,7 @@ test.describe('UseCase 5.4: Lokaler Modus - Export- und Verlassen-Dialog (DlgExp
     await expect(infoPage.dlgExportModal).not.toBeVisible({ timeout: 3000 });
 
     // 3. Attempt second export with the same filename
-    await offlineDropdown.click();
+    await myTourneysMenu.click();
     await exportMenuItem.click();
     await expect(infoPage.dlgExportModal).toBeVisible({ timeout: 5000 });
     expect(await infoPage.inputExportFilename.inputValue()).toBe(originalFilename);

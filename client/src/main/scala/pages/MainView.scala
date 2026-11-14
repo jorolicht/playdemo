@@ -21,10 +21,6 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
   val BtnOption1:    HtmlId = genId(name)
   val BtnOption2:    HtmlId = genId(name)
   val BtnSearch:     HtmlId = genId(name)
-  val StatusTourney: HtmlId = genId(name)
-  val BtnLoadLast:   HtmlId = genId(name)
-  /** HTML-ID for button to delete the locally stored tournament in the status bar. */
-  val BtnDeleteLast: HtmlId = genId(name)
   /** HTML-ID for the news bar container below the hero section. */
   val NewsBarId:     HtmlId = genId(name)
   /** HTML-ID for the news bar content element. */
@@ -276,8 +272,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
    */
   def render(param: String = ""): Boolean = 
     if (param.isEmpty) {
-      val lastTourney = getLastTourneyInfo()
-      setMain(cviews.pages.MainView.html.Base(lastTourney))
+      setMain(cviews.pages.MainView.html.Base())
       loadLatestHistoryEntry()
     } else {
       // 1. Loading State
@@ -477,22 +472,6 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
         services.StartManager.start(services.StartKind.Demo)
       case `BtnCloseNews` =>
         addClass(gE(NewsBarId), "d-none")
-      case `BtnLoadLast` | `StatusTourney` =>
-        comps.Navbar.doReloadTourney()
-      case `BtnDeleteLast` =>
-        import shared.BoxButton
-        val isSimple = getLastTourneyInfo().exists(_.isSimple)
-        val msg = if (isSimple) "Möchten Sie diesen Wettbewerb wirklich unwiderruflich löschen?"
-                  else "Möchten Sie dieses Turnier wirklich unwiderruflich löschen?"
-        val title = if (isSimple) "Wettbewerb löschen" else "Turnier löschen"
-        DlgMsgbox.show(msg, title, List(BoxButton.Yes, BoxButton.No)).map {
-          case BoxButton.Yes =>
-            services.TourneyDB.purgeAllTourneyStorage(999999)
-            comps.ContextHeader.hide()
-            comps.Navbar.render()
-            render()
-          case _ => debug("Delete local tourney cancelled")
-        }
       case `BtnOption1` =>
         services.StartManager.start(services.StartKind.Tourney)
       case `BtnOption2` =>
