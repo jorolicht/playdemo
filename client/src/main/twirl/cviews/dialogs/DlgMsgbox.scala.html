@@ -2,7 +2,7 @@
 @import dialogs.DlgMsgbox.*
 @import shared.BoxButton
 
-@(title: String, body: String, btns: List[BoxButton], details: Option[(String, String)] = None)
+@(title: String, body: String, btns: List[BoxButton], details: Option[(String, String)] = None, labels: Map[BoxButton, String] = Map())
 
 <!-- Modal -->
 <div @id(ModalId)  class="modal fade" tabindex="-1">
@@ -26,7 +26,7 @@
         @* gleich breite Buttons: jede Spalte so breit wie der längste Button, mindestens 6rem *@
         <div style="display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: .5rem;">
           @for(btn <- btns) {
-            <button @id(btn.getId) type="button" class="btn btn-outline-secondary btn-xs box-btn" style="min-width: 6rem;">@gM(btn.msgCode)</button>
+            <button @id(btn.getId) type="button" class="btn btn-outline-secondary btn-xs box-btn" style="min-width: 6rem;">@labels.getOrElse(btn, gM(btn.msgCode))</button>
           }
         </div>
       </div>

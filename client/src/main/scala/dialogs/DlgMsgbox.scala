@@ -45,13 +45,24 @@ object DlgMsgbox extends BaseDialog with JsWrapper:
     val body = if (context.nonEmpty) s"$context:\n$text" else text
     show(body, gM("msgbox.errorTitle"), List(BoxButton.Close), Some((err.msgCode, err.callStack)))
 
-  def show(body: String, title: String, btns: List[BoxButton], details: Option[(String, String)] = None): Future[BoxButton] =
+  /**
+   * Zeigt eine Meldung mit Buttons.
+   *
+   * @param body    Text
+   * @param title   Titel
+   * @param btns    Buttons in Anzeigereihenfolge
+   * @param details optional (Code, CallStack), über den Button "Details" einblendbar
+   * @param labels  optionale Beschriftungen einzelner Buttons statt des Standardtexts
+   * @return Future mit dem gedrückten Button (Schließen = Cancel)
+   */
+  def show(body: String, title: String, btns: List[BoxButton], details: Option[(String, String)] = None,
+           labels: Map[BoxButton, String] = Map()): Future[BoxButton] =
     val p = Promise[BoxButton]()
     val f = p.future
 
     // init modal dialog, always copy and replace literal \n with real newlines
     val formattedBody = body.replace("\\n", "\n")
-    setHtml(getOrCreateDiv(LoadId), cviews.dialogs.html.DlgMsgbox(title, formattedBody, btns, details))
+    setHtml(getOrCreateDiv(LoadId), cviews.dialogs.html.DlgMsgbox(title, formattedBody, btns, details, labels))
     modal = Modal(gE(ModalId))
     modal.show()
 

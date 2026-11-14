@@ -395,7 +395,7 @@ object TourneyDB extends ComWrapper with Debouncer:
 
   /**
    * Generates the default export filename for a tournament in the format:
-   * "tourney_<turniername>_<datum>_export.json"
+   * "<turniername>_<datum>.json", z. B. "Demo1._Test_Meisterschaften_20300401.json"
    *
    * @param t The tournament to generate the filename for.
    * @return Formatted filename string.
@@ -412,7 +412,7 @@ object TourneyDB extends ComWrapper with Debouncer:
       val day = f"${d.getDate().toInt}%02d"
       s"$y$m$day"
     }
-    s"tourney_${safeName}_${dateStr}_export.json"
+    s"${safeName}_${dateStr}.json"
   }
 
   /**
