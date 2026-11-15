@@ -34,8 +34,6 @@ object StageAdmin extends BasePage with JsWrapper:
   val BtnResetCfg:     HtmlId = genId(name)
   /** Button to delete the entire stage. */
   val BtnDeleteFull:   HtmlId = genId(name)
-  /** Checkbox to select all available players. */
-  val ChkBoxAll:       HtmlId = genId(name)
   /** Checkbox prefix for selecting/deselecting individual players. */
   val ChkBoxPlayer:    HtmlId = genId(name)
   /** Selection dropdown for game draw mode. */
@@ -261,19 +259,6 @@ object StageAdmin extends BasePage with JsWrapper:
         sortBySelected = !sortBySelected
         render()
 
-      case `ChkBoxAll` =>
-        Global.currentSelection.competition.foreach { comp =>
-          comp.pants1Stage.foreach { p =>
-            p.status = PantStatus.PLAY
-          }
-          services.TourneyDB.tourney.updateCompetition(comp) match {
-            case Right(updatedComp) =>
-              Global.currentSelection = Global.currentSelection.copy(competition = Some(updatedComp))
-            case _ =>
-          }
-        }
-        render()
-
       case `RadAll` =>
         currentFilterOption = "ALL"
         Global.currentSelection.competition.foreach { comp =>
@@ -439,11 +424,7 @@ object StageAdmin extends BasePage with JsWrapper:
    * Updates the game mode dropdown and count info based on checkboxes.
    */
   private def updateModes(resetSelection: Boolean = false): Unit =
-    val checks = dom.document.querySelectorAll(".player-draw-check")
-    var count = 0
-    for (i <- 0 until checks.length) {
-      if (checks.item(i).asInstanceOf[dom.html.Input].checked) count += 1
-    }
+    val count = selectedSnos().length
     
     val modes = DrawRules.getAvailableModes(count, base.Global.lang)
     val select = gE(SelectDrawMode).asInstanceOf[dom.html.Select]
@@ -504,14 +485,7 @@ object StageAdmin extends BasePage with JsWrapper:
         if (encSelect != null) r.encVariant = encSelect.value
         
         // Get selected participants
-        val checks = dom.document.querySelectorAll(".player-draw-check")
-        val selectedSnos = ArrayBuffer[String]()
-        for (i <- 0 until checks.length) {
-          val input = checks.item(i).asInstanceOf[dom.html.Input]
-          if (input.checked) {
-            selectedSnos += input.getAttribute("data-sno")
-          }
-        }
+        val selectedSnos = StageAdmin.this.selectedSnos()
 
         val comp = Global.currentSelection.competition.get
         val allPants = comp.pants1Stage.toSeq
@@ -711,13 +685,22 @@ object StageAdmin extends BasePage with JsWrapper:
       } else "-"
     }.getOrElse("-")
 
-  private def getSelectedPlayersCount(): Int =
-    val checks = dom.document.querySelectorAll(".player-draw-check")
-    var count = 0
-    for (i <- 0 until checks.length) {
-      if (checks.item(i).asInstanceOf[dom.html.Input].checked) count += 1
-    }
-    count
+  private def getSelectedPlayersCount(): Int = selectedSnos().length
+
+  /**
+   * Startnummern der für die Auslosung ausgewählten Teilnehmer.
+   *
+   * - Folgeabschnitt: die angehakten Checkboxen (Auswahl aus dem vorherigen Abschnitt).
+   * - Erster Abschnitt: alle aktiven Teilnehmer, die Teilnahme wird bei der Anmeldung festgelegt.
+   *
+   * @return Startnummern als String (wie `data-sno`)
+   */
+  private def selectedSnos(): Seq[String] =
+    if Global.currentSelection.stage.exists(_.prefId.isDefined) then
+      val checks = dom.document.querySelectorAll(".player-draw-check")
+      (0 until checks.length).map(i => checks.item(i).asInstanceOf[dom.html.Input]).filter(_.checked).map(_.getAttribute("data-sno"))
+    else
+      Global.currentSelection.competition.map(_.pants1Stage.toSeq.filter(_.active).map(_.id.toString)).getOrElse(Seq())
 
   private def showGroupCountDialog(modeStr: String): Unit =
     val count = getSelectedPlayersCount()

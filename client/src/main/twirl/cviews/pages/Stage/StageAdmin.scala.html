@@ -22,15 +22,15 @@
 
 <div class="stage-cfg-container">
     <!-- SECTION 1: CONTROL -->
-    <div class="card shadow-sm mb-4 border-primary">
-        <div class="card-header bg-primary text-white py-2">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header card-header-neutral py-2">
             <h5 class="mb-0 small text-uppercase fw-bold"><i class="bi bi-controller me-2"></i>@gM("+title")</h5>
         </div>
         <div class="card-body py-3">
             <div class="row align-items-center">
                 <!-- Left: Start -->
                 <div class="col-md-4 border-end text-center">
-                    <button class="btn btn-success w-100 py-2 fw-bold" @id(BtnStartDrawing, "onclick") @disabledIfAus>
+                    <button class="btn btn-hero-primary w-100 py-2 fw-bold" @id(BtnStartDrawing, "onclick") @disabledIfAus>
                         <i class="bi bi-shuffle me-2 fs-5"></i>@gM("+btn_draw")
                     </button>
                     <div class="mt-2 text-muted small" @id(LabelDrawCnt)>
@@ -40,17 +40,17 @@
                 <!-- Right: Reset Actions -->
                 <div class="col-md-8">
                     <div class="d-flex flex-wrap gap-2 justify-content-center">
-                        <button class="btn btn-outline-warning btn-sm" @id(BtnResetInp, "onclick") title="Danach Anzeige Eingabe" @disabledNoAccess>
+                        <button class="btn btn-outline-red3 btn-sm" @id(BtnResetInp, "onclick") title="Danach Anzeige Eingabe" @disabledNoAccess>
                             <i class="bi bi-eraser me-1"></i>@gM("+btn_reset_results")
                         </button>
-                        <button class="btn btn-outline-warning btn-sm" @id(BtnResetDrw, "onclick") title="Danach Anzeige Auslosung" @disabledNoAccess>
+                        <button class="btn btn-outline-red3 btn-sm" @id(BtnResetDrw, "onclick") title="Danach Anzeige Auslosung" @disabledNoAccess>
                             <i class="bi bi-shuffle me-1"></i>@gM("+btn_reset_draw")
                         </button>
-                        <button class="btn btn-outline-danger btn-sm" @id(BtnResetCfg, "onclick") title="Danach Anzeige Konfiguration" @disabledNoAccess>
+                        <button class="btn btn-outline-red3 btn-sm" @id(BtnResetCfg, "onclick") title="Danach Anzeige Konfiguration" @disabledNoAccess>
                             <i class="bi bi-gear-wide-connected me-1"></i>@gM("+btn_reset_cfg")
                         </button>
-                        <button class="btn btn-danger btn-sm" @id(BtnDeleteFull, "onclick") @disabledNoAccess>
-                            <i class="bi bi-trash3-fill me-1"></i>@gM("+btn_delete_stage")
+                        <button class="btn btn-red3 btn-sm" @id(BtnDeleteFull, "onclick") @disabledNoAccess>
+                            <i class="bi bi-trash3-fill me-1"></i>@gM("+btn_delete_stage", stage.name)
                         </button>
                     </div>
                     @if(stage.nextIds.nonEmpty) {
@@ -66,14 +66,25 @@
 
     <!-- SECTION 2: CONFIGURATION -->
     <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light py-2">
-            <h5 class="mb-0 small text-uppercase fw-bold text-muted"><i class="bi bi-sliders me-2"></i>@gM("+config_title")</h5>
+        <div class="card-header card-header-neutral py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0 small text-uppercase fw-bold"><i class="bi bi-sliders me-2"></i>@gM("+config_title")</h5>
+            <div class="d-flex align-items-center gap-2">
+                <label class="small fw-bold mb-0" @forAttr(SelScoring)>@gM("+scoring_label")</label>
+                <select class="form-select form-select-sm w-auto" @id(SelScoring, "onchange") title="@gM("+scoring_hint")" @if(scoringLocked){disabled}>
+                    @if(!shared.sport.Sports.isKnown(scoringKey)) {
+                        <option value="@scoringKey" selected>@scoringKey (@gM("+scoring_unknown"))</option>
+                    }
+                    @shared.sport.Sports.keys().map { k =>
+                        <option value="@k" @if(k == scoringKey){selected}>@k (@gM("+scoring_version", shared.sport.Sports.get(k).sport.version.toString))</option>
+                    }
+                </select>
+            </div>
         </div>
         <div class="card-body">
             <div class="row g-4">
                 <div class="col-md-8">
                     <label class="form-label fw-bold">@gM("+game_mode")</label>
-                    <select class="form-select border-primary" @id(SelectDrawMode, "onchange") @disabledIfAus>
+                    <select class="form-select" @id(SelectDrawMode, "onchange") @disabledIfAus>
                         <option value="UNKN" @{if(stage.stageConfig == StageConfig.UNKN || stage.stageConfig == StageConfig.CFG) "selected" else ""}>@gM("+select_mode")</option>
                         @modes.map { m =>
                             <option value="@m.stageConfig.productPrefix" @if(!m.isEnabled){disabled class="text-muted"} @{if(stage.stageConfig == m.stageConfig) "selected" else ""}>
@@ -111,25 +122,14 @@
                         </select>
                     </div>
                 }
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">@gM("+scoring_label")</label>
-                    <select class="form-select" @id(SelScoring, "onchange") title="@gM("+scoring_hint")" @if(scoringLocked){disabled}>
-                        @if(!shared.sport.Sports.isKnown(scoringKey)) {
-                            <option value="@scoringKey" selected>@scoringKey (@gM("+scoring_unknown"))</option>
-                        }
-                        @shared.sport.Sports.keys().map { k =>
-                            <option value="@k" @if(k == scoringKey){selected}>@k (@gM("+scoring_version", shared.sport.Sports.get(k).sport.version.toString))</option>
-                        }
-                    </select>
-                </div>
             </div>
         </div>
     </div>
 
     <!-- SECTION 3: PLAYER / TEAMS -->
     <div class="card shadow-sm">
-        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h5 class="mb-0 small text-uppercase fw-bold text-muted"><i class="bi @if(isTeam){bi-people}else{bi-person-check} me-2"></i>@tM("+players_title")</h5>
+        <div class="card-header card-header-neutral py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0 small text-uppercase fw-bold"><i class="bi @if(isTeam){bi-people}else{bi-person-check} me-2"></i>@tM("+players_title")</h5>
             <div class="d-flex align-items-center flex-wrap gap-3">
                 @if(stage.prefId.isDefined) {
                     <!-- Radio Button Group for Predecessor filtering -->
@@ -158,7 +158,7 @@
                     <button class="btn btn-outline-secondary btn-sm fw-bold" @id(BtnAddDummy, "onclick") @disabledIfAus>
                         <i class="bi bi-plus-circle me-1"></i>@gM("+btn_add_dummy")
                     </button>
-                    <button class="btn btn-outline-primary btn-sm fw-bold" @id(BtnAddPlayer, "onclick") @disabledIfAus>
+                    <button class="btn btn-outline-hero btn-sm fw-bold" @id(BtnAddPlayer, "onclick") @disabledIfAus>
                         <i class="bi bi-person-plus me-1"></i>@gM("+btn_add_player")
                     </button>
                     }
@@ -168,22 +168,23 @@
                         <i class="bi bi-plus-circle me-1"></i>@gM("+btn_add_dummy")
                     </button>
                     }
-                    <button class="btn btn-outline-primary btn-sm fw-bold" @id(ChkBoxAll, "onclick") @disabledIfAus>
-                        <i class="bi bi-check2-all me-1"></i>@gM("+btn_select_all")
-                    </button>
                 }
             </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive" style="max-height: 400px;">
                 <table class="table table-hover table-sm mb-0 align-middle">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
-                            <th class="ps-2 text-center" style="width: 50px;">
-                                <button class="btn btn-link btn-sm p-0 @{if(sortBySelected) "text-primary fw-bold" else "text-muted"}" @id(BtnSortSelected, "onclick") title="Nach Auswahl sortieren">
-                                    <i class="bi bi-arrow-down-up"></i>
-                                </button>
-                            </th>
+                            @if(stage.prefId.isDefined) {
+                                <th class="ps-2 text-center" style="width: 50px;">
+                                    <button class="btn btn-link btn-sm p-0 @{if(sortBySelected) "text-hero fw-bold" else "text-muted"}" @id(BtnSortSelected, "onclick") title="Nach Auswahl sortieren">
+                                        <i class="bi bi-arrow-down-up"></i>
+                                    </button>
+                                </th>
+                            } else {
+                                <th class="ps-3" style="width: 70px;">@gM("+snr_header")</th>
+                            }
                             <th>@tM("+name_header")</th>
                             <th>@gM("+club_header")</th>
                             @if(stage.prefId.isDefined) {
@@ -197,10 +198,14 @@
                             <tr><td colspan="@{if(stage.prefId.isDefined) 5 else 4}" class="text-center py-4 text-muted">@tM("+no_players")</td></tr>
                         }
                         @participants.map { p =>
-                            <tr class="cursor-pointer @{if(p.status == PantStatus.PLAY) "table-success" else ""}">
-                                <td class="ps-3 text-center">
-                                    <input @id(ChkBoxPlayer, "onchange", p.id.toString) class="form-check-input player-draw-check" type="checkbox" data-sno="@p.id" @{if(p.status == PantStatus.PLAY) "checked" else ""} @disabledIfAus>
-                                </td>
+                            <tr class="cursor-pointer">
+                                @if(stage.prefId.isDefined) {
+                                    <td class="ps-3 text-center">
+                                        <input @id(ChkBoxPlayer, "onchange", p.id.toString) class="form-check-input player-draw-check" type="checkbox" data-sno="@p.id" @{if(p.status == PantStatus.PLAY) "checked" else ""} @disabledIfAus>
+                                    </td>
+                                } else {
+                                    <td class="ps-3">@p.id.startId</td>
+                                }
                                 <td class="fw-bold">@p.name</td>
                                 <td class="small">@p.club</td>
                                 @if(stage.prefId.isDefined) {

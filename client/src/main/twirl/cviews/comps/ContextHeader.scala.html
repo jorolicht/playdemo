@@ -48,15 +48,15 @@
                             @* Split-Button: Name -> CompetitionInfo des aktuellen Wettbewerbs, Pfeil -> Auswahlliste *@
                             @selection.competition.map { sc =>
                                 <a href="javascript:appLoadPage('CompetitionInfo', '@sc.id.value')" class="btn btn-outline-light btn-sm border-secondary py-1">
-                                    <span class="badge bg-success me-1">C</span>
+                                    <span class="badge badge-palegreen4 me-1">C</span>
                                     @sc.name
                                 </a>
                                 <button type="button" class="btn btn-outline-light btn-sm dropdown-toggle dropdown-toggle-split border-secondary py-1" data-bs-toggle="dropdown" aria-expanded="false">
                                     <span class="visually-hidden">Toggle Dropdown</span>
                                 </button>
                             }.getOrElse {
-                                <a class="btn btn-outline-light btn-sm dropdown-toggle border-secondary py-1 text-white-50" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="badge bg-success me-1">C</span>
+                                <a class="btn btn-outline-light btn-sm dropdown-toggle border-secondary py-1 text-white-50 ctx-placeholder" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="badge badge-palegreen4 me-1">C</span>
                                     @gM("contextHeader.selectCompetition")
                                 </a>
                             }
@@ -82,7 +82,7 @@
                             @if(selection.stage.isDefined) {
                                 <div class="btn-group">
                                     <a href="javascript:appLoadPage('StageAdmin', '@selection.stage.get.id.value')" class="btn btn-outline-info text-white btn-sm border-secondary py-1 fw-bold">
-                                        <span class="badge bg-info me-1 text-dark">S</span>
+                                        <span class="badge badge-lightgoldenrod me-1">S</span>
                                         @selection.stage.get.name
                                     </a>
                                     @if(stages.length > 1) {
@@ -99,8 +99,8 @@
                                     }
                                 </div>
                             } else {
-                                <a class="btn btn-outline-info text-white btn-sm dropdown-toggle border-secondary py-1 text-white-50" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="badge bg-info me-1 text-dark">S</span>
+                                <a class="btn btn-outline-info text-white btn-sm dropdown-toggle border-secondary py-1 text-white-50 ctx-placeholder" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="badge badge-lightgoldenrod me-1">S</span>
                                     @gM("contextHeader.selectStage")
                                 </a>
                                 <ul class="dropdown-menu shadow">

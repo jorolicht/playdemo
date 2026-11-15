@@ -7,7 +7,7 @@
     <!-- Stage Header -->
     <div class="d-flex justify-content-between align-items-end mb-3 border-bottom pb-2">
         <div>
-            <h2 class="h4 mb-1 text-primary">@stage.name</h2>
+            <h2 class="h4 mb-1 text-hero">@stage.name</h2>
             <div class="small text-muted">
                 @gM("stageLayout.status") <span class="badge @{stage.status match {
                     case StageStatus.CFG => "bg-secondary"
@@ -27,35 +27,35 @@
     </div>
 
     <!-- Stage Sub-Menu (Tabs) -->
-    <ul class="nav nav-tabs mb-4">
+    <ul class="nav nav-tabs stage-tabs mb-4">
         <li class="nav-item">
-            <a class="nav-link @{if(activeTab == "CFG") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('StageAdmin', '')">
+            <a class="nav-link @{if(activeTab == "CFG") "active" else ""}" href="javascript:appLoadPage('StageAdmin', '')">
                 <i class="bi bi-gear me-1"></i>@gM("stageLayout.tabAdmin")
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @{if(activeTab == "DRW") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('StageDraw', '')">
+            <a class="nav-link @{if(activeTab == "DRW") "active" else ""}" href="javascript:appLoadPage('StageDraw', '')">
                 <i class="bi bi-shuffle me-1"></i>@gM("stageLayout.tabDraw")
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @{if(activeTab == "INP") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('StageInput', '')">
+            <a class="nav-link @{if(activeTab == "INP") "active" else ""}" href="javascript:appLoadPage('StageInput', '')">
                 <i class="bi bi-input-cursor-text me-1"></i>@gM("stageLayout.tabInput")
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @{if(activeTab == "RES") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('StageResult', '')">
+            <a class="nav-link @{if(activeTab == "RES") "active" else ""}" href="javascript:appLoadPage('StageResult', '')">
                 <i class="bi bi-bar-chart-line me-1"></i>@gM("stageLayout.tabResult")
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @{if(activeTab == "SCH") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('StageScoreSheet', '')">
+            <a class="nav-link @{if(activeTab == "SCH") "active" else ""}" href="javascript:appLoadPage('StageScoreSheet', '')">
                 <i class="bi bi-file-earmark-text me-1"></i>@gM("stageLayout.tabScoresheet")
             </a>
         </li>
         @if(stage.certificate) {
             <li class="nav-item">
-                <a class="nav-link @{if(activeTab == "CERT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('StageCertificate', '')">
+                <a class="nav-link @{if(activeTab == "CERT") "active" else ""}" href="javascript:appLoadPage('StageCertificate', '')">
                     <i class="bi bi-award me-1"></i>@gM("stageLayout.tabCertificate")
                 </a>
             </li>

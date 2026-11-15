@@ -75,7 +75,7 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
     await expect(mainView.dlgStartDemoModal).not.toBeVisible({ timeout: 3000 });
 
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
-    const tourneyNameElem = page.locator('.card-body .fw-bold.text-primary').first();
+    const tourneyNameElem = page.locator('.card-body .tourney-name').first();
     await expect(tourneyNameElem).toBeVisible();
     const titleText = await tourneyNameElem.innerText();
     expect(titleText).toContain('Demo:');
@@ -338,7 +338,7 @@ test.describe('UseCase 1: Startseite (MainView)', () => {
 
     // 3. Verify navigation to TourneyInfo and tournament name is loaded
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
-    const tourneyNameElem = page.locator('.card-body .fw-bold.text-primary').first();
+    const tourneyNameElem = page.locator('.card-body .tourney-name').first();
     await expect(tourneyNameElem).toBeVisible();
     expect(await tourneyNameElem.innerText()).toContain(localTourneyName);
   });

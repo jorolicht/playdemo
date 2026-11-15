@@ -246,7 +246,7 @@ test.describe('UseCase 5.3: Turnier- & Wettbewerbserstellung mit Datum-Validieru
 
     // 7. Verify competition action buttons in table are also enabled
     const compEditBtn = infoPage.compTable.locator('tbody tr button.btn-outline-secondary').first();
-    const compDeleteBtn = infoPage.compTable.locator('tbody tr button.btn-outline-danger').first();
+    const compDeleteBtn = infoPage.compTable.locator('tbody tr button[id^="TourneyInfo_BtnDeleteComp-"]').first();
     await expect(compEditBtn).toBeEnabled();
     await expect(compDeleteBtn).toBeEnabled();
 
