@@ -40,6 +40,8 @@ object StageAdmin extends BasePage with JsWrapper:
   val SelectDrawMode:  HtmlId = genId(name)
   /** Label displaying count of selected players. */
   val LabelDrawCnt:    HtmlId = genId(name)
+  /** Hinweis in der Steuerung: erst Spielmodus/Format wählen (nur sichtbar, solange keiner gewählt ist). */
+  val InfoSelectMode:  HtmlId = genId(name)
 
   val RadAll:          HtmlId = genId(name)
   val RadTop:          HtmlId = genId(name)
@@ -458,6 +460,8 @@ object StageAdmin extends BasePage with JsWrapper:
     if (select != null && btn != null && stageOpt.isDefined) {
       val stage = stageOpt.get
       val isDefault = select.value == "UNKN"
+      val info = gE(InfoSelectMode)
+      if (info != null) info.classList.toggle("d-none", !isDefault)
       val isAllowed = stage.status == StageStatus.CFG && base.Global.hasTourneyAccess(services.TourneyDB.tourney)
       
       btn.disabled = isDefault || !isAllowed

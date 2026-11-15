@@ -62,6 +62,9 @@
                 </div>
             </div>
         </div>
+        <div class="card-footer bg-white py-2 small text-muted @if(stage.stageConfig != StageConfig.UNKN && stage.stageConfig != StageConfig.CFG){d-none}" @id(InfoSelectMode)>
+            <i class="bi bi-info-circle me-1"></i> @gM("+info_select_mode")
+        </div>
     </div>
 
     <!-- SECTION 2: CONFIGURATION -->

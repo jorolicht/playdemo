@@ -549,3 +549,6 @@ td.boto {
 .btn-red3 { --bs-btn-color: #fff; --bs-btn-bg: #CD0000; --bs-btn-border-color: #CD0000; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #a30000; --bs-btn-hover-border-color: #a30000; --bs-btn-active-color: #fff; --bs-btn-active-bg: #8b0000; --bs-btn-active-border-color: #8b0000; --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: #CD0000; --bs-btn-disabled-border-color: #CD0000; }
 .stage-cfg-container .form-check-input:checked { background-color: #336699; border-color: #336699; }
 .stage-cfg-container .form-select:focus, .stage-cfg-container .form-check-input:focus { border-color: #336699; box-shadow: 0 0 0 .2rem rgba(51, 102, 153, .25); }
+.accordion-neutral .accordion-button, .accordion-neutral .accordion-button:not(.collapsed) { background-color: #e9ecef; color: #111418; box-shadow: inset 0 -1px 0 #ced4da; }
+.accordion-neutral .accordion-button:focus { box-shadow: inset 0 -1px 0 #ced4da, 0 0 0 .2rem rgba(51, 102, 153, .25); }
+.accordion-neutral .accordion-button:not(.collapsed)::after { filter: grayscale(1) brightness(.3); }

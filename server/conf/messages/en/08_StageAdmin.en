@@ -41,3 +41,4 @@ StageAdmin.scoring_version = version {0}
 StageAdmin.scoring_unknown = unknown, the latest version is used
 StageAdmin.system_label = Team system
 StageAdmin.system_info = Description of the selected team system
+StageAdmin.info_select_mode = Please select a game mode/format, then the draw can be generated.

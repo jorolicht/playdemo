@@ -41,3 +41,4 @@ StageAdmin.scoring_version = Version {0}
 StageAdmin.scoring_unknown = unbekannt, gerechnet wird mit der neuesten Version
 StageAdmin.system_label = Spielsystem
 StageAdmin.system_info = Beschreibung des gewählten Spielsystems
+StageAdmin.info_select_mode = Bitte Spielmodus/Format auswählen, dann kann die Auslosung generiert werden.
