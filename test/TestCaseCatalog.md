@@ -133,6 +133,9 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-CI-07 [👤]:** Eigenständigen Wettbewerb (`ident == "SIMPLE"`) im lokalen Modus löschen: Klick auf „Löschen“ und Bestätigen mit „Ja“ löscht den lokalen Speicher (`App.demo_tourney`, `App.demo_comps` etc.) sowie sämtliche Browser-Schlüssel (`tourney_is_local_mode`, `tourney_slug`, `tourney_name`, `tourney_ident`, `tourney_last_*`). Navigiert zur Startseite (`MainView`); „Meine Turniere“ zeigt keinen Eintrag „lokal im Browser“ mehr.
 - [x] **TC-CI-08 [👤]:** Eigenständigen Wettbewerb (`ident == "SIMPLE"`) im Cloud-Modus löschen: Klick auf „Löschen“ und Bestätigen mit „Ja“ sendet einen `DELETE`-Request an den Server (`/wp-json/tourney/v1/delete`), bereinigt sämtliche Browser-Speicherschlüssel und und navigiert zur Startseite (`MainView`).
 - [x] **TC-CI-09 [👤]:** Nach dem Löschen eines Wettbewerbs (`ident == "SIMPLE"`) startet ein nachfolgender Klick auf „Demo“ direkt, ohne dass die Warnmeldung „Achtung: das aktuelle lokale Turnier wird gelöscht!“ erscheint.
+- [x] **TC-CI-10 [👤]:** In der Abschnittsliste steht vor „Löschen“ der Button „Nachfolger“ (Symbol Staffelübergabe). Er ist deaktiviert, solange im Abschnitt kein Ergebnis eingegeben ist.
+- [x] **TC-CI-11 [👤]:** „Nachfolger“ bei unvollständigen Ergebnissen: Hinweisdialog mit „ABBRUCH“ und „WEITER“. „ABBRUCH“ legt nichts an, „WEITER“ öffnet „Neuen Wettbewerbsabschnitt starten“ mit dem Abschnitt als Vorgänger.
+- [x] **TC-CI-12 [👤]:** „Nachfolger“ bei vollständigen Ergebnissen öffnet ohne Rückfrage „Neuen Wettbewerbsabschnitt starten“ mit dem Abschnitt als Vorgänger.
 
 ---
 

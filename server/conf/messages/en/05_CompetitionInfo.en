@@ -30,3 +30,8 @@ CompetitionInfo.cert_yes = YES
 CompetitionInfo.cert_no = NO
 CompetitionInfo.save_leave = Save/Leave
 
+CompetitionInfo.successor = Successor
+CompetitionInfo.successor_title = Create successor stage
+CompetitionInfo.successor_incomplete = Not all results of stage "{0}" have been entered yet ({1} of {2} matches). Create a successor stage anyway?
+CompetitionInfo.successor_cancel = CANCEL
+CompetitionInfo.successor_continue = CONTINUE

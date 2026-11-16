@@ -42,6 +42,38 @@ object StageResult extends BasePage with JsWrapper:
   def hasResults(stage: Stage): Boolean =
     stage.matches.exists(m => m.finished && m.status != MEntry.MS_FIX)
 
+  /**
+   * Legt nach dem Dialog "Neuen Wettbewerbsabschnitt starten" einen nachfolgenden Abschnitt an (Vorgänger
+   * vorbelegt) und öffnet dessen Administration. Aufruf aus StageResult und CompetitionInfo ("Nachfolger").
+   *
+   * @param comp  Wettbewerb
+   * @param stage Wettbewerbsabschnitt, der Vorgänger wird
+   */
+  def prepareSuccessor(comp: Competition, stage: Stage): Unit =
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+    val existingStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == comp.id && !s.deleted)
+    dialogs.DlgStageStart.show(existingStages, Some(stage.id)).map {
+      case Right(res) =>
+        val initialNoPlayers = if (existingStages.isEmpty) comp.pants1Stage.count(_.active) else 0
+        services.TourneyDB.tourney.addStage(
+          coId = comp.id,
+          prefId = res.prefId,
+          name = res.name,
+          stageConfig = StageConfig.CFG,
+          size = 8,
+          noPlayers = initialNoPlayers
+        ) match {
+          case Right(newStage) =>
+            val updatedCompOpt = services.TourneyDB.tourney.competitions.find(c => c != null && c.id == comp.id)
+            Global.currentSelection = Global.currentSelection.copy(stage = Some(newStage), competition = updatedCompOpt)
+            comps.ContextHeader.render()
+            loadPage(PageNameTyp("StageAdmin"), "")
+          case Left(err) =>
+            error(s"Failed to start stage: ${err.msgCode}")
+        }
+      case _ => debug("Start stage cancelled")
+    }
+
   /** Button "Wettbewerb finalisieren" (Jeder-gegen-Jeden, KO-Runde, Schweizer System). */
   val FinalizeCompBtn: HtmlId = genId(name)
 
@@ -246,29 +278,7 @@ object StageResult extends BasePage with JsWrapper:
           dialogs.DlgMsgbox.show(gM("+next_incomplete", currentStage.mFinished.toString, currentStage.mTotal.toString),
             gM("+btn_next"), List(shared.BoxButton.Ok))
         } else {
-          val existingStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == comp.id && !s.deleted)
-          dialogs.DlgStageStart.show(existingStages, Some(currentStage.id)).map {
-            case Right(res) =>
-              val initialNoPlayers = if (existingStages.isEmpty) comp.pants1Stage.count(_.active) else 0
-
-              services.TourneyDB.tourney.addStage(
-                coId = comp.id, 
-                prefId = res.prefId, 
-                name = res.name, 
-                stageConfig = StageConfig.CFG, 
-                size = 8, 
-                noPlayers = initialNoPlayers
-              ) match {
-                case Right(newStage) => 
-                  val updatedCompOpt = services.TourneyDB.tourney.competitions.find(c => c != null && c.id == comp.id)
-                  Global.currentSelection = Global.currentSelection.copy(stage = Some(newStage), competition = updatedCompOpt)
-                  comps.ContextHeader.render()
-                  loadPage(PageNameTyp("StageAdmin"), "")
-                case Left(err) => 
-                  error(s"Failed to start stage: ${err.msgCode}")
-              }
-            case _ => debug("Start stage cancelled")
-          }
+          prepareSuccessor(comp, currentStage)
         }
       case `FinalizeCompBtn` => finalizeCompetition()
       case _ =>

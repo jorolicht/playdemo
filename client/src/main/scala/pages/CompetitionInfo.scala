@@ -34,6 +34,8 @@ object CompetitionInfo extends BasePage with JsWrapper:
   val RadioCert:         HtmlId = genId(name)
   /** Tree Node Glyph einer Stage in der Stage-Liste (klappt die Stage-Reiter auf), Suffix = Stage-Id. */
   val TngStage:          HtmlId = genId(name)
+  /** Button "Nachfolger" einer Stage (neuen nachfolgenden Abschnitt anlegen), Suffix = Stage-Id. */
+  val BtnSuccessor:      HtmlId = genId(name)
   /** Reiter einer aufgeklappten Stage, Suffix = "<Stage-Id>-<Seitenname>". */
   val BtnStageTab:       HtmlId = genId(name)
 
@@ -263,6 +265,23 @@ object CompetitionInfo extends BasePage with JsWrapper:
               error(s"Failed to toggle status: ${err.msgCode}")
           }
         }
+
+      // Nachfolger: bei unvollständigen Ergebnissen erst Rückfrage (ABBRUCH / WEITER)
+      case id if id.id.startsWith(BtnSuccessor.id + "-") =>
+        import shared.BoxButton
+        val sId = elem.id.substring(BtnSuccessor.id.length + 1)
+        for
+          comp  <- Global.currentSelection.competition
+          stage <- services.TourneyDB.tourney.stages.find(s => s != null && s.id.value.toString == sId)
+        do
+          if (stage.mFinished < stage.mTotal)
+            DlgMsgbox.show(gM("+successor_incomplete", stage.name, stage.mFinished.toString, stage.mTotal.toString),
+              gM("+successor_title"), List(BoxButton.Cancel, BoxButton.Ok),
+              labels = Map(BoxButton.Cancel -> gM("+successor_cancel"), BoxButton.Ok -> gM("+successor_continue"))).map {
+              case BoxButton.Ok => pages.Stage.StageResult.prepareSuccessor(comp, stage)
+              case _            => debug("Successor cancelled")
+            }
+          else pages.Stage.StageResult.prepareSuccessor(comp, stage)
 
       case id if id.id.startsWith(BtnDeleteStage.id) =>
         val stageId = StageId(elem.id.substring(BtnDeleteStage.id.length + 1).toInt)

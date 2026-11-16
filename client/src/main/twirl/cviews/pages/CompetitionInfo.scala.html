@@ -103,6 +103,10 @@
                                 </td>
                                 <td class="text-end pe-3">
                                     <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-hero py-0" @id(BtnSuccessor, "onclick", r.id.value.toString) title="@gM("+successor_title")"
+                                                @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN || !pages.Stage.StageResult.hasResults(r)){disabled}>
+                                            @iconHandover() <span class="ms-1">@gM("+successor")</span>
+                                        </button>
                                         <button class="btn btn-outline-danger" @id(BtnDeleteStage, "onclick", r.id.value.toString) @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN){disabled}>
                                             <i class="bi bi-trash"></i>
                                         </button>
