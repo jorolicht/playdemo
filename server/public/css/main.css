@@ -478,6 +478,7 @@ td.boto {
 
 /* Buttons: Hauptaktion in Hero-Blau (#336699), destruktive Aktion in red3 (#CD0000) */
 .btn-hero-primary { --bs-btn-color: #fff; --bs-btn-bg: #336699; --bs-btn-border-color: #336699; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #264d73; --bs-btn-hover-border-color: #264d73; --bs-btn-active-color: #fff; --bs-btn-active-bg: #1f3f5e; --bs-btn-active-border-color: #1f3f5e; --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: #336699; --bs-btn-disabled-border-color: #336699; }
+.btn-outline-hero { --bs-btn-color: #336699; --bs-btn-border-color: #336699; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #336699; --bs-btn-hover-border-color: #336699; --bs-btn-active-color: #fff; --bs-btn-active-bg: #264d73; --bs-btn-active-border-color: #264d73; --bs-btn-disabled-color: #336699; --bs-btn-disabled-border-color: #336699; }
 .btn-red3 { --bs-btn-color: #fff; --bs-btn-bg: #CD0000; --bs-btn-border-color: #CD0000; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #a30000; --bs-btn-hover-border-color: #a30000; --bs-btn-active-color: #fff; --bs-btn-active-bg: #8b0000; --bs-btn-active-border-color: #8b0000; --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: #CD0000; --bs-btn-disabled-border-color: #CD0000; }
 
 /* Dialoge: dunkelgrauer Header mit weißem Titel; gleich breite Footer-Buttons (dlg-btns), Hauptaktion in Hero-Blau (btn-hero-primary) */
