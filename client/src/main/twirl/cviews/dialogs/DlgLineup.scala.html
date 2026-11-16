@@ -47,8 +47,10 @@
                 }
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>@gM("DlgLineup.cancel")</button>
-                <button type="button" class="btn btn-primary" @id(ApplyId) @if(readOnly){disabled}>@gM("DlgLineup.save")</button>
+                <div class="dlg-btns">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>@gM("DlgLineup.cancel")</button>
+                    <button type="button" class="btn btn-hero-primary" @id(ApplyId) @if(readOnly){disabled}>@gM("DlgLineup.save")</button>
+                </div>
             </div>
         </div>
     </div>

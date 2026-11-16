@@ -20,12 +20,14 @@
                 </p>
             </div>
             <div class="modal-footer bg-light d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-outline-secondary" @id(CancelId) data-bs-dismiss="modal">
-                    @gM("dlg.startCompetition.btnCancel")
-                </button>
-                <button type="button" class="btn btn-success fw-bold px-3" @id(ApplyId)>
-                    <i class="bi bi-play-fill me-1"></i>@gM("dlg.startCompetition.btnStart")
-                </button>
+                <div class="dlg-btns">
+                    <button type="button" class="btn btn-outline-secondary" @id(CancelId) data-bs-dismiss="modal">
+                        @gM("dlg.startCompetition.btnCancel")
+                    </button>
+                    <button type="button" class="btn btn-hero-primary fw-bold px-3" @id(ApplyId)>
+                        <i class="bi bi-play-fill me-1"></i>@gM("dlg.startCompetition.btnStart")
+                    </button>
+                </div>
             </div>
         </div>
     </div>
