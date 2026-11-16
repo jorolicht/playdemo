@@ -154,8 +154,9 @@
                                         <td></td>
                                         <td colspan="5" class="ps-4">
                                             <span class="me-1" role="button" @id(TngStage, "onclick", st.id.value.toString)>@tng(openStages.contains(st.id.value))</span>
-                                            <span class="fw-semibold">@st.name</span>
-                                            <span class="badge bg-light text-dark border ms-2">@gM(st.stageConfig.msgCode)</span>
+                                            @* als Button: öffnet die Stage-Seite passend zum Status *@
+                                            <button type="button" class="btn btn-outline-primary btn-sm fw-bold stage-link" @id(BtnStageLink, "onclick", st.id.value.toString)>@st.name</button>
+                                            <span class="small text-muted ms-2">@gM("stageLayout.status")</span>
                                             <span class="badge ms-1 @{st.status match {
                                                 case StageStatus.CFG => "bg-secondary"
                                                 case StageStatus.AUS => "bg-info text-dark"
@@ -163,6 +164,8 @@
                                                 case StageStatus.FIN => "bg-success"
                                                 case _ => "bg-light text-dark"
                                             }}">@gM(st.status.msgCode)</span>
+                                            <span class="small text-muted ms-2">@gM("stageLayout.format")</span>
+                                            <span class="badge bg-light text-dark border ms-1">@gM(st.stageConfig.msgCode)</span>
                                             @if(openStages.contains(st.id.value)) {
                                                 <div class="d-flex flex-wrap gap-1 mt-2 ps-4">
                                                     @StageTabs.filter(t => t._1 != "StageCertificate" || st.certificate).map { case (page, icon, msg) =>

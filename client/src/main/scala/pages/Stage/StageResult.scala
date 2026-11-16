@@ -19,6 +19,16 @@ object StageResult extends BasePage with JsWrapper:
   def compName(stage: Stage): String =
     services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId).map(_.name).getOrElse("")
 
+  /**
+   * Wurden im Wettbewerbsabschnitt schon Ergebnisse eingegeben? Freilose (fest gesetzte Sieger) zählen nicht.
+   * Davon hängt ab, ob "START nachfolgender Abschnitt" aktiv ist.
+   *
+   * @param stage Wettbewerbsabschnitt
+   * @return true, wenn mindestens ein Spiel ein eingegebenes Ergebnis hat
+   */
+  def hasResults(stage: Stage): Boolean =
+    stage.matches.exists(m => m.finished && m.status != MEntry.MS_FIX)
+
   /** Button "Wettbewerb finalisieren" (Jeder-gegen-Jeden, KO-Runde, Schweizer System). */
   val FinalizeCompBtn: HtmlId = genId(name)
 
@@ -218,6 +228,10 @@ object StageResult extends BasePage with JsWrapper:
         
         if (currentStage.stageConfig.format == StageFormat.SW) {
           startNextSwissRound(currentStage)
+        } else if (currentStage.mFinished < currentStage.mTotal) {
+          // nicht alle Ergebnisse eingegeben: nur Hinweis, kein neuer Abschnitt
+          dialogs.DlgMsgbox.show(gM("+next_incomplete", currentStage.mFinished.toString, currentStage.mTotal.toString),
+            gM("+btn_next"), List(shared.BoxButton.Ok))
         } else {
           val existingStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == comp.id && !s.deleted)
           dialogs.DlgStageStart.show(existingStages, Some(currentStage.id)).map {

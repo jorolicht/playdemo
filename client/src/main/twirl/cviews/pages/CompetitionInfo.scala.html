@@ -80,7 +80,7 @@
                             <tr>
                                 <td class="ps-3 fw-bold">
                                     <span class="me-1" role="button" @id(TngStage, "onclick", r.id.value.toString)><i class="bi @{if (isStageOpen(r.id.value)) "bi-caret-down-fill" else "bi-caret-right-fill"} text-secondary"></i></span>
-                                    @r.name
+                                    <button type="button" class="btn btn-outline-primary btn-sm fw-bold stage-link" onclick="appLoadPage('StageAdmin', '@r.id.value')">@r.name</button>
                                 </td>
                                 <td>@r.noPlayers</td>
                                 <td>@r.getNoRounds</td>
@@ -103,9 +103,6 @@
                                 </td>
                                 <td class="text-end pe-3">
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-primary" onclick="appLoadPage('StageAdmin', '@r.id.value')">
-                                            <i class="bi bi-eye me-1"></i>@gM("+show_action")
-                                        </button>
                                         <button class="btn btn-outline-danger" @id(BtnDeleteStage, "onclick", r.id.value.toString) @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN){disabled}>
                                             <i class="bi bi-trash"></i>
                                         </button>
