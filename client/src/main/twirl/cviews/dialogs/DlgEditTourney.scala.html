@@ -76,12 +76,14 @@
                 </form>
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary rounded-pill px-4" @id(CancelId) data-bs-dismiss="modal">
-                    @gM("btn.cancel")
-                </button>
-                <button type="button" class="btn btn-primary rounded-pill px-4" @id(ApplyId)>
-                    <i class="bi bi-check-lg me-1"></i>@gM("btn.save")
-                </button>
+                <div class="dlg-btns">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" @id(CancelId) data-bs-dismiss="modal">
+                        @gM("btn.cancel")
+                    </button>
+                    <button type="button" class="btn btn-hero-primary rounded-pill px-4" @id(ApplyId)>
+                        <i class="bi bi-check-lg me-1"></i>@gM("btn.save")
+                    </button>
+                </div>
             </div>
         </div>
     </div>

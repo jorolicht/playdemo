@@ -82,8 +82,8 @@ object DlgExportTourney extends BaseDialog with JsWrapper:
       }
       val applyBtn = gE(ApplyId, withWarning = false)
       if (applyBtn != null) {
-        applyBtn.classList.remove("btn-danger")
-        applyBtn.classList.add("btn-primary")
+        applyBtn.classList.remove("btn-red3")
+        applyBtn.classList.add("btn-hero-primary")
         val defaultLabel = if (saveAndLeave) gM("dlg.exportTourney.btnLeave") else gM("dlg.exportTourney.btnExport")
         val icon = if (saveAndLeave) "bi-box-arrow-right" else "bi-download"
         setHtml(applyBtn, s"""<i class="bi $icon me-1"></i>$defaultLabel""")
@@ -110,8 +110,8 @@ object DlgExportTourney extends BaseDialog with JsWrapper:
           }
           val applyBtn = gE(ApplyId, withWarning = false)
           if (applyBtn != null) {
-            applyBtn.classList.remove("btn-primary")
-            applyBtn.classList.add("btn-danger")
+            applyBtn.classList.remove("btn-hero-primary")
+            applyBtn.classList.add("btn-red3")
             val overwriteLabel = gM("dlg.exportTourney.btnOverwrite")
             setHtml(applyBtn, s"""<i class="bi bi-exclamation-octagon me-1"></i>$overwriteLabel""")
           }

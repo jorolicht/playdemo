@@ -75,8 +75,10 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>@gM("DlgAddSingle.cancel")</button>
-                <button type="button" class="btn btn-primary" @id(ApplyId)>@gM("DlgAddSingle.save")</button>
+                <div class="dlg-btns">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>@gM("DlgAddSingle.cancel")</button>
+                    <button type="button" class="btn btn-hero-primary" @id(ApplyId)>@gM("DlgAddSingle.save")</button>
+                </div>
             </div>
         </div>
     </div>

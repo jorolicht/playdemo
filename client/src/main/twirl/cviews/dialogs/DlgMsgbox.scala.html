@@ -23,10 +23,10 @@
         @if(details.isDefined) {
           <button @id(DetailsBtnId) type="button" class="btn btn-outline-secondary btn-xs box-btn">@gM("msgbox.details")</button>
         }
-        @* gleich breite Buttons: jede Spalte so breit wie der längste Button, mindestens 6rem *@
-        <div style="display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: .5rem;">
+        @* gleich breite Buttons (dlg-btns); "OK"/"Ja" als Hauptaktion in Hero-Blau *@
+        <div class="dlg-btns">
           @for(btn <- btns) {
-            <button @id(btn.getId) type="button" class="btn btn-outline-secondary btn-xs box-btn" style="min-width: 6rem;">@labels.getOrElse(btn, gM(btn.msgCode))</button>
+            <button @id(btn.getId) type="button" class="btn @if(btn == BoxButton.Ok || btn == BoxButton.Yes){btn-hero-primary}else{btn-outline-secondary} btn-xs box-btn">@labels.getOrElse(btn, gM(btn.msgCode))</button>
           }
         </div>
       </div>

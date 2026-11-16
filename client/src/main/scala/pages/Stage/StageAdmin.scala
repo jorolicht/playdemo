@@ -707,8 +707,10 @@ object StageAdmin extends BasePage with JsWrapper:
             </div>
           </div>
           <div class="modal-footer bg-light p-3 border-0 d-flex justify-content-end gap-2">
-            <button class="btn btn-outline-secondary fw-bold" id="customGroupCancelBtn">Abbrechen</button>
-            <button class="btn btn-primary fw-bold px-4" id="customGroupOkBtn">OK</button>
+            <div class="dlg-btns">
+              <button class="btn btn-outline-secondary fw-bold" id="customGroupCancelBtn">Abbrechen</button>
+              <button class="btn btn-hero-primary fw-bold px-4" id="customGroupOkBtn">OK</button>
+            </div>
           </div>
         </div>
       </div>

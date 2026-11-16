@@ -37,8 +37,10 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>@gM("DlgStageStart.cancel")</button>
-                <button type="button" class="btn btn-primary" @id(ApplyId)>@gM("DlgStageStart.start")</button>
+                <div class="dlg-btns">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @id(CancelId)>@gM("DlgStageStart.cancel")</button>
+                    <button type="button" class="btn btn-hero-primary" @id(ApplyId)>@gM("DlgStageStart.start")</button>
+                </div>
             </div>
         </div>
     </div>
