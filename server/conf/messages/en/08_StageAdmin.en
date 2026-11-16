@@ -19,7 +19,6 @@ StageAdmin.filter_top = Top half
 StageAdmin.filter_bottom = Bottom half
 StageAdmin.filter_bottum = Bottom half
 StageAdmin.btn_add_dummy = + ADD DUMMY
-StageAdmin.btn_add_player = + ADD PLAYER
 StageAdmin.btn_select_all = SELECT ALL
 StageAdmin.name_header = Name, First Name
 StageAdmin.club_header = Club

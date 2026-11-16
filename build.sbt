@@ -625,6 +625,7 @@ lazy val client = project
             |object Console { 
             |  val enabled = true
             |  def start() = DebugConsole.start()
+            |  def genDemoResults(): String = TestResult.genDemoResults().merge
             |}
             |""".stripMargin          
 
@@ -633,6 +634,7 @@ lazy val client = project
             |object Console { 
             |  val enabled = false
             |  def start() = println("debug console not available")
+            |  def genDemoResults(): String = "genDemoResults not available (APP_ADDON=false)"
             |}
             |""".stripMargin          
 

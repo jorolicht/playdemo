@@ -19,7 +19,6 @@ StageAdmin.filter_top = Obere Hälfte
 StageAdmin.filter_bottom = Untere Hälfte
 StageAdmin.filter_bottum = Untere Hälfte
 StageAdmin.btn_add_dummy = + DUMMY HINZUFÜGEN
-StageAdmin.btn_add_player = + SPIELER HINZUFÜGEN
 StageAdmin.btn_select_all = ALLE AUSWÄHLEN
 StageAdmin.name_header = Name, Vorname
 StageAdmin.club_header = Verein
