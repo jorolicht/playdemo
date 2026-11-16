@@ -114,7 +114,7 @@ test.describe('UseCase 8: Abschnitts-Verwaltung & Auslosung (StageAdmin & StageD
     }
 
     // 7. Click NextStageBtn to start follower stage
-    const nextStageBtn = page.locator('button[id*="NextStageBtn"], button:has-text("Nächsten Wettbewerbsabschnitt")').first();
+    const nextStageBtn = page.locator('button[id*="NextStageBtn"], button:has-text("START nachfolgender Abschnitt")').first();
     await expect(nextStageBtn).toBeVisible({ timeout: 5000 });
     await nextStageBtn.click();
 

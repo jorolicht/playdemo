@@ -17,7 +17,6 @@ CompetitionInfo.participants_header = Teilnehmer
 CompetitionInfo.status_header = Status
 CompetitionInfo.actions_header = Aktionen
 CompetitionInfo.no_stages = Keine Wettbewerbsabschnitte angelegt.
-CompetitionInfo.show_action = Anzeigen
 CompetitionInfo.participants_list = Teilnehmerliste ({0})
 CompetitionInfo.snr_header = SNo
 CompetitionInfo.double_name_header = Name/Name

@@ -58,7 +58,7 @@
             </button>
             @if(!cert) {
             <div class="d-flex">
-                <button class="btn btn-primary" @id(NextStageBtn, "onclick")>
+                <button class="btn btn-primary" @id(NextStageBtn, "onclick") @if(!pages.Stage.StageResult.hasResults(stage)){disabled}>
                     @gM("+btn_next") <i class="bi bi-arrow-right ms-1"></i>
                 </button>
                 <span class="text-muted mx-2 align-self-center">@gM("+or")</span>

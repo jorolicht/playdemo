@@ -21,6 +21,8 @@ object TourneyInfo extends BasePage with JsWrapper:
   val TngComp:          HtmlId = genId(name)
   val TngStage:         HtmlId = genId(name)
   val BtnStageTab:      HtmlId = genId(name)
+  /** Stage-Name als Button im Baum der Wettbewerbsliste, Suffix = Stage-Id; öffnet die Seite passend zum Stage-Status. */
+  val BtnStageLink:     HtmlId = genId(name)
   /** Button "Bearbeiten" eines Wettbewerbs in der Wettbewerbsliste, Suffix = Wettbewerbs-Id. */
   val BtnEditComp:      HtmlId = genId(name)
   /** Button "Löschen" eines Wettbewerbs in der Wettbewerbsliste, Suffix = Wettbewerbs-Id. */
@@ -234,6 +236,16 @@ object TourneyInfo extends BasePage with JsWrapper:
         val stageId = elem.id.substring(TngStage.id.length + 1).toInt
         if (!openStages.remove(stageId)) openStages += stageId
         render()
+
+      // Wettbewerb und Stage auswählen; loadPage("StageAdmin", <StageId>) wählt die Seite passend zum Stage-Status
+      case id if id.id.startsWith(BtnStageLink.id + "-") =>
+        val sId = elem.id.substring(BtnStageLink.id.length + 1)
+        services.StageDB.stages.find(s => s != null && s.id.value.toString == sId).foreach { stage =>
+          val comp = services.CompetitionDB.competitions.find(c => c != null && c.id == stage.coId)
+          Global.currentSelection = Global.currentSelection.copy(competition = comp, stage = Some(stage))
+          comps.ContextHeader.render()
+          loadPage(pages.Stage.StageAdmin.name, sId)
+        }
 
       // Suffix "<StageId>-<Seitenname>": Wettbewerb und Stage auswählen, dann Reiter-Seite laden
       case id if id.id.startsWith(BtnStageTab.id + "-") =>
