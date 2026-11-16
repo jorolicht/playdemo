@@ -46,7 +46,6 @@ object StageAdmin extends BasePage with JsWrapper:
   val RadAll:          HtmlId = genId(name)
   val RadTop:          HtmlId = genId(name)
   val RadBottom:       HtmlId = genId(name)
-  val BtnAddPlayer:    HtmlId = genId(name)
   /** Auswahl des Wertungssystems (Version) des Wettbewerbs. */
   val SelScoring:      HtmlId = genId(name)
   /** Auswahl des Spielsystems der Begegnungen (Mannschaften). */
@@ -347,48 +346,6 @@ object StageAdmin extends BasePage with JsWrapper:
             services.TourneyDB.tourney.updateCompetition(comp)
             render()
           }
-
-      case `BtnAddPlayer` =>
-        val tourney = services.TourneyDB.tourney
-        val comp = Global.currentSelection.competition.get
-        val activeSnos = comp.pants1Stage.filter(_.active).map(_.id).toSet
-        val sortedPlayers = tourney.players.toSeq
-          .filterNot(p => activeSnos.contains(SNO.single(p.id)))
-          .sortBy(_.displayName.toLowerCase)
-        val clubsMap = tourney.clubs.map(c => c.id.toInt -> c.name).toMap
-        
-        dialogs.DlgAddPlayer.show(sortedPlayers, clubsMap).map {
-          case Right(selectedPlayer) =>
-            Global.currentSelection.competition.foreach { comp =>
-              val sno = SNO.single(selectedPlayer.id)
-              val existingOpt = comp.pants1Stage.find(_.id == sno)
-              existingOpt match {
-                case Some(existing) =>
-                  existing.active = true
-                  existing.status = PantStatus.PLAY
-                case None =>
-                  val newPant = Pant(
-                    id = sno,
-                    name = selectedPlayer.displayName,
-                    club = tourney.clubs.find(_.id.toInt == selectedPlayer.clubId).map(_.name).getOrElse(""),
-                    rating = selectedPlayer.meta.ttr.getOrElse(0),
-                    birthYear = selectedPlayer.birthYear.map(_.toString).getOrElse(""),
-                    active = true,
-                    status = PantStatus.PLAY,
-                    clubId = selectedPlayer.clubId
-                  )
-                  comp.pants1Stage += newPant
-              }
-              tourney.updateCompetition(comp) match {
-                case Right(updatedComp) =>
-                  Global.currentSelection = Global.currentSelection.copy(competition = Some(updatedComp))
-                case _ =>
-              }
-              render()
-            }
-          case _ =>
-            debug("DlgAddPlayer: Add player cancelled or error.")
-        }
 
       case id if id.id.startsWith(ChkBoxPlayer.id) =>
         val sno = SNO.fromString(elem.id.substring(ChkBoxPlayer.id.length + 1))

@@ -28,21 +28,25 @@ object TestResult extends JsWrapper:
    * @param param Custom parameter string.
    */
   def testResult_genDemoResults(group: String, number: Int, param: String): Future[Either[AppError, String]] =
-    // Verify we are in the StageInput page
-    val lastPage = dom.window.sessionStorage.getItem("tourney_last_page")
-    if (lastPage != "StageInput") {
-      val errMsg = "Fehler: Sie müssen sich im UseCase StageInput befinden!"
-      addOutput(errMsg)
-      return Future(Left(AppError(errMsg)))
-    }
-
-    Global.currentSelection.stage match {
-      case None =>
-        val errMsg = "Fehler: Keine Stage ausgewählt!"
+    genDemoResults() match
+      case Left(errMsg) =>
         addOutput(errMsg)
         Future(Left(AppError(errMsg)))
-      case Some(_) =>
-        StageInput.setRandomScores()
-        addOutput("Demo-Ergebnisse erfolgreich eingetragen.")
+      case Right(msg) =>
+        addOutput(msg)
         Future.successful(Right(s"FINISHED: ${group}-Test:${number}"))
-    }
+
+  /**
+   * Generiert Demo-Ergebnisse für die ausgewählte Stage (wie der Button "DEMO-Ergebnisse"); auch als globale
+   * Funktion `genDemoResults()` in der Browser-Konsole verfügbar (nur mit APP_ADDON=true).
+   *
+   * @return Erfolgsmeldung, Left mit Fehlermeldung außerhalb von StageInput bzw. ohne ausgewählte Stage
+   */
+  def genDemoResults(): Either[String, String] =
+    if (dom.window.sessionStorage.getItem("tourney_last_page") != "StageInput")
+      Left("Fehler: Sie müssen sich im UseCase StageInput befinden!")
+    else if (Global.currentSelection.stage.isEmpty)
+      Left("Fehler: Keine Stage ausgewählt!")
+    else
+      StageInput.setRandomScores()
+      Right("Demo-Ergebnisse erfolgreich eingetragen.")

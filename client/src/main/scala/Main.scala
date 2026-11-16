@@ -67,6 +67,8 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
     dom.window.asInstanceOf[js.Dynamic].appSwitchLang = (lang: String) => pages.MainView.switchLang(lang)
     // expose addon Console.start function, only if addon is included, otherwise dummy function
     dom.window.asInstanceOf[js.Dynamic].startConsole = () => addon.Console.start()
+    // Demo-Ergebnisse für die ausgewählte Stage in StageInput erzeugen (nur mit Addon, sonst Hinweis)
+    dom.window.asInstanceOf[js.Dynamic].genDemoResults = () => addon.Console.genDemoResults()
 
     // Zurück/Vor im Browser zwischen statischen Seiten (/preise/ …) und Startseite (URLs setzt pages.syncUrl)
     if (Global.fws) dom.window.addEventListener("popstate", (_: dom.PopStateEvent) => {

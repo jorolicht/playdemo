@@ -218,7 +218,7 @@ cd server/docker/dev
 Nach Code-Änderungen genügt `APP_ENV=dev sbt compile`: Der Build kopiert das Plugin direkt in das gemountete
 WordPress-Verzeichnis.
 
-Für Tests im Browser bietet der Client eine Konsole: In der JavaScript-Konsole `startConsole()` aufrufen (Addon `addon.Console`).
+Für Tests im Browser bietet der Client eine Konsole: In der JavaScript-Konsole `startConsole()` aufrufen (Addon `addon.Console`). `genDemoResults()` trägt in der Ergebniseingabe (StageInput) Demo-Ergebnisse für den ausgewählten Abschnitt ein (wie der Button „DEMO-Ergebnisse“). Beides nur mit Addon (`APP_ADDON=true`).
 
 ---
 
