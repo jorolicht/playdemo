@@ -34,7 +34,7 @@ object DlgCompetition extends BaseDialog with JsWrapper:
   val ApplyId:        HtmlId = genId(name)
   val CancelId:       HtmlId = genId(name)
   val CloseId:        HtmlId = genId(name)
-  /** Hinweis, dass Kategorie und Typ eines gestarteten Wettbewerbs nicht mehr änderbar sind. */
+  /** Hinweis, dass Kategorie und Typ eines bestehenden Wettbewerbs nicht mehr änderbar sind. */
   val LockHintId:     HtmlId = genId(name)
 
   private var modal: Modal = null
@@ -96,8 +96,8 @@ object DlgCompetition extends BaseDialog with JsWrapper:
       startInput.max = s"${intDateToStr(currentTourney.endDate)}T23:59"
     }
 
-    // Gestarteter Wettbewerb (mindestens ein Wettbewerbsabschnitt angelegt): nur Name, Beginn und TTR änderbar
-    val locked = existingComp.exists(c => services.TourneyDB.tourney.stages.exists(s => s != null && s.coId == c.id && !s.deleted))
+    // Bearbeiten: Kategorie und Wettbewerbstyp sind nachträglich nicht änderbar, nur Name, Beginn und TTR
+    val locked = existingComp.isDefined
     gE(CompCategoryId).asInstanceOf[dom.html.Select].disabled = locked
     gE(CompTypId).asInstanceOf[dom.html.Select].disabled = locked
     if locked then gE(LockHintId).classList.remove("d-none") else gE(LockHintId).classList.add("d-none")
