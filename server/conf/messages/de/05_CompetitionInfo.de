@@ -33,7 +33,7 @@ CompetitionInfo.cert_yes = JA
 CompetitionInfo.cert_no = NEIN
 CompetitionInfo.save_leave = Speichern/Verlassen
 
-CompetitionInfo.successor = Nachfolger
+CompetitionInfo.successor = Nachfolger starten
 CompetitionInfo.successor_title = Nachfolgenden Abschnitt anlegen
 CompetitionInfo.successor_incomplete = Im Abschnitt "{0}" sind noch nicht alle Ergebnisse eingegeben ({1} von {2} Spielen). Trotzdem einen nachfolgenden Abschnitt anlegen?
 CompetitionInfo.successor_cancel = ABBRUCH

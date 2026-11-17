@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { MainViewPage } from '../pages/MainViewPage';
 
 /**
- * CompetitionInfo: button "Nachfolger" in the stage list.
+ * CompetitionInfo: button "Nachfolger starten" in the stage list (only for stages without successor).
  * Demo tourney, competition 1 "S-Klasse Herren Einzel": stage 3 Vorrunde (finished), stage 4 Endrunde (one match played).
  */
 test.describe('UseCase 6: CompetitionInfo – Nachfolger eines Abschnitts', () => {
@@ -44,8 +44,21 @@ test.describe('UseCase 6: CompetitionInfo – Nachfolger eines Abschnitts', () =
     await expect(page.locator('select[id*="DlgStageStart_InputPrefId"]')).toHaveValue('4');
   });
 
+  test('TC-CI-18 [👤]: Abschnitt mit Nachfolger zeigt keinen Button „Nachfolger starten“', async ({ page }) => {
+    await page.locator('tr', { hasText: 'S-Klasse Herren Einzel' }).locator('.comp-link').click();
+    // Vorrunde (3) hat die Endrunde (4) als Nachfolger, die Endrunde selbst hat keinen
+    await expect(page.locator('#CompetitionInfo_BtnSuccessor-4')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('#CompetitionInfo_BtnSuccessor-4')).toContainText('Nachfolger starten');
+    await expect(page.locator('#CompetitionInfo_BtnSuccessor-3')).toHaveCount(0);
+  });
+
   test('TC-CI-12 [👤]: Vollständige Ergebnisse – direkt zum Dialog', async ({ page }) => {
     await page.locator('tr', { hasText: 'S-Klasse Herren Einzel' }).locator('.comp-link').click();
+    // Nachfolger (Endrunde 4) löschen, damit die Vorrunde (3) wieder einen Nachfolger bekommen kann
+    await expect(page.locator('#CompetitionInfo_BtnSuccessor-3')).toHaveCount(0, { timeout: 5000 });
+    await page.locator('#CompetitionInfo_BtnDeleteStage-4').click();
+    await page.locator('.modal.show .box-btn.btn-hero-primary').click();
+    await expect(page.locator('#CompetitionInfo_BtnDeleteStage-4')).toHaveCount(0, { timeout: 5000 });
     await page.locator('#CompetitionInfo_BtnSuccessor-3').click();
     await expect(page.locator('#DlgStageStart_ModalId')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('select[id*="DlgStageStart_InputPrefId"]')).toHaveValue('3');
