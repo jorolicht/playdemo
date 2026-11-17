@@ -177,8 +177,8 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-SI-07 [👤]:** Im Demo-Modus erscheint in der Kopfzeile von `StageInput` (Card-Title `<h5>`) der Button „DEMO-Ergebnisse“. Ein Klick darauf generiert automatische Zufallsergebnisse für alle ungespielten Begegnungen (inkl. automatischer Siegerpropagation in Folge-K.o.-Runden) und deaktiviert den Button nach Abschluss des Abschnitts.
 - [x] **TC-SI-08 [👤]:** Im KO-System (`SingleElimination`) wird für Spiele, bei denen die Teilnehmer noch nicht feststehen, der Button für den Schiedsrichterzettel angezeigt. Auf dem erzeugten Zettel bleiben die Spielernamen leer für manuelle Eintragungen. Bei Spielen mit Freilos wird kein Schiedsrichterzettel-Button angezeigt.
 - [x] **TC-SI-09 [👤]:** Im Gruppen-Spielsystem (`Groups`) öffnet der Schiedsrichterzettel-Button einer Spielzeile in `StageInput` die Seite `StageScoreSheet` ausschließlich mit dem ausgewählten Spiel (genau 1 Zettel in der Vorschau, passender Titel und Einzelzettel-Druckbutton) statt aller Zettel der Gruppe oder Runde.
-- [x] **TC-SI-10 [👤]:** In `StageResult` ist „START nachfolgender Abschnitt“ (Jeder-gegen-Jeden, Gruppen, K.-o.-Runde) deaktiviert, solange im Abschnitt kein Ergebnis eingegeben ist (Freilose zählen nicht).
-- [x] **TC-SI-11 [👤]:** Sind nicht alle Ergebnisse eingegeben, zeigt ein Klick auf „START nachfolgender Abschnitt“ nur einen Hinweisdialog (eingegebene/alle Spiele); es wird kein neuer Abschnitt angelegt.
+- [x] **TC-SI-10 [👤]:** In `StageResult` ist „Start Nachfolger“ (Jeder-gegen-Jeden, Gruppen, K.-o.-Runde) deaktiviert, solange im Abschnitt kein Ergebnis eingegeben ist (Freilose zählen nicht).
+- [x] **TC-SI-11 [👤]:** Sind nicht alle Ergebnisse eingegeben, zeigt ein Klick auf „Start Nachfolger“ nur einen Hinweisdialog (eingegebene/alle Spiele); es wird kein neuer Abschnitt angelegt.
 
 ### 9.2 Anonymer Besucher (🌐)
 - [x] **TC-SI-06 [🌐]:** Aufrufen von `StageResult` im öffentlichen Modus. Ergebnisse und Tabellenstände sind sichtbar, die Ergebniseingabefelder sind jedoch deaktiviert.
@@ -193,6 +193,7 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [ ] **TC-PR-03 [👤]:** Aufrufen von `Certificate` nach Abschluss eines Wettbewerbs.
 - [ ] **TC-PR-04 [👤]:** Auswählen einer Urkunden-Vorlage (Layout, Hintergrundbild, Schriftart, Platzierungen 1-4).
 - [ ] **TC-PR-05 [👤]:** Generieren der PDF-Urkunden für die Erstplatzierten. Die Namen, Vereine und Wettbewerbstitel werden korrekt eingesetzt.
+- [x] **TC-PR-06 [👤]:** „Runde drucken (4 pro Seite)“ in `StageScoreSheet` druckt alle Schiedsrichterzettel der Vorschau (4 pro Seite), nicht nur die erste Seite, und erzeugt keine leere Seite am Ende. Der Druckbutton ist in Hero-Blau.
 
 ---
 
