@@ -57,6 +57,10 @@ enum StageConfig(val id: Int, val format: StageFormat) derives CanEqual:
   case KO     extends StageConfig(109, StageFormat.KO)    // Knockout - single elimination   
   case SW     extends StageConfig(110, StageFormat.SW)    // Swiss - players are paired in each round based on their current score, with the goal of matching players with similar performance.
 
+  // --- Gekoppelte Stages (doc/DoubleModes.md) ---
+  case DRR    extends StageConfig(113, StageFormat.RR)    // Doppelte Runde: Hinrunde (auswählbar)
+  case DRR2   extends StageConfig(114, StageFormat.RR)    // Doppelte Runde: Rückrunde, nur intern als Partner angelegt
+
   // --------------------------------
 
   def msgCode: String = s"StageConfig.$productPrefix"
@@ -202,6 +206,29 @@ object StageStatus:
   def fromName(name: String): StageStatus = values.find(_.productPrefix == name).getOrElse(UNKN)
 
 
+/** Art der Kopplung zweier Stages (siehe doc/DoubleModes.md). */
+enum LinkKind derives CanEqual:
+  /** Doppelte Runde: Hinrunde + Rückrunde */
+  case DRR
+
+object LinkKind:
+  given rw: ReadWriter[LinkKind] =
+    readwriter[String].bimap[LinkKind](_.toString, s => LinkKind.valueOf(s))
+
+/**
+ * Kopplung einer Stage an ihre Partner-Stage. Gekoppelte Stages laufen mit denselben Teilnehmern; die
+ * Kopplung ist unabhängig vom Qualifikationsfluss (`prefId`/`nextIds`).
+ *
+ * @param kind    Art der Kopplung
+ * @param primary true = Stage 1 (Hinrunde), false = Partner-Stage (Rückrunde), die das Gesamtergebnis trägt
+ * @param partner ID der Partner-Stage
+ */
+case class StageLink(kind: LinkKind, primary: Boolean, partner: StageId)
+
+object StageLink:
+  given rw: ReadWriter[StageLink] = macroRW
+
+
 enum StageData:
   case GroupsStage(groups: ArrayBuffer[Group])
   case KnockoutStage(state: KoStage)
@@ -240,6 +267,7 @@ object StageData:
  * @param encVariant Spielweise der Begegnungen bei Mannschaften (z. B. "firstTo2", "all"), leer = Standard des Formats.
  * @param encounters Begegnungen (Aufstellung und Einzelspiele) je Spielnummer bei Mannschaften.
  * @param encSystem Spielsystem der Begegnungen bei Mannschaften (z. B. "bundes"), leer = Standard des Formats.
+ * @param link Kopplung an eine Partner-Stage (z. B. Hin-/Rückrunde einer Doppelten Runde), None = nicht gekoppelt.
  */
 case class Stage(
   id:                   StageId,
@@ -261,7 +289,8 @@ case class Stage(
   val matches:          ArrayBuffer[MEntry] = ArrayBuffer.empty,
   var encVariant:       String = "",
   val encounters:       ArrayBuffer[Encounter] = ArrayBuffer.empty,
-  var encSystem:        String = ""
+  var encSystem:        String = "",
+  var link:             Option[StageLink] = None
 ):
 
   // -----------------------------
@@ -285,6 +314,13 @@ case class Stage(
   // -----------------------------
   def isGroupStage: Boolean = stageConfig.format == StageFormat.GR
   def isKoStage: Boolean    = stageConfig.format == StageFormat.KO
+
+  /** Ist die Stage an eine Partner-Stage gekoppelt? */
+  def isLinked: Boolean  = link.isDefined
+  /** Ist die Stage die Partner-Stage (Rückrunde) eines Verbunds? Sie trägt das Gesamtergebnis. */
+  def isPartner: Boolean = link.exists(!_.primary)
+  /** Ist die Stage die erste Stage (Hinrunde) eines Verbunds? */
+  def isPrimary: Boolean = link.exists(_.primary)
 
   def getNoRounds: Int = data match {
     case StageData.GroupsStage(groups) =>
@@ -670,6 +706,18 @@ case class Stage(
 
 object Stage:
   given rw: ReadWriter[Stage] = macroRW
+
+  /**
+   * Reihenfolge für Stage-Listen: Die Partner-Stage (Rückrunde) steht direkt hinter ihrer ersten Stage,
+   * sonst bleibt die Reihenfolge erhalten. Partner ohne erste Stage in der Liste stehen am Ende.
+   *
+   * @param stages Stages (z. B. eines Wettbewerbs)
+   * @return neu geordnete Stages
+   */
+  def linkedOrder(stages: Seq[Stage]): Seq[Stage] =
+    def partnersOf(s: Stage) = stages.filter(p => p.isPartner && p.link.exists(_.partner == s.id))
+    val orphans = stages.filter(p => p.isPartner && !stages.exists(s => p.link.exists(_.partner == s.id)))
+    stages.filterNot(_.isPartner).flatMap(s => s +: partnersOf(s)) ++ orphans
 
   /**
    * Liefert das Wertungssystem eines Wettbewerbs (`Competition.scoring`); wird vom Client beim Start gesetzt, da die

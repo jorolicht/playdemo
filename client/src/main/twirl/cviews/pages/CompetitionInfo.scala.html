@@ -78,7 +78,8 @@
                         }
                         @stages.map { r =>
                             <tr>
-                                <td class="ps-3 fw-bold">
+                                <td class="@if(r.isPartner){ps-5}else{ps-3} fw-bold">
+                                    @if(r.isPartner) {<i class="bi bi-link-45deg text-secondary me-1" title="@gM("+linked_title", services.TourneyDB.tourney.partnerOf(r).map(_.name).getOrElse(""))"></i>}
                                     <span class="me-1" role="button" @id(TngStage, "onclick", r.id.value.toString)><i class="bi @{if (isStageOpen(r.id.value)) "bi-caret-down-fill" else "bi-caret-right-fill"} text-secondary"></i></span>
                                     <button type="button" class="btn btn-outline-mv-tourney btn-sm fw-bold stage-link" onclick="appLoadPage('StageAdmin', '@r.id.value')">@r.name</button>
                                 </td>
@@ -103,8 +104,9 @@
                                 </td>
                                 <td class="text-end pe-3">
                                     <div class="btn-group btn-group-sm">
-                                        @* "Nachfolger starten" nur, solange der Abschnitt noch keinen Nachfolger hat *@
-                                        @if(!stages.exists(_.prefId.contains(r.id))) {
+                                        @* "Nachfolger starten" nur, solange der Abschnitt noch keinen Nachfolger hat;
+                                           bei Hin-/Rückrunde nur an der Rückrunde, die das Gesamtergebnis trägt *@
+                                        @if(!stages.exists(_.prefId.contains(r.id)) && !r.isPrimary) {
                                         <button type="button" class="btn btn-mv-tourney d-inline-flex align-items-center gap-2" @id(BtnSuccessor, "onclick", r.id.value.toString) title="@gM("+successor_title")"
                                                 @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN || !pages.Stage.StageResult.hasResults(r)){disabled}>
                                             <span class="fs-5 lh-1" aria-hidden="true">&#x2933;</span>

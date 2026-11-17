@@ -5,7 +5,8 @@ import { test, expect } from '@playwright/test';
  * Das Plugin-Template setzt html/body auf height:100% + overflow-x:hidden; im Druck wird das aufgehoben.
  */
 test.describe('StageScoreSheet: Druck aller Zettel', () => {
-  test('TC-PR-06 [👤]: Druck enthält alle Zettel (4 pro Seite), keine leere Seite am Ende', async ({ page }) => {
+  test('TC-PR-06 [👤]: Druck enthält alle Zettel (4 pro Seite), keine leere Seite am Ende', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'page.pdf() gibt es nur in Chromium');
     await page.goto('/');
     await page.locator('#MainView_BtnDemo').click();
     const compRow = page.locator('tr', { hasText: 'S-Klasse Herren Einzel' }).first();

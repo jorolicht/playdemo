@@ -202,7 +202,7 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [ ] **TC-PR-03 [👤]:** Aufrufen von `Certificate` nach Abschluss eines Wettbewerbs.
 - [ ] **TC-PR-04 [👤]:** Auswählen einer Urkunden-Vorlage (Layout, Hintergrundbild, Schriftart, Platzierungen 1-4).
 - [ ] **TC-PR-05 [👤]:** Generieren der PDF-Urkunden für die Erstplatzierten. Die Namen, Vereine und Wettbewerbstitel werden korrekt eingesetzt.
-- [x] **TC-PR-06 [👤]:** „Runde drucken (4 pro Seite)“ in `StageScoreSheet` druckt alle Schiedsrichterzettel der Vorschau (4 pro Seite), nicht nur die erste Seite, und erzeugt keine leere Seite am Ende. Der Druckbutton ist in Hero-Blau.
+- [x] **TC-PR-06 [👤]:** „Runde drucken (4 pro Seite)“ in `StageScoreSheet` druckt alle Schiedsrichterzettel der Vorschau (4 pro Seite), nicht nur die erste Seite, und erzeugt keine leere Seite am Ende. Der Druckbutton ist in Hero-Blau. Nur in Chromium (`page.pdf()`).
 
 ---
 
@@ -329,3 +329,13 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-LANG-02 [🌐]:** Der Besuch einer `/en/`-URL merkt Englisch (localStorage `tourney_lang`); deutsche URLs zeigen trotzdem Deutsch (mit Hinweis auf die englische Fassung); Seiten ohne Sprach-URL (z. B. Login, Turnierseiten) nutzen die gemerkte Sprache, sonst die Browsersprache.
 - [x] **TC-LANG-03 [🌐]:** Der Sprachumschalter DE | EN in der Navbar führt zur Gegenstück-URL (`/impressum/` ↔ `/en/imprint/`) und merkt die Wahl.
 - [x] **TC-LANG-04 [🌐]:** Englischsprachige Besucher ohne gemerkte Wahl sehen auf deutschen Seiten den Hinweis „This page is also available in English“ (Link auf die englische Fassung); Schließen merkt Deutsch ohne Neuladen. Deutschsprachige Besucher sehen keinen Hinweis.
+
+---
+
+## 23. UseCase: Doppelte Runde (Hin- und Rückrunde, `doc/DoubleModes.md`)
+
+### 23.1 Turnierverwalter (👤)
+- [x] **TC-DM-01 [👤]:** Spielmodus „Doppelte Runde“: Der Start der Spielphase benennt die Stage in „<Name> – Hinrunde“ um und legt „<Name> – Rückrunde“ mit denselben Paarungen (Heim/Gast getauscht, Spielnummern ab 1) im Status Auslosung an. Umschalter Hinrunde | Rückrunde wechselt auf dieselbe Seite der anderen Runde. Die Auslosung der Rückrunde ist nicht änderbar (kein Start), die Administration zeigt die Kopplung, Auslosung/Konfiguration löschen ist gesperrt. In `CompetitionInfo` steht die Rückrunde eingerückt mit Verbindungssymbol unter der Hinrunde; „Nachfolger starten“ gibt es nur an der Rückrunde.
+- [x] **TC-DM-02 [👤]:** Nach allen Ergebnissen der Hinrunde wird die Rückrunde spielbar. Die Ergebnisse der Hinrunde zeigen statt Nachfolger/Finalisieren einen Hinweis auf die Rückrunde. Die Ergebnisse der Rückrunde zeigen standardmäßig die Gesamttabelle (je Teilnehmer alle Spiele beider Runden), umschaltbar auf nur Rückrunde. Der Filter „Obere Hälfte“ eines Nachfolgers nutzt die Gesamttabelle.
+- [x] **TC-DM-06 [👤]:** Löschen der Hinrunde fragt nach („gemeinsam gelöscht“) und löscht Hin- und Rückrunde.
+- [x] **TC-DM-07 [👤]:** „Auslosung löschen“ an der Hinrunde löst die Kopplung: Die Rückrunde wird gelöscht, der Namenszusatz „– Hinrunde“ entfällt.

@@ -22,7 +22,7 @@ object StageCertificate extends BasePage with JsWrapper:
           case StageData.GroupsStage(groups)  => cviews.pages.Stage.Result.html.Groups(stage, groups.toSeq, cert = true)
           case StageData.KnockoutStage(_)     => cviews.pages.Stage.Result.html.SingleElimination(stage, cert = true)
           case StageData.SwissStage(sw)       => cviews.pages.Stage.Result.html.SwissSystem(stage, sw, cert = true)
-          case StageData.RoundRobinStage(rr)  => cviews.pages.Stage.Result.html.RoundRobin(stage, Seq(rr), cert = true)
+          case StageData.RoundRobinStage(rr)  => cviews.pages.Stage.Result.html.RoundRobin(stage, StageAdmin.getStageGroups(stage), cert = true)
         setMain(cviews.comps.html.StageLayout(stage, "CERT")(view))
         if (stage.data.isInstanceOf[StageData.KnockoutStage]) StageResult.initSlidingWindow()
         true

@@ -1,7 +1,23 @@
 @import shared.model.*
 @import base.Messages.gM
+@import cviews.helper.html.*
 
 @(stage: Stage, activeTab: String)(content: Html)
+
+@* Seite des aktiven Reiters, für den Umschalter Hinrunde/Rückrunde gekoppelter Stages *@
+@tabPage = @{ activeTab match {
+    case "CFG" => "StageAdmin"
+    case "DRW" => "StageDraw"
+    case "INP" => "StageInput"
+    case "SCH" => "StageScoreSheet"
+    case _     => "StageResult"
+}}
+@legButton(leg: Stage, label: String) = {
+    <button type="button" class="btn @if(leg.id == stage.id){btn-hero-primary}else{btn-outline-secondary}"
+            @id(pages.CompetitionInfo.BtnStageTab, "onclick", s"${leg.id.value}-$tabPage") @if(leg.id == stage.id){aria-pressed="true"}>
+        @label
+    </button>
+}
 
 <div class="container mt-4">
     <!-- Stage Header -->
@@ -25,6 +41,17 @@
             </button>
         </div>
     </div>
+
+    @* Umschalter Hinrunde | Rückrunde einer Doppelten Runde *@
+    @services.TourneyDB.tourney.partnerOf(stage).map { partner =>
+        @defining(if (stage.isPrimary) (stage, partner) else (partner, stage)) { case (first, second) =>
+        <div class="btn-group btn-group-sm mb-3" role="group">
+            <span class="btn btn-light border-0 disabled"><i class="bi bi-link-45deg"></i></span>
+            @legButton(first, gM("stageLayout.firstLeg"))
+            @legButton(second, gM("stageLayout.secondLeg"))
+        </div>
+        }
+    }
 
     <!-- Stage Sub-Menu (Tabs) -->
     <ul class="nav nav-tabs stage-tabs mb-4">

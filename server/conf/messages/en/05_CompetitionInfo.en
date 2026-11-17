@@ -38,3 +38,5 @@ CompetitionInfo.successor_title = Create successor stage
 CompetitionInfo.successor_incomplete = Not all results of stage "{0}" have been entered yet ({1} of {2} matches). Create a successor stage anyway?
 CompetitionInfo.successor_cancel = CANCEL
 CompetitionInfo.successor_continue = CONTINUE
+CompetitionInfo.linked_title = Linked to "{0}"
+CompetitionInfo.delete_linked = First and second leg ("{0}" and "{1}") belong together and are deleted together. Really delete?

@@ -28,3 +28,6 @@ StageResult.or = oder
 StageResult.btn_finalize = Wettbewerb finalisieren
 StageResult.finalize_confirm = Soll der Wettbewerb "{0}" finalisiert werden? Danach sind keine Änderungen mehr möglich (Reaktivieren über die Wettbewerbsübersicht).
 StageResult.next_incomplete = Es sind noch nicht alle Ergebnisse eingegeben ({0} von {1} Spielen). Der nachfolgende Abschnitt kann erst gestartet werden, wenn alle Ergebnisse vorliegen.
+StageResult.tab_second = Rückrunde
+StageResult.tab_total = Gesamt
+StageResult.drr_primary_hint = Gesamttabelle, Nachfolger und Finalisieren finden Sie in der Rückrunde.

@@ -499,6 +499,8 @@ stageLayout.tabResult                               = Results
 stageLayout.tabScoresheet                           = Scoresheet
 stageLayout.tabCertificate                          = Certificates
 stageLayout.showCertificate                         = Show certificate
+stageLayout.firstLeg                                = First leg
+stageLayout.secondLeg                               = Second leg
 
 footer.realizedWith                                 = Realized with Scala.js & WordPress.
 footer.followUs                                     = Follow us on {0}

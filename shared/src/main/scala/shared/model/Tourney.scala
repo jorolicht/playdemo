@@ -327,6 +327,11 @@ case class Tourney(
         stages(targetIdx) = updatedR
         addDirtyStage(updatedR)
 
+        // Gekoppelte Partner-Stage (z. B. Rückrunde) mit löschen
+        r.link.foreach { l =>
+          if (stages.exists(s => s != null && s.id == l.partner && !s.deleted)) deleteStage(l.partner, doSync = false)
+        }
+
         // Remove from predecessor's nextIds
         r.prefId.foreach { pid =>
           val pIdx = if (pid.value > 0 && pid.value <= 128 && stages(pid.value - 1) != null && stages(pid.value - 1).id == pid) pid.value - 1 else stages.indexWhere(s => s != null && s.id == pid)
@@ -384,8 +389,82 @@ case class Tourney(
         val updatedR = stage.copy(id = finalId, version = stage.version + 1)
         stages(targetIdx) = updatedR
         addDirtyStage(updatedR)
+        releasePartner(updatedR)
         if (doSync) triggerStageSync()
         Right(updatedR)
+      }
+    }
+
+  /**
+   * Gibt die Rückrunde einer Doppelten Runde zum Spielen frei (AUS → EIN), sobald die Hinrunde beendet ist.
+   *
+   * @param stage gerade gespeicherte Stage
+   */
+  private def releasePartner(stage: Stage): Unit =
+    if (stage.isPrimary && stage.status == StageStatus.FIN) {
+      stage.link.foreach { l =>
+        val pIdx = stages.indexWhere(s => s != null && s.id == l.partner && !s.deleted)
+        if (pIdx >= 0 && stages(pIdx).status == StageStatus.AUS) {
+          val p = stages(pIdx)
+          val released = p.copy(status = StageStatus.EIN, version = p.version + 1)
+          stages(pIdx) = released
+          addDirtyStage(released)
+        }
+      }
+    }
+
+  /** Liefert die gekoppelte Partner-Stage einer Stage (nicht gelöscht). */
+  def partnerOf(stage: Stage): Option[Stage] =
+    stage.link.flatMap(l => stages.find(s => s != null && s.id == l.partner && !s.deleted))
+
+  /**
+   * Legt zur ausgelosten und gestarteten Hinrunde einer Doppelten Runde die Rückrunde als gekoppelte
+   * Partner-Stage an: gleiche Teilnehmer in gleicher Reihenfolge, gleiche Paarungen mit vertauschtem
+   * Heim/Gast, Spielnummern wieder ab 1. Die Rückrunde bleibt im Status AUS, bis die Hinrunde beendet ist.
+   *
+   * @param primary     Hinrunde (Matches bereits initialisiert)
+   * @param primaryName neuer Name der Hinrunde
+   * @param partnerName Name der Rückrunde
+   * @param doSync      Synchronisation auslösen
+   * @return (Hinrunde, Rückrunde) wie gespeichert
+   */
+  def addLinkedStage(primary: Stage, primaryName: String, partnerName: String, doSync: Boolean = true): Either[AppError, (Stage, Stage)] =
+    addStage(primary.coId, None, partnerName, StageConfig.DRR2, primary.size, primary.noPlayers, doSync = false).flatMap { p =>
+      p.data = primary.data match
+        case StageData.RoundRobinStage(g) => StageData.RoundRobinStage(RoundRobin.returnGroup(g))
+        case other                        => other
+      p.noWinSets  = primary.noWinSets
+      p.encVariant = primary.encVariant
+      p.encSystem  = primary.encSystem
+      p.demo       = primary.demo
+      p.matches ++= RoundRobin.mirrorMatches(primary.matches.toSeq, p.id)
+      p.status     = StageStatus.AUS
+      p.link       = Some(StageLink(LinkKind.DRR, primary = false, partner = primary.id))
+      primary.name = primaryName
+      primary.link = Some(StageLink(LinkKind.DRR, primary = true, partner = p.id))
+      val res = for
+        first  <- updateStage(primary, doSync = false)
+        second <- updateStage(p, doSync = false)
+      yield (first, second)
+      if (doSync) triggerStageSync()
+      res
+    }
+
+  /**
+   * Löst die Kopplung einer Hinrunde: Die Rückrunde wird gelöscht, die Hinrunde ist wieder eine einfache Stage.
+   * Aufruf beim Zurücksetzen der Auslosung oder Konfiguration der Hinrunde.
+   *
+   * @param primary Hinrunde
+   * @param name    Name der Hinrunde nach dem Lösen
+   */
+  def unlinkStage(primary: Stage, name: String): Unit =
+    primary.link.foreach { l =>
+      primary.link = None
+      primary.name = name
+      // Kopplung der Rückrunde vorher lösen, sonst löscht deleteStage die Hinrunde mit
+      stages.find(s => s != null && s.id == l.partner && !s.deleted).foreach { p =>
+        p.link = None
+        deleteStage(p.id, doSync = false)
       }
     }
 

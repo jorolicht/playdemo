@@ -36,15 +36,28 @@ object StageDraw extends BasePage with JsWrapper:
    * Darf die Auslosung der Stage noch geändert werden (Spieler tauschen, Setzen, Paarungsmodus, Start)?
    * Nur im Status Auslosung (AUS); beim Schweizer System zusätzlich im Status FIN, wenn die nächste
    * Runde ausgelost wird. Sobald Spiele laufen (EIN), sind keine Änderungen mehr möglich.
-   * Außerdem nur mit Schreibrecht und wenn der Wettbewerb nicht finalisiert ist.
+   * Außerdem nur mit Schreibrecht und wenn der Wettbewerb nicht finalisiert ist. Die Rückrunde einer
+   * Doppelten Runde ist nie änderbar, sie übernimmt die Auslosung der Hinrunde.
    *
    * @param stage Stage
    * @return true, wenn die Auslosung änderbar ist
    */
+  /**
+   * Legt beim Start der Spielphase einer Doppelten Runde (Hinrunde) die gekoppelte Rückrunde an und benennt
+   * die Hinrunde um. Andere Stages und bereits gekoppelte Hinrunden bleiben unverändert.
+   *
+   * @param stage gerade gestartete Stage
+   * @return die (ggf. umbenannte) Stage oder ein Fehler beim Anlegen der Rückrunde
+   */
+  def linkSecondLeg(stage: Stage): Either[shared.basic.AppError, Stage] =
+    if (stage.stageConfig != StageConfig.DRR || stage.isLinked) Right(stage)
+    else services.TourneyDB.tourney.addLinkedStage(stage, gM("+drr_first", stage.name), gM("+drr_second", stage.name)).map(_._1)
+
   def canEditDraw(stage: Stage): Boolean =
     val compFin = services.TourneyDB.tourney.competitions.exists(c => c != null && c.id == stage.coId && c.status == CompStatus.FIN)
     val statusOk = stage.status == StageStatus.AUS || (stage.stageConfig.format == StageFormat.SW && stage.status == StageStatus.FIN)
-    statusOk && !compFin && base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+    // die Rückrunde einer Doppelten Runde übernimmt die Auslosung der Hinrunde
+    statusOk && !compFin && !stage.isPartner && base.Global.hasTourneyAccess(services.TourneyDB.tourney)
 
   def render(param: String = ""): Boolean = 
     selectedPlayer = None
@@ -116,7 +129,7 @@ object StageDraw extends BasePage with JsWrapper:
           stage.initMatches(comp.typ) match {
             case Right(_) =>
               stage.status = StageStatus.EIN
-              services.TourneyDB.tourney.updateStage(stage) match {
+              services.TourneyDB.tourney.updateStage(stage).flatMap(linkSecondLeg) match {
                 case Right(updatedStage) =>
                   Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
                   loadPage(StageInput.name, "")

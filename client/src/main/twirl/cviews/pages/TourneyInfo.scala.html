@@ -151,7 +151,8 @@
                                 @stagesByComp.getOrElse(c.id.value, Seq.empty).map { st =>
                                     <tr class="table-light">
                                         <td></td>
-                                        <td colspan="5" class="ps-4">
+                                        <td colspan="5" class="@if(st.isPartner){ps-5}else{ps-4}">
+                                            @if(st.isPartner) {<i class="bi bi-link-45deg text-secondary me-1" title="@gM("CompetitionInfo.linked_title", services.TourneyDB.tourney.partnerOf(st).map(_.name).getOrElse(""))"></i>}
                                             <span class="me-1" role="button" @id(TngStage, "onclick", st.id.value.toString)>@tng(openStages.contains(st.id.value))</span>
                                             @* als Button: öffnet die Stage-Seite passend zum Status *@
                                             <button type="button" class="btn btn-outline-mv-tourney btn-sm fw-bold stage-link" @id(BtnStageLink, "onclick", st.id.value.toString)>@st.name</button>

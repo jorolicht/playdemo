@@ -27,3 +27,7 @@ StageDraw.btn_start_round = Start Round {0}
 
 
 StageDraw.locked = The draw is closed (matches running or finished) and can no longer be changed.
+StageDraw.drr_first = {0} – first leg
+StageDraw.drr_second = {0} – second leg
+StageDraw.drr_start_info = When the playing phase starts, the second leg is created with the same pairings (home/away swapped).
+StageDraw.drr_partner = The second leg uses the draw of the first leg with home/away swapped. It becomes playable once all matches of the first leg are finished.

@@ -41,3 +41,5 @@ CompetitionInfo.successor_title = Nachfolgenden Abschnitt anlegen
 CompetitionInfo.successor_incomplete = Im Abschnitt "{0}" sind noch nicht alle Ergebnisse eingegeben ({1} von {2} Spielen). Trotzdem einen nachfolgenden Abschnitt anlegen?
 CompetitionInfo.successor_cancel = ABBRUCH
 CompetitionInfo.successor_continue = WEITER
+CompetitionInfo.linked_title = Gekoppelt mit "{0}"
+CompetitionInfo.delete_linked = Hin- und Rückrunde ("{0}" und "{1}") gehören zusammen und werden gemeinsam gelöscht. Wirklich löschen?

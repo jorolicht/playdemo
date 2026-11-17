@@ -9,8 +9,15 @@
 @isFin = @{ compOpt.exists(_.status == CompStatus.FIN) }
 @disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin || stage.status != StageStatus.AUS) "disabled" else "" }
 
+@if(stage.isPartner) {
+<div class="alert alert-info py-2 small mb-3"><i class="bi bi-link-45deg me-1"></i>@gM("StageDraw.drr_partner")</div>
+} else {
 @if(!pages.Stage.StageDraw.canEditDraw(stage) && stage.status != StageStatus.AUS) {
 <div class="alert alert-info py-2 small mb-3"><i class="bi bi-lock me-1"></i>@gM("StageDraw.locked")</div>
+}
+@if(stage.stageConfig == StageConfig.DRR && stage.status == StageStatus.AUS) {
+<div class="alert alert-info py-2 small mb-3"><i class="bi bi-link-45deg me-1"></i>@gM("StageDraw.drr_start_info")</div>
+}
 }
 <div class="card shadow-sm">
     <div class="card-body">
@@ -57,6 +64,7 @@
             }
         </div>
 
+        @if(!stage.isPartner) {
         <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
             <button class="btn btn-outline-danger" onclick="appLoadPage('StageAdmin', '')">
                 <i class="bi bi-arrow-left me-1"></i>@gM("+btn_back")
@@ -65,6 +73,7 @@
                 @gM("+btn_start") <i class="bi bi-play-circle ms-1"></i>
             </button>
         </div>
+        }
     </div>
 </div>
 

@@ -71,7 +71,7 @@ object TourneyInfo extends BasePage with JsWrapper:
         // Get real competitions from DB
         val compList = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
 
-        val stagesByComp = services.StageDB.stages.toSeq.filter(s => s != null && !s.deleted).groupBy(_.coId.value)
+        val stagesByComp = services.StageDB.stages.toSeq.filter(s => s != null && !s.deleted).groupBy(_.coId.value).view.mapValues(Stage.linkedOrder).toMap
 
         setMain(cviews.pages.html.TourneyInfo(tourney, compList, stagesByComp, openComps.toSet, openStages.toSet))
         true

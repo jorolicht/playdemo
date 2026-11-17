@@ -25,6 +25,7 @@ object DrawRules:
     val isDe = lang.toLowerCase.startsWith("de")
     Seq(
       ModeOption(StageConfig.RR, if (isDe) "Round Robin / Jeder-gegen-Jeden" else "Round Robin", count >= 3),
+      ModeOption(StageConfig.DRR, if (isDe) "Doppelte Runde (Hin- und Rückrunde)" else "Double Round Robin (first and second leg)", count >= 3),
       ModeOption(StageConfig.SW, if (isDe) "Schweizer-System" else "Swiss System", count > 6),
       ModeOption(StageConfig.KO, if (isDe) "KO-System" else "Knockout System", count >= 4),
       
@@ -71,7 +72,7 @@ object DrawRules:
    */
   def calculateDistribution(stageConfig: StageConfig, count: Int, customGroupCount: Option[Int] = None): Seq[Int] =
     stageConfig match
-      case StageConfig.RR => Seq(count)
+      case StageConfig.RR | StageConfig.DRR => Seq(count)
       
       case StageConfig.GRPS3 => Seq.fill(count / 3)(3)
       

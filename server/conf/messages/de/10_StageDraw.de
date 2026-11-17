@@ -27,3 +27,7 @@ StageDraw.btn_start_round = Start Runde {0}
 
 
 StageDraw.locked = Die Auslosung ist abgeschlossen (Spiele laufen oder sind beendet) und kann nicht mehr geändert werden.
+StageDraw.drr_first = {0} – Hinrunde
+StageDraw.drr_second = {0} – Rückrunde
+StageDraw.drr_start_info = Beim Start der Spielphase wird die Rückrunde mit denselben Paarungen (Heim/Gast getauscht) angelegt.
+StageDraw.drr_partner = Die Rückrunde übernimmt die Auslosung der Hinrunde mit vertauschtem Heim/Gast. Sie wird spielbar, sobald alle Spiele der Hinrunde beendet sind.
