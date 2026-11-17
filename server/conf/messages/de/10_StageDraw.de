@@ -25,3 +25,5 @@ StageDraw.btn_start_round = Start Runde {0}
 
 
 
+
+StageDraw.locked = Die Auslosung ist abgeschlossen (Spiele laufen oder sind beendet) und kann nicht mehr geändert werden.

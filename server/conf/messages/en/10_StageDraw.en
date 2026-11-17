@@ -25,3 +25,5 @@ StageDraw.btn_start_round = Start Round {0}
 
 
 
+
+StageDraw.locked = The draw is closed (matches running or finished) and can no longer be changed.

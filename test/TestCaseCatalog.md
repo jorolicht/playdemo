@@ -133,12 +133,13 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-CI-07 [👤]:** Eigenständigen Wettbewerb (`ident == "SIMPLE"`) im lokalen Modus löschen: Klick auf „Löschen“ und Bestätigen mit „Ja“ löscht den lokalen Speicher (`App.demo_tourney`, `App.demo_comps` etc.) sowie sämtliche Browser-Schlüssel (`tourney_is_local_mode`, `tourney_slug`, `tourney_name`, `tourney_ident`, `tourney_last_*`). Navigiert zur Startseite (`MainView`); „Meine Turniere“ zeigt keinen Eintrag „lokal im Browser“ mehr.
 - [x] **TC-CI-08 [👤]:** Eigenständigen Wettbewerb (`ident == "SIMPLE"`) im Cloud-Modus löschen: Klick auf „Löschen“ und Bestätigen mit „Ja“ sendet einen `DELETE`-Request an den Server (`/wp-json/tourney/v1/delete`), bereinigt sämtliche Browser-Speicherschlüssel und und navigiert zur Startseite (`MainView`).
 - [x] **TC-CI-09 [👤]:** Nach dem Löschen eines Wettbewerbs (`ident == "SIMPLE"`) startet ein nachfolgender Klick auf „Demo“ direkt, ohne dass die Warnmeldung „Achtung: das aktuelle lokale Turnier wird gelöscht!“ erscheint.
-- [x] **TC-CI-10 [👤]:** In der Abschnittsliste steht vor „Löschen“ der Button „Nachfolger“ (Symbol Staffelübergabe). Er ist deaktiviert, solange im Abschnitt kein Ergebnis eingegeben ist.
-- [x] **TC-CI-11 [👤]:** „Nachfolger“ bei unvollständigen Ergebnissen: Hinweisdialog mit „ABBRUCH“ und „WEITER“. „ABBRUCH“ legt nichts an, „WEITER“ öffnet „Neuen Wettbewerbsabschnitt starten“ mit dem Abschnitt als Vorgänger.
-- [x] **TC-CI-12 [👤]:** „Nachfolger“ bei vollständigen Ergebnissen öffnet ohne Rückfrage „Neuen Wettbewerbsabschnitt starten“ mit dem Abschnitt als Vorgänger.
+- [x] **TC-CI-10 [👤]:** In der Abschnittsliste steht vor „Löschen“ der Button „Nachfolger starten“ (Symbol Staffelübergabe). Er ist deaktiviert, solange im Abschnitt kein Ergebnis eingegeben ist.
+- [x] **TC-CI-11 [👤]:** „Nachfolger starten“ bei unvollständigen Ergebnissen: Hinweisdialog mit „ABBRUCH“ und „WEITER“. „ABBRUCH“ legt nichts an, „WEITER“ öffnet „Neuen Wettbewerbsabschnitt starten“ mit dem Abschnitt als Vorgänger.
+- [x] **TC-CI-12 [👤]:** „Nachfolger starten“ bei vollständigen Ergebnissen öffnet ohne Rückfrage „Neuen Wettbewerbsabschnitt starten“ mit dem Abschnitt als Vorgänger.
 - [x] **TC-CI-15 [👤]:** Im Dialog „Wettbewerb bearbeiten“ sind Kategorie und Wettbewerbstyp immer gesperrt (auch ohne Wettbewerbsabschnitt), mit Hinweis; Name, Beginn und TTR bleiben änderbar.
 - [x] **TC-CI-16 [👤]:** „Wettbewerb bearbeiten“: Ein Beginn außerhalb des Turnierzeitraums wird mit Fehlermeldung abgelehnt, der Dialog bleibt offen.
 - [x] **TC-CI-17 [👤]:** „Wettbewerb bearbeiten“: Umbenennen auf den Namen eines anderen Wettbewerbs (Groß-/Kleinschreibung egal) wird abgelehnt; ein neuer, freier Name wird übernommen.
+- [x] **TC-CI-18 [👤]:** Hat ein Abschnitt bereits einen Nachfolger (ein anderer Abschnitt verweist per Vorgänger auf ihn), erscheint in der Abschnittsliste kein Button „Nachfolger starten“.
 
 ---
 
@@ -166,6 +167,9 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-SA-04 [👤]:** Manuelles Tauschen von Spielern in Gruppen/Runden vor Freigabe des Abschnitts.
 - [x] **TC-SA-05 [👤]:** Freigabe des Abschnitts („Abschnitt starten“). Der Spielplan und die Ergebniseingabe werden aktiviert.
 - [x] **TC-SA-06 [👤]:** Nachfolgender Abschnitt mit vorangegangenem Rundenturnier (`RoundRobin`): Filterung nach „Obere Hälfte“, „Untere Hälfte“ und „Alle“ sowie Anzeige der Vorrundenplatzierung in der Spalte `prev_stage`.
+- [x] **TC-SD-10 [👤]:** `StageDraw` bei laufenden Spielen (K.-o.): Hinweis „Auslosung ist abgeschlossen“, kein „SETZEN“ und keine Setzfelder, Start deaktiviert, Klick auf Spieler tauscht nicht.
+- [x] **TC-SD-11 [👤]:** `StageDraw` bei beendetem Abschnitt (Jeder-gegen-Jeden): Hinweis, Klick auf Spieler tauscht nicht. (Ausnahme Schweizer System: Auslosung der Folgerunde im Status beendet bleibt möglich.)
+- [x] **TC-SD-12 [👤]:** `StageDraw` im Status Auslosung: kein Sperrhinweis, Spieler tauschen weiterhin möglich.
 
 ---
 
