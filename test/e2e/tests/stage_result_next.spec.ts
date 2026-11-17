@@ -2,10 +2,10 @@ import { test, expect } from '@playwright/test';
 import { MainViewPage } from '../pages/MainViewPage';
 
 /**
- * StageResult: button "START nachfolgender Abschnitt".
+ * StageResult: button "Start Nachfolger".
  * Demo tourney, competition 1 "S-Klasse Herren Einzel": stage 4 Endrunde (knockout, only one match played).
  */
-test.describe('UseCase 9: StageResult – START nachfolgender Abschnitt', () => {
+test.describe('UseCase 9: StageResult – Start Nachfolger', () => {
 
   test('TC-SI-10 [👤]: Button ist ohne eingegebene Ergebnisse deaktiviert', async ({ page }) => {
     const mainView = new MainViewPage(page);
@@ -25,7 +25,7 @@ test.describe('UseCase 9: StageResult – START nachfolgender Abschnitt', () => 
     await page.evaluate(() => (window as any).appLoadPage('StageResult', ''));
 
     const nextBtn = page.locator('#StageResult_NextStageBtn');
-    await expect(nextBtn).toHaveText(/START nachfolgender Abschnitt/, { timeout: 5000 });
+    await expect(nextBtn).toHaveText(/Start Nachfolger/, { timeout: 5000 });
     await expect(nextBtn).toBeDisabled();
   });
 

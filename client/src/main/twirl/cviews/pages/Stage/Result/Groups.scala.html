@@ -57,7 +57,7 @@
                 <i class="bi bi-printer me-1"></i>@gM("+btn_print")
             </button>
             @if(!cert) {
-            <button class="btn btn-primary" @id(NextStageBtn, "onclick") @if(!pages.Stage.StageResult.hasResults(stage)){disabled}>
+            <button class="btn btn-mv-tourney" @id(NextStageBtn, "onclick") @if(!pages.Stage.StageResult.hasResults(stage)){disabled}>
                 @gM("+btn_next") <i class="bi bi-arrow-right ms-1"></i>
             </button>
             }
