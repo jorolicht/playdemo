@@ -166,11 +166,11 @@
             </div>
         </div>
         @if(mList.length == 1) {
-            <button class="btn btn-primary px-4 fw-bold shadow-sm" @id(PrintSingleBtn, "onclick", mList.head._1.gameNo.toString) data-game="@mList.head._1.gameNo">
+            <button class="btn btn-hero-primary px-4 fw-bold shadow-sm" @id(PrintSingleBtn, "onclick", mList.head._1.gameNo.toString) data-game="@mList.head._1.gameNo">
                 <i class="bi bi-printer-fill me-1"></i>@{if(base.Global.lang == "de") "Zettel drucken" else "Print Scoresheet"}
             </button>
         } else {
-            <button class="btn btn-primary px-4 fw-bold shadow-sm" onclick="window.print()">
+            <button class="btn btn-hero-primary px-4 fw-bold shadow-sm" onclick="window.print()">
                 <i class="bi bi-printer-fill me-1"></i>@{if(base.Global.lang == "de") "Runde drucken (4 pro Seite)" else "Print Round (4 per page)"}
             </button>
         }
@@ -318,6 +318,13 @@
 
 <style>
     @@media print {
+        /* Das Plugin-Template setzt html/body auf height:100% + overflow-x:hidden (tourney.php);
+           im Druck würde damit alles nach der ersten Seite abgeschnitten */
+        html, body {
+            height: auto !important;
+            overflow: visible !important;
+        }
+
         /* Hide navbar, sidebar, layout headers, footers and screen-only wrappers */
         body .navbar,
         body .sidebar,
@@ -355,6 +362,11 @@
             page-break-after: always !important;
             box-sizing: border-box !important;
             padding: 5mm !important;
+        }
+
+        /* kein Umbruch nach dem letzten Blatt (sonst leere Seite am Ende) */
+        body .printarea-referee:last-child {
+            page-break-after: auto !important;
         }
         
         body .referee-single-card-container {
