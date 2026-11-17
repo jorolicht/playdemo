@@ -88,7 +88,7 @@
         <div class="bracket-match-body">
             <div class="bracket-player-row @{if(m.finished && m.sets._1 > m.sets._2) "winner" else if(m.finished) "loser" else ""}">
                 <div class="d-flex flex-column text-start overflow-hidden">
-                    <span class="bracket-player-name" title="@getPlayerName(m.stNoA)">@getPlayerName(m.stNoA)</span>
+                    <span class="bracket-player-name@if(m.stNoA.isBye){ bye}" title="@getPlayerName(m.stNoA)">@getPlayerName(m.stNoA)</span>
                     @if(getPlayerClub(m.stNoA).nonEmpty) {
                         <span class="bracket-player-club">@getPlayerClub(m.stNoA)</span>
                     }
@@ -98,7 +98,7 @@
             </div>
             <div class="bracket-player-row @{if(m.finished && m.sets._2 > m.sets._1) "winner" else if(m.finished) "loser" else ""}">
                 <div class="d-flex flex-column text-start overflow-hidden">
-                    <span class="bracket-player-name" title="@getPlayerName(m.stNoB)">@getPlayerName(m.stNoB)</span>
+                    <span class="bracket-player-name@if(m.stNoB.isBye){ bye}" title="@getPlayerName(m.stNoB)">@getPlayerName(m.stNoB)</span>
                     @if(getPlayerClub(m.stNoB).nonEmpty) {
                         <span class="bracket-player-club">@getPlayerClub(m.stNoB)</span>
                     }
@@ -299,7 +299,7 @@
         align-items: center;
         font-size: 0.7rem;
         font-weight: 600;
-        color: #868e96;
+        color: #495057;
         margin-bottom: 0.5rem;
     }
     
@@ -327,6 +327,11 @@
         color: #94a3b8;
     }
     
+    /* Freilos: dunkleres Grau statt der hellen Verlierer-Farbe */
+    .bracket-player-name.bye {
+        color: #495057;
+    }
+
     .bracket-player-name {
         font-weight: 500;
         white-space: nowrap;
@@ -337,7 +342,7 @@
     
     .bracket-player-club {
         font-size: 0.7rem;
-        color: #94a3b8;
+        color: #495057;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
