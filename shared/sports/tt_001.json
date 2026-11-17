@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "sport": {
+    "id": "TT",
+    "version": 1,
+    "name": { "de": { "one": "Tischtennis" }, "en": { "one": "Table Tennis" } }
+  },
+  "levels": [
+    {
+      "id": "ball", "kind": "atomic",
+      "name": { "de": { "one": "Ball", "other": "Bälle", "short": "B" },
+                "en": { "one": "Point", "other": "Points", "short": "P" } }
+    },
+    {
+      "id": "set", "kind": "race", "unit": "ball",
+      "target": 11, "winBy": 2, "cap": null,
+      "name": { "de": { "one": "Satz", "other": "Sätze", "short": "S" },
+                "en": { "one": "Game", "other": "Games", "short": "G" } }
+    },
+    {
+      "id": "match", "kind": "bestOf", "unit": "set", "toWin": 3,
+      "name": { "de": { "one": "Spiel", "other": "Spiele", "short": "Sp" },
+                "en": { "one": "Match", "other": "Matches", "short": "M" } }
+    }
+  ],
+  "match": "match",
+  "variants": {
+    "bo5": { "name": { "de": { "one": "3 Gewinnsätze" }, "en": { "one": "Best of 5" } }, "override": { "match": { "toWin": 3 } } },
+    "bo7": { "name": { "de": { "one": "4 Gewinnsätze" }, "en": { "one": "Best of 7" } }, "override": { "match": { "toWin": 4 } } },
+    "bo3": { "name": { "de": { "one": "2 Gewinnsätze" }, "en": { "one": "Best of 3" } }, "override": { "match": { "toWin": 2 } } }
+  },
+  "formats": {
+    "single": { "type": "single", "name": { "de": { "one": "Einzel" }, "en": { "one": "Singles" } } },
+    "double": { "type": "double", "name": { "de": { "one": "Doppel" }, "en": { "one": "Doubles" } } },
+    "mixed":  { "type": "double", "name": { "de": { "one": "Mixed" },  "en": { "one": "Mixed Doubles" } } },
+    "team2": {
+      "type": "team",
+      "name": { "de": { "one": "2er-Mannschaft" }, "en": { "one": "Team of 2" } },
+      "encounter": {
+        "level": {
+          "id": "encounter", "kind": "bestOf", "unit": "match", "toWin": 2,
+          "name": { "de": { "one": "Begegnung", "other": "Begegnungen", "short": "Bg" },
+                    "en": { "one": "Tie", "other": "Ties", "short": "T" } }
+        },
+        "variants": {
+          "firstTo2": { "name": { "de": { "one": "Bis 2 Siege" },  "en": { "one": "First to 2 wins" } }, "override": {} },
+          "all":      { "name": { "de": { "one": "Alle 3 Spiele" }, "en": { "one": "Play all 3 matches" } },
+                        "override": { "encounter": { "kind": "fixed", "count": 3 } } }
+        },
+        "defaultVariant": "firstTo2",
+        "teamSize": 2,
+        "maxPlayers": 3,
+        "positions": { "home": ["A", "B", "D1"], "away": ["X", "Y", "D1"] },
+        "games": [
+          { "type": "single", "home": "A",  "away": "X" },
+          { "type": "single", "home": "B",  "away": "Y" },
+          { "type": "double", "home": "D1", "away": "D1" }
+        ]
+      },
+      "standings": {
+        "points": { "win": 2, "draw": 1, "loss": 0 },
+        "tieBreakers": ["diff:encounter", "diff:match", "diff:set", "diff:ball"]
+      }
+    },
+    "team3":  { "type": "team",   "name": { "de": { "one": "3er-Mannschaft" }, "en": { "one": "Team of 3" } } },
+    "team4":  { "type": "team",   "name": { "de": { "one": "4er-Mannschaft" }, "en": { "one": "Team of 4" } } },
+    "team6":  { "type": "team",   "name": { "de": { "one": "6er-Mannschaft" }, "en": { "one": "Team of 6" } } }
+  },
+  "standings": {
+    "points": { "win": 2, "draw": 1, "loss": 0 },
+    "tieBreakers": ["diff:match", "diff:set", "diff:ball"]
+  }
+}

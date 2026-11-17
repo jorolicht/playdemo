@@ -476,10 +476,82 @@ td.boto {
   color: #b5bcc3 !important;
 }
 
-/* Buttons: Hauptaktion in Hero-Blau (#336699), destruktive Aktion in red3 (#CD0000) */
+/* Card-Header und Buttons im Stil der Hero-Section der Startseite (#336699) */
+.card-hero {
+  border-color: #336699 !important;
+}
+.card-header-hero {
+  background: linear-gradient(135deg, #336699 0%, #4d82b8 100%);
+  color: #fff;
+  border-bottom: none;
+}
+.btn-hero {
+  color: #fff;
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+}
+.btn-hero:hover, .btn-hero:focus {
+  color: #336699;
+  background-color: #fff;
+  border-color: #fff;
+}
+.btn-hero-solid {
+  color: #336699;
+  background-color: #fff;
+  border: 1px solid #fff;
+  font-weight: 600;
+}
+.btn-hero-solid:hover, .btn-hero-solid:focus {
+  color: #fff;
+  background-color: #264d73;
+  border-color: #fff;
+}
+.btn-hero-danger:hover, .btn-hero-danger:focus {
+  color: #fff;
+  background-color: #c0392b;
+  border-color: #c0392b;
+}
+.btn-hero:disabled, .btn-hero-solid:disabled {
+  color: rgba(255, 255, 255, 0.55);
+  background-color: transparent;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* Farben der Startseiten-Buttons "Ganzes Turnier" (#4A607A) und "Wettbewerb starten" (#A3B8CC) für Turnier bzw. Wettbewerb */
+.text-mv-tourney { color: #4A607A !important; }
+.btn-outline-mv-tourney { --bs-btn-color: #4A607A; --bs-btn-border-color: #4A607A; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #4A607A; --bs-btn-hover-border-color: #4A607A; --bs-btn-active-color: #fff; --bs-btn-active-bg: #3E5167; --bs-btn-active-border-color: #3E5167; }
+.badge-mv-quick { background-color: #A3B8CC !important; color: #212529 !important; }
+/* Breadcrumb-Platzhalter ("Selektiere Wettbewerb/Abschnitt"): beim Hovern lesbar */
+.ctx-placeholder:hover, .ctx-placeholder:focus, .ctx-placeholder.show { color: #212529 !important; }
+
+/* Löschen-Buttons in "red3" (#CD0000) */
+.btn-outline-red3 { --bs-btn-color: #CD0000; --bs-btn-border-color: #CD0000; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #CD0000; --bs-btn-hover-border-color: #CD0000; --bs-btn-active-color: #fff; --bs-btn-active-bg: #a30000; --bs-btn-active-border-color: #a30000; --bs-btn-disabled-color: #CD0000; --bs-btn-disabled-border-color: #CD0000; }
+
+/* Wettbewerb in "PaleGreen4" (#548B54): Card-Header CompetitionInfo, "Wettbewerb hinzufügen", Breadcrumb-Symbol */
+.card-palegreen4 { border-color: #548B54 !important; }
+.card-header-palegreen4 { background-color: #548B54 !important; color: #fff; }
+.btn-palegreen4 { --bs-btn-color: #fff; --bs-btn-bg: #548B54; --bs-btn-border-color: #548B54; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #477647; --bs-btn-hover-border-color: #477647; --bs-btn-active-color: #fff; --bs-btn-active-bg: #3d653d; --bs-btn-active-border-color: #3d653d; --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: #548B54; --bs-btn-disabled-border-color: #548B54; }
+.badge-palegreen4 { background-color: #548B54 !important; color: #fff !important; }
+
+/* Wettbewerbsabschnitt in "LightGoldenrod" (#EEDD82, dunkle Schrift): Card-Header CompetitionInfo, Breadcrumb-Symbol */
+.card-lightgoldenrod { border-color: #EEDD82 !important; }
+.card-header-lightgoldenrod { background-color: #EEDD82 !important; color: #212529; }
+.badge-lightgoldenrod { background-color: #EEDD82 !important; color: #212529 !important; }
+
+/* Stage-Seiten: Blau wie card-header-hero (#336699) als einzige Akzentfarbe, neutrale Card-Header, red3 nur für destruktive Aktionen */
+.text-hero { color: #336699 !important; }
+.stage-tabs .nav-link { color: #336699; }
+.stage-tabs .nav-link:hover { color: #264d73; }
+.stage-tabs .nav-link.active { color: #336699; font-weight: 700; border-top: 3px solid #336699; }
+.card-header-neutral { background-color: #e9ecef !important; color: #111418; border-bottom: 1px solid #ced4da; }
 .btn-hero-primary { --bs-btn-color: #fff; --bs-btn-bg: #336699; --bs-btn-border-color: #336699; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #264d73; --bs-btn-hover-border-color: #264d73; --bs-btn-active-color: #fff; --bs-btn-active-bg: #1f3f5e; --bs-btn-active-border-color: #1f3f5e; --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: #336699; --bs-btn-disabled-border-color: #336699; }
 .btn-outline-hero { --bs-btn-color: #336699; --bs-btn-border-color: #336699; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #336699; --bs-btn-hover-border-color: #336699; --bs-btn-active-color: #fff; --bs-btn-active-bg: #264d73; --bs-btn-active-border-color: #264d73; --bs-btn-disabled-color: #336699; --bs-btn-disabled-border-color: #336699; }
 .btn-red3 { --bs-btn-color: #fff; --bs-btn-bg: #CD0000; --bs-btn-border-color: #CD0000; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #a30000; --bs-btn-hover-border-color: #a30000; --bs-btn-active-color: #fff; --bs-btn-active-bg: #8b0000; --bs-btn-active-border-color: #8b0000; --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: #CD0000; --bs-btn-disabled-border-color: #CD0000; }
+.stage-cfg-container .form-check-input:checked { background-color: #336699; border-color: #336699; }
+.stage-cfg-container .form-select:focus, .stage-cfg-container .form-check-input:focus { border-color: #336699; box-shadow: 0 0 0 .2rem rgba(51, 102, 153, .25); }
+.accordion-neutral .accordion-button, .accordion-neutral .accordion-button:not(.collapsed) { background-color: #e9ecef; color: #111418; box-shadow: inset 0 -1px 0 #ced4da; }
+.accordion-neutral .accordion-button:focus { box-shadow: inset 0 -1px 0 #ced4da, 0 0 0 .2rem rgba(51, 102, 153, .25); }
+.accordion-neutral .accordion-button:not(.collapsed)::after { filter: grayscale(1) brightness(.3); }
 
 /* Dialoge: dunkelgrauer Header mit weißem Titel; gleich breite Footer-Buttons (dlg-btns), Hauptaktion in Hero-Blau (btn-hero-primary) */
 .modal .modal-header { background-color: #495057 !important; color: #fff !important; border-bottom: 1px solid #343a40; }

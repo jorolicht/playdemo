@@ -482,7 +482,7 @@ test.describe('UseCase 6: Wettbewerbsverwaltung (CompetitionInfo)', () => {
       // 4. Verify navigation directly to TourneyInfo
       const infoTitle = page.locator('.card-header h3');
       await expect(infoTitle).toBeVisible({ timeout: 10000 });
-      const tourneyNameElem = page.locator('.card-body .fw-bold.text-primary').first();
+      const tourneyNameElem = page.locator('.card-body .tourney-name').first();
       await expect(tourneyNameElem).toBeVisible();
       const titleText = await tourneyNameElem.innerText();
       expect(titleText).toContain('Demo:');

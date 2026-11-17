@@ -6,3 +6,7 @@ CompTyp.MIXED = Mixed
 CompTyp.Mixed = Mixed
 CompTyp.TEAM = Team
 CompTyp.Team = Team
+CompTyp.TEAM2 = 2er-Mannschaft
+CompTyp.TEAM3 = 3er-Mannschaft
+CompTyp.TEAM4 = 4er-Mannschaft
+CompTyp.TEAM6 = 6er-Mannschaft

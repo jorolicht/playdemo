@@ -102,7 +102,7 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Meine Turniere', () => {
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
     
     // Verify tournament name starts with "Demo:"
-    const tourneyNameElem = page.locator('.card-body .fw-bold.text-primary').first();
+    const tourneyNameElem = page.locator('.card-body .tourney-name').first();
     await expect(tourneyNameElem).toBeVisible();
     const titleText = await tourneyNameElem.innerText();
     expect(titleText).toContain('Demo:');
@@ -255,7 +255,7 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Meine Turniere', () => {
 
     // Verify alert message and navigation to TourneyInfo
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
-    const tourneyNameElem = page.locator('.card-body .fw-bold.text-primary').first();
+    const tourneyNameElem = page.locator('.card-body .tourney-name').first();
     await expect(tourneyNameElem).toBeVisible();
     const titleText = await tourneyNameElem.innerText();
     expect(titleText).toContain('Importiertes Testturnier');
@@ -342,7 +342,7 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Meine Turniere', () => {
 
     // 4. Verify navigation to TourneyInfo and loaded tournament name
     await expect(infoPage.cardHeaderTitle).toBeVisible({ timeout: 10000 });
-    const tourneyNameElem = page.locator('.card-body .fw-bold.text-primary').first();
+    const tourneyNameElem = page.locator('.card-body .tourney-name').first();
     await expect(tourneyNameElem).toBeVisible();
     expect(await tourneyNameElem.innerText()).toContain('Reloaded Local Tourney');
   });

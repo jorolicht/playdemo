@@ -7,8 +7,8 @@
 
 <div class="container mt-4">
     <!-- Competition Header Card -->
-    <div class="card shadow-sm mb-4 border-success">
-        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header card-header-neutral d-flex justify-content-between align-items-center">
             <h3 class="h5 mb-0"><i class="bi bi-info-circle me-2"></i>@gM("+title", comp.name)</h3>
             <div class="btn-group btn-group-sm">
                 <button class="btn btn-light" @id(BtnEditComp, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN){disabled}>@gM("+edit")</button>
@@ -52,8 +52,8 @@
     </div>
 
     <!-- Stages List Section -->
-    <div class="card shadow-sm border-info mb-4">
-        <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header card-header-neutral d-flex justify-content-between align-items-center">
             <h4 class="h5 mb-0 fw-bold"><i class="bi bi-layers me-2"></i>@gM("+stages_title")</h4>
             <button class="btn btn-dark btn-sm" @id(BtnStartStage, "onclick") @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN){disabled}>
                 <i class="bi bi-plus-lg me-1"></i>@gM("+start_stage")
@@ -80,7 +80,7 @@
                             <tr>
                                 <td class="ps-3 fw-bold">
                                     <span class="me-1" role="button" @id(TngStage, "onclick", r.id.value.toString)><i class="bi @{if (isStageOpen(r.id.value)) "bi-caret-down-fill" else "bi-caret-right-fill"} text-secondary"></i></span>
-                                    <button type="button" class="btn btn-outline-primary btn-sm fw-bold stage-link" onclick="appLoadPage('StageAdmin', '@r.id.value')">@r.name</button>
+                                    <button type="button" class="btn btn-outline-mv-tourney btn-sm fw-bold stage-link" onclick="appLoadPage('StageAdmin', '@r.id.value')">@r.name</button>
                                 </td>
                                 <td>@r.noPlayers</td>
                                 <td>@r.getNoRounds</td>
@@ -139,11 +139,11 @@
     </div>
 
     <!-- Participants Accordion -->
-    <div class="accordion mb-4 shadow-sm" id="participantsAccordion">
+    <div class="accordion accordion-neutral mb-4 shadow-sm" id="participantsAccordion">
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingParticipants">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParticipants" aria-expanded="true" aria-controls="collapseParticipants">
-                    <i class="bi bi-people me-2"></i>@gM("+participants_list", participants.length.toString)
+                    <i class="bi bi-people me-2"></i>@gM(if (shared.format.TeamEncounter.isTeam(comp.typ)) "+team_list" else "+participants_list", participants.length.toString)
                 </button>
             </h2>
             <div id="collapseParticipants" class="accordion-collapse collapse show" aria-labelledby="headingParticipants" data-bs-parent="#participantsAccordion">
@@ -160,7 +160,7 @@
                                         </th>
                                         <th>
                                             <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
-                                                @if(isDoubleComp){ @gM("+double_name_header") }else{ @gM("+name_header") } @sortIcon("name", sortCol, sortAsc)
+                                                @if(shared.format.TeamEncounter.isTeam(comp.typ)){ @gM("+team_name_header") }else if(isDoubleComp){ @gM("+double_name_header") }else{ @gM("+name_header") } @sortIcon("name", sortCol, sortAsc)
                                             </button>
                                         </th>
                                         <th>
@@ -170,7 +170,7 @@
                                         </th>
                                         <th class="text-center" style="width: 100px;">
                                             <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
-                                                @if(isDoubleComp){ @gM("+double_ttr_header") }else{ @gM("+ttr_header") } @sortIcon("ttr", sortCol, sortAsc)
+                                                @if(shared.format.TeamEncounter.isTeam(comp.typ)){ @gM("+team_ttr_header") }else if(isDoubleComp){ @gM("+double_ttr_header") }else{ @gM("+ttr_header") } @sortIcon("ttr", sortCol, sortAsc)
                                             </button>
                                         </th>
                                         @if(!isDoubleComp) {

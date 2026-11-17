@@ -1,0 +1,45 @@
+###
+# Mannschaften: Seite TeamList, Dialoge DlgTeam und DlgLineup
+###
+TeamList.title = Mannschaften
+TeamList.add_player = Spieler anlegen
+TeamList.no_competitions = Keine Mannschaftswettbewerbe vorhanden.
+TeamList.teams_suffix = Mannschaften
+TeamList.add_team = Mannschaft hinzufügen
+TeamList.edit_team = Mannschaft bearbeiten
+TeamList.no_header = Nr.
+TeamList.name_header = Mannschaft
+TeamList.club_header = Verein
+TeamList.players_header = Spieler
+TeamList.ttr_header = Ø TTR
+TeamList.action_header = Aktion
+TeamList.no_teams = Noch keine Mannschaften angelegt.
+TeamList.reserve = Ersatzspieler
+TeamList.reserve_short = Ersatz
+TeamList.incomplete = unvollständig
+TeamList.delete_title = Mannschaft löschen
+TeamList.confirm_delete = Möchten Sie die Mannschaft '{0}' wirklich löschen?
+TeamList.err_player_in_other_team = Ein Spieler ist bereits in einer anderen Mannschaft dieses Wettbewerbs.
+TeamList.err_save = Fehler beim Speichern
+
+DlgTeam.name = Name der Mannschaft
+DlgTeam.club = Verein
+DlgTeam.player = Spieler {0}
+DlgTeam.reserve = Ersatzspieler
+DlgTeam.new_player = Spieler neu anlegen
+DlgTeam.hint = Die Stammspieler bestimmen die Ø-Wertung für die Auslosung. Der Ersatzspieler kann in jeder Begegnung aufgestellt werden.
+DlgTeam.cancel = Abbrechen
+DlgTeam.save = Speichern
+DlgTeam.err_name = Bitte einen Namen für die Mannschaft eingeben.
+DlgTeam.err_duplicate = Ein Spieler kann nur einmal in der Mannschaft stehen.
+
+DlgLineup.title = Aufstellung: {0}
+DlgLineup.missing = – fehlt –
+DlgLineup.single = Einzel
+DlgLineup.double = Doppel
+DlgLineup.hint = Nicht besetzte Positionen werden als verloren gewertet. Bleiben alle Positionen leer, gilt die Mannschaft als nicht angetreten.
+DlgLineup.started = Die Begegnung ist gestartet, die Aufstellung kann nicht mehr geändert werden.
+DlgLineup.cancel = Abbrechen
+DlgLineup.save = Übernehmen
+DlgLineup.err_single = Ein Spieler kann nur ein Einzel spielen.
+DlgLineup.err_double = Ein Doppel braucht zwei verschiedene Spieler.

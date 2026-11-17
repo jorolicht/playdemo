@@ -21,6 +21,8 @@ object SNO:
     else
       s"[${id2.value},${id1.value}]"
   def bye(seed: Int): SNO = s"[${-1 - seed}]"
+  /** Startnummer einer Mannschaft, z. B. "[T5]". */
+  def team(id: Int): SNO = s"[T${id}]"
   val nn: SNO = "[0]"
 
   // By using StringReader and StringWriter directly, 
@@ -40,9 +42,16 @@ object SNO:
     private def content: String =  s.substring(1, s.length - 1) // remove the surrounding brackets
     private def parts: Array[String] = content.split(",")
     
-    def isSingle: Boolean = parts.length == 1 && !content.startsWith("-") && content != "0"
+    /** true bei einer Mannschaft ("[T5]"). */
+    def isTeam: Boolean = content.startsWith("T")
+    def isSingle: Boolean = parts.length == 1 && !content.startsWith("-") && content != "0" && !isTeam
     def isDouble: Boolean = parts.length == 2
-    def startId: String =  String.format("%03d", parts(0).toInt)
+    def startId: String =
+      if isTeam then "T" + String.format("%03d", teamId)
+      else String.format("%03d", parts(0).toInt)
+
+    /** Kennung der Mannschaft, 0 wenn keine Mannschaft. */
+    def teamId: Int = if isTeam then content.substring(1).toIntOption.getOrElse(0) else 0
     def isBye: Boolean = parts.length == 1 && content.startsWith("-")
     def isNN: Boolean = s == "[0]"  
 
@@ -55,7 +64,7 @@ object SNO:
 
     def singleId: PlayerId =
       val p = parts
-      if p.length == 1 then
+      if p.length == 1 && !isTeam then
         PlayerId(p(0).toInt)
       else 
         PlayerId(0)
@@ -70,7 +79,7 @@ object SNO:
 
     def singleIdOpt: Option[PlayerId] =
       val p = parts
-      if p.length == 1 then
+      if p.length == 1 && !isTeam then
         val v = p(0).toInt
         if v > 0 then Some(PlayerId(v))
         else None
@@ -87,7 +96,7 @@ object SNO:
 
     def byeSeedOpt: Option[Int] =
       val p = parts
-      if p.length == 1 then
+      if p.length == 1 && !isTeam then
         val v = p(0).toLong
         if v < 0 then Some((-1 - v).toInt)
         else None

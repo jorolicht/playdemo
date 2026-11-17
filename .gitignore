@@ -94,3 +94,16 @@ shared/.jvm
 .env_*
 *.env
 !.env.example
+
+# lokale Projekt-Archive
+*.tar.gz
+
+# Codex-Anweisungen (lokal)
+AGENTS.md
+
+# Spielberichtsbogen (Vorlage, nicht im Repo)
+test/Spielbogen_Bezirk_Ufr-Nord_Rev_1.pdf
+
+# scala-cli Build-Verzeichnisse
+.scala-build/
+.bsp/

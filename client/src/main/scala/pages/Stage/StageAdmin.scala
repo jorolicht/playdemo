@@ -34,18 +34,50 @@ object StageAdmin extends BasePage with JsWrapper:
   val BtnResetCfg:     HtmlId = genId(name)
   /** Button to delete the entire stage. */
   val BtnDeleteFull:   HtmlId = genId(name)
-  /** Checkbox to select all available players. */
-  val ChkBoxAll:       HtmlId = genId(name)
   /** Checkbox prefix for selecting/deselecting individual players. */
   val ChkBoxPlayer:    HtmlId = genId(name)
   /** Selection dropdown for game draw mode. */
   val SelectDrawMode:  HtmlId = genId(name)
   /** Label displaying count of selected players. */
   val LabelDrawCnt:    HtmlId = genId(name)
+  /** Hinweis in der Steuerung: erst Spielmodus/Format wählen (nur sichtbar, solange keiner gewählt ist). */
+  val InfoSelectMode:  HtmlId = genId(name)
 
   val RadAll:          HtmlId = genId(name)
   val RadTop:          HtmlId = genId(name)
   val RadBottom:       HtmlId = genId(name)
+  /** Auswahl des Wertungssystems (Version) des Wettbewerbs. */
+  val SelScoring:      HtmlId = genId(name)
+  /** Auswahl des Spielsystems der Begegnungen (Mannschaften). */
+  val SelEncSystem:    HtmlId = genId(name)
+  /** Info-Button zum gewählten Spielsystem (öffnet die Seite [[pages.SystemInfo]]). */
+  val BtnSystemInfo:   HtmlId = genId(name)
+
+  /**
+   * Optionen (Spielweisen) eines Spielsystems als `<option>`-Elemente; Standard-Spielweise zuerst.
+   *
+   * @param cfg      Spielsystem
+   * @param selected gewählte Spielweise (leer oder unbekannt = Standard)
+   * @return HTML der Optionen
+   */
+  def variantOptionsHtml(cfg: shared.sport.EncounterCfg, selected: String): String =
+    import shared.sport.localized
+    val sel = if cfg.variants.contains(selected) then selected else cfg.defaultVariant
+    cfg.variants.toSeq.sortBy(_._1 != cfg.defaultVariant).map { case (vId, v) =>
+      val label = v.name.localized(Global.lang).one.replace("&", "&amp;").replace("<", "&lt;")
+      s"""<option value="$vId"${if vId == sel then " selected" else ""}>$label</option>"""
+    }.mkString
+
+  /**
+   * Darf das Wertungssystem eines Wettbewerbs noch geändert werden? Nur in der Konfiguration, solange keine Stage
+   * ausgelost ist; danach bleibt die Version fest, damit sich bestehende Ergebnisse nicht ändern.
+   *
+   * @param comp Wettbewerb
+   * @return true, wenn änderbar
+   */
+  def scoringChangeable(comp: Competition): Boolean =
+    comp.status == CompStatus.CFG &&
+      services.TourneyDB.tourney.stages.forall(s => s == null || s.coId != comp.id || s.status == StageStatus.CFG)
   val BtnSortSelected: HtmlId = genId(name)
 
   var currentFilterOption: String = "ALL"
@@ -202,8 +234,11 @@ object StageAdmin extends BasePage with JsWrapper:
               stage.size = 0
               stage.noPlayers = 0
               stage.noWinSets = 3
+              stage.encVariant = ""
+              stage.encSystem = ""
               stage.data = StageData.GroupsStage(ArrayBuffer.empty)
               stage.matches.clear()
+              stage.encounters.clear()
               
               services.TourneyDB.tourney.updateStage(stage) match {
                 case Right(updatedStage) =>
@@ -223,19 +258,6 @@ object StageAdmin extends BasePage with JsWrapper:
 
       case `BtnSortSelected` =>
         sortBySelected = !sortBySelected
-        render()
-
-      case `ChkBoxAll` =>
-        Global.currentSelection.competition.foreach { comp =>
-          comp.pants1Stage.foreach { p =>
-            p.status = PantStatus.PLAY
-          }
-          services.TourneyDB.tourney.updateCompetition(comp) match {
-            case Right(updatedComp) =>
-              Global.currentSelection = Global.currentSelection.copy(competition = Some(updatedComp))
-            case _ =>
-          }
-        }
         render()
 
       case `RadAll` =>
@@ -300,6 +322,31 @@ object StageAdmin extends BasePage with JsWrapper:
         }
         render()
 
+      case `SelEncSystem` =>
+        // Optionen des neu gewählten Systems anzeigen; übernommen wird die Auswahl bei der Auslosung
+        val sysId = elem.asInstanceOf[dom.html.Select].value
+        for
+          comp <- Global.currentSelection.competition
+          cfg  <- TeamEncounter.configFor(comp, sysId)
+          sel  <- Option(dom.document.getElementById("rnd-enc-variant"))
+        do sel.innerHTML = variantOptionsHtml(cfg, "")
+
+      case `BtnSystemInfo` =>
+        for comp <- Global.currentSelection.competition do
+          val sysId = Option(dom.document.getElementById("rnd-enc-system")).map(_.asInstanceOf[dom.html.Select].value).getOrElse("")
+          loadPage(pages.SystemInfo.name, pages.SystemInfo.param(comp, sysId))
+
+      case `SelScoring` =>
+        val key = elem.asInstanceOf[dom.html.Select].value
+        Global.currentSelection.competition
+          .flatMap(c => services.TourneyDB.tourney.competitions.find(x => x != null && x.id == c.id))
+          .filter(scoringChangeable)
+          .foreach { comp =>
+            comp.scoring = key
+            services.TourneyDB.tourney.updateCompetition(comp)
+            render()
+          }
+
       case id if id.id.startsWith(ChkBoxPlayer.id) =>
         val sno = SNO.fromString(elem.id.substring(ChkBoxPlayer.id.length + 1))
         val checked = elem.asInstanceOf[dom.html.Input].checked
@@ -336,11 +383,7 @@ object StageAdmin extends BasePage with JsWrapper:
    * Updates the game mode dropdown and count info based on checkboxes.
    */
   private def updateModes(resetSelection: Boolean = false): Unit =
-    val checks = dom.document.querySelectorAll(".player-draw-check")
-    var count = 0
-    for (i <- 0 until checks.length) {
-      if (checks.item(i).asInstanceOf[dom.html.Input].checked) count += 1
-    }
+    val count = selectedSnos().length
     
     val modes = DrawRules.getAvailableModes(count, base.Global.lang)
     val select = gE(SelectDrawMode).asInstanceOf[dom.html.Select]
@@ -374,6 +417,8 @@ object StageAdmin extends BasePage with JsWrapper:
     if (select != null && btn != null && stageOpt.isDefined) {
       val stage = stageOpt.get
       val isDefault = select.value == "UNKN"
+      val info = gE(InfoSelectMode)
+      if (info != null) info.classList.toggle("d-none", !isDefault)
       val isAllowed = stage.status == StageStatus.CFG && base.Global.hasTourneyAccess(services.TourneyDB.tourney)
       
       btn.disabled = isDefault || !isAllowed
@@ -395,16 +440,13 @@ object StageAdmin extends BasePage with JsWrapper:
         // Read configuration from UI
         val setsSelect = dom.document.getElementById("rnd-sets").asInstanceOf[dom.html.Select]
         if (setsSelect != null) r.noWinSets = setsSelect.value.toInt
+        val sysSelect = dom.document.getElementById("rnd-enc-system").asInstanceOf[dom.html.Select]
+        if (sysSelect != null) r.encSystem = sysSelect.value
+        val encSelect = dom.document.getElementById("rnd-enc-variant").asInstanceOf[dom.html.Select]
+        if (encSelect != null) r.encVariant = encSelect.value
         
         // Get selected participants
-        val checks = dom.document.querySelectorAll(".player-draw-check")
-        val selectedSnos = ArrayBuffer[String]()
-        for (i <- 0 until checks.length) {
-          val input = checks.item(i).asInstanceOf[dom.html.Input]
-          if (input.checked) {
-            selectedSnos += input.getAttribute("data-sno")
-          }
-        }
+        val selectedSnos = StageAdmin.this.selectedSnos()
 
         val comp = Global.currentSelection.competition.get
         val allPants = comp.pants1Stage.toSeq
@@ -604,13 +646,22 @@ object StageAdmin extends BasePage with JsWrapper:
       } else "-"
     }.getOrElse("-")
 
-  private def getSelectedPlayersCount(): Int =
-    val checks = dom.document.querySelectorAll(".player-draw-check")
-    var count = 0
-    for (i <- 0 until checks.length) {
-      if (checks.item(i).asInstanceOf[dom.html.Input].checked) count += 1
-    }
-    count
+  private def getSelectedPlayersCount(): Int = selectedSnos().length
+
+  /**
+   * Startnummern der für die Auslosung ausgewählten Teilnehmer.
+   *
+   * - Folgeabschnitt: die angehakten Checkboxen (Auswahl aus dem vorherigen Abschnitt).
+   * - Erster Abschnitt: alle aktiven Teilnehmer, die Teilnahme wird bei der Anmeldung festgelegt.
+   *
+   * @return Startnummern als String (wie `data-sno`)
+   */
+  private def selectedSnos(): Seq[String] =
+    if Global.currentSelection.stage.exists(_.prefId.isDefined) then
+      val checks = dom.document.querySelectorAll(".player-draw-check")
+      (0 until checks.length).map(i => checks.item(i).asInstanceOf[dom.html.Input]).filter(_.checked).map(_.getAttribute("data-sno"))
+    else
+      Global.currentSelection.competition.map(_.pants1Stage.toSeq.filter(_.active).map(_.id.toString)).getOrElse(Seq())
 
   private def showGroupCountDialog(modeStr: String): Unit =
     val count = getSelectedPlayersCount()

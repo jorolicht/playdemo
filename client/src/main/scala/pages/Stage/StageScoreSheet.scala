@@ -20,6 +20,23 @@ class QRCode(elem: HTMLElement, param: QRCodeParam) extends js.Object {
   def makeCode(url: String): js.Any = js.native
 }
 
+/**
+ * Schiedsrichterzettel eines Spiels (Einzel/Doppel) einer Mannschaftsbegegnung.
+ *
+ * @param encounterNo Spielnummer der Begegnung
+ * @param encounter   Begegnung ("Mannschaft A – Mannschaft B")
+ * @param label       Spielnummer auf dem Zettel, z. B. "12.3"
+ * @param playfield   Tisch
+ * @param nameA       Spieler/Doppel Heim (leer = vor Abgabe der Aufstellung, wird von Hand eingetragen)
+ * @param nameB       Spieler/Doppel Gast
+ * @param clubA       Mannschaft und Position Heim, z. B. "TTC Musterstadt · A1"
+ * @param clubB       Mannschaft und Position Gast
+ * @param info1       Gruppe bzw. Runde
+ * @param info2       Runde und Art des Spiels (Einzel/Doppel)
+ */
+case class TeamSheet(encounterNo: Int, encounter: String, label: String, playfield: String, nameA: String, nameB: String,
+                     clubA: String, clubB: String, info1: String, info2: String)
+
 object StageScoreSheet extends BasePage with JsWrapper:
   def name = PageNameTyp("StageScoreSheet")
   val PrintRoundBtn: HtmlId = genId(name)
@@ -32,6 +49,25 @@ object StageScoreSheet extends BasePage with JsWrapper:
         val comp = Global.currentSelection.competition
         val pants = comp.map(_.pants1Stage.toSeq).getOrElse(Seq.empty)
         
+        // Mannschaften: Zettel je Einzel/Doppel. "team_<gameNo>" bzw. "<gameNo>" = eine Begegnung,
+        // "round_<n>" = Begegnungen einer Runde, ohne Parameter = alle Begegnungen der Stage
+        val teamComp = comp.filter(c => shared.format.TeamEncounter.configFor(c, stage.encSystem).isDefined)
+        teamComp.foreach { c =>
+          val de = Global.lang == "de"
+          val one = param.stripPrefix("team_").toIntOption
+          val round = if (param.startsWith("round_")) param.substring(6).toIntOption else None
+          val selected = stage.matches.toSeq.filter(m => m != null && !m.stNoA.isBye && !m.stNoB.isBye &&
+            one.forall(_ == m.gameNo) && round.forall(_ == m.round))
+          val sheets = selected.flatMap(m => teamSheets(stage, c, m.gameNo))
+          val title = (one, round) match
+            case (Some(no), _) => if (de) s"Begegnung $no" else s"tie $no"
+            case (_, Some(r))  => if (de) s"Runde $r" else s"round $r"
+            case _             => if (de) "alle Begegnungen" else "all ties"
+          setMain(cviews.comps.html.StageLayout(stage, "SCH")(cviews.pages.Stage.html.StageScoreSheet(stage, Seq(), None, sheets, title)))
+          if (param.nonEmpty && sheets.nonEmpty) dom.window.setTimeout(() => dom.window.print(), 300)
+          return true
+        }
+
         var activeSecParam: Option[Int] = None
         var isPrintRound = false
         var isPrintSingle = false
@@ -112,6 +148,37 @@ object StageScoreSheet extends BasePage with JsWrapper:
       val gameNo = Option(elem.getAttribute("data-game")).flatMap(_.toIntOption).getOrElse(elem.id.substring(PrintSingleBtn.id.length + 1).toInt)
       printSingle(gameNo)
     }
+
+  /**
+   * Schiedsrichterzettel aller Spiele einer Mannschaftsbegegnung. Entfallene und kampflos gewertete Spiele bekommen
+   * keinen Zettel. Vor Abgabe der Aufstellungen bleiben die Namen leer, die Positionen (z. B. A1–B2) stehen dabei.
+   *
+   * @param stage  Stage
+   * @param comp   Wettbewerb
+   * @param gameNo Spielnummer der Begegnung
+   * @return Zettel in Spielfolge, leer wenn der Eintrag keine Begegnung ist
+   */
+  def teamSheets(stage: Stage, comp: Competition, gameNo: Int): Seq[TeamSheet] =
+    (for
+      cfg <- shared.format.TeamEncounter.configFor(comp, stage.encSystem)
+      m   <- stage.matches.find(_.gameNo == gameNo)
+    yield
+      val pants        = comp.pants1Stage.toSeq
+      val teamA        = StageInput.formatSnoName(m.stNoA, pants)
+      val teamB        = StageInput.formatSnoName(m.stNoB, pants)
+      val (info1, inf) = getInfoStrings(m, stage)
+      val enc          = stage.encounters.find(_.gameNo == gameNo)
+      def name(sno: SNO) = if (sno.isNN) "" else StageInput.formatPlayerSno(sno)
+      cfg.games.zipWithIndex.flatMap { case (gc, i) =>
+        val g = enc.flatMap(_.games.find(_.no == i + 1))
+        if (g.exists(x => x.status == MEntry.MS_SKIP || x.status == MEntry.MS_FIX)) None
+        else
+          val typ = if (gc.isDouble) gM("StageInput.double") else gM("StageInput.single")
+          Some(TeamSheet(gameNo, s"$teamA – $teamB", s"$gameNo.${i + 1}", g.map(_.playfield).getOrElse(""),
+            g.map(x => name(x.snoA)).getOrElse(""), g.map(x => name(x.snoB)).getOrElse(""),
+            s"$teamA · ${gc.home}", s"$teamB · ${gc.away}", info1, Seq(inf, typ).filter(_.nonEmpty).mkString(" · ")))
+      }
+    ).getOrElse(Seq())
 
   /**
    * Bereitet den Druck aller Schiedsrichterzettel einer bestimmten Runde vor und öffnet den Browser-Druckdialog.

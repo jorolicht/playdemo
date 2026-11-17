@@ -1,0 +1,67 @@
+@import shared.sport.{ EncounterCfg, localized }
+@import cviews.helper.html.*
+@import pages.SystemInfo.*
+
+@(scoringKey: String, sections: Seq[FormatSection], selected: Option[(String, String)])
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="h5 mb-0"><i class="bi bi-diagram-3 me-2"></i>@gM("SystemInfo.title")</h3>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-secondary">@gM("SystemInfo.scoring", scoringKey)</span>
+            <button class="btn btn-sm btn-outline-primary" @id(BtnBack, "onclick")>
+                <i class="bi bi-arrow-left me-1"></i>@gM("SystemInfo.back")
+            </button>
+        </div>
+    </div>
+    <p class="text-muted small">@gM("SystemInfo.intro")</p>
+
+    @if(sections.isEmpty) {
+        <div class="text-center py-5 text-muted">@gM("SystemInfo.none")</div>
+    }
+
+    @sections.map { sec =>
+        <h4 class="h6 mt-4 mb-2 text-uppercase fw-bold text-muted">
+            @sec.formatName
+            <span class="fw-normal text-lowercase ms-2">@gM("SystemInfo.roster", sec.teamSize.toString, sec.maxPlayers.toString)</span>
+        </h4>
+        @sec.systems.map { sys =>
+            @defining(selected.contains((sec.formatId, sys.id))) { isSel =>
+                <div class="card shadow-sm mb-3 @if(isSel){border-primary border-2}" id="sys-@sec.formatId-@sys.id">
+                    <div class="card-header d-flex justify-content-between align-items-center @if(isSel){bg-primary text-white}else{bg-light}">
+                        <span class="fw-bold">@sys.name.localized(base.Global.lang).one</span>
+                        @if(isSel) { <span class="badge bg-light text-primary">@gM("SystemInfo.selected")</span> }
+                    </div>
+                    <div class="card-body small">
+                        @sys.descriptionIn(base.Global.lang).split("\n\n").filter(_.trim.nonEmpty).map { para =>
+                            <p>@para</p>
+                        }
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold small text-uppercase text-muted">@gM("SystemInfo.order")</h6>
+                                <ol class="mb-0">
+                                    @sys.games.indices.map { i => <li>@gameLabel(sys, i)</li> }
+                                </ol>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold small text-uppercase text-muted">@gM("SystemInfo.options")</h6>
+                                <ul class="mb-0">
+                                    @sys.variants.toSeq.sortBy(_._1 != sys.defaultVariant).map { case (vId, v) =>
+                                        <li>
+                                            <span class="fw-bold">@v.name.localized(base.Global.lang).one</span>
+                                            @if(vId == sys.defaultVariant) { <span class="badge bg-light text-dark border ms-1">@gM("SystemInfo.default")</span> }
+                                            <div class="text-muted">@endRule(sys.levelFor(vId))</div>
+                                        </li>
+                                    }
+                                </ul>
+                                @if(sys.levelFor("").allowDraw || sys.variants.keys.exists(v => sys.levelFor(v).allowDraw)) {
+                                    <div class="text-muted mt-2"><i class="bi bi-info-circle me-1"></i>@gM("SystemInfo.ko_hint")</div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    }
+</div>

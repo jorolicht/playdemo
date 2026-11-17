@@ -48,13 +48,20 @@ object DlgAddSingle extends BaseDialog with JsWrapper:
 
   def render(param: String = ""): Boolean = true
 
-  def show(clubs: Seq[Club]): Future[Either[AppError, DlgAddSingleResult]] =
+  /**
+   * Zeigt den Dialog zum Anlegen eines Teilnehmers bzw. Spielers.
+   *
+   * @param clubs      Vereine (Vorschläge)
+   * @param playerOnly true = nur Spieler anlegen (Titel "Spieler neu anlegen", ohne Auswahl Registrieren/Anmelden)
+   * @return Ergebnis oder Fehler "dlg.cancel" bei Abbruch
+   */
+  def show(clubs: Seq[Club], playerOnly: Boolean = false): Future[Either[AppError, DlgAddSingleResult]] =
     val p = Promise[Either[AppError, DlgAddSingleResult]]()
     val f = p.future
 
     val currentYear = 2026 // Could be dynamic
     
-    setHtml(eE(LoadId, "span"), cviews.dialogs.html.DlgAddSingle(clubs, currentYear))
+    setHtml(eE(LoadId, "span"), cviews.dialogs.html.DlgAddSingle(clubs, currentYear, playerOnly))
     modal = Modal(gE(ModalId))
     
     modal.show()

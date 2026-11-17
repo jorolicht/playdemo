@@ -42,6 +42,10 @@ object DlgAddDouble extends BaseDialog with JsWrapper:
   val Plist2Id:       HtmlId = genId(name)
   val RadioPlayId:    HtmlId = genId(name)
   val RadioRegId:     HtmlId = genId(name)
+  /** Button "Spieler neu anlegen" hinter dem Suchfeld für Spieler 1. */
+  val BtnNewP1Id:     HtmlId = genId(name)
+  /** Button "Spieler neu anlegen" hinter dem Suchfeld für Spieler 2. */
+  val BtnNewP2Id:     HtmlId = genId(name)
   
   val ApplyId:        HtmlId = genId(name)
   val CancelId:       HtmlId = genId(name)
@@ -60,11 +64,17 @@ object DlgAddDouble extends BaseDialog with JsWrapper:
   /**
    * Displays the add double dialog and returns a Future containing the result.
    *
-   * @param players Sequence of available players to select from.
-   * @param clubs Sequence of clubs for resolving player club names.
+   * @param players0     Sequence of available players to select from.
+   * @param clubs0       Sequence of clubs for resolving player club names.
+   * @param createPlayer legt aus den Eingaben von [[DlgAddSingle]] einen neuen Spieler im Turnier an
+   *                     (Button "Spieler neu anlegen"); liefert den Spieler oder einen Fehler
    * @return Future containing Either an AppError (on cancel) or DlgAddDoubleResult.
    */
-  def show(players: Seq[Player], clubs: Seq[Club]): Future[Either[AppError, DlgAddDoubleResult]] =
+  def show(players0: Seq[Player], clubs0: Seq[Club],
+           createPlayer: DlgAddSingleResult => Either[AppError, (Player, Seq[Club])]): Future[Either[AppError, DlgAddDoubleResult]] =
+    // wählbare Spieler und Vereine, wachsen durch "Spieler neu anlegen"
+    var players = players0
+    var clubs   = clubs0
     val p = Promise[Either[AppError, DlgAddDoubleResult]]()
     val f = p.future
 
@@ -109,6 +119,18 @@ object DlgAddDouble extends BaseDialog with JsWrapper:
 
     gE(InputP2Id).addEventListener("input", (_: dom.Event) => updateDatalists())
     gE(InputP2Id).addEventListener("change", (_: dom.Event) => updateDatalists())
+
+    // "Spieler neu anlegen": Doppel-Dialog ausblenden, Spieler-Dialog zeigen, danach mit neuem Spieler fortsetzen
+    def newPlayer(inputId: HtmlId): Unit =
+      newPlayerFromDialog(modal, gE(ModalId), clubs, createPlayer) { (pl, cl) =>
+        players = players :+ pl
+        clubs   = cl
+        val clubName = clubs.find(_.id.toInt == pl.clubId).map(_.name).getOrElse("?")
+        gE(inputId).asInstanceOf[dom.html.Input].value = s"${pl.lastName}, ${pl.firstName} [$clubName]"
+        updateDatalists()
+      }
+    gE(BtnNewP1Id).onclick = (_: MouseEvent) => newPlayer(InputP1Id)
+    gE(BtnNewP2Id).onclick = (_: MouseEvent) => newPlayer(InputP2Id)
 
     gE(ApplyId).onclick = { (_: MouseEvent) =>
       val val1 = getInput(gE(InputP1Id)).trim

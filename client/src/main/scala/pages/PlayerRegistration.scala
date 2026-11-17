@@ -26,6 +26,12 @@ object PlayerRegistration extends BasePage with JsWrapper:
   val BtnDeleteParticipant: HtmlId = genId(name)
   /** Button to upload participant list from CSV. */
   val BtnUploadCsv:      HtmlId = genId(name)
+  /** Info-Icon hinter "CSV Upload": zeigt das erlaubte CSV-Format mit Beispiel. */
+  val BtnCsvInfo:        HtmlId = genId(name)
+  /** Tree Node Glyph vor dem Mannschaftsnamen: Spieler der Mannschaft ein-/ausklappen, Suffix = Mannschafts-Id. */
+  val BtnTeamTng:        HtmlId = genId(name)
+  /** Ids der aufgeklappten Mannschaften (bleibt beim Neu-Rendern erhalten). */
+  var expandedTeams: Set[Int] = Set.empty
   /** Select element to choose a competition. */
   val SelectComp:        HtmlId = genId(name)
 
@@ -69,6 +75,8 @@ object PlayerRegistration extends BasePage with JsWrapper:
       case Some(c) => 
         val filteredPants = if (c.typ == CompTyp.DOUBLE || c.typ == CompTyp.MIXED) {
           c.pants1Stage.filter(_.id.isDouble).toSeq
+        } else if (shared.format.TeamEncounter.isTeam(c.typ)) {
+          c.pants1Stage.filter(_.id.isTeam).toSeq
         } else {
           c.pants1Stage.filter(_.id.isSingle).toSeq
         }
@@ -115,6 +123,12 @@ object PlayerRegistration extends BasePage with JsWrapper:
       case `BtnUploadCsv` =>
         doUploadCsv()
 
+      case id if id.id.startsWith(BtnTeamTng.id + "-") =>
+        id.id.substring(BtnTeamTng.id.length + 1).toIntOption.foreach(toggleTeam)
+
+      case `BtnCsvInfo` =>
+        Global.currentSelection.competition.foreach(c => dialogs.DlgCsvInfo.show(c.typ))
+
       case id if id.id.startsWith(BtnDeleteParticipant.id) =>
         val snoStr = elem.getAttribute("data-sno")
         removeParticipant(snoStr)
@@ -126,6 +140,19 @@ object PlayerRegistration extends BasePage with JsWrapper:
 
       case _ => 
         debug(s"PlayerRegistration handleEvent: ${elem.id}")
+
+  /**
+   * Klappt die Spielerliste einer Mannschaft ein oder aus, ohne die Seite neu zu rendern.
+   *
+   * @param teamId Id der Mannschaft
+   */
+  private def toggleTeam(teamId: Int): Unit =
+    val open = !expandedTeams.contains(teamId)
+    expandedTeams = if open then expandedTeams + teamId else expandedTeams - teamId
+    val rows = dom.document.querySelectorAll(s".team-players-$teamId")
+    (0 until rows.length).foreach(k => rows(k).classList.toggle("d-none", !open))
+    Option(dom.document.getElementById(s"team-tng-icon-$teamId"))
+      .foreach(_.setAttribute("class", if open then "bi bi-caret-down-fill" else "bi bi-caret-right-fill"))
 
   private def toggleSort(col: String): Unit =
     if (sortCol == col) sortAsc = !sortAsc
@@ -157,22 +184,94 @@ object PlayerRegistration extends BasePage with JsWrapper:
       }
     }
 
+  /**
+   * Entfernt eine Meldung aus dem ausgewählten Wettbewerb. Bei Doppeln und Mannschaften wird vorher nachgefragt;
+   * es wird nur das Doppel bzw. die Mannschaft gelöscht, die Spieler bleiben im Turnier.
+   *
+   * @param snoStr Startnummer der Meldung
+   */
   private def removeParticipant(snoStr: String): Unit =
+    val sno = SNO.fromString(snoStr)
+    val pantOpt = Global.currentSelection.competition.flatMap(_.pants1Stage.find(_.id == sno))
+    pantOpt match
+      case Some(pant) if sno.isDouble || sno.isTeam =>
+        val (question, title) =
+          if (sno.isTeam) (gM("PlayerRegistration.delete_team_question", pant.name), gM("PlayerRegistration.delete_team_title"))
+          else            (gM("PlayerRegistration.delete_double_question", pant.name), gM("PlayerRegistration.delete_double_title"))
+        dialogs.DlgMsgbox.show(question, title, List(BoxButton.Yes, BoxButton.No)).map {
+          case BoxButton.Yes => doRemoveParticipant(sno)
+          case _             => ()
+        }
+      case _ => doRemoveParticipant(sno)
+
+  /**
+   * Entfernt die Meldung ohne Rückfrage; bei Mannschaften auch die Mannschaft samt Spielerzuordnung.
+   *
+   * @param sno Startnummer der Meldung
+   */
+  private def doRemoveParticipant(sno: SNO): Unit =
     Global.currentSelection.competition.filter(!isLocked(_)).foreach { c =>
-      val sno = SNO.fromString(snoStr)
+      val snoStr = sno.toString
       val idx = c.pants1Stage.indexWhere(_.id == sno)
       if (idx != -1) {
         c.pants1Stage.remove(idx)
+        // gemeldete Mannschaft: Mannschaft samt Spielerzuordnung entfernen
+        if (sno.isTeam) c.teams.filterInPlace(_.id != sno.teamId)
         debug(s"Removed participant with SNO: $snoStr")
         services.TourneyDB.tourney.updateCompetition(c)
         render() // Refresh UI
       }
     }
 
+  /**
+   * Stellt den Verein sicher und sucht einen gleichen Spieler (Name, Verein, Jahrgang) im Turnier oder legt ihn neu an;
+   * der TTR-Wert aus den Eingaben wird übernommen.
+   *
+   * @param res Eingaben aus [[dialogs.DlgAddSingle]]
+   * @return Spieler oder Fehler
+   */
+  def findOrAddPlayer(res: dialogs.DlgAddSingleResult): Either[AppError, Player] =
+    val tourney = services.TourneyDB.tourney
+    val club = tourney.clubs.find(_.name == res.clubName).getOrElse {
+      tourney.addClub(res.clubName, checkSimilarity = false, doSync = true).toOption.get
+    }
+    tourney.players.find(p =>
+      p.firstName == res.firstName &&
+      p.lastName == res.lastName &&
+      p.clubId == club.id.toInt &&
+      p.birthYear == res.year
+    ) match {
+      case Some(existingPlayer) =>
+        val updatedPlayer = existingPlayer.copy(
+          meta = existingPlayer.meta.copy(ttr = res.ttr)
+        )
+        tourney.updatePlayer(updatedPlayer)
+        Right(updatedPlayer)
+      case None =>
+        tourney.addPlayer(
+          firstName = res.firstName, 
+          lastName = res.lastName, 
+          clubId = club.id.toInt, 
+          birthYear = res.year, 
+          email = res.email,
+          whatsApp = res.whatsApp,
+          doSync = true
+        ).map { player =>
+          val updatedPlayer = player.copy(
+            meta = player.meta.copy(ttr = res.ttr)
+          )
+          tourney.updatePlayer(updatedPlayer)
+          updatedPlayer
+        }
+    }
+
   private def handleAddParticipant(): Unit =
     Global.currentSelection.competition.filter(!isLocked(_)).foreach { c =>
       val tourney = services.TourneyDB.tourney
-      if (c.typ == CompTyp.DOUBLE || c.typ == CompTyp.MIXED) {
+      if (shared.format.TeamEncounter.isTeam(c.typ)) {
+        // Mannschaft über den Dialog der Seite "Mannschaften" anlegen und melden
+        TeamList.addTeam(c, () => render())
+      } else if (c.typ == CompTyp.DOUBLE || c.typ == CompTyp.MIXED) {
         val registeredPlayerIds: Set[PlayerId] = c.pants1Stage.flatMap { pant =>
           if (pant.id.isDouble) {
             val (p1, p2) = pant.id.doubleId
@@ -182,7 +281,9 @@ object PlayerRegistration extends BasePage with JsWrapper:
 
         val availablePlayers = tourney.players.toSeq.filterNot(p => registeredPlayerIds.contains(p.id))
         val clubs = tourney.clubs.toSeq
-        dialogs.DlgAddDouble.show(availablePlayers, clubs).map {
+        val createPlayer = (res: dialogs.DlgAddSingleResult) =>
+          findOrAddPlayer(res).map(pl => (pl, tourney.clubs.toSeq))
+        dialogs.DlgAddDouble.show(availablePlayers, clubs, createPlayer).map {
           case Right(res) =>
             // Create Pant for double
             val doubleSno = SNO.double(res.player1.id, res.player2.id)
@@ -210,41 +311,9 @@ object PlayerRegistration extends BasePage with JsWrapper:
         val clubs = tourney.clubs.toSeq
         dialogs.DlgAddSingle.show(clubs).map {
           case Right(res) =>
-            // 1. Ensure club exists
-            val club = tourney.clubs.find(_.name == res.clubName).getOrElse {
-              tourney.addClub(res.clubName, checkSimilarity = false, doSync = true).toOption.get
-            }
-            
-            // 2. Find existing player or add new player to tourney
-            val playerResult = tourney.players.find(p =>
-              p.firstName == res.firstName &&
-              p.lastName == res.lastName &&
-              p.clubId == club.id.toInt &&
-              p.birthYear == res.year
-            ) match {
-              case Some(existingPlayer) =>
-                val updatedPlayer = existingPlayer.copy(
-                  meta = existingPlayer.meta.copy(ttr = res.ttr)
-                )
-                tourney.updatePlayer(updatedPlayer)
-                Right(updatedPlayer)
-              case None =>
-                tourney.addPlayer(
-                  firstName = res.firstName, 
-                  lastName = res.lastName, 
-                  clubId = club.id.toInt, 
-                  birthYear = res.year, 
-                  email = res.email,
-                  whatsApp = res.whatsApp,
-                  doSync = true
-                ).map { player =>
-                  val updatedPlayer = player.copy(
-                    meta = player.meta.copy(ttr = res.ttr)
-                  )
-                  tourney.updatePlayer(updatedPlayer)
-                  updatedPlayer
-                }
-            }
+            // 1./2. Verein sicherstellen, Spieler suchen oder neu anlegen
+            val playerResult = findOrAddPlayer(res)
+            val clubName = playerResult.toOption.flatMap(pl => tourney.clubs.find(_.id.toInt == pl.clubId)).map(_.name).getOrElse(res.clubName)
 
             playerResult match {
               case Right(updatedPlayer) =>
@@ -256,7 +325,7 @@ object PlayerRegistration extends BasePage with JsWrapper:
                   val p = Pant(
                     id = singleSno,
                     name = updatedPlayer.displayName,
-                    club = club.name,
+                    club = clubName,
                     rating = res.ttr.getOrElse(0),
                     birthYear = res.year.map(_.toString).getOrElse(""),
                     active = res.enroll,
@@ -274,6 +343,36 @@ object PlayerRegistration extends BasePage with JsWrapper:
         }
       }
     }
+
+  /**
+   * Bildet nach dem CSV-Import die Mannschaften: alle Zeilen mit gleichem Mannschaftsnamen gehören zu einer Mannschaft,
+   * die Reihenfolge der Zeilen ergibt die Positionen (Stammspieler, dann Ersatz). Eine vorhandene Mannschaft gleichen
+   * Namens wird ersetzt. Mannschaften mit zu vielen Spielern oder mit Spielern einer anderen Mannschaft des
+   * Wettbewerbs werden nicht übernommen.
+   *
+   * @param comp Mannschaftswettbewerb
+   * @param rows (Mannschaft, Mannschaftsverein, Spieler) in der Reihenfolge der Datei
+   * @return Fehlertexte der nicht übernommenen Mannschaften
+   */
+  private def importTeams(comp: Competition, rows: Seq[(String, String, PlayerId)]): Seq[String] =
+    shared.format.TeamEncounter.configFor(comp) match
+      case None => Seq()
+      case Some(cfg) =>
+        val names = rows.map(_._1).distinctBy(_.toLowerCase)
+        names.flatMap { name =>
+          val group    = rows.filter(_._1.equalsIgnoreCase(name))
+          val players  = group.map(_._3).distinct
+          val clubName = group.map(_._2).find(_.nonEmpty).getOrElse("")
+          val existing = comp.teams.find(_.name.equalsIgnoreCase(name))
+          val inOther  = comp.teams.filterNot(t => existing.exists(_.id == t.id)).flatMap(_.players).toSet
+          if (players.size > cfg.maxPlayers)
+            Some(gM("PlayerRegistration.csv_team_too_many", name, players.size.toString, cfg.maxPlayers.toString))
+          else if (players.exists(inOther.contains))
+            Some(gM("PlayerRegistration.csv_team_in_other", name))
+          else TeamList.saveTeam(comp, cfg, existing, name, clubName, players) match
+            case Right(_)  => None
+            case Left(err) => Some(s"${name}: ${gM(err.msgCode)}")
+        }
 
   /**
    * Handles uploading a CSV file containing player data.
@@ -314,8 +413,17 @@ object PlayerRegistration extends BasePage with JsWrapper:
               val nIdx = if (idxNachname >= 0) idxNachname else 1
               val cIdx = if (idxVerein >= 0) idxVerein else 2
               val tIdx = if (idxTtr >= 0) idxTtr else 3
-              
-              case class CsvPlayer(firstName: String, lastName: String, clubName: String, ttr: Option[Int])
+              // optionale Spalten nur über den Spaltennamen
+              val yIdx = cols.indexWhere(Set("jahrgang", "geburtsjahr", "birth year", "year of birth").contains)
+              val eIdx = cols.indexWhere(Set("email", "e-mail").contains)
+              val wIdx = cols.indexWhere(Set("whatsapp", "whats app").contains)
+              val mIdx  = cols.indexWhere(Set("mannschaft", "team").contains)
+              val mcIdx = cols.indexWhere(Set("mannschaftsverein", "team club").contains)
+              val curYear = new scala.scalajs.js.Date().getFullYear().toInt
+
+              case class CsvPlayer(firstName: String, lastName: String, clubName: String, ttr: Option[Int],
+                                   birthYear: Option[Int], email: Option[String], whatsApp: Option[String],
+                                   team: String, teamClub: String)
               
               val csvPlayers = lines.tail.flatMap { line =>
                 val parts = line.split(sep).map(_.trim)
@@ -327,15 +435,28 @@ object PlayerRegistration extends BasePage with JsWrapper:
                     try Some(parts(tIdx).toInt) catch { case _: Exception => None }
                   } else None
                   
+                  def opt(i: Int): Option[String] = if (i >= 0 && parts.length > i && parts(i).nonEmpty) Some(parts(i)) else None
+                  val year  = opt(yIdx).flatMap(_.toIntOption).filter(y => y >= 1900 && y <= curYear)
+                  val email = opt(eIdx).filter(_.contains("@"))
+                  val wa    = opt(wIdx)
+
                   if (fn.nonEmpty && ln.nonEmpty && cn.nonEmpty) {
-                    Some(CsvPlayer(fn, ln, cn, ttrVal))
+                    Some(CsvPlayer(fn, ln, cn, ttrVal, year, email, wa, opt(mIdx).getOrElse(""), opt(mcIdx).getOrElse("")))
                   } else None
                 } else None
               }
               
+              // importierte Spieler mit ihrer Mannschaft (für die Mannschaftsbildung am Ende)
+              val imported = scala.collection.mutable.ArrayBuffer[(CsvPlayer, PlayerId)]()
+
               def importNext(index: Int): Future[Unit] = {
                 if (index >= csvPlayers.length) {
+                  val errors =
+                    if (mIdx >= 0 && shared.format.TeamEncounter.isTeam(c.typ))
+                      importTeams(c, imported.toSeq.collect { case (cp, id) if cp.team.nonEmpty => (cp.team, cp.teamClub, id) })
+                    else Seq()
                   render()
+                  if (errors.nonEmpty) DlgMsgbox.show(errors.mkString("\n"), gM("PlayerRegistration.csv_team_errors_title"), List(BoxButton.Ok))
                   Future.successful(())
                 } else {
                   val p = csvPlayers(index)
@@ -346,6 +467,9 @@ object PlayerRegistration extends BasePage with JsWrapper:
                   val playerRes: Either[AppError, Player] = existingPlayerOpt match {
                     case Some(player) =>
                       val updatedPlayer = player.copy(
+                        birthYear = p.birthYear.orElse(player.birthYear),
+                        email     = p.email.orElse(player.email),
+                        whatsApp  = p.whatsApp.orElse(player.whatsApp),
                         meta = player.meta.copy(ttr = p.ttr.orElse(player.meta.ttr))
                       )
                       tourney.updatePlayer(updatedPlayer)
@@ -358,9 +482,9 @@ object PlayerRegistration extends BasePage with JsWrapper:
                         firstName = p.firstName,
                         lastName = p.lastName,
                         clubId = club.id.toInt,
-                        birthYear = None,
-                        email = None,
-                        whatsApp = None,
+                        birthYear = p.birthYear,
+                        email = p.email,
+                        whatsApp = p.whatsApp,
                         doSync = true
                       ).map { player =>
                         val updatedPlayer = player.copy(
@@ -373,6 +497,7 @@ object PlayerRegistration extends BasePage with JsWrapper:
 
                   playerRes match {
                     case Right(importedPlayer) =>
+                      imported += ((p, importedPlayer.id))
                       // For SINGLE competition, add to pants1Stage as inactive (PantStatus.REGI)
                       if (isSingleComp) {
                         val singleSno = SNO.single(importedPlayer.id)

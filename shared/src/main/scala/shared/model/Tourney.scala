@@ -120,7 +120,8 @@ case class Tourney(
         cttInfo = None,
         pants1Stage = ArrayBuffer(),
         deleted = false,
-        version = 1
+        version = 1,
+        scoring = shared.sport.Sports.latestKey()  // neue Wettbewerbe: neueste Version des Wertungssystems
       )
       competitions(index) = c
       addDirtyCompetition(c)
@@ -723,7 +724,10 @@ case class Tourney(
           (pant.id.isSingle && pant.id.singleId == playerId) ||
           (pant.id.isDouble && (pant.id.doubleId._1 == playerId || pant.id.doubleId._2 == playerId))
         }
-        if (toRemove.nonEmpty) {
+        // Spieler aus den Mannschaften des Wettbewerbs entfernen (die Mannschaft bleibt gemeldet)
+        val inTeams = comp.teams.filter(_.players.contains(playerId))
+        inTeams.foreach(t => t.players = t.players.filterNot(_ == playerId))
+        if (toRemove.nonEmpty || inTeams.nonEmpty) {
           comp.pants1Stage --= toRemove
           updateCompetition(comp, doSync)
         }

@@ -19,6 +19,24 @@ sealed trait MEntry {
   def sets: (Int,Int)
   def info: String
   def result: String
+
+  /**
+   * Kennzahl, wie das Spiel bzw. die Begegnung endet.
+   *
+   * Einzel und Doppel: Anzahl der Gewinnsätze, z. B. `3` = 3 Gewinnsätze.
+   *
+   * Mannschaften: Spielweise der Begegnung (siehe `TeamEncounter.winSetsCode` / `levelFromCode`):
+   *
+   * | Kennzahl      | Bedeutung                                          | Beispiel                                                    |
+   * |---------------|----------------------------------------------------|-------------------------------------------------------------|
+   * | `n`           | bis n Punkte                                       | `3` = Corbillon-Cup, bis 3 Punkte                           |
+   * | `-n`          | alle n Spiele                                      | `-5` = alle 5 Spiele                                        |
+   * | `-(100 + n)`  | alle n Spiele, Unentschieden möglich               | `-110` = Braunschweiger System, alle 10, 5:5 möglich        |
+   * | `-(200 + n)`  | alle n Spiele, bei Gleichstand Entscheidungsspiel  | `-204` = Swaythling-Cup mit Entscheidungsdoppel             |
+   * | `-(1100 + n)` | bis n Punkte, Unentschieden bei (n-1):(n-1)        | `-1108` = 4er-Paarkreuz bis 8 (7:7); `-1109` = 6er bis 9 (8:8) |
+   *
+   * Bei einem Freilos gewinnt der Gegner mit n:0 (`StageHelper.byeSets`).
+   */
   def winSets: Int
   def toString: String
   def toTx: MEntryTx
@@ -74,7 +92,16 @@ sealed trait MEntry {
   
   def countable = (status == MEntry.MS_FIN) 
 
-  def validSets(): Boolean = ((sets._1 == winSets & sets._2 < winSets) | (sets._1 < winSets & sets._2 == winSets))
+  def validSets(): Boolean =
+    shared.format.StageHelper.validSets(sets, winSets) || (tieBreakWinner != 0 && sets._1 == sets._2 && sets._1 > 0)
+
+  /**
+   * Sieger einer nach Punkten unentschiedenen K.-o.-Begegnung, die über Sätze/Bälle entschieden wurde.
+   *
+   * @return 1 = A, 2 = B, 0 = kein Tie-Break
+   */
+  def tieBreakWinner: Int =
+    if result == MEntry.TieBreakA then 1 else if result == MEntry.TieBreakB then 2 else 0
 
   def reset(resetPantA: Boolean=false, resetPantB: Boolean=false):MEntry = { 
     if (resetPantA) setPantA(SNO.nn)
@@ -91,27 +118,20 @@ sealed trait MEntry {
   def getWinner(): SNO = {
     if      (sets._1 > sets._2) stNoA
     else if (sets._2 > sets._1) stNoB
+    else if (tieBreakWinner == 1) stNoA
+    else if (tieBreakWinner == 2) stNoB
     else SNO.nn
   }
   
   def getLooser(): SNO = {
     if      (sets._1 > sets._2) stNoB
     else if (sets._2 > sets._1) stNoA
+    else if (tieBreakWinner == 1) stNoB
+    else if (tieBreakWinner == 2) stNoA
     else SNO.nn
   }
 
-  def getBallFromStr(b: String):(Int,Int) = {
-    if      (b == "")              (-1,-1)  
-    else if (b == "+0" | b == "0") (11,0) 
-    else if (b == "-0")            (0,11)  
-    else b.toIntOption.getOrElse(0) match {  
-      case a if   10 to 500 contains a => (a+2, a)
-      case b if    1 to   9 contains b => (11, b)
-      case c if   -9 to  -1 contains c => (-c, 11)
-      case d if -500 to -10 contains d => (-d, 2 - d) 
-      case _                           => (-1,-1)
-    }
-  }
+  def getBallFromStr(b: String):(Int,Int) = shared.format.StageHelper.getBallFromStr(b)
 
   def getBalls: Array[(Int,Int)] = {
     val ballsArr = new scala.collection.mutable.ArrayBuffer[(Int,Int)]()
@@ -483,7 +503,15 @@ object MEntry {
   val MS_FIN   =  2   // finished with winner
   val MS_FIX   =  3   // finished with fixed winner (bye ...)
   val MS_DRAW  =  4   // finished with no winner
+  val MS_SKIP  =  5   // not played, encounter already decided (team competitions)
   val MS_UNKN  = 99   // finished with no winner or error
+
+  /**
+   * `result` einer Mannschaftsbegegnung in der K.-o.-Runde, die nach Punkten unentschieden steht (z. B. 7:7) und
+   * über Sätze bzw. Bälle entschieden wurde: Sieger Mannschaft A bzw. B (siehe `TeamEncounter.koTieBreak`).
+   */
+  val TieBreakA = "TB:A"
+  val TieBreakB = "TB:B"
 
   // list of player currently playing in (coId, stageId, gameNo)
   val playing: Map[PlayerId, HashSet[(CompId, StageId, Int)]] = Map()
@@ -497,6 +525,7 @@ object MEntry {
     case MS_FIN    => "FIN"
     case MS_FIX    => "FIX"    
     case MS_DRAW   => "DRAW"
+    case MS_SKIP   => "SKIP"
     case MS_UNKN   => "UNKN"
     case _         => "ERROR"
   }

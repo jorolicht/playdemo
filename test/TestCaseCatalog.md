@@ -136,6 +136,8 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-CI-10 [👤]:** In der Abschnittsliste steht vor „Löschen“ der Button „Nachfolger starten“ (Symbol Staffelübergabe). Er ist deaktiviert, solange im Abschnitt kein Ergebnis eingegeben ist.
 - [x] **TC-CI-11 [👤]:** „Nachfolger starten“ bei unvollständigen Ergebnissen: Hinweisdialog mit „ABBRUCH“ und „WEITER“. „ABBRUCH“ legt nichts an, „WEITER“ öffnet „Neuen Wettbewerbsabschnitt starten“ mit dem Abschnitt als Vorgänger.
 - [x] **TC-CI-12 [👤]:** „Nachfolger starten“ bei vollständigen Ergebnissen öffnet ohne Rückfrage „Neuen Wettbewerbsabschnitt starten“ mit dem Abschnitt als Vorgänger.
+- [x] **TC-CI-13 [👤]:** Bei Mannschaftswettbewerben heißt das Teilnehmer-Accordion in `CompetitionInfo` „Mannschaftsliste“, die Spalten „Mannschaftsname“ und „Ø TTR“; in der Anmeldung (`PlayerRegistration`) heißen sie „Mannschaft“ und „Ø TTR“.
+- [x] **TC-CI-14 [👤]:** Bei Einzelwettbewerben bleiben „Teilnehmerliste“, „Name, Vorname“ und „TTR“.
 - [x] **TC-CI-15 [👤]:** Im Dialog „Wettbewerb bearbeiten“ sind Kategorie und Wettbewerbstyp immer gesperrt (auch ohne Wettbewerbsabschnitt), mit Hinweis; Name, Beginn und TTR bleiben änderbar.
 - [x] **TC-CI-16 [👤]:** „Wettbewerb bearbeiten“: Ein Beginn außerhalb des Turnierzeitraums wird mit Fehlermeldung abgelehnt, der Dialog bleibt offen.
 - [x] **TC-CI-17 [👤]:** „Wettbewerb bearbeiten“: Umbenennen auf den Namen eines anderen Wettbewerbs (Groß-/Kleinschreibung egal) wird abgelehnt; ein neuer, freier Name wird übernommen.

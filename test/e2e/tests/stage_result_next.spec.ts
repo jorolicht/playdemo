@@ -47,6 +47,6 @@ test.describe('UseCase 9: StageResult – Start Nachfolger', () => {
     await expect(page.locator('#DlgStageStart_ModalId')).not.toBeVisible();
     await box.locator('button').filter({ hasText: /OK/i }).click();
     await expect(box).toHaveCount(0);
-    await expect(page.locator('.nav-tabs .nav-link.active[href*="StageResult"]')).toBeVisible();
+    await expect(page.locator('.stage-tabs .nav-link.active[href*="StageResult"]')).toBeVisible();
   });
 });

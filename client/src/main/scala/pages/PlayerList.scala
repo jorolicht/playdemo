@@ -93,7 +93,7 @@ object PlayerList extends BasePage with JsWrapper:
         c.pants1Stage.exists { pant =>
           (pant.id.isSingle && pant.id.singleId == p.id) ||
           (pant.id.isDouble && (pant.id.doubleId._1 == p.id || pant.id.doubleId._2 == p.id))
-        }
+        } || c.teams.exists(t => t.players.contains(p.id) && c.pants1Stage.exists(_.id == t.sno))
       }.map(_.name)
       PlayerListRow(p, club, playerComps)
     }
@@ -101,6 +101,26 @@ object PlayerList extends BasePage with JsWrapper:
     val sortedRows = sortRows(rows)
     setMain(cviews.pages.html.PlayerList(sortedRows, sortCol, sortAsc))
     true
+
+  /**
+   * Text der Rückfrage beim Löschen eines Spielers: listet die Wettbewerbe, in denen er gemeldet ist,
+   * bei Mannschaftswettbewerben mit dem Namen der Mannschaft.
+   *
+   * @param player zu löschender Spieler
+   * @return Text für die Rückfrage
+   */
+  private def deleteConfirmText(player: Player): String =
+    val entries = services.TourneyDB.tourney.competitions.toSeq.filter(c => c != null && !c.deleted).flatMap { c =>
+      val asPant = c.pants1Stage.exists { pant =>
+        (pant.id.isSingle && pant.id.singleId == player.id) ||
+        (pant.id.isDouble && (pant.id.doubleId._1 == player.id || pant.id.doubleId._2 == player.id))
+      }
+      val teams = c.teams.filter(_.players.contains(player.id)).map(t => gM("PlayerList.delete_team", c.name, t.name))
+      if asPant then c.name +: teams else teams
+    }
+    val question = gM("PlayerList.delete_question", player.displayName)
+    if entries.isEmpty then s"$question\n\n${gM("PlayerList.delete_none")}"
+    else s"$question\n\n${gM("PlayerList.delete_plays_in")}\n${entries.map("• " + _).mkString("\n")}\n\n${gM("PlayerList.delete_hint")}"
 
   /**
    * Handles DOM events for this page.
@@ -120,8 +140,8 @@ object PlayerList extends BasePage with JsWrapper:
         val tourney = services.TourneyDB.tourney
         tourney.players.find(_.id == PlayerId(pIdVal)).foreach { player =>
           dialogs.DlgMsgbox.show(
-            s"Möchten Sie den Spieler '${player.displayName}' wirklich aus allen Wettbewerben und dem Turnier löschen?",
-            "Spieler löschen",
+            deleteConfirmText(player),
+            gM("PlayerList.delete_title"),
             List(BoxButton.Yes, BoxButton.No)
           ).map { btn =>
             if (btn == BoxButton.Yes) {
