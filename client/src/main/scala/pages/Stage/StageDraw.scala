@@ -32,6 +32,20 @@ object StageDraw extends BasePage with JsWrapper:
   private var rrResizeListener: Option[scala.scalajs.js.Function1[dom.Event, Unit]] = None
   private var lastSwissDrawOption: DrawOption = DrawOption.SwUpperLower
 
+  /**
+   * Darf die Auslosung der Stage noch geändert werden (Spieler tauschen, Setzen, Paarungsmodus, Start)?
+   * Nur im Status Auslosung (AUS); beim Schweizer System zusätzlich im Status FIN, wenn die nächste
+   * Runde ausgelost wird. Sobald Spiele laufen (EIN), sind keine Änderungen mehr möglich.
+   * Außerdem nur mit Schreibrecht und wenn der Wettbewerb nicht finalisiert ist.
+   *
+   * @param stage Stage
+   * @return true, wenn die Auslosung änderbar ist
+   */
+  def canEditDraw(stage: Stage): Boolean =
+    val compFin = services.TourneyDB.tourney.competitions.exists(c => c != null && c.id == stage.coId && c.status == CompStatus.FIN)
+    val statusOk = stage.status == StageStatus.AUS || (stage.stageConfig.format == StageFormat.SW && stage.status == StageStatus.FIN)
+    statusOk && !compFin && base.Global.hasTourneyAccess(services.TourneyDB.tourney)
+
   def render(param: String = ""): Boolean = 
     selectedPlayer = None
     rrResizeListener.foreach(l => dom.window.removeEventListener("resize", l))
@@ -67,7 +81,9 @@ object StageDraw extends BasePage with JsWrapper:
         false
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
-    HtmlId(elem.id) match
+    if Global.currentSelection.stage.exists(st => !canEditDraw(st)) then
+      debug("StageDraw: draw is locked (matches running, competition finalized or no write access)")
+    else HtmlId(elem.id) match
       case `SelectSwissDrawOption` =>
         val select = elem.asInstanceOf[dom.html.Select]
         val optName = select.value
