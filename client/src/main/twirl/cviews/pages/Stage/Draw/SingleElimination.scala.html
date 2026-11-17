@@ -186,8 +186,9 @@
       <button class="btn btn-outline-danger" onclick="appLoadPage('StageAdmin', '')">
         <i class="bi bi-arrow-left me-1"></i>@gM("StageDraw.btn_back")
       </button>
-      <button class="btn btn-success px-4 fw-bold" @id(BtnStartPlaying, "onclick") @disabledNoAccess>
-        @gM("StageDraw.btn_start") <i class="bi bi-play-circle ms-1"></i>
+      <button class="btn btn-mv-tourney px-4 fw-bold d-inline-flex align-items-center gap-2" @id(BtnStartPlaying, "onclick") @disabledNoAccess>
+        <span class="fs-5 lh-1" aria-hidden="true">&#x2933;</span>
+        @gM("StageDraw.btn_start", stage.name)
       </button>
     </div>
   </div>
