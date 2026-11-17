@@ -98,7 +98,7 @@
                                     </th>
                                     <th>
                                         <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
-                                            @if(isDoubleComp){ @gM("+double_name_header") }else{ @gM("+name_header") } @sortIcon("name", sortCol, sortAsc)
+                                            @if(selection.competition.exists(c => shared.format.TeamEncounter.isTeam(c.typ))){ @gM("+team_name_header") }else if(isDoubleComp){ @gM("+double_name_header") }else{ @gM("+name_header") } @sortIcon("name", sortCol, sortAsc)
                                         </button>
                                     </th>
                                     <th>
@@ -108,7 +108,7 @@
                                     </th>
                                     <th class="text-center" style="width: 100px;">
                                         <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
-                                            @if(isDoubleComp){ @gM("+double_ttr_header") }else{ @gM("+ttr_header") } @sortIcon("ttr", sortCol, sortAsc)
+                                            @if(selection.competition.exists(c => shared.format.TeamEncounter.isTeam(c.typ))){ @gM("+team_ttr_header") }else if(isDoubleComp){ @gM("+double_ttr_header") }else{ @gM("+ttr_header") } @sortIcon("ttr", sortCol, sortAsc)
                                         </button>
                                     </th>
                                     @if(!isDoubleComp) {

@@ -139,7 +139,7 @@
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingParticipants">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParticipants" aria-expanded="true" aria-controls="collapseParticipants">
-                    <i class="bi bi-people me-2"></i>@gM("+participants_list", participants.length.toString)
+                    <i class="bi bi-people me-2"></i>@gM(if (shared.format.TeamEncounter.isTeam(comp.typ)) "+team_list" else "+participants_list", participants.length.toString)
                 </button>
             </h2>
             <div id="collapseParticipants" class="accordion-collapse collapse show" aria-labelledby="headingParticipants" data-bs-parent="#participantsAccordion">
@@ -156,7 +156,7 @@
                                         </th>
                                         <th>
                                             <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-start" @id(IdHeaderName, "onclick")>
-                                                @if(isDoubleComp){ @gM("+double_name_header") }else{ @gM("+name_header") } @sortIcon("name", sortCol, sortAsc)
+                                                @if(shared.format.TeamEncounter.isTeam(comp.typ)){ @gM("+team_name_header") }else if(isDoubleComp){ @gM("+double_name_header") }else{ @gM("+name_header") } @sortIcon("name", sortCol, sortAsc)
                                             </button>
                                         </th>
                                         <th>
@@ -166,7 +166,7 @@
                                         </th>
                                         <th class="text-center" style="width: 100px;">
                                             <button class="btn btn-link btn-sm text-muted fw-bold text-decoration-none p-0 w-100 text-center" @id(IdHeaderTtr, "onclick")>
-                                                @if(isDoubleComp){ @gM("+double_ttr_header") }else{ @gM("+ttr_header") } @sortIcon("ttr", sortCol, sortAsc)
+                                                @if(shared.format.TeamEncounter.isTeam(comp.typ)){ @gM("+team_ttr_header") }else if(isDoubleComp){ @gM("+double_ttr_header") }else{ @gM("+ttr_header") } @sortIcon("ttr", sortCol, sortAsc)
                                             </button>
                                         </th>
                                         @if(!isDoubleComp) {
