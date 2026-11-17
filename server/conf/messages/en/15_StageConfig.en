@@ -22,3 +22,5 @@ StageConfig.KO = Knockout System
 StageConfig.SW = Swiss System
 StageConfig.DRR = Double Round Robin (first leg)
 StageConfig.DRR2 = Double Round Robin (second leg)
+StageConfig.DE = Double elimination (winners bracket)
+StageConfig.DEL = Double elimination (losers bracket)

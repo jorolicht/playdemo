@@ -22,3 +22,5 @@ StageConfig.KO = K.O.-System
 StageConfig.SW = Schweizer System
 StageConfig.DRR = Doppelte Runde (Hinrunde)
 StageConfig.DRR2 = Doppelte Runde (Rückrunde)
+StageConfig.DE = Doppeltes K.-o. (Gewinnerrunde)
+StageConfig.DEL = Doppeltes K.-o. (Verliererrunde)

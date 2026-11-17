@@ -332,10 +332,14 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 
 ---
 
-## 23. UseCase: Doppelte Runde (Hin- und Rückrunde, `doc/DoubleModes.md`)
+## 23. UseCase: Gekoppelte Stages – Doppelte Runde und Doppeltes K.-o. (`doc/DoubleModes.md`)
 
 ### 23.1 Turnierverwalter (👤)
 - [x] **TC-DM-01 [👤]:** Spielmodus „Doppelte Runde“: Der Start der Spielphase benennt die Stage in „<Name> – Hinrunde“ um und legt „<Name> – Rückrunde“ mit denselben Paarungen (Heim/Gast getauscht, Spielnummern ab 1) im Status Auslosung an. Umschalter Hinrunde | Rückrunde wechselt auf dieselbe Seite der anderen Runde. Die Auslosung der Rückrunde ist nicht änderbar (kein Start), die Administration zeigt die Kopplung, Auslosung/Konfiguration löschen ist gesperrt. In `CompetitionInfo` steht die Rückrunde eingerückt mit Verbindungssymbol unter der Hinrunde; „Nachfolger starten“ gibt es nur an der Rückrunde.
 - [x] **TC-DM-02 [👤]:** Nach allen Ergebnissen der Hinrunde wird die Rückrunde spielbar. Die Ergebnisse der Hinrunde zeigen statt Nachfolger/Finalisieren einen Hinweis auf die Rückrunde. Die Ergebnisse der Rückrunde zeigen standardmäßig die Gesamttabelle (je Teilnehmer alle Spiele beider Runden), umschaltbar auf nur Rückrunde. Der Filter „Obere Hälfte“ eines Nachfolgers nutzt die Gesamttabelle.
+- [x] **TC-DM-03 [👤]:** Spielmodus „Doppeltes K.-o.“, 8 Spieler: Der Start benennt die Stage in „<Name> – Gewinnerrunde“ um (7 Spiele, kein Spiel um Platz 3) und legt „<Name> – Verliererrunde“ (6 Spiele + Finale) an. Die Verlierer der WB-Runde 1 spielen paarweise in LB-Runde 1, die Verlierer der Halbfinals steigen gekreuzt in LB-Runde 2 ein, der Verlierer des WB-Finales in LB-Runde 4; der WB-Sieger steht im Finale auf Position A. Platzierung nach allen Spielen: 1, 2, 3, 4, 5, 5, 7, 7.
+- [x] **TC-DM-04 [👤]:** 6 Spieler (Freilose): Freilose der Gewinnerrunde werden in der Verliererrunde durchgereicht; nach allen Spielen sind genau die 6 Spieler platziert (Plätze 1–4 eindeutig), kein Freilos in der Platzierung.
+- [x] **TC-DM-05 [👤]:** Option „Finale mit Rückspiel“ (4 Spieler): Gewinnt der LB-Sieger das erste Finale, wird das Rückspiel mit denselben Spielern spielbar und entscheidet Platz 1/2. Gewinnt der WB-Sieger das erste Finale, ist das Rückspiel „nicht erforderlich“.
 - [x] **TC-DM-06 [👤]:** Löschen der Hinrunde fragt nach („gemeinsam gelöscht“) und löscht Hin- und Rückrunde.
 - [x] **TC-DM-07 [👤]:** „Auslosung löschen“ an der Hinrunde löst die Kopplung: Die Rückrunde wird gelöscht, der Namenszusatz „– Hinrunde“ entfällt.
+- [x] **TC-DM-08 [👤]:** Doppeltes K.-o.: Löschen eines WB-Ergebnisses, dessen Verlierer in der Verliererrunde schon gespielt hat, weist in der Rückfrage darauf hin und setzt das abhängige LB-Spiel zurück.

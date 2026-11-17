@@ -117,6 +117,10 @@ object StageResult extends BasePage with JsWrapper:
           case StageData.GroupsStage(groups) => 
             setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.Groups(stage, groups.toSeq))))
             true
+          case StageData.KnockoutStage(_) if stage.stageConfig == StageConfig.DEL =>
+            // Verliererrunde eines Doppelten K.-o.: Platzierung und Spiele der Verliererrunde
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.DoubleElimination(stage))))
+            true
           case StageData.KnockoutStage(ko) => 
             setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.SingleElimination(stage))))
             initSlidingWindow()

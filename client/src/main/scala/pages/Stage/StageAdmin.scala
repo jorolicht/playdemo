@@ -79,6 +79,9 @@ object StageAdmin extends BasePage with JsWrapper:
     comp.status == CompStatus.CFG &&
       services.TourneyDB.tourney.stages.forall(s => s == null || s.coId != comp.id || s.status == StageStatus.CFG)
   val BtnSortSelected: HtmlId = genId(name)
+  /** Doppeltes K.-o.: Checkbox "Finale mit Rückspiel" und ihr Container (nur bei Spielmodus DE sichtbar). */
+  val ChkFinalReset:   HtmlId = genId(name)
+  val BoxFinalReset:   HtmlId = genId(name)
 
   var currentFilterOption: String = "ALL"
   var sortBySelected: Boolean = false
@@ -421,6 +424,9 @@ object StageAdmin extends BasePage with JsWrapper:
       val isDefault = select.value == "UNKN"
       val info = gE(InfoSelectMode)
       if (info != null) info.classList.toggle("d-none", !isDefault)
+      // Doppeltes K.-o.: Option "Finale mit Rückspiel"
+      val reset = gE(BoxFinalReset)
+      if (reset != null) reset.classList.toggle("d-none", select.value != StageConfig.DE.productPrefix)
       val isAllowed = stage.status == StageStatus.CFG && base.Global.hasTourneyAccess(services.TourneyDB.tourney)
       
       btn.disabled = isDefault || !isAllowed
@@ -446,6 +452,8 @@ object StageAdmin extends BasePage with JsWrapper:
         if (sysSelect != null) r.encSystem = sysSelect.value
         val encSelect = dom.document.getElementById("rnd-enc-variant").asInstanceOf[dom.html.Select]
         if (encSelect != null) r.encVariant = encSelect.value
+        val resetChk = gE(ChkFinalReset).asInstanceOf[dom.html.Input]
+        r.finalReset = cfg == StageConfig.DE && resetChk != null && resetChk.checked
         
         // Get selected participants
         val selectedSnos = StageAdmin.this.selectedSnos()
@@ -526,14 +534,15 @@ object StageAdmin extends BasePage with JsWrapper:
     }
 
   /**
-   * Löst beim Zurücksetzen der Auslosung oder Konfiguration einer Hinrunde (Doppelte Runde) die Kopplung:
-   * Die Rückrunde wird gelöscht und der Namenszusatz "– Hinrunde" entfernt.
+   * Löst beim Zurücksetzen der Auslosung oder Konfiguration einer ersten Stage (Hinrunde bzw. Gewinnerrunde)
+   * die Kopplung: Die Partner-Stage wird gelöscht und der Namenszusatz ("– Hinrunde", "– Gewinnerrunde") entfernt.
    *
    * @param stage zurückgesetzte Stage
    */
   private def unlinkFirstLeg(stage: Stage): Unit =
     if (stage.isPrimary)
-      services.TourneyDB.tourney.unlinkStage(stage, stage.name.stripSuffix(gM("StageDraw.drr_first", "")))
+      val suffix = if (stage.link.exists(_.kind == LinkKind.DE)) gM("StageDraw.de_first", "") else gM("StageDraw.drr_first", "")
+      services.TourneyDB.tourney.unlinkStage(stage, stage.name.stripSuffix(suffix))
 
   private def handleDeleteStage(): Unit =
     import shared.BoxButton

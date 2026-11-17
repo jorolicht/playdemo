@@ -41,4 +41,5 @@ StageAdmin.scoring_unknown = unknown, the latest version is used
 StageAdmin.system_label = Team system
 StageAdmin.system_info = Description of the selected team system
 StageAdmin.info_select_mode = Please select a game mode/format, then the draw can be generated.
-StageAdmin.linked_info = Linked to "{0}": configuration, participants and draw are taken from the first leg.
+StageAdmin.linked_info = Linked to "{0}": configuration, participants and draw are taken from that stage.
+StageAdmin.final_reset = Final with second match (if the losers bracket winner wins the first final)

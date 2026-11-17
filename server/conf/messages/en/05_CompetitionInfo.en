@@ -39,4 +39,4 @@ CompetitionInfo.successor_incomplete = Not all results of stage "{0}" have been 
 CompetitionInfo.successor_cancel = CANCEL
 CompetitionInfo.successor_continue = CONTINUE
 CompetitionInfo.linked_title = Linked to "{0}"
-CompetitionInfo.delete_linked = First and second leg ("{0}" and "{1}") belong together and are deleted together. Really delete?
+CompetitionInfo.delete_linked = The stages "{0}" and "{1}" are linked and are deleted together. Really delete?

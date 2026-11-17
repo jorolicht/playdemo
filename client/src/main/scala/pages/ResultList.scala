@@ -127,6 +127,12 @@ object ResultList extends BasePage with JsWrapper:
             if (rrPants.nonEmpty) rrPants.sortBy(_.place._1).toSeq
             else comp.pants1Stage.filter(_.place._1 > 0).sortBy(_.place._1).toSeq
 
+          case StageData.KnockoutStage(_) if stage.stageConfig == StageConfig.DEL =>
+            // Verliererrunde eines Doppelten K.-o.: Platzierung aus Finale und Verliererrunde
+            shared.format.DoubleElimination.placements(stage).flatMap { case (sno, place) =>
+              comp.pants1Stage.find(_.id == sno).map(_.copy(place = (place, 0)))
+            }
+
           case StageData.KnockoutStage(_) =>
             getKoRanking(comp, stage)
         }

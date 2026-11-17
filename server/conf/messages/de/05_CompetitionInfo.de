@@ -42,4 +42,4 @@ CompetitionInfo.successor_incomplete = Im Abschnitt "{0}" sind noch nicht alle E
 CompetitionInfo.successor_cancel = ABBRUCH
 CompetitionInfo.successor_continue = WEITER
 CompetitionInfo.linked_title = Gekoppelt mit "{0}"
-CompetitionInfo.delete_linked = Hin- und Rückrunde ("{0}" und "{1}") gehören zusammen und werden gemeinsam gelöscht. Wirklich löschen?
+CompetitionInfo.delete_linked = Die Stages "{0}" und "{1}" sind gekoppelt und werden gemeinsam gelöscht. Wirklich löschen?

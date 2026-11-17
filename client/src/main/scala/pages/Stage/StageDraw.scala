@@ -43,15 +43,21 @@ object StageDraw extends BasePage with JsWrapper:
    * @return true, wenn die Auslosung änderbar ist
    */
   /**
-   * Legt beim Start der Spielphase einer Doppelten Runde (Hinrunde) die gekoppelte Rückrunde an und benennt
-   * die Hinrunde um. Andere Stages und bereits gekoppelte Hinrunden bleiben unverändert.
+   * Legt beim Start der Spielphase die gekoppelte Partner-Stage an und benennt die erste Stage um:
+   * Doppelte Runde → Rückrunde, Doppeltes K.-o. → Verliererrunde mit Finale. Andere Stages und bereits
+   * gekoppelte Stages bleiben unverändert.
    *
    * @param stage gerade gestartete Stage
-   * @return die (ggf. umbenannte) Stage oder ein Fehler beim Anlegen der Rückrunde
+   * @return die (ggf. umbenannte) Stage oder ein Fehler beim Anlegen der Partner-Stage
    */
   def linkSecondLeg(stage: Stage): Either[shared.basic.AppError, Stage] =
-    if (stage.stageConfig != StageConfig.DRR || stage.isLinked) Right(stage)
-    else services.TourneyDB.tourney.addLinkedStage(stage, gM("+drr_first", stage.name), gM("+drr_second", stage.name)).map(_._1)
+    if (stage.isLinked) Right(stage)
+    else stage.stageConfig match
+      case StageConfig.DRR =>
+        services.TourneyDB.tourney.addLinkedStage(stage, LinkKind.DRR, gM("+drr_first", stage.name), gM("+drr_second", stage.name)).map(_._1)
+      case StageConfig.DE =>
+        services.TourneyDB.tourney.addLinkedStage(stage, LinkKind.DE, gM("+de_first", stage.name), gM("+de_second", stage.name)).map(_._1)
+      case _ => Right(stage)
 
   def canEditDraw(stage: Stage): Boolean =
     val compFin = services.TourneyDB.tourney.competitions.exists(c => c != null && c.id == stage.coId && c.status == CompStatus.FIN)
@@ -80,6 +86,11 @@ object StageDraw extends BasePage with JsWrapper:
               true
             case StageData.SwissStage(swGroup) =>
               setMain(cviews.comps.html.StageLayout(r, "DRW")(cviews.pages.Stage.Draw.html.SwissSystem(r, swGroup, lastSwissDrawOption)))
+              true
+            case StageData.KnockoutStage(_) if r.stageConfig == StageConfig.DEL =>
+              // Verliererrunde: keine eigene Auslosung, sie wird aus den Ergebnissen der Gewinnerrunde befüllt
+              setMain(cviews.comps.html.StageLayout(r, "DRW")(play.twirl.api.Html(
+                s"""<div class="alert alert-info py-2 small"><i class="bi bi-link-45deg me-1"></i>${gM("+de_partner")}</div>""")))
               true
             case StageData.KnockoutStage(state) =>
               val g = Group(1, state.size, 1, "KO-Baum (Setzung)", r.noWinSets)

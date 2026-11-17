@@ -48,7 +48,7 @@
 @getRoundName(roundNo: Int) = @{
     roundNo match {
         case 0 => gM("+round_3rd")
-        case 1 => gM("+round_final")
+        case 1 => if (stage.isPrimary) gM("+round_wb_final") else gM("+round_final")
         case 2 => gM("+round_semi")
         case 3 => gM("+round_quarter")
         case 4 => gM("+round_last16")
@@ -161,7 +161,10 @@
             <button class="btn btn-outline-primary" onclick="window.print()">
                 <i class="bi bi-printer me-1"></i>@gM("+btn_print")
             </button>
-            @if(!cert) {
+            @if(stage.isPrimary && !cert) {
+            <div class="text-muted small align-self-center"><i class="bi bi-link-45deg me-1"></i>@gM("+de_primary_hint")</div>
+            }
+            @if(!cert && !stage.isPrimary) {
             <div class="d-flex">
                 <button class="btn btn-mv-tourney" @id(NextStageBtn, "onclick") @if(!pages.Stage.StageResult.hasResults(stage)){disabled}>
                     @gM("+btn_next") <i class="bi bi-arrow-right ms-1"></i>

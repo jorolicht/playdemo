@@ -246,7 +246,8 @@
                         }.toSeq
                         val mergedSectionOpt = if (finalMatches.nonEmpty) Some((1, gM("+round.final_combo"), finalMatches, 1)) else None
                         val allSections = otherSections ++ mergedSectionOpt
-                        allSections.sortBy(-_._4)
+                        // Verliererrunde (Doppeltes K.-o.): Runden 101 … aufsteigend, danach Finale (150/151)
+                        if (stage.stageConfig == StageConfig.DEL) allSections.sortBy(_._4) else allSections.sortBy(-_._4)
                     } else {
                         matches.groupBy(_._1.round).toSeq.sortBy(_._1).map { case (r, mList) =>
                             (r, gM("+round.default", r.toString), mList, r)

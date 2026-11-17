@@ -113,6 +113,13 @@
                         <option value="4" @{if(stage.noWinSets == 4) "selected" else ""}>@gM("+best_of_7")</option>
                     </select>
                 </div>
+                @* Doppeltes K.-o.: Finale mit Rückspiel (sichtbar nur bei Spielmodus DE) *@
+                <div class="col-md-4 d-flex align-items-end @if(stage.stageConfig != StageConfig.DE){d-none}" @id(BoxFinalReset)>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" @id(ChkFinalReset) @if(stage.finalReset){checked} @disabledIfAus>
+                        <label class="form-check-label" @forAttr(ChkFinalReset)>@gM("+final_reset")</label>
+                    </div>
+                </div>
                 @encCfg.map { cfg =>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">@gM("+system_label")</label>

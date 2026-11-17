@@ -389,7 +389,7 @@ case class Tourney(
         val updatedR = stage.copy(id = finalId, version = stage.version + 1)
         stages(targetIdx) = updatedR
         addDirtyStage(updatedR)
-        releasePartner(updatedR)
+        syncPartner(updatedR)
         if (doSync) triggerStageSync()
         Right(updatedR)
       }
@@ -413,35 +413,73 @@ case class Tourney(
       }
     }
 
+  /**
+   * Hält gekoppelte Stages nach dem Speichern einer Stage konsistent: Doppelte Runde → Rückrunde freigeben,
+   * Doppeltes K.-o. → Verlierer der Gewinnerrunde und Sieger der Verliererrunde weitergeben.
+   *
+   * @param stage gerade gespeicherte Stage
+   */
+  private def syncPartner(stage: Stage): Unit =
+    stage.link.foreach { l =>
+      l.kind match
+        case LinkKind.DRR => releasePartner(stage)
+        case LinkKind.DE  =>
+          val pIdx = stages.indexWhere(s => s != null && s.id == l.partner && !s.deleted)
+          if (pIdx >= 0) {
+            val other = stages(pIdx)
+            val (wb, lb) = if (stage.isPrimary) (stage, other) else (other, stage)
+            // die gespeicherte LB teilt sich die Matches mit `lb`; bei gespeicherter WB die LB neu ablegen
+            if (DoubleElimination.propagate(wb, lb) && stage.isPrimary) {
+              val upd = lb.copy(version = lb.version + 1)
+              stages(pIdx) = upd
+              addDirtyStage(upd)
+            }
+          }
+    }
+
   /** Liefert die gekoppelte Partner-Stage einer Stage (nicht gelöscht). */
   def partnerOf(stage: Stage): Option[Stage] =
     stage.link.flatMap(l => stages.find(s => s != null && s.id == l.partner && !s.deleted))
 
   /**
-   * Legt zur ausgelosten und gestarteten Hinrunde einer Doppelten Runde die Rückrunde als gekoppelte
-   * Partner-Stage an: gleiche Teilnehmer in gleicher Reihenfolge, gleiche Paarungen mit vertauschtem
-   * Heim/Gast, Spielnummern wieder ab 1. Die Rückrunde bleibt im Status AUS, bis die Hinrunde beendet ist.
+   * Legt zur ausgelosten und gestarteten ersten Stage eines Verbunds die gekoppelte Partner-Stage an.
    *
-   * @param primary     Hinrunde (Matches bereits initialisiert)
-   * @param primaryName neuer Name der Hinrunde
-   * @param partnerName Name der Rückrunde
+   * - Doppelte Runde: Rückrunde mit gleichen Teilnehmern in gleicher Reihenfolge, gleichen Paarungen mit
+   *   vertauschtem Heim/Gast, Spielnummern wieder ab 1. Status AUS, bis die Hinrunde beendet ist.
+   * - Doppeltes K.-o.: Verliererrunde mit Finale (ggf. Rückspiel), Status EIN wie die Gewinnerrunde; Freilose
+   *   der ersten Runde werden sofort durchgereicht.
+   *
+   * @param primary     erste Stage (Matches bereits initialisiert)
+   * @param kind        Art der Kopplung
+   * @param primaryName neuer Name der ersten Stage
+   * @param partnerName Name der Partner-Stage
    * @param doSync      Synchronisation auslösen
-   * @return (Hinrunde, Rückrunde) wie gespeichert
+   * @return (erste Stage, Partner-Stage) wie gespeichert
    */
-  def addLinkedStage(primary: Stage, primaryName: String, partnerName: String, doSync: Boolean = true): Either[AppError, (Stage, Stage)] =
-    addStage(primary.coId, None, partnerName, StageConfig.DRR2, primary.size, primary.noPlayers, doSync = false).flatMap { p =>
-      p.data = primary.data match
-        case StageData.RoundRobinStage(g) => StageData.RoundRobinStage(RoundRobin.returnGroup(g))
-        case other                        => other
+  def addLinkedStage(primary: Stage, kind: LinkKind, primaryName: String, partnerName: String, doSync: Boolean = true): Either[AppError, (Stage, Stage)] =
+    val cfg = kind match
+      case LinkKind.DRR => StageConfig.DRR2
+      case LinkKind.DE  => StageConfig.DEL
+    addStage(primary.coId, None, partnerName, cfg, primary.size, primary.noPlayers, doSync = false).flatMap { p =>
       p.noWinSets  = primary.noWinSets
       p.encVariant = primary.encVariant
       p.encSystem  = primary.encSystem
       p.demo       = primary.demo
-      p.matches ++= RoundRobin.mirrorMatches(primary.matches.toSeq, p.id)
-      p.status     = StageStatus.AUS
-      p.link       = Some(StageLink(LinkKind.DRR, primary = false, partner = primary.id))
+      p.finalReset = primary.finalReset
+      kind match
+        case LinkKind.DRR =>
+          p.data = primary.data match
+            case StageData.RoundRobinStage(g) => StageData.RoundRobinStage(RoundRobin.returnGroup(g))
+            case other                        => other
+          p.matches ++= RoundRobin.mirrorMatches(primary.matches.toSeq, p.id)
+          p.status = StageStatus.AUS
+        case LinkKind.DE =>
+          p.data = StageData.KnockoutStage(KoStage(p.id.value, partnerName, p.coId.value.toLong, primary.noWinSets, size = DoubleElimination.wbSize(primary)))
+          p.matches ++= DoubleElimination.initLbMatches(p.id, primary, primary.finalReset)
+          p.status = StageStatus.EIN
+      p.link       = Some(StageLink(kind, primary = false, partner = primary.id))
       primary.name = primaryName
-      primary.link = Some(StageLink(LinkKind.DRR, primary = true, partner = p.id))
+      primary.link = Some(StageLink(kind, primary = true, partner = p.id))
       val res = for
         first  <- updateStage(primary, doSync = false)
         second <- updateStage(p, doSync = false)

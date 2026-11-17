@@ -42,13 +42,18 @@
         </div>
     </div>
 
-    @* Umschalter Hinrunde | Rückrunde einer Doppelten Runde *@
+    @* Umschalter gekoppelter Stages: Hinrunde | Rückrunde bzw. Gewinnerrunde | Verliererrunde *@
     @services.TourneyDB.tourney.partnerOf(stage).map { partner =>
         @defining(if (stage.isPrimary) (stage, partner) else (partner, stage)) { case (first, second) =>
         <div class="btn-group btn-group-sm mb-3" role="group">
             <span class="btn btn-light border-0 disabled"><i class="bi bi-link-45deg"></i></span>
-            @legButton(first, gM("stageLayout.firstLeg"))
-            @legButton(second, gM("stageLayout.secondLeg"))
+            @if(stage.link.exists(_.kind == LinkKind.DE)) {
+                @legButton(first, gM("stageLayout.winners"))
+                @legButton(second, gM("stageLayout.losers"))
+            } else {
+                @legButton(first, gM("stageLayout.firstLeg"))
+                @legButton(second, gM("stageLayout.secondLeg"))
+            }
         </div>
         }
     }

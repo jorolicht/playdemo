@@ -60,6 +60,8 @@ enum StageConfig(val id: Int, val format: StageFormat) derives CanEqual:
   // --- Gekoppelte Stages (doc/DoubleModes.md) ---
   case DRR    extends StageConfig(113, StageFormat.RR)    // Doppelte Runde: Hinrunde (auswählbar)
   case DRR2   extends StageConfig(114, StageFormat.RR)    // Doppelte Runde: Rückrunde, nur intern als Partner angelegt
+  case DE     extends StageConfig(115, StageFormat.KO)    // Doppeltes K.-o.: Gewinnerrunde (auswählbar)
+  case DEL    extends StageConfig(116, StageFormat.KO)    // Doppeltes K.-o.: Verliererrunde mit Finale, nur intern als Partner angelegt
 
   // --------------------------------
 
@@ -210,6 +212,8 @@ object StageStatus:
 enum LinkKind derives CanEqual:
   /** Doppelte Runde: Hinrunde + Rückrunde */
   case DRR
+  /** Doppeltes K.-o.: Gewinnerrunde + Verliererrunde (mit Finale) */
+  case DE
 
 object LinkKind:
   given rw: ReadWriter[LinkKind] =
@@ -220,7 +224,8 @@ object LinkKind:
  * Kopplung ist unabhängig vom Qualifikationsfluss (`prefId`/`nextIds`).
  *
  * @param kind    Art der Kopplung
- * @param primary true = Stage 1 (Hinrunde), false = Partner-Stage (Rückrunde), die das Gesamtergebnis trägt
+ * @param primary true = Stage 1 (Hinrunde bzw. Gewinnerrunde), false = Partner-Stage (Rückrunde bzw.
+ *                Verliererrunde mit Finale), die das Gesamtergebnis trägt
  * @param partner ID der Partner-Stage
  */
 case class StageLink(kind: LinkKind, primary: Boolean, partner: StageId)
@@ -268,6 +273,7 @@ object StageData:
  * @param encounters Begegnungen (Aufstellung und Einzelspiele) je Spielnummer bei Mannschaften.
  * @param encSystem Spielsystem der Begegnungen bei Mannschaften (z. B. "bundes"), leer = Standard des Formats.
  * @param link Kopplung an eine Partner-Stage (z. B. Hin-/Rückrunde einer Doppelten Runde), None = nicht gekoppelt.
+ * @param finalReset Doppeltes K.-o.: Finale mit Rückspiel, falls der Sieger der Verliererrunde das erste Finale gewinnt.
  */
 case class Stage(
   id:                   StageId,
@@ -290,7 +296,8 @@ case class Stage(
   var encVariant:       String = "",
   val encounters:       ArrayBuffer[Encounter] = ArrayBuffer.empty,
   var encSystem:        String = "",
-  var link:             Option[StageLink] = None
+  var link:             Option[StageLink] = None,
+  var finalReset:       Boolean = false
 ):
 
   // -----------------------------
@@ -329,6 +336,8 @@ case class Stage(
       shared.utils.GroupPlan.get(rr.size).noRounds
     case StageData.SwissStage(sw) =>
       sw.pairing.length
+    case StageData.KnockoutStage(ko) if stageConfig == StageConfig.DEL =>
+      shared.format.DoubleElimination.lbRounds(ko.size) + 1
     case StageData.KnockoutStage(ko) =>
       ko.rnds
     case null => 0
@@ -416,7 +425,11 @@ case class Stage(
     encounters.clear()
     SingleElimination.initKoMatches(coId, coTyp, id, stageConfig.format, TeamEncounter.matchWinSets(this, coTyp), ko) match
       case Right(koMatches) =>
-        matches ++= koMatches
+        // Gewinnerrunde eines Doppelten K.-o.: kein Spiel um Platz 3, die Verlierer gehen in die Verliererrunde
+        if stageConfig == StageConfig.DE then
+          matches ++= koMatches.filterNot(_.round == 0)
+          matches.foreach { case m: MEntryKo => m.looPos = ""; case _ => }
+        else matches ++= koMatches
         Right(true)
       case Left(err) =>
         Left(err)

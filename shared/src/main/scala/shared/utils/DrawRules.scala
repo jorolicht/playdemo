@@ -28,6 +28,7 @@ object DrawRules:
       ModeOption(StageConfig.DRR, if (isDe) "Doppelte Runde (Hin- und Rückrunde)" else "Double Round Robin (first and second leg)", count >= 3),
       ModeOption(StageConfig.SW, if (isDe) "Schweizer-System" else "Swiss System", count > 6),
       ModeOption(StageConfig.KO, if (isDe) "KO-System" else "Knockout System", count >= 4),
+      ModeOption(StageConfig.DE, if (isDe) "Doppeltes K.-o.-System" else "Double Elimination", count >= 4),
       
       // 3er Gruppen
       ModeOption(StageConfig.GRPS3, if (isDe) "3er Gruppen" else "Groups of 3", (count / 3 >= 2) && (count % 3 == 0)),
