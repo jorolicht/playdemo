@@ -5,7 +5,7 @@ Tags: tournament, table tennis, sports, scalajs, playframework
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,11 @@ Das Plugin verwendet Semantic Versioning (SemVer) `MAJOR.MINOR.PATCH`. Datenbank
 Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel (`filemtime`) oder der aktuellen Plugin-Version versioniert, sodass Browser-Caches nach Updates sofort invalidiert werden.
 
 == Changelog ==
+
+= 1.3.0 =
+* Spielmodus „Doppelte Runde“: Hin- und Rückrunde mit gespiegelten Paarungen, Gesamttabelle aus beiden Runden.
+* Spielmodus „Doppeltes K.-o.“: Gewinner- und Verliererrunde mit Finale, optional mit Rückspiel; Platzierung aller Teilnehmer.
+* Gekoppelte Abschnitte werden gemeinsam angezeigt, umgeschaltet und gelöscht.
 
 = 1.2.2 =
 * ClickTT: Import, Update und Export über das Menü „ClickTT“ in der Turnierübersicht (bisher Administration bzw. „Lade ClickTT-Daten“).
