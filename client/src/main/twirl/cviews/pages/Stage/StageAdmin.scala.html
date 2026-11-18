@@ -58,6 +58,11 @@
                             <i class="bi bi-trash3-fill me-1"></i>@gM("+btn_delete_stage", stage.name)
                         </button>
                     </div>
+                    <div class="mt-2 text-center">
+                        <button class="btn btn-mv-search btn-sm" @id(BtnFinalizeComp, "onclick") @if(!pages.Stage.StageResult.canFinalize){disabled}>
+                            <i class="bi bi-lock me-1"></i>@gM("StageResult.btn_finalize")
+                        </button>
+                    </div>
                     @if(stage.nextIds.nonEmpty) {
                         <div class="mt-2 text-center text-danger small">
                             <i class="bi bi-exclamation-triangle-fill me-1"></i>

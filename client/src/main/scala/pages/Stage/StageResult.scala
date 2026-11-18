@@ -314,7 +314,7 @@ object StageResult extends BasePage with JsWrapper:
    * Wettbewerbsübersicht). Der aktuelle Wettbewerbsabschnitt wird vorher als Urkunden-Abschnitt markiert;
    * anschließend wird die Wettbewerbsübersicht (CompetitionInfo) angezeigt.
    */
-  private def finalizeCompetition(): Unit =
+  def finalizeCompetition(): Unit =
     import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
     import shared.BoxButton
     Global.currentSelection.competition.filter(_ => canFinalize).foreach { comp =>

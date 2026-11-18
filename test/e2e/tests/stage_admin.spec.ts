@@ -176,4 +176,39 @@ test.describe('UseCase 8: Abschnitts-Verwaltung & Auslosung (StageAdmin & StageD
     const checkedBoxesAll = page.locator('.player-draw-check:checked');
     await expect(checkedBoxesAll).toHaveCount(4);
   });
+
+  test('TC-SA-07 [👤]: "Wettbewerb finalisieren" auch in der Administration unter den Lösch-Buttons', async ({ page }) => {
+    const mainView = new MainViewPage(page);
+    await mainView.goto();
+    await mainView.startDemo();
+    await page.locator('tr', { hasText: 'B-Klasse Damen Einzel' }).locator('.comp-link').click();
+    await page.locator('button[id*="BtnStartStage"]').click();
+    await page.locator('input[id*="DlgStageStart_InputNameId"]').fill('Finale');
+    await page.locator('button[id*="DlgStageStart_ApplyId"]').click();
+    await expect(page.locator('#DlgStageStart_ModalId')).not.toBeVisible({ timeout: 5000 });
+    for (let i = 0; i < 4; i++) await page.locator('#StageAdmin_BtnAddDummy').click();
+    await page.locator('#StageAdmin_SelectDrawMode').selectOption('RR');
+    await page.locator('#StageAdmin_BtnStartDrawing').click();
+    await page.locator('#StageDraw_BtnStartPlaying').click();
+    await page.locator('#StageInput_BtnDemoScores').click();
+    await page.evaluate(() => (window as any).appLoadPage('StageAdmin', ''));
+
+    const btn = page.locator('#StageAdmin_BtnFinalizeComp');
+    await expect(btn).toHaveText(/Wettbewerb finalisieren/, { timeout: 5000 });
+    await expect(btn).toBeEnabled();
+    // unter den vier roten Buttons
+    const below = await page.evaluate(() => {
+      const b = document.getElementById('StageAdmin_BtnFinalizeComp')!.getBoundingClientRect();
+      const d = document.getElementById('StageAdmin_BtnDeleteFull')!.getBoundingClientRect();
+      return b.top >= d.bottom;
+    });
+    expect(below).toBe(true);
+    await btn.click();
+    const box = page.locator('.modal.show');
+    await expect(box).toContainText('finalisiert werden', { timeout: 5000 });
+    await box.locator('.box-btn.btn-hero-primary').click();
+    await expect(page.locator('#StageAdmin_BtnFinalizeComp')).toHaveCount(0, { timeout: 5000 });   // weiter zur Wettbewerbsübersicht
+    await page.evaluate(() => (window as any).appLoadPage('StageAdmin', ''));
+    await expect(page.locator('#StageAdmin_BtnFinalizeComp')).toBeDisabled({ timeout: 5000 });
+  });
 });
