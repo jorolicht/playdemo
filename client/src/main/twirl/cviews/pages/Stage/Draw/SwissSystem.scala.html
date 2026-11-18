@@ -220,8 +220,9 @@
             <button class="btn btn-outline-danger" onclick="appLoadPage('StageAdmin', '')">
                 <i class="bi bi-arrow-left me-1"></i>@gM("StageDraw.btn_back")
             </button>
-            <button class="btn btn-success px-4 fw-bold" @id(BtnStartSwiss, "onclick") data-rnd="@numTabs" @disabledNoAccess style="display: @{if(numTabs == activeDrawRound) "block" else "none"};">
-                @gM("+btn_start_round", numTabs.toString) <i class="bi bi-play-circle ms-1"></i>
+            <button class="btn btn-mv-tourney px-4 fw-bold align-items-center gap-2" @id(BtnStartSwiss, "onclick") data-rnd="@numTabs" @disabledNoAccess style="display: @{if(numTabs == activeDrawRound) "inline-flex" else "none"};">
+                <i class="bi bi-play-circle" aria-hidden="true"></i>
+                @gM("+btn_start_round", numTabs.toString)
             </button>
         </div>
     </div>
