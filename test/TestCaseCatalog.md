@@ -172,7 +172,7 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-SD-10 [👤]:** `StageDraw` bei laufenden Spielen (K.-o.): Hinweis „Auslosung ist abgeschlossen“, kein „SETZEN“ und keine Setzfelder, Start deaktiviert, Klick auf Spieler tauscht nicht.
 - [x] **TC-SD-11 [👤]:** `StageDraw` bei beendetem Abschnitt (Jeder-gegen-Jeden): Hinweis, Klick auf Spieler tauscht nicht. (Ausnahme Schweizer System: Auslosung der Folgerunde im Status beendet bleibt möglich.)
 - [x] **TC-SD-12 [👤]:** `StageDraw` im Status Auslosung: kein Sperrhinweis, Spieler tauschen weiterhin möglich.
-- [x] **TC-SD-13 [👤]:** `StageDraw`: Der Start-Button heißt „Start <Stagename>“, mit Pfeil ⤳ in der Farbe `btn-mv-tourney` (#4A607A).
+- [x] **TC-SD-13 [👤]:** `StageDraw`: Der Start-Button heißt „Start <Stagename>“, mit Symbol `bi-play-circle` in der Farbe `btn-mv-tourney` (#4A607A).
 
 ---
 

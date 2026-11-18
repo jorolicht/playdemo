@@ -51,8 +51,9 @@ test.describe('StageDraw: Sperre nach der Auslosung', () => {
     await page.locator('#StageAdmin_SelectDrawMode').selectOption('RR');
     await page.locator('#StageAdmin_BtnStartDrawing').click();
     await expect(page.locator('#StageDraw_BtnStartPlaying')).toBeEnabled({ timeout: 5000 });
-    // TC-SD-13: Button "Start <Stagename>" mit Pfeil ⤳ in btn-mv-tourney
-    await expect(page.locator('#StageDraw_BtnStartPlaying')).toHaveText(/⤳\s*Start Vorrunde/);
+    // TC-SD-13: Button "Start <Stagename>" mit Symbol bi-play-circle in btn-mv-tourney
+    await expect(page.locator('#StageDraw_BtnStartPlaying')).toHaveText(/^\s*Start Vorrunde\s*$/);
+    await expect(page.locator('#StageDraw_BtnStartPlaying i.bi-play-circle')).toHaveCount(1);
     await expect(page.locator('#StageDraw_BtnStartPlaying')).toHaveClass(/btn-mv-tourney/);
     await expect(page.locator('.stage-content .alert-info', { hasText: 'Auslosung ist abgeschlossen' })).toHaveCount(0);
     const items = page.locator('li[id^="StageDraw_PlayerItem"]');
