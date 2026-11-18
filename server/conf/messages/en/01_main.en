@@ -536,6 +536,6 @@ appView.offlinePreparing                            = Preparing for offline use 
 appView.offlineUnsupported                          = This browser does not support offline use here (HTTPS required).
 appView.storagePersisted                            = Data is stored persistently.
 appView.storageVolatile                             = The browser may delete the data when storage runs low.
-appView.dataHint                                    = Local tournaments are stored only in this browser on this device. Back them up regularly via “Storage → Export tournament to file (JSON)”.
+appView.dataHint                                    = Local tournaments are stored only in this browser on this device. Back them up regularly via “My Tournaments → Export tournament to file”.
 appView.lastTitle                                   = Continue working
 appView.lastBtn                                     = Continue
