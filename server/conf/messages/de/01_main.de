@@ -111,7 +111,6 @@ dlg.leaveTourney.msg                                 = Möchten Sie das aktuelle
 ###
 tourneyNew.title                                    = Neues Turnier erstellen
 tourneyNew.titleEdit                                = Turnier bearbeiten
-tourneyNew.btnLoadCtt                               = Lade ClickTT-Daten
 tourneyNew.secGeneralInfo                           = Allgemeine Informationen
 tourneyNew.name                                     = Turniername
 tourneyNew.namePlh                                  = z.B. 45. Stadtmeisterschaft
@@ -149,6 +148,11 @@ tourneyNew.cloudLoginRequired                       = (Anmeldung erforderlich)
 # TourneyInfo
 ###
 tourneyInfo.title                                   = Turnier-Informationen
+tourneyInfo.ctt.menu                                = ClickTT
+tourneyInfo.ctt.import                              = Import
+tourneyInfo.ctt.update                              = Update
+tourneyInfo.ctt.export                              = Export
+tourneyInfo.ctt.title                               = ClickTT {0}
 tourneyInfo.badgeTourney                            = Turnier
 tourneyInfo.badgeMatchboard                         = Anzeigetafel
 tourneyInfo.date                                    = Datum
@@ -164,7 +168,6 @@ tourneyInfo.actions                                 = Aktionen
 ###
 tourneyAdmin.headerMeta                             = Veranstalter: {0} | ID: {1}
 tourneyAdmin.tabImpExp                              = Import / Export
-tourneyAdmin.tabCtt                                 = ClickTT Update
 tourneyAdmin.tabCert                                = Urkunden Konfiguration
 tourneyAdmin.tabMessages                            = Messages
 tourneyAdmin.tabMatchboard                          = InfoAnzeige

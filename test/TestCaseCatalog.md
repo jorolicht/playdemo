@@ -337,3 +337,15 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 
 ### 24.1 Turnierverwalter (👤)
 - [x] **TC-TL-01 [👤]:** 6er-Paarkreuz: Ein in einem Doppel eingesetzter Spieler ist in den übrigen Doppeln gesperrt (im Einzel weiterhin wählbar) und wird nach Abwahl wieder frei. Steht ein Spieler dennoch in zwei Doppeln, verweigert „Übernehmen“ mit „Ein Spieler kann nur ein Doppel spielen.“
+
+---
+
+## 25. UseCase: ClickTT in der Turnierübersicht (`TourneyInfo`, `ClickTTPanel`)
+
+### 25.1 Turnierverwalter (👤)
+- [x] **TC-CTT-01 [👤]:** Bei Sportart Tischtennis steht im Card-Header von `TourneyInfo` vor „Bearbeiten“ das Dropdown „ClickTT“ mit „Import“, „Update“ und „Export“. Die Administration hat keinen Reiter „ClickTT Update“ mehr.
+- [x] **TC-CTT-02 [👤]:** „Import“ öffnet den Dialog `DlgClickTT`; eine ClickTT-XML wird eingelesen („… Wettbewerbe gefunden“), „Daten übernehmen“ legt daraus ein neues Turnier an.
+- [x] **TC-CTT-03 [👤]:** „Update“ blendet unter der Turnier-Card den Bereich „ClickTT Update“ ein; eine XML-Datei wird eingelesen (im Demo-Turnier: „keine Spieler ohne ID/Lizenznummer“). Das Schließen-Kreuz blendet den Bereich aus.
+- [x] **TC-CTT-06 [👤]:** „Update“ mit einem Spieler ohne Lizenznummer zeigt die Zuordnungstabelle; nach Auswahl und „Zuordnungen speichern“ ist der Spieler zugeordnet und der Bereich geschlossen.
+- [x] **TC-CTT-04 [👤]:** „Export“ blendet den Bereich „ClickTT Export“ ein; nach „ClickTT XML Ergebnis Datei erzeugen“ und Auswahl der Abschnitte wird `clicktt_export_ergebnisse_<id>.xml` heruntergeladen.
+- [x] **TC-CTT-05 [👤]:** Bei anderer Sportart gibt es kein ClickTT-Dropdown; `TourneyNew` hat keinen Button „Lade ClickTT-Daten“ mehr.

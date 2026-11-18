@@ -18,7 +18,6 @@ object TourneyNew extends BasePage with JsWrapper:
   def name = PageNameTyp("TourneyNew")
 
   val BtnSave: HtmlId    = genId(name)
-  val BtnLoadCtt: HtmlId = genId(name)
 
   private var isEditMode: Boolean = false
 
@@ -92,15 +91,6 @@ object TourneyNew extends BasePage with JsWrapper:
     HtmlId(elem.id) match
       case `BtnSave` => 
         saveTourney()
-      case `BtnLoadCtt` =>
-        dialogs.DlgClickTT.show().map {
-          case Right(t) => 
-            Global.currentSelection = Selection(Some(t))
-            comps.ContextHeader.render()
-            loadPage(pages.TourneyInfo.name, "")
-          case Left(err) => 
-            debug(s"ClickTT Import cancelled or failed: $err")
-        }
       case _ => 
         debug(s"Unhandled event in TourneyNew: ${elem.id}")
 

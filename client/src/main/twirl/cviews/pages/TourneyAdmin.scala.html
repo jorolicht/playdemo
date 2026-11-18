@@ -5,9 +5,6 @@
 
 @(tourney: Tourney, activeTab: String, templates: Seq[pages.TourneyAdmin.WpPage], isLoadingTemplates: Boolean)
 
-@unassignedPlayers = @{ pages.TourneyAdmin.unassignedPlayers }
-@xmlPersons = @{ pages.TourneyAdmin.xmlPersons }
-@playerAssignments = @{ pages.TourneyAdmin.playerAssignments }
 @socketMessages = @{ pages.TourneyAdmin.socketMessages }
 
 <div class="container mt-4">
@@ -31,13 +28,6 @@
                 <i class="bi bi-arrow-down-up me-1"></i>@gM("tourneyAdmin.tabImpExp")
             </a>
         </li>
-        @if(tourney.ident != "SIMPLE") {
-        <li class="nav-item">
-            <a class="nav-link @{if(activeTab == "CTT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'CTT')">
-                <i class="bi bi-file-earmark-code me-1"></i>@gM("tourneyAdmin.tabCtt")
-            </a>
-        </li>
-        }
         <li class="nav-item">
             <a class="nav-link @{if(activeTab == "CERT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'CERT')">
                 <i class="bi bi-award me-1"></i>@gM("tourneyAdmin.tabCert")
@@ -94,112 +84,6 @@
                                 <i class="bi bi-upload me-1"></i>@gM("tourneyAdmin.importBtn")
                             </button>
                             <input type="file" id="adminImportFile" style="display: none;" accept=".json" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-
-        @if(activeTab == "CTT" && tourney.ident != "SIMPLE") {
-            <div class="card shadow-sm border-start border-4 border-info mb-4 animate-fade-in">
-                <div class="card-body">
-                    <h5 class="card-title text-secondary fw-bold mb-3">
-                        <i class="bi bi-file-earmark-code me-2 text-info"></i>@gM("tourneyAdmin.cttTitle")
-                    </h5>
-                    <p class="text-muted small">
-                        @gM("tourneyAdmin.cttDesc")
-                    </p>
-                    <button class="btn btn-info text-white fw-bold" onclick="document.getElementById('clickttUpdateFile').click()">
-                        <i class="bi bi-file-earmark-arrow-up me-1"></i>@gM("tourneyAdmin.cttBtn")
-                    </button>
-                    <input type="file" id="clickttUpdateFile" style="display: none;" accept=".xml" />
-                </div>
-            </div>
-
-            @if(unassignedPlayers.nonEmpty) {
-                <div class="card shadow-sm animate-fade-in mb-4">
-                    <div class="card-header bg-light fw-bold text-secondary py-3">
-                        <i class="bi bi-person-check me-2 text-info"></i>@gM("tourneyAdmin.unassignedPlayersTitle")
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0 text-nowrap">
-                                <thead class="table-light small text-muted">
-                                    <tr>
-                                        <th class="ps-4">@gM("tourneyAdmin.thPlayer")</th>
-                                        <th>@gM("tourneyAdmin.thClub")</th>
-                                        <th>@gM("tourneyAdmin.thClickTTMapping")</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @unassignedPlayers.map { p =>
-                                        @defining(pages.TourneyAdmin.getBestCandidates(p, xmlPersons)) { candidates =>
-                                            <tr>
-                                                <td class="ps-4 fw-bold text-dark">@p.firstName @p.lastName @p.birthYear.map(by => s"($by)").getOrElse("")</td>
-                                                <td class="text-muted">@{tourney.clubs.find(_.id.toInt == p.clubId).map(_.name).getOrElse("Kein Verein")}</td>
-                                                <td>
-                                                    <select class="form-select form-select-sm border-secondary-subtle" 
-                                                            id="select-assign-@p.id.value"
-                                                            style="max-width: 555px;">
-                                                        <option value="">@gM("tourneyAdmin.optDoNotAssign")</option>
-                                                        @candidates.map { case (xp, sim) =>
-                                                            @defining(playerAssignments.get(p.id.value).contains(xp.licenceNr)) { isSelected =>
-                                                                <option value="@xp.licenceNr" @{if(isSelected) "selected" else ""}>
-                                                                    @xp.firstname @xp.lastname @if(xp.birthyear.trim.nonEmpty && xp.birthyear.trim != "0"){(@xp.birthyear.trim)} (@xp.clubName.getOrElse("Unbekannter Verein"), Lizenz: @xp.licenceNr) - Übereinstimmung: @{(sim * 100).toInt}%
-                                                                </option>
-                                                            }
-                                                        }
-                                                    </select>
-                                                </td>
-                                            </tr>
-                                        }
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            }
-
-            @if(xmlPersons.nonEmpty && unassignedPlayers.nonEmpty) {
-                <div class="card shadow-sm animate-fade-in mb-4">
-                    <div class="card-body text-end p-3">
-                        @if(unassignedPlayers.isEmpty) {
-                            <span class="text-muted small me-3">Alle Spieler sind bereits zugeordnet. Sie können die Mappings und Zuordnungen aktualisieren.</span>
-                        }
-                        <button class="btn btn-success fw-bold px-4" id="save-assignments-btn">
-                            <i class="bi bi-check-circle me-1"></i>@gM("tourneyAdmin.btnSaveAssignments")
-                        </button>
-                    </div>
-                </div>
-            }
-
-            <!-- Section: Spielergebnisse im ClickTT Format erzeugen für Import -->
-            <div class="card shadow-sm border-start border-4 border-success mb-4 animate-fade-in">
-                <div class="card-body">
-                    <h5 class="card-title text-secondary fw-bold mb-3">
-                        <i class="bi bi-file-earmark-diff me-2 text-success"></i>@gM("tourneyAdmin.genCttTitle")
-                    </h5>
-                    <p class="text-muted small">
-                        @gM("tourneyAdmin.genCttDesc")
-                    </p>
-                    <button class="btn btn-success fw-bold" id="generate-ctt-results-btn">
-                        <i class="bi bi-file-earmark-arrow-down me-1"></i>@gM("tourneyAdmin.genCttBtn")
-                    </button>
-                    
-                    <div id="ctt-export-selection" style="display: none;" class="mt-4 animate-fade-in">
-                        <div id="ctt-export-warning-box" class="alert alert-warning mb-3 text-dark small" style="display: none;">
-                            <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
-                            <strong>Hinweis:</strong> Die folgenden Spieler haben keine zugewiesene ClickTT-ID. Die Spielergebnisse dieser Teilnehmer werden beim Export nicht berücksichtigt:
-                            <ul id="ctt-export-warning-players-list" class="mb-0 mt-2 ps-3 fw-semibold"></ul>
-                        </div>
-
-                        <h6 class="fw-bold text-secondary mb-3">Wählen Sie die Wettbewerbe und Abschnitte aus:</h6>
-                        <div id="ctt-export-competitions-list" class="border rounded p-3 bg-light-subtle"></div>
-                        <div class="text-end mt-3">
-                            <button class="btn btn-primary fw-bold" id="download-ctt-results-btn">
-                                <i class="bi bi-download me-1"></i>Ergebnis XML herunterladen
-                            </button>
                         </div>
                     </div>
                 </div>
