@@ -104,9 +104,16 @@
 
                 <div class="d-flex justify-content-end gap-2 border-top pt-3">
                     <button type="button" class="btn btn-secondary" onclick="appLoadPage('MainView', '')">@gM("btn.cancel")</button>
+                    @if(isEdit) {
                     <button type="submit" class="btn btn-primary px-4" @id(BtnSave, "onclick")>
-                        <i class="bi @if(isEdit){bi-save}else{bi-plus-circle} me-2"></i>@if(isEdit){@gM("tourneyNew.btnSave")}else{@gM("tourneyNew.btnCreate")}
+                        <i class="bi bi-save me-2"></i>@gM("tourneyNew.btnSave")
                     </button>
+                    } else {
+                    <button type="submit" class="btn btn-mv-tourney px-4 fw-bold d-inline-flex align-items-center gap-2" @id(BtnSave, "onclick")>
+                        <span class="fs-5 lh-1" aria-hidden="true">&#x2933;</span>
+                        @gM("tourneyNew.btnCreate")
+                    </button>
+                    }
                 </div>
             </form>
         </div>
