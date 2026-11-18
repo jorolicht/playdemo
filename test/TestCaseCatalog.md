@@ -344,3 +344,10 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-DM-06 [👤]:** Löschen der Hinrunde fragt nach („gemeinsam gelöscht“) und löscht Hin- und Rückrunde.
 - [x] **TC-DM-07 [👤]:** „Auslosung löschen“ an der Hinrunde löst die Kopplung: Die Rückrunde wird gelöscht, der Namenszusatz „– Hinrunde“ entfällt.
 - [x] **TC-DM-08 [👤]:** Doppeltes K.-o.: Löschen eines WB-Ergebnisses, dessen Verlierer in der Verliererrunde schon gespielt hat, weist in der Rückfrage darauf hin und setzt das abhängige LB-Spiel zurück.
+
+---
+
+## 24. UseCase: Mannschaftsaufstellung (`DlgLineup`)
+
+### 24.1 Turnierverwalter (👤)
+- [x] **TC-TL-01 [👤]:** 6er-Paarkreuz: Ein in einem Doppel eingesetzter Spieler ist in den übrigen Doppeln gesperrt (im Einzel weiterhin wählbar) und wird nach Abwahl wieder frei. Steht ein Spieler dennoch in zwei Doppeln, verweigert „Übernehmen“ mit „Ein Spieler kann nur ein Doppel spielen.“
