@@ -169,6 +169,7 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-SA-04 [👤]:** Manuelles Tauschen von Spielern in Gruppen/Runden vor Freigabe des Abschnitts.
 - [x] **TC-SA-05 [👤]:** Freigabe des Abschnitts („Abschnitt starten“). Der Spielplan und die Ergebniseingabe werden aktiviert.
 - [x] **TC-SA-06 [👤]:** Nachfolgender Abschnitt mit vorangegangenem Rundenturnier (`RoundRobin`): Filterung nach „Obere Hälfte“, „Untere Hälfte“ und „Alle“ sowie Anzeige der Vorrundenplatzierung in der Spalte `prev_stage`.
+- [x] **TC-SA-07 [👤]:** In der Administration (`StageAdmin`) steht unter den vier roten Buttons zusätzlich „Wettbewerb finalisieren“ (wie in `StageResult`): nach Rückfrage wird der Wettbewerb finalisiert und die Wettbewerbsübersicht angezeigt; danach ist der Button gesperrt.
 - [x] **TC-SD-10 [👤]:** `StageDraw` bei laufenden Spielen (K.-o.): Hinweis „Auslosung ist abgeschlossen“, kein „SETZEN“ und keine Setzfelder, Start deaktiviert, Klick auf Spieler tauscht nicht.
 - [x] **TC-SD-11 [👤]:** `StageDraw` bei beendetem Abschnitt (Jeder-gegen-Jeden): Hinweis, Klick auf Spieler tauscht nicht. (Ausnahme Schweizer System: Auslosung der Folgerunde im Status beendet bleibt möglich.)
 - [x] **TC-SD-12 [👤]:** `StageDraw` im Status Auslosung: kein Sperrhinweis, Spieler tauschen weiterhin möglich.

@@ -34,6 +34,8 @@ object StageAdmin extends BasePage with JsWrapper:
   val BtnResetCfg:     HtmlId = genId(name)
   /** Button to delete the entire stage. */
   val BtnDeleteFull:   HtmlId = genId(name)
+  /** Button "Wettbewerb finalisieren" (wie in StageResult), unter den Lösch-Buttons. */
+  val BtnFinalizeComp: HtmlId = genId(name)
   /** Checkbox prefix for selecting/deselecting individual players. */
   val ChkBoxPlayer:    HtmlId = genId(name)
   /** Selection dropdown for game draw mode. */
@@ -255,6 +257,9 @@ object StageAdmin extends BasePage with JsWrapper:
 
       case `BtnDeleteFull` => 
         handleDeleteStage()
+
+      case `BtnFinalizeComp` =>
+        StageResult.finalizeCompetition()
 
       case `BtnSortSelected` =>
         sortBySelected = !sortBySelected
