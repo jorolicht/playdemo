@@ -27,6 +27,12 @@ object TourneyInfo extends BasePage with JsWrapper:
   val BtnEditComp:      HtmlId = genId(name)
   /** Button "Löschen" eines Wettbewerbs in der Wettbewerbsliste, Suffix = Wettbewerbs-Id. */
   val BtnDeleteComp:    HtmlId = genId(name)
+  /** Dropdown "ClickTT" im Card-Header (nur Sportart TT): Import als neues Turnier, Update, Export, siehe [[ClickTTPanel]]. */
+  val BtnCttImport:     HtmlId = genId(name)
+  val BtnCttUpdate:     HtmlId = genId(name)
+  val BtnCttExport:     HtmlId = genId(name)
+  /** Schließt den geöffneten ClickTT-Bereich. */
+  val BtnCttClose:      HtmlId = genId(name)
 
   /** Stage-Reiter im Baum der Wettbewerbsliste: (Seitenname, Bootstrap-Icon, Message-Key), wie in StageLayout. */
   val StageTabs: Seq[(String, String, String)] = Seq(
@@ -74,6 +80,7 @@ object TourneyInfo extends BasePage with JsWrapper:
         val stagesByComp = services.StageDB.stages.toSeq.filter(s => s != null && !s.deleted).groupBy(_.coId.value).view.mapValues(Stage.linkedOrder).toMap
 
         setMain(cviews.pages.html.TourneyInfo(tourney, compList, stagesByComp, openComps.toSet, openStages.toSet))
+        ClickTTPanel.wire(tourney)
         true
       }
     } else {
@@ -138,6 +145,25 @@ object TourneyInfo extends BasePage with JsWrapper:
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit = 
     HtmlId(elem.id) match
+      case `BtnCttImport` =>
+        dialogs.DlgClickTT.show().map {
+          case Right(t) =>
+            ClickTTPanel.close()
+            Global.currentSelection = Selection(Some(t))
+            comps.ContextHeader.render()
+            render()
+          case Left(err) =>
+            debug(s"ClickTT Import cancelled or failed: $err")
+        }
+      case `BtnCttUpdate` =>
+        ClickTTPanel.open("UPDATE", services.TourneyDB.tourney)
+        render()
+      case `BtnCttExport` =>
+        ClickTTPanel.open("EXPORT", services.TourneyDB.tourney)
+        render()
+      case `BtnCttClose` =>
+        ClickTTPanel.close()
+        render()
       case `BtnEditTourney` =>
         val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
         dialogs.DlgEditTourney.show(tourney).map {

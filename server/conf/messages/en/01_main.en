@@ -111,7 +111,6 @@ dlg.leaveTourney.msg                                 = Are you sure you want to 
 ###
 tourneyNew.title                                    = Create New Tournament
 tourneyNew.titleEdit                                = Edit Tournament
-tourneyNew.btnLoadCtt                               = Load ClickTT Data
 tourneyNew.secGeneralInfo                           = General Information
 tourneyNew.name                                     = Tournament Name
 tourneyNew.namePlh                                  = e.g. 45th City Championship
@@ -149,6 +148,11 @@ tourneyNew.cloudLoginRequired                       = (Login required)
 # TourneyInfo
 ###
 tourneyInfo.title                                   = Tournament Information
+tourneyInfo.ctt.menu                                = ClickTT
+tourneyInfo.ctt.import                              = Import
+tourneyInfo.ctt.update                              = Update
+tourneyInfo.ctt.export                              = Export
+tourneyInfo.ctt.title                               = ClickTT {0}
 tourneyInfo.badgeTourney                            = Tournament
 tourneyInfo.badgeMatchboard                         = Scoreboard
 tourneyInfo.date                                    = Date
@@ -164,7 +168,6 @@ tourneyInfo.actions                                 = Actions
 ###
 tourneyAdmin.headerMeta                             = Organizer: {0} | ID: {1}
 tourneyAdmin.tabImpExp                              = Import / Export
-tourneyAdmin.tabCtt                                 = ClickTT Update
 tourneyAdmin.tabCert                                = Certificate Configuration
 tourneyAdmin.tabMessages                            = Messages
 tourneyAdmin.tabMatchboard                          = Display Board
