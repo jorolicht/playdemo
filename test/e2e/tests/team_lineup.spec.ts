@@ -35,7 +35,12 @@ async function openLineup6(page: Page) {
   await page.locator('#StageAdmin_SelectDrawMode').selectOption('RR');
   await page.locator('#StageAdmin_BtnStartDrawing').click();
   await page.locator('#StageDraw_BtnStartPlaying').click();
-  await page.locator('button[id^="StageInput_LineupBtn-"]').first().click();
+  await openDialog(page, 1, 0);
+}
+
+/** Öffnet die Aufstellung einer Mannschaft (side 0 = A, 1 = B) der Begegnung gameNo. */
+async function openDialog(page: Page, gameNo: number, side: number) {
+  await page.locator(`#StageInput_LineupBtn-${gameNo}_${side}`).click();
   await expect(page.locator('#DlgLineup_ModalId')).toBeVisible({ timeout: 5000 });
 }
 
@@ -74,5 +79,45 @@ test.describe('UseCase 24: Mannschaftsaufstellung (DlgLineup)', () => {
     await page.locator('#DlgLineup_ApplyId').click();
     await expect.poll(() => msg).toBe('Ein Spieler kann nur ein Doppel spielen.');
     await expect(page.locator('#DlgLineup_ModalId')).toBeVisible();
+  });
+
+  test('TC-TL-02 [👤]: Demo-Ergebnisse stellen fehlende Aufstellungen auf, starten die Begegnungen und tragen die Ergebnisse ein', async ({ page }) => {
+    await openLineup6(page);
+    // Mannschaft A der Begegnung 1 von Hand: Spieler in umgekehrter Reihenfolge
+    const ids = await sel(page, 'A1').locator('option').evaluateAll(os => os.map(o => (o as HTMLOptionElement).value).filter(v => v !== '0'));
+    const rev = [...ids].reverse();
+    const lastA1 = (await sel(page, 'A1').locator(`option[value="${rev[0]}"]`).textContent())!.split(',')[0].trim();
+    for (let i = 0; i < 6; i++) await sel(page, `A${i + 1}`).selectOption(rev[i]);
+    for (let d = 0; d < 3; d++) {
+      await sel(page, `D${d + 1}`, 1).selectOption(rev[2 * d]);
+      await sel(page, `D${d + 1}`, 2).selectOption(rev[2 * d + 1]);
+    }
+    await page.locator('#DlgLineup_ApplyId').click();
+    await expect(page.locator('#DlgLineup_ModalId')).not.toBeVisible({ timeout: 5000 });
+
+    await page.locator('#StageInput_BtnDemoScores').click();
+    await expect(page.locator('.badge', { hasText: 'Beendet' }).first()).toBeVisible({ timeout: 10000 });
+
+    // Spiele der Begegnungen: Positionen und Spieler je Seite (Heim-/Gast-Zelle)
+    const games = (gameNo: number) => page.locator(`tr.enc-sub-${gameNo}`).evaluateAll(trs => trs.map(tr => {
+      const tds = Array.from(tr.querySelectorAll('td')).map(td => td.textContent!.replace(/\s+/g, ' ').trim());
+      const k = tds.findIndex(t => t === 'Doppel' || t === 'Einzel');
+      return { home: tds[k - 1], kind: tds[k], away: tds[k + 1] };
+    }));
+    for (const gameNo of [1, 2, 3]) {
+      const gs = await games(gameNo);
+      expect(gs.length).toBeGreaterThan(0);
+      for (const side of ['home', 'away'] as const) {
+        const pos = (g: any) => side === 'home' ? g[side].split(' ')[0] : g[side].split(' ').pop();
+        const doubles = new Map<string, string>();
+        gs.filter(g => g.kind === 'Doppel').forEach(g => doubles.set(pos(g), g[side]));
+        expect(doubles.size).toBe(3);
+        const names = [...doubles.values()].flatMap(v => v.replace(/^D\d\s*|\s*D\d$/g, '').split('/').map(x => x.trim()));
+        expect(new Set(names).size).toBe(6);              // jeder Spieler nur in einem Doppel
+      }
+    }
+    // eigene Aufstellung von Mannschaft A in Begegnung 1 bleibt: A1 = letzter Spieler des Kaders
+    const a1 = (await games(1)).find(g => g.kind === 'Einzel' && g.home.startsWith('A1 '))!;
+    expect(a1.home).toContain(lastA1);
   });
 });

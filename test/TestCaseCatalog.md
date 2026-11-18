@@ -351,6 +351,7 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 
 ### 24.1 Turnierverwalter (👤)
 - [x] **TC-TL-01 [👤]:** 6er-Paarkreuz: Ein in einem Doppel eingesetzter Spieler ist in den übrigen Doppeln gesperrt (im Einzel weiterhin wählbar) und wird nach Abwahl wieder frei. Steht ein Spieler dennoch in zwei Doppeln, verweigert „Übernehmen“ mit „Ein Spieler kann nur ein Doppel spielen.“
+- [x] **TC-TL-02 [👤]:** „DEMO-Ergebnisse“ bei 6er-Mannschaften: fehlende Aufstellungen beider Mannschaften werden gesetzt (jeder Spieler nur in einem Doppel), die Begegnungen gestartet und alle Ergebnisse eingetragen; eine schon abgegebene Aufstellung bleibt erhalten.
 
 ---
 
