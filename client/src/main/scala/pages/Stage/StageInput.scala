@@ -368,7 +368,9 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     }
 
   /**
-   * Standardaufstellung für Demo-Ergebnisse: Stammspieler in die Einzel, die ersten beiden ins Doppel.
+   * Standardaufstellung für Demo-Ergebnisse: Stammspieler der Reihe nach in die Einzel, in die Doppel jeweils die
+   * nächsten zwei Spieler (D1 = Spieler 1+2, D2 = 3+4, …), damit jeder Spieler nur ein Doppel spielt. Reicht der Kader
+   * nicht, wird von vorn weitergezählt.
    *
    * @param cfg  Spielsystem
    * @param side 0 = Heim, 1 = Gast
@@ -377,8 +379,10 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
   private def defaultLineup(cfg: shared.sport.EncounterCfg, side: Int, team: Team): Lineup =
     val singles = cfg.sidePositions(side).filterNot(cfg.isDoublePos(side, _))
     val doubles = cfg.sidePositions(side).filter(cfg.isDoublePos(side, _))
+    val n       = team.players.length
+    def pair(i: Int): Seq[PlayerId] = if n < 2 then team.players else Seq(team.players((2 * i) % n), team.players((2 * i + 1) % n))
     Lineup((singles.zip(team.players).map { case (pos, id) => pos -> Seq(id) } ++
-            doubles.map(pos => pos -> team.players.take(2))).toMap)
+            doubles.zipWithIndex.map { case (pos, i) => pos -> pair(i) }).toMap)
 
   /**
    * Trägt zufällige Ergebnisse in offene Begegnungen ein (Demo).
