@@ -3,7 +3,7 @@
  * Plugin Name: Tourney
  * Plugin URI: https://turnier-service.info
  * Description: Tourney WordPress Plugin - Professionelle Turnierverwaltung für Tischtennis und Turniersport
- * Version: 1.2.0
+ * Version: 1.2.2
  * Requires at least: 6.0
  * Requires PHP: 8.0
  * Author: Robert Lichtenegger
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // SemVer MAJOR.MINOR.PATCH Versionskonstanten
-define('TOURNEY_VERSION', '1.2.0');
+define('TOURNEY_VERSION', '1.2.2');
 define('TOURNEY_DB_VERSION', '1.2.0');
 
 // Define Plugin-Path
