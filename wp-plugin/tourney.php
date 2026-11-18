@@ -133,6 +133,8 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/api/competition.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/stage.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/json.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/stats.php';
+require_once TOURNEY_PLUGIN_PATH . 'includes/stats-mail.php';
+register_deactivation_hook(__FILE__, 'tourney_stats_mail_unschedule');
 require_once TOURNEY_PLUGIN_PATH . 'includes/seo.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/home-static.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/static-pages.php';
