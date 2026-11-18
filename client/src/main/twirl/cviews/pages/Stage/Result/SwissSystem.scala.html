@@ -170,8 +170,9 @@
                     </button>
                     @if(!cert) {
                     <div class="d-flex">
-                        <button class="btn btn-success px-4 fw-bold" @id(NextStageBtn, "onclick")>
-                            @gM("StageDraw.btn_start_round", (maxRound + 1).toString) <i class="bi bi-play-circle ms-1"></i>
+                        <button class="btn btn-mv-tourney px-4 fw-bold d-inline-flex align-items-center gap-2" @id(NextStageBtn, "onclick")>
+                            <i class="bi bi-play-circle" aria-hidden="true"></i>
+                            @gM("StageDraw.btn_start_round", (maxRound + 1).toString)
                         </button>
                         <span class="text-muted mx-2 align-self-center">@gM("+or")</span>
                         <button class="btn btn-mv-search" @id(FinalizeCompBtn, "onclick") @if(!canFinalize){disabled}>
