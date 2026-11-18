@@ -109,7 +109,7 @@
                                         @if(!stages.exists(_.prefId.contains(r.id)) && !r.isPrimary) {
                                         <button type="button" class="btn btn-mv-tourney d-inline-flex align-items-center gap-2" @id(BtnSuccessor, "onclick", r.id.value.toString) title="@gM("+successor_title")"
                                                 @if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || comp.status == CompStatus.FIN || !pages.Stage.StageResult.hasResults(r)){disabled}>
-                                            <span class="fs-5 lh-1" aria-hidden="true">&#x2933;</span>
+                                            <i class="bi bi-play-circle" aria-hidden="true"></i>
                                             @gM("+successor")
                                         </button>
                                         }
