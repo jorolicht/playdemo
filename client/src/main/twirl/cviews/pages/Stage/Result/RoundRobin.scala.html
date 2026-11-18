@@ -9,6 +9,16 @@
     <div class="card-body">
         <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title_rr", stage.name)</h5>
 
+        @* Rückrunde einer Doppelten Runde: Gesamttabelle oder nur Rückrunde *@
+        @if(stage.isPartner && !cert) {
+        <div class="d-flex justify-content-center mb-3 d-print-none">
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn @if(drrTotal){btn-hero-primary}else{btn-outline-secondary}" @id(BtnDrrTotal, "onclick")>@gM("+tab_total")</button>
+                <button type="button" class="btn @if(!drrTotal){btn-hero-primary}else{btn-outline-secondary}" @id(BtnDrrSecond, "onclick")>@gM("+tab_second")</button>
+            </div>
+        </div>
+        }
+
         <div class="row justify-content-center">
             @if(groups.isEmpty) {
                 <div class="col-12 text-center py-5 text-muted italic">@gM("+no_results")</div>
@@ -56,7 +66,10 @@
             <button class="btn btn-outline-primary" onclick="window.print()">
                 <i class="bi bi-printer me-1"></i>@gM("+btn_print")
             </button>
-            @if(!cert) {
+            @if(stage.isPrimary && !cert) {
+            <div class="text-muted small align-self-center"><i class="bi bi-link-45deg me-1"></i>@gM("+drr_primary_hint")</div>
+            }
+            @if(!cert && !stage.isPrimary) {
             <div class="d-flex">
                 <button class="btn btn-mv-tourney" @id(NextStageBtn, "onclick") @if(!pages.Stage.StageResult.hasResults(stage)){disabled}>
                     @gM("+btn_next") <i class="bi bi-arrow-right ms-1"></i>

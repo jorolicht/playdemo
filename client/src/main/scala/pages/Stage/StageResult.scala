@@ -86,6 +86,25 @@ object StageResult extends BasePage with JsWrapper:
     Global.currentSelection.competition.exists(_.status == CompStatus.RUN) &&
       base.Global.hasTourneyAccess(services.TourneyDB.tourney)
 
+  /** Umschalter der Rückrunde einer Doppelten Runde: Gesamttabelle bzw. nur Rückrunde. */
+  val BtnDrrTotal:  HtmlId = genId(name)
+  val BtnDrrSecond: HtmlId = genId(name)
+
+  /** Ansicht der Rückrunde einer Doppelten Runde: true = Gesamttabelle (Standard), false = nur Rückrunde. */
+  var drrTotal: Boolean = true
+  private var drrStageId: Option[StageId] = None
+
+  /**
+   * Gruppen der Ergebnisansicht eines Jeder-gegen-Jeden-Abschnitts. Bei der Rückrunde einer Doppelten Runde
+   * je nach Umschalter die Gesamttabelle aus Hin- und Rückrunde oder nur die Rückrunde.
+   *
+   * @param stage Abschnitt
+   * @param rr    Gruppe des Abschnitts
+   * @return anzuzeigende Gruppen
+   */
+  def rrGroups(stage: Stage, rr: shared.format.Group): Seq[shared.format.Group] =
+    if (stage.isPartner && drrTotal) StageAdmin.getStageGroups(stage) else Seq(rr)
+
   private var currentStartIndex: Int = 0
   private var resizeListener: Option[js.Function1[dom.Event, Unit]] = None
   private var keydownListener: Option[js.Function1[dom.KeyboardEvent, Unit]] = None
@@ -98,6 +117,10 @@ object StageResult extends BasePage with JsWrapper:
           case StageData.GroupsStage(groups) => 
             setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.Groups(stage, groups.toSeq))))
             true
+          case StageData.KnockoutStage(_) if stage.stageConfig == StageConfig.DEL =>
+            // Verliererrunde eines Doppelten K.-o.: Platzierung und Spiele der Verliererrunde
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.DoubleElimination(stage))))
+            true
           case StageData.KnockoutStage(ko) => 
             setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.SingleElimination(stage))))
             initSlidingWindow()
@@ -106,7 +129,8 @@ object StageResult extends BasePage with JsWrapper:
             setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.SwissSystem(stage, sw))))
             true
           case StageData.RoundRobinStage(rr) => 
-            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.RoundRobin(stage, Seq(rr)))))
+            if (!drrStageId.contains(stage.id)) { drrTotal = true; drrStageId = Some(stage.id) }
+            setMain(cviews.comps.html.StageLayout(stage, "RES")(cviews.pages.Stage.Result.html.PrintArea(stage)(cviews.pages.Stage.Result.html.RoundRobin(stage, rrGroups(stage, rr)))))
             true
       case None => 
         debug("StageResult: No stage selected, redirecting to Competition Info")
@@ -281,6 +305,8 @@ object StageResult extends BasePage with JsWrapper:
           prepareSuccessor(comp, currentStage)
         }
       case `FinalizeCompBtn` => finalizeCompetition()
+      case `BtnDrrTotal`     => drrTotal = true;  render()
+      case `BtnDrrSecond`    => drrTotal = false; render()
       case _ =>
 
   /**

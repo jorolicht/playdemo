@@ -96,7 +96,7 @@ object CompetitionInfo extends BasePage with JsWrapper:
     Global.currentSelection.competition match
       case Some(c) => 
         // Real stages from the tourney object (shared model)
-        val stages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == c.id && !s.deleted)
+        val stages = Stage.linkedOrder(services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == c.id && !s.deleted))
         if (stages.length == 1 && Global.currentSelection.stage.isEmpty) {
           Global.currentSelection = Global.currentSelection.copy(stage = stages.headOption)
         }
@@ -343,17 +343,30 @@ object CompetitionInfo extends BasePage with JsWrapper:
       }
     }
 
+  /**
+   * Text der Rückfrage beim Löschen einer Stage: Nachfolger werden mit gelöscht, gekoppelte Stages
+   * (Hin- und Rückrunde) immer gemeinsam.
+   *
+   * @param r zu löschende Stage
+   * @return Text der Rückfrage
+   */
+  def deleteMessage(r: Stage): String =
+    services.TourneyDB.tourney.partnerOf(r) match
+      case Some(p) =>
+        val (first, second) = if (r.isPrimary) (r, p) else (p, r)
+        gM("CompetitionInfo.delete_linked", first.name, second.name)
+      case None if r.nextIds.nonEmpty =>
+        s"Möchten Sie diese Stage und ALLE ${r.nextIds.length} nachfolgenden Stages wirklich löschen?"
+      case None =>
+        "Möchten Sie diese Stage wirklich löschen?"
+
   private def handleDeleteStage(stageId: StageId): Unit =
     import shared.BoxButton
     val stages = services.TourneyDB.tourney.stages
     val rIdx = stageId.value - 1
     if (rIdx >= 0 && rIdx < 128 && stages(rIdx) != null) {
       val r = stages(rIdx)
-      val msg = if (r.nextIds.nonEmpty) {
-        s"Möchten Sie diese Stage und ALLE ${r.nextIds.length} nachfolgenden Stages wirklich löschen?"
-      } else {
-        "Möchten Sie diese Stage wirklich löschen?"
-      }
+      val msg = deleteMessage(r)
       
       dialogs.DlgMsgbox.show(msg, "Stage löschen", List(BoxButton.Yes, BoxButton.No)).map {
         case BoxButton.Yes => 

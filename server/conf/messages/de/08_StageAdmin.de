@@ -41,3 +41,5 @@ StageAdmin.scoring_unknown = unbekannt, gerechnet wird mit der neuesten Version
 StageAdmin.system_label = Spielsystem
 StageAdmin.system_info = Beschreibung des gewählten Spielsystems
 StageAdmin.info_select_mode = Bitte Spielmodus/Format auswählen, dann kann die Auslosung generiert werden.
+StageAdmin.linked_info = Gekoppelt mit "{0}": Konfiguration, Teilnehmer und Auslosung stammen aus dieser Stage.
+StageAdmin.final_reset = Finale mit Rückspiel (falls der Sieger der Verliererrunde das erste Finale gewinnt)

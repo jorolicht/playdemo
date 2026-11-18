@@ -1,0 +1,108 @@
+@*
+ * Ergebnisse der Verliererrunde eines Doppelten K.-o. (gekoppelt an die Gewinnerrunde):
+ * Platzierung nach shared.format.DoubleElimination.placements und die Spiele der Verliererrunde mit Finale je Runde.
+ *@
+@import shared.model.*
+@import shared.format.*
+@import cviews.helper.html.*
+@import pages.Stage.StageResult.*
+
+@(stage: Stage, cert: Boolean = false)
+
+@compOpt = @{ services.TourneyDB.tourney.competitions.find(c => c != null && c.id == stage.coId) }
+@pants = @{ compOpt.map(_.pants1Stage.toSeq).getOrElse(Seq.empty) }
+
+@playerName(sno: SNO) = @{
+    if (sno.isNN) gM("+tbd")
+    else if (sno.isBye) gM("+bye")
+    else pants.find(_.id == sno).map(_.name).getOrElse(sno.toString)
+}
+
+@rounds = @{ stage.matches.collect { case m: MEntryKo => m }.toSeq.groupBy(_.round).toSeq.sortBy(_._1) }
+
+@roundName(r: Int) = @{
+    if (r == shared.format.DoubleElimination.RoundFinal) gM("+round_final")
+    else if (r == shared.format.DoubleElimination.RoundReset) gM("+round_final_reset")
+    else gM("+round_lb", (r - 100).toString)
+}
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-4 border-bottom pb-2 text-secondary">@gM("+title", stage.name)</h5>
+
+        @* Platzierung *@
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8 col-lg-6">
+                <div class="border rounded overflow-hidden shadow-sm bg-white">
+                    <div class="bg-dark text-white p-2 text-center fw-bold">@gM("+de_placement")</div>
+                    <table class="table table-sm table-striped mb-0 small" id="de-placement">
+                        <thead class="table-secondary">
+                            <tr><th class="ps-3 text-center" style="width: 80px;">@gM("+rank_header")</th><th>@gM("+name_header")</th></tr>
+                        </thead>
+                        <tbody>
+                            @defining(shared.format.DoubleElimination.placements(stage)) { places =>
+                                @if(places.isEmpty) {
+                                    <tr><td colspan="2" class="text-center text-muted py-3">@gM("+no_results")</td></tr>
+                                }
+                                @places.map { case (sno, place) =>
+                                    <tr>
+                                        <td class="ps-3 fw-bold text-center">@place</td>
+                                        <td>@playerName(sno)@if(cert) {@CertBtn(stage, playerName(sno), place.toString)}</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        @* Spiele der Verliererrunde und Finale, je Runde eine Spalte *@
+        <div class="d-flex flex-wrap gap-3 de-rounds">
+            @rounds.map { case (r, ms) =>
+                <div class="de-round flex-fill">
+                    <div class="fw-bold small text-secondary border-bottom mb-2 pb-1">@roundName(r)</div>
+                    @ms.sortBy(_.gameNo).map { m =>
+                        <div class="border rounded bg-white shadow-sm mb-2 p-2 small de-match" data-game="@m.gameNo">
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem;">
+                                <span>@gM("+game_no", m.gameNo.toString)</span>
+                                @if(shared.format.DoubleElimination.resetNotNeeded(m)) { <span>@gM("+final_reset_not_needed")</span> }
+                            </div>
+                            @if(!shared.format.DoubleElimination.resetNotNeeded(m)) {
+                            <div class="d-flex justify-content-between @if(m.finished && m.getWinner() == m.stNoA){fw-bold}">
+                                <span class="@if(m.stNoA.isBye || m.stNoA.isNN){text-muted}">@playerName(m.stNoA)</span>
+                                <span>@{if (m.finished || m.status == MEntry.MS_RUN) m.sets._1.toString else "-"}</span>
+                            </div>
+                            <div class="d-flex justify-content-between @if(m.finished && m.getWinner() == m.stNoB){fw-bold}">
+                                <span class="@if(m.stNoB.isBye || m.stNoB.isNN){text-muted}">@playerName(m.stNoB)</span>
+                                <span>@{if (m.finished || m.status == MEntry.MS_RUN) m.sets._2.toString else "-"}</span>
+                            </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="mt-4 pt-3 border-top d-flex justify-content-between d-print-none">
+            <button class="btn btn-outline-primary" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i>@gM("+btn_print")
+            </button>
+            @if(!cert) {
+            <div class="d-flex">
+                <button class="btn btn-mv-tourney" @id(NextStageBtn, "onclick") @if(!pages.Stage.StageResult.hasResults(stage)){disabled}>
+                    @gM("+btn_next") <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+                <span class="text-muted mx-2 align-self-center">@gM("+or")</span>
+                <button class="btn btn-mv-search" @id(FinalizeCompBtn, "onclick") @if(!canFinalize){disabled}>
+                    <i class="bi bi-lock me-1"></i>@gM("+btn_finalize")
+                </button>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .de-round { min-width: 200px; max-width: 280px; }
+</style>

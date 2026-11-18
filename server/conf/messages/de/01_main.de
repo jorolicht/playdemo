@@ -502,6 +502,10 @@ stageLayout.tabResult                               = Ergebnisse
 stageLayout.tabScoresheet                           = Schiri
 stageLayout.tabCertificate                          = Urkunden
 stageLayout.showCertificate                         = Urkunde anzeigen
+stageLayout.firstLeg                                = Hinrunde
+stageLayout.secondLeg                               = Rückrunde
+stageLayout.winners                                 = Gewinnerrunde
+stageLayout.losers                                  = Verliererrunde
 
 footer.realizedWith                                 = Realisiert mit Scala.js & WordPress.
 footer.followUs                                     = Folgen Sie uns auf {0}

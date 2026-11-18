@@ -512,6 +512,21 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     }
 
   /**
+   * Doppeltes K.-o.: Hängen an einem Spiel der Gewinnerrunde bereits gespielte Spiele der Verliererrunde?
+   * Dann werden diese beim Löschen des Ergebnisses ebenfalls zurückgesetzt (Hinweis in der Rückfrage).
+   *
+   * @param stage  Stage des Spiels
+   * @param gameNo Spielnummer
+   * @return true, wenn ein Spieler des Spiels in der Verliererrunde schon ein Ergebnis hat
+   */
+  private def lbAffected(stage: Stage, gameNo: Int): Boolean =
+    stage.link.exists(l => l.primary && l.kind == LinkKind.DE) && stage.existsMatchNo(gameNo) && {
+      val m = stage.getMatch(gameNo)
+      services.TourneyDB.tourney.partnerOf(stage).exists(_.matches.exists(lm =>
+        lm.status == MEntry.MS_FIN && Seq(lm.stNoA, lm.stNoB).exists(s => s == m.stNoA || s == m.stNoB)))
+    }
+
+  /**
    * Resets/deletes the match result and updates dependent block/playable statuses.
    */
   def deleteMatchResult(gameNo: Int): Unit =
@@ -528,8 +543,9 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
         import shared.BoxButton
 
         val isTeam = TeamEncounter.isTeam(comp.typ)
+        val lbHint = if (lbAffected(stage, gameNo)) " " + gM("+de_reset_warning") else ""
         DlgMsgbox.show(
-          if (isTeam) gM("+delete_team_confirm") else "Möchten Sie das Ergebnis dieses Spiels wirklich löschen?",
+          (if (isTeam) gM("+delete_team_confirm") else "Möchten Sie das Ergebnis dieses Spiels wirklich löschen?") + lbHint,
           if (isTeam) gM("+delete_team_title") else "Spielergebnis löschen",
           List(BoxButton.Yes, BoxButton.No)
         ).map {

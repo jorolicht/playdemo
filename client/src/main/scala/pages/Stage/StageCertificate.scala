@@ -20,11 +20,13 @@ object StageCertificate extends BasePage with JsWrapper:
         comps.ContextHeader.render()
         val view = stage.data match
           case StageData.GroupsStage(groups)  => cviews.pages.Stage.Result.html.Groups(stage, groups.toSeq, cert = true)
+          case StageData.KnockoutStage(_) if stage.stageConfig == StageConfig.DEL =>
+            cviews.pages.Stage.Result.html.DoubleElimination(stage, cert = true)
           case StageData.KnockoutStage(_)     => cviews.pages.Stage.Result.html.SingleElimination(stage, cert = true)
           case StageData.SwissStage(sw)       => cviews.pages.Stage.Result.html.SwissSystem(stage, sw, cert = true)
-          case StageData.RoundRobinStage(rr)  => cviews.pages.Stage.Result.html.RoundRobin(stage, Seq(rr), cert = true)
+          case StageData.RoundRobinStage(rr)  => cviews.pages.Stage.Result.html.RoundRobin(stage, StageAdmin.getStageGroups(stage), cert = true)
         setMain(cviews.comps.html.StageLayout(stage, "CERT")(view))
-        if (stage.data.isInstanceOf[StageData.KnockoutStage]) StageResult.initSlidingWindow()
+        if (stage.data.isInstanceOf[StageData.KnockoutStage] && stage.stageConfig != StageConfig.DEL) StageResult.initSlidingWindow()
         true
       case _ => 
         debug("StageCertificate: No stage selected, redirecting to Competition Info")

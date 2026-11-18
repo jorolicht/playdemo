@@ -81,6 +81,9 @@ object StageAdmin extends BasePage with JsWrapper:
     comp.status == CompStatus.CFG &&
       services.TourneyDB.tourney.stages.forall(s => s == null || s.coId != comp.id || s.status == StageStatus.CFG)
   val BtnSortSelected: HtmlId = genId(name)
+  /** Doppeltes K.-o.: Checkbox "Finale mit Rückspiel" und ihr Container (nur bei Spielmodus DE sichtbar). */
+  val ChkFinalReset:   HtmlId = genId(name)
+  val BoxFinalReset:   HtmlId = genId(name)
 
   var currentFilterOption: String = "ALL"
   var sortBySelected: Boolean = false
@@ -210,6 +213,7 @@ object StageAdmin extends BasePage with JsWrapper:
           DlgMsgbox.show("Möchten Sie wirklich die gesamte Auslosung löschen? Alle Ergebnisse werden gelöscht!", "Auslosung löschen", List(BoxButton.Yes, BoxButton.No)).map {
             case BoxButton.Yes =>
               activeCustomGroupCount = None
+              unlinkFirstLeg(stage)
               stage.matches.clear()
               stage.status = StageStatus.CFG
               services.TourneyDB.tourney.updateStage(stage) match {
@@ -231,6 +235,7 @@ object StageAdmin extends BasePage with JsWrapper:
           DlgMsgbox.show("Möchten Sie wirklich die gesamte Konfiguration dieser Stage löschen und zurücksetzen?", "Konfiguration löschen", List(BoxButton.Yes, BoxButton.No)).map {
             case BoxButton.Yes =>
               activeCustomGroupCount = None
+              unlinkFirstLeg(stage)
               stage.stageConfig = StageConfig.CFG
               stage.status = StageStatus.CFG
               stage.size = 0
@@ -424,6 +429,9 @@ object StageAdmin extends BasePage with JsWrapper:
       val isDefault = select.value == "UNKN"
       val info = gE(InfoSelectMode)
       if (info != null) info.classList.toggle("d-none", !isDefault)
+      // Doppeltes K.-o.: Option "Finale mit Rückspiel"
+      val reset = gE(BoxFinalReset)
+      if (reset != null) reset.classList.toggle("d-none", select.value != StageConfig.DE.productPrefix)
       val isAllowed = stage.status == StageStatus.CFG && base.Global.hasTourneyAccess(services.TourneyDB.tourney)
       
       btn.disabled = isDefault || !isAllowed
@@ -449,6 +457,8 @@ object StageAdmin extends BasePage with JsWrapper:
         if (sysSelect != null) r.encSystem = sysSelect.value
         val encSelect = dom.document.getElementById("rnd-enc-variant").asInstanceOf[dom.html.Select]
         if (encSelect != null) r.encVariant = encSelect.value
+        val resetChk = gE(ChkFinalReset).asInstanceOf[dom.html.Input]
+        r.finalReset = cfg == StageConfig.DE && resetChk != null && resetChk.checked
         
         // Get selected participants
         val selectedSnos = StageAdmin.this.selectedSnos()
@@ -528,14 +538,21 @@ object StageAdmin extends BasePage with JsWrapper:
       }
     }
 
+  /**
+   * Löst beim Zurücksetzen der Auslosung oder Konfiguration einer ersten Stage (Hinrunde bzw. Gewinnerrunde)
+   * die Kopplung: Die Partner-Stage wird gelöscht und der Namenszusatz ("– Hinrunde", "– Gewinnerrunde") entfernt.
+   *
+   * @param stage zurückgesetzte Stage
+   */
+  private def unlinkFirstLeg(stage: Stage): Unit =
+    if (stage.isPrimary)
+      val suffix = if (stage.link.exists(_.kind == LinkKind.DE)) gM("StageDraw.de_first", "") else gM("StageDraw.drr_first", "")
+      services.TourneyDB.tourney.unlinkStage(stage, stage.name.stripSuffix(suffix))
+
   private def handleDeleteStage(): Unit =
     import shared.BoxButton
     val r = Global.currentSelection.stage.get
-    val msg = if (r.nextIds.nonEmpty) {
-      s"Möchten Sie diese Stage und ALLE ${r.nextIds.length} nachfolgenden Stages wirklich löschen?"
-    } else {
-      "Möchten Sie diese Stage wirklich löschen?"
-    }
+    val msg = CompetitionInfo.deleteMessage(r)
     
     DlgMsgbox.show(msg, "Stage löschen", List(BoxButton.Yes, BoxButton.No)).map {
       case BoxButton.Yes => 
@@ -555,6 +572,7 @@ object StageAdmin extends BasePage with JsWrapper:
 
   /**
    * Liefert alle Gruppen eines Abschnitts, sowohl für Gruppen-Abschnitte als auch für Rundenturniere (RoundRobin).
+   * Für die Rückrunde einer Doppelten Runde ist das die Gesamttabelle aus Hin- und Rückrunde.
    *
    * @param stage Der Abschnitt, aus dem die Gruppen extrahiert werden sollen.
    * @return Eine Sequenz aller Gruppen des Abschnitts.
@@ -562,6 +580,9 @@ object StageAdmin extends BasePage with JsWrapper:
   def getStageGroups(stage: Stage): Seq[Group] =
     stage.data match
       case StageData.GroupsStage(groups) => groups.toSeq
+      // Rückrunde einer Doppelten Runde: Gesamttabelle aus Hin- und Rückrunde
+      case StageData.RoundRobinStage(rrGroup) if stage.isPartner =>
+        services.TourneyDB.tourney.partnerOf(stage).flatMap(first => RoundRobin.combinedTable(first, stage)).toSeq
       case StageData.RoundRobinStage(rrGroup) => Seq(rrGroup)
       case _ => Seq.empty
 

@@ -327,6 +327,11 @@ case class Tourney(
         stages(targetIdx) = updatedR
         addDirtyStage(updatedR)
 
+        // Gekoppelte Partner-Stage (z. B. Rückrunde) mit löschen
+        r.link.foreach { l =>
+          if (stages.exists(s => s != null && s.id == l.partner && !s.deleted)) deleteStage(l.partner, doSync = false)
+        }
+
         // Remove from predecessor's nextIds
         r.prefId.foreach { pid =>
           val pIdx = if (pid.value > 0 && pid.value <= 128 && stages(pid.value - 1) != null && stages(pid.value - 1).id == pid) pid.value - 1 else stages.indexWhere(s => s != null && s.id == pid)
@@ -384,8 +389,120 @@ case class Tourney(
         val updatedR = stage.copy(id = finalId, version = stage.version + 1)
         stages(targetIdx) = updatedR
         addDirtyStage(updatedR)
+        syncPartner(updatedR)
         if (doSync) triggerStageSync()
         Right(updatedR)
+      }
+    }
+
+  /**
+   * Gibt die Rückrunde einer Doppelten Runde zum Spielen frei (AUS → EIN), sobald die Hinrunde beendet ist.
+   *
+   * @param stage gerade gespeicherte Stage
+   */
+  private def releasePartner(stage: Stage): Unit =
+    if (stage.isPrimary && stage.status == StageStatus.FIN) {
+      stage.link.foreach { l =>
+        val pIdx = stages.indexWhere(s => s != null && s.id == l.partner && !s.deleted)
+        if (pIdx >= 0 && stages(pIdx).status == StageStatus.AUS) {
+          val p = stages(pIdx)
+          val released = p.copy(status = StageStatus.EIN, version = p.version + 1)
+          stages(pIdx) = released
+          addDirtyStage(released)
+        }
+      }
+    }
+
+  /**
+   * Hält gekoppelte Stages nach dem Speichern einer Stage konsistent: Doppelte Runde → Rückrunde freigeben,
+   * Doppeltes K.-o. → Verlierer der Gewinnerrunde und Sieger der Verliererrunde weitergeben.
+   *
+   * @param stage gerade gespeicherte Stage
+   */
+  private def syncPartner(stage: Stage): Unit =
+    stage.link.foreach { l =>
+      l.kind match
+        case LinkKind.DRR => releasePartner(stage)
+        case LinkKind.DE  =>
+          val pIdx = stages.indexWhere(s => s != null && s.id == l.partner && !s.deleted)
+          if (pIdx >= 0) {
+            val other = stages(pIdx)
+            val (wb, lb) = if (stage.isPrimary) (stage, other) else (other, stage)
+            // die gespeicherte LB teilt sich die Matches mit `lb`; bei gespeicherter WB die LB neu ablegen
+            if (DoubleElimination.propagate(wb, lb) && stage.isPrimary) {
+              val upd = lb.copy(version = lb.version + 1)
+              stages(pIdx) = upd
+              addDirtyStage(upd)
+            }
+          }
+    }
+
+  /** Liefert die gekoppelte Partner-Stage einer Stage (nicht gelöscht). */
+  def partnerOf(stage: Stage): Option[Stage] =
+    stage.link.flatMap(l => stages.find(s => s != null && s.id == l.partner && !s.deleted))
+
+  /**
+   * Legt zur ausgelosten und gestarteten ersten Stage eines Verbunds die gekoppelte Partner-Stage an.
+   *
+   * - Doppelte Runde: Rückrunde mit gleichen Teilnehmern in gleicher Reihenfolge, gleichen Paarungen mit
+   *   vertauschtem Heim/Gast, Spielnummern wieder ab 1. Status AUS, bis die Hinrunde beendet ist.
+   * - Doppeltes K.-o.: Verliererrunde mit Finale (ggf. Rückspiel), Status EIN wie die Gewinnerrunde; Freilose
+   *   der ersten Runde werden sofort durchgereicht.
+   *
+   * @param primary     erste Stage (Matches bereits initialisiert)
+   * @param kind        Art der Kopplung
+   * @param primaryName neuer Name der ersten Stage
+   * @param partnerName Name der Partner-Stage
+   * @param doSync      Synchronisation auslösen
+   * @return (erste Stage, Partner-Stage) wie gespeichert
+   */
+  def addLinkedStage(primary: Stage, kind: LinkKind, primaryName: String, partnerName: String, doSync: Boolean = true): Either[AppError, (Stage, Stage)] =
+    val cfg = kind match
+      case LinkKind.DRR => StageConfig.DRR2
+      case LinkKind.DE  => StageConfig.DEL
+    addStage(primary.coId, None, partnerName, cfg, primary.size, primary.noPlayers, doSync = false).flatMap { p =>
+      p.noWinSets  = primary.noWinSets
+      p.encVariant = primary.encVariant
+      p.encSystem  = primary.encSystem
+      p.demo       = primary.demo
+      p.finalReset = primary.finalReset
+      kind match
+        case LinkKind.DRR =>
+          p.data = primary.data match
+            case StageData.RoundRobinStage(g) => StageData.RoundRobinStage(RoundRobin.returnGroup(g))
+            case other                        => other
+          p.matches ++= RoundRobin.mirrorMatches(primary.matches.toSeq, p.id)
+          p.status = StageStatus.AUS
+        case LinkKind.DE =>
+          p.data = StageData.KnockoutStage(KoStage(p.id.value, partnerName, p.coId.value.toLong, primary.noWinSets, size = DoubleElimination.wbSize(primary)))
+          p.matches ++= DoubleElimination.initLbMatches(p.id, primary, primary.finalReset)
+          p.status = StageStatus.EIN
+      p.link       = Some(StageLink(kind, primary = false, partner = primary.id))
+      primary.name = primaryName
+      primary.link = Some(StageLink(kind, primary = true, partner = p.id))
+      val res = for
+        first  <- updateStage(primary, doSync = false)
+        second <- updateStage(p, doSync = false)
+      yield (first, second)
+      if (doSync) triggerStageSync()
+      res
+    }
+
+  /**
+   * Löst die Kopplung einer Hinrunde: Die Rückrunde wird gelöscht, die Hinrunde ist wieder eine einfache Stage.
+   * Aufruf beim Zurücksetzen der Auslosung oder Konfiguration der Hinrunde.
+   *
+   * @param primary Hinrunde
+   * @param name    Name der Hinrunde nach dem Lösen
+   */
+  def unlinkStage(primary: Stage, name: String): Unit =
+    primary.link.foreach { l =>
+      primary.link = None
+      primary.name = name
+      // Kopplung der Rückrunde vorher lösen, sonst löscht deleteStage die Hinrunde mit
+      stages.find(s => s != null && s.id == l.partner && !s.deleted).foreach { p =>
+        p.link = None
+        deleteStage(p.id, doSync = false)
       }
     }
 

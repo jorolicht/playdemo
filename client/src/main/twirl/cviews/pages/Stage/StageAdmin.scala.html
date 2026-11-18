@@ -19,8 +19,13 @@
 
 @disabledIfAus = @{ if(stage.status != StageStatus.CFG || !base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin) "disabled" else "" }
 @disabledNoAccess = @{ if(!base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin) "disabled" else "" }
+@* Rückrunde einer Doppelten Runde: Auslosung und Konfiguration kommen aus der Hinrunde *@
+@disabledPartner = @{ if(stage.isPartner || !base.Global.hasTourneyAccess(services.TourneyDB.tourney) || isFin) "disabled" else "" }
 
 <div class="stage-cfg-container">
+    @if(stage.isPartner) {
+    <div class="alert alert-info py-2 small mb-3"><i class="bi bi-link-45deg me-1"></i>@gM("+linked_info", services.TourneyDB.tourney.partnerOf(stage).map(_.name).getOrElse(""))</div>
+    }
     <!-- SECTION 1: CONTROL -->
     <div class="card shadow-sm mb-4">
         <div class="card-header card-header-neutral py-2">
@@ -43,10 +48,10 @@
                         <button class="btn btn-outline-red3 btn-sm" @id(BtnResetInp, "onclick") title="Danach Anzeige Eingabe" @disabledNoAccess>
                             <i class="bi bi-eraser me-1"></i>@gM("+btn_reset_results")
                         </button>
-                        <button class="btn btn-outline-red3 btn-sm" @id(BtnResetDrw, "onclick") title="Danach Anzeige Auslosung" @disabledNoAccess>
+                        <button class="btn btn-outline-red3 btn-sm" @id(BtnResetDrw, "onclick") title="Danach Anzeige Auslosung" @disabledPartner>
                             <i class="bi bi-shuffle me-1"></i>@gM("+btn_reset_draw")
                         </button>
-                        <button class="btn btn-outline-red3 btn-sm" @id(BtnResetCfg, "onclick") title="Danach Anzeige Konfiguration" @disabledNoAccess>
+                        <button class="btn btn-outline-red3 btn-sm" @id(BtnResetCfg, "onclick") title="Danach Anzeige Konfiguration" @disabledPartner>
                             <i class="bi bi-gear-wide-connected me-1"></i>@gM("+btn_reset_cfg")
                         </button>
                         <button class="btn btn-red3 btn-sm" @id(BtnDeleteFull, "onclick") @disabledNoAccess>
@@ -99,6 +104,10 @@
                                 @m.label @if(!m.isEnabled){ (@gM("+not_possible"))}
                             </option>
                         }
+                        @* intern angelegte Modi (z. B. Rückrunde einer Doppelten Runde) sind nicht auswählbar, aber anzuzeigen *@
+                        @if(stage.stageConfig != StageConfig.UNKN && stage.stageConfig != StageConfig.CFG && !modes.exists(_.stageConfig == stage.stageConfig)) {
+                            <option value="@stage.stageConfig.productPrefix" selected>@gM(stage.stageConfig.msgCode)</option>
+                        }
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -108,6 +117,13 @@
                         <option value="3" @{if(stage.noWinSets == 3 || stage.noWinSets < 2 || stage.noWinSets > 4) "selected" else ""}>@gM("+best_of_5")</option>
                         <option value="4" @{if(stage.noWinSets == 4) "selected" else ""}>@gM("+best_of_7")</option>
                     </select>
+                </div>
+                @* Doppeltes K.-o.: Finale mit Rückspiel (sichtbar nur bei Spielmodus DE) *@
+                <div class="col-md-4 d-flex align-items-end @if(stage.stageConfig != StageConfig.DE){d-none}" @id(BoxFinalReset)>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" @id(ChkFinalReset) @if(stage.finalReset){checked} @disabledIfAus>
+                        <label class="form-check-label" @forAttr(ChkFinalReset)>@gM("+final_reset")</label>
+                    </div>
                 </div>
                 @encCfg.map { cfg =>
                     <div class="col-md-4">
