@@ -5,7 +5,7 @@ Tags: tournament, table tennis, sports, scalajs, playframework
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,11 @@ Das Plugin verwendet Semantic Versioning (SemVer) `MAJOR.MINOR.PATCH`. Datenbank
 Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel (`filemtime`) oder der aktuellen Plugin-Version versioniert, sodass Browser-Caches nach Updates sofort invalidiert werden.
 
 == Changelog ==
+
+= 1.2.1 =
+* Mannschaftsaufstellung: Jeder Spieler kann nur in einem Doppel eingesetzt werden.
+* Auslosung: Der Start-Button nennt die Spielphase („⤳ Start <Name>“).
+* Offline-App: Der Sicherungshinweis verweist auf „Meine Turniere → Turnier exportieren in Datei“.
 
 = 1.2.0 =
 * Mannschaftswettbewerbe für 2er-, 3er-, 4er- und 6er-Mannschaften mit passenden Spielsystemen und Ergebniseingabe je Begegnung; Mannschaften auch per CSV-Import.
