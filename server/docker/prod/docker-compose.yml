@@ -72,6 +72,8 @@ services:
   wp-cli:
     image: jorolich/wp-cli-image:latest
     container_name: wp-cli-instance
+    # nach einem Neustart des Servers wieder starten (System-Cron nutzt den Container für WP-Cron)
+    restart: unless-stopped
     user: root
     volumes:
       - ./wp_data:/var/www/html
