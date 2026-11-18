@@ -41,8 +41,8 @@ object DlgLineup extends BaseDialog with JsWrapper:
 
   /**
    * Sperrt in jeder Auswahl die Spieler, die dort nicht mehr gewählt werden dürfen: In den Einzeln spielt jeder
-   * Spieler höchstens einmal, im Doppel sind die beiden Partner verschieden. Ein Einzelspieler darf zusätzlich im
-   * Doppel spielen.
+   * Spieler höchstens einmal, in den Doppeln ebenfalls (Partner verschieden, kein Spieler in zwei Doppeln). Ein
+   * Einzelspieler darf zusätzlich im Doppel spielen.
    *
    * @param cfg  Spielsystem
    * @param side 0 = Mannschaft A, 1 = Mannschaft B
@@ -59,9 +59,9 @@ object DlgLineup extends BaseDialog with JsWrapper:
     singles.foreach { pos =>
       block(sel(pos, 1), singles.filter(_ != pos).map(p => value(sel(p, 1))).toSet - "0")
     }
-    cfg.sidePositions(side).filter(cfg.isDoublePos(side, _)).foreach { pos =>
-      block(sel(pos, 1), Set(value(sel(pos, 2))) - "0")
-      block(sel(pos, 2), Set(value(sel(pos, 1))) - "0")
+    val doubles = for pos <- cfg.sidePositions(side).filter(cfg.isDoublePos(side, _)); idx <- 1 to 2 yield (pos, idx)
+    doubles.foreach { case (pos, idx) =>
+      block(sel(pos, idx), doubles.filter(_ != (pos, idx)).map((p, i) => value(sel(p, i))).toSet - "0")
     }
 
   /**
@@ -98,8 +98,10 @@ object DlgLineup extends BaseDialog with JsWrapper:
       }.toMap
       val singles = map.filter { case (pos, _) => !cfg.isDoublePos(side, pos) }.values.flatten.toSeq
       val badDouble = map.exists { case (pos, ids) => cfg.isDoublePos(side, pos) && (ids.length == 1 || (ids.length == 2 && ids(0) == ids(1))) }
+      val doubles = map.filter { case (pos, _) => cfg.isDoublePos(side, pos) }.values.flatten.toSeq
       if singles.distinct.length != singles.length then dom.window.alert(gM("DlgLineup.err_single"))
       else if badDouble then dom.window.alert(gM("DlgLineup.err_double"))
+      else if doubles.distinct.length != doubles.length then dom.window.alert(gM("DlgLineup.err_double_once"))
       else
         if !p.isCompleted then p.success(Right(Lineup(map)))
         modal.hide()

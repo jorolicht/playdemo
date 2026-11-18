@@ -43,3 +43,4 @@ DlgLineup.cancel = Abbrechen
 DlgLineup.save = Übernehmen
 DlgLineup.err_single = Ein Spieler kann nur ein Einzel spielen.
 DlgLineup.err_double = Ein Doppel braucht zwei verschiedene Spieler.
+DlgLineup.err_double_once = Ein Spieler kann nur ein Doppel spielen.

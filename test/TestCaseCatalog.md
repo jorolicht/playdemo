@@ -330,3 +330,10 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-LANG-02 [🌐]:** Der Besuch einer `/en/`-URL merkt Englisch (localStorage `tourney_lang`); deutsche URLs zeigen trotzdem Deutsch (mit Hinweis auf die englische Fassung); Seiten ohne Sprach-URL (z. B. Login, Turnierseiten) nutzen die gemerkte Sprache, sonst die Browsersprache.
 - [x] **TC-LANG-03 [🌐]:** Der Sprachumschalter DE | EN in der Navbar führt zur Gegenstück-URL (`/impressum/` ↔ `/en/imprint/`) und merkt die Wahl.
 - [x] **TC-LANG-04 [🌐]:** Englischsprachige Besucher ohne gemerkte Wahl sehen auf deutschen Seiten den Hinweis „This page is also available in English“ (Link auf die englische Fassung); Schließen merkt Deutsch ohne Neuladen. Deutschsprachige Besucher sehen keinen Hinweis.
+
+---
+
+## 24. UseCase: Mannschaftsaufstellung (`DlgLineup`)
+
+### 24.1 Turnierverwalter (👤)
+- [x] **TC-TL-01 [👤]:** 6er-Paarkreuz: Ein in einem Doppel eingesetzter Spieler ist in den übrigen Doppeln gesperrt (im Einzel weiterhin wählbar) und wird nach Abwahl wieder frei. Steht ein Spieler dennoch in zwei Doppeln, verweigert „Übernehmen“ mit „Ein Spieler kann nur ein Doppel spielen.“
