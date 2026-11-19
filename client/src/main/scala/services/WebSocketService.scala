@@ -147,6 +147,9 @@ object WebSocketService:
             case ex: Throwable =>
               debug(s"[WebSocket] Error parsing REFEREE_SUBMIT message: ${ex.getMessage}")
           }
+        } else if (msg.startsWith(MultiUser.SyncPrefix)) {
+          // Multiuser: Änderung eines anderen Bearbeiters
+          MultiUser.onRemoteChange(msg.substring(MultiUser.SyncPrefix.length))
         } else {
           messageListener.foreach(_(msg))
         }

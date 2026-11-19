@@ -67,6 +67,11 @@ function tourney_get_stages(WP_REST_Request $request)
 
 /**
  * Synchronisiert die Stages-Daten mit optimistic locking via Version-Counter.
+ *
+ * Body: {"events": [Stage, ...], "bases": {"<id>": <Version>, ...}, "log": [{"id": <StageId>, "text": "..."}, ...]}
+ * - bases (optional): Version, auf der die Änderung beruht; weicht die gespeicherte Version ab, hat ein anderer
+ *   Bearbeiter die Stage inzwischen gespeichert → 409 version_mismatch, der Client führt die Änderungen zusammen.
+ * - log (optional): Texte für das Änderungsprotokoll.
  */
 function tourney_sync_stages(WP_REST_Request $request)
 {
@@ -83,23 +88,29 @@ function tourney_sync_stages(WP_REST_Request $request)
     }
 
     $events = $body["events"] ?? [];
+    // Multiuser: Version, auf der die Änderung des Clients beruht (Stage-ID => Version beim Laden/letzten Speichern)
+    $bases = is_array($body["bases"] ?? null) ? $body["bases"] : [];
 
     // 🔒 Optimistic locking Check vorab für alle Events
     foreach ($events as $stage) {
         if (!isset($stage["id"])) continue;
-        
+
         $id = intval($stage["id"]);
         if ($id < 1 || $id > 128) continue;
-        
+
         $key = sprintf('stage%03d', $id);
         $meta_ver = "_{$key}_ts"; // Wir nutzen das Feld für die Version
-        
+
         $stored_ver = intval(get_post_meta($post_id, $meta_ver, true));
         $client_ver = intval($stage["version"] ?? 0);
 
         // Optimistic Locking:
-        // Client version must be greater than or equal to stored version to prevent overwriting newer updates.
-        if ($client_ver < $stored_ver) {
+        // Mit Basisversion: die Stage darf seit dem Laden durch den Client nicht verändert worden sein.
+        // Ohne Basisversion (ältere Clients, Import): Client-Version >= gespeicherte Version.
+        $conflict = array_key_exists((string)$id, $bases)
+            ? $stored_ver !== intval($bases[(string)$id])
+            : $client_ver < $stored_ver;
+        if ($conflict) {
             return ApiHelper::error(
                 "version_mismatch", 
                 "Stage $id has been modified by another user.", 
@@ -126,6 +137,9 @@ function tourney_sync_stages(WP_REST_Request $request)
         update_post_meta($post_id, $key, wp_slash(wp_json_encode($stage, JSON_UNESCAPED_UNICODE)));
         update_post_meta($post_id, $meta_ver, $client_ver);
     }
+
+    // Änderungsprotokoll (Ergebnisse), siehe includes/api/changelog.php
+    tourney_changelog_add($post_id, 'stage', $body["log"] ?? []);
 
     return [
         "success" => true

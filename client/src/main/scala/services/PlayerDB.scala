@@ -62,9 +62,11 @@ object PlayerDB extends ComWrapper with Debouncer:
       ).flatMap {
         case Right(res) =>
           version = res.version
+          MultiUser.notifyChange("player", base.Messages.gM("multiuser.playersChanged"))
           Future.successful(Right(()))
         case Left(err) if err.is("version_mismatch") =>
           Logging.error(s"Sync fehlgeschlagen: Version-Mismatch bei Spielern. Lade neu... ${err.msg}")
+          if (MultiUser.enabled) MultiUser.showToast(base.Messages.gM("multiuser.reloaded", base.Messages.gM("multiuser.players")))
           load().map(_ => Left(err))
         case Left(err) =>
           Future.successful(Left(err))

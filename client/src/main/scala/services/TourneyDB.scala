@@ -10,6 +10,7 @@ import shared.basic.AppError
 import scala.util.control.NonFatal
 import base.{Global, Logging}
 import shared.model.Tourney
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * TourneyDB provides methods to manage tournament data and synchronize it with the server.
@@ -147,13 +148,64 @@ object TourneyDB extends ComWrapper with Debouncer:
       ).flatMap {
         case Right(res) =>
           version = res.version
+          // Multiuser: neue Version immer melden (sonst Konflikt beim nächsten Speichern der anderen), Hinweis nur bei
+          // geänderten Grunddaten
+          val basic = basicJson(tourney)
+          MultiUser.notifyChange("tourney", if (basic != lastBasic) base.Messages.gM("multiuser.tourneyChanged") else "")
+          lastBasic = basic
           Future.successful(Right(()))
+        case Left(err) if err.is("version_mismatch") && MultiUser.enabled =>
+          // Multiuser: nur die Grunddaten neu laden; Wettbewerbe, Spieler, Vereine und Stages haben eigene Speicherung
+          Logging.error(s"Sync fehlgeschlagen: Version-Mismatch bei Turnierdaten. Lade Grunddaten neu... ${err.msg}")
+          MultiUser.showToast(base.Messages.gM("multiuser.reloaded", base.Messages.gM("multiuser.tourney")))
+          refreshBasic().map(_ => Left(err))
         case Left(err) if err.is("version_mismatch") =>
           Logging.error(s"Sync fehlgeschlagen: Version-Mismatch bei Turnierdaten. Lade neu... ${err.msg}")
           load(tourney.wpId).map(_ => Left(err))
         case Left(err) =>
           Future.successful(Left(err))
       }
+
+  /** Multiuser: zuletzt geladene bzw. gespeicherte Grunddaten (JSON ohne Listen), siehe [[basicJson]]. */
+  private var lastBasic: String = ""
+
+  /**
+   * Grunddaten eines Turniers als JSON, ohne Vereine, Spieler, Wettbewerbe und Stages.
+   *
+   * @param t Turnier
+   * @return JSON zum Vergleich
+   */
+  private def basicJson(t: Tourney): String =
+    write(t.copy(clubs = ArrayBuffer(), players = ArrayBuffer(), competitions = ArrayBuffer(), stages = ArrayBuffer()))
+
+  /**
+   * Multiuser: lädt die Grunddaten des Turniers (Name, Termine, Veranstalter …) neu, behält aber Vereine, Spieler,
+   * Wettbewerbe und Stages, die über eigene Endpunkte gespeichert werden (die Kopien in den Grunddaten sind veraltet).
+   *
+   * @return erledigt bzw. Fehler
+   */
+  def refreshBasic(): Future[Either[AppError, Unit]] =
+    val cur = tourney
+    ajaxGet[TourneyResponse](routeGet, List("postId" -> cur.wpId.toString), host = Global.homeUrl).map {
+      case Right(res) if res.tourney != null && res.tourney.name.nonEmpty && tourney.eq(cur) =>
+        val nt = res.tourney
+        nt.clubs.clear();        nt.clubs ++= cur.clubs
+        nt.players.clear();      nt.players ++= cur.players
+        nt.competitions.clear(); nt.competitions ++= cur.competitions
+        nt.stages.clear();       nt.stages ++= cur.stages
+        tourney = nt
+        version = res.version
+        lastBasic = basicJson(nt)
+        ClubDB.initHandler()
+        PlayerDB.initHandler()
+        CompetitionDB.initHandler()
+        StageDB.initHandler()
+        if (Global.currentSelection.tourney.isDefined)
+          Global.currentSelection = Global.currentSelection.copy(tourney = Some(nt))
+        Right(())
+      case Right(_)  => Right(())
+      case Left(err) => Left(err)
+    }
 
   /**
    * Loads basic tournament data from the WordPress server.
@@ -208,6 +260,7 @@ object TourneyDB extends ComWrapper with Debouncer:
             case Right(res) if res.tourney != null && res.tourney.name.nonEmpty =>
               tourney = res.tourney
               version = res.version
+              lastBasic = basicJson(res.tourney)
               if (!Global.isLocalMode && res.tourney.slug.nonEmpty) {
                 Global.tourneySlug = res.tourney.slug
               }

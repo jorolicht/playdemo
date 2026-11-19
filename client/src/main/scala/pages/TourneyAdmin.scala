@@ -53,7 +53,31 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
     }
   }
 
-  private var activeTab = "IMPEXP" // Tabs: "IMPEXP", "CERT", "MESSAGES", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT"
+  private var activeTab = "IMPEXP" // Tabs: "IMPEXP", "CERT", "MESSAGES", "CHANGELOG", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT"
+
+  /** Multiuser: zuletzt geladenes Änderungsprotokoll (neueste Einträge zuerst), Reiter "CHANGELOG". */
+  var changelog: Seq[services.MultiUser.ChangeLogEntry] = Seq.empty
+
+  /**
+   * Zeitpunkt eines Protokolleintrags für die Anzeige.
+   *
+   * @param ts Zeitpunkt "JJJJ-MM-TT hh:mm:ss"
+   * @return "TT.MM.JJJJ hh:mm:ss", bei unbekanntem Format unverändert
+   */
+  def formatTs(ts: String): String =
+    ts match
+      case s"$y-$m-$d $time" => s"$d.$m.$y $time"
+      case other             => other
+
+  /** Lädt das Änderungsprotokoll und zeigt den Reiter erneut an. */
+  private def fetchChangelog(): Unit =
+    services.MultiUser.loadChangelog().map {
+      case Right(entries) =>
+        changelog = entries
+        if (Global.activePageName == name.value && activeTab == "CHANGELOG") render()
+      case Left(err) =>
+        error(s"TourneyAdmin: Änderungsprotokoll konnte nicht geladen werden: ${err.msgCode}")
+    }
 
   /**
    * Renders the tournament administration page for the currently selected tournament.
@@ -66,8 +90,16 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   def render(param: String = ""): Boolean =
     Global.currentSelection.tourney match
       case Some(tourney) =>
-        if (param.nonEmpty && List("IMPEXP", "CERT", "MESSAGES", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT").contains(param.toUpperCase)) {
+        val tabParam = param.nonEmpty && List("IMPEXP", "CERT", "MESSAGES", "CHANGELOG", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT").contains(param.toUpperCase)
+        if (tabParam) {
           activeTab = param.toUpperCase
+        }
+        if (activeTab == "CHANGELOG" && !services.MultiUser.enabled) {
+          activeTab = "IMPEXP"
+        }
+        // Protokoll beim Öffnen des Reiters (Aufruf mit Parameter) neu laden
+        if (activeTab == "CHANGELOG" && tabParam) {
+          fetchChangelog()
         }
         if (tourney.ident == "SIMPLE" && activeTab == "HOMEPAGE") {
           activeTab = "IMPEXP"

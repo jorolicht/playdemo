@@ -365,3 +365,16 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-CTT-06 [👤]:** „Update“ mit einem Spieler ohne Lizenznummer zeigt die Zuordnungstabelle; nach Auswahl und „Zuordnungen speichern“ ist der Spieler zugeordnet und der Bereich geschlossen.
 - [x] **TC-CTT-04 [👤]:** „Export“ blendet den Bereich „ClickTT Export“ ein; nach „ClickTT XML Ergebnis Datei erzeugen“ und Auswahl der Abschnitte wird `clicktt_export_ergebnisse_<id>.xml` heruntergeladen.
 - [x] **TC-CTT-05 [👤]:** Bei anderer Sportart gibt es kein ClickTT-Dropdown; `TourneyNew` hat keinen Button „Lade ClickTT-Daten“ mehr.
+
+---
+
+## 26. UseCase: Multiuser-Betrieb (`services/MultiUser`, `StageDB`, `includes/api/changelog.php`)
+
+Zwei angemeldete Bearbeiter (A, B) im selben Cloud-Turnier auf turnier-service.info (nicht Embed-Plugin, Demo- oder Lokalmodus). Änderungen laufen über den WebSocket des Play-Servers (`SYNC:`-Meldung, Weiterleitung an die anderen Clients des Turniers); die Daten liegen weiter in WordPress.
+
+### 26.1 Turnierverwalter (👤)
+- [x] **TC-MU-01 [👤]:** A trägt ein Ergebnis ein; bei B erscheint es ohne Neuladen in der Ergebniseingabe, dazu der Hinweis „<Name>: <Wettbewerb> – <Stage>: Spiel n …“.
+- [x] **TC-MU-02 [👤]:** Bei der Aktualisierung durch eine Änderung von A bleiben bei B eingegebene, noch nicht gespeicherte Werte erhalten.
+- [x] **TC-MU-03 [👤]:** B arbeitet auf altem Stand (Meldung unterdrückt) und speichert ein anderes Spiel derselben Stage: WordPress meldet einen Konflikt (409), B führt die Änderungen je Spiel zusammen und speichert erneut; beide Ergebnisse bleiben erhalten.
+- [x] **TC-MU-04 [👤]:** A und B tragen dasselbe Spiel unterschiedlich ein: Die letzte Eingabe (B) gilt, B erhält den Hinweis „… Ihre Eingabe gilt: … Spiel n“, A zeigt danach das Ergebnis von B.
+- [x] **TC-MU-05 [👤]:** `TourneyAdmin`, Reiter „Änderungen“: Das Protokoll zeigt Zeit, Bearbeiter und Ergebnis jeder Eingabe (neueste zuerst), bei Spiel n beide Eingaben.

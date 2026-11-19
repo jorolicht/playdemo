@@ -131,6 +131,7 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/api/club.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/tourney.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/competition.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/stage.php';
+require_once TOURNEY_PLUGIN_PATH . 'includes/api/changelog.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/json.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/stats.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/stats-mail.php';

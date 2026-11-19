@@ -60,6 +60,13 @@ class WebSocketManagerActor extends Actor with Logging {
         case _ =>
           sender() ! false
       }
+
+    case Relay(slug, msg, from) =>
+      clients.get(slug).foreach { set =>
+        val others = set.filterNot(_ == from)
+        logger.info(s"Relaying change notification for slug '$slug' to ${others.size} other client(s)")
+        others.foreach(_ ! WebSocketClientActor.SendToClient(msg))
+      }
   }
 }
 
@@ -87,6 +94,15 @@ object WebSocketManagerActor {
   case class Register(slug: String, ref: ActorRef)
   case class Unregister(slug: String, ref: ActorRef)
   case class SendToSlug(slug: String, msg: String)
+
+  /**
+   * Multiuser: Änderungsmeldung eines Clients an alle anderen Clients desselben Turniers weiterreichen.
+   *
+   * @param slug Kanal (Turnier)
+   * @param msg  Meldung im Format `SYNC:<json>`
+   * @param from Client-Actor des Absenders (erhält die Meldung nicht zurück)
+   */
+  case class Relay(slug: String, msg: String, from: ActorRef)
 }
 
 /**
@@ -108,6 +124,11 @@ class WebSocketClientActor(out: ActorRef, manager: ActorRef, slug: String) exten
   def receive: Receive = {
     case "ping" =>
       // Keep-alive message
+
+    case msg: String if msg.startsWith(WebSocketClientActor.SyncPrefix) =>
+      // Multiuser: Änderungsmeldung (Daten liegen in WordPress, die Empfänger laden selbst nach)
+      if (msg.length <= WebSocketClientActor.MaxSyncLength) manager ! Relay(slug, msg, self)
+      else logger.warn(s"[Server WebSocket] change notification too long (${msg.length}) for slug '$slug'")
 
     case msg: String =>
       logger.info(s"[Server WebSocket] message from client ($slug): $msg")
@@ -132,4 +153,10 @@ object WebSocketClientActor {
     Props(new WebSocketClientActor(out, manager, slug))
 
   case class SendToClient(msg: String)
+
+  /** Präfix der Multiuser-Änderungsmeldungen (`SYNC:<json>`). */
+  val SyncPrefix = "SYNC:"
+
+  /** Maximale Länge einer Änderungsmeldung in Zeichen. */
+  val MaxSyncLength = 4096
 }

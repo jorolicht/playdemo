@@ -60,9 +60,11 @@ object CompetitionDB extends ComWrapper with Debouncer:
         host = Global.homeUrl
       ).flatMap {
         case Right(res) =>
+          MultiUser.notifyChange("competition", s"${dirty.map(_.name).distinct.mkString(", ")} ${base.Messages.gM("multiuser.changed")}")
           Future.successful(Right(()))
         case Left(err) if err.is("version_mismatch") =>
           Logging.error(s"Sync fehlgeschlagen: Version-Mismatch bei Wettbewerben. Lade neu... ${err.msg}")
+          if (MultiUser.enabled) MultiUser.showToast(base.Messages.gM("multiuser.reloaded", base.Messages.gM("multiuser.competitions")))
           load().map(_ => Left(err))
         case Left(err) =>
           Future.successful(Left(err))

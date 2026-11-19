@@ -56,9 +56,11 @@ object ClubDB extends ComWrapper with Debouncer:
       ).flatMap {
         case Right(res) =>
           version = res.version
+          MultiUser.notifyChange("club", base.Messages.gM("multiuser.clubsChanged"))
           Future.successful(Right(()))
         case Left(err) if err.is("version_mismatch") =>
           Logging.error(s"Sync fehlgeschlagen: Version-Mismatch bei Vereinen. Lade neu... ${err.msg}")
+          if (MultiUser.enabled) MultiUser.showToast(base.Messages.gM("multiuser.reloaded", base.Messages.gM("multiuser.clubs")))
           load().map(_ => Left(err))
         case Left(err) =>
           Future.successful(Left(err))
