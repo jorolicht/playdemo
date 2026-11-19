@@ -212,15 +212,17 @@
                                     </div>
                                 }
                             </div>
-                            @if(queryStr.nonEmpty && base.Global.usePlayServer) {
-                                <div class="col-md-5">
-                                    <div class="position-relative rounded-3 overflow-hidden border shadow-sm" style="max-height: 180px;">
+                            @if((addr.zip.trim.nonEmpty || addr.city.trim.nonEmpty) && base.Global.usePlayServer) {
+                                @* Karte vom Play-Server (Ort mittig mit Marker); ohne Treffer für die Adresse wird die Spalte entfernt *@
+                                <div class="col-md-5" id="TourneyWelcome_MapCol">
+                                    <div class="position-relative rounded-3 overflow-hidden border shadow-sm">
                                         @defining(if (base.Global.playUrl.nonEmpty) base.Global.playUrl.trim.stripSuffix("/") else "/srv") { playBase =>
-                                            <img src="@playBase/api/map/static?query=@java.net.URLEncoder.encode(queryStr, "UTF-8")&zoom=15" alt="Veranstaltungsort Karte" class="w-100 object-fit-cover" style="height: 180px;" />
+                                            <a href="https://www.openstreetmap.org/search?query=@java.net.URLEncoder.encode(queryStr, "UTF-8")" target="_blank" rel="noopener noreferrer" title="OpenStreetMap">
+                                                <img src="@playBase/api/map/static?query=@java.net.URLEncoder.encode(queryStr, "UTF-8")&zoom=16" alt="Veranstaltungsort Karte" id="TourneyWelcome_MapImg"
+                                                     class="w-100 h-auto d-block" width="640" height="320"
+                                                     onerror="var c = document.getElementById('TourneyWelcome_MapCol'); if (c) c.remove();" />
+                                            </a>
                                         }
-                                        <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white p-2 text-center small">
-                                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>@if(addr.description.nonEmpty) { @addr.description } else { @addr.city }
-                                        </div>
                                     </div>
                                 </div>
                             }

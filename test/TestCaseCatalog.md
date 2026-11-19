@@ -76,10 +76,12 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 
 ### 3.1 Anonymer Besucher (🌐)
 - [x] **TC-TW-01 [🌐]:** Aufrufen von `TourneyWelcome`. Turniername, Veranstalter, Austragungsort, Datum und Wettbewerbsübersicht werden angezeigt.
-- [x] **TC-TW-02 [🌐]:** Überprüfung des DSGVO-konformen Karten-Previews. Die Karte wird über den internen Traefik-Proxy (`/srv/api/map/static`) ohne direkte Verbindung zu OpenStreetMap geladen. Das Badge „DSGVO-konform“ ist sichtbar.
+- [x] **TC-TW-02 [🌐]:** DSGVO-konforme Karte (`/srv/api/map/static`): Der Play-Server lädt Kacheln und Adresssuche selbst und liefert ein PNG 640×320 mit dem Ort in der Mitte, Marker und „© OpenStreetMap-Mitwirkende“; für eine unbekannte Adresse 404.
 - [x] **TC-TW-03 [🌐]:** Klick auf den Button „iCal Kalendereintrag (.ics)“. Eine iCalendar-Datei wird zum Download bereitgestellt.
 - [x] **TC-TW-04 [🌐]:** Klick auf „Online-Anmeldung“ bei einem zukünftigen Turnier/Wettbewerb. Der Dialog zur öffentlichen Spieler-Anmeldung (`DlgPublicRegistration`) öffnet sich.
 - [x] **TC-TW-05 [🌐]:** Klick auf eine Wettbewerbszeile. Die Anwendung wechselt zur öffentlichen Detailansicht `CompetitionWelcome`.
+- [x] **TC-TW-07 [🌐]:** Cloud-Turnier mit bekannter Adresse: Unter „Adresse & Anfahrt“ steht die Karte vollständig (Hinweis „© OpenStreetMap-Mitwirkende“ sichtbar); ein Klick öffnet die Adresse bei OpenStreetMap.
+- [x] **TC-TW-08 [🌐]:** Unbekannte Adresse bzw. weder PLZ noch Ort: Es wird keine Karte angezeigt; Adresse und die Links OpenStreetMap/Google Maps bleiben.
 
 ### 3.2 Turnierverwalter & Admin (👤 / 👑)
 - [x] **TC-TW-06 [👤/👑]:** In der Kopfzeile wird zusätzlich ein Button „Zur Turnierverwaltung“ angezeigt, der direkt zur Admin-Ansicht `TourneyInfo` führt.
