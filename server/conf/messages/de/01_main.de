@@ -167,7 +167,6 @@ tourneyInfo.actions                                 = Aktionen
 # TourneyAdmin
 ###
 tourneyAdmin.headerMeta                             = Veranstalter: {0} | ID: {1}
-tourneyAdmin.tabImpExp                              = Import / Export
 tourneyAdmin.tabCert                                = Urkunden Konfiguration
 tourneyAdmin.tabMessages                            = Messages
 tourneyAdmin.tabMatchboard                          = InfoAnzeige
@@ -179,12 +178,6 @@ tourneyAdmin.clEmpty                                = Noch keine Einträge vorha
 tourneyAdmin.clTime                                 = Zeit
 tourneyAdmin.clUser                                 = Bearbeiter
 tourneyAdmin.clChange                               = Änderung
-tourneyAdmin.exportTitle                            = Turnier exportieren
-tourneyAdmin.exportDesc                             = Laden Sie die aktuellen Daten dieses Turniers als JSON-Datei herunter. Das Backup kann später jederzeit wieder importiert werden.
-tourneyAdmin.exportBtn                              = JSON-Export herunterladen
-tourneyAdmin.importTitle                            = Turnier importieren
-tourneyAdmin.importDesc                             = Wählen Sie ein zuvor exportiertes Turnier (.json) aus, um die Daten einzulesen und zu laden.
-tourneyAdmin.importBtn                              = JSON-Datei einlesen...
 tourneyAdmin.cttTitle                               = ClickTT Update (Spieler-Datenabgleich)
 tourneyAdmin.cttDesc                                = Laden Sie eine aktualisierte ClickTT XML-Datei hoch, um Spieler-IDs (internalNr) und Lizenznummern (licenceNr) für neu angemeldete Teilnehmer automatisch zuzuordnen und abzugleichen.
 tourneyAdmin.cttBtn                                 = ClickTT XML-Datei auswählen...
@@ -340,6 +333,8 @@ tourneyHomepage.registerNow                         = Jetzt anmelden
 tourneyHomepage.registrationClosed                  = Anmeldeschluss
 tourneyHomepage.registrationUntil                   = bis {0}
 tourneyHomepage.registrationFrom                    = Anmeldung ab {0}
+tourneyHomepage.registrationDisabled                = Anmeldung nicht freigeschaltet
+tourneyHomepage.registrationDisabledHint            = Turnier-Administration → Homepage
 tourneyHomepage.addCalendar                         = Kalendereintrag erstellen
 tourneyHomepage.icsDownload                         = Kalender-Datei (.ics)
 tourneyHomepage.googleCal                           = Google Kalender
@@ -559,7 +554,7 @@ appView.offlinePreparing                            = Wird für die Offline-Nutz
 appView.offlineUnsupported                          = Dieser Browser unterstützt die Offline-Nutzung hier nicht (HTTPS erforderlich).
 appView.storagePersisted                            = Daten werden dauerhaft gespeichert.
 appView.storageVolatile                             = Der Browser darf die Daten bei Speichermangel löschen.
-appView.dataHint                                    = Lokale Turniere liegen nur in diesem Browser auf diesem Gerät. Sichern Sie sie regelmäßig über „Meine Turniere → Turnier exportieren in Datei“.
+appView.dataHint                                    = Lokale Turniere liegen nur in diesem Browser auf diesem Gerät. Sichern Sie sie regelmäßig über „Meine Turniere → Turnier in Datei exportieren“.
 appView.lastTitle                                   = Weiterarbeiten
 appView.lastBtn                                     = Fortsetzen
 
@@ -589,6 +584,7 @@ reg.captchaFallback                                 = Sicherheitsabfrage: Was is
 reg.submit                                          = Anmelden
 reg.successTitle                                    = Anmeldung erfolgreich!
 reg.successMsg                                      = Vielen Dank, {0}! Ihre Anmeldung für „{1}“ ist eingegangen.
+reg.defaultHint                                     = Bitte spätestens 30 Min vor Beginn des Wettbewerbs bei der Turnierleitung melden um Teilnahme zu gewährleisten.
 reg.errRequired                                     = Bitte füllen Sie alle Pflichtfelder (*) aus.
 reg.errTtr                                          = Bitte geben Sie einen TTR-Wert zwischen 0 und 3500 ein (0 = kein TTR).
 reg.errBirthYear                                    = Bitte geben Sie einen gültigen Jahrgang ein (z. B. 1985).

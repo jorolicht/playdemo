@@ -11,59 +11,9 @@ import shared.model.*
 
 /**
  * Service manager for administrative tasks in the tournament management application.
- * Provides functions for exporting and importing tournament data.
+ * Provides the import of tournament data (export to file: [[TourneyDB.triggerExportDownload]]).
  */
 object AdminManager extends ComWrapper {
-
-  /**
-   * Exports the currently loaded tournament as a JSON file.
-   * Filters out null entries from the competitions and stages lists to optimize size.
-   */
-  def exportCurrentTourney(): Unit = {
-    val t = TourneyDB.tourney
-    if (t.wpId == 0) {
-      dom.window.alert("Es ist kein Turnier geladen, das exportiert werden könnte.")
-      return
-    }
-
-    // Clone and clean arrays to exclude null items from serialized JSON
-    val cleanTourney = t.copy(
-      clubs = t.clubs.clone(),
-      players = t.players.clone(),
-      competitions = t.competitions.filter(_ != null),
-      stages = t.stages.filter(_ != null)
-    )
-
-    val rawJson = write(cleanTourney, indent = 2)
-    val jsonString = collapseJsonArrays(rawJson, Seq("points", "sets", "ballDiff", "balls", "pos", "sno"))
-    val blob = new dom.Blob(js.Array(jsonString), dom.BlobPropertyBag(`type` = "application/json"))
-    val url = dom.URL.createObjectURL(blob)
-    val a = dom.document.createElement("a").asInstanceOf[dom.html.Anchor]
-    a.href = url
-    a.download = s"tourney_export_${t.wpId}_${t.startDate}.json"
-    dom.document.body.appendChild(a)
-    a.click()
-    dom.document.body.removeChild(a)
-    dom.URL.revokeObjectURL(url)
-  }
-
-  /**
-   * Collapses multi-line JSON arrays for specified keys so they are formatted on a single line.
-   * Useful for keys like "points", "sets", "ballDiff", and "balls" to make the JSON more readable and compact.
-   */
-  private def collapseJsonArrays(json: String, keys: Seq[String]): String = {
-    val keysPattern = keys.map(scala.util.matching.Regex.quote).mkString("|")
-    val regex = s"""(?s)"($keysPattern)"\\s*:\\s*\\[([^\\]]*?)\\]""".r
-    regex.replaceAllIn(json, m => {
-      val key = m.group(1)
-      val content = m.group(2)
-      val cleaned = content.split(",")
-        .map(_.trim)
-        .filter(_.nonEmpty)
-        .mkString(",")
-      s""""$key": [$cleaned]"""
-    })
-  }
 
   /**
    * Imports a tournament from a JSON string.

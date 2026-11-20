@@ -180,24 +180,74 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
     services.StartManager.start(services.StartKind.Demo)
 
   /**
-   * Exports the current tournament data to a local JSON file.
+   * Turnier, das über "Meine Turniere → Turnier in Datei exportieren" gespeichert werden kann.
+   *
+   * @param tourney Turnier
+   * @param version Version, die mit dem Turnier gespeichert wird
+   * @param local   true = lokal im Browser gespeichertes Turnier, false = geöffnetes Cloud-Turnier
+   */
+  case class ExportCandidate(tourney: shared.model.Tourney, version: Int, local: Boolean)
+
+  /**
+   * Turniere, die in eine Datei exportiert werden können: das lokale Turnier (geöffnet oder im Browser gespeichert)
+   * und das geöffnete Cloud-Turnier, sofern der Benutzer es bearbeiten darf.
+   *
+   * @return 0–2 Kandidaten, lokales Turnier zuerst
+   */
+  def exportCandidates: List[ExportCandidate] =
+    import base.Global
+    import services.TourneyDB
+    val opened  = Global.currentSelection.tourney
+    val inLocal = Global.isLocalMode || Global.isDemoMode
+    val local =
+      if (inLocal) opened.map(t => ExportCandidate(t, TourneyDB.version, true))
+      else
+        Option(dom.window.localStorage.getItem("App.demo_tourney")).filter(_.trim.nonEmpty).flatMap { raw =>
+          try
+            val req = shared.basic.Pickle.read[TourneyDB.TourneySyncRequest](raw)
+            Option(req.tourney).filter(_.name.nonEmpty).map(t => ExportCandidate(t, req.version, true))
+          catch case _: Throwable => None
+        }
+    val cloud =
+      if (inLocal) None
+      else opened.filter(t => t.wpId > 0 && t.wpId != 999999 && Global.hasTourneyAccess(t)).map(t => ExportCandidate(t, TourneyDB.version, false))
+    local.toList ++ cloud.toList
+
+  /**
+   * "Meine Turniere → Turnier in Datei exportieren": Gibt es ein lokales und ein Cloud-Turnier, wird zuerst gefragt,
+   * welches gespeichert werden soll; danach Dialog mit Dateiname und Download.
    */
   private def doLocalExport(): Unit = {
-    import services.TourneyDB
-    import base.Global
+    import shared.BoxButton
 
-    val tourney = Global.currentSelection.tourney.getOrElse(TourneyDB.tourney)
-    if (tourney.wpId != 0 || tourney.name.nonEmpty) {
-      dialogs.DlgExportTourney.show(tourney, saveAndLeave = false).map {
+    def exportTo(c: ExportCandidate): Unit =
+      dialogs.DlgExportTourney.show(c.tourney, saveAndLeave = false).map {
         case Some(filename) if filename.nonEmpty =>
-          TourneyDB.triggerExportDownload(filename, tourney)
+          services.TourneyDB.triggerExportDownload(filename, c.tourney, c.version)
           render()   // neue Datei in "Meine Turniere"
         case _ =>
-          debug("Local export cancelled")
+          debug("Export cancelled")
       }
-    } else {
-      dom.window.alert("Kein aktives Turnier zum Exportieren vorhanden.")
-    }
+
+    exportCandidates match
+      case Nil         => debug("Export: no tournament available")
+      case c :: Nil    => exportTo(c)
+      case candidates  =>
+        val local = candidates.find(_.local).get
+        val cloud = candidates.find(!_.local).get
+        dialogs.DlgMsgbox.show(
+          gM("navbar.exportChoosePrompt"),
+          gM("navbar.exportChooseTitle"),
+          List(BoxButton.Cancel, BoxButton.Yes, BoxButton.No),
+          labels = Map(
+            BoxButton.Cancel -> gM("navbar.loadOverwriteCancel"),
+            BoxButton.Yes    -> gM("navbar.exportChooseLocal", local.tourney.name),
+            BoxButton.No     -> gM("navbar.exportChooseCloud", cloud.tourney.name))
+        ).map {
+          case BoxButton.Yes => exportTo(local)
+          case BoxButton.No  => exportTo(cloud)
+          case _             => debug("Export cancelled")
+        }
   }
 
   /**

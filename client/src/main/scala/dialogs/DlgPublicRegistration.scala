@@ -38,6 +38,14 @@ object DlgPublicRegistration extends BaseDialog with JsWrapper:
   private case class Form(lastname: String, firstname: String, club: String, ttr: Option[Int],
                           birthYear: Option[Int], email: String, whatsApp: String)
 
+  /**
+   * Hinweis für Spieler nach der Anmeldung (Turnier-Administration, Reiter "Homepage").
+   *
+   * @return Text des Turnierleiters, ohne eigene Angabe der Standardtext, "" = kein Hinweis
+   */
+  def registrationHint: String =
+    Global.currentAci.registrationHint.getOrElse(gM("reg.defaultHint")).trim
+
   /** Liest das Formular. */
   private def readForm(): Form =
     def v(id: String) = getInput(gE(HtmlId(id))).trim
@@ -86,16 +94,29 @@ object DlgPublicRegistration extends BaseDialog with JsWrapper:
 
     val applyBtn = gE(ApplyId)
 
-    // Zeigt die Erfolgsmeldung und schließt den Dialog mit dem angemeldeten Spieler.
+    // Zeigt die Erfolgsmeldung. Mit Hinweis des Turnierleiters bleibt der Dialog offen, bis der Spieler ihn
+    // schließt, sonst schließt er sich nach kurzer Zeit; Ergebnis ist der angemeldete Spieler.
     def finish(form: Form, player: Player): Unit =
       gE(HtmlId("reg-step-1")).classList.add("d-none")
       gE(HtmlId("reg-step-3")).classList.remove("d-none")
       applyBtn.classList.add("d-none")
       gE(HtmlId("reg-success-msg")).textContent = gM("reg.successMsg", form.firstname, comp.name)
-      dom.window.setTimeout(() => {
-        modal.hide()
-        p.trySuccess(Right(player))
-      }, 1800)
+      val hint = registrationHint
+      if (hint.isEmpty) {
+        dom.window.setTimeout(() => {
+          modal.hide()
+          p.trySuccess(Right(player))
+        }, 1800)
+      } else {
+        val hintElem = gE(HtmlId("reg-success-hint"))
+        hintElem.textContent = hint
+        hintElem.classList.remove("d-none")
+        val closeBtn = gE(CancelId)
+        closeBtn.textContent = gM("btn.close")
+        def done(): Unit = { modal.hide(); p.trySuccess(Right(player)) }
+        closeBtn.onclick = (_: MouseEvent) => done()
+        gE(CloseId).onclick = (_: MouseEvent) => done()
+      }
 
     applyBtn.onclick = { (_: MouseEvent) =>
       hideError()
@@ -161,7 +182,7 @@ object DlgPublicRegistration extends BaseDialog with JsWrapper:
             .getOrElse(Player(id = tourney.nextPlayerId(), firstName = form.firstname, lastName = form.lastname, clubId = clubId))
         }
       val pant = Pant(id = SNO.single(player.id), name = s"${player.lastName}, ${player.firstName}", club = form.club,
-                      rating = ttr, status = PantStatus.UNKN, active = true, clubId = clubId)
+                      rating = ttr, status = PantStatus.REGI, active = true, clubId = clubId)
       if (!comp.pants1Stage.exists(_.id == pant.id)) comp.pants1Stage += pant
       services.PlayerDB.triggerSync(tourney.players.toSeq)
       services.CompetitionDB.triggerSync(tourney.competitions.toSeq)

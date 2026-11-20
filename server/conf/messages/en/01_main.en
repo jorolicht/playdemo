@@ -167,7 +167,6 @@ tourneyInfo.actions                                 = Actions
 # TourneyAdmin
 ###
 tourneyAdmin.headerMeta                             = Organizer: {0} | ID: {1}
-tourneyAdmin.tabImpExp                              = Import / Export
 tourneyAdmin.tabCert                                = Certificate Configuration
 tourneyAdmin.tabMessages                            = Messages
 tourneyAdmin.tabMatchboard                          = Display Board
@@ -179,12 +178,6 @@ tourneyAdmin.clEmpty                                = No entries yet.
 tourneyAdmin.clTime                                 = Time
 tourneyAdmin.clUser                                 = Editor
 tourneyAdmin.clChange                               = Change
-tourneyAdmin.exportTitle                            = Export Tournament
-tourneyAdmin.exportDesc                             = Download current tournament data as a JSON file. The backup can be re-imported at any time.
-tourneyAdmin.exportBtn                              = Download JSON Export
-tourneyAdmin.importTitle                            = Import Tournament
-tourneyAdmin.importDesc                             = Select a previously exported tournament file (.json) to import and load data.
-tourneyAdmin.importBtn                              = Load JSON File...
 tourneyAdmin.cttTitle                               = ClickTT Update (Player Matching)
 tourneyAdmin.cttDesc                                = Upload an updated ClickTT XML file to automatically match and assign player IDs (internalNr) and license numbers (licenceNr).
 tourneyAdmin.cttBtn                                 = Select ClickTT XML File...
@@ -340,6 +333,8 @@ tourneyHomepage.registerNow                         = Register Now
 tourneyHomepage.registrationClosed                  = Registration Closed
 tourneyHomepage.registrationUntil                   = until {0}
 tourneyHomepage.registrationFrom                    = Registration from {0}
+tourneyHomepage.registrationDisabled                = Registration not enabled
+tourneyHomepage.registrationDisabledHint            = Tournament administration → Homepage
 tourneyHomepage.addCalendar                         = Add to Calendar
 tourneyHomepage.icsDownload                         = Calendar file (.ics)
 tourneyHomepage.googleCal                           = Google Calendar
@@ -589,6 +584,7 @@ reg.captchaFallback                                 = Security question: what is
 reg.submit                                          = Register
 reg.successTitle                                    = Registration successful!
 reg.successMsg                                      = Thank you, {0}! Your registration for “{1}” has been received.
+reg.defaultHint                                     = Please report to the tournament desk at least 30 minutes before the competition starts to secure your participation.
 reg.errRequired                                     = Please fill in all required fields (*).
 reg.errTtr                                          = Please enter a TTR value between 0 and 3500 (0 = no TTR).
 reg.errBirthYear                                    = Please enter a valid year of birth (e.g. 1985).

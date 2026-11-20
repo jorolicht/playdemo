@@ -15,8 +15,6 @@ import shared.basic.Pickle.*
 object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   def name = PageNameTyp("TourneyAdmin")
 
-  val BtnExportId:      HtmlId = genId(name)
-  val BtnImportId:      HtmlId = genId(name)
   val BtnClickTTId:     HtmlId = genId(name)
   val RadioCertId:      HtmlId = genId(name)
 
@@ -53,7 +51,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
     }
   }
 
-  private var activeTab = "IMPEXP" // Tabs: "IMPEXP", "CERT", "MESSAGES", "CHANGELOG", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT"
+  private var activeTab = "CERT" // Tabs: "CERT", "MESSAGES", "CHANGELOG", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT"
 
   /** Multiuser: zuletzt geladenes Änderungsprotokoll (neueste Einträge zuerst), Reiter "CHANGELOG". */
   var changelog: Seq[services.MultiUser.ChangeLogEntry] = Seq.empty
@@ -81,7 +79,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
 
   /**
    * Renders the tournament administration page for the currently selected tournament.
-   * For standalone competitions (ident == "SIMPLE"), the Homepage ("HOMEPAGE") tab is hidden and falls back to "IMPEXP".
+   * For standalone competitions (ident == "SIMPLE"), the Homepage ("HOMEPAGE") tab is hidden and falls back to "CERT".
    * ClickTT (Import/Update/Export) liegt in der Turnierübersicht, siehe [[ClickTTPanel]].
    *
    * @param param The optional tab name to activate.
@@ -90,22 +88,22 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   def render(param: String = ""): Boolean =
     Global.currentSelection.tourney match
       case Some(tourney) =>
-        val tabParam = param.nonEmpty && List("IMPEXP", "CERT", "MESSAGES", "CHANGELOG", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT").contains(param.toUpperCase)
+        val tabParam = param.nonEmpty && List("CERT", "MESSAGES", "CHANGELOG", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT").contains(param.toUpperCase)
         if (tabParam) {
           activeTab = param.toUpperCase
         }
         if (activeTab == "CHANGELOG" && !services.MultiUser.enabled) {
-          activeTab = "IMPEXP"
+          activeTab = "CERT"
         }
         // Protokoll beim Öffnen des Reiters (Aufruf mit Parameter) neu laden
         if (activeTab == "CHANGELOG" && tabParam) {
           fetchChangelog()
         }
         if (tourney.ident == "SIMPLE" && activeTab == "HOMEPAGE") {
-          activeTab = "IMPEXP"
+          activeTab = "CERT"
         }
         if (!Global.currentAci.showMessagesTab && activeTab == "MESSAGES") {
-          activeTab = "IMPEXP"
+          activeTab = "CERT"
         }
 
         if (activeTab == "CERT" && !templatesLoaded && !isLoadingTemplates) {
@@ -118,16 +116,19 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
         if (activeTab == "HOMEPAGE") {
           val ta = dom.document.getElementById("homepage-info-textarea").asInstanceOf[dom.html.TextArea]
           val cb = dom.document.getElementById("allow-registration-checkbox").asInstanceOf[dom.html.Input]
+          val hintTa = dom.document.getElementById("registration-hint-textarea").asInstanceOf[dom.html.TextArea]
           val btn = dom.document.getElementById("homepage-save-btn").asInstanceOf[dom.html.Button]
           
           if (ta != null) ta.value = Global.currentAci.homepageInfo
           if (cb != null) cb.checked = Global.currentAci.allowRegistration
+          if (hintTa != null) hintTa.value = dialogs.DlgPublicRegistration.registrationHint
           
           if (btn != null) {
             btn.onclick = (e: dom.Event) => {
               val updatedAci = Global.currentAci.copy(
                 homepageInfo = ta.value,
-                allowRegistration = cb.checked
+                allowRegistration = cb.checked,
+                registrationHint = Some(hintTa.value.trim)
               )
               services.TourneyDB.saveAci(tourney.wpId, updatedAci).map {
                 case Right(_) =>
@@ -182,30 +183,6 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
                 case Left(err) =>
                   dialogs.DlgMsgbox.showError(err, "Fehler beim Speichern")
               }
-            }
-          }
-        }
-
-        // Wire change listener for adminImportFile
-        val fileInput = dom.document.getElementById("adminImportFile").asInstanceOf[dom.html.Input]
-        if (fileInput != null) {
-          fileInput.onchange = (e: dom.Event) => {
-            if (fileInput.files.length > 0) {
-              val file = fileInput.files(0)
-              val reader = new dom.FileReader()
-              reader.onload = (e: dom.Event) => {
-                val jsonString = reader.result.asInstanceOf[String]
-                services.AdminManager.importTourney(jsonString).map {
-                  case Right(slug) =>
-                    dom.window.alert("Import erfolgreich! Das Turnier wird nun geladen.")
-                    fileInput.value = "" // reset
-                    loadPage(TourneyInfo.name, "")
-                  case Left(err) =>
-                    dialogs.DlgMsgbox.showError(err, "Fehler beim Import")
-                    fileInput.value = "" // reset
-                }
-              }
-              reader.readAsText(file)
             }
           }
         }
@@ -319,16 +296,6 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit =
     HtmlId(elem.id) match
-      case `BtnExportId` =>
-        services.AdminManager.exportCurrentTourney()
-
-      case `BtnImportId` =>
-        val fileInput = dom.document.getElementById("adminImportFile").asInstanceOf[dom.html.Input]
-        if (fileInput != null) {
-          fileInput.value = ""
-          fileInput.click()
-        }
-
       case id if id.id.startsWith(RadioCertId.id) =>
         val suffix = elem.id.substring(RadioCertId.id.length + 1)
         if (suffix.startsWith("SETTMPL-")) {

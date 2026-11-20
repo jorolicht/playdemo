@@ -473,13 +473,14 @@ object TourneyDB extends ComWrapper with Debouncer:
    *
    * @param filename Target file name.
    * @param t Tournament to export (defaults to current active tournament).
+   * @param ver Version stored with the tournament (defaults to the version of the active tournament).
    */
-  def triggerExportDownload(filename: String, t: Tourney = tourney): Unit = {
+  def triggerExportDownload(filename: String, t: Tourney = tourney, ver: Int = version): Unit = {
     import services.DemoManager.DemoPayload
     import shared.basic.Pickle.*
 
     val finalFilename = if (filename.toLowerCase.endsWith(".json")) filename else s"$filename.json"
-    val tReq = TourneySyncRequest(version, t)
+    val tReq = TourneySyncRequest(ver, t)
     val payload = DemoPayload(tReq)
     val jsonString = write(payload)
     

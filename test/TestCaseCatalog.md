@@ -35,7 +35,7 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-MV-10 [👑]:** Klick auf den Button „Management“. Die Anwendung wechselt direkt zur Admin-Verwaltungskonsole (`Management`).
 
 ### 1.4 Main Navbar: Menü „Meine Turniere“ (🌐 / 👤)
-- [x] **TC-NB-01 [🌐]:** Navbar-Layout: Der alte Start-Dropdown-Button, der Menüpunkt „Suchen“, das Badge „Lokaler Modus“, der Demo-Button, der RELOAD-Button und das Menü „Ablage“ sind entfernt. Erstes Menü links ist „Meine Turniere“: oben die zuletzt verwendeten Turniere (höchstens 3, mit Symbol: lokal im Browser, Datei, Cloud; ohne Einträge „Noch keine Turniere verwendet“), nach einem Trennstrich „Öffnen/Archiv“ (Ordnersymbol), „Lokales Turnier exportieren in Datei“ (nur mit geladenem lokalem Turnier, sonst ausgegraut) und „Turnier exportieren in Cloud“.
+- [x] **TC-NB-01 [🌐]:** Navbar-Layout: Der alte Start-Dropdown-Button, der Menüpunkt „Suchen“, das Badge „Lokaler Modus“, der Demo-Button, der RELOAD-Button und das Menü „Ablage“ sind entfernt. Erstes Menü links ist „Meine Turniere“: oben die zuletzt verwendeten Turniere (höchstens 3, mit Symbol: lokal im Browser, Datei, Cloud; ohne Einträge „Noch keine Turniere verwendet“), nach einem Trennstrich „Öffnen/Archiv“ (Ordnersymbol), „Turnier in Datei exportieren“ (nur mit lokalem Turnier im Browser oder geöffnetem Cloud-Turnier mit Schreibrecht, sonst ausgegraut) und „Turnier exportieren in Cloud“.
 - [x] **TC-NB-02 [🌐]:** Demo-Button: Klick auf den „Demo“-Button (im MainView-Container) öffnet den Bestätigungsdialog `DlgStartDemo` („Demo lokal starten?“, Warnhinweis: „Achtung: das aktuelle lokale Turnier wird gelöscht!“) mit 2 Buttons („ABBRECHEN“ und „DEMO STARTEN“). Klick auf „ABBRECHEN“ schließt den Dialog und verbleibt auf der Seite; Klick auf „DEMO STARTEN“ startet das vorkonfigurierte Demo-Turnier direkt im lokalen Modus (`isLocalMode = true`, `isDemoMode = false`), sichert es im lokalen Browserspeicher und navigiert zu `TourneyInfo`.
 - [x] **TC-NB-03 [🌐]:** Meine Turniere -> Turnier exportieren in Cloud (nicht angemeldet): Ist der Benutzer nicht angemeldet, ist das Menüelement ausgegraut (`disabled`, `aria-disabled="true"`).
 - [x] **TC-NB-04 [👤]:** Meine Turniere -> Turnier exportieren in Cloud (bereits in der Cloud): Ist das aktuelle Turnier bereits in der Cloud (`tourney_is_local_mode = false`), ist das Menüelement ebenfalls ausgegraut (`disabled`).
@@ -48,6 +48,9 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-NB-10 [👤]:** Ohne gespeicherten `tourney_slug` (und ohne zuvor geöffnetes Cloud-Turnier) zeigt „Meine Turniere“ keinen Cloud-Eintrag.
 - [x] **TC-NB-11 [👤]:** Cloud-Eintrag ohne Zugriffsrechte: Ist der angemeldete Benutzer weder Administrator noch Veranstalter des Turniers, erscheint ein Berechtigungsfehler („Sie haben keine Berechtigung für dieses Turnier.“).
 - [x] **TC-NB-12 [👤]:** Meine Turniere -> Turnier exportieren in Cloud (Ausführung): Klick auf die aktive Option lädt das lokale Turnier in die Cloud hoch, synchronisiert Vereine, Spieler, Wettbewerbe und Abschnitte, entfernt das lokale Duplikat und schaltet in den Cloud-Modus um.
+- [x] **TC-NB-13 [👤]:** Meine Turniere -> Turnier in Datei exportieren mit lokalem Turnier im Browser und geöffnetem Cloud-Turnier: Ein Dialog fragt „Welches Turnier soll in eine Datei gespeichert werden?“ (Lokales Turnier „…“ / Cloud-Turnier „…“); die heruntergeladene Datei enthält das gewählte Turnier, das Cloud-Turnier bleibt geöffnet.
+- [x] **TC-NB-14 [👤]:** Nur Cloud-Turnier geöffnet (kein lokales Turnier): Der Export öffnet direkt den Dialog mit dem Dateinamen, ohne Auswahl.
+- [x] **TC-TA-IE-01 [👤]:** Die Turnier-Administration hat keinen Reiter „Import / Export“ mehr; Aufruf mit `IMPEXP` öffnet „Urkunden Konfiguration“.
 
 ---
 
@@ -390,9 +393,11 @@ Anmeldung nur für Einzel, wenn turnierweit erlaubt (TourneyAdmin, Reiter „Hom
 ### 27.1 Anonymer Besucher (🌐)
 - [x] **TC-PR-01 [🌐]:** Wettbewerbsliste: „Jetzt anmelden“ mit „bis TT.MM.JJJJ“ bei offenem Wettbewerb, „Anmeldeschluss“ bei beendeter Anmeldung, „Anmeldung ab TT.MM.JJJJ“ vor Beginn des Zeitraums, kein Button bei Doppel.
 - [x] **TC-PR-02 [🌐]:** Anmeldedialog prüft Pflichtfelder (Name, Vorname, Verein, TTR) sowie das Format von E-Mail und WhatsApp-Nummer.
-- [x] **TC-PR-03 [🌐]:** Anmeldung mit freiwilligen Angaben (Jahrgang, E-Mail, WhatsApp) nach Captcha: Spieler mit diesen Angaben und Teilnehmer mit TTR im Wettbewerb gespeichert.
+- [x] **TC-PR-03 [🌐]:** Anmeldung mit freiwilligen Angaben (Jahrgang, E-Mail, WhatsApp) nach Captcha: Spieler mit diesen Angaben und Teilnehmer mit TTR und Status „registriert“ (`REGI`) im Wettbewerb gespeichert; der Dialog zeigt den Standardhinweis („Bitte spätestens 30 Min vor Beginn …“) und bleibt offen, bis der Spieler „Schließen“ klickt.
 - [x] **TC-PR-04 [🌐]:** E-Mail und WhatsApp-Nummer der Spieler sind für Besucher (ohne Schreibrecht) über `GET players` nicht abrufbar.
 - [x] **TC-PR-05 [🌐]:** Der Server lehnt Anmeldungen zu beendeten, noch nicht geöffneten und Doppel-Wettbewerben ab (`registration_closed`).
 
 ### 27.2 Turnierverwalter (👤)
 - [x] **TC-PR-06 [👤]:** „Wettbewerb bearbeiten“ zeigt den Bereich „Online-Anmeldung“ (Anmeldung ab/bis, „Anmeldung beendet“); nach Setzen der Checkbox ist die Anmeldung auf der Turnierseite geschlossen.
+- [x] **TC-PR-07 [👤]:** Ist die Anmeldung turnierweit nicht erlaubt, sieht der Turnierleiter auf der Turnierseite statt „Anmeldeschluss“ den Hinweis „Anmeldung nicht freigeschaltet – Turnier-Administration → Homepage“ (nicht bei beendeter Anmeldung oder Doppel); Besucher sehen weiterhin „Anmeldeschluss“.
+- [x] **TC-PR-08 [👤]:** Turnier-Administration, Reiter „Homepage“: Feld „Hinweis nach der Online-Anmeldung“ ist mit dem Standardtext vorbelegt; ein eigener Text wird gespeichert und nach der nächsten Anmeldung im Dialog angezeigt.

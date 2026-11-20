@@ -1083,12 +1083,22 @@ object Tourney:
       case NonFatal(_) =>
         Left(AppError("TODOerr0144.decode.Tourney", json.take(20), "", "Tourney.decSeq"))
 
-/** Access Control and Configuration Info (ACI) */
+/**
+ * Access Control and Configuration Info (ACI)
+ *
+ * @param homepageInfo      Informationstext der Turnierseite (Markdown)
+ * @param allowRegistration Online-Anmeldung auf der Turnierseite erlaubt (Hauptschalter)
+ * @param dateFormat        Datumsformat (DE, UK, US)
+ * @param showMessagesTab   Reiter "Nachrichten" in der Turnier-Administration anzeigen
+ * @param registrationHint  Hinweis für Spieler nach der Online-Anmeldung; None = Standardtext (reg.defaultHint),
+ *                          "" = kein Hinweis
+ */
 case class ACI(
   homepageInfo: String = "",
   allowRegistration: Boolean = false,
   dateFormat: String = "DE",
-  showMessagesTab: Boolean = true
+  showMessagesTab: Boolean = true,
+  registrationHint: Option[String] = None
 ) derives ReadWriter
 
 case class SaveAciResponse(success: Boolean) derives ReadWriter

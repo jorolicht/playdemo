@@ -144,6 +144,12 @@
                                                             }
                                                         } else if(!c.registrationSupported) {
                                                             <span class="text-muted">–</span>
+                                                        } else if(!base.Global.currentAci.allowRegistration && base.Global.hasTourneyAccess(tourney) && !c.regClosed && c.status != CompStatus.FIN && isCompStartInFuture(c, tourney)) {
+                                                            @* Nur für Turnierleiter: Hauptschalter in der Turnier-Administration ist aus *@
+                                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle fw-normal" data-testid="reg-disabled-@c.id.value">
+                                                                <i class="bi bi-info-circle me-1"></i>@gM("tourneyHomepage.registrationDisabled")
+                                                            </span>
+                                                            <div class="small text-muted mt-1">@gM("tourneyHomepage.registrationDisabledHint")</div>
                                                         } else if(base.Global.currentAci.allowRegistration && !c.regClosed && c.regFrom.nonEmpty && todayIso < c.regFrom && isCompStartInFuture(c, tourney)) {
                                                             <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle fw-normal" data-testid="reg-from-@c.id.value">
                                                                 @gM("tourneyHomepage.registrationFrom", isoToDisplay(c.regFrom))

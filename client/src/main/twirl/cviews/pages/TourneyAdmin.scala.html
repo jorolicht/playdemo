@@ -24,11 +24,6 @@
     <!-- Navigation Tabs -->
     <ul class="nav nav-tabs mb-4" role="tablist">
         <li class="nav-item">
-            <a class="nav-link @{if(activeTab == "IMPEXP") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'IMPEXP')">
-                <i class="bi bi-arrow-down-up me-1"></i>@gM("tourneyAdmin.tabImpExp")
-            </a>
-        </li>
-        <li class="nav-item">
             <a class="nav-link @{if(activeTab == "CERT") "active fw-bold text-primary" else ""}" href="javascript:appLoadPage('TourneyAdmin', 'CERT')">
                 <i class="bi bi-award me-1"></i>@gM("tourneyAdmin.tabCert")
             </a>
@@ -68,35 +63,6 @@
 
     <!-- Tab Contents -->
     <div class="tab-content">
-        @if(activeTab == "IMPEXP") {
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="card shadow-sm h-100 border-start border-4 border-primary">
-                        <div class="card-body">
-                            <h5 class="card-title text-secondary fw-bold mb-3"><i class="bi bi-download me-2 text-primary"></i>@gM("tourneyAdmin.exportTitle")</h5>
-                            <p class="text-muted small">@gM("tourneyAdmin.exportDesc")</p>
-                            <button class="btn btn-primary" @id(BtnExportId, "onclick")>
-                                <i class="bi bi-download me-1"></i>@gM("tourneyAdmin.exportBtn")
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="card shadow-sm h-100 border-start border-4 border-success">
-                        <div class="card-body">
-                            <h5 class="card-title text-secondary fw-bold mb-3"><i class="bi bi-upload me-2 text-success"></i>@gM("tourneyAdmin.importTitle")</h5>
-                            <p class="text-muted small">@gM("tourneyAdmin.importDesc")</p>
-                            <button class="btn btn-success" @id(BtnImportId, "onclick")>
-                                <i class="bi bi-upload me-1"></i>@gM("tourneyAdmin.importBtn")
-                            </button>
-                            <input type="file" id="adminImportFile" style="display: none;" accept=".json" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-
         @if(activeTab == "CERT") {
             <!-- Urkunden-Templates Vorschau -->
             <div class="card shadow-sm border-start border-4 border-warning">
@@ -339,6 +305,11 @@
                         <label class="form-check-label fw-bold" for="allow-registration-checkbox">
                             @gM("tourneyAdmin.allowRegistrationLabel")
                         </label>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold" for="registration-hint-textarea">@gM("tourneyAdmin.registrationHintLabel")</label>
+                        <textarea class="form-control" id="registration-hint-textarea" rows="3"></textarea>
+                        <div class="form-text">@gM("tourneyAdmin.registrationHintDesc")</div>
                     </div>
                     <button class="btn btn-success fw-bold" id="homepage-save-btn">
                         <i class="bi bi-save me-1"></i>@gM("btn.save")

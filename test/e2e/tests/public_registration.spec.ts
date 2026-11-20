@@ -15,6 +15,7 @@ import path from 'path';
  */
 
 const USER = process.env.WP_ADMIN_USER || '';
+const DEFAULT_HINT = 'Bitte spätestens 30 Min vor Beginn des Wettbewerbs bei der Turnierleitung melden um Teilnahme zu gewährleisten.';
 const PASS = process.env.WP_ADMIN_PASSWORD || '';
 
 test.describe.configure({ mode: 'serial' });
@@ -150,6 +151,12 @@ test.describe('UseCase 27: Öffentliche Anmeldung zu Wettbewerben', () => {
     await dlg.getByRole('button', { name: 'Anmelden' }).click();
     expect((await saved).status()).toBe(200);
     await expect(page.locator('#reg-step-3')).toContainText('Anmeldung erfolgreich');
+    // Standardhinweis; Dialog bleibt offen, bis der Spieler ihn schließt
+    await expect(page.locator('#reg-success-hint')).toHaveText(DEFAULT_HINT);
+    await page.waitForTimeout(2500);
+    await expect(dlg).toBeVisible();
+    await dlg.getByRole('button', { name: 'Schließen' }).click();
+    await expect(page.locator('.modal.show')).toHaveCount(0);
 
     // Teilnehmer und freiwillige Angaben gespeichert (Sicht des Administrators)
     const players = (await api(adminPage, 'GET', `players?postId=${postId}`)).json.players;
@@ -160,7 +167,7 @@ test.describe('UseCase 27: Öffentliche Anmeldung zu Wettbewerben', () => {
     expect(p.whatsApp).toBe('+49 170 1234567');
     const comps = (await api(adminPage, 'GET', `competitions?postId=${postId}`)).json.competitions;
     const c1 = comps.find((c: any) => c && c.id === 1);
-    expect(c1.pants1Stage.some((x: any) => x.id === `[${p.id}]` && x.rating === 1450)).toBe(true);
+    expect(c1.pants1Stage.some((x: any) => x.id === `[${p.id}]` && x.rating === 1450 && x.status === 'REGI')).toBe(true);
   });
 
   test('TC-PR-04 [🌐]: Kontaktdaten sind für Besucher nicht abrufbar', async () => {
@@ -182,6 +189,35 @@ test.describe('UseCase 27: Öffentliche Anmeldung zu Wettbewerben', () => {
     }
   });
 
+  test('TC-PR-08 [👤]: Turnierleiter legt im Reiter "Homepage" einen eigenen Hinweis fest, der nach der Anmeldung erscheint', async () => {
+    const hint = 'Bitte bis 9:30 Uhr am Turniertisch melden.';
+    await adminPage.goto(`/${slug}/`);
+    await expect(adminPage.locator('tr', { hasText: 'Herren Einzel' })).toBeVisible({ timeout: 15000 });
+    await adminPage.evaluate(() => (window as any).appLoadPage('TourneyAdmin', 'HOMEPAGE'));
+    const ta = adminPage.locator('#registration-hint-textarea');
+    await expect(ta).toHaveValue(DEFAULT_HINT);
+    await ta.fill(hint);
+    await expect(adminPage.locator('#allow-registration-checkbox')).toBeChecked();
+    adminPage.once('dialog', d => d.accept());
+    const saved = adminPage.waitForResponse(r => r.url().includes('/save-aci') && r.status() === 200);
+    await adminPage.locator('#homepage-save-btn').click();
+    await saved;
+    expect((await api(adminPage, 'GET', `read-aci?postId=${postId}`)).json.registrationHint).toBe(hint);
+
+    await openWelcome();
+    await page.locator('tr', { hasText: 'Herren Einzel' }).getByRole('link', { name: 'Jetzt anmelden' }).click();
+    const dlg = page.locator('.modal.show');
+    await page.locator('#reg-lastname').fill(lastName + 'B');
+    await page.locator('#reg-firstname').fill('Bernd');
+    await page.locator('#reg-club').fill('TTC Testverein');
+    await page.locator('#reg-ttr').fill('1300');
+    await expect.poll(() => page.locator('[name="cf-turnstile-response"]').inputValue().catch(() => ''), { timeout: 20000 }).not.toBe('');
+    await dlg.getByRole('button', { name: 'Anmelden' }).click();
+    await expect(page.locator('#reg-success-hint')).toHaveText(hint);
+    await dlg.getByRole('button', { name: 'Schließen' }).click();
+    await expect(page.locator('.modal.show')).toHaveCount(0);
+  });
+
   test('TC-PR-06 [👤]: Turnierleiter beendet die Anmeldung im Dialog "Wettbewerb bearbeiten" per Checkbox', async () => {
     await adminPage.goto(`/${slug}/`);
     await adminPage.waitForFunction(() => typeof (window as any).appLoadPage === 'function');
@@ -199,5 +235,26 @@ test.describe('UseCase 27: Öffentliche Anmeldung zu Wettbewerben', () => {
     await openWelcome();
     await expect(page.locator('tr', { hasText: 'Herren Einzel' })).toContainText('Anmeldeschluss');
     await expect(page.locator('tr', { hasText: 'Herren Einzel' }).getByRole('link', { name: 'Jetzt anmelden' })).toHaveCount(0);
+  });
+
+  test('TC-PR-07 [👤]: Anmeldung turnierweit nicht erlaubt: Turnierleiter sieht Hinweis, Besucher "Anmeldeschluss"', async () => {
+    expect((await api(adminPage, 'POST', `save-aci?postId=${postId}`, { allowRegistration: false })).status).toBe(200);
+
+    await adminPage.goto(`/${slug}/`);
+    // Turnierleiter landet in der Verwaltungsansicht; danach die öffentliche Turnierseite öffnen
+    await expect(adminPage.locator('tr', { hasText: 'Jugend Einzel' })).toBeVisible({ timeout: 15000 });
+    await adminPage.evaluate(() => (window as any).appLoadPage('TourneyWelcome', ''));
+    await expect(adminPage.getByText('Wettbewerbe & Zeitplan')).toBeVisible();
+    const adminRow = adminPage.locator('tr', { hasText: 'Jugend Einzel' });
+    await expect(adminRow).toContainText('Anmeldung nicht freigeschaltet', { timeout: 15000 });
+    await expect(adminRow).toContainText('Turnier-Administration');
+    // beendete Anmeldung bleibt "Anmeldeschluss", Doppel ohne Hinweis
+    await expect(adminPage.locator('tr', { hasText: 'Damen Einzel' })).toContainText('Anmeldeschluss');
+    await expect(adminPage.locator('[data-testid="reg-disabled-4"]')).toHaveCount(0);
+
+    await openWelcome();
+    const row = page.locator('tr', { hasText: 'Jugend Einzel' });
+    await expect(row).toContainText('Anmeldeschluss');
+    await expect(row).not.toContainText('nicht freigeschaltet');
   });
 });

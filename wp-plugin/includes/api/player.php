@@ -280,7 +280,7 @@ function tourney_public_register(WP_REST_Request $request)
                 "name"   => $last_name . ", " . $first_name,
                 "club"   => $club['name'] ?? $club_name,
                 "rating" => $ttr,
-                "status" => "UNKN",
+                "status" => "REGI",   // nur registriert, Teilnahme bestätigt der Turnierleiter
                 "active" => true,
                 "clubId" => $club_id,
             ];

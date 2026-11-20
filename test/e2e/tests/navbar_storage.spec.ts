@@ -46,7 +46,7 @@ test.describe('UseCase 1.4: Main Navbar - Demo-Button & Meine Turniere', () => {
     const moveCloudItem = page.locator('a[id*="MoveToCloudId"], a.dropdown-item-move-cloud');
     await expect(importLocalItem).toHaveText(/Öffnen\/Archiv|Open\/Archive/);
     await expect(importLocalItem.locator('i.bi-folder2-open')).toHaveCount(1);
-    await expect(exportItem).toHaveText(/Lokales Turnier exportieren in Datei|Export local tournament to file/);
+    await expect(exportItem).toHaveText(/Turnier in Datei exportieren|Export tournament to file/);
     // without a loaded local tournament both exports are greyed out
     await expect(exportItem).toHaveClass(/disabled/);
     await expect(exportItem).toHaveAttribute('aria-disabled', 'true');

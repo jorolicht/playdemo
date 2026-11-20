@@ -132,15 +132,18 @@
                             }
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item fw-bold" role="button" @id(ImportLocalId, "onclick")><i class="bi bi-folder2-open me-2 text-success"></i>@gM("navbar.open")</a></li>
-                            @* Exporte nur mit geladenem lokalem Turnier, in die Cloud zusätzlich nur angemeldet *@
+                            @* Export in Datei: lokales Turnier (im Browser) und/oder geöffnetes Cloud-Turnier mit Schreibrecht;
+                               Export in die Cloud nur mit geladenem lokalem Turnier und angemeldet *@
                             @defining((Global.isLocalMode || Global.isDemoMode) && selection.tourney.isDefined) { localLoaded =>
+                                @defining(comps.Navbar.exportCandidates.nonEmpty) { canExport =>
                                 <li>
-                                    <a class="dropdown-item fw-bold @if(!localLoaded){disabled text-muted}" role="button"
-                                       @if(!localLoaded){aria-disabled="true" tabindex="-1"}
+                                    <a class="dropdown-item fw-bold @if(!canExport){disabled text-muted}" role="button"
+                                       @if(!canExport){aria-disabled="true" tabindex="-1"}
                                        @id(ExportLocalId, "onclick")>
-                                        <i class="bi bi-download me-2 @if(localLoaded){text-primary}else{text-secondary}"></i>@gM("navbar.exportFile")
+                                        <i class="bi bi-download me-2 @if(canExport){text-primary}else{text-secondary}"></i>@gM("navbar.exportFile")
                                     </a>
                                 </li>
+                                }
                                 @defining(Global.user.isEmpty || !localLoaded) { isMoveDisabled =>
                                 <li>
                                     <a class="dropdown-item fw-bold dropdown-item-move-cloud @if(isMoveDisabled){disabled text-muted}" role="button"
