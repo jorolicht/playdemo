@@ -145,6 +145,13 @@ object CompId:
     )
 
 
+/**
+ * Wettbewerb eines Turniers.
+ *
+ * Online-Anmeldung (öffentliche Turnierseite, nur Einzel): `regFrom`/`regTo` begrenzen den Zeitraum (Datum
+ * "JJJJ-MM-TT", jeweils einschließlich, leer = keine Grenze), `regClosed` beendet die Anmeldung vorzeitig.
+ * Siehe [[Competition.registrationOpen]]; serverseitig `tourney_public_register_is_open` (includes/api/player.php).
+ */
 case class Competition(
   id:                   CompId,
   var name:             String,
@@ -163,7 +170,10 @@ case class Competition(
   var version:          Int = 0,
   var cttSNO2Ident:     Map[SNO, String] = Map.empty,
   val teams:            ArrayBuffer[Team] = ArrayBuffer(),
-  var scoring:          String = ""
+  var scoring:          String = "",
+  var regFrom:          String = "",
+  var regTo:            String = "",
+  var regClosed:        Boolean = false
 ):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
 
@@ -181,6 +191,20 @@ case class Competition(
     if getRatingUpperLevel > 0 then f"${getRatingUpperLevel}%04d"
     else "XXXX"
 
+  /** Ist die Online-Anmeldung für diese Art Wettbewerb möglich? Nur Einzel (Doppel/Mannschaften brauchen Partner). */
+  def registrationSupported: Boolean = typ == CompTyp.SINGLE
+
+  /**
+   * Ist die Online-Anmeldung nach den Einstellungen des Wettbewerbs an einem Tag offen?
+   * (Ohne turnierweiten Schalter und Wettbewerbsbeginn, die prüft der Aufrufer.)
+   *
+   * @param today Datum "JJJJ-MM-TT"
+   * @return true, wenn Einzel, nicht beendet, nicht abgeschlossen und `today` im Zeitraum `regFrom`–`regTo` liegt
+   */
+  def registrationOpen(today: String): Boolean =
+    registrationSupported && !regClosed && status != CompStatus.FIN &&
+      (regFrom.isEmpty || today >= regFrom) && (regTo.isEmpty || today <= regTo)
+
 
 object Competition:
   given rw: ReadWriter[Competition] =
@@ -191,6 +215,8 @@ object Competition:
         }
         // Wertungssystem (Schlüssel, z. B. "tt_001"); leer = vor Einführung der Versionen angelegt (Sports.LegacyKey)
         if (comp.scoring == null) comp.scoring = ""
+        if (comp.regFrom == null) comp.regFrom = ""
+        if (comp.regTo == null) comp.regTo = ""
         if (comp.teams == null) comp.copy(teams = ArrayBuffer()) else comp
       },
       macroRW[Competition]

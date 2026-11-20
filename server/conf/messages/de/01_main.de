@@ -338,6 +338,8 @@ tourneyHomepage.competitionsSchedule                = Wettbewerbe & Zeitplan
 tourneyHomepage.startTime                           = Startzeit
 tourneyHomepage.registerNow                         = Jetzt anmelden
 tourneyHomepage.registrationClosed                  = Anmeldeschluss
+tourneyHomepage.registrationUntil                   = bis {0}
+tourneyHomepage.registrationFrom                    = Anmeldung ab {0}
 tourneyHomepage.addCalendar                         = Kalendereintrag erstellen
 tourneyHomepage.icsDownload                         = Kalender-Datei (.ics)
 tourneyHomepage.googleCal                           = Google Kalender
@@ -451,7 +453,13 @@ dlg.comp.btnCreate                                  = Erstellen
 dlg.comp.errName                                    = Bitte geben Sie einen gültigen Namen ein.
 dlg.comp.errDate                                    = Das Datum des Wettbewerbs muss im Zeitraum des Turniers liegen.
 dlg.comp.titleEdit                                  = Wettbewerb bearbeiten
-dlg.comp.locked                                     = Kategorie und Wettbewerbstyp können nachträglich nicht geändert werden. Änderbar sind Name, Beginn und TTR von/bis.
+dlg.comp.locked                                     = Kategorie und Wettbewerbstyp können nachträglich nicht geändert werden. Änderbar sind Name, Beginn, TTR von/bis und die Online-Anmeldung.
+dlg.comp.regTitle                                   = Online-Anmeldung (Turnierseite)
+dlg.comp.regHint                                    = Nur für Einzel und wenn die Anmeldung in der Turnier-Administration (Homepage) erlaubt ist. Leere Felder = keine Grenze; spätestens mit Wettbewerbsbeginn endet die Anmeldung.
+dlg.comp.regFrom                                    = Anmeldung ab
+dlg.comp.regTo                                      = Anmeldung bis
+dlg.comp.regClosed                                  = Anmeldung beendet
+dlg.comp.errReg                                     = Das Datum „Anmeldung ab“ darf nicht nach „Anmeldung bis“ liegen.
 btn.save                                            = Speichern
 
 ###
@@ -568,3 +576,25 @@ multiuser.players                                   = Die Spieler
 multiuser.clubs                                     = Die Vereine
 multiuser.competitions                              = Die Wettbewerbe
 multiuser.tourney                                   = Die Turnierdaten
+
+# Öffentliche Anmeldung (DlgPublicRegistration)
+reg.clubPlh                                         = z. B. TTC Freising
+reg.ttrPlh                                          = z. B. 1450
+reg.optional                                        = Freiwillige Angaben
+reg.birthYear                                       = Jahrgang
+reg.birthYearPlh                                    = z. B. 1985
+reg.email                                           = E-Mail
+reg.whatsApp                                        = WhatsApp-Nr.
+reg.captchaFallback                                 = Sicherheitsabfrage: Was ist 4 + 3?
+reg.submit                                          = Anmelden
+reg.successTitle                                    = Anmeldung erfolgreich!
+reg.successMsg                                      = Vielen Dank, {0}! Ihre Anmeldung für „{1}“ ist eingegangen.
+reg.errRequired                                     = Bitte füllen Sie alle Pflichtfelder (*) aus.
+reg.errTtr                                          = Bitte geben Sie einen TTR-Wert zwischen 0 und 3500 ein (0 = kein TTR).
+reg.errBirthYear                                    = Bitte geben Sie einen gültigen Jahrgang ein (z. B. 1985).
+reg.errEmail                                        = Bitte geben Sie eine gültige E-Mail-Adresse ein.
+reg.errWhatsApp                                     = Bitte geben Sie eine gültige Telefonnummer ein (Ziffern, optional mit +).
+reg.errCaptcha                                      = Bitte bestätigen Sie die Sicherheitsabfrage.
+reg.errCaptchaServer                                = Die Sicherheitsabfrage ist fehlgeschlagen. Bitte versuchen Sie es erneut.
+reg.errClosed                                       = Die Anmeldung zu diesem Wettbewerb ist nicht (mehr) möglich.
+reg.errSave                                         = Die Anmeldung konnte nicht gespeichert werden. Bitte versuchen Sie es später erneut.

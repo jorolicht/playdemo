@@ -31,6 +31,11 @@ object DlgCompetition extends BaseDialog with JsWrapper:
   val StartDateId:    HtmlId = genId(name)
   val TtrFromId:      HtmlId = genId(name)
   val TtrToId:        HtmlId = genId(name)
+  /** Online-Anmeldung: Bereich, Datum ab/bis, Checkbox "Anmeldung beendet". */
+  val RegBoxId:       HtmlId = genId(name)
+  val RegFromId:      HtmlId = genId(name)
+  val RegToId:        HtmlId = genId(name)
+  val RegClosedId:    HtmlId = genId(name)
   val ApplyId:        HtmlId = genId(name)
   val CancelId:       HtmlId = genId(name)
   val CloseId:        HtmlId = genId(name)
@@ -127,6 +132,9 @@ object DlgCompetition extends BaseDialog with JsWrapper:
         setInput(gE(CompNameId), comp.name)
         setInput(gE(TtrFromId), comp.lowLevel.map(_.toString).getOrElse(""))
         setInput(gE(TtrToId), comp.upperLevel.map(_.toString).getOrElse(""))
+        setInput(gE(RegFromId), comp.regFrom)
+        setInput(gE(RegToId), comp.regTo)
+        gE(RegClosedId).asInstanceOf[dom.html.Input].checked = comp.regClosed
 
       case None =>
         setHtml(gE(TitleId), gM("dlg.comp.title"))
@@ -146,7 +154,17 @@ object DlgCompetition extends BaseDialog with JsWrapper:
         setInput(gE(CompNameId), "")
         setInput(gE(TtrFromId), "")
         setInput(gE(TtrToId), "")
+        setInput(gE(RegFromId), "")
+        setInput(gE(RegToId), "")
+        gE(RegClosedId).asInstanceOf[dom.html.Input].checked = false
     }
+
+    // Online-Anmeldung gibt es nur für Einzel
+    def updateRegBox(): Unit =
+      val single = CompTyp.fromString(getInput(gE(CompTypId))) == CompTyp.SINGLE
+      if single then gE(RegBoxId).classList.remove("d-none") else gE(RegBoxId).classList.add("d-none")
+    updateRegBox()
+    gE(CompTypId).asInstanceOf[dom.html.Select].onchange = (_: dom.Event) => updateRegBox()
     
     modal.show()
 
@@ -156,8 +174,13 @@ object DlgCompetition extends BaseDialog with JsWrapper:
       val compDateInt = startRaw.take(10).replace("-", "").toIntOption.getOrElse(0)
       val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
 
+      val regFrom = getInput(gE(RegFromId)).trim
+      val regTo   = getInput(gE(RegToId)).trim
+
       if (name.length < 3) {
         showError(gM("dlg.comp.errName"))
+      } else if (regFrom.nonEmpty && regTo.nonEmpty && regFrom > regTo) {
+        showError(gM("dlg.comp.errReg"))
       } else if (tourney.startDate > 0 && tourney.endDate > 0 && (compDateInt < tourney.startDate || compDateInt > tourney.endDate)) {
         showError(gM("dlg.comp.errDate"))
       } else if (tourney.competitions.exists(c => c != null && !c.deleted && c.name.trim.equalsIgnoreCase(name) && !existingComp.exists(_.id == c.id))) {
@@ -180,6 +203,7 @@ object DlgCompetition extends BaseDialog with JsWrapper:
         
         val ttrFrom = try Some(getInput(gE(TtrFromId)).toInt) catch { case _:Exception => None }
         val ttrTo   = try Some(getInput(gE(TtrToId)).toInt)   catch { case _:Exception => None }
+        val regClosed = gE(RegClosedId).asInstanceOf[dom.html.Input].checked
         
         val comp = existingComp.map(_.copy(
           name = name,
@@ -187,7 +211,10 @@ object DlgCompetition extends BaseDialog with JsWrapper:
           category = cat,
           startDate = startFormatted,
           lowLevel = ttrFrom,
-          upperLevel = ttrTo
+          upperLevel = ttrTo,
+          regFrom = regFrom,
+          regTo = regTo,
+          regClosed = regClosed
         )).getOrElse(Competition(
           id = CompId(0), // Temporary ID
           name = name,
@@ -196,7 +223,10 @@ object DlgCompetition extends BaseDialog with JsWrapper:
           startDate = startFormatted,
           status = CompStatus.CFG,
           lowLevel = ttrFrom,
-          upperLevel = ttrTo
+          upperLevel = ttrTo,
+          regFrom = regFrom,
+          regTo = regTo,
+          regClosed = regClosed
         ))
         
         validate match {

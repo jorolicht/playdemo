@@ -338,6 +338,8 @@ tourneyHomepage.competitionsSchedule                = Competitions & Schedule
 tourneyHomepage.startTime                           = Start Time
 tourneyHomepage.registerNow                         = Register Now
 tourneyHomepage.registrationClosed                  = Registration Closed
+tourneyHomepage.registrationUntil                   = until {0}
+tourneyHomepage.registrationFrom                    = Registration from {0}
 tourneyHomepage.addCalendar                         = Add to Calendar
 tourneyHomepage.icsDownload                         = Calendar file (.ics)
 tourneyHomepage.googleCal                           = Google Calendar
@@ -451,7 +453,13 @@ dlg.comp.btnCreate                                  = Create
 dlg.comp.errName                                    = Please enter a valid name.
 dlg.comp.errDate                                    = The competition date must be within the tournament period.
 dlg.comp.titleEdit                                  = Edit Competition
-dlg.comp.locked                                     = Category and competition type cannot be changed afterwards. Name, start and TTR from/to can be changed.
+dlg.comp.locked                                     = Category and competition type cannot be changed afterwards. Name, start, TTR from/to and online registration can be changed.
+dlg.comp.regTitle                                   = Online registration (tournament page)
+dlg.comp.regHint                                    = Singles only and only if registration is enabled in the tournament administration (Homepage). Empty fields = no limit; registration ends at the latest when the competition starts.
+dlg.comp.regFrom                                    = Registration from
+dlg.comp.regTo                                      = Registration until
+dlg.comp.regClosed                                  = Registration closed
+dlg.comp.errReg                                     = “Registration from” must not be after “Registration until”.
 btn.save                                            = Save
 
 ###
@@ -568,3 +576,25 @@ multiuser.players                                   = The players
 multiuser.clubs                                     = The clubs
 multiuser.competitions                              = The competitions
 multiuser.tourney                                   = The tournament data
+
+# Öffentliche Anmeldung (DlgPublicRegistration)
+reg.clubPlh                                         = e.g. TTC Freising
+reg.ttrPlh                                          = e.g. 1450
+reg.optional                                        = Optional details
+reg.birthYear                                       = Year of birth
+reg.birthYearPlh                                    = e.g. 1985
+reg.email                                           = Email
+reg.whatsApp                                        = WhatsApp no.
+reg.captchaFallback                                 = Security question: what is 4 + 3?
+reg.submit                                          = Register
+reg.successTitle                                    = Registration successful!
+reg.successMsg                                      = Thank you, {0}! Your registration for “{1}” has been received.
+reg.errRequired                                     = Please fill in all required fields (*).
+reg.errTtr                                          = Please enter a TTR value between 0 and 3500 (0 = no TTR).
+reg.errBirthYear                                    = Please enter a valid year of birth (e.g. 1985).
+reg.errEmail                                        = Please enter a valid email address.
+reg.errWhatsApp                                     = Please enter a valid phone number (digits, optionally with +).
+reg.errCaptcha                                      = Please complete the security check.
+reg.errCaptchaServer                                = The security check failed. Please try again.
+reg.errClosed                                       = Registration for this competition is not (or no longer) possible.
+reg.errSave                                         = The registration could not be saved. Please try again later.

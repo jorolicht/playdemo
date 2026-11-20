@@ -30,6 +30,7 @@ add_action('rest_api_init', function () {
 
 /**
  * Gibt alle Spieler für eine bestimmte Post-ID zurück.
+ * E-Mail und WhatsApp-Nummer nur, wenn der angemeldete Benutzer das Turnier bearbeiten darf (Nonce nötig).
  */
 function tourney_get_players(WP_REST_Request $request)
 {
@@ -45,7 +46,15 @@ function tourney_get_players(WP_REST_Request $request)
 
     $players_json = get_post_meta($post_id, $meta, true);
     $players = $players_json ? json_decode($players_json, true) : [];
-    
+
+    // Datenschutz: Kontaktdaten (aus der öffentlichen Anmeldung) nur für Bearbeiter des Turniers
+    if (!tourney_user_can_edit_post($post_id)) {
+        $players = array_map(function ($p) {
+            unset($p['email'], $p['whatsApp']);
+            return $p;
+        }, $players ?: []);
+    }
+
     return [
         "version" => $version,
         "players" => array_values($players)
@@ -134,14 +143,26 @@ function tourney_public_register(WP_REST_Request $request)
     $email      = sanitize_email($body['email'] ?? '');
     $ttr        = max(0, min(4000, intval($body['ttr'] ?? 0)));
     $comp_id    = intval($body['compId'] ?? 0);
+    // freiwillige Angaben: Jahrgang, E-Mail (oben), WhatsApp-Nummer
+    $birth_year = intval($body['birthYear'] ?? 0);
+    $whatsapp   = trim(sanitize_text_field($body['whatsApp'] ?? ''));
 
     foreach (array($first_name, $last_name, $club_name) as $value) {
         if ($value === '' || mb_strlen($value) > 100) {
             return ApiHelper::error("invalid_input", "Name or club missing or too long", "", "tourney_public_register", HttpStatus::BAD_REQUEST);
         }
     }
-    if (!is_email($email) || $comp_id < 1 || $comp_id > 64) {
-        return ApiHelper::error("invalid_input", "Invalid email or competition", "", "tourney_public_register", HttpStatus::BAD_REQUEST);
+    if (($body['email'] ?? '') !== '' && !is_email($email)) {
+        return ApiHelper::error("invalid_input", "Invalid email", "", "tourney_public_register", HttpStatus::BAD_REQUEST);
+    }
+    if ($birth_year !== 0 && ($birth_year < 1900 || $birth_year > intval(wp_date('Y')))) {
+        return ApiHelper::error("invalid_input", "Invalid year of birth", "", "tourney_public_register", HttpStatus::BAD_REQUEST);
+    }
+    if ($whatsapp !== '' && !preg_match('/^\+?[0-9 ()\/-]{6,25}$/', $whatsapp)) {
+        return ApiHelper::error("invalid_input", "Invalid WhatsApp number", "", "tourney_public_register", HttpStatus::BAD_REQUEST);
+    }
+    if ($comp_id < 1 || $comp_id > 64) {
+        return ApiHelper::error("invalid_input", "Invalid competition", "", "tourney_public_register", HttpStatus::BAD_REQUEST);
     }
 
     $aci = json_decode(get_post_meta($post_id, 'aci', true) ?: '{}', true);
@@ -207,16 +228,31 @@ function tourney_public_register(WP_REST_Request $request)
             }
         }
         $players_changed = false;
+        $optional = array_filter([
+            "birthYear" => $birth_year ?: null,
+            "email"     => $email ?: null,
+            "whatsApp"  => $whatsapp ?: null,
+        ], fn($v) => $v !== null);
         if ($player_id === 0) {
             $player_id = tourney_public_register_next_id($players);
-            $players[] = [
+            $players[] = array_merge([
                 "id"        => $player_id,
                 "firstName" => $first_name,
                 "lastName"  => $last_name,
                 "clubId"    => $club_id,
-                "email"     => $email,
-            ];
+            ], $optional);
             $players_changed = true;
+        } else {
+            // vorhandener Spieler: nur fehlende freiwillige Angaben ergänzen, nichts überschreiben
+            foreach ($players as $i => $p) {
+                if (intval($p['id'] ?? 0) !== $player_id) continue;
+                foreach ($optional as $key => $value) {
+                    if (empty($p[$key])) {
+                        $players[$i][$key] = $value;
+                        $players_changed = true;
+                    }
+                }
+            }
         }
 
         // Teilnehmer in den Wettbewerb eintragen (falls noch nicht vorhanden)
@@ -269,8 +305,9 @@ function tourney_public_register(WP_REST_Request $request)
 /**
  * Prüft, ob die Anmeldung zu einem Wettbewerb noch offen ist.
  *
- * Entspricht der Logik des Clients (Tourney.isRegLocked, TourneyWelcome.isCompStartInFuture):
- * Wettbewerb nicht abgeschlossen, Start-Stage (falls vorhanden) noch in Konfiguration und
+ * Entspricht der Logik des Clients (Competition.registrationOpen, TourneyWelcome.canRegister):
+ * Wettbewerb nicht abgeschlossen, Einzel, Anmeldung nicht beendet (regClosed), heute im Zeitraum
+ * regFrom–regTo (Zeitzone von WordPress), Start-Stage (falls vorhanden) noch in Konfiguration und
  * Startdatum (falls angegeben) nicht in der Vergangenheit.
  *
  * @param int   $post_id Die WordPress Post-ID des Turniers.
@@ -280,6 +317,18 @@ function tourney_public_register(WP_REST_Request $request)
 function tourney_public_register_is_open($post_id, array $comp)
 {
     if (($comp['status'] ?? '') === 'FIN') {
+        return false;
+    }
+
+    // Einstellungen des Wettbewerbs (Competition.registrationOpen): nur Einzel, nicht beendet, im Zeitraum
+    if (($comp['typ'] ?? '') !== 'SINGLE' || !empty($comp['regClosed'])) {
+        return false;
+    }
+    $today = wp_date('Y-m-d');
+    if (!empty($comp['regFrom']) && $today < $comp['regFrom']) {
+        return false;
+    }
+    if (!empty($comp['regTo']) && $today > $comp['regTo']) {
         return false;
     }
 

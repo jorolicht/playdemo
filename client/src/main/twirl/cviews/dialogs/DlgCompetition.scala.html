@@ -56,6 +56,28 @@
                             <input type="number" class="form-control" @id(TtrToId) placeholder="3000">
                         </div>
                     </div>
+
+                    @* Online-Anmeldung auf der öffentlichen Turnierseite (nur Einzel) *@
+                    <fieldset class="border rounded-3 px-3 pt-2 pb-3" @id(RegBoxId)>
+                        <legend class="float-none w-auto px-2 mb-0 small fw-bold text-secondary">
+                            <i class="bi bi-person-plus me-1"></i>@gM("dlg.comp.regTitle")
+                        </legend>
+                        <div class="form-text mt-0 mb-2">@gM("dlg.comp.regHint")</div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label @forAttr(RegFromId) class="form-label">@gM("dlg.comp.regFrom")</label>
+                                <input type="date" class="form-control" @id(RegFromId)>
+                            </div>
+                            <div class="col-6">
+                                <label @forAttr(RegToId) class="form-label">@gM("dlg.comp.regTo")</label>
+                                <input type="date" class="form-control" @id(RegToId)>
+                            </div>
+                        </div>
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" @id(RegClosedId)>
+                            <label class="form-check-label" @forAttr(RegClosedId)>@gM("dlg.comp.regClosed")</label>
+                        </div>
+                    </fieldset>
                 </form>
             </div>
             <div class="modal-footer">

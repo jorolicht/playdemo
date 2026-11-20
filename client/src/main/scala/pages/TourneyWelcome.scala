@@ -70,6 +70,36 @@ object TourneyWelcome extends BasePage with JsWrapper:
     }
 
   /**
+   * Heutiges Datum (lokale Zeit des Browsers) für den Vergleich mit dem Anmeldezeitraum.
+   *
+   * @return Datum "JJJJ-MM-TT"
+   */
+  def todayIso: String =
+    val d = new scala.scalajs.js.Date()
+    f"${d.getFullYear().toInt}%04d-${d.getMonth().toInt + 1}%02d-${d.getDate().toInt}%02d"
+
+  /**
+   * Datum "JJJJ-MM-TT" für die Anzeige.
+   *
+   * @param iso Datum "JJJJ-MM-TT"
+   * @return "TT.MM.JJJJ", bei anderem Format unverändert
+   */
+  def isoToDisplay(iso: String): String =
+    iso match
+      case s"$y-$m-$d" => s"$d.$m.$y"
+      case other       => other
+
+  /**
+   * Ist die Online-Anmeldung zu einem Wettbewerb jetzt möglich? Turnierweit erlaubt (Homepage-Einstellung),
+   * Wettbewerb noch nicht begonnen und nach den Einstellungen des Wettbewerbs offen (Einzel, Zeitraum, nicht beendet).
+   *
+   * @param c       Wettbewerb
+   * @param tourney Turnier
+   */
+  def canRegister(c: Competition, tourney: Tourney): Boolean =
+    Global.currentAci.allowRegistration && isCompStartInFuture(c, tourney) && c.registrationOpen(todayIso)
+
+  /**
    * Opens the public registration dialog for a competition in VIEW-mode.
    *
    * @param compIdStr Competition ID string.
@@ -81,7 +111,7 @@ object TourneyWelcome extends BasePage with JsWrapper:
       val compOpt = services.CompetitionDB.competitions.find(c => c != null && c.id.value == cId)
 
       compOpt match {
-        case Some(comp) =>
+        case Some(comp) if canRegister(comp, tourney) =>
           dialogs.DlgPublicRegistration.show(tourney, comp).map {
             case Right(player) =>
               debug(s"Public registration successful for ${player.firstName} ${player.lastName}")
@@ -90,8 +120,8 @@ object TourneyWelcome extends BasePage with JsWrapper:
             case Left(_) =>
               debug("Public registration dialog closed")
           }
-        case None =>
-          debug(s"Competition not found for ID: $compIdStr")
+        case _ =>
+          debug(s"Competition not found or registration closed for ID: $compIdStr")
       }
     } catch {
       case e: Exception => error(s"openPublicRegistration error: ${e.getMessage}")

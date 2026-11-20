@@ -96,7 +96,9 @@ object PlayerDB extends ComWrapper with Debouncer:
     }
 
     val params = List("postId" -> TourneyDB.tourney.wpId.toString)
-    ajaxGet[PlayersResponse]("/wp-json/tourney/v1/players", params, host = Global.homeUrl).map {
+    // Nonce mitschicken: nur Bearbeiter erhalten die Kontaktdaten (E-Mail, WhatsApp), siehe tourney_get_players
+    ajaxGet[PlayersResponse]("/wp-json/tourney/v1/players", params, hdrs = Map("X-WP-Nonce" -> Global.wpNonce),
+                             host = Global.homeUrl).map {
       case Right(res) =>
         if (TourneyDB.tourney.wpId != 0) {
           TourneyDB.tourney.players.clear()
@@ -113,7 +115,8 @@ object PlayerDB extends ComWrapper with Debouncer:
 
   case class PublicRegisterRequest(
     compId: Int, firstName: String, lastName: String, clubName: String, clubId: Int,
-    normalizedName: String, ttr: Int, email: String, turnstileToken: String
+    normalizedName: String, ttr: Int, email: String, turnstileToken: String,
+    birthYear: Int = 0, whatsApp: String = ""
   ) derives ReadWriter
   case class PublicRegisterResponse(playerId: Int, clubId: Int) derives ReadWriter
 

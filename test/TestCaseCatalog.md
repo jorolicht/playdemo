@@ -380,3 +380,19 @@ Zwei angemeldete Bearbeiter (A, B) im selben Cloud-Turnier auf turnier-service.i
 - [x] **TC-MU-03 [👤]:** B arbeitet auf altem Stand (Meldung unterdrückt) und speichert ein anderes Spiel derselben Stage: WordPress meldet einen Konflikt (409), B führt die Änderungen je Spiel zusammen und speichert erneut; beide Ergebnisse bleiben erhalten.
 - [x] **TC-MU-04 [👤]:** A und B tragen dasselbe Spiel unterschiedlich ein: Die letzte Eingabe (B) gilt, B erhält den Hinweis „… Ihre Eingabe gilt: … Spiel n“, A zeigt danach das Ergebnis von B.
 - [x] **TC-MU-05 [👤]:** `TourneyAdmin`, Reiter „Änderungen“: Das Protokoll zeigt Zeit, Bearbeiter und Ergebnis jeder Eingabe (neueste zuerst), bei Spiel n beide Eingaben.
+
+---
+
+## 27. UseCase: Öffentliche Anmeldung zu Wettbewerben (`TourneyWelcome`, `DlgPublicRegistration`, `DlgCompetition`)
+
+Anmeldung nur für Einzel, wenn turnierweit erlaubt (TourneyAdmin, Reiter „Homepage“), der Wettbewerb noch nicht begonnen hat und nach den Einstellungen des Wettbewerbs offen ist (Zeitraum „Anmeldung ab/bis“, Checkbox „Anmeldung beendet“). Der Server (`public-register`) prüft dieselben Bedingungen.
+
+### 27.1 Anonymer Besucher (🌐)
+- [x] **TC-PR-01 [🌐]:** Wettbewerbsliste: „Jetzt anmelden“ mit „bis TT.MM.JJJJ“ bei offenem Wettbewerb, „Anmeldeschluss“ bei beendeter Anmeldung, „Anmeldung ab TT.MM.JJJJ“ vor Beginn des Zeitraums, kein Button bei Doppel.
+- [x] **TC-PR-02 [🌐]:** Anmeldedialog prüft Pflichtfelder (Name, Vorname, Verein, TTR) sowie das Format von E-Mail und WhatsApp-Nummer.
+- [x] **TC-PR-03 [🌐]:** Anmeldung mit freiwilligen Angaben (Jahrgang, E-Mail, WhatsApp) nach Captcha: Spieler mit diesen Angaben und Teilnehmer mit TTR im Wettbewerb gespeichert.
+- [x] **TC-PR-04 [🌐]:** E-Mail und WhatsApp-Nummer der Spieler sind für Besucher (ohne Schreibrecht) über `GET players` nicht abrufbar.
+- [x] **TC-PR-05 [🌐]:** Der Server lehnt Anmeldungen zu beendeten, noch nicht geöffneten und Doppel-Wettbewerben ab (`registration_closed`).
+
+### 27.2 Turnierverwalter (👤)
+- [x] **TC-PR-06 [👤]:** „Wettbewerb bearbeiten“ zeigt den Bereich „Online-Anmeldung“ (Anmeldung ab/bis, „Anmeldung beendet“); nach Setzen der Checkbox ist die Anmeldung auf der Turnierseite geschlossen.
