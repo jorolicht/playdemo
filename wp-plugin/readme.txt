@@ -5,7 +5,7 @@ Tags: tournament, table tennis, sports, scalajs, playframework
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,9 @@ Das Plugin verwendet Semantic Versioning (SemVer) `MAJOR.MINOR.PATCH`. Datenbank
 Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel (`filemtime`) oder der aktuellen Plugin-Version versioniert, sodass Browser-Caches nach Updates sofort invalidiert werden.
 
 == Changelog ==
+
+= 1.4.4 =
+* Seite „Support/Kosten“: Einzelturnier und 5er-Paket direkt über Payhip kaufen.
 
 = 1.4.3 =
 * Neues Kostenmodell auf der Seite „Support/Kosten“: Testturnier, Einzelturnier, 5er-Paket, Vereins- und Verbandslizenz.
