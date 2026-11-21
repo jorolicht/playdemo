@@ -39,7 +39,7 @@ sbt startet automatisch im Projekt `server` (`Global / onLoad`).
 
 ### Tests
 
-Es gibt keine Scala-Unit-Tests. E2E-Tests (Playwright) in `test/e2e` (Konfiguration über `test/e2e/.env`, siehe `.env.example`; Basis-URL `WP_URL`):
+Scala-Unit-Tests (munit) für den gemeinsamen Code liegen in `shared/src/test/scala` und laufen mit `sbt sharedJVM/test` (u. a. Blossom-Matching und Auslosung im Schweizer System). E2E-Tests (Playwright) in `test/e2e` (Konfiguration über `test/e2e/.env`, siehe `.env.example`; Basis-URL `WP_URL`):
 
 ```
 cd test/e2e

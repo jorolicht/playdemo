@@ -347,84 +347,91 @@ object SwissSys:
     }
   }
 
+/**
+ * Auslosung der nächsten Runde im Schweizer System als Maximum-Weight-Matching ([[MaxWeightMatching]]).
+ *
+ * Jeder Teilnehmer ist ein Knoten, bei ungerader Anzahl kommt ein Knoten für das Freilos dazu. Die Kantengewichte
+ * sind Strafpunkte (negativ) in klar getrennten Größenordnungen, sodass gilt (wichtigstes zuerst):
+ *   1. keine Wiederholung einer Paarung bzw. kein zweites Freilos (nur wenn es gar nicht anders geht)
+ *   2. Freilos für einen Spieler der untersten Punktgruppe
+ *   3. Paarung innerhalb der Punktgruppe (Abweichung quadratisch bestraft)
+ *   4. Vereinsschutz (keine Spieler desselben Vereins)
+ *   5. möglichst ähnliche Wertung (TTR); beim Freilos der Schwächste
+ * Das Matching ist optimal (nicht heuristisch) und deterministisch.
+ */
 object SwissMatcher {
 
-  // Berechnung des Kantengewichts nach Vorgabe
-  def calculateWeight(p1: SwissPlayer, p2: SwissPlayer, history: Set[(Int, Int)]): Double = {
-    val sameClub = if (p1.club == p2.club) 1 else 0
-    val alreadyPlayed = if (history.contains((p1.id, p2.id)) || history.contains((p2.id, p1.id))) 1 else 0
-    val ratingDifference = Math.abs(p1.rating - p2.rating)
-    val sameScoreGroup = if (p1.scoreGroup == p2.scoreGroup) 1 else 0
+  /** Strafe für eine wiederholte Paarung bzw. ein zweites Freilos. */
+  val PenaltyRepeat: Long      = 100000000000000L   // 1e14
+  /** Strafe je Punkt, den der Freilos-Empfänger über der untersten Punktgruppe liegt. */
+  val PenaltyByeScore: Long    = 1000000000000L     // 1e12
+  /** Strafe je Quadrat der Punktdifferenz einer Paarung. */
+  val PenaltyScoreDiff: Long   = 10000000L          // 1e7
+  /** Strafe für eine Paarung von Spielern desselben Vereins. */
+  val PenaltySameClub: Long    = 100000L            // 1e5
+  /** Strafe je 10 Punkte Wertungsunterschied (höchstens 300 je Paarung). */
+  val PenaltyRatingStep: Long  = 1L
 
-    val score = 
-      (-10000 * sameClub) +
-      (-100000 * alreadyPlayed) +
-      (-50 * ratingDifference) +
-      (+10 * sameScoreGroup)
-    
-    score.toDouble
+  /** Haben die Spieler mit den Kennungen a und b schon gegeneinander gespielt (b = -1: Freilos)? */
+  private def played(a: Int, b: Int, history: Set[(Int, Int)]): Boolean =
+    history.contains((a, b)) || history.contains((b, a))
+
+  /**
+   * Gewicht einer Paarung (größer = besser, Strafpunkte negativ).
+   *
+   * @param p1      Spieler 1
+   * @param p2      Spieler 2
+   * @param history bereits gespielte Paarungen (Kennungen, -1 = Freilos)
+   */
+  def calculateWeight(p1: SwissPlayer, p2: SwissPlayer, history: Set[(Int, Int)]): Long = {
+    val diff = (p1.scoreGroup - p2.scoreGroup).toLong
+    val sameClub = p1.club != 0 && p1.club == p2.club
+    -((if (played(p1.id, p2.id, history)) PenaltyRepeat else 0L) +
+      diff * diff * PenaltyScoreDiff +
+      (if (sameClub) PenaltySameClub else 0L) +
+      math.min(300L, math.abs(p1.rating - p2.rating) / 10L) * PenaltyRatingStep)
   }
 
-  def calculateByeWeight(p: SwissPlayer, history: Set[(Int, Int)]): Double = {
-    val alreadyHadBye = history.contains((p.id, -1)) || history.contains((-1, p.id))
-    if (alreadyHadBye) -1000000.0 else 0.0
-  }
+  /**
+   * Gewicht des Freiloses für einen Spieler (größer = besser): bevorzugt die unterste Punktgruppe, darin den
+   * Spieler mit der niedrigsten Wertung; ein zweites Freilos nur, wenn es nicht anders geht.
+   *
+   * @param p        Spieler
+   * @param minScore Punktzahl der untersten Punktgruppe
+   * @param history  bereits gespielte Paarungen (Kennungen, -1 = Freilos)
+   */
+  def calculateByeWeight(p: SwissPlayer, minScore: Int, history: Set[(Int, Int)]): Long =
+    -((if (played(p.id, -1, history)) PenaltyRepeat else 0L) +
+      (p.scoreGroup - minScore).toLong * PenaltyByeScore +
+      math.min(300L, math.max(0, p.rating) / 10L) * PenaltyRatingStep)
 
-  // Ein einfacher Weighted Perfect Matching Algorithmus
+  /**
+   * Berechnet die Paarungen der nächsten Runde.
+   *
+   * @param players Teilnehmer mit aktueller Punktgruppe (scoreGroup = Siege)
+   * @param history bereits gespielte Paarungen als Paare von Kennungen, (id, -1) = Freilos
+   * @return Paarungen ((id1, id2), …); bei ungerader Anzahl genau ein Freilos (id, -1)
+   */
   def computePairings(players: Seq[SwissPlayer], history: Set[(Int, Int)]): Seq[SwissPair] = {
-    val hasBye = players.length % 2 != 0
-    val activePlayers = players.toList
-    
-    var bestPairs = Seq.empty[SwissPair]
-    var bestScore = Double.NegativeInfinity
-    
-    val rnd = new scala.util.Random(42) // deterministic seed for reproducibility
-    
-    // Wir probieren 10000 Versuche aus und nehmen die Paarung mit der höchsten Gesamtbewertung
-    for (_ <- 1 to 10000) {
-      var remaining = rnd.shuffle(activePlayers)
-      val currentPairs = scala.collection.mutable.ListBuffer[SwissPair]()
-      var currentScore = 0.0
-      
-      if (hasBye) {
-        // Unter den verbleibenden Spielern wählen wir einen für das Freilos
-        // Wir maximieren die Bye-Bewertung (bevorzugen Spieler, die noch kein Freilos hatten)
-        val byeScored = remaining.map(p => (p, calculateByeWeight(p, history)))
-        // Wir nehmen den besten (am wenigsten bestraften), bei Gleichstand zufällig durch shuffle
-        val bestBye = byeScored.maxBy(_._2)
-        val byePlayer = bestBye._1
-        
-        currentPairs += SwissPair((byePlayer.id, -1), (0, 0), (0, 0))
-        currentScore += bestBye._2
-        
-        remaining = remaining.filter(_.id != byePlayer.id)
-      }
-      
-      while (remaining.nonEmpty) {
-        val p1 = remaining.head
-        remaining = remaining.tail
-        
-        if (remaining.nonEmpty) {
-          val scoredOpponents = remaining.map { p2 =>
-            (p2, calculateWeight(p1, p2, history))
-          }
-          val bestOpp = scoredOpponents.maxBy(_._2)
-          val p2 = bestOpp._1
-          val weight = bestOpp._2
-          
-          currentPairs += SwissPair((p1.id, p2.id), (0, 0), (0, 0))
-          currentScore += weight
-          
-          remaining = remaining.filter(_.id != p2.id)
-        }
-      }
-      
-      if (currentScore > bestScore) {
-        bestScore = currentScore
-        bestPairs = currentPairs.toSeq
-      }
-    }
-    
-    bestPairs
+    val ps = players.toIndexedSeq
+    val n = ps.length
+    if (n == 0) return Seq.empty
+    if (n == 1) return Seq(SwissPair((ps(0).id, -1), (0, 0), (0, 0)))
+
+    val byeVertex = if (n % 2 != 0) n else -1
+    val minScore = ps.map(_.scoreGroup).min
+    val edges = scala.collection.mutable.ArrayBuffer.empty[MaxWeightMatching.Edge]
+    for (i <- 0 until n; j <- i + 1 until n)
+      edges += MaxWeightMatching.Edge(i, j, calculateWeight(ps(i), ps(j), history))
+    if (byeVertex >= 0)
+      for (i <- 0 until n) edges += MaxWeightMatching.Edge(i, byeVertex, calculateByeWeight(ps(i), minScore, history))
+
+    val mate = MaxWeightMatching.compute(edges.toSeq, maxCardinality = true)
+    // Paarungen in der Reihenfolge der Teilnehmerliste, Freilos zuletzt
+    val pairs = (0 until n).filter(i => mate(i) > i && mate(i) != byeVertex)
+      .map(i => SwissPair((ps(i).id, ps(mate(i)).id), (0, 0), (0, 0)))
+    val bye = (0 until n).find(i => byeVertex >= 0 && mate(i) == byeVertex)
+      .map(i => SwissPair((ps(i).id, -1), (0, 0), (0, 0)))
+    pairs ++ bye.toSeq
   }
 }
