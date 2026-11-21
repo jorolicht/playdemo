@@ -72,7 +72,8 @@ case class AdminUserInfo(
   club: String = "",
   roles: List[String] = Nil,
   user_profile: UserProfile = UserProfile(),
-  allowed_tourneys: Int = 0
+  allowed_tourneys: Int = 0,
+  license_until: String = ""
 )
 
 object AdminUserInfo:

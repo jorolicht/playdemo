@@ -321,7 +321,9 @@ object Global:
         val isAdminOrMaster = u.roles.exists(r => List("administrator", "editor", "tourney_master").contains(r))
         val isTourneyAdminOfThis = u.isTurnierAdmin && (u.org == tourney.organizer || u.username == tourney.organizer || u.email == tourney.organizer)
         val isPageEditor = !fws && canEditPage
-        isAdminOrMaster || isTourneyAdminOfThis || isPageEditor
+        // archivierte Turniere: nur Administratoren dürfen weiter bearbeiten (gilt für das geladene Turnier)
+        val archived = currentAci.archived && currentSelection.tourney.exists(_.wpId == tourney.wpId)
+        isAdminOrMaster || ((isTourneyAdminOfThis || isPageEditor) && !archived)
       case None => false
     }
 

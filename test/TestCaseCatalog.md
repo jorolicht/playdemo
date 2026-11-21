@@ -429,3 +429,16 @@ Nur Cloud-Turniere. Das Logo liegt als Anhang des Turnier-Posts in der Mediathek
 - [x] **TC-LOGO-05 [🌐]:** Hochladen ohne Schreibrecht auf das Turnier wird abgelehnt (401/403).
 - [x] **TC-LOGO-06 [👤]:** Ein neues Logo ersetzt das alte (alte Datei gelöscht); Speichern der Homepage-Einstellungen lässt das Logo unverändert; „Entfernen“ löscht Logo und Datei.
 - [x] **TC-LOGO-07 [👤]:** Beim endgültigen Löschen des Turniers wird das Logo mit gelöscht.
+
+---
+
+## 30. UseCase: Abrechnung der Cloud-Turniere und Archiv (`includes/user.php`, `cpt.php`, Kostenseite)
+
+Guthaben in Posten (gekaufte Turniere 2 Jahre gültig, Altbestand und manuelle Gutschriften unbefristet). Beim Anlegen wird ein Turnier reserviert; wird es ohne Ergebnis gelöscht, kommt es zurück. Mit Vereins-/Verbandslizenz (Feld „gültig bis“ im Benutzerprofil bzw. in der Management-Konsole) wird kein Guthaben verbraucht und nicht archiviert. Ein Turnier ist 1 Jahr nach Turnierende (frühestens 1 Jahr nach dem Anlegen) archiviert: schreibgeschützt, öffentlich lesbar.
+
+### 30.1 Turnierverwalter (👤) / Administrator (👑)
+- [x] **TC-CR-01 [👤]:** Ohne Guthaben wird das Anlegen abgelehnt (`tourney_limit_reached`); ein Kauf ergibt einen Posten mit Ablauf in 2 Jahren; Anlegen reserviert 1 Turnier, Löschen ohne Ergebnis gibt es mit demselben Ablaufdatum zurück.
+- [x] **TC-CR-02 [👤]:** Nach dem ersten Ergebnis (`stages-sync`, `_has_results`) gibt das Löschen kein Guthaben zurück.
+- [x] **TC-CR-03 [👤]:** Abgelaufenes Guthaben zählt nicht; das Anlegen wird abgelehnt.
+- [x] **TC-CR-04 [👑]:** Lizenz über die Management-Konsole (`admin/update_user_profile`, `license_until`): Anlegen ohne Guthaben, kein Verbrauch.
+- [x] **TC-AR-01 [👤]:** Archiv: mit Lizenz nicht archiviert; ohne Lizenz `read-aci` → `archived`, Schreiben als Turnierleiter 403 (`tourney_archived`), als Administrator erlaubt; der Turnierleiter sieht die öffentliche Seite mit Hinweis „Archiv“ (`data-canedit="0"`).

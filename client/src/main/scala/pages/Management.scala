@@ -141,6 +141,8 @@ object Management extends BasePage with JsWrapper with ComWrapper:
     if (rolesElem != null) rolesElem.textContent = u.roles.mkString(", ")
     if (availableInput != null) availableInput.value = u.user_profile.available.toString
     if (executedInput != null) executedInput.value = u.user_profile.executed.toString
+    val licenseInput = dom.document.getElementById("mgmt-license-input").asInstanceOf[dom.html.Input]
+    if (licenseInput != null) licenseInput.value = u.license_until
 
     if (tbody != null) {
       if (u.user_profile.history.isEmpty) {
@@ -174,16 +176,20 @@ object Management extends BasePage with JsWrapper with ComWrapper:
 
         showStatusAlert("Speichere UserProfile...", isSuccess = true)
 
-        val payloadMap = Map(
+        val licenseInput = dom.document.getElementById("mgmt-license-input").asInstanceOf[dom.html.Input]
+        val newLicense = if (licenseInput != null) licenseInput.value.trim else u.license_until
+
+        val payload = ujson.Obj(
           "user_id" -> u.user_id,
           "available" -> newAvailable,
-          "executed" -> newExecuted
+          "executed" -> newExecuted,
+          "license_until" -> newLicense
         )
 
-        ajaxPost[String, Map[String, Int]]("/wp-json/tourney/v1/admin/update_user_profile", List(), write(payloadMap), Map("X-WP-NONCE" -> Global.wpNonce), Global.homeUrl).map {
+        ajaxPost[String, ujson.Value]("/wp-json/tourney/v1/admin/update_user_profile", List(), ujson.write(payload), Map("X-WP-NONCE" -> Global.wpNonce), Global.homeUrl).map {
           case Right(_) =>
             val updatedProfile = u.user_profile.copy(available = newAvailable, executed = newExecuted)
-            val updatedUser = u.copy(user_profile = updatedProfile, allowed_tourneys = newAvailable)
+            val updatedUser = u.copy(user_profile = updatedProfile, allowed_tourneys = newAvailable, license_until = newLicense)
             selectedUser = Some(updatedUser)
             searchResults = searchResults.map(x => if (x.user_id == u.user_id) updatedUser else x)
             renderUsersList(searchResults)

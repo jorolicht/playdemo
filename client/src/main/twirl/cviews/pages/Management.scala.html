@@ -77,6 +77,15 @@
                                     <span class="badge bg-secondary" id="mgmt-selected-roles">-</span>
                                 </div>
 
+                                @* Vereins-/Verbandslizenz (Vergabe auf Anfrage): Turniere ohne Guthaben, keine Archivfrist *@
+                                <div class="bg-light p-3 rounded border mb-3">
+                                    <label for="mgmt-license-input" class="form-label fw-bold text-dark mb-1">
+                                        <i class="bi bi-patch-check-fill text-success me-1"></i>Vereins-/Verbandslizenz gültig bis:
+                                    </label>
+                                    <input type="date" id="mgmt-license-input" class="form-control" style="max-width: 220px;">
+                                    <div class="form-text">Leer = keine Lizenz. Solange sie gilt, werden Turniere ohne Guthaben angelegt und nicht archiviert.</div>
+                                </div>
+
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-6">
                                         <div class="bg-light p-3 rounded border">

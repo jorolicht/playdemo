@@ -498,7 +498,8 @@ function tourney_api_create(WP_REST_Request $request) {
         // Check UserProfile available count limit for TourneyAdmin / Author / Subscriber
         // (gilt nur für neue Posts; beim Überschreiben wird erst nach der Existenzprüfung entschieden)
         $is_admin_or_editor = tourney_is_admin_or_editor($current_user);
-        $limit_reached = !$is_admin_or_editor && tourney_get_user_profile($current_user->ID)['available'] <= 0;
+        $limit_reached = !$is_admin_or_editor && !tourney_user_license_valid($current_user->ID)
+            && tourney_get_user_profile($current_user->ID)['available'] <= 0;
         $limit_error = ApiHelper::error(
             "tourney_limit_reached",
             "Sie haben keine verfügbaren Turniere mehr (available = 0). Bitte kaufen Sie über die Preisseite weitere Turniere.",
@@ -762,8 +763,9 @@ function tourney_read_aci(WP_REST_Request $request)
     if (!is_object($aci)) {
         $aci = new stdClass();
     }
-    // Logo des Turniers (Mediathek, siehe includes/api/logo.php); wird nicht im ACI gespeichert
+    // Logo des Turniers (Mediathek, siehe includes/api/logo.php) und Archivstatus; werden nicht im ACI gespeichert
     $aci->logoUrl = tourney_logo_url($post_id);
+    $aci->archived = tourney_is_archived($post_id);
     
     return new WP_REST_Response($aci, 200);
 }
@@ -785,7 +787,7 @@ function tourney_save_aci(WP_REST_Request $request)
     }
     // logoUrl ergibt sich aus dem Logo-Anhang (tourney_logo_url) und wird nicht gespeichert
     if (is_array($aci)) {
-        unset($aci['logoUrl']);
+        unset($aci['logoUrl'], $aci['archived']);
     }
     
     update_post_meta($post_id, 'aci', wp_slash(json_encode($aci, JSON_UNESCAPED_UNICODE)));

@@ -541,6 +541,7 @@ function tourney_api_admin_search_users( WP_REST_Request $request ) {
             'roles'            => $roles_list,
             'user_profile'     => $profile,
             'allowed_tourneys' => (int) $profile['available'],
+            'license_until'    => tourney_user_license_until( $u->ID ),
         );
     }
 
@@ -575,12 +576,17 @@ function tourney_api_admin_update_user_profile( WP_REST_Request $request ) {
     }
 
     tourney_update_user_profile( $target_user_id, $profile );
+    if ( array_key_exists( 'license_until', (array) $params ) ) {
+        tourney_user_set_license( $target_user_id, sanitize_text_field( (string) $params['license_until'] ) );
+    }
+    $profile = tourney_get_user_profile( $target_user_id );
 
     return rest_ensure_response( array(
         'success'          => true,
         'user_id'          => $target_user_id,
         'user_profile'     => $profile,
         'allowed_tourneys' => (int) $profile['available'],
+        'license_until'    => tourney_user_license_until( $target_user_id ),
         'message'          => 'UserProfile erfolgreich aktualisiert.',
     ) );
 }

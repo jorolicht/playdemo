@@ -57,7 +57,44 @@ function tourney_user_can_edit_post( $post_id ) {
  * @return bool True, wenn der aktuelle Benutzer den Post bearbeiten darf.
  */
 function tourney_api_can_edit_request_post( WP_REST_Request $request ) {
-    return tourney_user_can_edit_post( ApiHelper::getPostId( $request ) );
+    $post_id = ApiHelper::getPostId( $request );
+    if ( ! tourney_user_can_edit_post( $post_id ) ) {
+        return false;
+    }
+    // Archivierte Turniere: nur noch lesen (Administratoren und Redakteure dürfen weiter bearbeiten)
+    if ( ! in_array( $request->get_method(), array( 'GET', 'HEAD' ), true ) && tourney_is_archived( $post_id )
+         && ! tourney_is_admin_or_editor() ) {
+        return new WP_Error( 'tourney_archived', 'Das Turnier ist archiviert und kann nicht mehr bearbeitet werden.', array( 'status' => 403 ) );
+    }
+    return true;
+}
+
+/** Tage nach Turnierende, ab denen ein Cloud-Turnier archiviert (schreibgeschützt) ist. */
+const TOURNEY_ARCHIVE_DAYS = 365;
+
+/**
+ * Prüft, ob ein Cloud-Turnier archiviert ist: TOURNEY_ARCHIVE_DAYS Tage nach dem Turnierende (ersatzweise
+ * Turnierbeginn), frühestens nach dem Anlegen, solange der Autor keine gültige Vereins-/Verbandslizenz hat. Archivierte
+ * Turniere bleiben öffentlich lesbar. Nur auf der Website (TOURNEY_FWS), nicht im Embed-Plugin.
+ *
+ * @param int $post_id Post-ID des Turniers.
+ * @return bool
+ */
+function tourney_is_archived( $post_id ) {
+    $post_id = intval( $post_id );
+    if ( ! ( defined( 'TOURNEY_FWS' ) && TOURNEY_FWS ) || $post_id <= 0 || get_post_type( $post_id ) !== 'tourney' ) {
+        return false;
+    }
+    $created = substr( (string) get_post_field( 'post_date', $post_id ), 0, 10 ) ?: wp_date( 'Y-m-d' );
+    $end     = intval( get_post_meta( $post_id, 'endDate', true ) ) ?: intval( get_post_meta( $post_id, 'startDate', true ) );
+    $end_dt  = $end > 19000101 ? DateTime::createFromFormat( 'Ymd', (string) $end ) : false;
+    // Frist ab dem späteren Datum: Turnierende bzw. Anlegen (nachträglich angelegte Turniere bleiben 1 Jahr bearbeitbar)
+    $base    = $end_dt && $end_dt->format( 'Y-m-d' ) > $created ? $end_dt->format( 'Y-m-d' ) : $created;
+    $limit   = ( new DateTime( $base ) )->modify( '+' . TOURNEY_ARCHIVE_DAYS . ' days' )->format( 'Y-m-d' );
+    if ( $limit >= wp_date( 'Y-m-d' ) ) {
+        return false;
+    }
+    return ! tourney_user_license_valid( (int) get_post_field( 'post_author', $post_id ) );
 }
 
 /**
@@ -89,12 +126,20 @@ function tourney_register_custom_roles() {
 }
 add_action( 'init', 'tourney_register_custom_roles' );
 
+/** Gültigkeit gekaufter Turniere in Jahren (ab Kaufdatum). */
+const TOURNEY_CREDIT_VALID_YEARS = 2;
+
 /**
  * Retrieves the UserProfile array structure for a given user ID.
  * Performs automatic legacy migration from 'allowed_tourneys' if 'user_profile' meta is missing/empty.
  *
+ * Guthaben wird in Posten ("lots") geführt: je Kauf ein Posten mit Restanzahl und Ablaufdatum (Kaufdatum +
+ * TOURNEY_CREDIT_VALID_YEARS). Posten ohne Ablaufdatum gelten unbefristet (Altbestand vor Einführung der Posten,
+ * manuelle Gutschriften). "available" ist die Summe der noch gültigen Posten.
+ *
  * @param int $user_id The ID of the user.
- * @return array Array with keys: available (int), executed (int), history (array of Purchase arrays)
+ * @return array Array with keys: available (int), executed (int), history (array of Purchase arrays),
+ *               lots (array of ["remaining" => int, "expires" => "Y-m-d" oder ""])
  */
 function tourney_get_user_profile( $user_id ) {
     $meta = get_user_meta( $user_id, 'user_profile', true );
@@ -133,25 +178,128 @@ function tourney_get_user_profile( $user_id ) {
         }
     }
 
+    // Altbestand ohne Posten: bisheriges Guthaben als ein unbefristeter Posten
+    if ( isset( $profile['lots'] ) && is_array( $profile['lots'] ) ) {
+        $lots = tourney_clean_credit_lots( $profile['lots'] );
+    } else {
+        $legacy = isset( $profile['available'] ) ? max( 0, intval( $profile['available'] ) ) : 0;
+        $lots   = $legacy > 0 ? array( array( 'remaining' => $legacy, 'expires' => '' ) ) : array();
+    }
+
     return array(
-        'available' => isset( $profile['available'] ) ? max( 0, intval( $profile['available'] ) ) : 0,
+        'available' => tourney_credit_available( $lots ),
         'executed'  => isset( $profile['executed'] ) ? max( 0, intval( $profile['executed'] ) ) : 0,
         'history'   => $clean_history,
+        'lots'      => $lots,
     );
+}
+
+/**
+ * Bereinigt Guthabenposten: nur Posten mit Restanzahl > 0, Ablaufdatum "Y-m-d" oder "".
+ *
+ * @param array $lots Posten.
+ * @return array Bereinigte Posten.
+ */
+function tourney_clean_credit_lots( array $lots ) {
+    $clean = array();
+    foreach ( $lots as $lot ) {
+        if ( ! is_array( $lot ) ) {
+            continue;
+        }
+        $remaining = max( 0, intval( $lot['remaining'] ?? 0 ) );
+        $expires   = (string) ( $lot['expires'] ?? '' );
+        if ( $remaining > 0 && ( $expires === '' || preg_match( '/^\d{4}-\d{2}-\d{2}$/', $expires ) ) ) {
+            $clean[] = array( 'remaining' => $remaining, 'expires' => $expires );
+        }
+    }
+    return $clean;
+}
+
+/**
+ * Prüft, ob ein Guthabenposten heute noch gültig ist.
+ *
+ * @param array $lot Posten.
+ * @return bool true ohne Ablaufdatum oder wenn das Ablaufdatum heute oder später ist.
+ */
+function tourney_credit_lot_valid( array $lot ) {
+    return $lot['expires'] === '' || $lot['expires'] >= wp_date( 'Y-m-d' );
+}
+
+/**
+ * Summe der gültigen Guthabenposten.
+ *
+ * @param array $lots Posten.
+ * @return int Verfügbare Turniere.
+ */
+function tourney_credit_available( array $lots ) {
+    $sum = 0;
+    foreach ( $lots as $lot ) {
+        if ( tourney_credit_lot_valid( $lot ) ) {
+            $sum += $lot['remaining'];
+        }
+    }
+    return $sum;
+}
+
+/**
+ * Bucht 1 Turnier aus dem am frühesten ablaufenden gültigen Posten ab (unbefristete Posten zuletzt).
+ *
+ * @param array $lots Posten (wird verändert).
+ * @return string|false Ablaufdatum des belasteten Postens ("" = unbefristet) oder false ohne gültiges Guthaben.
+ */
+function tourney_credit_take( array &$lots ) {
+    $best = -1;
+    foreach ( $lots as $i => $lot ) {
+        if ( $lot['remaining'] < 1 || ! tourney_credit_lot_valid( $lot ) ) {
+            continue;
+        }
+        if ( $best < 0 ) {
+            $best = $i;
+            continue;
+        }
+        $b = $lots[ $best ]['expires'];
+        $e = $lot['expires'];
+        if ( $b === '' && $e !== '' || ( $e !== '' && $b !== '' && $e < $b ) ) {
+            $best = $i;
+        }
+    }
+    if ( $best < 0 ) {
+        return false;
+    }
+    $lots[ $best ]['remaining'] -= 1;
+    return $lots[ $best ]['expires'];
 }
 
 /**
  * Saves the UserProfile structure for a given user ID as a JSON-encoded string.
  *
+ * Wurde "available" vom Aufrufer geändert (Administrator, Management-Konsole), wird die Differenz als
+ * unbefristeter Posten gutgeschrieben bzw. von den gültigen Posten abgebucht.
+ *
  * @param int   $user_id The ID of the user.
- * @param array $profile Array containing available, executed, and history.
+ * @param array $profile Array containing available, executed, history and lots.
  * @return bool True on success.
  */
 function tourney_update_user_profile( $user_id, array $profile ) {
+    $lots = tourney_clean_credit_lots( isset( $profile['lots'] ) && is_array( $profile['lots'] ) ? $profile['lots'] : array() );
+    if ( isset( $profile['available'] ) ) {
+        $delta = max( 0, intval( $profile['available'] ) ) - tourney_credit_available( $lots );
+        if ( $delta > 0 ) {
+            $lots[] = array( 'remaining' => $delta, 'expires' => '' );
+        }
+        for ( $i = 0; $i < -$delta; $i++ ) {
+            if ( tourney_credit_take( $lots ) === false ) {
+                break;
+            }
+        }
+        $lots = tourney_clean_credit_lots( $lots );
+    }
+
     $clean_profile = array(
-        'available' => isset( $profile['available'] ) ? max( 0, intval( $profile['available'] ) ) : 0,
+        'available' => tourney_credit_available( $lots ),
         'executed'  => isset( $profile['executed'] ) ? max( 0, intval( $profile['executed'] ) ) : 0,
         'history'   => isset( $profile['history'] ) && is_array( $profile['history'] ) ? array_values( $profile['history'] ) : array(),
+        'lots'      => array_values( $lots ),
     );
 
     $json_string = wp_json_encode( $clean_profile );
@@ -161,7 +309,7 @@ function tourney_update_user_profile( $user_id, array $profile ) {
 }
 
 /**
- * Adds a purchase to the user's history and increments available tournaments count.
+ * Adds a purchase to the user's history and a credit lot valid for TOURNEY_CREDIT_VALID_YEARS years.
  *
  * @param int         $user_id The ID of the user.
  * @param int         $count   Number of tournaments bought.
@@ -177,35 +325,101 @@ function tourney_user_profile_add_purchase( $user_id, $count, $price = 0.0, $dat
     }
 
     $profile = tourney_get_user_profile( $user_id );
-    $profile['available'] += $count;
+    $bought  = DateTime::createFromFormat( 'YmdHi', substr( (string) $date, 0, 12 ) ) ?: new DateTime();
+    $profile['lots'][] = array(
+        'remaining' => $count,
+        'expires'   => $bought->modify( '+' . TOURNEY_CREDIT_VALID_YEARS . ' years' )->format( 'Y-m-d' ),
+    );
+    unset( $profile['available'] );   // Guthaben ergibt sich aus den Posten
 
-    $purchase = array(
+    $profile['history'][] = array(
         'date'  => (string) $date,
         'count' => $count,
         'price' => $price,
     );
-
-    $profile['history'][] = $purchase;
     tourney_update_user_profile( $user_id, $profile );
-    return $profile;
+    return tourney_get_user_profile( $user_id );
 }
 
 /**
- * Executes a tournament for a user, decrementing available by 1 and incrementing executed by 1 if available >= 1.
+ * Reserviert 1 Turnier vom Guthaben (beim Anlegen eines Cloud-Turniers) und zählt es als durchgeführt.
  *
  * @param int $user_id The ID of the user.
- * @return bool True if successfully decremented, false if available < 1.
+ * @return string|false Ablaufdatum des belasteten Postens ("" = unbefristet) oder false ohne gültiges Guthaben.
  */
-function tourney_user_profile_execute_tournament( $user_id ) {
+function tourney_user_reserve_tournament( $user_id ) {
     $profile = tourney_get_user_profile( $user_id );
-    if ( $profile['available'] < 1 ) {
+    $expires = tourney_credit_take( $profile['lots'] );
+    if ( $expires === false ) {
         return false;
     }
-
-    $profile['available'] = max( 0, $profile['available'] - 1 );
+    unset( $profile['available'] );
     $profile['executed'] += 1;
     tourney_update_user_profile( $user_id, $profile );
-    return true;
+    return $expires;
+}
+
+/**
+ * Gibt ein reserviertes Turnier zurück (Turnier ohne Ergebnis gelöscht).
+ *
+ * @param int    $user_id The ID of the user.
+ * @param string $expires Ablaufdatum des ursprünglich belasteten Postens ("" = unbefristet).
+ * @return void
+ */
+function tourney_user_refund_tournament( $user_id, $expires ) {
+    $profile = tourney_get_user_profile( $user_id );
+    $profile['lots'][] = array( 'remaining' => 1, 'expires' => (string) $expires );
+    unset( $profile['available'] );
+    $profile['executed'] = max( 0, $profile['executed'] - 1 );
+    tourney_update_user_profile( $user_id, $profile );
+}
+
+/**
+ * Executes a tournament for a user (Reservierung, siehe tourney_user_reserve_tournament).
+ *
+ * @param int $user_id The ID of the user.
+ * @return bool True if successfully reserved, false without valid credit.
+ */
+function tourney_user_profile_execute_tournament( $user_id ) {
+    return tourney_user_reserve_tournament( $user_id ) !== false;
+}
+
+/**
+ * Datum, bis zu dem die Vereins- bzw. Verbandslizenz eines Benutzers gilt.
+ *
+ * @param int $user_id The ID of the user.
+ * @return string "Y-m-d" oder "" ohne Lizenz.
+ */
+function tourney_user_license_until( $user_id ) {
+    $until = (string) get_user_meta( $user_id, 'tourney_license_until', true );
+    return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $until ) ? $until : '';
+}
+
+/**
+ * Prüft, ob die Lizenz eines Benutzers heute gilt (Turniere ohne Guthaben anlegen, keine Archivfrist).
+ *
+ * @param int $user_id The ID of the user.
+ * @return bool
+ */
+function tourney_user_license_valid( $user_id ) {
+    $until = tourney_user_license_until( $user_id );
+    return $until !== '' && $until >= wp_date( 'Y-m-d' );
+}
+
+/**
+ * Setzt bzw. entfernt ("") die Lizenz eines Benutzers.
+ *
+ * @param int    $user_id The ID of the user.
+ * @param string $until   "Y-m-d" oder "".
+ * @return void
+ */
+function tourney_user_set_license( $user_id, $until ) {
+    $until = trim( (string) $until );
+    if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $until ) ) {
+        update_user_meta( $user_id, 'tourney_license_until', $until );
+    } elseif ( $until === '' ) {
+        delete_user_meta( $user_id, 'tourney_license_until' );
+    }
 }
 
 /**
@@ -259,6 +473,39 @@ function tourney_add_custom_user_profile_fields( $user ) {
                     <span class="description"><?php esc_html_e( 'Anzahl der vom Benutzer bereits durchgeführten Turniere.', 'tourney' ); ?></span>
                 <?php else : ?>
                     <input type="number" id="user_profile_executed" value="<?php echo esc_attr( $profile['executed'] ); ?>" class="regular-text" disabled="disabled" /><br />
+                <?php endif; ?>
+            </td>
+        </tr>
+        <tr>
+            <th><?php esc_html_e( 'Guthaben (gültig bis)', 'tourney' ); ?></th>
+            <td>
+                <?php if ( ! empty( $profile['lots'] ) ) : ?>
+                    <table class="widefat striped" style="max-width: 400px;">
+                        <thead><tr><th><?php esc_html_e( 'Turniere', 'tourney' ); ?></th><th><?php esc_html_e( 'gültig bis', 'tourney' ); ?></th></tr></thead>
+                        <tbody>
+                            <?php foreach ( $profile['lots'] as $lot ) : ?>
+                                <tr<?php echo tourney_credit_lot_valid( $lot ) ? '' : ' style="opacity:.5"'; ?>>
+                                    <td><?php echo esc_html( $lot['remaining'] ); ?></td>
+                                    <td><?php echo esc_html( $lot['expires'] === '' ? __( 'unbefristet', 'tourney' ) : wp_date( 'd.m.Y', strtotime( $lot['expires'] ) ) ); ?><?php echo tourney_credit_lot_valid( $lot ) ? '' : ' (' . esc_html__( 'abgelaufen', 'tourney' ) . ')'; ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else : ?>
+                    <span class="description"><?php esc_html_e( 'Kein Guthaben.', 'tourney' ); ?></span>
+                <?php endif; ?>
+                <span class="description"><?php esc_html_e( 'Gekaufte Turniere gelten 2 Jahre ab Kauf; manuell gutgeschriebene unbefristet.', 'tourney' ); ?></span>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="tourney_license_until"><?php esc_html_e( 'Vereins-/Verbandslizenz gültig bis', 'tourney' ); ?></label></th>
+            <td>
+                <?php $license_until = tourney_user_license_until( $user->ID ); ?>
+                <?php if ( $can_edit_counter ) : ?>
+                    <input type="date" name="tourney_license_until" id="tourney_license_until" value="<?php echo esc_attr( $license_until ); ?>" /><br />
+                    <span class="description"><?php esc_html_e( 'Solange die Lizenz gilt: Turniere ohne Guthaben anlegen, keine Archivfrist. Leer = keine Lizenz.', 'tourney' ); ?></span>
+                <?php else : ?>
+                    <input type="date" id="tourney_license_until" value="<?php echo esc_attr( $license_until ); ?>" disabled="disabled" />
                 <?php endif; ?>
             </td>
         </tr>
@@ -326,6 +573,9 @@ function ucfe_save_custom_user_profile_fields( $user_id ) {
             $profile['executed'] = max( 0, intval( $_POST['user_profile_executed'] ) );
         }
         tourney_update_user_profile( $user_id, $profile );
+        if ( isset( $_POST['tourney_license_until'] ) ) {
+            tourney_user_set_license( $user_id, sanitize_text_field( wp_unslash( $_POST['tourney_license_until'] ) ) );
+        }
     }
 }
 if ( TOURNEY_FWS ) {

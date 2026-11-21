@@ -236,7 +236,9 @@ function tourney_render($atts) {
         ));
         $editPostId = !empty($found) ? $found[0] : 0;
     }
-    $canEdit = tourney_user_can_edit_post($editPostId);
+    // archivierte Turniere: für Turnierleiter nur noch lesbar (öffentliche Ansicht)
+    $canEdit = tourney_user_can_edit_post($editPostId)
+        && !(tourney_is_archived($editPostId) && !tourney_is_admin_or_editor());
 
     $turnstile_key = get_option('cfturnstile_key', getenv('TURNSTILE_SITEKEY') ?: '');
     if (!empty($turnstile_key)) {

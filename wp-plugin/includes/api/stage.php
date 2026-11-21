@@ -138,10 +138,37 @@ function tourney_sync_stages(WP_REST_Request $request)
         update_post_meta($post_id, $meta_ver, $client_ver);
     }
 
+    // Erstes Ergebnis vermerken: Turniere mit Ergebnis geben beim Löschen kein Guthaben zurück (cpt.php)
+    if (!get_post_meta($post_id, '_has_results', true) && tourney_stages_have_results($events)) {
+        update_post_meta($post_id, '_has_results', 1);
+    }
+
     // Änderungsprotokoll (Ergebnisse), siehe includes/api/changelog.php
     tourney_changelog_add($post_id, 'stage', $body["log"] ?? []);
 
     return [
         "success" => true
     ];
+}
+
+/**
+ * Prüft, ob in Stages mindestens ein Spiel mit Ergebnis steht (Status FIN = 2 oder DRAW = 4; Freilose zählen nicht).
+ * Die Spiele liegen kodiert vor ("content", Felder durch "^" getrennt); die Position des Status hängt vom
+ * Format ab (siehe MEntry im Client): Gruppe/Jeder gegen jeden 13, K.-o. 11, Schweizer System 9.
+ *
+ * @param array $stages Stages (wie in stages-sync).
+ * @return bool
+ */
+function tourney_stages_have_results($stages) {
+    $pos = ['GR' => 13, 'RR' => 13, 'KO' => 11, 'SW' => 9];
+    foreach ((array) $stages as $stage) {
+        foreach ((array) ($stage['matches'] ?? []) as $m) {
+            $idx = $pos[$m['stageFormat'] ?? ''] ?? null;
+            if ($idx === null || !isset($m['content'])) continue;
+            $f = explode('^', (string) $m['content']);
+            $status = intval($f[$idx] ?? -99);
+            if ($status === 2 || $status === 4) return true;
+        }
+    }
+    return false;
 }

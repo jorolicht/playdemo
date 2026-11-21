@@ -190,7 +190,7 @@ function tourney_check_author_creation_limit( $data, $postarr ) {
 
         $is_admin_or_editor = tourney_is_admin_or_editor( $user );
 
-        if ( ! $is_admin_or_editor ) {
+        if ( ! $is_admin_or_editor && ! tourney_user_license_valid( $user_id ) ) {
             $profile = tourney_get_user_profile( $user_id );
             if ( $profile['available'] <= 0 ) {
                 wp_die(
@@ -240,11 +240,36 @@ function tourney_decrement_author_creation_counter( $post_id, $post, $update ) {
 
     $is_admin_or_editor = tourney_is_admin_or_editor( $user );
 
-    if ( ! $is_admin_or_editor ) {
-        if ( tourney_user_profile_execute_tournament( $author_id ) ) {
+    // Mit gültiger Lizenz wird kein Guthaben verbraucht
+    if ( ! $is_admin_or_editor && ! tourney_user_license_valid( $author_id ) ) {
+        $expires = tourney_user_reserve_tournament( $author_id );
+        if ( $expires !== false ) {
             update_post_meta( $post_id, '_counter_decremented', 1 );
+            update_post_meta( $post_id, '_credit_expires', $expires );
         }
     }
+}
+
+/**
+ * Gibt das reservierte Turnier zurück, wenn ein Turnier ohne eingetragenes Ergebnis endgültig gelöscht wird
+ * (Ausprobieren verbraucht kein Guthaben). Ergebnisse vermerkt tourney_sync_stages in "_has_results".
+ *
+ * @param int $post_id Post-ID.
+ * @return void
+ */
+function tourney_refund_unused_tourney( $post_id ) {
+    if ( get_post_type( $post_id ) !== 'tourney' || ! get_post_meta( $post_id, '_counter_decremented', true )
+         || get_post_meta( $post_id, '_has_results', true ) ) {
+        return;
+    }
+    $author_id = (int) get_post_field( 'post_author', $post_id );
+    if ( $author_id > 0 ) {
+        tourney_user_refund_tournament( $author_id, (string) get_post_meta( $post_id, '_credit_expires', true ) );
+    }
+    delete_post_meta( $post_id, '_counter_decremented' );
+}
+if ( TOURNEY_FWS ) {
+    add_action( 'before_delete_post', 'tourney_refund_unused_tourney' );
 }
 if ( TOURNEY_FWS ) {
     add_action( 'wp_insert_post', 'tourney_decrement_author_creation_counter', 10, 3 );

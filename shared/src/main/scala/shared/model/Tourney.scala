@@ -1094,6 +1094,7 @@ object Tourney:
  *                          "" = kein Hinweis
  * @param logoUrl           Adresse des eigenen Logos (Turnierseite, Urkunden), "" = kein Logo; wird vom Server
  *                          aus dem Logo-Anhang ermittelt (read-aci) und nicht gespeichert
+ * @param archived          Turnier archiviert (1 Jahr nach Turnierende, schreibgeschützt); vom Server ermittelt
  */
 case class ACI(
   homepageInfo: String = "",
@@ -1101,7 +1102,8 @@ case class ACI(
   dateFormat: String = "DE",
   showMessagesTab: Boolean = true,
   registrationHint: Option[String] = None,
-  logoUrl: String = ""
+  logoUrl: String = "",
+  archived: Boolean = false
 ) derives ReadWriter
 
 case class SaveAciResponse(success: Boolean) derives ReadWriter
