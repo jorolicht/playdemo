@@ -240,11 +240,11 @@ object Global:
    * Turnier nicht lokal im Browser gespeichert ist (kein Lokal- oder Demo-Modus).
    */
   def usePlayServer: Boolean = fws && !isLocalMode && !isDemoMode
-  def isViewMode: Boolean = activePageName == "TourneyWelcome" || activePageName == "CompetitionWelcome"
+  def isViewMode: Boolean = activePageName == "TourneyWelcome" || activePageName == "CompetitionWelcome" || activePageName == "MyTourney"
   var activePageName: String = ""
   def isTourneyPage(pageName: String): Boolean = 
     Set(
-      "TourneyInfo", "TourneyWelcome", "TourneyAdmin", "CompetitionInfo", "CompetitionWelcome", "PlayerRegistration", 
+      "TourneyInfo", "TourneyWelcome", "MyTourney", "TourneyAdmin", "CompetitionInfo", "CompetitionWelcome", "PlayerRegistration", 
       "PlayerList", "TeamList", "SystemInfo", "ResultList", "StageAdmin", "StageDraw", 
       "StageInput", "StageResult", "StageScoreSheet", "StageCertificate", "Certificate"
     ).contains(pageName)

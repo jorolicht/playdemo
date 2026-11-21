@@ -1,0 +1,133 @@
+@import shared.model.*
+@import cviews.helper.html.*
+@import pages.MyTourney.*
+@import base.Messages.gM
+
+@(tourney: Tourney, players: Seq[Player], view: Option[pages.MyTourney.View], lastUpdate: String)
+
+@* „Mein Turnier“: persönliche Ansicht für Spieler, siehe pages.MyTourney *@
+<div class="container mt-4 mb-5" data-testid="my-tourney">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h3 class="h4 fw-bold text-dark mb-0"><i class="bi bi-person-badge me-2 text-primary"></i>@gM("myTourney.title")</h3>
+        <button class="btn btn-outline-secondary btn-sm" @id(BtnBackId, "onclick")>
+            <i class="bi bi-arrow-left me-1"></i>@gM("myTourney.back")
+        </button>
+    </div>
+
+    @view match {
+        case None => {
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <p class="text-muted mb-3">@gM("myTourney.selectHint")</p>
+                    @if(players.isEmpty) {
+                        <div class="alert alert-info mb-0">@gM("myTourney.noPlayers")</div>
+                    } else {
+                        <div class="d-flex flex-wrap gap-2">
+                            <select class="form-select" style="max-width: 420px;" @id(SelectId) aria-label="@gM("myTourney.selectLabel")">
+                                <option value="">@gM("myTourney.selectLabel")</option>
+                                @players.map { p =>
+                                    <option value="@p.id.value">@p.displayName</option>
+                                }
+                            </select>
+                            <button class="btn btn-primary" @id(BtnSelectId, "onclick")>
+                                <i class="bi bi-check2 me-1"></i>@gM("myTourney.select")
+                            </button>
+                        </div>
+                        <div class="form-text mt-2">@gM("myTourney.storedHint")</div>
+                    }
+                </div>
+            </div>
+        }
+
+        case Some(v) => {
+            <div class="card shadow-sm border-0 rounded-4 mb-4 bg-white">
+                <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <div class="fw-bold fs-5" data-testid="my-player">@v.player.displayName</div>
+                        @if(v.club.nonEmpty) { <div class="text-muted small">@v.club</div> }
+                    </div>
+                    <div class="d-flex align-items-center gap-2 small text-muted">
+                        @if(lastUpdate.nonEmpty) { <span>@gM("myTourney.updated", lastUpdate)</span> }
+                        <button class="btn btn-outline-primary btn-sm" @id(BtnRefreshId, "onclick") title="@gM("myTourney.refresh")">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" @id(BtnChangeId, "onclick")>@gM("myTourney.change")</button>
+                    </div>
+                </div>
+            </div>
+
+            @* Nächste Spiele *@
+            <div class="card shadow-sm border-0 rounded-4 mb-4" data-testid="my-next">
+                <div class="card-header bg-white fw-bold py-3"><i class="bi bi-clock me-2 text-primary"></i>@gM("myTourney.next")</div>
+                <ul class="list-group list-group-flush">
+                    @if(v.next.isEmpty) {
+                        <li class="list-group-item text-muted">@gM("myTourney.noNext")</li>
+                    }
+                    @v.next.map { g =>
+                        <li class="list-group-item @if(g.called){list-group-item-warning}">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <div class="fw-bold">@gM("myTourney.vs", g.opponent)</div>
+                                    <div class="small text-muted">@g.comp.name · @g.stage.name · @roundLabel(g.stage, g.m)</div>
+                                </div>
+                                @if(g.called) {
+                                    <span class="badge flex-shrink-0 bg-warning text-dark fs-6" data-testid="my-called"><i class="bi bi-megaphone-fill me-1"></i>@gM("myTourney.called", g.m.playfield)</span>
+                                } else if(g.ready) {
+                                    <span class="badge flex-shrink-0 bg-success-subtle text-success-emphasis border border-success-subtle">@gM("myTourney.ready")</span>
+                                } else {
+                                    <span class="badge flex-shrink-0 bg-secondary-subtle text-secondary-emphasis border">@gM("myTourney.waiting")</span>
+                                }
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            @* Ergebnisse *@
+            <div class="card shadow-sm border-0 rounded-4 mb-4" data-testid="my-results">
+                <div class="card-header bg-white fw-bold py-3"><i class="bi bi-check2-square me-2 text-success"></i>@gM("myTourney.results")</div>
+                <ul class="list-group list-group-flush">
+                    @if(v.results.isEmpty) {
+                        <li class="list-group-item text-muted">@gM("myTourney.noResultsYet")</li>
+                    }
+                    @v.results.map { r =>
+                        <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <div class="fw-bold">@if(r.bye){@gM("myTourney.bye")}else{@gM("myTourney.vs", r.opponent)}</div>
+                                <div class="small text-muted">@r.comp.name · @r.stage.name · @roundLabel(r.stage, r.m)</div>
+                            </div>
+                            @if(!r.bye) {
+                                <span class="badge flex-shrink-0 fs-6 @{r.won match { case Some(true) => "bg-success"; case Some(false) => "bg-danger"; case None => "bg-secondary" }}">@{r.sets._1}:@{r.sets._2}</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            @* Wettbewerbe mit Tabellenplatz bzw. Stand im K.-o.-Baum *@
+            <div class="card shadow-sm border-0 rounded-4" data-testid="my-comps">
+                <div class="card-header bg-white fw-bold py-3"><i class="bi bi-trophy me-2 text-warning"></i>@gM("myTourney.comps")</div>
+                <ul class="list-group list-group-flush">
+                    @v.comps.map { ci =>
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between flex-wrap gap-2">
+                                <div>
+                                    <span class="fw-bold">@ci.comp.name</span>
+                                    <span class="text-muted small ms-1">@gM(ci.comp.typ.msgCode)</span>
+                                    @ci.partner.map { p => <div class="small text-muted">@gM("myTourney.partner", p)</div> }
+                                </div>
+                                <div class="small text-muted text-end">
+                                    @startDisplay(ci.comp)
+                                    <span class="badge ms-1 @{if(ci.comp.status == CompStatus.RUN) "bg-warning text-dark" else if(ci.comp.status == CompStatus.FIN) "bg-success" else "bg-secondary"}">@gM(ci.comp.status.msgCode)</span>
+                                </div>
+                            </div>
+                            @ci.stages.map { case (s, text) =>
+                                <div class="small mt-1"><span class="text-muted">@s.name:</span> <span class="fw-semibold">@text</span></div>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    }
+</div>

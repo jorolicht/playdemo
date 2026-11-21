@@ -136,7 +136,7 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
 
         // Full Web Site: Wiederherstellung nur auf der Homepage; eingebettet: nur Bearbeitungsseiten für Schreibberechtigte
         val restoreAllowed = if (Global.fws) Global.isHomePage && tourneyParam.isEmpty
-                             else Global.canEditPage && lastPage != null && Global.isTourneyPage(lastPage) && lastPage != "TourneyWelcome" && lastPage != "CompetitionWelcome"
+                             else Global.canEditPage && lastPage != null && Global.isTourneyPage(lastPage) && lastPage != "TourneyWelcome" && lastPage != "CompetitionWelcome" && lastPage != "MyTourney"
         // Statische Seiten haben eine eigene URL; auf der Startseite nicht wiederherstellen
         val lastIsStatic = lastPage == pages.MainView.name.value && pages.MainView.isStaticPage(lastParam)
         val canRestore = startPage.isEmpty && !lastIsStatic &&

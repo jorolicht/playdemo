@@ -16,6 +16,10 @@
                         <i class="bi bi-pencil-square me-1"></i>Online-Anmeldung
                     </button>
                 }
+                @* „Mein Turnier“: persönliche Ansicht für Spieler *@
+                <button class="btn btn-light btn-sm fw-bold" onclick="appLoadPage('MyTourney', '')" data-testid="my-tourney-btn">
+                    <i class="bi bi-person-badge me-1"></i>@base.Messages.gM("myTourney.title")
+                </button>
                 <button class="btn btn-outline-light btn-sm" onclick="appLoadPage('TourneyWelcome', '')">
                     <i class="bi bi-arrow-left me-1"></i>Turnier-Übersicht
                 </button>

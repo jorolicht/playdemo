@@ -401,3 +401,16 @@ Anmeldung nur für Einzel, wenn turnierweit erlaubt (TourneyAdmin, Reiter „Hom
 - [x] **TC-PR-06 [👤]:** „Wettbewerb bearbeiten“ zeigt den Bereich „Online-Anmeldung“ (Anmeldung ab/bis, „Anmeldung beendet“); nach Setzen der Checkbox ist die Anmeldung auf der Turnierseite geschlossen.
 - [x] **TC-PR-07 [👤]:** Ist die Anmeldung turnierweit nicht erlaubt, sieht der Turnierleiter auf der Turnierseite statt „Anmeldeschluss“ den Hinweis „Anmeldung nicht freigeschaltet – Turnier-Administration → Homepage“ (nicht bei beendeter Anmeldung oder Doppel); Besucher sehen weiterhin „Anmeldeschluss“.
 - [x] **TC-PR-08 [👤]:** Turnier-Administration, Reiter „Homepage“: Feld „Hinweis nach der Online-Anmeldung“ ist mit dem Standardtext vorbelegt; ein eigener Text wird gespeichert und nach der nächsten Anmeldung im Dialog angezeigt.
+
+---
+
+## 28. UseCase: „Mein Turnier“ – persönliche Ansicht für Spieler (`MyTourney`)
+
+Button „Mein Turnier“ auf der Turnierseite (`TourneyWelcome`, bei Einzel-Wettbewerben auch `CompetitionWelcome`). Der Besucher wählt seinen Namen (ohne Konto, je Turnier im Browser gespeichert) und sieht seine nächsten Spiele, Ergebnisse und Wettbewerbe mit Tabellenplatz bzw. Stand im K.-o.-Baum. Einzel und Doppel; Mannschaftswettbewerbe nur in der Liste. Die Daten werden alle 30 Sekunden neu geladen.
+
+### 28.1 Anonymer Besucher (🌐)
+- [x] **TC-MT-01 [🌐]:** Name wählen: nächste Spiele mit Gegner, Wettbewerb, Spielphase und Gruppe („Spielbereit“ vor „Wartet“), Ergebnis aus eigener Sicht (3:0, grün bei Sieg) und Tabellenplatz in der Gruppe mit Punkten.
+- [x] **TC-MT-02 [🌐]:** Ein aufgerufenes Spiel steht oben mit „Aufgerufen – Tisch n“.
+- [x] **TC-MT-03 [🌐]:** K.-o.: „Nächste Runde: Halbfinale“ bzw. „Ausgeschieden: Viertelfinale“; ein Freilos erscheint als „Freilos“ ohne Ergebnis.
+- [x] **TC-MT-04 [🌐]:** Die Auswahl bleibt nach erneutem Aufruf erhalten; „Anderer Name“ setzt sie zurück.
+- [x] **TC-MT-05 [🌐]:** Ruft die Turnierleitung ein Spiel auf, erscheint „Aufgerufen – Tisch n“ ohne Neuladen nach spätestens 30 Sekunden.

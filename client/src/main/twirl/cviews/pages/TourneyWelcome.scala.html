@@ -47,6 +47,12 @@
             <h4 class="h5 mb-0 fw-bold text-dark">
                 <i class="bi bi-list-stars me-2 text-primary"></i>@gM("tourneyHomepage.competitionsContainer")
             </h4>
+            @* „Mein Turnier“: persönliche Ansicht für Spieler *@
+            @if(competitions.nonEmpty) {
+                <a href="javascript:appLoadPage('MyTourney', '')" class="btn btn-primary btn-sm rounded-pill px-3" data-testid="my-tourney-btn">
+                    <i class="bi bi-person-badge me-1"></i>@gM("myTourney.title")
+                </a>
+            }
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
