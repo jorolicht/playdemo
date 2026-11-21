@@ -5,7 +5,7 @@ Tags: tournament, table tennis, sports, scalajs, playframework
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
-Stable tag: 1.4.2
+Stable tag: 1.4.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,12 @@ Das Plugin verwendet Semantic Versioning (SemVer) `MAJOR.MINOR.PATCH`. Datenbank
 Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel (`filemtime`) oder der aktuellen Plugin-Version versioniert, sodass Browser-Caches nach Updates sofort invalidiert werden.
 
 == Changelog ==
+
+= 1.4.3 =
+* Neues Kostenmodell auf der Seite „Support/Kosten“: Testturnier, Einzelturnier, 5er-Paket, Vereins- und Verbandslizenz.
+* Abrechnung: Anlegen reserviert ein Turnier, Löschen ohne Ergebnis gibt es zurück; gekaufte Turniere 2 Jahre gültig.
+* Archiv: Cloud-Turniere sind 1 Jahr nach Turnierende schreibgeschützt und bleiben öffentlich sichtbar (nicht mit Lizenz).
+* Vereins-/Verbandslizenz im Benutzerprofil und in der Management-Konsole.
 
 = 1.4.2 =
 * Eigenes Logo je Turnier: Upload in der Turnier-Administration (Reiter „Homepage“; PNG, JPG oder WebP bis 2 MB, Verkleinerung auf 400 px). Anzeige auf der Turnierseite und auf den Urkunden, in eigenen Urkundenvorlagen über den Platzhalter #Logo.
