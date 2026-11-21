@@ -5,7 +5,7 @@ Tags: tournament, table tennis, sports, scalajs, playframework
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
-Stable tag: 1.4.5
+Stable tag: 1.4.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,9 @@ Das Plugin verwendet Semantic Versioning (SemVer) `MAJOR.MINOR.PATCH`. Datenbank
 Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel (`filemtime`) oder der aktuellen Plugin-Version versioniert, sodass Browser-Caches nach Updates sofort invalidiert werden.
 
 == Changelog ==
+
+= 1.4.6 =
+* Schweizer System: optimale Auslosung der Folgerunden (Blossom-Matching) – Punktgruppen, keine Wiederholungen, Vereinsschutz und Freilos für die unterste Punktgruppe.
 
 = 1.4.5 =
 * Seite „Funktionen“ aktualisiert: Doppeltes K.-o., Mannschaftswettbewerbe, Online-Anmeldung, „Mein Turnier“, mehrere Bearbeiter, Urkunden mit Logo, Offline-App.
