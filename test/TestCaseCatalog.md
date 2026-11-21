@@ -50,7 +50,7 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-NB-12 [👤]:** Meine Turniere -> Turnier exportieren in Cloud (Ausführung): Klick auf die aktive Option lädt das lokale Turnier in die Cloud hoch, synchronisiert Vereine, Spieler, Wettbewerbe und Abschnitte, entfernt das lokale Duplikat und schaltet in den Cloud-Modus um.
 - [x] **TC-NB-13 [👤]:** Meine Turniere -> Turnier in Datei exportieren mit lokalem Turnier im Browser und geöffnetem Cloud-Turnier: Ein Dialog fragt „Welches Turnier soll in eine Datei gespeichert werden?“ (Lokales Turnier „…“ / Cloud-Turnier „…“); die heruntergeladene Datei enthält das gewählte Turnier, das Cloud-Turnier bleibt geöffnet.
 - [x] **TC-NB-14 [👤]:** Nur Cloud-Turnier geöffnet (kein lokales Turnier): Der Export öffnet direkt den Dialog mit dem Dateinamen, ohne Auswahl.
-- [x] **TC-TA-IE-01 [👤]:** Die Turnier-Administration hat keinen Reiter „Import / Export“ mehr; Aufruf mit `IMPEXP` öffnet „Urkunden Konfiguration“.
+- [x] **TC-TA-IE-01 [👤]:** Die Turnier-Administration der Website hat keinen Reiter „Import / Export“ mehr; Aufruf mit `IMPEXP` öffnet „Urkunden Konfiguration“. Im Embed-Plugin (ohne Menü „Meine Turniere“) bleibt der Reiter mit Export (Dateinamen-Dialog) und Import.
 
 ---
 

@@ -369,7 +369,10 @@ function tourney_public_register_verify_captcha($token)
         return ApiHelper::error("captcha_failed", "Captcha token missing", "", "tourney_public_register", HttpStatus::FORBIDDEN);
     }
 
+    // Timeout 15 s statt WordPress-Standard 5 s: Cloudflare antwortet zeitweise erst nach mehreren Sekunden,
+    // ein Abbruch würde ein gültiges Captcha als captcha_failed ablehnen
     $response = wp_remote_post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+        'timeout' => 15,
         'body' => [
             'secret'   => $secret_key,
             'response' => $token,

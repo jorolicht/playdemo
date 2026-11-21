@@ -15,6 +15,8 @@ import shared.basic.Pickle.*
 object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   def name = PageNameTyp("TourneyAdmin")
 
+  val BtnExportId:      HtmlId = genId(name)
+  val BtnImportId:      HtmlId = genId(name)
   val BtnClickTTId:     HtmlId = genId(name)
   val RadioCertId:      HtmlId = genId(name)
 
@@ -51,7 +53,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
     }
   }
 
-  private var activeTab = "CERT" // Tabs: "CERT", "MESSAGES", "CHANGELOG", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT"
+  private var activeTab = "CERT" // Tabs: "IMPEXP" (nur Embed-Plugin), "CERT", "MESSAGES", "CHANGELOG", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT"
 
   /** Multiuser: zuletzt geladenes Änderungsprotokoll (neueste Einträge zuerst), Reiter "CHANGELOG". */
   var changelog: Seq[services.MultiUser.ChangeLogEntry] = Seq.empty
@@ -88,9 +90,13 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
   def render(param: String = ""): Boolean =
     Global.currentSelection.tourney match
       case Some(tourney) =>
-        val tabParam = param.nonEmpty && List("CERT", "MESSAGES", "CHANGELOG", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT").contains(param.toUpperCase)
+        val tabParam = param.nonEmpty && List("IMPEXP", "CERT", "MESSAGES", "CHANGELOG", "MATCHBOARD", "HOMEPAGE", "DATEFORMAT").contains(param.toUpperCase)
         if (tabParam) {
           activeTab = param.toUpperCase
+        }
+        // Import/Export nur im Embed-Plugin; auf der Website über "Meine Turniere" (Navbar)
+        if (activeTab == "IMPEXP" && Global.fws) {
+          activeTab = "CERT"
         }
         if (activeTab == "CHANGELOG" && !services.MultiUser.enabled) {
           activeTab = "CERT"
@@ -183,6 +189,30 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
                 case Left(err) =>
                   dialogs.DlgMsgbox.showError(err, "Fehler beim Speichern")
               }
+            }
+          }
+        }
+
+        // Embed-Plugin, Reiter "Import / Export": Import einer Turnierdatei als Cloud-Turnier
+        val fileInput = dom.document.getElementById("adminImportFile").asInstanceOf[dom.html.Input]
+        if (fileInput != null) {
+          fileInput.onchange = (e: dom.Event) => {
+            if (fileInput.files.length > 0) {
+              val file = fileInput.files(0)
+              val reader = new dom.FileReader()
+              reader.onload = (e: dom.Event) => {
+                val jsonString = reader.result.asInstanceOf[String]
+                services.AdminManager.importTourney(jsonString).map {
+                  case Right(slug) =>
+                    dom.window.alert("Import erfolgreich! Das Turnier wird nun geladen.")
+                    fileInput.value = "" // reset
+                    loadPage(TourneyInfo.name, "")
+                  case Left(err) =>
+                    dialogs.DlgMsgbox.showError(err, "Fehler beim Import")
+                    fileInput.value = "" // reset
+                }
+              }
+              reader.readAsText(file)
             }
           }
         }
@@ -296,6 +326,22 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
 
   override def handleEvent(elem: HTMLElement, event: Event): Unit =
     HtmlId(elem.id) match
+      case `BtnExportId` =>
+        // Export in Datei mit Dateinamen-Dialog (wie "Meine Turniere → Turnier in Datei exportieren")
+        Global.currentSelection.tourney.foreach { t =>
+          dialogs.DlgExportTourney.show(t, saveAndLeave = false).map {
+            case Some(filename) if filename.nonEmpty => services.TourneyDB.triggerExportDownload(filename, t)
+            case _                                   => debug("Export cancelled")
+          }
+        }
+
+      case `BtnImportId` =>
+        val fileInput = dom.document.getElementById("adminImportFile").asInstanceOf[dom.html.Input]
+        if (fileInput != null) {
+          fileInput.value = ""
+          fileInput.click()
+        }
+
       case id if id.id.startsWith(RadioCertId.id) =>
         val suffix = elem.id.substring(RadioCertId.id.length + 1)
         if (suffix.startsWith("SETTMPL-")) {

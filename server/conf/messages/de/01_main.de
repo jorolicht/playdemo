@@ -167,6 +167,13 @@ tourneyInfo.actions                                 = Aktionen
 # TourneyAdmin
 ###
 tourneyAdmin.headerMeta                             = Veranstalter: {0} | ID: {1}
+tourneyAdmin.tabImpExp                              = Import / Export
+tourneyAdmin.exportTitle                            = Turnier exportieren
+tourneyAdmin.exportDesc                             = Laden Sie die aktuellen Daten dieses Turniers als JSON-Datei herunter. Das Backup kann später jederzeit wieder importiert werden.
+tourneyAdmin.exportBtn                              = JSON-Export herunterladen
+tourneyAdmin.importTitle                            = Turnier importieren
+tourneyAdmin.importDesc                             = Wählen Sie ein zuvor exportiertes Turnier (.json) aus, um die Daten einzulesen und zu laden.
+tourneyAdmin.importBtn                              = JSON-Datei einlesen...
 tourneyAdmin.tabCert                                = Urkunden Konfiguration
 tourneyAdmin.tabMessages                            = Messages
 tourneyAdmin.tabMatchboard                          = InfoAnzeige

@@ -95,9 +95,28 @@
 
     <div class="history-timeline">
         <!-- Latest entry (displayed in the MainView news bar) -->
+        <div class="history-entry" data-version="1.4.0" data-date="2026-11-21" data-summary="Online registration for competitions, multi-user editing with change log.">
+            <div class="history-entry-header">
+                <span class="history-version"><i class="bi bi-tag-fill"></i> Version 1.4.0</span>
+                <span class="history-date"><i class="bi bi-calendar3 me-1"></i>2026-11-21</span>
+            </div>
+            <div class="history-summary">
+                Online registration for competitions, multi-user editing with change log.
+            </div>
+            <ul class="history-details">
+                <li>Online registration: on the tournament page, players register for a singles competition with last name, first name, club and TTR rating (optionally year of birth, email, WhatsApp), protected by a captcha. Registered players get the status “registered”.</li>
+                <li>Edit competition: registration period “from/until” and checkbox “Registration closed”. The competition list shows “Register now … until”, “Registration from …” or “Registration closed”.</li>
+                <li>Tournament administration, “Homepage” tab: note shown after online registration (default: “Please report to the tournament desk at least 30 minutes before the competition starts …”). If registration is not enabled, the tournament director sees a hint in the competition list.</li>
+                <li>Privacy: players' email addresses and WhatsApp numbers are only available to editors of the tournament.</li>
+                <li>Multi-user editing: results entered by other editors appear immediately; simultaneous entries are merged per match (“last entry wins” with a notice). New “Changes” tab with the change log.</li>
+                <li>Tournament page: GDPR-compliant map of the venue (OpenStreetMap, served by our own server).</li>
+                <li>My Tournaments: “Export tournament to file” for the local and the opened cloud tournament; the “Import / Export” tab in the administration is removed (it remains in the WordPress plugin).</li>
+            </ul>
+        </div>
+
         <div class="history-entry" data-version="1.3.1" data-date="2026-11-18" data-summary="Daily statistics mail to the website administrator.">
             <div class="history-entry-header">
-                <span class="history-version"><i class="bi bi-tag-fill"></i> Version 1.3.1</span>
+                <span class="history-version"><i class="bi bi-tag"></i> Version 1.3.1</span>
                 <span class="history-date"><i class="bi bi-calendar3 me-1"></i>2026-11-18</span>
             </div>
             <div class="history-summary">

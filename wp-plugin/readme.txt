@@ -5,7 +5,7 @@ Tags: tournament, table tennis, sports, scalajs, playframework
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
-Stable tag: 1.3.1
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,13 @@ Das Plugin verwendet Semantic Versioning (SemVer) `MAJOR.MINOR.PATCH`. Datenbank
 Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel (`filemtime`) oder der aktuellen Plugin-Version versioniert, sodass Browser-Caches nach Updates sofort invalidiert werden.
 
 == Changelog ==
+
+= 1.4.0 =
+* Online-Anmeldung auf der Turnierseite: Spieler melden sich mit Name, Vorname, Verein, TTR (optional Jahrgang, E-Mail, WhatsApp) und Captcha zu einem Einzel-Wettbewerb an; Status „registriert“.
+* Wettbewerb: Anmeldezeitraum (ab/bis) und „Anmeldung beendet“; Hinweis nach der Anmeldung im Reiter „Homepage“ einstellbar.
+* Datenschutz: E-Mail und WhatsApp-Nummer der Spieler nur für Bearbeiter des Turniers abrufbar.
+* Mehrbenutzer-Betrieb (Website): Live-Abgleich der Ergebnisse, Zusammenführen je Spiel, Änderungsprotokoll.
+* DSGVO-konforme Karte auf der Turnierseite (Website); Export lokaler und Cloud-Turniere über „Meine Turniere“.
 
 = 1.3.1 =
 * Statistik: Jeden Morgen um 8 Uhr erhält der Administrator der Website die Nutzungszahlen (gestern, letzte 7 und 30 Tage, Vormonat) per E-Mail.
