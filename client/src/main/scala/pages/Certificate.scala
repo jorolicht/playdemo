@@ -91,7 +91,15 @@ object Certificate extends BasePage with JsWrapper with services.ComWrapper:
     val html1 = "(?i)#(Turnier|Tourney)".r.replaceAllIn(rawHtml, tNameRepl)
     val html2 = "(?i)#(Wettbewerb|Competition)".r.replaceAllIn(html1, cNameRepl)
     val html3 = "(?i)#Name".r.replaceAllIn(html2, pNameRepl)
-    "(?i)#(Platz|Place)".r.replaceAllIn(html3, rNameRepl)
+    val html4 = "(?i)#(Platz|Place)".r.replaceAllIn(html3, rNameRepl)
+    // #Logo: eigenes Logo des Turniers (Turnier-Administration, Reiter "Homepage"), ohne Logo entfällt es
+    "(?i)#Logo".r.replaceAllIn(html4, scala.util.matching.Regex.quoteReplacement(logoHtml))
+
+  /** HTML für den Platzhalter #Logo in Urkundenvorlagen; "" ohne Logo. */
+  private def logoHtml: String =
+    val url = Global.currentAci.logoUrl
+    if (url.isEmpty) ""
+    else s"""<img src="${url.replace("\"", "&quot;")}" alt="Logo" class="cert-logo" style="max-height: 140px; max-width: 320px; object-fit: contain;">"""
 
   private def fetchTemplateContent(templateName: String, param: String): Unit =
     isLoading = true

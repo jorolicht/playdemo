@@ -87,6 +87,67 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
    * @param param The optional tab name to activate.
    * @return True if a tournament is loaded and rendered, false otherwise.
    */
+  /**
+   * Eigenes Logo nur für Cloud-Turniere (Mediathek von WordPress), nicht im lokalen bzw. Demo-Modus.
+   *
+   * @param t Turnier
+   */
+  def logoSupported(t: Tourney): Boolean =
+    !Global.isDemoMode && !Global.isLocalMode && t.wpId > 0 && t.wpId != 999999
+
+  /**
+   * Bindet Hochladen und Entfernen des Logos im Reiter "Homepage" an. Die Datei wird vor dem Hochladen auf Format
+   * und Größe geprüft; der Server prüft beides erneut und verkleinert das Bild.
+   *
+   * @param t Turnier
+   */
+  private def wireLogo(t: Tourney): Unit =
+    val fileInput = dom.document.getElementById("tourney-logo-file").asInstanceOf[dom.html.Input]
+    val uploadBtn = dom.document.getElementById("tourney-logo-upload-btn").asInstanceOf[dom.html.Button]
+    val deleteBtn = dom.document.getElementById("tourney-logo-delete-btn").asInstanceOf[dom.html.Button]
+    val errElem   = dom.document.getElementById("tourney-logo-error")
+    def showError(code: String): Unit =
+      if (errElem != null) {
+        val key = s"tourneyAdmin.logoErr.$code"
+        val msg = gM(key)
+        errElem.textContent = if (msg == key) gM("tourneyAdmin.logoErr.logo_save") else msg
+        errElem.classList.remove("d-none")
+      }
+    if (uploadBtn != null && fileInput != null) {
+      uploadBtn.onclick = (_: dom.Event) => { fileInput.value = ""; fileInput.click() }
+      fileInput.onchange = (_: dom.Event) => {
+        if (fileInput.files.length > 0) {
+          val file = fileInput.files(0)
+          if (!Seq("image/png", "image/jpeg", "image/webp").contains(file.`type`)) showError("logo_type")
+          else if (file.size > 2 * 1024 * 1024) showError("logo_too_large")
+          else {
+            uploadBtn.disabled = true
+            services.TourneyDB.uploadLogo(t.wpId, file).map {
+              case Right(url) =>
+                Global.currentAci = Global.currentAci.copy(logoUrl = url)
+                render()
+              case Left(err) =>
+                uploadBtn.disabled = false
+                showError(err.msgCode)
+            }
+          }
+        }
+      }
+    }
+    if (deleteBtn != null) {
+      deleteBtn.onclick = (_: dom.Event) => {
+        deleteBtn.disabled = true
+        services.TourneyDB.deleteLogo(t.wpId).map {
+          case Right(_) =>
+            Global.currentAci = Global.currentAci.copy(logoUrl = "")
+            render()
+          case Left(err) =>
+            deleteBtn.disabled = false
+            showError(err.msgCode)
+        }
+      }
+    }
+
   def render(param: String = ""): Boolean =
     Global.currentSelection.tourney match
       case Some(tourney) =>
@@ -128,6 +189,7 @@ object TourneyAdmin extends BasePage with JsWrapper with services.ComWrapper:
           if (ta != null) ta.value = Global.currentAci.homepageInfo
           if (cb != null) cb.checked = Global.currentAci.allowRegistration
           if (hintTa != null) hintTa.value = dialogs.DlgPublicRegistration.registrationHint
+          if (logoSupported(tourney)) wireLogo(tourney)
           
           if (btn != null) {
             btn.onclick = (e: dom.Event) => {

@@ -4,6 +4,15 @@ tourneyAdmin.homepageInfoPlh = Enter homepage details here (HTML markup allowed)
 tourneyAdmin.allowRegistrationLabel = Allow players to register online
 tourneyAdmin.registrationHintLabel = Note after online registration
 tourneyAdmin.registrationHintDesc = Shown to the player after a successful registration. Empty = no note.
+tourneyAdmin.logoLabel = Custom logo
+tourneyAdmin.logoNone = No logo uploaded
+tourneyAdmin.logoUpload = Upload logo
+tourneyAdmin.logoDelete = Remove
+tourneyAdmin.logoDesc = PNG, JPG or WebP, max. 2 MB; resized to 400 px. Shown on the tournament page and on certificates (in custom certificate templates via the placeholder #Logo). Please only use logos you hold the rights to.
+tourneyAdmin.logoCloudOnly = A custom logo is only available for cloud tournaments.
+tourneyAdmin.logoErr.logo_type = Please choose a PNG, JPG or WebP file.
+tourneyAdmin.logoErr.logo_too_large = The file is larger than 2 MB.
+tourneyAdmin.logoErr.logo_save = The logo could not be saved.
 tourneyAdmin.tabDateFormat = Settings
 tourneyAdmin.selectDateFormatLabel = Select the desired date format:
 tourneyAdmin.dateFormatDe = German Format

@@ -430,6 +430,51 @@ object TourneyDB extends ComWrapper with Debouncer:
     }
 
   /**
+   * Lädt das Logo eines Cloud-Turniers hoch (Turnier-Administration, Reiter "Homepage"); ersetzt ein vorhandenes.
+   * Der Server prüft Größe (höchstens 2 MB) und Format (PNG, JPG, WebP) und verkleinert auf höchstens 400 px.
+   *
+   * @param wpId Post-ID des Turniers
+   * @param file Bilddatei
+   * @return Right(Adresse des Logos) oder Left(Fehler, z. B. logo_too_large, logo_type)
+   */
+  def uploadLogo(wpId: Int, file: org.scalajs.dom.File): Future[Either[AppError, String]] =
+    val form = new org.scalajs.dom.FormData()
+    form.append("file", file)
+    val init = js.Dynamic.literal(
+      method = "POST", body = form, credentials = "include",
+      headers = js.Dictionary("X-WP-Nonce" -> Global.wpNonce)
+    ).asInstanceOf[org.scalajs.dom.RequestInit]
+    logoRequest(wpId, init).map(_.flatMap { json =>
+      val url = json.logoUrl
+      if (js.isUndefined(url) || url == null) Left(AppError("logo_save")) else Right(url.toString)
+    })
+
+  /**
+   * Entfernt das Logo eines Cloud-Turniers.
+   *
+   * @param wpId Post-ID des Turniers
+   * @return Right(()) oder Left(Fehler)
+   */
+  def deleteLogo(wpId: Int): Future[Either[AppError, Unit]] =
+    val init = js.Dynamic.literal(
+      method = "DELETE", credentials = "include", headers = js.Dictionary("X-WP-Nonce" -> Global.wpNonce)
+    ).asInstanceOf[org.scalajs.dom.RequestInit]
+    logoRequest(wpId, init).map(_.map(_ => ()))
+
+  /** Aufruf von tourney/v1/logo; Fehlerantworten des Servers (msgCode) werden zu AppError. */
+  private def logoRequest(wpId: Int, init: org.scalajs.dom.RequestInit): Future[Either[AppError, js.Dynamic]] =
+    import scala.scalajs.js.Thenable.Implicits.*
+    val url = s"${Global.homeUrl.stripSuffix("/")}/wp-json/tourney/v1/logo?postId=$wpId"
+    (for
+      resp <- org.scalajs.dom.fetch(url, init).toFuture
+      json <- resp.json().toFuture
+    yield
+      val d = json.asInstanceOf[js.Dynamic]
+      if (resp.ok) Right(d)
+      else Left(AppError(if (js.isUndefined(d.msgCode)) s"http_${resp.status}" else d.msgCode.toString))
+    ).recover { case NonFatal(e) => Left(AppError("logo_save", e.getMessage)) }
+
+  /**
    * Saves ACI configuration for the given tournament post ID.
    */
   def saveAci(wpId: Int, aci: shared.model.ACI): Future[Either[AppError, Unit]] =

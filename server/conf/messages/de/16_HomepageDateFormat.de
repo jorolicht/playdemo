@@ -4,6 +4,15 @@ tourneyAdmin.homepageInfoPlh = Geben Sie hier Details für die Startseite ein (H
 tourneyAdmin.allowRegistrationLabel = Spieler Turnieranmeldung erlauben
 tourneyAdmin.registrationHintLabel = Hinweis nach der Online-Anmeldung
 tourneyAdmin.registrationHintDesc = Wird dem Spieler nach erfolgreicher Anmeldung angezeigt. Leer = kein Hinweis.
+tourneyAdmin.logoLabel = Eigenes Logo
+tourneyAdmin.logoNone = Kein Logo hinterlegt
+tourneyAdmin.logoUpload = Logo hochladen
+tourneyAdmin.logoDelete = Entfernen
+tourneyAdmin.logoDesc = PNG, JPG oder WebP, höchstens 2 MB; wird auf 400 px verkleinert. Erscheint auf der Turnierseite und auf den Urkunden (in eigenen Urkundenvorlagen über den Platzhalter #Logo). Bitte nur Logos verwenden, an denen Sie die Rechte haben.
+tourneyAdmin.logoCloudOnly = Ein eigenes Logo ist nur für Turniere in der Cloud möglich.
+tourneyAdmin.logoErr.logo_type = Bitte eine PNG-, JPG- oder WebP-Datei wählen.
+tourneyAdmin.logoErr.logo_too_large = Die Datei ist größer als 2 MB.
+tourneyAdmin.logoErr.logo_save = Das Logo konnte nicht gespeichert werden.
 tourneyAdmin.tabDateFormat = Einstellungen
 tourneyAdmin.selectDateFormatLabel = Wählen Sie das gewünschte Datumsformat:
 tourneyAdmin.dateFormatDe = Deutsches Format

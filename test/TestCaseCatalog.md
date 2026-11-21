@@ -414,3 +414,18 @@ Button „Mein Turnier“ auf der Turnierseite (`TourneyWelcome`, bei Einzel-Wet
 - [x] **TC-MT-03 [🌐]:** K.-o.: „Nächste Runde: Halbfinale“ bzw. „Ausgeschieden: Viertelfinale“; ein Freilos erscheint als „Freilos“ ohne Ergebnis.
 - [x] **TC-MT-04 [🌐]:** Die Auswahl bleibt nach erneutem Aufruf erhalten; „Anderer Name“ setzt sie zurück.
 - [x] **TC-MT-05 [🌐]:** Ruft die Turnierleitung ein Spiel auf, erscheint „Aufgerufen – Tisch n“ ohne Neuladen nach spätestens 30 Sekunden.
+
+---
+
+## 29. UseCase: Eigenes Logo eines Turniers (`TourneyAdmin` Reiter „Homepage“, `includes/api/logo.php`)
+
+Nur Cloud-Turniere. Das Logo liegt als Anhang des Turnier-Posts in der Mediathek (PNG, JPG oder WebP, höchstens 2 MB, auf 400 px verkleinert) und erscheint auf der Turnierseite und auf den Urkunden (Standardurkunde statt des Pokal-Symbols, eigene Vorlagen über den Platzhalter `#Logo`).
+
+### 29.1 Turnierverwalter (👤) / Besucher (🌐)
+- [x] **TC-LOGO-01 [👤]:** Logo hochladen: Vorschau im Reiter „Homepage“, Bild auf 400 px verkleinert, Adresse über `read-aci` (`logoUrl`).
+- [x] **TC-LOGO-02 [🌐]:** Das Logo erscheint auf der Turnierseite (`TourneyWelcome`).
+- [x] **TC-LOGO-03 [👤]:** Die Standardurkunde zeigt das Logo statt des Pokal-Symbols.
+- [x] **TC-LOGO-04 [👤]:** Falsches Format wird abgelehnt: im Client mit Hinweis, auf dem Server anhand des Inhalts (`logo_type`).
+- [x] **TC-LOGO-05 [🌐]:** Hochladen ohne Schreibrecht auf das Turnier wird abgelehnt (401/403).
+- [x] **TC-LOGO-06 [👤]:** Ein neues Logo ersetzt das alte (alte Datei gelöscht); Speichern der Homepage-Einstellungen lässt das Logo unverändert; „Entfernen“ löscht Logo und Datei.
+- [x] **TC-LOGO-07 [👤]:** Beim endgültigen Löschen des Turniers wird das Logo mit gelöscht.

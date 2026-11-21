@@ -22,7 +22,12 @@
             } else {
                 <!-- Default Certificate Design fallback -->
                 <div class="mb-5">
-                    <i class="bi bi-award-fill text-warning" style="font-size: 5rem;"></i>
+                    @* Eigenes Logo des Turniers statt des Pokal-Symbols *@
+                    @if(base.Global.currentAci.logoUrl.nonEmpty) {
+                        <img src="@base.Global.currentAci.logoUrl" alt="Logo" data-testid="cert-logo" style="max-height: 140px; max-width: 320px; object-fit: contain;">
+                    } else {
+                        <i class="bi bi-award-fill text-warning" style="font-size: 5rem;"></i>
+                    }
                 </div>
                 
                 <h1 class="display-1 fw-bold mb-4" style="font-family: serif;">@gM("cert.title")</h1>

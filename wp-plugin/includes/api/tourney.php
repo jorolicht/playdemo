@@ -762,6 +762,8 @@ function tourney_read_aci(WP_REST_Request $request)
     if (!is_object($aci)) {
         $aci = new stdClass();
     }
+    // Logo des Turniers (Mediathek, siehe includes/api/logo.php); wird nicht im ACI gespeichert
+    $aci->logoUrl = tourney_logo_url($post_id);
     
     return new WP_REST_Response($aci, 200);
 }
@@ -780,6 +782,10 @@ function tourney_save_aci(WP_REST_Request $request)
     $aci = json_decode($body, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         return ApiHelper::error("invalid_json", "Invalid JSON payload", "", "", HttpStatus::BAD_REQUEST);
+    }
+    // logoUrl ergibt sich aus dem Logo-Anhang (tourney_logo_url) und wird nicht gespeichert
+    if (is_array($aci)) {
+        unset($aci['logoUrl']);
     }
     
     update_post_meta($post_id, 'aci', wp_slash(json_encode($aci, JSON_UNESCAPED_UNICODE)));

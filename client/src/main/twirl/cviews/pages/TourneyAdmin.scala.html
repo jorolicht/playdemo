@@ -333,6 +333,33 @@
                     <h5 class="card-title text-secondary fw-bold mb-3">
                         <i class="bi bi-house-door me-2 text-success"></i>@gM("tourneyAdmin.tabHomepage")
                     </h5>
+                    @* Eigenes Logo (Turnierseite und Urkunden), nur Cloud-Turniere: Mediathek, siehe includes/api/logo.php *@
+                    <div class="mb-4" data-testid="logo-section">
+                        <label class="form-label fw-bold">@gM("tourneyAdmin.logoLabel")</label>
+                        @if(pages.TourneyAdmin.logoSupported(tourney)) {
+                            <div class="d-flex align-items-center flex-wrap gap-3">
+                                @if(base.Global.currentAci.logoUrl.nonEmpty) {
+                                    <img src="@base.Global.currentAci.logoUrl" alt="@gM("tourneyAdmin.logoLabel")" id="tourney-logo-preview"
+                                         class="border rounded p-1 bg-white" style="max-height: 80px; max-width: 200px; object-fit: contain;">
+                                } else {
+                                    <span class="text-muted small" id="tourney-logo-none">@gM("tourneyAdmin.logoNone")</span>
+                                }
+                                <input type="file" id="tourney-logo-file" accept="image/png,image/jpeg,image/webp" class="d-none">
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="tourney-logo-upload-btn">
+                                    <i class="bi bi-upload me-1"></i>@gM("tourneyAdmin.logoUpload")
+                                </button>
+                                @if(base.Global.currentAci.logoUrl.nonEmpty) {
+                                    <button type="button" class="btn btn-outline-danger btn-sm" id="tourney-logo-delete-btn">
+                                        <i class="bi bi-trash me-1"></i>@gM("tourneyAdmin.logoDelete")
+                                    </button>
+                                }
+                            </div>
+                            <div class="alert alert-danger py-2 small mt-2 mb-0 d-none" id="tourney-logo-error"></div>
+                            <div class="form-text">@gM("tourneyAdmin.logoDesc")</div>
+                        } else {
+                            <div class="form-text mt-0">@gM("tourneyAdmin.logoCloudOnly")</div>
+                        }
+                    </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">@gM("tourneyAdmin.homepageInfoLabel")</label>
                         <textarea class="form-control" id="homepage-info-textarea" rows="8" placeholder="@gM("tourneyAdmin.homepageInfoPlh")"></textarea>

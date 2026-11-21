@@ -1092,13 +1092,16 @@ object Tourney:
  * @param showMessagesTab   Reiter "Nachrichten" in der Turnier-Administration anzeigen
  * @param registrationHint  Hinweis für Spieler nach der Online-Anmeldung; None = Standardtext (reg.defaultHint),
  *                          "" = kein Hinweis
+ * @param logoUrl           Adresse des eigenen Logos (Turnierseite, Urkunden), "" = kein Logo; wird vom Server
+ *                          aus dem Logo-Anhang ermittelt (read-aci) und nicht gespeichert
  */
 case class ACI(
   homepageInfo: String = "",
   allowRegistration: Boolean = false,
   dateFormat: String = "DE",
   showMessagesTab: Boolean = true,
-  registrationHint: Option[String] = None
+  registrationHint: Option[String] = None,
+  logoUrl: String = ""
 ) derives ReadWriter
 
 case class SaveAciResponse(success: Boolean) derives ReadWriter
