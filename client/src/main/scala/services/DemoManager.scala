@@ -120,6 +120,7 @@ object DemoManager extends ComWrapper {
         response.text().toFuture.flatMap { content =>
           try {
             val payload = read[DemoPayload](content)
+            refreshRunningMatches(payload.tourney.tourney)
             val prefix = gM("demo.namePrefix")
             if (!payload.tourney.tourney.name.startsWith(prefix)) {
               payload.tourney.tourney.name = prefix + payload.tourney.tourney.name
@@ -153,6 +154,23 @@ object DemoManager extends ComWrapper {
     }
   }
 
+  /**
+   * Setzt die Startzeit laufender Spiele (Status RUN) auf „vor einigen Minuten“. Die Demo-Daten wurden zu einem festen
+   * Zeitpunkt aufgezeichnet; ohne Anpassung zeigte die Ergebniseingabe sonst die gesamte Zeit seitdem als Spielzeit
+   * (z. B. „55030:50“).
+   *
+   * @param t Demo-Turnier
+   * @param minutesAgo wie lange die Spiele schon laufen
+   */
+  def refreshRunningMatches(t: shared.model.Tourney, minutesAgo: Int = 4): Unit =
+    val d = new scala.scalajs.js.Date(new scala.scalajs.js.Date().getTime() - minutesAgo * 60000.0)
+    val ts = f"${d.getFullYear().toInt}%04d${d.getMonth().toInt + 1}%02d${d.getDate().toInt}%02d" +
+             f"${d.getHours().toInt}%02d${d.getMinutes().toInt}%02d${d.getSeconds().toInt}%02d"
+    for
+      stage <- t.stages if stage != null
+      m     <- stage.matches if m.status == shared.model.MEntry.MS_RUN
+    do m.startTime = ts
+
   def loadDemoTemplate(query: String): Future[Boolean] = {
     val filename = if (query.contains("single") || query.contains("competition")) {
       "demo_competition.json"
@@ -180,6 +198,7 @@ object DemoManager extends ComWrapper {
             // Populate TourneyDB
             TourneyDB.tourney = payload.tourney.tourney
             TourneyDB.version = payload.tourney.version
+            refreshRunningMatches(TourneyDB.tourney)
             
             // Decouple from server
             TourneyDB.tourney.wpId = 999999
