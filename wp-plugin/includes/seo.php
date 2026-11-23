@@ -95,11 +95,16 @@ function tourney_seo_title_parts($parts) {
 }
 
 /**
- * Prüft, ob die aktuelle Seite nicht indexiert werden soll (Slug-Liste oder Statistik-Shortcode).
+ * Prüft, ob die aktuelle Seite nicht indexiert werden soll (Slug-Liste, Statistik-Shortcode oder englische
+ * Fassung einer statischen Seite mit Kennzeichen noindex).
  *
  * @return bool True für noindex-Seiten.
  */
 function tourney_seo_is_noindex() {
+    $static = tourney_static_current();
+    if ($static) {
+        return $static['lang'] === 'en' && !empty($static['noindex']);
+    }
     if (!is_singular()) {
         return false;
     }

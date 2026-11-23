@@ -1,0 +1,370 @@
+<!--
+ * Hilfe / Benutzerhandbuch (Deutsch)
+ *
+ * Statische Seite /hilfe/ (TOURNEY_STATIC_PAGES in wp-plugin/includes/static-pages.php, MainView.StaticSlugs).
+ * Die Bilder liegen in site/content/hilfe/ und werden mit test/e2e/docs (Playwright) erzeugt:
+ *   cd test/e2e && npx playwright test --config docs.config.ts
+-->
+<style>
+    .hlp-wrapper { font-family: 'Inter', system-ui, -apple-system, sans-serif; color: var(--bs-body-color, #1e293b); line-height: 1.6; }
+    .hlp-hero { background: linear-gradient(135deg, rgba(13,110,253,.08) 0%, rgba(102,16,242,.08) 100%); border: 1px solid rgba(13,110,253,.15);
+                border-radius: 16px; padding: 32px 24px; margin-bottom: 28px; text-align: center; }
+    .hlp-title { font-weight: 800; font-size: 2rem; margin-bottom: 8px; }
+    .hlp-subtitle { max-width: 760px; margin: 0 auto; color: var(--bs-secondary-color, #64748b); }
+    .hlp-toc { background: var(--bs-tertiary-bg, #f8fafc); border: 1px solid var(--bs-border-color, #e2e8f0); border-radius: 12px;
+               padding: 18px 22px; margin-bottom: 32px; columns: 2 280px; column-gap: 32px; }
+    .hlp-toc a { text-decoration: none; display: block; padding: 2px 0; break-inside: avoid; }
+    .hlp-toc .hlp-toc-head { font-weight: 700; margin-top: 6px; break-after: avoid; }
+    .hlp-section { margin-bottom: 40px; scroll-margin-top: 80px; }
+    .hlp-section h2 { font-weight: 800; font-size: 1.45rem; padding-bottom: 6px; border-bottom: 2px solid rgba(13,110,253,.2); margin-bottom: 16px; }
+    .hlp-section h3 { font-weight: 700; font-size: 1.12rem; margin: 22px 0 8px; scroll-margin-top: 80px; }
+    .hlp-fig { margin: 14px 0 18px; text-align: center; }
+    .hlp-fig img { max-width: 100%; height: auto; border: 1px solid var(--bs-border-color, #e2e8f0); border-radius: 10px;
+                   box-shadow: 0 6px 18px rgba(15,23,42,.08); }
+    .hlp-fig img.hlp-narrow { max-width: 420px; }
+    .hlp-fig figcaption { font-size: .85rem; color: var(--bs-secondary-color, #64748b); margin-top: 6px; }
+    .hlp-note { border-left: 4px solid #0d6efd; background: rgba(13,110,253,.06); border-radius: 6px; padding: 10px 14px; margin: 12px 0; }
+    .hlp-cloud { display: inline-block; font-size: .72rem; font-weight: 700; padding: 1px 8px; border-radius: 50px;
+                 background: rgba(79,70,229,.12); color: #4f46e5; vertical-align: middle; margin-left: 6px; }
+    .hlp-wrapper table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: .92rem; }
+    .hlp-wrapper th, .hlp-wrapper td { border: 1px solid var(--bs-border-color, #e2e8f0); padding: 6px 10px; text-align: left; vertical-align: top;
+                                       overflow-wrap: anywhere; hyphens: auto; }
+    .hlp-wrapper th { background: var(--bs-tertiary-bg, #f8fafc); }
+    .hlp-wrapper code { font-size: .88em; }
+</style>
+
+<div class="hlp-wrapper" lang="de">
+    <div class="hlp-hero">
+        <h2 class="hlp-title"><i class="bi bi-life-preserver text-primary me-2"></i>Schritt für Schritt</h2>
+        <p class="hlp-subtitle">
+            Vom ersten Turnier bis zur Siegerehrung – für Turnierleitungen, Spielerinnen und Spieler.
+            Funktionen, die es nur für Turniere in der Cloud gibt, sind mit <span class="hlp-cloud">Cloud</span> gekennzeichnet.
+        </p>
+    </div>
+
+    <nav class="hlp-toc">
+        <div class="hlp-toc-head">Erste Schritte</div>
+        <a href="#start">1. Offline oder Cloud?</a>
+        <a href="#meine-turniere">2. Startseite und „Meine Turniere“</a>
+        <div class="hlp-toc-head">Turnierleitung</div>
+        <a href="#turnier-anlegen">3. Turnier anlegen</a>
+        <a href="#wettbewerbe">4. Wettbewerbe</a>
+        <a href="#teilnehmer">5. Spieler, Doppel und Mannschaften</a>
+        <a href="#spielphasen">6. Spielphasen und Spielsysteme</a>
+        <a href="#auslosung">7. Auslosung</a>
+        <a href="#eingabe">8. Ergebnisse eingeben</a>
+        <a href="#ergebnisse">9. Tabellen, Turnierbaum und Folgerunden</a>
+        <a href="#drucken">10. Schiedsrichterzettel, Urkunden und Ergebnisliste</a>
+        <a href="#clicktt">11. ClickTT</a>
+        <a href="#administration">12. Turnier-Administration</a>
+        <a href="#sichern">13. Sichern, Exportieren und Archiv</a>
+        <div class="hlp-toc-head">Spielerinnen und Spieler</div>
+        <a href="#turnierseite">14. Die Turnierseite</a>
+        <a href="#anmeldung">15. Online anmelden</a>
+        <a href="#mein-turnier">16. „Mein Turnier“</a>
+        <div class="hlp-toc-head">Konto und Kosten</div>
+        <a href="#konto">17. Konto, Guthaben und Lizenzen</a>
+        <a href="#referenz">18. Übersicht der Seiten</a>
+    </nav>
+
+    <!-- 1 -->
+    <div class="hlp-section" id="start">
+        <h2>1. Offline oder Cloud?</h2>
+        <p>TurnierService läuft vollständig im Browser. Sie können auf zwei Arten arbeiten:</p>
+        <table>
+            <tr><th style="width:22%"></th><th>Offline (lokal)</th><th>Cloud <span class="hlp-cloud">Cloud</span></th></tr>
+            <tr><td>Konto</td><td>nicht nötig</td><td>Anmeldung mit E-Mail-Adresse</td></tr>
+            <tr><td>Daten</td><td>nur in diesem Browser auf diesem Gerät</td><td>auf dem Server, von überall erreichbar</td></tr>
+            <tr><td>Kosten</td><td>dauerhaft kostenlos, alle Turnierfunktionen</td><td>je Turnier bzw. Lizenz, siehe <a href="/preise/" onclick="appLoadPage('MainView', 'pricing'); return false;">Support &amp; Kosten</a></td></tr>
+            <tr><td>Zusätzlich</td><td>–</td><td>Turnierseite im Internet, Online-Anmeldung, „Mein Turnier“, Ergebniseingabe per QR-Code, Anzeigetafel, mehrere Bearbeiter</td></tr>
+        </table>
+        <div class="hlp-note">Zum Ausprobieren starten Sie auf der Startseite die <strong>Demo</strong>: ein fertiges Turnier mit Spielern, Gruppen und K.-o.-Runde. Alles, was Sie dort ändern, bleibt in Ihrem Browser.</div>
+        <p>Ein lokales Turnier können Sie jederzeit in die Cloud übernehmen („Meine Turniere → Turnier exportieren in Cloud“).
+           Die <strong>Offline-App</strong> (Menü „Tools“) lässt sich installieren und läuft auch ohne Internet in der Halle.</p>
+    </div>
+
+    <!-- 2 -->
+    <div class="hlp-section" id="meine-turniere">
+        <h2>2. Startseite und „Meine Turniere“</h2>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/01-startseite.png" alt="Startseite" loading="lazy">
+            <figcaption>Startseite: Demo, ganzes Turnier, Schnellstart für einen einzelnen Wettbewerb, Suche</figcaption></figure>
+        <ul>
+            <li><strong>Demo</strong> – vorbereitetes Turnier zum Ausprobieren.</li>
+            <li><strong>Neues Turnier</strong> – Turnier mit mehreren Wettbewerben anlegen (Abschnitt 3).</li>
+            <li><strong>Schnellstart</strong> – ein einzelner Wettbewerb ohne Turnier drumherum, z. B. für ein Vereinstraining.</li>
+            <li><strong>Suchen &amp; Finden</strong> – veröffentlichte Turniere nach Name, Datum oder Veranstalter.</li>
+        </ul>
+        <p>Das Menü <strong>„Meine Turniere“</strong> zeigt die zuletzt verwendeten Turniere – lokal im Browser, als Datei oder in der Cloud – und bietet:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/02-meine-turniere.png" alt="Menü Meine Turniere" loading="lazy">
+            <figcaption>„Meine Turniere“ mit zuletzt verwendeten Turnieren, Öffnen/Archiv und Export</figcaption></figure>
+        <ul>
+            <li><strong>Öffnen/Archiv</strong> – eine Turnierdatei (JSON) laden.</li>
+            <li><strong>Turnier in Datei exportieren</strong> – das lokale oder das geöffnete Cloud-Turnier als Datei sichern. Gibt es beides, fragt ein Dialog, welches gespeichert werden soll.</li>
+            <li><strong>Turnier exportieren in Cloud</strong> – das lokale Turnier in die Cloud übernehmen (angemeldet).</li>
+        </ul>
+    </div>
+
+    <!-- 3 -->
+    <div class="hlp-section" id="turnier-anlegen">
+        <h2>3. Turnier anlegen</h2>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/04-turnier-anlegen.png" alt="Neues Turnier erstellen" loading="lazy">
+            <figcaption>Neues Turnier: Name, Veranstalter, Sportart, Datum, Ansprechpartner und Austragungsort</figcaption></figure>
+        <p>Füllen Sie Name, Veranstalter (meist der Verein), Sportart sowie Start- und Enddatum aus. Ansprechpartner und
+           Austragungsort erscheinen bei Cloud-Turnieren auf der Turnierseite, der Ort auch als Karte.
+           Nach dem Speichern sehen Sie die <strong>Turnierübersicht</strong>:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/03-turnieruebersicht.png" alt="Turnierübersicht" loading="lazy">
+            <figcaption>Turnierübersicht mit allen Wettbewerben; Wettbewerbe mit Spielphasen lassen sich aufklappen</figcaption></figure>
+        <ul>
+            <li><strong>ClickTT</strong> – Import, Update und Export (Abschnitt 11).</li>
+            <li><strong>Bearbeiten</strong> / <strong>Löschen</strong> – Turnierdaten ändern bzw. das Turnier löschen.</li>
+            <li><strong>Speichern/Verlassen</strong> – Turnier sichern und schließen; bei lokalen Turnieren können Sie dabei eine Datei speichern.</li>
+            <li>Die dunkle Leiste darunter zeigt, wo Sie gerade sind (Turnier / Wettbewerb / Spielphase), und führt zu <strong>Anmeldung</strong>, <strong>Spieler</strong> und <strong>Ergebnisse</strong>.</li>
+        </ul>
+    </div>
+
+    <!-- 4 -->
+    <div class="hlp-section" id="wettbewerbe">
+        <h2>4. Wettbewerbe</h2>
+        <p>Ein Turnier besteht aus Wettbewerben, z. B. „Herren A Einzel“ oder „Damen Doppel“. Über <strong>„Wettbewerb hinzufügen“</strong> legen Sie einen neuen an:</p>
+        <figure class="hlp-fig"><img class="hlp-narrow" src="/wp-content/plugins/tourney/pages/hilfe/05-wettbewerb-dialog.png" alt="Wettbewerb erstellen" loading="lazy">
+            <figcaption>Wettbewerb mit Typ, Beginn, TTR-Grenzen und Online-Anmeldung</figcaption></figure>
+        <ul>
+            <li><strong>Wettbewerbstyp:</strong> Einzel, Doppel, Mixed oder Mannschaft (2er, 3er, 4er, 6er).</li>
+            <li><strong>Beginn</strong> mit Datum und Uhrzeit, <strong>TTR von/bis</strong> als Spielklasse.</li>
+            <li><strong>Online-Anmeldung</strong> <span class="hlp-cloud">Cloud</span> (nur Einzel): Zeitraum „Anmeldung ab/bis“ und „Anmeldung beendet“. Zusätzlich muss die Anmeldung in der Administration erlaubt sein (Abschnitt 12).</li>
+        </ul>
+        <p>Ein Klick auf den Wettbewerb öffnet seine Übersicht mit Spielphasen und Teilnehmerliste:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/06-wettbewerb.png" alt="Wettbewerbsübersicht" loading="lazy">
+            <figcaption>Wettbewerb mit Spielphasen (Vorrunde, Endrunde) und Teilnehmerliste</figcaption></figure>
+        <p><strong>Finalisieren</strong> schließt einen Wettbewerb ab, wenn alle Spiele gespielt sind; danach sind Ergebnisse und Platzierungen fest.</p>
+    </div>
+
+    <!-- 5 -->
+    <div class="hlp-section" id="teilnehmer">
+        <h2>5. Spieler, Doppel und Mannschaften</h2>
+        <p>Unter <strong>Anmeldung</strong> wählen Sie einen Wettbewerb und tragen die Teilnehmer ein:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/07-spieler-anmeldung.png" alt="Turnier-Anmeldung" loading="lazy">
+            <figcaption>Anmeldung zu einem Wettbewerb: Teilnehmer hinzufügen, CSV-Upload, Teilnahme an- und abhaken</figcaption></figure>
+        <ul>
+            <li><strong>Teilnehmer hinzufügen</strong> – einzeln mit Name, Verein, TTR und Jahrgang.</li>
+            <li><strong>CSV-Upload</strong> – viele Spieler auf einmal, z. B. aus einer Excel-Liste; alternativ der ClickTT-Import.</li>
+            <li>Der Haken <strong>Teilnahme</strong> legt fest, wer in der nächsten Spielphase mitspielt – z. B. für Spieler, die nicht erschienen sind.</li>
+            <li><strong>Doppel:</strong> Zwei angemeldete Spieler werden zu einem Doppel gepaart.</li>
+            <li><strong>Mannschaften:</strong> Mannschaften bestehen aus Stammspielern; vor jeder Begegnung wird die Aufstellung festgelegt. Jeder Spieler kann nur in einem Doppel eingesetzt werden.</li>
+        </ul>
+        <p>Unter <strong>Spieler</strong> finden Sie alle Spieler des Turniers mit Verein und TTR.</p>
+        <div class="hlp-note">Spieler, die sich selbst online angemeldet haben <span class="hlp-cloud">Cloud</span>, stehen mit dem Status „registriert“ in der Liste.
+            Ob sie wirklich spielen, legen Sie über den Haken „Teilnahme“ fest.</div>
+    </div>
+
+    <!-- 6 -->
+    <div class="hlp-section" id="spielphasen">
+        <h2>6. Spielphasen und Spielsysteme</h2>
+        <p>Ein Wettbewerb wird in <strong>Spielphasen</strong> (Wettbewerbsabschnitten) gespielt, z. B. Gruppen-Vorrunde und K.-o.-Endrunde.
+           Mit <strong>„Wettbewerbsabschnitt starten“</strong> legen Sie die erste an, mit <strong>„Nachfolger starten“</strong> die folgende:</p>
+        <figure class="hlp-fig"><img class="hlp-narrow" src="/wp-content/plugins/tourney/pages/hilfe/08-spielphase-starten.png" alt="Wettbewerbsabschnitt starten" loading="lazy">
+            <figcaption>Neue Spielphase mit Namen anlegen</figcaption></figure>
+        <p>Jede Spielphase hat fünf Reiter: <strong>Administration</strong>, <strong>Auslosung</strong>, <strong>Eingabe</strong>, <strong>Ergebnisse</strong> und <strong>Schiri</strong>.
+           In der Administration wählen Sie Spielsystem, Gewinnsätze und Teilnehmer:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/09-spielsystem.png" alt="Spielphase konfigurieren" loading="lazy">
+            <figcaption>Administration einer Spielphase: Spielmodus, Gewinnsätze, Wertungssystem und Spieler</figcaption></figure>
+        <table>
+            <tr><th>Spielsystem</th><th>Wofür</th></tr>
+            <tr><td>Gruppen (3er bis 8er, auch gemischt)</td><td>Vorrunden mit Tabellen; die Besten kommen weiter</td></tr>
+            <tr><td>K.-o.-System</td><td>Endrunden mit Freilosen und Spiel um Platz 3</td></tr>
+            <tr><td>Jeder gegen jeden</td><td>kleine Felder, jeder spielt gegen jeden</td></tr>
+            <tr><td>Doppelte Runde</td><td>Hin- und Rückrunde mit gespiegelten Paarungen und Gesamttabelle</td></tr>
+            <tr><td>Doppeltes K.-o.</td><td>Gewinner- und Verliererrunde mit Finale (optional mit Rückspiel); wer einmal verliert, ist noch nicht ausgeschieden</td></tr>
+            <tr><td>Schweizer System</td><td>große Felder in wenigen Runden; Spieler mit gleicher Punktzahl spielen gegeneinander (Abschnitt 9)</td></tr>
+        </table>
+        <p><strong>Gewinnsätze:</strong> 2 (Best-of-3), 3 (Best-of-5) oder 4 (Best-of-7). Das <strong>Wertungssystem</strong> legt die Regeln der Sportart fest
+           (Satz- und Spielwertung, Entscheidungskriterien der Tabelle). Bei Mannschaften wählen Sie zusätzlich das Spielsystem der Begegnung
+           (z. B. Bundessystem, Swaythling-Cup, Corbillon-Cup, Braunschweiger System, Paarkreuz).</p>
+        <p>Mit <strong>„+ Dummy hinzufügen“</strong> füllen Sie ein Feld zum Testen mit Platzhaltern auf. <strong>„Auslosung generieren“</strong> lost aus.</p>
+    </div>
+
+    <!-- 7 -->
+    <div class="hlp-section" id="auslosung">
+        <h2>7. Auslosung</h2>
+        <p>Die Auslosung setzt die Spieler nach TTR und vermeidet, dass Spieler desselben Vereins früh aufeinandertreffen.
+           Im Reiter <strong>Auslosung</strong> können Sie das Ergebnis vor dem Start korrigieren:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/10-auslosung.png" alt="Auslosung K.-o.-System" loading="lazy">
+            <figcaption>Auslosung einer K.-o.-Runde mit Setzpositionen und Freilosen</figcaption></figure>
+        <ul>
+            <li>Zwei Positionen nacheinander anklicken vertauscht sie; alternativ neue Setzpositionen eintragen und mit <strong>„Setzen“</strong> übernehmen.</li>
+            <li>Spieler desselben Vereins, die in der ersten Runde gegeneinander spielen würden, sind rot markiert.</li>
+            <li><strong>„Start &lt;Spielphase&gt;“</strong> beginnt die Spiele. Danach ist die Auslosung gesperrt.</li>
+        </ul>
+    </div>
+
+    <!-- 8 -->
+    <div class="hlp-section" id="eingabe">
+        <h2>8. Ergebnisse eingeben</h2>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/11-ergebniseingabe.png" alt="Ergebniseingabe" loading="lazy">
+            <figcaption>Ergebniseingabe je Runde mit Tisch, Satzergebnissen und Aktionen</figcaption></figure>
+        <ul>
+            <li><strong>Tisch:</strong> Tragen Sie den Tisch ein, sobald ein Spiel aufgerufen wird. Aufgerufene Spiele sehen die Spieler in „Mein Turnier“ <span class="hlp-cloud">Cloud</span>.</li>
+            <li><strong>Sätze in Kurzschreibweise:</strong> die Punkte des Verlierers, negativ wenn Spieler B den Satz gewinnt.
+                Beispiele: <code>5</code> = 11:5, <code>-5</code> = 5:11, <code>10</code> = 12:10.</li>
+            <li>Mit dem grünen Haken speichern Sie das Spiel. Plausibilität und Gewinnsätze werden geprüft.</li>
+            <li><strong>Ergebniseingabe per QR-Code</strong> <span class="hlp-cloud">Cloud</span>: Auf jedem Schiedsrichterzettel steht ein QR-Code.
+                Schiedsrichter oder Spieler tragen das Ergebnis mit dem Smartphone ein; ein blinkender Info-Button zeigt der Turnierleitung eingegangene Ergebnisse zur Übernahme.</li>
+        </ul>
+        <div class="hlp-note"><strong>Mehrere Bearbeiter</strong> <span class="hlp-cloud">Cloud</span>: Mehrere Turnierleiter können gleichzeitig eingeben.
+            Ergebnisse der anderen erscheinen sofort; tragen zwei dasselbe Spiel ein, gilt die letzte Eingabe (mit Hinweis).
+            Alle Eingaben stehen im Änderungsprotokoll (Abschnitt 12).</div>
+    </div>
+
+    <!-- 9 -->
+    <div class="hlp-section" id="ergebnisse">
+        <h2>9. Tabellen, Turnierbaum und Folgerunden</h2>
+        <p>Der Reiter <strong>Ergebnisse</strong> zeigt je nach Spielsystem Tabellen oder den Turnierbaum:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/12-gruppentabelle.png" alt="Gruppentabellen" loading="lazy">
+            <figcaption>Gruppentabellen mit Spielen, Sätzen, Bällen und Platz</figcaption></figure>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/13-ko-baum.png" alt="K.-o.-Turnierbaum" loading="lazy">
+            <figcaption>K.-o.-Turnierbaum: Sieger rücken automatisch in die nächste Runde</figcaption></figure>
+        <ul>
+            <li><strong>Start Nachfolger</strong>: Wenn alle Spiele gespielt sind, startet die nächste Spielphase mit den qualifizierten Spielern.</li>
+            <li><strong>Schweizer System:</strong> Nach jeder Runde lost <strong>„Start Runde n“</strong> die nächste Runde aus. Dabei gilt:
+                keine Wiederholung einer Paarung, Spieler mit gleicher Punktzahl gegeneinander, Vereinsschutz, möglichst ähnliche TTR-Werte;
+                das Freilos erhält der schwächste Spieler der untersten Punktgruppe, niemand zweimal.</li>
+        </ul>
+    </div>
+
+    <!-- 10 -->
+    <div class="hlp-section" id="drucken">
+        <h2>10. Schiedsrichterzettel, Urkunden und Ergebnisliste</h2>
+        <h3>Schiedsrichterzettel</h3>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/14-spielzettel.png" alt="Schiedsrichterzettel" loading="lazy">
+            <figcaption>Schiedsrichterzettel mit Gruppe, Runde, Spielnummer, Tisch und QR-Code (vier pro A4-Seite)</figcaption></figure>
+        <p>Im Reiter <strong>Schiri</strong> drucken Sie die Zettel einer Runde (vier pro Seite) oder einzeln.</p>
+        <h3>Urkunden</h3>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/15-urkunde.png" alt="Urkunde" loading="lazy">
+            <figcaption>Urkunde mit Vorschau; Turnier, Wettbewerb, Name und Platz lassen sich vor dem Druck anpassen</figcaption></figure>
+        <p>Urkunden erstellen Sie aus der Ergebnisliste oder im Urkunden-Reiter der letzten Spielphase. Mit eigenem Logo
+           <span class="hlp-cloud">Cloud</span> erscheint dieses oben auf der Urkunde. Eigene Vorlagen (WordPress-Seiten) wählen Sie in der Administration;
+           darin setzen die Platzhalter <code>#Turnier</code>, <code>#Wettbewerb</code>, <code>#Name</code>, <code>#Platz</code> und <code>#Logo</code> die Werte ein.</p>
+        <h3>Ergebnisliste</h3>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/16-ergebnisliste.png" alt="Ergebnisliste" loading="lazy">
+            <figcaption>Platzierungen und Ergebnisse aller Wettbewerbe</figcaption></figure>
+    </div>
+
+    <!-- 11 -->
+    <div class="hlp-section" id="clicktt">
+        <h2>11. ClickTT</h2>
+        <p>Über das Menü <strong>ClickTT</strong> in der Turnierübersicht:</p>
+        <ul>
+            <li><strong>Import</strong> – Meldeliste aus ClickTT (XML): Wettbewerbe, Vereine, Spieler mit TTR.</li>
+            <li><strong>Update</strong> – Änderungen einer neueren ClickTT-Datei übernehmen.</li>
+            <li><strong>Export</strong> – Ergebnisdatei für ClickTT erzeugen; Sie wählen die Wettbewerbe und Spielphasen aus.</li>
+        </ul>
+    </div>
+
+    <!-- 12 -->
+    <div class="hlp-section" id="administration">
+        <h2>12. Turnier-Administration</h2>
+        <p>Die Turnier-Administration erreichen Sie über die Turnierübersicht. Je nach Turnier gibt es diese Reiter:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/17-administration-homepage.png" alt="Turnier-Administration Homepage" loading="lazy">
+            <figcaption>Reiter „Homepage“: Logo, Informationen für die Turnierseite, Online-Anmeldung und Hinweis nach der Anmeldung</figcaption></figure>
+        <table>
+            <tr><th>Reiter</th><th>Inhalt</th></tr>
+            <tr><td>Urkunden Konfiguration</td><td>Urkundenvorlage für das Turnier auswählen</td></tr>
+            <tr><td>Homepage <span class="hlp-cloud">Cloud</span></td><td><strong>Eigenes Logo</strong> (PNG, JPG oder WebP bis 2 MB, erscheint auf Turnierseite und Urkunden),
+                Informationen für die Turnierseite (z. B. Startgeld), <strong>Spieler-Turnieranmeldung erlauben</strong> und der <strong>Hinweis nach der Online-Anmeldung</strong></td></tr>
+            <tr><td>Änderungen <span class="hlp-cloud">Cloud</span></td><td>Änderungsprotokoll: wer wann welches Ergebnis eingetragen hat</td></tr>
+            <tr><td>InfoAnzeige <span class="hlp-cloud">Cloud</span></td><td>Anzeigetafel für die Halle (Bildschirm oder Beamer): laufende Spiele, Tische und Durchsagen</td></tr>
+            <tr><td>Messages</td><td>Prüfen der Live-Verbindung (Nachrichten senden und empfangen)</td></tr>
+            <tr><td>Einstellungen</td><td>Datumsformat der Anzeigen</td></tr>
+        </table>
+        <div class="hlp-note">Ist die Online-Anmeldung nicht freigeschaltet, sehen Sie als Turnierleitung auf der Turnierseite „Anmeldung nicht freigeschaltet“; Besucher sehen „Anmeldeschluss“.</div>
+    </div>
+
+    <!-- 13 -->
+    <div class="hlp-section" id="sichern">
+        <h2>13. Sichern, Exportieren und Archiv</h2>
+        <ul>
+            <li><strong>Lokale Turniere</strong> liegen nur in Ihrem Browser. Sichern Sie sie regelmäßig über „Meine Turniere → Turnier in Datei exportieren“.
+                Beim Löschen der Browserdaten gehen sie sonst verloren.</li>
+            <li>Eine Datei laden Sie über <strong>„Öffnen/Archiv“</strong>. Ein vorhandenes lokales Turnier wird dabei ersetzt; vorher fragt ein Dialog, ob es gespeichert werden soll.</li>
+            <li><strong>Cloud-Turniere</strong> <span class="hlp-cloud">Cloud</span> lassen sich ebenfalls als Datei exportieren. Ein Jahr nach Turnierende werden sie archiviert:
+                Die Ergebnisse bleiben öffentlich sichtbar, bearbeiten ist nicht mehr möglich. Mit Vereins- oder Verbandslizenz entfällt die Archivierung.</li>
+        </ul>
+    </div>
+
+    <!-- 14 -->
+    <div class="hlp-section" id="turnierseite">
+        <h2>14. Die Turnierseite <span class="hlp-cloud">Cloud</span></h2>
+        <p>Jedes Cloud-Turnier hat eine eigene öffentliche Seite, die Sie weitergeben können:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/hilfe/18-turnierseite.png" alt="Turnierseite" loading="lazy">
+            <figcaption>Turnierseite mit Logo, Wettbewerben und Zeitplan, Online-Anmeldung, Informationen und Anfahrt</figcaption></figure>
+        <ul>
+            <li><strong>Wettbewerbe &amp; Zeitplan</strong> mit Startzeit, Spielklasse und Status; Startzeiten lassen sich in den Kalender übernehmen.</li>
+            <li><strong>Jetzt anmelden</strong> – Online-Anmeldung (Abschnitt 15), solange die Anmeldung offen ist.</li>
+            <li><strong>Mein Turnier</strong> – persönliche Ansicht für Spieler (Abschnitt 16).</li>
+            <li><strong>Ergebnisse</strong> und <strong>InfoAnzeige</strong> in der Kopfleiste, <strong>Adresse &amp; Anfahrt</strong> mit datenschutzfreundlicher Karte.</li>
+        </ul>
+    </div>
+
+    <!-- 15 -->
+    <div class="hlp-section" id="anmeldung">
+        <h2>15. Online anmelden <span class="hlp-cloud">Cloud</span></h2>
+        <figure class="hlp-fig"><img class="hlp-narrow" src="/wp-content/plugins/tourney/pages/hilfe/19-online-anmeldung.png" alt="Online-Anmeldung" loading="lazy">
+            <figcaption>Anmeldedialog: Pflichtangaben und freiwillige Angaben</figcaption></figure>
+        <ol>
+            <li>Auf der Turnierseite beim gewünschten Wettbewerb <strong>„Jetzt anmelden“</strong> klicken.</li>
+            <li>Nachname, Vorname, Verein und TTR-Wert eintragen; Jahrgang, E-Mail und WhatsApp-Nummer sind freiwillig.</li>
+            <li>Die Sicherheitsprüfung (Captcha) läuft automatisch; dann <strong>„Anmelden“</strong>.</li>
+        </ol>
+        <p>Nach der Anmeldung erscheint ein Hinweis der Turnierleitung, z. B. „Bitte spätestens 30 Min vor Beginn des Wettbewerbs bei der Turnierleitung melden“.
+           E-Mail-Adresse und WhatsApp-Nummer sieht nur die Turnierleitung. Die Anmeldung ist für Einzel-Wettbewerbe im eingestellten Zeitraum möglich.</p>
+    </div>
+
+    <!-- 16 -->
+    <div class="hlp-section" id="mein-turnier">
+        <h2>16. „Mein Turnier“ <span class="hlp-cloud">Cloud</span></h2>
+        <figure class="hlp-fig"><img class="hlp-narrow" src="/wp-content/plugins/tourney/pages/hilfe/20-mein-turnier.png" alt="Mein Turnier auf dem Smartphone" loading="lazy">
+            <figcaption>„Mein Turnier“ auf dem Smartphone: nächste Spiele, Ergebnisse und Platzierung</figcaption></figure>
+        <p>Auf der Turnierseite <strong>„Mein Turnier“</strong> antippen und den eigenen Namen wählen – ohne Konto. Der Browser merkt sich die Auswahl. Angezeigt werden:</p>
+        <ul>
+            <li><strong>Nächste Spiele</strong> mit Gegner; ein aufgerufenes Spiel steht oben mit „Aufgerufen – Tisch n“.</li>
+            <li><strong>Ergebnisse</strong> aus eigener Sicht, grün bei Sieg, rot bei Niederlage.</li>
+            <li><strong>Meine Wettbewerbe</strong> mit Tabellenplatz bzw. Stand im K.-o.-Baum (z. B. „Nächste Runde: Halbfinale“), beim Doppel mit Partner.</li>
+        </ul>
+        <p>Die Ansicht aktualisiert sich alle 30 Sekunden von selbst.</p>
+    </div>
+
+    <!-- 17 -->
+    <div class="hlp-section" id="konto">
+        <h2>17. Konto, Guthaben und Lizenzen</h2>
+        <ul>
+            <li><strong>Konto:</strong> Registrieren und anmelden über „Login“ oben rechts, auch mit Passkey.</li>
+            <li><strong>Guthaben:</strong> Für jedes Cloud-Turnier wird ein Turnier vom Guthaben verbraucht – reserviert beim Anlegen. Löschen Sie es, bevor ein Ergebnis eingetragen ist,
+                bekommen Sie es zurück. Gekaufte Turniere sind 2 Jahre gültig.</li>
+            <li><strong>Vereins- und Verbandslizenz:</strong> beliebig viele Turniere ohne Guthaben und ohne Archivierung, solange die Lizenz gilt.</li>
+            <li>Ein laufendes Turnier wird nie gesperrt, auch wenn das Guthaben aufgebraucht ist.</li>
+        </ul>
+        <p>Preise und Pakete: <a href="/preise/" onclick="appLoadPage('MainView', 'pricing'); return false;">Support &amp; Kosten</a>. Fragen beantworten wir gern über das
+           <a href="/kontakt/" onclick="appLoadPage('MainView', 'contact'); return false;">Kontaktformular</a>.</p>
+    </div>
+
+    <!-- 18 -->
+    <div class="hlp-section" id="referenz">
+        <h2>18. Übersicht der Seiten</h2>
+        <table>
+            <tr><th>Seite</th><th>Zweck</th><th>Erreichbar über</th></tr>
+            <tr><td>Startseite</td><td>Demo, neues Turnier, Schnellstart, Suche</td><td>Logo</td></tr>
+            <tr><td>Turniersuche</td><td>veröffentlichte Turniere finden</td><td>Startseite „Suche öffnen“</td></tr>
+            <tr><td>Turnierübersicht</td><td>Wettbewerbe, ClickTT, Turnier bearbeiten</td><td>„Meine Turniere“, Leiste oben</td></tr>
+            <tr><td>Turnier-Administration</td><td>Urkunden, Homepage, Änderungen, InfoAnzeige, Einstellungen</td><td>Turnierübersicht</td></tr>
+            <tr><td>Wettbewerb</td><td>Spielphasen, Teilnehmerliste, Finalisieren</td><td>Klick auf den Wettbewerb</td></tr>
+            <tr><td>Anmeldung</td><td>Teilnehmer eines Wettbewerbs, CSV-Upload, Doppel und Mannschaften</td><td>Leiste „Anmeldung“</td></tr>
+            <tr><td>Spieler</td><td>alle Spieler des Turniers</td><td>Leiste „Spieler“</td></tr>
+            <tr><td>Spielphase</td><td>Administration, Auslosung, Eingabe, Ergebnisse, Schiri</td><td>Klick auf die Spielphase</td></tr>
+            <tr><td>Ergebnisse</td><td>Platzierungen aller Wettbewerbe, Urkunden</td><td>Leiste „Ergebnisse“</td></tr>
+            <tr><td>Urkunde</td><td>Urkunde anpassen und drucken</td><td>Ergebnisse, Urkunden-Reiter</td></tr>
+            <tr><td>Turnierseite <span class="hlp-cloud">Cloud</span></td><td>öffentliche Seite mit Zeitplan, Anmeldung, Karte</td><td>Link des Turniers</td></tr>
+            <tr><td>Mein Turnier <span class="hlp-cloud">Cloud</span></td><td>persönliche Ansicht für Spieler</td><td>Turnierseite</td></tr>
+            <tr><td>Offline-App</td><td>Turnierverwaltung ohne Internet</td><td>Menü „Tools“</td></tr>
+        </table>
+    </div>
+</div>

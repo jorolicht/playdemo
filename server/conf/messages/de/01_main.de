@@ -75,6 +75,7 @@ navbar.logoAlt                                      = Logo
 navbar.toggleNav                                    = Navigation umschalten
 navbar.functions                                    = Funktionen
 navbar.pricing                                      = Support/Kosten
+navbar.help                                         = Hilfe
 navbar.tools                                        = Tools
 navbar.wordpressPlugin                              = Wordpress-Plugin
 navbar.excelTemplate                                = Excel-Vorlage

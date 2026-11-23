@@ -35,7 +35,8 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
   val StaticSlugs: Map[String, (String, String)] = Map(
     "funktionen" -> ("funktionen", "features"), "pricing" -> ("preise", "pricing"), "excel" -> ("excel", "excel"),
     "plugin" -> ("plugin", "plugin"), "history" -> ("historie", "history"), "impressum" -> ("impressum", "imprint"),
-    "privacy" -> ("datenschutz", "privacy"), "contact" -> ("kontakt", "contact"), "gtc" -> ("agb", "terms"))
+    "privacy" -> ("datenschutz", "privacy"), "contact" -> ("kontakt", "contact"), "gtc" -> ("agb", "terms"),
+    "hilfe" -> ("hilfe", "help"))
 
   /**
    * Normalisiert einen Seitenparameter (deutsch/englisch, z. B. "preise", "functions") auf den Dateinamen in pages/.
@@ -51,6 +52,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
     case "contact" | "kontakt"                => "contact"
     case "pricing" | "preise"                 => "pricing"
     case "history" | "historie"               => "history"
+    case "help" | "hilfe"                     => "hilfe"
     case other                                => other
   }
 
@@ -445,6 +447,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
                 case "contact" | "kontakt"          => if (Global.lang == "en") "Contact" else "Kontakt"
                 case "pricing" | "preise"           => if (Global.lang == "en") "Support & Pricing" else "Support & Kosten"
                 case "history"                      => if (Global.lang == "en") "Version History" else "Versionshistorie"
+                case "hilfe"                        => if (Global.lang == "en") "Help & User Guide" else "Hilfe & Benutzerhandbuch"
                 case _                              => staticName.capitalize
               }
               setMain(cviews.pages.MainView.html.PageContent(pageTitle, text))

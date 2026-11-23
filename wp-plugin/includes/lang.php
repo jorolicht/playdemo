@@ -46,6 +46,9 @@ function tourney_lang_rewrite() {
  */
 function tourney_lang_alternates() {
     $static = tourney_static_current();
+    if ($static && tourney_static_en_noindex($static['de'])) {
+        return null;   // englische Fassung nicht indexiert: keine hreflang-Verweise
+    }
     if ($static) {
         return ['de' => tourney_static_url($static['de'], 'de'), 'en' => tourney_static_url($static['de'], 'en')];
     }

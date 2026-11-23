@@ -442,3 +442,13 @@ Guthaben in Posten (gekaufte Turniere 2 Jahre gültig, Altbestand und manuelle G
 - [x] **TC-CR-03 [👤]:** Abgelaufenes Guthaben zählt nicht; das Anlegen wird abgelehnt.
 - [x] **TC-CR-04 [👑]:** Lizenz über die Management-Konsole (`admin/update_user_profile`, `license_until`): Anlegen ohne Guthaben, kein Verbrauch.
 - [x] **TC-AR-01 [👤]:** Archiv: mit Lizenz nicht archiviert; ohne Lizenz `read-aci` → `archived`, Schreiben als Turnierleiter 403 (`tourney_archived`), als Administrator erlaubt; der Turnierleiter sieht die öffentliche Seite mit Hinweis „Archiv“ (`data-canedit="0"`).
+
+---
+
+## 31. UseCase: Hilfe & Benutzerhandbuch (`site/content/hilfe.html`)
+
+Statische Seite `/hilfe/` (englisch vorerst Platzhalter `/en/help/`), Menüpunkt „Hilfe“. Die Screenshots erzeugt `test/e2e/docs` (`npx playwright test --config docs.config.ts`) aus dem Demo-Turnier bzw. einem vorübergehenden Cloud-Turnier.
+
+### 31.1 Besucher (🌐)
+- [x] **TC-HELP-01 [🌐]:** Der Menüpunkt „Hilfe“ öffnet das Handbuch; alle 18 Einträge des Inhaltsverzeichnisses haben ein Ziel, alle 20 Screenshots werden geladen.
+- [x] **TC-HELP-02 [🌐]:** `/hilfe/` ist indexierbar (Canonical, Sitemap); der englische Platzhalter `/en/help/` hat `noindex`, fehlt in der Sitemap, und es gibt keine hreflang-Verweise.

@@ -47,6 +47,11 @@ const TOURNEY_STATIC_PAGES = [
                       'desc' => 'Kontakt zu TurnierService: Fragen, Support und Feedback zur Turniersoftware.',
                       'en' => ['slug' => 'contact', 'title' => 'Contact',
                                'desc' => 'Contact TurnierService: questions, support and feedback on the tournament software.']],
+    'hilfe'       => ['file' => 'hilfe', 'page' => 'hilfe', 'title' => 'Hilfe & Benutzerhandbuch',
+                      'desc' => 'Benutzerhandbuch von TurnierService: Turnier anlegen, Wettbewerbe, Auslosung, Ergebniseingabe, Urkunden, Online-Anmeldung und „Mein Turnier“ Schritt für Schritt.',
+                      // noindex: englische Fassung vorerst nur Platzhalter (kein Index, keine Sitemap, kein hreflang)
+                      'en' => ['slug' => 'help', 'title' => 'Help & User Guide', 'noindex' => true,
+                               'desc' => 'TurnierService user guide: creating tournaments, competitions, draws, result entry, certificates, online registration and “My Tournament” step by step.']],
     'agb'         => ['file' => 'gtc', 'page' => 'gtc', 'title' => 'Allgemeine Geschäftsbedingungen',
                       'desc' => 'Allgemeine Geschäftsbedingungen (AGB) von TurnierService.',
                       'en' => ['slug' => 'terms', 'title' => 'Terms and Conditions',
@@ -81,6 +86,24 @@ function tourney_static_current() {
  * @param string $de   Deutscher Slug (Schlüssel in TOURNEY_STATIC_PAGES).
  * @param string $lang 'de' oder 'en'.
  * @return string Absolute URL, z. B. https://…/impressum/ bzw. https://…/en/imprint/.
+ */
+/**
+ * Prüft, ob die englische Fassung einer statischen Seite nicht indexiert werden soll (Kennzeichen "noindex",
+ * z. B. solange sie nur ein Platzhalter ist): dann noindex, kein Eintrag in der Sitemap und keine hreflang-Verweise.
+ *
+ * @param string $de Deutscher Slug (Schlüssel in TOURNEY_STATIC_PAGES).
+ * @return bool
+ */
+function tourney_static_en_noindex($de) {
+    return !empty(TOURNEY_STATIC_PAGES[$de]['en']['noindex']);
+}
+
+/**
+ * URL einer statischen Seite in einer Sprache.
+ *
+ * @param string $de   Deutscher Slug (Schlüssel in TOURNEY_STATIC_PAGES).
+ * @param string $lang Sprache ("de" oder "en").
+ * @return string Absolute URL.
  */
 function tourney_static_url($de, $lang) {
     return $lang === 'en' ? home_url('/en/' . TOURNEY_STATIC_PAGES[$de]['en']['slug'] . '/') : home_url("/$de/");
@@ -160,6 +183,9 @@ function tourney_static_sitemap() {
             $list = [];
             foreach (TOURNEY_STATIC_PAGES as $slug => $page) {
                 foreach (['de' => '', 'en' => '_en'] as $lang => $suffix) {
+                    if ($lang === 'en' && tourney_static_en_noindex($slug)) {
+                        continue;
+                    }
                     $file  = TOURNEY_PLUGIN_PATH . 'pages/' . $page['file'] . $suffix . '.html';
                     $entry = ['loc' => tourney_static_url($slug, $lang)];
                     if (file_exists($file)) {
