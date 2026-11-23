@@ -5,7 +5,7 @@ Tags: tournament, table tennis, sports, scalajs, playframework
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
-Stable tag: 1.4.8
+Stable tag: 1.4.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,9 @@ Das Plugin verwendet Semantic Versioning (SemVer) `MAJOR.MINOR.PATCH`. Datenbank
 Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel (`filemtime`) oder der aktuellen Plugin-Version versioniert, sodass Browser-Caches nach Updates sofort invalidiert werden.
 
 == Changelog ==
+
+= 1.4.9 =
+* Demo-Turnier: laufende Spiele zeigen eine realistische Spielzeit.
 
 = 1.4.8 =
 * Hilfe & Benutzerhandbuch jetzt auch auf Englisch (/en/help/) mit englischen Screenshots.
