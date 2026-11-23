@@ -1,0 +1,37 @@
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+@import dialogs.DlgCopyTourney.*
+@import base.Messages.gM
+
+@(tourney: shared.model.Tourney)
+
+@* Dialog „Turnier kopieren“ (Turniervorlage aus dem Vorjahr) *@
+<div class="modal fade" @id(ModalId) tabindex="-1" @ariaLabelledBy(TitleId) aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow border-0 rounded-3">
+            <div class="modal-header bg-primary text-white py-3">
+                <h5 class="modal-title fw-bold" @id(TitleId)><i class="bi bi-copy me-2"></i>@gM("dlg.copyTourney.title")</h5>
+                <button type="button" class="btn-close btn-close-white" @id(CloseId) aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-secondary small">@gM("dlg.copyTourney.text", tourney.name)</p>
+                <div class="mb-3">
+                    <label class="form-label fw-bold" @forAttr(InputNameId)>@gM("dlg.copyTourney.name")</label>
+                    <input type="text" class="form-control" @id(InputNameId)>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-bold" @forAttr(InputDateId)>@gM("dlg.copyTourney.date")</label>
+                    <input type="date" class="form-control" style="max-width: 220px;" @id(InputDateId)>
+                    <div class="form-text">@gM("dlg.copyTourney.dateHint")</div>
+                </div>
+                <div class="alert alert-danger py-2 small mb-0 d-none" @id(ErrorId)></div>
+            </div>
+            <div class="modal-footer bg-light">
+                <div class="dlg-btns">
+                    <button type="button" class="btn btn-outline-secondary" @id(CancelId)>@gM("btn.cancel")</button>
+                    <button type="button" class="btn btn-hero-primary fw-bold px-3" @id(ApplyId)><i class="bi bi-copy me-1"></i>@gM("dlg.copyTourney.apply")</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

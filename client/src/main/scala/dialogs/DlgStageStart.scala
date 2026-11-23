@@ -49,9 +49,10 @@ object DlgStageStart extends BaseDialog with JsWrapper:
    * Shows the stage start dialog.
    *
    * @param existingStages List of existing stages in the competition.
+   * @param defaultName Vorbelegter Name (z. B. aus dem Phasenplan einer Turniervorlage), leer = kein Vorschlag.
    * @return A Future that completes with either an AppError or a DlgStageStartResult.
    */
-  def show(existingStages: Seq[Stage], preSelectedPrefId: Option[StageId] = None): Future[Either[AppError, DlgStageStartResult]] =
+  def show(existingStages: Seq[Stage], preSelectedPrefId: Option[StageId] = None, defaultName: String = ""): Future[Either[AppError, DlgStageStartResult]] =
     val p = Promise[Either[AppError, DlgStageStartResult]]()
     val f = p.future
 
@@ -63,7 +64,7 @@ object DlgStageStart extends BaseDialog with JsWrapper:
       setHtml(gE(LoadId), cviews.dialogs.html.DlgStageStart(existingStages))
       modal = Modal(gE(ModalId))
     
-    setInput(gE(InputNameId), "")
+    setInput(gE(InputNameId), defaultName)
     preSelectedPrefId.foreach { prefId =>
       val el = gE(InputPrefId)
       if (el != null) el.asInstanceOf[js.Dynamic].value = prefId.value.toString

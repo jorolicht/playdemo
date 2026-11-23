@@ -141,9 +141,12 @@ object CompetitionInfo extends BasePage with JsWrapper:
       case `BtnStartStage` => 
         val c = Global.currentSelection.competition.get
         val existingStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == c.id && !s.deleted)
+        // Phasenplan aus einer Turniervorlage: Name, Spielsystem und Gewinnsätze vorbelegen
+        val plan = TourneyTemplate.nextPlan(c, existingStages)
         
-        dialogs.DlgStageStart.show(existingStages).map {
+        dialogs.DlgStageStart.show(existingStages, None, plan.map(_.name).getOrElse("")).map {
           case Right(res) => 
+            val usedPlan = plan.filter(_.name.equalsIgnoreCase(res.name))
             if (existingStages.isEmpty) {
               c.pants1Stage.foreach { p =>
                 p.status = if (p.active) PantStatus.PLAY else PantStatus.REGI
@@ -161,7 +164,11 @@ object CompetitionInfo extends BasePage with JsWrapper:
               size = 8, 
               noPlayers = initialNoPlayers
             ) match {
-              case Right(r) => 
+              case Right(r0) => 
+                val r = usedPlan.fold(r0) { p =>
+                  TourneyTemplate.applyPlan(r0, p)
+                  services.TourneyDB.tourney.updateStage(r0).getOrElse(r0)
+                }
                 val updatedCompOpt = services.TourneyDB.tourney.competitions.find(comp => comp != null && comp.id == c.id)
                 Global.currentSelection = Global.currentSelection.copy(stage = Some(r), competition = updatedCompOpt)
                 comps.ContextHeader.render()

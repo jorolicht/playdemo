@@ -52,8 +52,11 @@ object StageResult extends BasePage with JsWrapper:
   def prepareSuccessor(comp: Competition, stage: Stage): Unit =
     import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
     val existingStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && s.coId == comp.id && !s.deleted)
-    dialogs.DlgStageStart.show(existingStages, Some(stage.id)).map {
+    // Phasenplan aus einer Turniervorlage: Name, Spielsystem und Gewinnsätze vorbelegen
+    val plan = TourneyTemplate.nextPlan(comp, existingStages)
+    dialogs.DlgStageStart.show(existingStages, Some(stage.id), plan.map(_.name).getOrElse("")).map {
       case Right(res) =>
+        val usedPlan = plan.filter(_.name.equalsIgnoreCase(res.name))
         val initialNoPlayers = if (existingStages.isEmpty) comp.pants1Stage.count(_.active) else 0
         services.TourneyDB.tourney.addStage(
           coId = comp.id,
@@ -63,7 +66,11 @@ object StageResult extends BasePage with JsWrapper:
           size = 8,
           noPlayers = initialNoPlayers
         ) match {
-          case Right(newStage) =>
+          case Right(created) =>
+            val newStage = usedPlan.fold(created) { p =>
+              TourneyTemplate.applyPlan(created, p)
+              services.TourneyDB.tourney.updateStage(created).getOrElse(created)
+            }
             val updatedCompOpt = services.TourneyDB.tourney.competitions.find(c => c != null && c.id == comp.id)
             Global.currentSelection = Global.currentSelection.copy(stage = Some(newStage), competition = updatedCompOpt)
             comps.ContextHeader.render()

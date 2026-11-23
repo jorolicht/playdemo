@@ -105,7 +105,7 @@ object Navbar extends BaseComp with base.JsWrapper with services.ComWrapper:
    *
    * @param action Laden des neuen Turniers
    */
-  private def confirmOverwriteLocal(action: () => Unit): Unit =
+  def confirmOverwriteLocal(action: () => Unit): Unit =
     import shared.BoxButton
     services.RecentTourneys.localTourneyName match
       case None => switchTourney(action)

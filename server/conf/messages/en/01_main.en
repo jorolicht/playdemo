@@ -642,3 +642,16 @@ myTourney.koLoserBracket                            = Losers' bracket (after: {0
 myTourney.koSecond                                  = 2nd place
 myTourney.koThird                                   = 3rd place
 myTourney.koWinner                                  = Winner
+
+# Copy tournament (template)
+tourneyInfo.copy                                    = Copy
+tourneyInfo.copyHint                                = Create a new tournament with the same competitions (without players and results)
+dlg.copyTourney.title                               = Copy tournament
+dlg.copyTourney.text                                = A new tournament is created from “{0}”: competitions with stages, start times, venue, contact and homepage texts are copied, players and results are not. Start times and registration periods are moved to the new date.
+dlg.copyTourney.name                                = Name of the new tournament
+dlg.copyTourney.date                                = Start date
+dlg.copyTourney.dateHint                            = Suggestion: the same weekday one year later.
+dlg.copyTourney.apply                               = Copy
+dlg.copyTourney.errName                             = Please enter a name with at least 3 characters.
+dlg.copyTourney.errDate                             = Please choose a valid start date.
+dlg.copyTourney.error                               = The tournament could not be copied

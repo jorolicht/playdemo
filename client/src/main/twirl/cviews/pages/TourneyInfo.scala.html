@@ -57,6 +57,9 @@
                     </ul>
                 </div>
                 }
+                <button class="btn btn-hero btn-sm me-2" @id(BtnCopyTourney, "onclick") @if(!base.Global.hasTourneyAccess(tourney)){disabled} title="@gM("tourneyInfo.copyHint")">
+                    <i class="bi bi-copy me-1"></i>@gM("tourneyInfo.copy")
+                </button>
                 <button class="btn btn-hero btn-sm me-2" @id(BtnEditTourney, "onclick") @if(!base.Global.hasTourneyAccess(tourney)){disabled}>
                     <i class="bi bi-pencil me-1"></i>@gM("btn.edit")
                 </button>

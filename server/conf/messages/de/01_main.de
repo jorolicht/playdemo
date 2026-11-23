@@ -642,3 +642,16 @@ myTourney.koLoserBracket                            = Verliererrunde (nach: {0})
 myTourney.koSecond                                  = Platz 2
 myTourney.koThird                                   = Platz 3
 myTourney.koWinner                                  = Sieger
+
+# Turnier kopieren (Turniervorlage)
+tourneyInfo.copy                                    = Kopieren
+tourneyInfo.copyHint                                = Neues Turnier mit denselben Wettbewerben anlegen (ohne Spieler und Ergebnisse)
+dlg.copyTourney.title                               = Turnier kopieren
+dlg.copyTourney.text                                = Aus „{0}“ wird ein neues Turnier angelegt: Wettbewerbe mit Spielphasen, Startzeiten, Ort, Kontakt und Homepage-Texte werden übernommen, Spieler und Ergebnisse nicht. Startzeiten und Anmeldezeiträume werden auf das neue Datum verschoben.
+dlg.copyTourney.name                                = Name des neuen Turniers
+dlg.copyTourney.date                                = Startdatum
+dlg.copyTourney.dateHint                            = Vorschlag: derselbe Wochentag ein Jahr später.
+dlg.copyTourney.apply                               = Kopieren
+dlg.copyTourney.errName                             = Bitte einen Namen mit mindestens 3 Zeichen eingeben.
+dlg.copyTourney.errDate                             = Bitte ein gültiges Startdatum wählen.
+dlg.copyTourney.error                               = Das Turnier konnte nicht kopiert werden

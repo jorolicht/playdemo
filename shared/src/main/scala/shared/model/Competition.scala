@@ -173,7 +173,8 @@ case class Competition(
   var scoring:          String = "",
   var regFrom:          String = "",
   var regTo:            String = "",
-  var regClosed:        Boolean = false
+  var regClosed:        Boolean = false,
+  var stagePlan:        List[StagePlan] = List()
 ):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
 
@@ -206,6 +207,33 @@ case class Competition(
       (regFrom.isEmpty || today >= regFrom) && (regTo.isEmpty || today <= regTo)
 
 
+/**
+ * Vorlage einer Spielphase aus einem kopierten Turnier ([[TourneyTemplate]]). Beim Start einer Spielphase werden Name,
+ * Spielsystem und Gewinnsätze daraus vorbelegt; Spieler und Auslosung entstehen wie gewohnt neu.
+ *
+ * @param name        Name der Spielphase (bei gekoppelten Phasen ohne Zusatz „– Hinrunde“ bzw. „– Gewinnerrunde“)
+ * @param config      Spielsystem ([[StageConfig]] als Name, z. B. "KO", "GRPS34", "DRR")
+ * @param winSets     Gewinnsätze (0 = Standard)
+ * @param encSystem   Spielsystem der Begegnungen bei Mannschaften
+ * @param encVariant  Spielweise der Begegnungen bei Mannschaften
+ * @param finalReset  Doppeltes K.-o.: Finale mit Rückspiel
+ * @param certificate Spielphase mit Urkunden
+ * @param pref        Index der Vorgänger-Phase in der Liste, -1 = erste Phase
+ */
+case class StagePlan(
+  name:        String,
+  config:      String,
+  winSets:     Int = 0,
+  encSystem:   String = "",
+  encVariant:  String = "",
+  finalReset:  Boolean = false,
+  certificate: Boolean = false,
+  pref:        Int = -1
+)
+
+object StagePlan:
+  given rw: ReadWriter[StagePlan] = macroRW
+
 object Competition:
   given rw: ReadWriter[Competition] =
     ReadWriter.join(
@@ -217,6 +245,7 @@ object Competition:
         if (comp.scoring == null) comp.scoring = ""
         if (comp.regFrom == null) comp.regFrom = ""
         if (comp.regTo == null) comp.regTo = ""
+        if (comp.stagePlan == null) comp.stagePlan = List()
         if (comp.teams == null) comp.copy(teams = ArrayBuffer()) else comp
       },
       macroRW[Competition]

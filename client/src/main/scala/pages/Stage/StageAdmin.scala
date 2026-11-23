@@ -147,6 +147,14 @@ object StageAdmin extends BasePage with JsWrapper:
           cviews.pages.Stage.html.StageAdmin(r, participants, modes)
         ))
         
+        // Phasenplan einer Turniervorlage: Spielsystem vorwählen, solange noch keines festgelegt ist
+        if (r.status == StageStatus.CFG && (r.stageConfig == StageConfig.CFG || r.stageConfig == StageConfig.UNKN)) {
+          comp.flatMap(c => c.stagePlan.find(_.name.equalsIgnoreCase(TourneyTemplate.baseName(r.name)))).foreach { p =>
+            val select = gE(SelectDrawMode).asInstanceOf[dom.html.Select]
+            if (select != null && select.querySelector(s"option[value='${p.config}']") != null) select.value = p.config
+          }
+        }
+
         // Initial state update
         dom.window.setTimeout(() => updateModes(), 50)
         true

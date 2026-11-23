@@ -15,6 +15,8 @@ object TourneyInfo extends BasePage with JsWrapper:
   def name = PageNameTyp("TourneyInfo")
 
   val BtnEditTourney:   HtmlId = genId(name)
+  /** „Kopieren“: Turniervorlage für ein neues Turnier (services.TourneyCopy). */
+  val BtnCopyTourney:   HtmlId = genId(name)
   val BtnDeleteTourney: HtmlId = genId(name)
   val BtnSaveLeave:     HtmlId = genId(name)
   val BtnAddComp:       HtmlId = genId(name)
@@ -164,6 +166,9 @@ object TourneyInfo extends BasePage with JsWrapper:
       case `BtnCttClose` =>
         ClickTTPanel.close()
         render()
+      case `BtnCopyTourney` =>
+        Global.currentSelection.tourney.foreach(services.TourneyCopy.run)
+
       case `BtnEditTourney` =>
         val tourney = Global.currentSelection.tourney.getOrElse(services.TourneyDB.tourney)
         dialogs.DlgEditTourney.show(tourney).map {

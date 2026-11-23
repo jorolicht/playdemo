@@ -454,3 +454,13 @@ Statische Seiten `/hilfe/` und `/en/help/` (`hilfe_en.html`), Menüpunkt „Hilf
 - [x] **TC-HELP-01 [🌐]:** Der Menüpunkt „Hilfe“ öffnet das Handbuch; alle 18 Einträge des Inhaltsverzeichnisses haben ein Ziel, alle 20 Screenshots werden geladen.
 - [x] **TC-HELP-02 [🌐]:** `/hilfe/` und `/en/help/` sind indexierbar (Canonical, kein noindex), per hreflang verknüpft und stehen in der Sitemap.
 - [x] **TC-HELP-03 [🌐]:** Die englische Fassung hat 18 Abschnitte und lädt alle 20 englischen Screenshots (`pages/help/`).
+
+---
+
+## 32. UseCase: Turnier kopieren – Turniervorlage aus dem Vorjahr (`TourneyInfo`, `services/TourneyCopy`, `shared/model/TourneyTemplate`)
+
+Button „Kopieren“ in der Turnierübersicht: Dialog mit Name und Startdatum (Vorschlag: gleicher Wochentag ein Jahr später, Jahreszahl im Namen angepasst). Übernommen werden Stammdaten, Ort, Kontakt und Wettbewerbe ohne Spieler, Mannschaften und Ergebnisse; Start- und Anmeldezeiten werden verschoben. Die Spielphasen bleiben als Phasenplan im Wettbewerb und werden beim Start vorbelegt (Name, Spielsystem, Gewinnsätze). Cloud → neues Cloud-Turnier mit Homepage-Einstellungen und Logo; lokal → neues lokales Turnier (mit Rückfrage zum Speichern). Unit-Tests: `TourneyTemplateSuite`.
+
+### 32.1 Turnierverwalter (🌐 / 👤)
+- [x] **TC-COPY-01 [🌐]:** Lokales Demo-Turnier kopieren: Vorschlag 2031-03-31; nach der Rückfrage „überschreiben“ öffnet sich das neue Turnier mit 4 Wettbewerben in Konfiguration, ohne Teilnehmer, Startzeit verschoben; „Wettbewerbsabschnitt starten“ schlägt „Vorrunde“ (Jeder gegen Jeden) und danach „Endrunde“ (K.-o.) vor.
+- [x] **TC-COPY-02 [👤]:** Cloud-Turnier kopieren: neues Cloud-Turnier mit 4 Wettbewerben (Status Konfiguration, Phasenplan, verschobene Startzeit), ohne Spieler und Spielphasen, mit Homepage-Text, Anmeldeeinstellung und eigener Kopie des Logos; das Quellturnier bleibt unverändert.

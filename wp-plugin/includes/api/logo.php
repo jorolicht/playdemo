@@ -35,6 +35,14 @@ add_action('rest_api_init', function () {
         ],
     ]);
 
+    // POST /tourney/v1/logo-copy?postId=<ziel>  Body {"from": <quelle>} - Logo eines anderen Turniers übernehmen
+    // ("Turnier kopieren"); Schreibrecht auf beide Turniere nötig
+    register_rest_route('tourney/v1', '/logo-copy', [
+        'methods'             => 'POST',
+        'callback'            => 'tourney_copy_logo',
+        'permission_callback' => 'tourney_api_can_edit_request_post'
+    ]);
+
 });
 
 /**
@@ -150,3 +158,50 @@ function tourney_logo_delete_post($post_id) {
     }
 }
 add_action('before_delete_post', 'tourney_logo_delete_post');
+
+/**
+ * Übernimmt das Logo eines anderen Turniers als eigenen Anhang ("Turnier kopieren"). Die Datei wird kopiert,
+ * damit beide Turniere ihr Logo unabhängig ändern oder löschen können.
+ *
+ * @param WP_REST_Request $request Parameter postId (Ziel), Body {"from": Post-ID der Quelle}.
+ * @return array|WP_REST_Response ["logoUrl" => URL] (leer, wenn die Quelle kein Logo hat) oder Fehler.
+ */
+function tourney_copy_logo(WP_REST_Request $request) {
+    $post_id = ApiHelper::getPostId($request);
+    $body    = json_decode($request->get_body(), true);
+    $from    = intval(is_array($body) ? ($body['from'] ?? 0) : 0);
+    if (!$post_id || $from <= 0) {
+        return ApiHelper::error("missing_param", "Post ID or source missing", "", "", HttpStatus::BAD_REQUEST);
+    }
+    if (!tourney_user_can_edit_post($from)) {
+        return ApiHelper::error("forbidden", "No access to the source tournament", "", "tourney_copy_logo", HttpStatus::FORBIDDEN);
+    }
+    $src_id = intval(get_post_meta($from, 'tourney_logo', true));
+    $path   = $src_id > 0 ? get_attached_file($src_id) : '';
+    if (!$path || !file_exists($path)) {
+        return ["logoUrl" => ""];
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/media.php';
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+
+    $upload = wp_upload_bits(basename($path), null, file_get_contents($path));
+    if (!empty($upload['error'])) {
+        return ApiHelper::error("logo_save", $upload['error'], "", "tourney_copy_logo", HttpStatus::INTERNAL_SERVER_ERROR);
+    }
+    $type = wp_check_filetype($upload['file']);
+    $attachment_id = wp_insert_attachment([
+        'post_mime_type' => $type['type'],
+        'post_title'     => 'Logo ' . get_the_title($post_id),
+        'post_status'    => 'inherit',
+    ], $upload['file'], $post_id);
+    if (is_wp_error($attachment_id) || !$attachment_id) {
+        return ApiHelper::error("logo_save", "Attachment failed", "", "tourney_copy_logo", HttpStatus::INTERNAL_SERVER_ERROR);
+    }
+    wp_update_attachment_metadata($attachment_id, wp_generate_attachment_metadata($attachment_id, $upload['file']));
+
+    tourney_remove_logo($post_id);
+    update_post_meta($post_id, 'tourney_logo', $attachment_id);
+    return ["logoUrl" => tourney_logo_url($post_id)];
+}
