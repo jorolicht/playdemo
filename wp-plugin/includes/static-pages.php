@@ -49,8 +49,7 @@ const TOURNEY_STATIC_PAGES = [
                                'desc' => 'Contact TurnierService: questions, support and feedback on the tournament software.']],
     'hilfe'       => ['file' => 'hilfe', 'page' => 'hilfe', 'title' => 'Hilfe & Benutzerhandbuch',
                       'desc' => 'Benutzerhandbuch von TurnierService: Turnier anlegen, Wettbewerbe, Auslosung, Ergebniseingabe, Urkunden, Online-Anmeldung und „Mein Turnier“ Schritt für Schritt.',
-                      // noindex: englische Fassung vorerst nur Platzhalter (kein Index, keine Sitemap, kein hreflang)
-                      'en' => ['slug' => 'help', 'title' => 'Help & User Guide', 'noindex' => true,
+                      'en' => ['slug' => 'help', 'title' => 'Help & User Guide',
                                'desc' => 'TurnierService user guide: creating tournaments, competitions, draws, result entry, certificates, online registration and “My Tournament” step by step.']],
     'agb'         => ['file' => 'gtc', 'page' => 'gtc', 'title' => 'Allgemeine Geschäftsbedingungen',
                       'desc' => 'Allgemeine Geschäftsbedingungen (AGB) von TurnierService.',

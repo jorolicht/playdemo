@@ -447,8 +447,9 @@ Guthaben in Posten (gekaufte Turniere 2 Jahre gültig, Altbestand und manuelle G
 
 ## 31. UseCase: Hilfe & Benutzerhandbuch (`site/content/hilfe.html`)
 
-Statische Seite `/hilfe/` (englisch vorerst Platzhalter `/en/help/`), Menüpunkt „Hilfe“. Die Screenshots erzeugt `test/e2e/docs` (`npx playwright test --config docs.config.ts`) aus dem Demo-Turnier bzw. einem vorübergehenden Cloud-Turnier.
+Statische Seiten `/hilfe/` und `/en/help/` (`hilfe_en.html`), Menüpunkt „Hilfe“/„Help“. Die Screenshots erzeugt `test/e2e/docs` aus dem Demo-Turnier bzw. einem vorübergehenden Cloud-Turnier: `npx playwright test --config docs.config.ts` (Deutsch, `site/content/hilfe/`), mit `HELP_LANG=en` Englisch (`site/content/help/`).
 
 ### 31.1 Besucher (🌐)
 - [x] **TC-HELP-01 [🌐]:** Der Menüpunkt „Hilfe“ öffnet das Handbuch; alle 18 Einträge des Inhaltsverzeichnisses haben ein Ziel, alle 20 Screenshots werden geladen.
-- [x] **TC-HELP-02 [🌐]:** `/hilfe/` ist indexierbar (Canonical, Sitemap); der englische Platzhalter `/en/help/` hat `noindex`, fehlt in der Sitemap, und es gibt keine hreflang-Verweise.
+- [x] **TC-HELP-02 [🌐]:** `/hilfe/` und `/en/help/` sind indexierbar (Canonical, kein noindex), per hreflang verknüpft und stehen in der Sitemap.
+- [x] **TC-HELP-03 [🌐]:** Die englische Fassung hat 18 Abschnitte und lädt alle 20 englischen Screenshots (`pages/help/`).

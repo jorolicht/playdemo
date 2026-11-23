@@ -3,13 +3,17 @@ import fs from 'fs';
 import path from 'path';
 
 /**
- * Screenshots für das Benutzerhandbuch (site/content/hilfe.html), Teil 2: Cloud-Turnier aus den Demo-Daten.
+ * Screenshots für das Benutzerhandbuch (site/content/hilfe.html bzw. hilfe_en.html), Teil 2: Cloud-Turnier aus den Demo-Daten.
  * Ein Administrator legt das Turnier an (Anmeldung freigeschaltet, Logo); Besucher sehen Turnierseite,
  * Online-Anmeldung und „Mein Turnier“. Aufnahmen als Administrator zeigen nur den Seiteninhalt (kein Benutzername).
  * Das Turnier wird danach wieder gelöscht.
  */
 
-const OUT = path.resolve(__dirname, '../../../site/content/hilfe');
+/** Sprache: HELP_LANG=en erzeugt die englischen Bilder (Oberfläche über /en/). */
+const EN = process.env.HELP_LANG === 'en';
+const HOME = EN ? '/en/' : '/';
+const LOCALE = EN ? 'en-GB' : 'de-DE';
+const OUT = path.resolve(__dirname, '../../../site/content', EN ? 'help' : 'hilfe');
 const USER = process.env.WP_ADMIN_USER || '';
 const PASS = process.env.WP_ADMIN_PASSWORD || '';
 const LOGO = path.resolve(__dirname, '../../../wp-plugin/img/pwa-512.png');
@@ -40,20 +44,20 @@ async function api(p: Page, method: string, route: string, body?: any): Promise<
 
 test('Handbuch: Cloud-Turnier, Turnierseite und Spieleransicht', async ({ browser }: { browser: Browser }) => {
   test.skip(!USER || !PASS, 'WP_ADMIN_USER/WP_ADMIN_PASSWORD nicht gesetzt');
-  const admin: BrowserContext = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'de-DE', viewport: { width: 1280, height: 1300 } });
+  const admin: BrowserContext = await browser.newContext({ ignoreHTTPSErrors: true, locale: LOCALE, viewport: { width: 1280, height: 1300 } });
   const ap = await admin.newPage();
   await ap.goto('/login/');
   await ap.locator('input[id*="LoginId"]').fill(USER);
   await ap.locator('input[id*="PasswordId"]').fill(PASS);
   await ap.locator('button[id*="BtnLogin"]').click();
   await expect.poll(async () => (await admin.cookies()).some(c => c.name.startsWith('wordpress_logged_in')), { timeout: 10000 }).toBe(true);
-  await ap.goto('/');
+  await ap.goto(HOME);   // merkt sich die Sprache der Oberfläche
 
   const demo = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../wp-plugin/data/demo_tourney.json'), 'utf8'));
   const t = demo.tourney.tourney;
   t.wpId = 0;
-  t.name = 'Vereinsmeisterschaft 2028';
-  t.address = { description: 'Sporthalle', country: 'DE', zip: '20095', city: 'Hamburg', street: 'Rathausmarkt 1' };
+  t.name = EN ? 'Club Championship 2028' : 'Vereinsmeisterschaft 2028';
+  t.address = { description: EN ? 'Sports hall' : 'Sporthalle', country: 'DE', zip: '20095', city: 'Hamburg', street: 'Rathausmarkt 1' };
   const res = await api(ap, 'POST', 'create?overwrite=1', t);   // Rest eines abgebrochenen Laufs überschreiben
   expect(res.status, JSON.stringify(res.json)).toBe(200);
   const slug = res.json.slug; const postId = res.json.pageId;
@@ -63,12 +67,13 @@ test('Handbuch: Cloud-Turnier, Turnierseite und Spieleransicht', async ({ browse
     await api(ap, 'POST', `competitions-sync?postId=${postId}`, { events: t.competitions.filter((c: any) => c) });
     await api(ap, 'POST', `stages-sync?postId=${postId}`, { events: t.stages.filter((s: any) => s) });
     await api(ap, 'POST', `save-aci?postId=${postId}`, { allowRegistration: true,
-      homepageInfo: '**Startgeld:** 8 €, Jugend 5 €. Bitte eigene Bälle mitbringen.' });
+      homepageInfo: EN ? '**Entry fee:** €8, juniors €5. Please bring your own balls.'
+                       : '**Startgeld:** 8 €, Jugend 5 €. Bitte eigene Bälle mitbringen.' });
 
     // Administration, Reiter Homepage, mit Logo
     await ap.goto(`/${slug}/`);
     await clean(ap);
-    await expect(ap.getByText('Turnier-Informationen')).toBeVisible({ timeout: 15000 });
+    await expect(ap.locator('.comp-link').first()).toBeVisible({ timeout: 15000 });
     await ap.evaluate(() => (window as any).appLoadPage('TourneyAdmin', 'HOMEPAGE'));
     await expect(ap.locator('[data-testid="logo-section"]')).toBeVisible({ timeout: 10000 });
     await ap.locator('#tourney-logo-file').setInputFiles(LOGO);
@@ -79,25 +84,27 @@ test('Handbuch: Cloud-Turnier, Turnierseite und Spieleransicht', async ({ browse
     await shot(ap, '17-administration-homepage', '#Main_ContentId');
 
     // Besucher: Turnierseite, Online-Anmeldung
-    const anon = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'de-DE', viewport: { width: 1280, height: 900 } });
+    const anon = await browser.newContext({ ignoreHTTPSErrors: true, locale: LOCALE, viewport: { width: 1280, height: 900 } });
     const p = await anon.newPage();
+    await p.goto(HOME);
     await p.goto(`/${slug}/`);
     await clean(p);
     await expect(p.locator('[data-testid="my-tourney-btn"]')).toBeVisible({ timeout: 15000 });
     await shot(p, '18-turnierseite');
-    const reg = p.getByRole('link', { name: 'Jetzt anmelden' }).first();
+    const reg = p.locator('[data-testid^="register-"]').first();
     await reg.click();
     await expect(p.locator('.modal.show')).toBeVisible();
-    await p.locator('#reg-lastname').fill('Muster');
-    await p.locator('#reg-firstname').fill('Max');
-    await p.locator('#reg-club').fill('TTC Musterstadt');
+    await p.locator('#reg-lastname').fill(EN ? 'Smith' : 'Muster');
+    await p.locator('#reg-firstname').fill(EN ? 'John' : 'Max');
+    await p.locator('#reg-club').fill(EN ? 'TT Club Springfield' : 'TTC Musterstadt');
     await p.locator('#reg-ttr').fill('1520');
     await shot(p, '19-online-anmeldung', '.modal.show .modal-content');
     await anon.close();
 
     // Spieler am Handy: Mein Turnier
-    const mobile = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'de-DE', viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+    const mobile = await browser.newContext({ ignoreHTTPSErrors: true, locale: LOCALE, viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
     const m = await mobile.newPage();
+    await m.goto(HOME);
     await m.goto(`/${slug}/`);
     await clean(m);
     await m.locator('[data-testid="my-tourney-btn"]').click();

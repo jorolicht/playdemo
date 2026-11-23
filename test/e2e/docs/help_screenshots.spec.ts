@@ -3,11 +3,15 @@ import path from 'path';
 import { MainViewPage } from '../pages/MainViewPage';
 
 /**
- * Screenshots für das Benutzerhandbuch (site/content/hilfe.html), Teil 1: Turnierleitung im lokalen Demo-Turnier.
+ * Screenshots für das Benutzerhandbuch (site/content/hilfe.html bzw. hilfe_en.html), Teil 1: Turnierleitung im lokalen
+ * Demo-Turnier.
  * Keine Anmeldung nötig, es erscheinen nur Demo-Daten.
  */
 
-const OUT = path.resolve(__dirname, '../../../site/content/hilfe');
+/** Sprache: HELP_LANG=en erzeugt die englischen Bilder (Oberfläche über /en/). */
+const EN = process.env.HELP_LANG === 'en';
+const HOME = EN ? '/en/' : '/';
+const OUT = path.resolve(__dirname, '../../../site/content', EN ? 'help' : 'hilfe');
 
 /** Blendet Elemente aus, die nicht ins Handbuch gehören (WordPress-Leiste, Cookie-/News-Hinweise). */
 async function clean(page: Page) {
@@ -23,7 +27,7 @@ async function shot(page: Page, name: string, target?: string) {
 
 test('Handbuch: Turnierleitung (Demo-Turnier)', async ({ page, browser }) => {
   const main = new MainViewPage(page);
-  await main.goto();
+  await page.goto(HOME);
   await clean(page);
   await shot(page, '01-startseite');
 
@@ -86,10 +90,10 @@ test('Handbuch: Turnierleitung (Demo-Turnier)', async ({ page, browser }) => {
   await shot(page, '15-urkunde');
 
   // neues Turnier anlegen (Formular) in einem frischen Browser ohne lokales Turnier
-  const ctx = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'de-DE', viewport: { width: 1280, height: 800 } });
+  const ctx = await browser.newContext({ ignoreHTTPSErrors: true, locale: EN ? 'en-GB' : 'de-DE', viewport: { width: 1280, height: 800 } });
   const p2 = await ctx.newPage();
   const main2 = new MainViewPage(p2);
-  await main2.goto();
+  await p2.goto(HOME);
   await clean(p2);
   await main2.startFullTourney();
   await expect(p2.locator('#Main_ContentId input').first()).toBeVisible({ timeout: 10000 });

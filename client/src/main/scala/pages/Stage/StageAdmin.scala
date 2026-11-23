@@ -416,7 +416,7 @@ object StageAdmin extends BasePage with JsWrapper:
 
     // Update count label
     val label = gE(LabelDrawCnt)
-    if (label != null) label.innerHTML = s"$count Teilnehmer ausgewählt"
+    if (label != null) label.innerHTML = gM("StageAdmin.selected_players", count.toString)
     
     updateButtonState()
 

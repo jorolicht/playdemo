@@ -135,7 +135,7 @@
 
     <div class="alert alert-info py-2 small d-flex justify-content-between align-items-center mb-4">
         <span><i class="bi bi-info-circle me-2"></i>@gM("StageDraw.dummy_se")</span>
-        <span class="badge bg-primary">KO-Feld: @ko.size</span>
+        <span class="badge bg-primary">@gM("StageDraw.ko_size", ko.size.toString)</span>
     </div>
 
     <div class="table-responsive">
@@ -145,9 +145,9 @@
             <th><small class="font-weight-bold ml-1 mr-1">@gM("table.pos")</small></th>
             <th>
               @if(stage.status == StageStatus.AUS && disabledNoAccess.isEmpty) {
-                <button @id(BtnSetzen, "onclick") type="button" class="btn btn-xs btn-outline-info font-weight-bold px-2 py-0 border">SETZEN</button>
+                <button @id(BtnSetzen, "onclick") type="button" class="btn btn-xs btn-outline-info font-weight-bold px-2 py-0 border">@gM("StageDraw.btn_set")</button>
               } else {
-                <small class="font-weight-bold ml-1 mr-1">Setz.</small>
+                <small class="font-weight-bold ml-1 mr-1">@gM("StageDraw.seed_short")</small>
               }
             </th>
             @compTyp match {

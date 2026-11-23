@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
  */
 const EN_PAGES: Record<string, string> = {
   features: 'funktionen', pricing: 'preise', excel: 'excel', plugin: 'plugin', history: 'historie',
-  imprint: 'impressum', privacy: 'datenschutz', contact: 'kontakt', terms: 'agb',
+  imprint: 'impressum', privacy: 'datenschutz', contact: 'kontakt', terms: 'agb', help: 'hilfe',
 };
 
 test.describe('Sprachfassungen /en/', () => {

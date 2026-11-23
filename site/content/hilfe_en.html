@@ -1,10 +1,370 @@
 <!--
- * Help / User Guide (English) – placeholder until the English translation of hilfe.html is available.
+ * Help / User Guide (English)
+ *
+ * Static page /en/help/ (TOURNEY_STATIC_PAGES in wp-plugin/includes/static-pages.php, MainView.StaticSlugs).
+ * Screenshots live in site/content/help/ and are generated with Playwright (test/e2e/docs):
+ *   cd test/e2e && HELP_LANG=en npx playwright test --config docs.config.ts
 -->
-<div class="container py-4" style="max-width: 760px;">
-    <h2 class="fw-bold mb-3"><i class="bi bi-life-preserver text-primary me-2"></i>Help &amp; User Guide</h2>
-    <p>The English user guide is in preparation. Until then, the complete guide is available in German, with screenshots of every step:
-       creating a tournament, competitions, draws, result entry, certificates, online registration and “My Tournament”.</p>
-    <p><a class="btn btn-primary fw-bold" href="/hilfe/">Open the German user guide</a></p>
-    <p class="text-muted small mb-0">Questions? Please use the <a href="/en/contact/" onclick="appLoadPage('MainView', 'contact'); return false;">contact form</a>.</p>
+<style>
+    .hlp-wrapper { font-family: 'Inter', system-ui, -apple-system, sans-serif; color: var(--bs-body-color, #1e293b); line-height: 1.6; }
+    .hlp-hero { background: linear-gradient(135deg, rgba(13,110,253,.08) 0%, rgba(102,16,242,.08) 100%); border: 1px solid rgba(13,110,253,.15);
+                border-radius: 16px; padding: 32px 24px; margin-bottom: 28px; text-align: center; }
+    .hlp-title { font-weight: 800; font-size: 2rem; margin-bottom: 8px; }
+    .hlp-subtitle { max-width: 760px; margin: 0 auto; color: var(--bs-secondary-color, #64748b); }
+    .hlp-toc { background: var(--bs-tertiary-bg, #f8fafc); border: 1px solid var(--bs-border-color, #e2e8f0); border-radius: 12px;
+               padding: 18px 22px; margin-bottom: 32px; columns: 2 280px; column-gap: 32px; }
+    .hlp-toc a { text-decoration: none; display: block; padding: 2px 0; break-inside: avoid; }
+    .hlp-toc .hlp-toc-head { font-weight: 700; margin-top: 6px; break-after: avoid; }
+    .hlp-section { margin-bottom: 40px; scroll-margin-top: 80px; }
+    .hlp-section h2 { font-weight: 800; font-size: 1.45rem; padding-bottom: 6px; border-bottom: 2px solid rgba(13,110,253,.2); margin-bottom: 16px; }
+    .hlp-section h3 { font-weight: 700; font-size: 1.12rem; margin: 22px 0 8px; scroll-margin-top: 80px; }
+    .hlp-fig { margin: 14px 0 18px; text-align: center; }
+    .hlp-fig img { max-width: 100%; height: auto; border: 1px solid var(--bs-border-color, #e2e8f0); border-radius: 10px;
+                   box-shadow: 0 6px 18px rgba(15,23,42,.08); }
+    .hlp-fig img.hlp-narrow { max-width: 420px; }
+    .hlp-fig figcaption { font-size: .85rem; color: var(--bs-secondary-color, #64748b); margin-top: 6px; }
+    .hlp-note { border-left: 4px solid #0d6efd; background: rgba(13,110,253,.06); border-radius: 6px; padding: 10px 14px; margin: 12px 0; }
+    .hlp-cloud { display: inline-block; font-size: .72rem; font-weight: 700; padding: 1px 8px; border-radius: 50px;
+                 background: rgba(79,70,229,.12); color: #4f46e5; vertical-align: middle; margin-left: 6px; }
+    .hlp-wrapper table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: .92rem; }
+    .hlp-wrapper th, .hlp-wrapper td { border: 1px solid var(--bs-border-color, #e2e8f0); padding: 6px 10px; text-align: left; vertical-align: top;
+                                       overflow-wrap: anywhere; hyphens: auto; }
+    .hlp-wrapper th { background: var(--bs-tertiary-bg, #f8fafc); }
+    .hlp-wrapper code { font-size: .88em; }
+</style>
+
+<div class="hlp-wrapper" lang="en">
+    <div class="hlp-hero">
+        <h2 class="hlp-title"><i class="bi bi-life-preserver text-primary me-2"></i>Step by step</h2>
+        <p class="hlp-subtitle">
+            From your first tournament to the award ceremony – for tournament directors and players.
+            Features that are only available for cloud tournaments are marked <span class="hlp-cloud">Cloud</span>.
+        </p>
+    </div>
+
+    <nav class="hlp-toc">
+        <div class="hlp-toc-head">Getting started</div>
+        <a href="#start">1. Offline or cloud?</a>
+        <a href="#meine-turniere">2. Home page and “My Tournaments”</a>
+        <div class="hlp-toc-head">Tournament directors</div>
+        <a href="#turnier-anlegen">3. Creating a tournament</a>
+        <a href="#wettbewerbe">4. Competitions</a>
+        <a href="#teilnehmer">5. Players, doubles and teams</a>
+        <a href="#spielphasen">6. Stages and systems</a>
+        <a href="#auslosung">7. The draw</a>
+        <a href="#eingabe">8. Entering results</a>
+        <a href="#ergebnisse">9. Tables, knockout draw and further rounds</a>
+        <a href="#drucken">10. Score sheets, certificates and result list</a>
+        <a href="#clicktt">11. ClickTT</a>
+        <a href="#administration">12. Tournament administration</a>
+        <a href="#sichern">13. Backup, export and archive</a>
+        <div class="hlp-toc-head">Players</div>
+        <a href="#turnierseite">14. The tournament page</a>
+        <a href="#anmeldung">15. Registering online</a>
+        <a href="#mein-turnier">16. “My Tournament”</a>
+        <div class="hlp-toc-head">Account and pricing</div>
+        <a href="#konto">17. Account, credit and licences</a>
+        <a href="#referenz">18. Overview of pages</a>
+    </nav>
+
+    <!-- 1 -->
+    <div class="hlp-section" id="start">
+        <h2>1. Offline or cloud?</h2>
+        <p>TourneyService runs entirely in your browser. You can work in two ways:</p>
+        <table>
+            <tr><th style="width:22%"></th><th>Offline (local)</th><th>Cloud <span class="hlp-cloud">Cloud</span></th></tr>
+            <tr><td>Account</td><td>not required</td><td>sign in with your email address</td></tr>
+            <tr><td>Data</td><td>only in this browser on this device</td><td>on the server, accessible from anywhere</td></tr>
+            <tr><td>Cost</td><td>free forever, all tournament features</td><td>per tournament or licence, see <a href="/en/pricing/" onclick="appLoadPage('MainView', 'pricing'); return false;">Support &amp; Pricing</a></td></tr>
+            <tr><td>In addition</td><td>–</td><td>tournament page on the internet, online registration, “My Tournament”, result entry via QR code, display board, several editors</td></tr>
+        </table>
+        <div class="hlp-note">To try it out, start the <strong>demo</strong> on the home page: a ready-made tournament with players, groups and a knockout stage. Everything you change there stays in your browser.</div>
+        <p>You can move a local tournament to the cloud at any time (“My Tournaments → Export tournament to cloud”).
+           The <strong>Offline App</strong> (“Tools” menu) can be installed and also works without internet in the hall.</p>
+    </div>
+
+    <!-- 2 -->
+    <div class="hlp-section" id="meine-turniere">
+        <h2>2. Home page and “My Tournaments”</h2>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/01-startseite.png" alt="Home page" loading="lazy">
+            <figcaption>Home page: demo, full tournament, quick start for a single competition, search</figcaption></figure>
+        <ul>
+            <li><strong>Demo</strong> – a prepared tournament to try things out.</li>
+            <li><strong>New Tournament</strong> – create a tournament with several competitions (section 3).</li>
+            <li><strong>Quick Start</strong> – a single competition without a surrounding tournament, e.g. for club training.</li>
+            <li><strong>Search &amp; Find</strong> – published tournaments by name, date or organizer.</li>
+        </ul>
+        <p>The <strong>“My Tournaments”</strong> menu shows your recently used tournaments – local in the browser, as a file or in the cloud – and offers:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/02-meine-turniere.png" alt="My Tournaments menu" loading="lazy">
+            <figcaption>“My Tournaments” with recently used tournaments, Open/Archive and export</figcaption></figure>
+        <ul>
+            <li><strong>Open/Archive</strong> – load a tournament file (JSON).</li>
+            <li><strong>Export tournament to file</strong> – save the local or the opened cloud tournament as a file. If both exist, a dialog asks which one to save.</li>
+            <li><strong>Export tournament to cloud</strong> – move the local tournament to the cloud (signed in).</li>
+        </ul>
+    </div>
+
+    <!-- 3 -->
+    <div class="hlp-section" id="turnier-anlegen">
+        <h2>3. Creating a tournament</h2>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/04-turnier-anlegen.png" alt="Create new tournament" loading="lazy">
+            <figcaption>New tournament: name, organizer, sport, dates, contact person and venue</figcaption></figure>
+        <p>Enter the name, the organizer (usually the club), the sport and the start and end date. For cloud tournaments,
+           the contact person and venue appear on the tournament page, the venue also as a map.
+           After saving you see the <strong>tournament overview</strong>:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/03-turnieruebersicht.png" alt="Tournament overview" loading="lazy">
+            <figcaption>Tournament overview with all competitions; competitions with stages can be expanded</figcaption></figure>
+        <ul>
+            <li><strong>ClickTT</strong> – import, update and export (section 11).</li>
+            <li><strong>Edit</strong> / <strong>Delete</strong> – change the tournament details or delete the tournament.</li>
+            <li><strong>Save/Leave</strong> – save and close the tournament; for local tournaments you can save a file at the same time.</li>
+            <li>The dark bar below shows where you are (tournament / competition / stage) and leads to <strong>Registration</strong>, <strong>Participants</strong> and <strong>Results</strong>.</li>
+        </ul>
+    </div>
+
+    <!-- 4 -->
+    <div class="hlp-section" id="wettbewerbe">
+        <h2>4. Competitions</h2>
+        <p>A tournament consists of competitions, e.g. “Men’s A Singles” or “Women’s Doubles”. Use <strong>“Add Competition”</strong> to create one:</p>
+        <figure class="hlp-fig"><img class="hlp-narrow" src="/wp-content/plugins/tourney/pages/help/05-wettbewerb-dialog.png" alt="Create competition" loading="lazy">
+            <figcaption>Competition with type, start, TTR limits and online registration</figcaption></figure>
+        <ul>
+            <li><strong>Competition type:</strong> singles, doubles, mixed or team (teams of 2, 3, 4 or 6).</li>
+            <li><strong>Start</strong> with date and time, <strong>TTR from/to</strong> as the playing class.</li>
+            <li><strong>Online registration</strong> <span class="hlp-cloud">Cloud</span> (singles only): period “Registration from/until” and “Registration closed”. Registration must also be enabled in the administration (section 12).</li>
+        </ul>
+        <p>Clicking a competition opens its overview with stages and participant list:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/06-wettbewerb.png" alt="Competition overview" loading="lazy">
+            <figcaption>Competition with stages (preliminary round, final round) and participant list</figcaption></figure>
+        <p><strong>Finalize</strong> closes a competition once all matches have been played; results and placings are then fixed.</p>
+    </div>
+
+    <!-- 5 -->
+    <div class="hlp-section" id="teilnehmer">
+        <h2>5. Players, doubles and teams</h2>
+        <p>Under <strong>Registration</strong> you select a competition and enter the participants:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/07-spieler-anmeldung.png" alt="Tournament registration" loading="lazy">
+            <figcaption>Registration for a competition: add participants, CSV upload, tick or untick participation</figcaption></figure>
+        <ul>
+            <li><strong>Add Participant</strong> – one at a time with name, club, TTR and year of birth.</li>
+            <li><strong>CSV Upload</strong> – many players at once, e.g. from an Excel list; alternatively the ClickTT import.</li>
+            <li>The <strong>Active</strong> tick decides who plays in the next stage – e.g. for players who did not turn up.</li>
+            <li><strong>Doubles:</strong> two registered players are paired into a doubles team.</li>
+            <li><strong>Teams:</strong> teams consist of regular players; the line-up is set before each encounter. Each player can only be used in one doubles.</li>
+        </ul>
+        <p>Under <strong>Participants</strong> you find all players of the tournament with club and TTR.</p>
+        <div class="hlp-note">Players who registered online themselves <span class="hlp-cloud">Cloud</span> appear in the list with the status “registered”.
+            Whether they actually play is decided with the “Active” tick.</div>
+    </div>
+
+    <!-- 6 -->
+    <div class="hlp-section" id="spielphasen">
+        <h2>6. Stages and systems</h2>
+        <p>A competition is played in <strong>stages</strong>, e.g. a group stage followed by a knockout final round.
+           Use <strong>“Start Stage”</strong> to create the first one and <strong>“Start successor”</strong> for the next:</p>
+        <figure class="hlp-fig"><img class="hlp-narrow" src="/wp-content/plugins/tourney/pages/help/08-spielphase-starten.png" alt="Start new stage" loading="lazy">
+            <figcaption>Create a new stage with a name</figcaption></figure>
+        <p>Each stage has five tabs: <strong>Administration</strong>, <strong>Draw</strong>, <strong>Input</strong>, <strong>Results</strong> and <strong>Scoresheet</strong>.
+           In the administration you choose the system, the sets to win and the participants:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/09-spielsystem.png" alt="Configure stage" loading="lazy">
+            <figcaption>Administration of a stage: game mode, match sets, scoring system and players</figcaption></figure>
+        <table>
+            <tr><th>System</th><th>Use</th></tr>
+            <tr><td>Groups (3 to 8 players, also mixed sizes)</td><td>preliminary rounds with tables; the best advance</td></tr>
+            <tr><td>Knockout</td><td>final rounds with byes and a match for 3rd place</td></tr>
+            <tr><td>Round robin</td><td>small fields, everyone plays everyone</td></tr>
+            <tr><td>Double round robin</td><td>first and second leg with mirrored pairings and an overall table</td></tr>
+            <tr><td>Double elimination</td><td>winners’ and losers’ bracket with a final (optionally with a reset match); one defeat does not eliminate a player</td></tr>
+            <tr><td>Swiss system</td><td>large fields in few rounds; players with equal scores meet (section 9)</td></tr>
+        </table>
+        <p><strong>Match sets:</strong> 2 (best of 3), 3 (best of 5) or 4 (best of 7). The <strong>scoring system</strong> defines the rules of the sport
+           (set and match scoring, table tie-breakers). For teams you also choose the system of the encounter
+           (e.g. Bundessystem, Swaythling Cup, Corbillon Cup, Braunschweig system, pair system).</p>
+        <p><strong>“+ Add Dummy”</strong> fills a field with placeholders for testing. <strong>“Generate Draw”</strong> makes the draw.</p>
+    </div>
+
+    <!-- 7 -->
+    <div class="hlp-section" id="auslosung">
+        <h2>7. The draw</h2>
+        <p>The draw seeds players by TTR and avoids players from the same club meeting early.
+           In the <strong>Draw</strong> tab you can adjust the result before the start:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/10-auslosung.png" alt="Knockout draw" loading="lazy">
+            <figcaption>Draw of a knockout stage with seeding positions and byes</figcaption></figure>
+        <ul>
+            <li>Clicking two positions one after the other swaps them; alternatively enter new seeding positions and apply them with <strong>“SET”</strong>.</li>
+            <li>Players from the same club who would meet in the first round are highlighted in red.</li>
+            <li><strong>“Start &lt;stage&gt;”</strong> starts the matches. The draw is locked from then on.</li>
+        </ul>
+    </div>
+
+    <!-- 8 -->
+    <div class="hlp-section" id="eingabe">
+        <h2>8. Entering results</h2>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/11-ergebniseingabe.png" alt="Result entry" loading="lazy">
+            <figcaption>Result entry per round with table, set scores and actions</figcaption></figure>
+        <ul>
+            <li><strong>Table:</strong> enter the table as soon as a match is called. Players see called matches in “My Tournament” <span class="hlp-cloud">Cloud</span>.</li>
+            <li><strong>Sets in short notation:</strong> the loser’s points, negative if player B wins the set.
+                Examples: <code>5</code> = 11:5, <code>-5</code> = 5:11, <code>10</code> = 12:10.</li>
+            <li>The green tick saves the match. Plausibility and sets to win are checked.</li>
+            <li><strong>Result entry via QR code</strong> <span class="hlp-cloud">Cloud</span>: every score sheet carries a QR code.
+                Umpires or players enter the result on their smartphone; a flashing info button shows the tournament director incoming results to accept.</li>
+        </ul>
+        <div class="hlp-note"><strong>Several editors</strong> <span class="hlp-cloud">Cloud</span>: several tournament directors can enter results at the same time.
+            Results from the others appear immediately; if two people enter the same match, the last entry wins (with a notice).
+            All entries are recorded in the change log (section 12).</div>
+    </div>
+
+    <!-- 9 -->
+    <div class="hlp-section" id="ergebnisse">
+        <h2>9. Tables, knockout draw and further rounds</h2>
+        <p>Depending on the system, the <strong>Results</strong> tab shows tables or the knockout draw:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/12-gruppentabelle.png" alt="Group tables" loading="lazy">
+            <figcaption>Group tables with matches, sets, balls and placing</figcaption></figure>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/13-ko-baum.png" alt="Knockout draw" loading="lazy">
+            <figcaption>Knockout draw: winners advance to the next round automatically</figcaption></figure>
+        <ul>
+            <li><strong>Start successor</strong>: once all matches have been played, the next stage starts with the qualified players.</li>
+            <li><strong>Swiss system:</strong> after each round, <strong>“Start Round n”</strong> draws the next round. The rules:
+                no repeated pairings, players with equal scores meet, club protection, TTR as close as possible;
+                the bye goes to the weakest player of the lowest score group, never twice to the same player.</li>
+        </ul>
+    </div>
+
+    <!-- 10 -->
+    <div class="hlp-section" id="drucken">
+        <h2>10. Score sheets, certificates and result list</h2>
+        <h3>Score sheets</h3>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/14-spielzettel.png" alt="Score sheets" loading="lazy">
+            <figcaption>Score sheets with group, round, match number, table and QR code (four per A4 page)</figcaption></figure>
+        <p>In the <strong>Scoresheet</strong> tab you print the sheets of a round (four per page) or individually.</p>
+        <h3>Certificates</h3>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/15-urkunde.png" alt="Certificate" loading="lazy">
+            <figcaption>Certificate with preview; tournament, competition, name and place can be adjusted before printing</figcaption></figure>
+        <p>You create certificates from the result list or in the certificate tab of the last stage. With a custom logo
+           <span class="hlp-cloud">Cloud</span> it appears at the top of the certificate. Custom templates (WordPress pages) are selected in the administration;
+           in them the placeholders <code>#Tourney</code>, <code>#Competition</code>, <code>#Name</code>, <code>#Place</code> and <code>#Logo</code> insert the values.</p>
+        <h3>Result list</h3>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/16-ergebnisliste.png" alt="Result list" loading="lazy">
+            <figcaption>Placings and results of all competitions</figcaption></figure>
+    </div>
+
+    <!-- 11 -->
+    <div class="hlp-section" id="clicktt">
+        <h2>11. ClickTT</h2>
+        <p>Via the <strong>ClickTT</strong> menu in the tournament overview:</p>
+        <ul>
+            <li><strong>Import</strong> – entry list from ClickTT (XML): competitions, clubs, players with TTR.</li>
+            <li><strong>Update</strong> – apply the changes of a newer ClickTT file.</li>
+            <li><strong>Export</strong> – create a result file for ClickTT; you select the competitions and stages.</li>
+        </ul>
+    </div>
+
+    <!-- 12 -->
+    <div class="hlp-section" id="administration">
+        <h2>12. Tournament administration</h2>
+        <p>You reach the tournament administration from the tournament overview. Depending on the tournament it has these tabs:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/17-administration-homepage.png" alt="Tournament administration Homepage" loading="lazy">
+            <figcaption>“Homepage” tab: logo, information for the tournament page, online registration and note after registration</figcaption></figure>
+        <table>
+            <tr><th>Tab</th><th>Content</th></tr>
+            <tr><td>Certificate Configuration</td><td>select the certificate template for the tournament</td></tr>
+            <tr><td>Homepage <span class="hlp-cloud">Cloud</span></td><td><strong>Custom logo</strong> (PNG, JPG or WebP up to 2 MB, shown on the tournament page and certificates),
+                information for the tournament page (e.g. entry fee), <strong>Allow players to register online</strong> and the <strong>Note after online registration</strong></td></tr>
+            <tr><td>Changes <span class="hlp-cloud">Cloud</span></td><td>change log: who entered which result and when</td></tr>
+            <tr><td>Display Board <span class="hlp-cloud">Cloud</span></td><td>display for the hall (screen or projector): running matches, tables and announcements</td></tr>
+            <tr><td>Messages</td><td>check the live connection (send and receive messages)</td></tr>
+            <tr><td>Settings</td><td>date format of the displays</td></tr>
+        </table>
+        <div class="hlp-note">If online registration is not enabled, tournament directors see “Registration not enabled” on the tournament page; visitors see “Registration closed”.</div>
+    </div>
+
+    <!-- 13 -->
+    <div class="hlp-section" id="sichern">
+        <h2>13. Backup, export and archive</h2>
+        <ul>
+            <li><strong>Local tournaments</strong> exist only in your browser. Back them up regularly via “My Tournaments → Export tournament to file”.
+                Otherwise they are lost when the browser data is cleared.</li>
+            <li>Load a file via <strong>“Open/Archive”</strong>. An existing local tournament is replaced; a dialog first asks whether to save it.</li>
+            <li><strong>Cloud tournaments</strong> <span class="hlp-cloud">Cloud</span> can also be exported to a file. One year after the tournament ends they are archived:
+                results stay publicly visible, but editing is no longer possible. With a club or association licence there is no archiving.</li>
+        </ul>
+    </div>
+
+    <!-- 14 -->
+    <div class="hlp-section" id="turnierseite">
+        <h2>14. The tournament page <span class="hlp-cloud">Cloud</span></h2>
+        <p>Every cloud tournament has its own public page that you can share:</p>
+        <figure class="hlp-fig"><img src="/wp-content/plugins/tourney/pages/help/18-turnierseite.png" alt="Tournament page" loading="lazy">
+            <figcaption>Tournament page with logo, competitions and schedule, online registration, information and directions</figcaption></figure>
+        <ul>
+            <li><strong>Competitions &amp; Schedule</strong> with start time, playing class and status; start times can be added to your calendar.</li>
+            <li><strong>Register Now</strong> – online registration (section 15) while registration is open.</li>
+            <li><strong>My Tournament</strong> – personal view for players (section 16).</li>
+            <li><strong>Results</strong> and <strong>Info</strong> (display board) in the header, <strong>Location &amp; Directions</strong> with a privacy-friendly map.</li>
+        </ul>
+    </div>
+
+    <!-- 15 -->
+    <div class="hlp-section" id="anmeldung">
+        <h2>15. Registering online <span class="hlp-cloud">Cloud</span></h2>
+        <figure class="hlp-fig"><img class="hlp-narrow" src="/wp-content/plugins/tourney/pages/help/19-online-anmeldung.png" alt="Online registration" loading="lazy">
+            <figcaption>Registration dialog: required and optional details</figcaption></figure>
+        <ol>
+            <li>On the tournament page, click <strong>“Register Now”</strong> next to the competition.</li>
+            <li>Enter last name, first name, club and TTR rating; year of birth, email and WhatsApp number are optional.</li>
+            <li>The security check (captcha) runs automatically; then click <strong>“Register”</strong>.</li>
+        </ol>
+        <p>After registering, a note from the tournament director appears, e.g. “Please report to the tournament desk at least 30 minutes before the competition starts”.
+           Only the tournament director sees email address and WhatsApp number. Registration is possible for singles competitions within the set period.</p>
+    </div>
+
+    <!-- 16 -->
+    <div class="hlp-section" id="mein-turnier">
+        <h2>16. “My Tournament” <span class="hlp-cloud">Cloud</span></h2>
+        <figure class="hlp-fig"><img class="hlp-narrow" src="/wp-content/plugins/tourney/pages/help/20-mein-turnier.png" alt="My Tournament on a smartphone" loading="lazy">
+            <figcaption>“My Tournament” on a smartphone: next matches, results and standing</figcaption></figure>
+        <p>On the tournament page, tap <strong>“My Tournament”</strong> and select your name – no account needed. The browser remembers your choice. It shows:</p>
+        <ul>
+            <li><strong>Next matches</strong> with opponent; a called match is at the top with “Called – table n”.</li>
+            <li><strong>Results</strong> from your point of view, green for a win, red for a defeat.</li>
+            <li><strong>My competitions</strong> with group standing or position in the knockout draw (e.g. “Next round: Semifinal”), for doubles with your partner.</li>
+        </ul>
+        <p>The view refreshes itself every 30 seconds.</p>
+    </div>
+
+    <!-- 17 -->
+    <div class="hlp-section" id="konto">
+        <h2>17. Account, credit and licences</h2>
+        <ul>
+            <li><strong>Account:</strong> register and sign in via “Login” at the top right, also with a passkey.</li>
+            <li><strong>Credit:</strong> each cloud tournament uses one tournament from your credit – reserved when you create it. If you delete it before any result has been entered,
+                you get it back. Purchased tournaments are valid for 2 years.</li>
+            <li><strong>Club and association licence:</strong> any number of tournaments without credit and without archiving while the licence is valid.</li>
+            <li>A running tournament is never blocked, even if your credit is used up.</li>
+        </ul>
+        <p>Prices and packages: <a href="/en/pricing/" onclick="appLoadPage('MainView', 'pricing'); return false;">Support &amp; Pricing</a>. We are happy to answer questions via the
+           <a href="/en/contact/" onclick="appLoadPage('MainView', 'contact'); return false;">contact form</a>.</p>
+    </div>
+
+    <!-- 18 -->
+    <div class="hlp-section" id="referenz">
+        <h2>18. Overview of pages</h2>
+        <table>
+            <tr><th>Page</th><th>Purpose</th><th>How to get there</th></tr>
+            <tr><td>Home page</td><td>demo, new tournament, quick start, search</td><td>logo</td></tr>
+            <tr><td>Tournament search</td><td>find published tournaments</td><td>home page “Open Search”</td></tr>
+            <tr><td>Tournament overview</td><td>competitions, ClickTT, edit tournament</td><td>“My Tournaments”, bar at the top</td></tr>
+            <tr><td>Tournament administration</td><td>certificates, homepage, changes, display board, settings</td><td>tournament overview</td></tr>
+            <tr><td>Competition</td><td>stages, participant list, finalize</td><td>click the competition</td></tr>
+            <tr><td>Registration</td><td>participants of a competition, CSV upload, doubles and teams</td><td>bar “Registration”</td></tr>
+            <tr><td>Participants</td><td>all players of the tournament</td><td>bar “Participants”</td></tr>
+            <tr><td>Stage</td><td>administration, draw, input, results, scoresheet</td><td>click the stage</td></tr>
+            <tr><td>Results</td><td>placings of all competitions, certificates</td><td>bar “Results”</td></tr>
+            <tr><td>Certificate</td><td>adjust and print a certificate</td><td>results, certificate tab</td></tr>
+            <tr><td>Tournament page <span class="hlp-cloud">Cloud</span></td><td>public page with schedule, registration, map</td><td>link of the tournament</td></tr>
+            <tr><td>My Tournament <span class="hlp-cloud">Cloud</span></td><td>personal view for players</td><td>tournament page</td></tr>
+            <tr><td>Offline App</td><td>tournament management without internet</td><td>“Tools” menu</td></tr>
+        </table>
+    </div>
 </div>

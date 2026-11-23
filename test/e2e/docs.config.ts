@@ -4,10 +4,12 @@ import path from 'path';
 
 /**
  * Playwright-Konfiguration für die Screenshots des Benutzerhandbuchs (nicht Teil der Testsuite).
- * Aufruf: cd test/e2e && npx playwright test --config docs.config.ts
- * Die Bilder landen in site/content/hilfe/ und werden mit `sbt compile` ins Plugin kopiert.
+ * Aufruf: cd test/e2e && npx playwright test --config docs.config.ts          (Deutsch  -> site/content/hilfe/)
+ *        cd test/e2e && HELP_LANG=en npx playwright test --config docs.config.ts (Englisch -> site/content/help/)
+ * Die Bilder werden mit `sbt compile` ins Plugin kopiert.
  */
 dotenv.config({ path: path.resolve(__dirname, '.env') });
+const EN = process.env.HELP_LANG === 'en';
 
 export default defineConfig({
   testDir: './docs',
@@ -18,9 +20,9 @@ export default defineConfig({
   use: {
     baseURL: process.env.WP_URL || 'https://localhost',
     ignoreHTTPSErrors: true,
-    locale: 'de-DE',
+    locale: EN ? 'en-GB' : 'de-DE',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 },
-    // deutsche Datumsfelder (TT.MM.JJJJ) wie im Browser der Nutzer
-    launchOptions: { args: ['--lang=de-DE'] } } }],
+    // Datumsfelder in der Sprache der Nutzer (DE: TT.MM.JJJJ, EN: DD/MM/YYYY)
+    launchOptions: { args: [EN ? '--lang=en-GB' : '--lang=de-DE'] } } }],
 });
