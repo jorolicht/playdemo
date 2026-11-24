@@ -96,12 +96,18 @@ object DlgPublicRegistration extends BaseDialog with JsWrapper:
 
     // Zeigt die Erfolgsmeldung. Mit Hinweis des Turnierleiters bleibt der Dialog offen, bis der Spieler ihn
     // schließt, sonst schließt er sich nach kurzer Zeit; Ergebnis ist der angemeldete Spieler.
-    def finish(form: Form, player: Player): Unit =
+    // waitPos > 0: Platz auf der Warteliste (statt Hinweis des Turnierleiters ein Hinweis zur Warteliste)
+    def finish(form: Form, player: Player, waitPos: Int): Unit =
       gE(HtmlId("reg-step-1")).classList.add("d-none")
       gE(HtmlId("reg-step-3")).classList.remove("d-none")
       applyBtn.classList.add("d-none")
-      gE(HtmlId("reg-success-msg")).textContent = gM("reg.successMsg", form.firstname, comp.name)
-      val hint = registrationHint
+      gE(HtmlId("reg-success-msg")).textContent =
+        if waitPos > 0 then gM("reg.waitlistMsg", form.firstname, comp.name, waitPos.toString)
+        else gM("reg.successMsg", form.firstname, comp.name)
+      if waitPos > 0 then gE(HtmlId("reg-success-title")).textContent = gM("reg.waitlistTitle")
+      val hint =
+        if waitPos > 0 then gM(if form.email.nonEmpty then "reg.waitlistHintMail" else "reg.waitlistHint")
+        else registrationHint
       if (hint.isEmpty) {
         dom.window.setTimeout(() => {
           modal.hide()
@@ -149,7 +155,7 @@ object DlgPublicRegistration extends BaseDialog with JsWrapper:
    * Meldet an: Cloud-Turnier über den Server, Demo-/Lokalmodus im lokalen Modell.
    */
   private def register(tourney: Tourney, comp: Competition, form: Form, token: String, applyBtn: HTMLElement,
-                       showError: String => Unit, finish: (Form, Player) => Unit): Unit =
+                       showError: String => Unit, finish: (Form, Player, Int) => Unit): Unit =
     val email    = Option(form.email).filter(_.nonEmpty)
     val whatsApp = Option(form.whatsApp).filter(_.nonEmpty)
     val ttr      = form.ttr.getOrElse(0)
@@ -157,15 +163,15 @@ object DlgPublicRegistration extends BaseDialog with JsWrapper:
       val similarClub = Club.findSimilar(form.club, tourney.clubs).map(_._1.toInt).getOrElse(0)
       val req = services.PlayerDB.PublicRegisterRequest(
         comp.id.value, form.firstname, form.lastname, form.club, similarClub, Club.normalize(form.club), ttr,
-        form.email, token, form.birthYear.getOrElse(0), form.whatsApp
+        form.email, token, form.birthYear.getOrElse(0), form.whatsApp, if Global.lang == "en" then "en" else "de"
       )
       applyBtn.setAttribute("disabled", "true")
       services.PlayerDB.publicRegister(req).foreach { res =>
         applyBtn.removeAttribute("disabled")
         res match {
-          case Right(playerId) =>
+          case Right((playerId, waitPos)) =>
             finish(form, tourney.players.find(_.id == playerId)
-              .getOrElse(Player(id = playerId, firstName = form.firstname, lastName = form.lastname)))
+              .getOrElse(Player(id = playerId, firstName = form.firstname, lastName = form.lastname)), waitPos)
           case Left(err) if err.is("registration_closed") => showError(gM("reg.errClosed"))
           case Left(err) if err.is("captcha_failed")      => showError(gM("reg.errCaptchaServer"))
           case Left(err) if err.is("invalid_input")       => showError(gM("reg.errRequired"))
@@ -181,10 +187,11 @@ object DlgPublicRegistration extends BaseDialog with JsWrapper:
                             whatsApp = whatsApp, doSync = true)
             .getOrElse(Player(id = tourney.nextPlayerId(), firstName = form.firstname, lastName = form.lastname, clubId = clubId))
         }
+      val full = comp.isFull
       val pant = Pant(id = SNO.single(player.id), name = s"${player.lastName}, ${player.firstName}", club = form.club,
-                      rating = ttr, status = PantStatus.REGI, active = true, clubId = clubId)
+                      rating = ttr, status = if full then PantStatus.WAIT else PantStatus.REGI, active = !full, clubId = clubId)
       if (!comp.pants1Stage.exists(_.id == pant.id)) comp.pants1Stage += pant
       services.PlayerDB.triggerSync(tourney.players.toSeq)
       services.CompetitionDB.triggerSync(tourney.competitions.toSeq)
-      finish(form, player)
+      finish(form, player, comp.waitPosition(pant.id))
     }

@@ -219,6 +219,7 @@ object PlayerRegistration extends BasePage with JsWrapper:
         if (sno.isTeam) c.teams.filterInPlace(_.id != sno.teamId)
         debug(s"Removed participant with SNO: $snoStr")
         services.TourneyDB.tourney.updateCompetition(c)
+        services.Waitlist.promote(c) // freier Platz: Warteliste rückt nach
         render() // Refresh UI
       }
     }

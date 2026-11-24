@@ -36,6 +36,8 @@ object DlgCompetition extends BaseDialog with JsWrapper:
   val RegFromId:      HtmlId = genId(name)
   val RegToId:        HtmlId = genId(name)
   val RegClosedId:    HtmlId = genId(name)
+  /** Höchstzahl der Teilnehmer (leer = unbegrenzt), weitere Online-Anmeldungen kommen auf die Warteliste. */
+  val MaxPantsId:     HtmlId = genId(name)
   val ApplyId:        HtmlId = genId(name)
   val CancelId:       HtmlId = genId(name)
   val CloseId:        HtmlId = genId(name)
@@ -135,6 +137,7 @@ object DlgCompetition extends BaseDialog with JsWrapper:
         setInput(gE(RegFromId), comp.regFrom)
         setInput(gE(RegToId), comp.regTo)
         gE(RegClosedId).asInstanceOf[dom.html.Input].checked = comp.regClosed
+        setInput(gE(MaxPantsId), if comp.maxPants > 0 then comp.maxPants.toString else "")
 
       case None =>
         setHtml(gE(TitleId), gM("dlg.comp.title"))
@@ -157,6 +160,7 @@ object DlgCompetition extends BaseDialog with JsWrapper:
         setInput(gE(RegFromId), "")
         setInput(gE(RegToId), "")
         gE(RegClosedId).asInstanceOf[dom.html.Input].checked = false
+        setInput(gE(MaxPantsId), "")
     }
 
     // Online-Anmeldung gibt es nur für Einzel
@@ -204,6 +208,7 @@ object DlgCompetition extends BaseDialog with JsWrapper:
         val ttrFrom = try Some(getInput(gE(TtrFromId)).toInt) catch { case _:Exception => None }
         val ttrTo   = try Some(getInput(gE(TtrToId)).toInt)   catch { case _:Exception => None }
         val regClosed = gE(RegClosedId).asInstanceOf[dom.html.Input].checked
+        val maxPants  = getInput(gE(MaxPantsId)).trim.toIntOption.filter(_ > 0).map(math.min(_, 512)).getOrElse(0)
         
         val comp = existingComp.map(_.copy(
           name = name,
@@ -214,7 +219,8 @@ object DlgCompetition extends BaseDialog with JsWrapper:
           upperLevel = ttrTo,
           regFrom = regFrom,
           regTo = regTo,
-          regClosed = regClosed
+          regClosed = regClosed,
+          maxPants = maxPants
         )).getOrElse(Competition(
           id = CompId(0), // Temporary ID
           name = name,
@@ -226,7 +232,8 @@ object DlgCompetition extends BaseDialog with JsWrapper:
           upperLevel = ttrTo,
           regFrom = regFrom,
           regTo = regTo,
-          regClosed = regClosed
+          regClosed = regClosed,
+          maxPants = maxPants
         ))
         
         validate match {

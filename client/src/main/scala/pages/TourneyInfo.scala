@@ -110,6 +110,7 @@ object TourneyInfo extends BasePage with JsWrapper:
       case Right(res) =>
         services.TourneyDB.tourney.updateCompetition(res.competition) match {
           case Right(newComp) =>
+            services.Waitlist.promote(newComp) // höhere Höchstzahl: Warteliste rückt nach
             if (Global.currentSelection.competition.exists(_.id == newComp.id))
               Global.currentSelection = Global.currentSelection.copy(competition = Some(newComp))
             comps.ContextHeader.render()

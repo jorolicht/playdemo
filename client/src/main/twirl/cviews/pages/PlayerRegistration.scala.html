@@ -140,6 +140,9 @@
                                                 </button>
                                             }
                                             @p.name
+                                            @if(p.status == PantStatus.WAIT) {
+                                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle fw-normal ms-1" data-testid="waitlist-badge">@gM("+waitlist_badge", selection.competition.map(_.waitPosition(p.id)).getOrElse(0).toString)</span>
+                                            }
                                         </td>
                                         <td>@p.club</td>
                                         <td class="text-center">@p.rating</td>

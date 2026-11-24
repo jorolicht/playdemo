@@ -37,6 +37,9 @@
 
                 <!-- STEP 1: Angaben & Captcha -->
                 <div id="reg-step-1">
+                    @if(competition.isFull) {
+                        <div class="alert alert-info py-2 small" data-testid="reg-waitlist-info"><i class="bi bi-hourglass-split me-1"></i>@gM("reg.waitlistInfo", competition.maxPants.toString)</div>
+                    }
                     <div class="row g-2 mb-2">
                         <div class="col-md-6">
                             <label for="reg-lastname" class="form-label fw-bold small text-dark mb-1">@gM("table.lastName") *</label>
@@ -93,7 +96,7 @@
                     <div class="text-success display-4 mb-3">
                         <i class="bi bi-check-circle-fill"></i>
                     </div>
-                    <h4 class="fw-bold text-dark mb-2">@gM("reg.successTitle")</h4>
+                    <h4 class="fw-bold text-dark mb-2" id="reg-success-title">@gM("reg.successTitle")</h4>
                     <p class="text-muted mb-0" id="reg-success-msg"></p>
                     @* Hinweis des Turnierleiters (Turnier-Administration, Reiter "Homepage") *@
                     <div class="alert alert-warning text-start small mt-3 mb-0 d-none" id="reg-success-hint" style="white-space: pre-line;"></div>

@@ -17,6 +17,7 @@ PlayerRegistration.reserve_short = Reserve
 PlayerRegistration.no_comp_selected = No competition selected
 PlayerRegistration.no_players = No participants registered for this competition yet.
 PlayerRegistration.remove = Remove
+PlayerRegistration.waitlist_badge = Waiting list {0}
 PlayerRegistration.footer_info = Click on column headers to sort. Start numbers are assigned automatically.
 PlayerRegistration.select_comp_prompt = Select Competition
 PlayerRegistration.select_comp_prompt_desc = Please select a competition above to manage registrations.

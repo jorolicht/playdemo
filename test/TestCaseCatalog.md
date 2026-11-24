@@ -464,3 +464,15 @@ Button „Kopieren“ in der Turnierübersicht: Dialog mit Name und Startdatum (
 ### 32.1 Turnierverwalter (🌐 / 👤)
 - [x] **TC-COPY-01 [🌐]:** Lokales Demo-Turnier kopieren: Vorschlag 2031-03-31; nach der Rückfrage „überschreiben“ öffnet sich das neue Turnier mit 4 Wettbewerben in Konfiguration, ohne Teilnehmer, Startzeit verschoben; „Wettbewerbsabschnitt starten“ schlägt „Vorrunde“ (Jeder gegen Jeden) und danach „Endrunde“ (K.-o.) vor.
 - [x] **TC-COPY-02 [👤]:** Cloud-Turnier kopieren: neues Cloud-Turnier mit 4 Wettbewerben (Status Konfiguration, Phasenplan, verschobene Startzeit), ohne Spieler und Spielphasen, mit Homepage-Text, Anmeldeeinstellung und eigener Kopie des Logos; das Quellturnier bleibt unverändert.
+
+---
+
+## 33. UseCase: Online-Anmeldung mit Warteliste (`Competition.maxPants`, `public-register`, `includes/api/waitlist.php`, `services/Waitlist`)
+
+Im Dialog „Wettbewerb bearbeiten“ legt der Turnierleiter eine Höchstzahl Teilnehmer fest (leer = unbegrenzt). Ist sie erreicht, kommen weitere Online-Anmeldungen mit Status WAIT (nicht aktiv) auf die Warteliste. Entfernt der Turnierleiter einen Teilnehmer oder erhöht er die Höchstzahl, rücken Spieler in Anmeldereihenfolge nach (Status REGI, aktiv). Mit E-Mail-Adresse gibt es Mails: Bestätigung, Wartelistenplatz, Nachrücken (Dev: Mailcatcher). Unit-Tests: `WaitingListSuite`.
+
+### 33.1 Besucher (🌐) / Turnierverwalter (👤)
+- [x] **TC-WL-01 [🌐]:** Freier Platz: Turnierseite zeigt „1 von 1 Plätzen frei“ (ohne Höchstzahl keine Angabe); Anmeldung mit Status REGI und Mail „Anmeldung bestätigt“.
+- [x] **TC-WL-02 [🌐]:** Ausgebucht: „Ausgebucht – 0 auf der Warteliste“, Button „Auf die Warteliste“, Hinweis im Dialog; nach der Anmeldung „Platz 1 der Warteliste“, Status WAIT (nicht aktiv), Mail „Warteliste“.
+- [x] **TC-WL-03 [👤]:** Anmeldeliste markiert „Warteliste 1“; nach dem Entfernen des Teilnehmers rückt die Spielerin nach (REGI, aktiv), `waitlist-notify` meldet 1 Mail, Mail „Nachgerückt“.
+- [x] **TC-WL-04 [👤]:** Höchstzahl im Dialog „Wettbewerb bearbeiten“ speichern (`maxPants` 16); Turnierseite zeigt „16 von 16 Plätzen frei“.

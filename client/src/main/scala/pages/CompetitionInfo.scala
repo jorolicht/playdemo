@@ -186,6 +186,7 @@ object CompetitionInfo extends BasePage with JsWrapper:
               val updatedComp = res.competition
               services.TourneyDB.tourney.updateCompetition(updatedComp) match {
                 case Right(newComp) =>
+                  services.Waitlist.promote(newComp) // höhere Höchstzahl: Warteliste rückt nach
                   Global.currentSelection = Global.currentSelection.copy(competition = Some(newComp))
                   comps.ContextHeader.render()
                   render()

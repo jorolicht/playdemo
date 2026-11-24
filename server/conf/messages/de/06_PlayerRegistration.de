@@ -17,6 +17,7 @@ PlayerRegistration.reserve_short = Ersatz
 PlayerRegistration.no_comp_selected = Kein Wettbewerb gewählt
 PlayerRegistration.no_players = Noch keine Teilnehmer für diesen Wettbewerb registriert.
 PlayerRegistration.remove = Entfernen
+PlayerRegistration.waitlist_badge = Warteliste {0}
 PlayerRegistration.footer_info = Klicken Sie auf die Spaltenköpfe zum Sortieren. Startnummern werden automatisch vergeben.
 PlayerRegistration.select_comp_prompt = Wettbewerb auswählen
 PlayerRegistration.select_comp_prompt_desc = Bitte wählen Sie oben einen Wettbewerb aus, um die Anmeldungen zu verwalten.

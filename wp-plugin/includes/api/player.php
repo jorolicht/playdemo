@@ -117,10 +117,14 @@ function tourney_sync_players(WP_REST_Request $request)
  * Teilnehmerliste des Wettbewerbs eingetragen.
  *
  * Body (JSON): compId, firstName, lastName, clubName, clubId (optional, vom Client per
- * Ähnlichkeit gefundener Verein), normalizedName (optional), ttr, email, turnstileToken.
+ * Ähnlichkeit gefundener Verein), normalizedName (optional), ttr, email, turnstileToken, lang ("de"|"en").
+ *
+ * Warteliste: Hat der Wettbewerb eine Höchstzahl (maxPants) und ist sie erreicht, kommt der Spieler mit Status
+ * WAIT (nicht aktiv) auf die Warteliste. Mit E-Mail-Adresse erhält er eine Bestätigung (tourney_registration_mail).
  *
  * @param WP_REST_Request $request Der REST-Request (postId bzw. slug des Turniers).
- * @return array|WP_REST_Response ["playerId", "clubId"] bei Erfolg, sonst Fehlerantwort.
+ * @return array|WP_REST_Response ["playerId", "clubId", "waitlist" (Platz auf der Warteliste, 0 = fester Platz)]
+ *                                bei Erfolg, sonst Fehlerantwort.
  */
 function tourney_public_register(WP_REST_Request $request)
 {
@@ -146,6 +150,7 @@ function tourney_public_register(WP_REST_Request $request)
     // freiwillige Angaben: Jahrgang, E-Mail (oben), WhatsApp-Nummer
     $birth_year = intval($body['birthYear'] ?? 0);
     $whatsapp   = trim(sanitize_text_field($body['whatsApp'] ?? ''));
+    $lang       = ($body['lang'] ?? '') === 'en' ? 'en' : 'de';
 
     foreach (array($first_name, $last_name, $club_name) as $value) {
         if ($value === '' || mb_strlen($value) > 100) {
@@ -255,15 +260,28 @@ function tourney_public_register(WP_REST_Request $request)
             }
         }
 
-        // Teilnehmer in den Wettbewerb eintragen (falls noch nicht vorhanden)
+        // Teilnehmer in den Wettbewerb eintragen (falls noch nicht vorhanden); Platz auf der Warteliste ermitteln
         $sno = "[" . $player_id . "]";
         $pants = $comp['pants1Stage'] ?? [];
         $registered = false;
+        $taken = 0;
+        $waiting = 0;
+        $position = 0;
         foreach ($pants as $pant) {
+            $status = $pant['status'] ?? '';
+            if ($status === 'WAIT') {
+                $waiting++;
+            } elseif ($status !== 'RJEC') {
+                $taken++;
+            }
             if (($pant['id'] ?? '') === $sno) {
                 $registered = true;
-                break;
+                $position = $status === 'WAIT' ? $waiting : 0;
             }
+        }
+        $max = intval($comp['maxPants'] ?? 0);
+        if (!$registered && $max > 0 && $taken >= $max) {
+            $position = $waiting + 1;
         }
 
         if ($clubs_changed) {
@@ -280,8 +298,9 @@ function tourney_public_register(WP_REST_Request $request)
                 "name"   => $last_name . ", " . $first_name,
                 "club"   => $club['name'] ?? $club_name,
                 "rating" => $ttr,
-                "status" => "REGI",   // nur registriert, Teilnahme bestätigt der Turnierleiter
-                "active" => true,
+                // nur registriert, Teilnahme bestätigt der Turnierleiter; bei vollem Wettbewerb Warteliste
+                "status" => $position > 0 ? "WAIT" : "REGI",
+                "active" => $position === 0,
                 "clubId" => $club_id,
             ];
             $comp['pants1Stage'] = $pants;
@@ -293,13 +312,21 @@ function tourney_public_register(WP_REST_Request $request)
             update_post_meta($post_id, "_{$comp_key}_ts", $comp['version']);
         }
 
-        return [
-            "playerId" => $player_id,
-            "clubId"   => $club_id,
-        ];
     } finally {
         $wpdb->query($wpdb->prepare("SELECT RELEASE_LOCK(%s)", $lock));
     }
+
+    // Bestätigung per Mail (nur neue Meldung mit E-Mail-Adresse), nach Freigabe der Sperre
+    if (!$registered && $email !== '') {
+        tourney_registration_mail($email, $position > 0 ? 'waitlist' : 'registered', $post_id, $comp['name'] ?? '',
+                                  $first_name, $position, $lang);
+    }
+
+    return [
+        "playerId" => $player_id,
+        "clubId"   => $club_id,
+        "waitlist" => $position,
+    ];
 }
 
 /**

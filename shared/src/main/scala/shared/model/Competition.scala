@@ -151,6 +151,10 @@ object CompId:
  * Online-Anmeldung (öffentliche Turnierseite, nur Einzel): `regFrom`/`regTo` begrenzen den Zeitraum (Datum
  * "JJJJ-MM-TT", jeweils einschließlich, leer = keine Grenze), `regClosed` beendet die Anmeldung vorzeitig.
  * Siehe [[Competition.registrationOpen]]; serverseitig `tourney_public_register_is_open` (includes/api/player.php).
+ *
+ * Warteliste: `maxPants` begrenzt die Teilnehmerzahl (0 = unbegrenzt). Ist der Wettbewerb voll, kommen weitere
+ * Online-Anmeldungen mit Status [[PantStatus.WAIT]] auf die Warteliste (Reihenfolge = Anmeldereihenfolge) und rücken
+ * mit [[Competition.promoteWaiting]] nach, sobald ein Platz frei wird.
  */
 case class Competition(
   id:                   CompId,
@@ -174,7 +178,8 @@ case class Competition(
   var regFrom:          String = "",
   var regTo:            String = "",
   var regClosed:        Boolean = false,
-  var stagePlan:        List[StagePlan] = List()
+  var stagePlan:        List[StagePlan] = List(),
+  var maxPants:         Int = 0
 ):
   var pant2idx: Map[SNO, Int] = Map.empty         // Pant id -> index in pant array
 
@@ -205,6 +210,38 @@ case class Competition(
   def registrationOpen(today: String): Boolean =
     registrationSupported && !regClosed && status != CompStatus.FIN &&
       (regFrom.isEmpty || today >= regFrom) && (regTo.isEmpty || today <= regTo)
+
+  /** Belegt die Meldung einen Platz? Alle außer Warteliste und abgelehnt. */
+  def occupiesPlace(p: Pant): Boolean = p.status != PantStatus.WAIT && p.status != PantStatus.RJEC
+
+  /** Anzahl belegter Plätze. */
+  def placesTaken: Int = pants1Stage.count(occupiesPlace)
+
+  /** Ist die Höchstzahl erreicht? (Ohne Höchstzahl nie.) */
+  def isFull: Boolean = maxPants > 0 && placesTaken >= maxPants
+
+  /** Meldungen auf der Warteliste in Nachrückreihenfolge. */
+  def waitingList: Seq[Pant] = pants1Stage.filter(_.status == PantStatus.WAIT).toSeq
+
+  /**
+   * Position einer Meldung auf der Warteliste.
+   *
+   * @param sno Startnummer
+   * @return 1, 2, … oder 0, wenn die Meldung nicht auf der Warteliste steht
+   */
+  def waitPosition(sno: SNO): Int = waitingList.indexWhere(_.id == sno) + 1
+
+  /**
+   * Lässt Meldungen der Warteliste nachrücken, solange Plätze frei sind (Status REGI, aktiv – wie eine
+   * Online-Anmeldung). Ohne Höchstzahl rücken alle nach.
+   *
+   * @return die nachgerückten Meldungen
+   */
+  def promoteWaiting(): List[Pant] =
+    val free = if maxPants > 0 then math.max(0, maxPants - placesTaken) else Int.MaxValue
+    val moved = waitingList.take(free).toList
+    moved.foreach { p => p.status = PantStatus.REGI; p.active = true }
+    moved
 
 
 /**

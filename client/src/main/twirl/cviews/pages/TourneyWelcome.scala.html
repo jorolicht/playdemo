@@ -153,8 +153,15 @@
                                                     <td class="text-end pe-4">
                                                         @if(canRegister(c, tourney)) {
                                                             <a href="javascript:openPublicRegistration('@c.id.value')" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" data-testid="register-@c.id.value">
-                                                                <i class="bi bi-person-plus-fill me-1"></i>@gM("tourneyHomepage.registerNow")
+                                                                @if(c.isFull) {
+                                                                    <i class="bi bi-hourglass-split me-1"></i>@gM("tourneyHomepage.joinWaitlist")
+                                                                } else {
+                                                                    <i class="bi bi-person-plus-fill me-1"></i>@gM("tourneyHomepage.registerNow")
+                                                                }
                                                             </a>
+                                                            @if(c.maxPants > 0) {
+                                                                <div class="small text-muted mt-1" data-testid="places-@c.id.value">@if(c.isFull) {@gM("tourneyHomepage.placesFull", c.waitingList.size.toString)} else {@gM("tourneyHomepage.placesFree", (c.maxPants - c.placesTaken).toString, c.maxPants.toString)}</div>
+                                                            }
                                                             @if(c.regTo.nonEmpty) {
                                                                 <div class="small text-muted mt-1">@gM("tourneyHomepage.registrationUntil", isoToDisplay(c.regTo))</div>
                                                             }
