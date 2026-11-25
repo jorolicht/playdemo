@@ -506,3 +506,8 @@ Tabellenberechnung: Unit-Tests `shared/src/test/scala/shared/format/HeadToHeadSu
 ## 38. UseCase: Kopfleiste des Matchboards (`server/app/views/MatchboardView.scala.html`; `matchboard_header.spec.ts`)
 ### 38.1 Besucher (🌐)
 - [x] **TC-MB-01 [🌐]:** Der Link „InfoAnzeige“ der Turnierübersicht enthält `?home=`; das Matchboard zeigt oben in der Farbe des Hauptmenüs (#336699) links das Logo (Turnierprogramm, bei hinterlegtem Vereinslogo dieses), mittig den Turniernamen aus WordPress (auch ohne Meldung eines Clients) und rechts eine Uhr (HH:MM); kein Platzhalter „Turnier“.
+
+## 39. Layout: Scrollbalken und Footer der Website-Variante (`tourney_render_direct_blank_page`; `layout_scroll.spec.ts`)
+- [x] **TC-LAYOUT-01 [🌐]:** Kurze Seite (Startseite): kein Element scrollt selbst, die Seite passt ins Fenster, Footer innerhalb des Fensters.
+- [x] **TC-LAYOUT-02 [🌐]:** Lange Seite (Kontakt): nur das Fenster scrollt, der Footer schließt die Seite ab.
+- [x] **TC-LAYOUT-03 [👤]:** Mit WordPress-Admin-Leiste nur ein senkrechter Scrollbalken; die Startseite passt einschließlich Admin-Leiste ins Fenster.

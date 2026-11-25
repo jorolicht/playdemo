@@ -271,7 +271,9 @@ function tourney_render($atts) {
    
     $output .= '<span id="Main_NavbarId"></span>';
     $output .= '<span id="Main_ContextHeaderId"></span>';
-    $wrapperClass = TOURNEY_FWS ? 'd-flex flex-column min-vh-100' : 'd-flex flex-column';
+    // Website-Variante: Wrapper füllt den Rest des Fensters unter Navbar/Kontextleiste (.tourney-spa-root, siehe
+    // tourney_render_direct_blank_page), nicht ein volles Fenster zusätzlich
+    $wrapperClass = TOURNEY_FWS ? 'd-flex flex-column flex-grow-1' : 'd-flex flex-column';
     $output .= '<div id="Main_AppWrapper" class="' . esc_attr($wrapperClass) . '">';
     $output .= '   <div id="Main_ContentId" class="flex-grow-1">';
     // Startseite bzw. statische Seiten der Website-Variante: Inhalt schon im HTML (SEO), der Client ersetzt ihn beim Start
@@ -396,12 +398,23 @@ function tourney_render_direct_blank_page() {
         wp_head(); 
         ?>
         <style>
-            html, body {
+            /* Nur das Fenster scrollt: overflow-x nur auf html (auf body würde body zum eigenen Scrollbereich und mit
+               der Admin-Leiste entstünden zwei senkrechte Scrollbalken), keine feste Höhe für html/body */
+            html {
                 margin: 0;
                 padding: 0;
-                width: 100%;
-                height: 100%;
                 overflow-x: hidden;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            /* App (Navbar, Kontextleiste, Inhalt, Footer) füllt genau das Fenster abzüglich der WordPress-Admin-Leiste;
+               der Inhalt nimmt den Rest, der Footer steht bei kurzen Seiten am unteren Fensterrand */
+            .tourney-spa-root {
+                display: flex;
+                flex-direction: column;
+                min-height: calc(100vh - var(--wp-admin--admin-bar--height, 0px));
             }
         </style>
     </head>
