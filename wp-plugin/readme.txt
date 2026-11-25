@@ -43,6 +43,7 @@ Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel 
 
 = 1.5.6 =
 * Durchsagen der Turnierleitung: Eingabe in der Turnierübersicht, Anzeige in „Mein Turnier“ und auf dem Matchboard.
+* Matchboard: Kopfleiste mit Logo (Verein bzw. Turnierprogramm), Turniername und Uhr.
 
 = 1.5.5 =
 * Tabellen: Direkter Vergleich bei Punktgleichheit (Einzel und Doppel) – bei gleicher Spieldifferenz entscheiden zuerst die Spiele untereinander (Wertungssystem Version 3, gilt für neue Wettbewerbe).
