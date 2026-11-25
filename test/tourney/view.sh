@@ -1,9 +1,10 @@
 #!/bin/bash
+. "$(dirname "$0")/../credentials.env"   # TEST_WP_USER, TEST_WP_PASSWORD (Vorlage: test/credentials.env.example)
 
 # Configuration
 BASE_URL="http://localhost:8080"
-USER="robert"
-PASS="x0CsysbewmNvehrtOEnCgsuT"
+USER="$TEST_WP_USER"
+PASS="$TEST_WP_PASSWORD"
 
 if [ -z "$1" ]; then
     echo "Usage: $0 <tournament-slug>"

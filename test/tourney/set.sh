@@ -1,13 +1,14 @@
 #!/bin/bash
+. "$(dirname "$0")/../credentials.env"   # TEST_WP_USER, TEST_WP_PASSWORD (Vorlage: test/credentials.env.example)
 # This script updates an existing tournament on the server using the Tourney Sync API.
 # usage: echo '<json-tourney>' | ./set.sh
 # echo '{"id":123, "name":"Dummy", "startDate":20260515, "endDate":"20260516", "organizer":"", "ident":"IGNORE", "typ":"TableTennis"}' | ./set.sh
 
 
 # Configuration
-USER="robert"
+USER="$TEST_WP_USER"
 # Application Password for WordPress
-PASSWORD="x0CsysbewmNvehrtOEnCgsuT"
+PASSWORD="$TEST_WP_PASSWORD"
 BASE_URL="http://localhost:8080/wp-json/tourney/v1"
 
 # Check if JSON input is provided

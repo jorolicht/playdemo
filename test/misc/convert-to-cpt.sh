@@ -1,7 +1,8 @@
+. "$(dirname "$0")/../credentials.env"   # TEST_WP_USER, TEST_WP_PASSWORD (Vorlage: test/credentials.env.example)
 # Ersetze diese Variablen mit deinen tatsächlichen Werten
 WORDPRESS_DOMAIN="localhost:8080"
-USER="robert"
-PASSWORD="mx5dkwkidnTmNavhDnSeVmqK"
+USER="$TEST_WP_USER"
+PASSWORD="$TEST_WP_PASSWORD"
 
 curl -X POST \
   -u ${USER}:${PASSWORD} \

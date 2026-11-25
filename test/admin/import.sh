@@ -1,4 +1,5 @@
 #!/bin/bash
+. "$(dirname "$0")/../credentials.env"   # TEST_WP_USER, TEST_WP_PASSWORD (Vorlage: test/credentials.env.example)
 
 # Dieses Skript importiert alle Turnier-Metadaten aus einer JSON-Datei in einen WordPress-Post.
 # Verwendung: ./import.sh <post_id_oder_slug> <input_file.json>
@@ -20,7 +21,7 @@ fi
 # Konfiguration
 WP_DOMAIN=${WORDPRESS_DOMAIN:-"localhost"}
 WP_USER=${USER:-"robert"}
-WP_PWD=${PASSWORD:-"7utE56CyUbYzH5LylhGiYlKt"}
+WP_PWD=${PASSWORD:-$TEST_WP_PASSWORD}
 WP_PROTO=${WORDPRESS_PROTO:-"https"}
 CURL_OPTS="-s"
 if [ "$WP_PROTO" = "https" ]; then CURL_OPTS="-sk"; fi

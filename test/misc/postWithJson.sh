@@ -1,3 +1,4 @@
+. "$(dirname "$0")/../credentials.env"   # TEST_WP_USER, TEST_WP_PASSWORD (Vorlage: test/credentials.env.example)
 # Ersetze diese Variablen mit deinen tatsächlichen Werten
 WORDPRESS_DOMAIN="localhost:8080"
 
@@ -10,14 +11,14 @@ WORDPRESS_DOMAIN="localhost:8080"
 
 
 
-Page_ID=$(curl -X GET -u "robert:PnK6aeahzx9dt4wlLHNTJYcH" \
+Page_ID=$(curl -X GET -u "${TEST_WP_USER}:${TEST_WP_PASSWORD}" \
   -H "Accept: application/json" \
   "http://${WORDPRESS_DOMAIN}/wp-json/wp/v2/playdemo?slug=playdemo_slug&status=private" | jq '.[0].id')   
 
 
 echo "Die ID der Page ist: ${Page_ID}"  
 
-curl -X POST -u "robert:PnK6aeahzx9dt4wlLHNTJYcH" \
+curl -X POST -u "${TEST_WP_USER}:${TEST_WP_PASSWORD}" \
   -H "Content-Type: application/json" \
   -d '{
         "meta": {

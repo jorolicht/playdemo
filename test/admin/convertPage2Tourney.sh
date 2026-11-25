@@ -1,4 +1,5 @@
 #!/bin/bash
+. "$(dirname "$0")/../credentials.env"   # TEST_WP_USER, TEST_WP_PASSWORD (Vorlage: test/credentials.env.example)
 
 # Dieses Skript wandelt eine Wordpress Seite in einen Custom Post Type 'tourney' um.
 # Verwendung: ./convertPage2Tourney.sh <post_id_oder_slug>
@@ -15,7 +16,7 @@ TARGET_TYPE="tourney"
 # Konfiguration (kann durch Umgebungsvariablen überschrieben werden)
 WP_DOMAIN=${WORDPRESS_DOMAIN:-"localhost"}
 WP_USER=${USER:-"robert"}
-WP_PWD=${PASSWORD:-"7utE56CyUbYzH5LylhGiYlKt"}
+WP_PWD=${PASSWORD:-$TEST_WP_PASSWORD}
 WP_PROTO=${WORDPRESS_PROTO:-"https"}
 
 # Zusätzliche Curl-Optionen (z.B. -k für selbstsignierte Zertifikate bei https)

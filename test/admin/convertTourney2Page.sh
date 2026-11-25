@@ -1,4 +1,5 @@
 #!/bin/bash
+. "$(dirname "$0")/../credentials.env"   # TEST_WP_USER, TEST_WP_PASSWORD (Vorlage: test/credentials.env.example)
 
 # Dieses Skript wandelt einen Custom Post Type 'tourney' in eine normale Wordpress Seite um.
 # Verwendung: ./convertTourney2Page.sh <post_id_oder_slug>
@@ -14,7 +15,7 @@ INPUT=$1
 # Konfiguration (kann durch Umgebungsvariablen überschrieben werden)
 WP_DOMAIN=${WORDPRESS_DOMAIN:-"localhost:8080"}
 WP_USER=${USER:-"robert"}
-WP_PWD=${PASSWORD:-"x0CsysbewmNvehrtOEnCgsuT"}
+WP_PWD=${PASSWORD:-$TEST_WP_PASSWORD}
 WP_PROTO=${WORDPRESS_PROTO:-"http"}
 
 # Zusätzliche Curl-Optionen (z.B. -k für selbstsignierte Zertifikate bei https)

@@ -14,7 +14,6 @@ import services.*
 
 val authMode: AuthMode = AuthMode.AppPassword
 val wpUserName: String = "robert"
-val wpAppPassword: String = "mx5dkwkidnTmNavhDnSeVmqK"
 
 def getTokenInfo(using cw: ComWrapper): Future[Either[AppError, String]] =
 
@@ -208,14 +207,15 @@ object TestAuth extends Authentication with ComWrapper with JsWrapper:
       case Right(res)  => addOutput(s"RESULT: res->${res}"); Right(s"FINISHED ${NAME}: ${group}-Test:${number} param:${param}")
     }
 
-  // http://localhost:9000/usecase/Console?param=test_--group_auth_--number_10_--param_xx  
+  // http://localhost:9000/usecase/Console?param=test_--group_auth_--number_10_--param_<Anwendungspasswort>
+  /** Holt ein JWT per Basic-Auth; das WordPress-Anwendungspasswort wird als `param` übergeben (steht nicht im Code). */
   def testBasic_getJwt(group: String, number: Int, param: String): Future[Either[AppError, String]] =
     val NAME = "testBasic_getJwt"
 
     //Global.authMode = AuthMode.AppPassword
     Global.authMode = AuthMode.Nonce
     Global.wpUserName = wpUserName
-    Global.wpAppPassword = wpAppPassword
+    Global.wpAppPassword = param
 
     object DefaultComWrapper extends ComWrapper
     given ComWrapper = DefaultComWrapper

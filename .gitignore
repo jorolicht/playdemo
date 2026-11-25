@@ -113,3 +113,4 @@ backup-project.sh
 
 # Export von WP Mail SMTP (enthält Zugangsdaten des Mailservers)
 wp-mail-smtp*.json
+test/credentials.env

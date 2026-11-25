@@ -1,8 +1,9 @@
 #!/bin/bash
+. "$(dirname "$0")/../credentials.env"   # TEST_WP_USER, TEST_WP_PASSWORD (Vorlage: test/credentials.env.example)
 
 # Configuration
-USER="robert"
-PASSWORD="x0CsysbewmNvehrtOEnCgsuT"
+USER="$TEST_WP_USER"
+PASSWORD="$TEST_WP_PASSWORD"
 PLAY_URL="https://localhost/playsrv"
 WP_URL="https://localhost/wp-json/tourney/v1"
 

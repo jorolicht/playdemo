@@ -1,4 +1,5 @@
 #!/bin/bash
+. "$(dirname "$0")/../credentials.env"   # TEST_WP_USER, TEST_WP_PASSWORD (Vorlage: test/credentials.env.example)
 
 # Dieses Skript exportiert alle Turnier-Metadaten eines WordPress-Posts in eine JSON-Datei.
 # Verwendung: ./export.sh <post_id_oder_slug> [output_file.json]
@@ -15,7 +16,7 @@ OUTPUT_FILE=${2:-"tourney_${INPUT}_export.json"}
 # Konfiguration
 WP_DOMAIN=${WORDPRESS_DOMAIN:-"localhost"}
 WP_USER=${USER:-"robert"}
-WP_PWD=${PASSWORD:-"mx5dkwkidnTmNavhDnSeVmqK"}
+WP_PWD=${PASSWORD:-$TEST_WP_PASSWORD}
 WP_PROTO=${WORDPRESS_PROTO:-"https"}
 CURL_OPTS="-s"
 if [ "$WP_PROTO" = "https" ]; then CURL_OPTS="-sk"; fi
