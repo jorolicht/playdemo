@@ -5,7 +5,7 @@ Tags: tournament, table tennis, sports, scalajs, playframework
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,9 @@ Das Plugin verwendet Semantic Versioning (SemVer) `MAJOR.MINOR.PATCH`. Datenbank
 Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel (`filemtime`) oder der aktuellen Plugin-Version versioniert, sodass Browser-Caches nach Updates sofort invalidiert werden.
 
 == Changelog ==
+
+= 1.5.5 =
+* Tabellen: Direkter Vergleich bei Punktgleichheit (Einzel und Doppel) – bei gleicher Spieldifferenz entscheiden zuerst die Spiele untereinander (Wertungssystem Version 3, gilt für neue Wettbewerbe).
 
 = 1.5.4 =
 * Mannschaften: K.-o.-Begegnung im Braunschweiger System wird bei 5:5 über Satz- und Balldifferenz entschieden (bisher blieb sie offen).
