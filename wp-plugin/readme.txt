@@ -5,7 +5,7 @@ Tags: tournament, table tennis, sports, scalajs, playframework
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,9 @@ Das Plugin verwendet Semantic Versioning (SemVer) `MAJOR.MINOR.PATCH`. Datenbank
 Alle JavaScript- und CSS-Dateien werden dynamisch mit dem Änderungszeitstempel (`filemtime`) oder der aktuellen Plugin-Version versioniert, sodass Browser-Caches nach Updates sofort invalidiert werden.
 
 == Changelog ==
+
+= 1.5.3 =
+* Neue Seite „Wertungssystem“: Satz- und Spielwertung, Kurzschreibweise, Tabellenkriterien, Schweizer System und alle Spielsysteme für Mannschaften; Verweis aus der Hilfe.
 
 = 1.5.2 =
 * Fußzeile der Website: Links zum TTC Freising Lerchenfeld und zum Bayerischen Tischtennis-Verband (BTTV).
