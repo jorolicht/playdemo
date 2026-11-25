@@ -45,9 +45,9 @@
                         <th style="width: 80px;" class="text-center">Tisch</th>
                         @* Input fields headers *@
                         @for(i <- 1 to (stage.noWinSets * 2 - 1)) {
-                            <th style="width: 50px;" class="text-center">Satz @i</th>
+                            <th style="width: 50px;" class="text-center">@base.SportText.level("set").one @i</th>
                         }
-                        <th style="width: 80px;" class="text-center">Sätze</th>
+                        <th style="width: 80px;" class="text-center">@base.SportText.level("set").plural</th>
                         <th style="width: 120px;" class="text-center d-print-none">Aktionen</th>
                     </tr>
                 </thead>

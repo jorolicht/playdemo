@@ -30,7 +30,7 @@
                             <tr>
                                 <td class="fw-bold" style="width: 4rem;">@pos</td>
                                 <td class="small text-muted" style="width: 5rem;">
-                                    @if(cfg.isDoublePos(side, pos)) { @gM("DlgLineup.double") } else { @gM("DlgLineup.single") }
+                                    @base.SportText.game(cfg.isDoublePos(side, pos))
                                 </td>
                                 <td>
                                     @playerSelect(pos, 1)

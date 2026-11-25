@@ -113,6 +113,31 @@ object Sports:
   /** Neueste Version der Standard-Sportart. */
   def latest: SportConfig = get(latestKey())
 
+  /**
+   * Name eines Wettbewerbsformats im Wertungssystem eines Wettbewerbs; fehlt er dort, aus der neuesten Version
+   * derselben Sportart.
+   *
+   * @param key      Schlüssel des Wertungssystems (leer = [[LegacyKey]])
+   * @param formatId Kennung des Formats (z. B. "single")
+   * @param lang     Sprachkürzel
+   * @return Name, ohne Eintrag die Kennung
+   */
+  def formatName(key: String, formatId: String, lang: String): String =
+    val cfg = get(key)
+    cfg.formatName(formatId, lang)
+      .orElse(get(latestKey(cfg.sport.id)).formatName(formatId, lang))
+      .getOrElse(formatId)
+
+  /**
+   * Name einer Sportart aus ihrer neuesten Version.
+   *
+   * @param sportId Kennung der Sportart (z. B. "TT")
+   * @param lang    Sprachkürzel
+   * @return Name, None wenn es kein Wertungssystem der Sportart gibt
+   */
+  def sportName(sportId: String, lang: String): Option[String] =
+    if keys(sportId).isEmpty then None else Some(get(latestKey(sportId)).sportName(lang)).filter(_.nonEmpty)
+
   // --- Kontext ---------------------------------------------------------------------------------------------------
 
   /** Stapel der mit [[using]] gesetzten Schlüssel (innerster zuerst). */

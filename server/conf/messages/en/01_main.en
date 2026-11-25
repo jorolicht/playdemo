@@ -119,7 +119,6 @@ tourneyNew.ident                                    = Identifier / Abbreviation
 tourneyNew.identPlh                                 = e.g. STM2026
 tourneyNew.organizer                                = Organizer
 tourneyNew.category                                 = Sport / Category
-tourneyNew.categoryTT                               = Table Tennis (TT)
 tourneyNew.categoryOther                            = Other
 tourneyNew.startDate                                = Start Date
 tourneyNew.endDate                                  = End Date

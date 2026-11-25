@@ -37,7 +37,7 @@
                         <label @forAttr(CompTypId) class="form-label fw-bold">@gM("compNew.type")</label>
                         <select class="form-select" @id(CompTypId)>
                             @CompTyp.values.filter(_ != CompTyp.Typ).map { t =>
-                                <option value="@t.toString" @if(t == CompTyp.SINGLE){selected}>@t.toString</option>
+                                <option value="@t.toString" @if(t == CompTyp.SINGLE){selected}>@base.SportText.typ(t)</option>
                             }
                         </select>
                     </div>

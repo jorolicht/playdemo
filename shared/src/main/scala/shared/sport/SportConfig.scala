@@ -10,7 +10,12 @@ import upickle.implicits.key
  * @param other Plural (z. B. "Sätze"), leer = wie Singular
  * @param short Kurzform für Tabellen und Anzeigetafeln (z. B. "S")
  */
-case class Name(one: String, other: String = "", short: String = "")
+case class Name(one: String, other: String = "", short: String = ""):
+  /** Plural, ohne eigene Angabe wie der Singular. */
+  def plural: String = if other.nonEmpty then other else one
+
+  /** Kurzform, ohne eigene Angabe wie der Singular. */
+  def abbr: String = if short.nonEmpty then short else one
 
 object Name:
   given rw: RW[Name] = macroRW
@@ -373,6 +378,46 @@ case class SportConfig(
 
   /** Stufe mit der Kennung `id`. */
   def level(id: String): Option[Level] = levels.find(_.id == id)
+
+  // --- Bezeichnungen (statt Texten aus den Message-Dateien, damit andere Sportarten eigene Namen mitbringen) ---
+
+  /**
+   * Name der Sportart.
+   *
+   * @param lang Sprachkürzel
+   * @return z. B. "Tischtennis"
+   */
+  def sportName(lang: String): String = sport.name.localized(lang).one
+
+  /**
+   * Name eines Wettbewerbsformats.
+   *
+   * @param formatId Kennung des Formats (z. B. "single", "team2")
+   * @param lang     Sprachkürzel
+   * @return z. B. "Einzel", None wenn das Format oder sein Name fehlt
+   */
+  def formatName(formatId: String, lang: String): Option[String] =
+    formats.get(formatId).map(_.name.localized(lang).one).filter(_.nonEmpty)
+
+  /**
+   * Name einer Stufe.
+   *
+   * @param id   Kennung der Stufe (z. B. "set")
+   * @param lang Sprachkürzel
+   * @return Singular, Plural und Kurzform, None wenn die Stufe oder ihr Name fehlt
+   */
+  def levelName(id: String, lang: String): Option[Name] =
+    level(id).map(_.name.localized(lang)).filter(_.one.nonEmpty)
+
+  /**
+   * Varianten, die nur die Gewinneinheiten der Spielstufe festlegen (bei TT "2/3/4 Gewinnsätze"), aufsteigend.
+   *
+   * @return (Gewinneinheiten, Namen der Variante)
+   */
+  def winVariants: Seq[(Int, Names)] =
+    variants.values.toSeq.flatMap { v =>
+      v.overrides.get(matchLevelId).flatMap(_.objOpt).flatMap(_.get("toWin")).flatMap(_.numOpt).map(n => (n.toInt, v.name))
+    }.sortBy(_._1)
 
   /** Stufe eines einzelnen Spiels. */
   def matchLevel: Level = level(matchLevelId).get

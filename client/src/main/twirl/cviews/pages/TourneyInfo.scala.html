@@ -95,7 +95,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="text-muted small uppercase fw-bold">@gM("tourneyNew.category")</div>
-                    <span class="badge bg-secondary">@gM(tourney.category.msgCode)</span>
+                    <span class="badge bg-secondary">@base.SportText.category(tourney.category)</span>
                 </div>
             </div>
         </div>
@@ -146,7 +146,7 @@
                                     @* als Button umrandet, damit erkennbar ist, dass der Name die Wettbewerbsübersicht öffnet *@
                                     <button type="button" class="btn btn-outline-mv-tourney btn-sm fw-bold comp-link" onclick="appLoadPage('CompetitionInfo', '@c.id.value')">@c.name</button>
                                 </td>
-                                <td><span class="badge bg-light text-dark border">@gM(c.typ.msgCode)</span></td>
+                                <td><span class="badge bg-light text-dark border">@base.SportText.compTyp(c)</span></td>
                                 <td>@{c.lowLevel.getOrElse(0)} - @{c.upperLevel.getOrElse("∞")}</td>
                                 <td>
                                     <span class="badge @{if(c.status == CompStatus.RUN) "bg-warning" else if(c.status == CompStatus.FIN) "bg-success" else "bg-secondary"}">

@@ -12,16 +12,15 @@ object StageResult extends BasePage with JsWrapper:
 
   /**
    * Spaltenüberschrift einer Ebene der Gruppentabelle. Bei Mannschaften stammt sie aus dem Wertungssystem
-   * (0 = Begegnungen, 1 = Spiele, 2 = Sätze), sonst gilt der bisherige Text.
+   * (0 = Begegnungen, 1 = Spiele, 2 = Sätze), sonst 0 = Spiele, 1 = Sätze, 2 = Bälle.
    *
-   * @param g       Gruppe
-   * @param depth   Abstand zur obersten Ebene
-   * @param default bisheriger Text
+   * @param g     Gruppe
+   * @param depth Abstand zur obersten Ebene
+   * @return Plural der Stufe aus dem Wertungssystem, leer wenn es die Stufe nicht gibt
    */
-  def levelHeader(g: shared.format.Group, depth: Int, default: String): String =
+  def levelHeader(g: shared.format.Group, depth: Int): String =
     import shared.sport.{ Sports, localized }
-    if Sports.current.encounter(g.format).isEmpty then default
-    else Sports.current.forFormat(g.format).levelBelowMatch(depth).map(_.name.localized(Global.lang).other).getOrElse(default)
+    Sports.current.forFormat(g.format).levelBelowMatch(depth).map(_.name.localized(Global.lang).plural).getOrElse("")
   val NextStageBtn:   HtmlId = genId(name)
   /**
    * Name des Wettbewerbs eines Wettbewerbsabschnitts (Überschrift der Druckausgabe).

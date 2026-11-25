@@ -119,7 +119,6 @@ tourneyNew.ident                                    = Ident / Kürzel
 tourneyNew.identPlh                                 = z.B. STM2026
 tourneyNew.organizer                                = Veranstalter
 tourneyNew.category                                 = Sportart / Kategorie
-tourneyNew.categoryTT                               = Tischtennis (TT)
 tourneyNew.categoryOther                            = Andere
 tourneyNew.startDate                                = Startdatum
 tourneyNew.endDate                                  = Enddatum

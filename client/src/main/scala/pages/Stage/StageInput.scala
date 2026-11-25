@@ -264,7 +264,7 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
           s"""Spiel-Nr:       $gameNo.$no
              |Wettbewerb:     ${comp.name}
              |Begegnung:      ${formatSnoName(m.stNoA, pants)}  vs  ${formatSnoName(m.stNoB, pants)}
-             |Spiel:          ${if (g.double) gM("+double") else gM("+single")}$pos
+             |Spiel:          ${SportText.game(g.double)}$pos
              |Paarung:        ${formatPlayerSno(g.snoA)}  vs  ${formatPlayerSno(g.snoB)}
              |Tisch:          ${orDash(g.playfield)}
              |Status:         $status

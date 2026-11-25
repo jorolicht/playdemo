@@ -32,10 +32,10 @@
         <div class="card-body bg-light">
             <div class="row text-center small">
                 <div class="col-md border-end">
-                    <span class="text-muted fw-bold">@gM("+sport")</span> @gM(comp.category.msgCode)
+                    <span class="text-muted fw-bold">@gM("+sport")</span> @base.SportText.category(comp.category)
                 </div>
                 <div class="col-md border-end">
-                    <span class="text-muted fw-bold">@gM("+type")</span> @gM(comp.typ.msgCode)
+                    <span class="text-muted fw-bold">@gM("+type")</span> @base.SportText.compTyp(comp)
                 </div>
                 <div class="col-md border-end">
                     <span class="text-muted fw-bold">@gM("+start")</span> @base.Global.formatDateTime(comp.startDate)

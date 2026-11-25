@@ -35,8 +35,6 @@ DlgTeam.err_duplicate = A player can only be listed once in a team.
 
 DlgLineup.title = Line-up: {0}
 DlgLineup.missing = – missing –
-DlgLineup.single = Singles
-DlgLineup.double = Doubles
 DlgLineup.hint = Empty positions count as lost. If all positions stay empty, the team did not show up.
 DlgLineup.started = The tie has started, the line-up can no longer be changed.
 DlgLineup.cancel = Cancel

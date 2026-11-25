@@ -61,7 +61,7 @@
                             <option value="0" @if(selection.competition.isEmpty){selected}>@gM("+please_select")</option>
                             @competitions.map { c =>
                                 <option value="@c.id.value" @if(selection.competition.exists(_.id == c.id)){selected}>
-                                    @c.name (@gM(c.typ.msgCode))
+                                    @c.name (@base.SportText.compTyp(c))
                                 </option>
                             }
                         </select>

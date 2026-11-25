@@ -173,7 +173,7 @@ object StageScoreSheet extends BasePage with JsWrapper:
         val g = enc.flatMap(_.games.find(_.no == i + 1))
         if (g.exists(x => x.status == MEntry.MS_SKIP || x.status == MEntry.MS_FIX)) None
         else
-          val typ = if (gc.isDouble) gM("StageInput.double") else gM("StageInput.single")
+          val typ = SportText.game(gc.isDouble)
           Some(TeamSheet(gameNo, s"$teamA – $teamB", s"$gameNo.${i + 1}", g.map(_.playfield).getOrElse(""),
             g.map(x => name(x.snoA)).getOrElse(""), g.map(x => name(x.snoB)).getOrElse(""),
             s"$teamA · ${gc.home}", s"$teamB · ${gc.away}", info1, Seq(inf, typ).filter(_.nonEmpty).mkString(" · ")))

@@ -64,7 +64,7 @@ object SystemInfo extends BasePage with JsWrapper:
    */
   def gameLabel(cfg: EncounterCfg, i: Int): String =
     val g = cfg.games(i)
-    val kind = if g.isDouble then gM("SystemInfo.double") else gM("SystemInfo.single")
+    val kind = SportText.game(g.isDouble)
     val pair = if g.isDouble then "" else s" ${g.home} – ${g.away}"
     val dec  = if g.decider then s" (${gM("SystemInfo.decider_game")})" else ""
     s"$kind$pair$dec"
@@ -89,7 +89,8 @@ object SystemInfo extends BasePage with JsWrapper:
     }
     // gewähltes System (leer = Standard des Formats)
     val selected = cfg.formats.get(selFmt).flatMap(_.system(selSys)).map(s => (selFmt, s.id))
-    setMain(cviews.pages.html.SystemInfo(Sports.resolveKey(key), sections, selected))
+    // Bezeichnungen (Einzel/Doppel) aus dem angezeigten Wertungssystem
+    Sports.using(key)(setMain(cviews.pages.html.SystemInfo(Sports.resolveKey(key), sections, selected)))
     selected.foreach { case (f, s) =>
       Option(dom.document.getElementById(s"sys-$f-$s")).foreach(_.asInstanceOf[scala.scalajs.js.Dynamic].scrollIntoView(true))
     }

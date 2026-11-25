@@ -17,14 +17,12 @@
     case "tableInfo1" => if (isDe) "Tisch" else "Table"
     case "tableInfo2" => if (isDe) "" else ""
     case "gameNo" => if (isDe) "Spiel-Nr." else "Game No."
-    case "set1" => if (isDe) "1. Satz" else "1st Set"
-    case "set2" => if (isDe) "2. Satz" else "2nd Set"
-    case "set3" => if (isDe) "3. Satz" else "3rd Set"
-    case "set4" => if (isDe) "4. Satz" else "4th Set"
-    case "set5" => if (isDe) "5. Satz" else "5th Set"
-    case "set6" => if (isDe) "6. Satz" else "6th Set"
-    case "set7" => if (isDe) "7. Satz" else "7th Set"
-    case "sets" => if (isDe) "Sätze" else "Sets"
+    case s if s.startsWith("set") && s.drop(3).toIntOption.nonEmpty =>
+      // "1. Satz" bzw. "1st Game": Stufenname aus dem Wertungssystem
+      val n = s.drop(3).toInt
+      val ord = if (isDe) s"$n." else n match { case 1 => "1st" case 2 => "2nd" case 3 => "3rd" case _ => s"${n}th" }
+      s"$ord ${base.SportText.level("set").one}"
+    case "sets" => base.SportText.level("set").plural
     case "winner" => if (isDe) "Sieger" else "Winner"
     case _ => key
   }
@@ -53,7 +51,7 @@
 @* Referee Single Card content (Grid elements); QR-Code/Link nur mit qrGameNo (Eintrag im Spielplan) *@
 @refereeCardContent(gameNoLabel: String, playfield: String, qrGameNo: Option[Int], nameA: String, nameB: String, clubA: String, clubB: String, info1: String, info2: String) = {
   <div class="RefereeTrnyName">@services.TourneyDB.tourney.name</div>
-  <div class="RefereeCompName"><h6>@compName - @gM(comp.typ.msgCode)</h6></div>
+  <div class="RefereeCompName"><h6>@compName - @base.SportText.compTyp(comp)</h6></div>
   <div class="RefereeCompInfo1 text-muted small">@info1</div>
   <div class="RefereeCompInfo2 text-muted small">@info2</div>
   <div class="RefereeTableInfo1 fw-bold">@{msg("tableInfo1")} @playfield</div>

@@ -35,8 +35,6 @@ DlgTeam.err_duplicate = Ein Spieler kann nur einmal in der Mannschaft stehen.
 
 DlgLineup.title = Aufstellung: {0}
 DlgLineup.missing = – fehlt –
-DlgLineup.single = Einzel
-DlgLineup.double = Doppel
 DlgLineup.hint = Nicht besetzte Positionen werden als verloren gewertet. Bleiben alle Positionen leer, gilt die Mannschaft als nicht angetreten.
 DlgLineup.started = Die Begegnung ist gestartet, die Aufstellung kann nicht mehr geändert werden.
 DlgLineup.cancel = Abbrechen

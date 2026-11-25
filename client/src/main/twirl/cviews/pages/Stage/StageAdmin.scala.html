@@ -113,9 +113,14 @@
                 <div class="col-md-4">
                     <label class="form-label fw-bold">@gM("+sets_label")</label>
                     <select class="form-select" id="rnd-sets" @disabledIfAus>
-                        <option value="2" @{if(stage.noWinSets == 2) "selected" else ""}>@gM("+best_of_3")</option>
-                        <option value="3" @{if(stage.noWinSets == 3 || stage.noWinSets < 2 || stage.noWinSets > 4) "selected" else ""}>@gM("+best_of_5")</option>
-                        <option value="4" @{if(stage.noWinSets == 4) "selected" else ""}>@gM("+best_of_7")</option>
+                        @* Gewinnsätze aus den Varianten des Wertungssystems; ohne gültige Angabe 3 *@
+                        @defining(base.SportText.winOptions()) { opts =>
+                            @defining(if(opts.exists(_._1 == stage.noWinSets)) stage.noWinSets else 3) { sel =>
+                                @for((n, label) <- opts) {
+                                    <option value="@n" @{if(n == sel) "selected" else ""}>@label</option>
+                                }
+                            }
+                        }
                     </select>
                 </div>
                 @* Doppeltes K.-o.: Finale mit Rückspiel (sichtbar nur bei Spielmodus DE) *@

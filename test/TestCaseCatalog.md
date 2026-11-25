@@ -483,3 +483,9 @@ Im Dialog „Wettbewerb bearbeiten“ legt der Turnierleiter eine Höchstzahl Te
 - [x] **TC-WRT-01 [🌐]:** Die Hilfe (Abschnitt 6) verweist auf `/wertung/`; die Seite hat 11 Abschnitte im Inhaltsverzeichnis (alle Ziele vorhanden), Kurzschreibweise, Tabellenkriterien und Spielsysteme für Mannschaften; Abschnitt 9 der Hilfe verweist auf `/wertung/#tabelle`.
 - [x] **TC-WRT-02 [🌐]:** `/wertung/` und `/en/scoring/` liefern 200, sind indexierbar, haben Canonical und hreflang aufeinander und stehen in der Sitemap.
 - [x] **TC-WRT-03 [🌐]:** Die englische Hilfe verweist auf `/en/scoring/` mit englischem Inhalt.
+
+## 35. UseCase: Bezeichnungen aus dem Wertungssystem (`base.SportText`, `shared/sports/tt_00n.json`; `sport_labels.spec.ts`)
+### 35.1 Turnierverwalter (👤), deutsch und englisch
+- [x] **TC-SPN-01 [👤]:** Die Turnierübersicht zeigt das Format der Wettbewerbe aus dem Wertungssystem („Einzel“/„Doppel“ bzw. „Singles“/„Doubles“).
+- [x] **TC-SPN-02 [👤]:** Der Tabellenkopf einer Jeder-gegen-jeden-Runde nennt die Stufen aus dem Wertungssystem („Spiele“, „Sätze“, „Bälle“ bzw. „Matches“, „Games“, „Points“).
+- [x] **TC-SPN-03 [👤]:** Die Auswahl der Gewinnsätze in der Stage-Administration kommt aus den Varianten („2/3/4 Gewinnsätze“ bzw. „Best of 3/5/7“, Werte 2–4, Standard 3).

@@ -28,10 +28,10 @@
         <div class="card-body bg-light">
             <div class="row text-center small">
                 <div class="col-md border-end">
-                    <span class="text-muted fw-bold">Sportart:</span> @gM(comp.category.msgCode)
+                    <span class="text-muted fw-bold">Sportart:</span> @base.SportText.category(comp.category)
                 </div>
                 <div class="col-md border-end">
-                    <span class="text-muted fw-bold">Wettbewerb-Typ:</span> @gM(comp.typ.msgCode)
+                    <span class="text-muted fw-bold">Wettbewerb-Typ:</span> @base.SportText.compTyp(comp)
                 </div>
                 <div class="col-md border-end">
                     <span class="text-muted fw-bold">Startzeit:</span> @base.Global.formatDateTime(comp.startDate)
