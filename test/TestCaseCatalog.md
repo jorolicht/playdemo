@@ -511,3 +511,11 @@ Tabellenberechnung: Unit-Tests `shared/src/test/scala/shared/format/HeadToHeadSu
 - [x] **TC-LAYOUT-01 [🌐]:** Kurze Seite (Startseite): kein Element scrollt selbst, die Seite passt ins Fenster, Footer innerhalb des Fensters.
 - [x] **TC-LAYOUT-02 [🌐]:** Lange Seite (Kontakt): nur das Fenster scrollt, der Footer schließt die Seite ab.
 - [x] **TC-LAYOUT-03 [👤]:** Mit WordPress-Admin-Leiste nur ein senkrechter Scrollbalken; die Startseite passt einschließlich Admin-Leiste ins Fenster.
+
+## 40. UseCase: Push-Benachrichtigungen für Durchsagen (`includes/api/push.php`, `includes/push-sw.js`, `services.Push`; `push.spec.ts`)
+Die Zustellung über einen echten Push-Dienst ist im Test-Browser nicht möglich (manuell prüfen, z. B. Chrome am Mac/Android).
+### 40.1 Besucher (🌐) / Turnierverwalter (👤)
+- [x] **TC-PUSH-01 [🌐]:** `push-key` liefert einen gleichbleibenden öffentlichen Schlüssel; `?tourney_push=sw` liefert den Service Worker (JavaScript, Benachrichtigung und Meldung an offene Seiten).
+- [x] **TC-PUSH-02 [🌐]:** Anmelden/Abmelden eines Geräts; abgelehnt werden unsichere (http), interne (127.0.0.1) Push-Adressen und Nicht-Turniere; erneute Anmeldung aktualisiert.
+- [x] **TC-PUSH-03 [👤]:** Durchsage mit angemeldetem Gerät: gespeichert, Versand versucht; ein Zustellfehler (kein Push-Dienst) bricht nicht ab und löscht die Anmeldung nicht.
+- [x] **TC-PUSH-04 [🌐]:** Direktlink `<turnier>/#mein-turnier` öffnet „Mein Turnier“ mit Durchsagen; bei blockierten Benachrichtigungen Hinweis, sonst Knopf „Durchsagen als Benachrichtigung erhalten“.

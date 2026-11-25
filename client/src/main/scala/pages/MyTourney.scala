@@ -28,6 +28,9 @@ object MyTourney extends BasePage with JsWrapper:
   val BtnBackId:    HtmlId = genId(name)
   /** Kasten mit den Durchsagen der Turnierleitung (services.Announcements). */
   val AnnounceBoxId: HtmlId = genId(name)
+  /** Push-Benachrichtigungen für Durchsagen: Bereich und Knopf zum Ein-/Ausschalten (services.Push). */
+  val PushBoxId:     HtmlId = genId(name)
+  val BtnPushId:     HtmlId = genId(name)
 
   /** Abstand des automatischen Neuladens in Millisekunden. */
   val RefreshMs = 30000
@@ -250,7 +253,37 @@ object MyTourney extends BasePage with JsWrapper:
         setMain(cviews.pages.html.MyTourney(t, players, view, lastUpdate))
         if (view.isDefined) startTimer() else stopTimer()
         loadAnnouncements(t)
+        showPush(t)
+        services.Push.listen(
+          postId => if (Global.activePageName == name.value && Global.currentSelection.tourney.exists(_.wpId == postId)) refresh(),
+          () => loadPage(name, ""))
         true
+
+  /**
+   * Zeigt den Knopf für Push-Benachrichtigungen passend zum Zustand (nur Cloud-Turniere mit Browser-Unterstützung;
+   * auf dem iPhone ohne installierte App ein Hinweis).
+   *
+   * @param t Turnier
+   */
+  private def showPush(t: Tourney): Unit =
+    import services.Push.State
+    services.Push.state(t).foreach { st =>
+      val html = st match
+        case State.Unsupported =>
+          if (services.Push.iosNeedsInstall && services.Announcements.available(t))
+            s"""<div class="small text-muted" data-testid="push-ios"><i class="bi bi-phone me-1"></i>${gM("push.iosHint")}</div>"""
+          else ""
+        case State.Denied =>
+          s"""<div class="small text-muted" data-testid="push-denied"><i class="bi bi-bell-slash me-1"></i>${gM("push.denied")}</div>"""
+        case State.On =>
+          s"""<button class="btn btn-sm btn-success" id="${BtnPushId.id}" onclick="window.appEvent(this, event); false" data-testid="push-btn" data-state="on">
+             |<i class="bi bi-bell-fill me-1"></i>${gM("push.on")}</button>
+             |<span class="small text-muted ms-2">${gM("push.onHint")}</span>""".stripMargin
+        case State.Off =>
+          s"""<button class="btn btn-sm btn-outline-primary" id="${BtnPushId.id}" onclick="window.appEvent(this, event); false" data-testid="push-btn" data-state="off">
+             |<i class="bi bi-bell me-1"></i>${gM("push.enable")}</button>""".stripMargin
+      if (Global.activePageName == name.value) Option(gE(PushBoxId)).foreach(_.innerHTML = html)
+    }
 
   /**
    * Lädt die Durchsagen und zeigt sie im Kasten oben an (bei jedem Anzeigen, also auch beim automatischen Neuladen).
@@ -304,6 +337,11 @@ object MyTourney extends BasePage with JsWrapper:
         render()
       case `BtnRefreshId` =>
         refresh()
+      case `BtnPushId` =>
+        val t = tourney
+        val on = elem.getAttribute("data-state") == "on"
+        elem.setAttribute("disabled", "disabled")
+        (if (on) services.Push.disable(t) else services.Push.enable(t)).foreach(_ => showPush(t))
       case `BtnBackId` =>
         stopTimer()
         val t = tourney

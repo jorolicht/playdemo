@@ -4,7 +4,8 @@
  *
  * Gespeichert als JSON-Liste im Post-Meta `announcements` des Turniers (neueste zuerst, höchstens
  * TOURNEY_ANNOUNCEMENT_MAX Einträge). Angezeigt in „Mein Turnier“ und – vom Client zusätzlich als Info-Eintrag an den
- * Play-Server geschickt – auf dem Matchboard.
+ * Play-Server geschickt – auf dem Matchboard; neue Durchsagen gehen außerdem als Push-Benachrichtigung an die angemeldeten Geräte
+ * (includes/api/push.php).
  *
  * - GET    /tourney/v1/announcements?postId=<id>               öffentlich
  * - POST   /tourney/v1/announcements?postId=<id>  {"text": ..} Schreibrecht auf das Turnier
@@ -101,8 +102,13 @@ function tourney_announcements_add(WP_REST_Request $request) {
     if (mb_strlen($text) > TOURNEY_ANNOUNCEMENT_MAX_LEN) {
         return ApiHelper::error("too_long", "Announcement too long", strval(TOURNEY_ANNOUNCEMENT_MAX_LEN), "tourney_announcements_add", HttpStatus::BAD_REQUEST);
     }
-    $entry = ["id" => wp_generate_password(8, false, false), "text" => $text, "ts" => wp_date('Y-m-d H:i')];
-    return tourney_announcements_change($post_id, fn($list) => array_merge([$entry], $list));
+    $entry  = ["id" => wp_generate_password(8, false, false), "text" => $text, "ts" => wp_date('Y-m-d H:i')];
+    $result = tourney_announcements_change($post_id, fn($list) => array_merge([$entry], $list));
+    // Push-Benachrichtigung an die angemeldeten Geräte (includes/api/push.php); Fehler brechen das Speichern nicht ab
+    if (is_array($result) && function_exists('tourney_push_announcement')) {
+        $result['push'] = tourney_push_announcement($post_id, $entry);
+    }
+    return $result;
 }
 
 /**

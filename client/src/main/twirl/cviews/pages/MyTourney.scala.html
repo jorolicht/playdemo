@@ -16,6 +16,8 @@
 
     @* Durchsagen der Turnierleitung (wird nach dem Laden gefüllt, leer = unsichtbar) *@
     <div @id(AnnounceBoxId)>@cviews.comps.html.AnnouncementBox(services.Announcements.cached(tourney))</div>
+    @* Push-Benachrichtigungen für Durchsagen (wird nach dem Prüfen des Browsers gefüllt) *@
+    <div class="mb-3" @id(PushBoxId)></div>
 
     @view match {
         case None => {

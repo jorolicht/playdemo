@@ -673,3 +673,9 @@ announce.hint                                       = Appears immediately on the
 announce.empty                                      = No announcements yet.
 announce.delete                                     = Delete announcement
 announce.error                                      = The announcement could not be saved
+
+push.enable                                         = Get announcements as notifications
+push.on                                             = Notifications on
+push.onHint                                         = Tap to turn off. New announcements also appear when the page is closed.
+push.denied                                         = Notifications are blocked in this browser. You can allow them again in the site settings.
+push.iosHint                                        = Notifications on the iPhone: add the page as an app via “Share → Add to Home Screen” and open it there.

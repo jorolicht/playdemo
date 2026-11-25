@@ -235,7 +235,11 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
         val t = TourneyDB.tourney
         Global.isLocalMode = false
         Global.isDemoMode = false
-        if (Global.canEditPage) {
+        // Direktlink auf „Mein Turnier“ (z. B. aus einer Push-Benachrichtigung): <turnier>/#mein-turnier
+        if (dom.window.location.hash == "#mein-turnier") {
+          Global.currentSelection = Selection(Some(t))
+          pages.loadPage(pages.MyTourney.name, "")
+        } else if (Global.canEditPage) {
           comps.Navbar.openTourneyView(t)
         } else {
           val compOpt = t.competitions.find(c => c != null && !c.deleted)

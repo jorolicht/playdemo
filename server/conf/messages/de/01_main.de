@@ -673,3 +673,9 @@ announce.hint                                       = Erscheint sofort auf dem M
 announce.empty                                      = Noch keine Durchsagen.
 announce.delete                                     = Durchsage löschen
 announce.error                                      = Die Durchsage konnte nicht gespeichert werden
+
+push.enable                                         = Durchsagen als Benachrichtigung erhalten
+push.on                                             = Benachrichtigungen an
+push.onHint                                         = Tippen zum Ausschalten. Neue Durchsagen erscheinen auch bei geschlossener Seite.
+push.denied                                         = Benachrichtigungen sind in diesem Browser blockiert. Sie lassen sich in den Einstellungen der Website wieder erlauben.
+push.iosHint                                        = Benachrichtigungen auf dem iPhone: Seite über „Teilen → Zum Home-Bildschirm“ als App hinzufügen und dort öffnen.
