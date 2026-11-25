@@ -13,7 +13,10 @@
                     <li class="list-inline-item me-3"><a href="@pages.MainView.staticUrl("privacy")" onclick="appLoadPage('MainView', 'privacy'); return false;" class="text-decoration-none text-muted small">@gM("footer.privacy")</a></li>
                     <li class="list-inline-item me-3"><a href="@pages.MainView.staticUrl("contact")" onclick="appLoadPage('MainView', 'contact'); return false;" class="text-decoration-none text-muted small">@gM("footer.contact")</a></li>
                     <li class="list-inline-item me-3"><a href="@pages.MainView.staticUrl("gtc")" onclick="appLoadPage('MainView', 'gtc'); return false;" class="text-decoration-none text-muted small">@gM("footer.gtc")</a></li>
-                    <li class="list-inline-item"><a href="@pages.MainView.staticUrl("history")" onclick="appLoadPage('MainView', 'history'); return false;" class="text-decoration-none text-muted small">@gM("footer.history")</a></li>
+                    <li class="list-inline-item me-3"><a href="@pages.MainView.staticUrl("history")" onclick="appLoadPage('MainView', 'history'); return false;" class="text-decoration-none text-muted small">@gM("footer.history")</a></li>
+                    @* Externe Links: Verein (Anbieter) und Landesverband *@
+                    <li class="list-inline-item me-3"><a href="https://ttcfreising.org/" target="_blank" rel="noopener" class="text-decoration-none text-muted small" data-testid="footer-club">TTC Freising Lerchenfeld</a></li>
+                    <li class="list-inline-item"><a href="https://www.bttv.de/" target="_blank" rel="noopener" class="text-decoration-none text-muted small" data-testid="footer-bttv">BTTV</a></li>
                 </ul>
                 @* Social-Media-Buttons: nur Netzwerke mit konfiguriertem Link (.env SOCIAL_*_URL) *@
                 @defining(Seq(

@@ -36,4 +36,22 @@ test.describe('Footer: Social-Media-Buttons', () => {
     // Ohne konfigurierte Links kein leerer Social-Bereich
     await expect(footer.locator('.footer-social')).toHaveCount(configured > 0 ? 1 : 0);
   });
+
+  test('TC-FT-02 [🌐]: Links zum Verein (TTC Freising Lerchenfeld) und zum BTTV öffnen in neuem Tab', async ({ page }) => {
+    await page.goto('/');
+    const footer = page.locator('footer.footer');
+    await expect(footer).toBeVisible({ timeout: 10000 });
+    const links = [
+      { id: 'footer-club', text: 'TTC Freising Lerchenfeld', href: 'https://ttcfreising.org/' },
+      { id: 'footer-bttv', text: 'BTTV', href: 'https://www.bttv.de/' },
+    ];
+    for (const l of links) {
+      const a = footer.locator(`[data-testid="${l.id}"]`);
+      await expect(a).toHaveText(l.text);
+      await expect(a).toHaveAttribute('href', l.href);
+      await expect(a).toHaveAttribute('target', '_blank');
+      await expect(a).toHaveAttribute('rel', /noopener/);
+    }
+    await footer.screenshot({ path: 'test-results/footer-links.png' });
+  });
 });
