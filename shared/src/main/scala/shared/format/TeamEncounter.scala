@@ -280,8 +280,11 @@ object TeamEncounter:
         else Right(List(enc.gameNo))
 
   /**
-   * Entscheidung einer Begegnung "bis n Punkte", die in der K.-o.-Runde nach allen Spielen (n-1):(n-1) steht
-   * (z. B. 7:7 bei der 4er-Mannschaft): zuerst die Satzdifferenz, dann die Balldifferenz aller gewerteten Spiele.
+   * Entscheidung einer Begegnung, die in der K.-o.-Runde nach allen Spielen unentschieden steht: zuerst die
+   * Satzdifferenz, dann die Balldifferenz aller gewerteten Spiele. Gilt für
+   *  - "bis n Punkte" bei (n-1):(n-1), z. B. 7:7 bei der 4er-Mannschaft (Paarkreuz),
+   *  - "alle Spiele" ohne Entscheidungsspiel bei Gleichstand, z. B. 5:5 im Braunschweiger System.
+   * Kennt das System ein Entscheidungsspiel (`level.decider`, z. B. Swaythling-Cup), entscheidet dieses.
    *
    * @param enc       Begegnung
    * @param level     Stufe der Begegnung (K.-o., ohne Unentschieden)
@@ -292,7 +295,11 @@ object TeamEncounter:
    */
   def koTieBreak(enc: Encounter, level: Level, score: (Int, Int), noWinSets: Int): Option[String] =
     val allPlayed = enc.games.forall(g => g.decided || g.status == MEntry.MS_SKIP)
-    if level.kind != Level.BestOf || score != (level.toWin - 1, level.toWin - 1) || !allPlayed then None
+    val drawn = level.kind match
+      case Level.BestOf => score == (level.toWin - 1, level.toWin - 1)
+      case Level.Fixed  => !level.decider && score._1 == score._2 && score._1 + score._2 == level.count
+      case _            => false
+    if !drawn || !allPlayed then None
     else
       val ((sa, sb), (ba, bb)) = totals(enc, noWinSets)
       if sa != sb then Some(if sa > sb then MEntry.TieBreakA else MEntry.TieBreakB)
