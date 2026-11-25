@@ -51,7 +51,7 @@ val minifyJs: Boolean      = getEnvValue(projectRootDir, "APP_MINIFY", "true").t
 // terser-Version für die Minimierung (über npx, wird beim ersten Aufruf geladen; Voraussetzung: Node.js/npx im PATH)
 val terserVersion          = "5.31.0"
 val appOrganization        = getEnvValue(projectRootDir, "APP_ORGANIZATION", "org.jorolicht")
-val appVersion             = getEnvValue(projectRootDir, "APP_VERSION", "1.5.5")
+val appVersion             = getEnvValue(projectRootDir, "APP_VERSION", "1.5.6")
 val appDate                = getEnvValue(projectRootDir, "APP_DATE", "2026-11-18")
 val appMaintainer          = getEnvValue(projectRootDir, "APP_MAINTAINER", "Robert Lichtenegger <robert.lichtenegger@gmail.com>")
 // Plugin-Variante: true = Full Web Site (Header/Footer + pages), false = eingebettet (ohne Header/Footer und pages)
