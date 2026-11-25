@@ -7,7 +7,7 @@ import shared.model.{MatchboardEntry, Matchboard}
 object MatchboardStore {
 
   case class SlugData(
-    var tourneyName: String = "Turnier",
+    var tourneyName: String = "",   // leer bis ein Client den Namen schickt; das Matchboard lädt ihn aus WordPress
     val matchboardDB: ListBuffer[MatchboardEntry] = ListBuffer(),
     val refereeDB: ListBuffer[String] = ListBuffer(),
     var lastActivity: Long = System.currentTimeMillis()

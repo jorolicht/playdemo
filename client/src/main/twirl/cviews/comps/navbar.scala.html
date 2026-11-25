@@ -68,7 +68,7 @@
                                     val slugName = t.slug.split('/').lastOption.getOrElse(t.slug).trim
                                     val slugParam = s"${slugName}-${t.wpId}"
                                     val playBase = if (Global.playUrl.nonEmpty) Global.playUrl.trim else "/srv"
-                                    s"$playBase/matchboard/view/$slugParam"
+                                    s"$playBase/matchboard/view/$slugParam?home=${scala.scalajs.js.URIUtils.encodeURIComponent(Global.homeUrl)}"
                                 } else "") { matchboardUrl =>
                                     @if(matchboardUrl.nonEmpty) {
                                         <a href="@matchboardUrl" target="_blank" 

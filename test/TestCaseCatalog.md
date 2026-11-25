@@ -502,3 +502,7 @@ Tabellenberechnung: Unit-Tests `shared/src/test/scala/shared/format/HeadToHeadSu
 - [x] **TC-ANN-02 [🌐]:** „Mein Turnier“ zeigt die Durchsage oben ohne Anmeldung (ohne Lösch-Button).
 - [x] **TC-ANN-03 [🌐]:** Ohne Schreibrecht kein Senden/Löschen (401/403); mehr als 200 Zeichen werden abgelehnt (400); Lesen ist öffentlich.
 - [x] **TC-ANN-04 [👤]:** Durchsage löschen: verschwindet aus Liste, WordPress, Matchboard und „Mein Turnier“.
+
+## 38. UseCase: Kopfleiste des Matchboards (`server/app/views/MatchboardView.scala.html`; `matchboard_header.spec.ts`)
+### 38.1 Besucher (🌐)
+- [x] **TC-MB-01 [🌐]:** Der Link „InfoAnzeige“ der Turnierübersicht enthält `?home=`; das Matchboard zeigt oben in der Farbe des Hauptmenüs (#336699) links das Logo (Turnierprogramm, bei hinterlegtem Vereinslogo dieses), mittig den Turniernamen aus WordPress (auch ohne Meldung eines Clients) und rechts eine Uhr (HH:MM); kein Platzhalter „Turnier“.
