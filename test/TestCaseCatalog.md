@@ -495,3 +495,10 @@ Tabellenberechnung: Unit-Tests `shared/src/test/scala/shared/format/HeadToHeadSu
 ### 36.1 Turnierverwalter (👤)
 - [x] **TC-H2H-01 [👤]:** Ein neu angelegter Wettbewerb erhält das Wertungssystem `tt_003` („Version 3“) in der Stage-Administration.
 - [x] **TC-H2H-02 [👤]:** Ein bestehender Wettbewerb (Demo, ohne Eintrag) behält seine Version (`tt_001`).
+
+## 37. UseCase: Durchsagen der Turnierleitung (`includes/api/announcement.php`, `services.Announcements`; `announcements.spec.ts`)
+### 37.1 Turnierverwalter (👤) / Besucher (🌐)
+- [x] **TC-ANN-01 [👤]:** Durchsage in der Turnierübersicht (Karte „Durchsagen“, höchstens 200 Zeichen) senden: erscheint in der Liste, ist in WordPress gespeichert (`GET announcements`) und steht als Info-Eintrag auf dem Matchboard (Play-Server).
+- [x] **TC-ANN-02 [🌐]:** „Mein Turnier“ zeigt die Durchsage oben ohne Anmeldung (ohne Lösch-Button).
+- [x] **TC-ANN-03 [🌐]:** Ohne Schreibrecht kein Senden/Löschen (401/403); mehr als 200 Zeichen werden abgelehnt (400); Lesen ist öffentlich.
+- [x] **TC-ANN-04 [👤]:** Durchsage löschen: verschwindet aus Liste, WordPress, Matchboard und „Mein Turnier“.

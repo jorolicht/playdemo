@@ -105,6 +105,26 @@
         @cviews.comps.html.ClickTTPanel(tourney, pages.ClickTTPanel.mode)
     }
 
+    @* Durchsagen der Turnierleitung (nur Cloud-Turniere, nur Bearbeiter), siehe services.Announcements *@
+    @if(services.Announcements.available(tourney) && base.Global.hasTourneyAccess(tourney)) {
+        <div class="card shadow-sm mb-4" data-testid="announce-card">
+            <div class="card-header bg-white">
+                <h4 class="h6 mb-0 text-dark"><i class="bi bi-megaphone me-2 text-primary"></i>@gM("announce.title")</h4>
+            </div>
+            <div class="card-body">
+                <div class="input-group">
+                    <input type="text" class="form-control" @id(InputAnnounce) maxlength="@services.Announcements.MaxLen"
+                           placeholder="@gM("announce.placeholder")" aria-label="@gM("announce.title")">
+                    <button class="btn btn-hero-primary" type="button" @id(BtnAnnounce, "onclick")>
+                        <i class="bi bi-send me-1"></i>@gM("announce.send")
+                    </button>
+                </div>
+                <div class="form-text mb-2">@gM("announce.hint")</div>
+                <div @id(AnnounceListId)>@cviews.comps.html.AnnouncementList(services.Announcements.cached(tourney), Some(BtnAnnounceDelete))</div>
+            </div>
+        </div>
+    }
+
     <!-- Competition List Section -->
     <div class="card shadow-sm">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">

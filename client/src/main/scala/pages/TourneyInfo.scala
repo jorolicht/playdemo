@@ -35,6 +35,11 @@ object TourneyInfo extends BasePage with JsWrapper:
   val BtnCttExport:     HtmlId = genId(name)
   /** Schließt den geöffneten ClickTT-Bereich. */
   val BtnCttClose:      HtmlId = genId(name)
+  /** Durchsagen: Eingabefeld, „Senden“, Lösch-Button je Durchsage (Suffix = Kennung), Liste. */
+  val InputAnnounce:     HtmlId = genId(name)
+  val BtnAnnounce:       HtmlId = genId(name)
+  val BtnAnnounceDelete: HtmlId = genId(name)
+  val AnnounceListId:    HtmlId = genId(name)
 
   /** Stage-Reiter im Baum der Wettbewerbsliste: (Seitenname, Bootstrap-Icon, Message-Key), wie in StageLayout. */
   val StageTabs: Seq[(String, String, String)] = Seq(
@@ -83,12 +88,51 @@ object TourneyInfo extends BasePage with JsWrapper:
 
         setMain(cviews.pages.html.TourneyInfo(tourney, compList, stagesByComp, openComps.toSet, openStages.toSet))
         ClickTTPanel.wire(tourney)
+        loadAnnouncements(tourney)
         true
       }
     } else {
       debug("TourneyInfo: No tournament found, redirecting to Home")
       loadPage(MainView.name, "")
       false
+    }
+
+  /**
+   * Lädt die Durchsagen für Bearbeiter eines Cloud-Turniers, zeigt sie an und stellt sie auf dem Matchboard wieder
+   * her (der Play-Server hält seine Einträge nur im Speicher).
+   *
+   * @param t Turnier
+   */
+  private def loadAnnouncements(t: Tourney): Unit =
+    if services.Announcements.available(t) && Global.hasTourneyAccess(t) then
+      services.Announcements.load(t).foreach { list =>
+        showAnnouncements(list)
+        services.Announcements.syncBoard(t, list)
+      }
+
+  /** Zeigt die Liste der Durchsagen neu an (nur, wenn die Karte sichtbar ist). */
+  private def showAnnouncements(list: Seq[Announcement]): Unit =
+    Option(gE(AnnounceListId)).foreach(_.innerHTML = cviews.comps.html.AnnouncementList(list, Some(BtnAnnounceDelete)).toString)
+
+  /** Schickt den Text des Eingabefelds als neue Durchsage. */
+  private def sendAnnouncement(): Unit =
+    val input = gE(InputAnnounce).asInstanceOf[dom.html.Input]
+    val text  = Option(input).map(_.value.trim).getOrElse("")
+    if text.nonEmpty then
+      services.Announcements.add(services.TourneyDB.tourney, text).foreach {
+        case Right(list) => input.value = ""; showAnnouncements(list)
+        case Left(err)   => DlgMsgbox.showError(err, gM("announce.error"))
+      }
+
+  /**
+   * Löscht eine Durchsage.
+   *
+   * @param id Kennung der Durchsage
+   */
+  private def deleteAnnouncement(id: String): Unit =
+    services.Announcements.remove(services.TourneyDB.tourney, id).foreach {
+      case Right(list) => showAnnouncements(list)
+      case Left(err)   => DlgMsgbox.showError(err, gM("announce.error"))
     }
 
   /**
@@ -253,6 +297,10 @@ object TourneyInfo extends BasePage with JsWrapper:
           }
         }
 
+      case `BtnAnnounce` =>
+        sendAnnouncement()
+      case id if id.id.startsWith(BtnAnnounceDelete.id + "-") =>
+        deleteAnnouncement(id.id.substring(BtnAnnounceDelete.id.length + 1))
       case id if id.id.startsWith(BtnEditComp.id + "-") =>
         compOf(id.id.substring(BtnEditComp.id.length + 1)).foreach(editComp)
 

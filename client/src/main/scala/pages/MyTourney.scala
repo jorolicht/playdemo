@@ -26,6 +26,8 @@ object MyTourney extends BasePage with JsWrapper:
   val BtnChangeId:  HtmlId = genId(name)
   val BtnRefreshId: HtmlId = genId(name)
   val BtnBackId:    HtmlId = genId(name)
+  /** Kasten mit den Durchsagen der Turnierleitung (services.Announcements). */
+  val AnnounceBoxId: HtmlId = genId(name)
 
   /** Abstand des automatischen Neuladens in Millisekunden. */
   val RefreshMs = 30000
@@ -247,7 +249,19 @@ object MyTourney extends BasePage with JsWrapper:
         val view    = storedPlayerId(t).flatMap(id => players.find(_.id == id)).map(buildView)
         setMain(cviews.pages.html.MyTourney(t, players, view, lastUpdate))
         if (view.isDefined) startTimer() else stopTimer()
+        loadAnnouncements(t)
         true
+
+  /**
+   * Lädt die Durchsagen und zeigt sie im Kasten oben an (bei jedem Anzeigen, also auch beim automatischen Neuladen).
+   *
+   * @param t Turnier
+   */
+  private def loadAnnouncements(t: Tourney): Unit =
+    services.Announcements.load(t).foreach { list =>
+      if (Global.activePageName == name.value)
+        Option(gE(AnnounceBoxId)).foreach(_.innerHTML = cviews.comps.html.AnnouncementBox(list).toString)
+    }
 
   /** Startet das automatische Neuladen (einmalig), solange die Seite angezeigt wird. */
   private def startTimer(): Unit =

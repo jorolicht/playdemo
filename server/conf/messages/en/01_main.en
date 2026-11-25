@@ -665,3 +665,11 @@ dlg.copyTourney.apply                               = Copy
 dlg.copyTourney.errName                             = Please enter a name with at least 3 characters.
 dlg.copyTourney.errDate                             = Please choose a valid start date.
 dlg.copyTourney.error                               = The tournament could not be copied
+
+announce.title                                      = Announcements
+announce.placeholder                                = e.g. Prize-giving Men A at 4 pm
+announce.send                                       = Send
+announce.hint                                       = Appears immediately on the match board and in “My Tournament” (up to 200 characters).
+announce.empty                                      = No announcements yet.
+announce.delete                                     = Delete announcement
+announce.error                                      = The announcement could not be saved

@@ -665,3 +665,11 @@ dlg.copyTourney.apply                               = Kopieren
 dlg.copyTourney.errName                             = Bitte einen Namen mit mindestens 3 Zeichen eingeben.
 dlg.copyTourney.errDate                             = Bitte ein gültiges Startdatum wählen.
 dlg.copyTourney.error                               = Das Turnier konnte nicht kopiert werden
+
+announce.title                                      = Durchsagen
+announce.placeholder                                = z. B. Siegerehrung Herren A um 16 Uhr
+announce.send                                       = Senden
+announce.hint                                       = Erscheint sofort auf dem Matchboard und in „Mein Turnier“ (höchstens 200 Zeichen).
+announce.empty                                      = Noch keine Durchsagen.
+announce.delete                                     = Durchsage löschen
+announce.error                                      = Die Durchsage konnte nicht gespeichert werden

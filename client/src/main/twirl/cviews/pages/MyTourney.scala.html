@@ -14,6 +14,9 @@
         </button>
     </div>
 
+    @* Durchsagen der Turnierleitung (wird nach dem Laden gefüllt, leer = unsichtbar) *@
+    <div @id(AnnounceBoxId)>@cviews.comps.html.AnnouncementBox(services.Announcements.cached(tourney))</div>
+
     @view match {
         case None => {
             <div class="card shadow-sm border-0 rounded-4">

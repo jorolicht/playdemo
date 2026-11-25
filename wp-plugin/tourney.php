@@ -128,6 +128,7 @@ require_once TOURNEY_PLUGIN_PATH . 'includes/api/user.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/webauthn.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/player.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/waitlist.php';
+require_once TOURNEY_PLUGIN_PATH . 'includes/api/announcement.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/club.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/tourney.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/competition.php';

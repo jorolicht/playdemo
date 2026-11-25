@@ -1,0 +1,29 @@
+@import shared.model.Announcement
+@import shared.DomTypes.HtmlId
+@import cviews.helper.html.*
+@import base.Messages.gM
+
+@*
+ * Liste der Durchsagen (neueste zuerst), siehe services.Announcements.
+ * deleteId: Lösch-Button je Durchsage ("<id>-<durchsage>"), None = nur lesen (Mein Turnier).
+ *@
+@(list: Seq[Announcement], deleteId: Option[HtmlId] = None)
+
+@if(list.isEmpty) {
+    @if(deleteId.nonEmpty) { <div class="text-muted small" data-testid="announce-empty">@gM("announce.empty")</div> }
+} else {
+    <ul class="list-group list-group-flush" data-testid="announce-list">
+        @for(a <- list) {
+            <li class="list-group-item d-flex align-items-start gap-2 px-0 bg-transparent" data-testid="announce-item">
+                <span class="badge bg-secondary-subtle text-secondary-emphasis border mt-1">@a.time</span>
+                <span class="flex-grow-1 fw-semibold" data-testid="announce-text">@a.text</span>
+                @for(del <- deleteId) {
+                    <button type="button" class="btn btn-outline-danger btn-sm py-0" @id(del, "onclick", a.id)
+                            title="@gM("announce.delete")" aria-label="@gM("announce.delete")">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                }
+            </li>
+        }
+    </ul>
+}
