@@ -477,3 +477,9 @@ Im Dialog „Wettbewerb bearbeiten“ legt der Turnierleiter eine Höchstzahl Te
 - [x] **TC-WL-02 [🌐]:** Ausgebucht: „Ausgebucht – 0 auf der Warteliste“, Button „Auf die Warteliste“, Hinweis im Dialog; nach der Anmeldung „Platz 1 der Warteliste“, Status WAIT (nicht aktiv), Mail „Warteliste“.
 - [x] **TC-WL-03 [👤]:** Anmeldeliste markiert „Warteliste 1“; nach dem Entfernen des Teilnehmers rückt die Spielerin nach (REGI, aktiv), `waitlist-notify` meldet 1 Mail, Mail „Nachgerückt“.
 - [x] **TC-WL-04 [👤]:** Höchstzahl im Dialog „Wettbewerb bearbeiten“ speichern (`maxPants` 16); Turnierseite zeigt „16 von 16 Plätzen frei“.
+
+## 34. UseCase: Statische Seite „Wertungssystem“ (`site/content/wertung.html`, `wertung_en.html`; `scoring_page.spec.ts`)
+### 34.1 Besucher (🌐)
+- [x] **TC-WRT-01 [🌐]:** Die Hilfe (Abschnitt 6) verweist auf `/wertung/`; die Seite hat 11 Abschnitte im Inhaltsverzeichnis (alle Ziele vorhanden), Kurzschreibweise, Tabellenkriterien und Spielsysteme für Mannschaften; Abschnitt 9 der Hilfe verweist auf `/wertung/#tabelle`.
+- [x] **TC-WRT-02 [🌐]:** `/wertung/` und `/en/scoring/` liefern 200, sind indexierbar, haben Canonical und hreflang aufeinander und stehen in der Sitemap.
+- [x] **TC-WRT-03 [🌐]:** Die englische Hilfe verweist auf `/en/scoring/` mit englischem Inhalt.

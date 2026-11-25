@@ -1,0 +1,291 @@
+<!--
+ * Wertungssystem (Deutsch)
+ *
+ * Statische Seite /wertung/ (TOURNEY_STATIC_PAGES in wp-plugin/includes/static-pages.php, MainView.StaticSlugs),
+ * verlinkt aus der Hilfe (hilfe.html, Abschnitte 6 und 9).
+ * Inhalt entspricht dem Wertungssystem Tischtennis Version 2 (shared/sports/tt_002.json) und der Tabellenberechnung
+ * in shared/format (Groups.calc, TeamEncounter, Result/SwissSystem.scala.html).
+-->
+<style>
+    .wrt-wrapper { font-family: 'Inter', system-ui, -apple-system, sans-serif; color: var(--bs-body-color, #1e293b); line-height: 1.6; }
+    .wrt-hero { background: linear-gradient(135deg, rgba(13,110,253,.08) 0%, rgba(102,16,242,.08) 100%); border: 1px solid rgba(13,110,253,.15);
+                border-radius: 16px; padding: 32px 24px; margin-bottom: 28px; text-align: center; }
+    .wrt-title { font-weight: 800; font-size: 2rem; margin-bottom: 8px; }
+    .wrt-subtitle { max-width: 760px; margin: 0 auto; color: var(--bs-secondary-color, #64748b); }
+    .wrt-toc { background: var(--bs-tertiary-bg, #f8fafc); border: 1px solid var(--bs-border-color, #e2e8f0); border-radius: 12px;
+               padding: 18px 22px; margin-bottom: 32px; columns: 2 280px; column-gap: 32px; }
+    .wrt-toc a { text-decoration: none; display: block; padding: 2px 0; break-inside: avoid; }
+    .wrt-section { margin-bottom: 40px; scroll-margin-top: 80px; }
+    .wrt-section h2 { font-weight: 800; font-size: 1.45rem; padding-bottom: 6px; border-bottom: 2px solid rgba(13,110,253,.2); margin-bottom: 16px; }
+    .wrt-section h3 { font-weight: 700; font-size: 1.12rem; margin: 22px 0 8px; scroll-margin-top: 80px; }
+    .wrt-note { border-left: 4px solid #0d6efd; background: rgba(13,110,253,.06); border-radius: 6px; padding: 10px 14px; margin: 12px 0; }
+    .wrt-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0 16px; }
+    .wrt-step { border: 1px solid rgba(13,110,253,.3); background: rgba(13,110,253,.06); border-radius: 8px; padding: 6px 12px; font-weight: 600; }
+    .wrt-wrapper table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: .92rem; }
+    .wrt-wrapper th, .wrt-wrapper td { border: 1px solid var(--bs-border-color, #e2e8f0); padding: 6px 10px; text-align: left; vertical-align: top;
+                                       overflow-wrap: anywhere; hyphens: auto; }
+    .wrt-wrapper th { background: var(--bs-tertiary-bg, #f8fafc); }
+    .wrt-wrapper code { font-size: .88em; }
+</style>
+
+<div class="wrt-wrapper" lang="de">
+    <div class="wrt-hero">
+        <h2 class="wrt-title"><i class="bi bi-calculator text-primary me-2"></i>Wertungssystem</h2>
+        <p class="wrt-subtitle">
+            Wie TurnierService Sätze, Spiele und Mannschaftsbegegnungen wertet und Tabellen berechnet –
+            vom einzelnen Ball bis zur Platzierung. Beschrieben ist das Wertungssystem Tischtennis, Version 2.
+        </p>
+    </div>
+
+    <nav class="wrt-toc">
+        <a href="#ueberblick">1. Überblick</a>
+        <a href="#satz">2. Satz</a>
+        <a href="#spiel">3. Spiel und Gewinnsätze</a>
+        <a href="#kurzschreibweise">4. Eingabe in Kurzschreibweise</a>
+        <a href="#kampflos">5. Freilos und kampflose Spiele</a>
+        <a href="#tabelle">6. Tabellen: Gruppen und Jeder gegen jeden</a>
+        <a href="#schweizer-system">7. Schweizer System</a>
+        <a href="#ko">8. K.-o.-System</a>
+        <a href="#begegnung">9. Mannschaften: die Begegnung</a>
+        <a href="#spielsysteme">10. Spielsysteme für Mannschaften</a>
+        <a href="#versionen">11. Versionen des Wertungssystems</a>
+    </nav>
+
+    <!-- 1 -->
+    <div class="wrt-section" id="ueberblick">
+        <h2>1. Überblick</h2>
+        <p>Das Wertungssystem legt die Regeln einer Sportart fest: wann ein Satz und ein Spiel gewonnen sind, wie eine
+           Mannschaftsbegegnung endet und in welcher Reihenfolge die Tabelle entschieden wird. Es ist in Stufen aufgebaut;
+           jede Stufe zählt die gewonnenen Einheiten der Stufe darunter:</p>
+        <div class="wrt-steps">
+            <span class="wrt-step">Ball</span> <i class="bi bi-arrow-right"></i>
+            <span class="wrt-step">Satz</span> <i class="bi bi-arrow-right"></i>
+            <span class="wrt-step">Spiel</span> <i class="bi bi-arrow-right"></i>
+            <span class="wrt-step">Begegnung <small class="text-muted">(nur Mannschaften)</small></span>
+        </div>
+        <table>
+            <tr><th>Stufe</th><th>Regel</th><th>Beispiel</th></tr>
+            <tr><td>Ball</td><td>kleinste gezählte Einheit</td><td>–</td></tr>
+            <tr><td>Satz</td><td>bis 11 Punkte, mindestens 2 Punkte Vorsprung</td><td>11:7, 12:10, 15:13</td></tr>
+            <tr><td>Spiel</td><td>wer zuerst die eingestellte Zahl von Sätzen gewinnt (2, 3 oder 4 Gewinnsätze)</td><td>3:1 bei 3 Gewinnsätzen</td></tr>
+            <tr><td>Begegnung</td><td>je nach Spielsystem: bis eine Mannschaft n Punkte hat oder alle Spiele</td><td>3:2 im Bundessystem</td></tr>
+        </table>
+        <p>Welche Regeln gelten, steht im Wettbewerb: Jeder Wettbewerb merkt sich die <strong>Version</strong> seines Wertungssystems
+           (Abschnitt 11) und wird immer danach gewertet – auch wenn später neue Regeln hinzukommen.</p>
+    </div>
+
+    <!-- 2 -->
+    <div class="wrt-section" id="satz">
+        <h2>2. Satz</h2>
+        <p>Ein Satz geht bis <strong>11 Punkte</strong>. Gewonnen hat, wer 11 Punkte erreicht und dabei mindestens
+           <strong>2 Punkte Vorsprung</strong> hat. Steht es 10:10, wird weitergespielt, bis eine Seite 2 Punkte vorn liegt
+           (12:10, 13:11, …); eine Obergrenze gibt es nicht.</p>
+        <table>
+            <tr><th>Ergebnis</th><th>gültig?</th><th>Begründung</th></tr>
+            <tr><td>11:9</td><td>ja</td><td>11 Punkte mit 2 Punkten Vorsprung</td></tr>
+            <tr><td>11:10</td><td>nein</td><td>nur 1 Punkt Vorsprung, es muss weitergespielt werden</td></tr>
+            <tr><td>14:12</td><td>ja</td><td>nach 10:10 mit genau 2 Punkten Vorsprung</td></tr>
+            <tr><td>14:10</td><td>nein</td><td>über 11 Punkte hinaus endet ein Satz immer mit genau 2 Punkten Vorsprung</td></tr>
+        </table>
+    </div>
+
+    <!-- 3 -->
+    <div class="wrt-section" id="spiel">
+        <h2>3. Spiel und Gewinnsätze</h2>
+        <p>Ein Spiel gewinnt, wer zuerst die nötige Zahl von Sätzen gewonnen hat. Die <strong>Gewinnsätze</strong> stellen Sie je
+           Spielphase in der Administration ein:</p>
+        <table>
+            <tr><th>Gewinnsätze</th><th>auch genannt</th><th>mögliche Ergebnisse</th></tr>
+            <tr><td>2</td><td>Best-of-3</td><td>2:0, 2:1</td></tr>
+            <tr><td>3</td><td>Best-of-5 (Standard)</td><td>3:0, 3:1, 3:2</td></tr>
+            <tr><td>4</td><td>Best-of-7</td><td>4:0, 4:1, 4:2, 4:3</td></tr>
+        </table>
+        <p>Ein Spiel kann nicht unentschieden enden. Beim Speichern prüft das Programm, dass jeder Satz gültig ist und dass genau eine
+           Seite die nötigen Sätze erreicht hat.</p>
+    </div>
+
+    <!-- 4 -->
+    <div class="wrt-section" id="kurzschreibweise">
+        <h2>4. Eingabe in Kurzschreibweise</h2>
+        <p>Weil der Sieger eines Satzes fast immer 11 Punkte hat, genügt bei der Eingabe eine Zahl je Satz:
+           die <strong>Punkte des Verlierers</strong>, <strong>positiv</strong>, wenn Spieler A (links) den Satz gewinnt,
+           <strong>negativ</strong>, wenn Spieler B gewinnt. Das Programm ergänzt die Punkte des Siegers.</p>
+        <table>
+            <tr><th>Eingabe</th><th>Satz</th><th>Erklärung</th></tr>
+            <tr><td><code>7</code></td><td>11:7</td><td>A gewinnt, B hat 7 Punkte</td></tr>
+            <tr><td><code>-8</code></td><td>8:11</td><td>B gewinnt, A hat 8 Punkte</td></tr>
+            <tr><td><code>10</code></td><td>12:10</td><td>ab 10 Punkten des Verlierers: Sieger hat 2 Punkte mehr</td></tr>
+            <tr><td><code>-13</code></td><td>13:15</td><td>Verlängerung, B gewinnt</td></tr>
+            <tr><td><code>0</code> oder <code>+0</code></td><td>11:0</td><td>A gewinnt zu null</td></tr>
+            <tr><td><code>-0</code></td><td>0:11</td><td>B gewinnt zu null</td></tr>
+        </table>
+        <p>Beispiel für ein Spiel mit 3 Gewinnsätzen: <code>5</code>, <code>-9</code>, <code>10</code>, <code>3</code> ergibt
+           11:5, 9:11, 12:10, 11:3 – also 3:1 für Spieler A.</p>
+    </div>
+
+    <!-- 5 -->
+    <div class="wrt-section" id="kampflos">
+        <h2>5. Freilos und kampflose Spiele</h2>
+        <ul>
+            <li><strong>Freilos im K.-o.-System:</strong> Trifft ein Spieler auf ein Freilos, gewinnt er kampflos und rückt automatisch
+                in die nächste Runde. Das Spiel wird mit den vollen Gewinnsätzen gewertet (z. B. 3:0), ohne Bälle.</li>
+            <li><strong>Freilos im Schweizer System:</strong> Bei ungerader Teilnehmerzahl erhält in jeder Runde ein Spieler ein Freilos;
+                es zählt als Sieg (Abschnitt 7).</li>
+            <li><strong>Fehlender Spieler in einer Mannschaftsbegegnung:</strong> Ist eine Position nicht besetzt, gewinnt die andere
+                Mannschaft dieses Spiel kampflos mit den vollen Gewinnsätzen. Fehlen beide Spieler, zählt das Spiel für niemanden.</li>
+        </ul>
+    </div>
+
+    <!-- 6 -->
+    <div class="wrt-section" id="tabelle">
+        <h2>6. Tabellen: Gruppen und Jeder gegen jeden</h2>
+        <p>In Gruppen, bei Jeder gegen jeden und in der Gesamttabelle der Doppelten Runde (Hin- und Rückrunde) wird die Tabelle
+           aus allen gewerteten Spielen berechnet. Die Reihenfolge entscheiden diese Kriterien, nacheinander – erst wenn zwei
+           Teilnehmer in einem Kriterium gleich sind, zählt das nächste:</p>
+        <table>
+            <tr><th>Rang</th><th>Einzel und Doppel</th><th>Mannschaften</th></tr>
+            <tr><td>1.</td><td>Spieldifferenz (gewonnene minus verlorene Spiele)</td><td>Begegnungsdifferenz (gewonnene minus verlorene Begegnungen)</td></tr>
+            <tr><td>2.</td><td>Satzdifferenz</td><td>Spieldifferenz (Einzel und Doppel aller Begegnungen)</td></tr>
+            <tr><td>3.</td><td>Balldifferenz</td><td>Satzdifferenz</td></tr>
+            <tr><td>4.</td><td>–</td><td>Balldifferenz</td></tr>
+        </table>
+        <p>Beispiel: Anna und Ben haben je 2 Spiele gewonnen und 1 verloren (Spieldifferenz +1). Anna hat die Sätze 7:4 gewonnen
+           (+3), Ben 6:4 (+2) – Anna steht vor Ben. Wären auch die Sätze gleich, entschiede die Balldifferenz.</p>
+        <div class="wrt-note">Sind zwei Teilnehmer in <strong>allen</strong> Kriterien gleich, erhalten sie <strong>denselben Platz</strong>
+            (z. B. zweimal Platz 2, danach Platz 4). Der direkte Vergleich der beiden wird derzeit nicht berücksichtigt.
+            Wer bei Gleichstand weiterkommt, entscheiden Sie dann in der Auslosung der Folgerunde.</div>
+        <p>Bei Mannschaften zählt eine unentschiedene Begegnung (z. B. 5:5 im Braunschweiger System) weder als gewonnen noch als
+           verloren; sie verändert die Begegnungsdifferenz nicht.</p>
+    </div>
+
+    <!-- 7 -->
+    <div class="wrt-section" id="schweizer-system">
+        <h2>7. Schweizer System</h2>
+        <p>Im Schweizer System spielen nicht alle gegeneinander; nach jeder Runde wird neu ausgelost. Die Tabelle ordnet nach:</p>
+        <ol>
+            <li><strong>Siege</strong> (ein Freilos zählt als Sieg),</li>
+            <li><strong>Buchholz-Wertung:</strong> Summe der Siege aller bisherigen Gegner (Freilose zählen nicht als Gegner) – wer
+                gegen stärkere Gegner gespielt hat, steht bei gleicher Siegzahl vorn,</li>
+            <li><strong>Satzdifferenz</strong>,</li>
+            <li><strong>TTR-Wert</strong>.</li>
+        </ol>
+        <p>Für die Auslosung der nächsten Runde gilt, in dieser Rangfolge: keine Paarung zweimal und kein zweites Freilos für denselben
+           Spieler; das Freilos erhält ein Spieler der untersten Punktgruppe; Spieler mit gleicher Siegzahl spielen gegeneinander;
+           Vereinsschutz; möglichst ähnliche TTR-Werte, das Freilos geht an den Schwächsten.</p>
+    </div>
+
+    <!-- 8 -->
+    <div class="wrt-section" id="ko">
+        <h2>8. K.-o.-System</h2>
+        <p>Im K.-o.-System rückt der Sieger jedes Spiels in die nächste Runde, der Verlierer scheidet aus (beim Doppelten K.-o. wechselt
+           er in die Verliererrunde). Die Platzierung ergibt sich aus der Runde, in der ein Teilnehmer ausscheidet; das Spiel um
+           Platz 3 entscheidet über die Plätze 3 und 4.</p>
+        <p>Eine K.-o.-Begegnung braucht immer einen Sieger. Bei Mannschaften gilt deshalb (Abschnitt 9): Steht es nach allen Spielen
+           unentschieden, entscheidet das Entscheidungsspiel bzw. die Satz- und Balldifferenz.</p>
+    </div>
+
+    <!-- 9 -->
+    <div class="wrt-section" id="begegnung">
+        <h2>9. Mannschaften: die Begegnung</h2>
+        <p>Bei Mannschaftswettbewerben kommt über dem Spiel die Stufe <strong>Begegnung</strong> hinzu: Zwei Mannschaften spielen
+           mehrere Einzel und Doppel in einer festen <strong>Spielfolge</strong>; jedes gewonnene Spiel ist ein Punkt für die Mannschaft.
+           Das Spielsystem (Abschnitt 10) wählen Sie je Spielphase in der Administration, zusammen mit einer Spielweise:</p>
+        <ul>
+            <li><strong>Bis n Punkte:</strong> Gespielt wird, bis eine Mannschaft n Punkte hat; die restlichen Spiele entfallen
+                (z. B. Bundessystem: Ende bei 3:0, 3:1 oder 3:2).</li>
+            <li><strong>Alle Spiele:</strong> Alle Spiele der Spielfolge werden ausgetragen, gewonnen hat die Mannschaft mit mehr Punkten
+                (z. B. Bundessystem „Alle 5 Spiele“: auch 4:1 oder 5:0 möglich).</li>
+            <li><strong>Unentschieden:</strong> Einige Systeme lassen ein Unentschieden zu (z. B. 2:2 im Swaythling-Cup, 7:7 beim
+                4er-Paarkreuz, 5:5 im Braunschweiger System). In der Tabelle zählt es weder als Sieg noch als Niederlage.</li>
+            <li><strong>Entscheidungsspiel:</strong> Ein Entscheidungsspiel (z. B. das Entscheidungsdoppel im Swaythling-Cup) wird nur
+                gespielt, wenn es nach allen übrigen Spielen unentschieden steht und die gewählte Spielweise es vorsieht.</li>
+        </ul>
+        <h3>Unentschieden in K.-o.-Runden</h3>
+        <p>In K.-o.-Runden gibt es kein Unentschieden:</p>
+        <ul>
+            <li>Kennt das System ein Entscheidungsspiel (Swaythling-Cup), wird es bei Gleichstand immer gespielt.</li>
+            <li>Bei „Bis n Punkte“ mit möglichem Unentschieden (4er- und 6er-Paarkreuz, z. B. 7:7) gewinnt die Mannschaft mit der
+                besseren <strong>Satzdifferenz</strong> aus allen Spielen der Begegnung, bei gleicher Satzdifferenz die mit der besseren
+                <strong>Balldifferenz</strong>.</li>
+        </ul>
+        <p>Vor der Eingabe geben beide Mannschaften ihre <strong>Aufstellung</strong> ab (Positionen A1, A2 … bzw. B1, B2 … und
+           Doppel). Nach dem Start der Begegnung ist die Aufstellung nicht mehr änderbar.</p>
+    </div>
+
+    <!-- 10 -->
+    <div class="wrt-section" id="spielsysteme">
+        <h2>10. Spielsysteme für Mannschaften</h2>
+        <p>In der Spielfolge steht A für die erste, B für die zweite Mannschaft, D für ein Doppel. Die Standard-Spielweise ist
+           jeweils zuerst genannt. In der Administration einer Spielphase zeigt der Info-Button neben der Systemauswahl dieselben
+           Angaben für das gewählte System.</p>
+
+        <h3>2er-Mannschaften (2 Stammspieler, Kader bis 3 Spieler)</h3>
+        <table>
+            <tr><th>System</th><th>Spielfolge</th><th>Spielweisen</th></tr>
+            <tr><td><strong>Bundessystem (Werner-Scheffler)</strong> – Standard, im Verbandsspielbetrieb am weitesten verbreitet</td>
+                <td>A1–B2, A2–B1, D–D, A1–B1, A2–B2</td>
+                <td>bis 3 Punkte; alle 5 Spiele</td></tr>
+            <tr><td><strong>Swaythling-Cup (modifiziert)</strong> – 4 Einzel jeder gegen jeden</td>
+                <td>A1–B1, A2–B2, A1–B2, A2–B1, Entscheidungsdoppel D–D</td>
+                <td>alle 4 Einzel, Unentschieden bei 2:2; Entscheidungsdoppel bei 2:2</td></tr>
+            <tr><td><strong>Quick-Cup (3-Punkte-System)</strong> – Kurzformat</td>
+                <td>A1–B1, A2–B2, D–D</td>
+                <td>bis 2 Punkte; alle 3 Spiele</td></tr>
+        </table>
+
+        <h3>3er-Mannschaften (3 Spieler)</h3>
+        <table>
+            <tr><th>System</th><th>Spielfolge</th><th>Spielweisen</th></tr>
+            <tr><td><strong>Corbillon-Cup</strong> – Standard; die Einzel bestreiten 2 Spieler, im Doppel kann der dritte eingesetzt werden</td>
+                <td>A1–B2, A2–B1, D–D, A1–B1, A2–B2</td>
+                <td>bis 3 Punkte; alle 5 Spiele</td></tr>
+            <tr><td><strong>Eckardt-Pokal</strong></td>
+                <td>A1–B2, A2–B1, A3–B3, D–D, A1–B1, A3–B2, A2–B3</td>
+                <td>bis 4 Punkte; alle 7 Spiele</td></tr>
+            <tr><td><strong>Braunschweiger System (3er)</strong> – jeder gegen jeden der anderen Mannschaft</td>
+                <td>D–D, A1–B2, A2–B1, A3–B2, A2–B3, A1–B1, A3–B3, A2–B2, A3–B1, A1–B3</td>
+                <td>alle 10 Spiele, Unentschieden bei 5:5</td></tr>
+        </table>
+
+        <h3>4er-Mannschaften (4 Spieler)</h3>
+        <table>
+            <tr><th>System</th><th>Spielfolge</th><th>Spielweisen</th></tr>
+            <tr><td><strong>4er-Mannschaft (Paarkreuz)</strong> – Standard, Verbandsspielbetrieb</td>
+                <td>D1–D1, D2–D2, A1–B2, A2–B1, A3–B4, A4–B3, A1–B1, A2–B2, A3–B3, A4–B4, A3–B1, A1–B3, A2–B4, A4–B2</td>
+                <td>bis 8 Punkte, Unentschieden bei 7:7</td></tr>
+            <tr><td><strong>Braunschweiger System (4er)</strong></td>
+                <td>D1–D1, D2–D2, A1–B1, A2–B2, A3–B3, A4–B4, A1–B2, A2–B1, A3–B4, A4–B3</td>
+                <td>alle 10 Spiele, Unentschieden bei 5:5</td></tr>
+        </table>
+
+        <h3>6er-Mannschaften (6 Spieler)</h3>
+        <table>
+            <tr><th>System</th><th>Spielfolge</th><th>Spielweisen</th></tr>
+            <tr><td><strong>6er-Paarkreuz</strong> – 3 Eingangsdoppel, 12 Einzel in den Paarkreuzen, Schlussdoppel</td>
+                <td>D1–D2, D2–D1, D3–D3, A1–B2, A2–B1, A3–B4, A4–B3, A5–B6, A6–B5, A1–B1, A2–B2, A3–B3, A4–B4, A5–B5, A6–B6, D1–D1</td>
+                <td>bis 9 Punkte, Unentschieden bei 8:8</td></tr>
+        </table>
+    </div>
+
+    <!-- 11 -->
+    <div class="wrt-section" id="versionen">
+        <h2>11. Versionen des Wertungssystems</h2>
+        <p>Regeln ändern sich: neue Spielsysteme kommen hinzu, Spielweisen werden ergänzt. Damit ein laufendes oder abgeschlossenes
+           Turnier dadurch nicht plötzlich anders gewertet wird, ist das Wertungssystem <strong>versioniert</strong>:</p>
+        <ul>
+            <li>Eine veröffentlichte Version wird nie mehr geändert; neue Regeln erscheinen als neue Version.</li>
+            <li>Ein neuer Wettbewerb erhält die neueste Version. Sie sehen sie in der Administration der Spielphase unter
+                <strong>„Wertungssystem“</strong> und können sie dort bis zur ersten Auslosung ändern.</li>
+            <li>Wettbewerbe aus älteren Turnieren behalten ihre Version, auch nach einem Update des Programms. Kennt eine Installation eine
+                Version nicht (z. B. ein Turnier aus einer neueren Installation), rechnet sie mit ihrer neuesten Version und zeigt einen Hinweis.</li>
+        </ul>
+        <table>
+            <tr><th>Version</th><th>Inhalt</th></tr>
+            <tr><td>Version 1</td><td>Satz bis 11 mit 2 Punkten Vorsprung, 2 bis 4 Gewinnsätze, Tabelle nach Spiel-, Satz- und Balldifferenz;
+                eine Mannschaftsform für 2er-Mannschaften (2 Einzel und 1 Doppel, bis 2 Siege oder alle 3 Spiele).
+                Gilt für alle Wettbewerbe, die vor Einführung der Versionen angelegt wurden.</td></tr>
+            <tr><td>Version 2</td><td>wie Version 1, dazu die Spielsysteme für 2er-, 3er-, 4er- und 6er-Mannschaften aus Abschnitt 10
+                mit Spielweisen, Unentschieden und Entscheidungsspiel.</td></tr>
+        </table>
+    </div>
+</div>

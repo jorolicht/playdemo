@@ -36,7 +36,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
     "funktionen" -> ("funktionen", "features"), "pricing" -> ("preise", "pricing"), "excel" -> ("excel", "excel"),
     "plugin" -> ("plugin", "plugin"), "history" -> ("historie", "history"), "impressum" -> ("impressum", "imprint"),
     "privacy" -> ("datenschutz", "privacy"), "contact" -> ("kontakt", "contact"), "gtc" -> ("agb", "terms"),
-    "hilfe" -> ("hilfe", "help"))
+    "hilfe" -> ("hilfe", "help"), "wertung" -> ("wertung", "scoring"))
 
   /**
    * Normalisiert einen Seitenparameter (deutsch/englisch, z. B. "preise", "functions") auf den Dateinamen in pages/.
@@ -53,6 +53,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
     case "pricing" | "preise"                 => "pricing"
     case "history" | "historie"               => "history"
     case "help" | "hilfe"                     => "hilfe"
+    case "scoring" | "wertung"                => "wertung"
     case other                                => other
   }
 
@@ -448,6 +449,7 @@ object MainView extends BasePage with JsWrapper with ComWrapper:
                 case "pricing" | "preise"           => if (Global.lang == "en") "Support & Pricing" else "Support & Kosten"
                 case "history"                      => if (Global.lang == "en") "Version History" else "Versionshistorie"
                 case "hilfe"                        => if (Global.lang == "en") "Help & User Guide" else "Hilfe & Benutzerhandbuch"
+                case "wertung"                      => if (Global.lang == "en") "Scoring System" else "Wertungssystem"
                 case _                              => staticName.capitalize
               }
               setMain(cviews.pages.MainView.html.PageContent(pageTitle, text))

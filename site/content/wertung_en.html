@@ -1,0 +1,287 @@
+<!--
+ * Scoring system (English)
+ *
+ * Static page /en/scoring/ (TOURNEY_STATIC_PAGES in wp-plugin/includes/static-pages.php, MainView.StaticSlugs),
+ * linked from the help page (hilfe_en.html, sections 6 and 9). German version: wertung.html.
+ * Content follows the table tennis scoring system version 2 (shared/sports/tt_002.json) and the table calculation
+ * in shared/format (Groups.calc, TeamEncounter, Result/SwissSystem.scala.html).
+-->
+<style>
+    .wrt-wrapper { font-family: 'Inter', system-ui, -apple-system, sans-serif; color: var(--bs-body-color, #1e293b); line-height: 1.6; }
+    .wrt-hero { background: linear-gradient(135deg, rgba(13,110,253,.08) 0%, rgba(102,16,242,.08) 100%); border: 1px solid rgba(13,110,253,.15);
+                border-radius: 16px; padding: 32px 24px; margin-bottom: 28px; text-align: center; }
+    .wrt-title { font-weight: 800; font-size: 2rem; margin-bottom: 8px; }
+    .wrt-subtitle { max-width: 760px; margin: 0 auto; color: var(--bs-secondary-color, #64748b); }
+    .wrt-toc { background: var(--bs-tertiary-bg, #f8fafc); border: 1px solid var(--bs-border-color, #e2e8f0); border-radius: 12px;
+               padding: 18px 22px; margin-bottom: 32px; columns: 2 280px; column-gap: 32px; }
+    .wrt-toc a { text-decoration: none; display: block; padding: 2px 0; break-inside: avoid; }
+    .wrt-section { margin-bottom: 40px; scroll-margin-top: 80px; }
+    .wrt-section h2 { font-weight: 800; font-size: 1.45rem; padding-bottom: 6px; border-bottom: 2px solid rgba(13,110,253,.2); margin-bottom: 16px; }
+    .wrt-section h3 { font-weight: 700; font-size: 1.12rem; margin: 22px 0 8px; scroll-margin-top: 80px; }
+    .wrt-note { border-left: 4px solid #0d6efd; background: rgba(13,110,253,.06); border-radius: 6px; padding: 10px 14px; margin: 12px 0; }
+    .wrt-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0 16px; }
+    .wrt-step { border: 1px solid rgba(13,110,253,.3); background: rgba(13,110,253,.06); border-radius: 8px; padding: 6px 12px; font-weight: 600; }
+    .wrt-wrapper table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: .92rem; }
+    .wrt-wrapper th, .wrt-wrapper td { border: 1px solid var(--bs-border-color, #e2e8f0); padding: 6px 10px; text-align: left; vertical-align: top;
+                                       overflow-wrap: anywhere; hyphens: auto; }
+    .wrt-wrapper th { background: var(--bs-tertiary-bg, #f8fafc); }
+    .wrt-wrapper code { font-size: .88em; }
+</style>
+
+<div class="wrt-wrapper" lang="en">
+    <div class="wrt-hero">
+        <h2 class="wrt-title"><i class="bi bi-calculator text-primary me-2"></i>Scoring System</h2>
+        <p class="wrt-subtitle">
+            How TurnierService scores sets, matches and team ties and calculates tables –
+            from a single point to the final placing. Described here is the table tennis scoring system, version 2.
+        </p>
+    </div>
+
+    <nav class="wrt-toc">
+        <a href="#ueberblick">1. Overview</a>
+        <a href="#satz">2. Set</a>
+        <a href="#spiel">3. Match and sets to win</a>
+        <a href="#kurzschreibweise">4. Short notation</a>
+        <a href="#kampflos">5. Byes and walkovers</a>
+        <a href="#tabelle">6. Tables: groups and round robin</a>
+        <a href="#schweizer-system">7. Swiss system</a>
+        <a href="#ko">8. Knockout</a>
+        <a href="#begegnung">9. Teams: the tie</a>
+        <a href="#spielsysteme">10. Team systems</a>
+        <a href="#versionen">11. Scoring system versions</a>
+    </nav>
+
+    <!-- 1 -->
+    <div class="wrt-section" id="ueberblick">
+        <h2>1. Overview</h2>
+        <p>The scoring system defines the rules of a sport: when a set and a match are won, how a team tie ends and in which order
+           the table is decided. It is built in levels; each level counts the units won on the level below:</p>
+        <div class="wrt-steps">
+            <span class="wrt-step">Point</span> <i class="bi bi-arrow-right"></i>
+            <span class="wrt-step">Set</span> <i class="bi bi-arrow-right"></i>
+            <span class="wrt-step">Match</span> <i class="bi bi-arrow-right"></i>
+            <span class="wrt-step">Tie <small class="text-muted">(teams only)</small></span>
+        </div>
+        <table>
+            <tr><th>Level</th><th>Rule</th><th>Example</th></tr>
+            <tr><td>Point</td><td>smallest counted unit</td><td>–</td></tr>
+            <tr><td>Set (game)</td><td>to 11 points, with a lead of at least 2 points</td><td>11:7, 12:10, 15:13</td></tr>
+            <tr><td>Match</td><td>whoever first wins the configured number of sets (2, 3 or 4 sets to win)</td><td>3:1 with 3 sets to win</td></tr>
+            <tr><td>Tie</td><td>depending on the team system: until one team has n points, or all matches</td><td>3:2 in the Bundessystem</td></tr>
+        </table>
+        <p>Which rules apply is stored in the competition: every competition keeps the <strong>version</strong> of its scoring system
+           (section 11) and is always scored by it – even when new rules are added later.</p>
+    </div>
+
+    <!-- 2 -->
+    <div class="wrt-section" id="satz">
+        <h2>2. Set</h2>
+        <p>A set is played to <strong>11 points</strong>. It is won by the side that reaches 11 points with a lead of at least
+           <strong>2 points</strong>. At 10:10 play continues until one side leads by 2 points (12:10, 13:11, …); there is no upper limit.</p>
+        <table>
+            <tr><th>Score</th><th>valid?</th><th>Reason</th></tr>
+            <tr><td>11:9</td><td>yes</td><td>11 points with a 2-point lead</td></tr>
+            <tr><td>11:10</td><td>no</td><td>only a 1-point lead, play continues</td></tr>
+            <tr><td>14:12</td><td>yes</td><td>after 10:10 with exactly 2 points ahead</td></tr>
+            <tr><td>14:10</td><td>no</td><td>beyond 11 points a set always ends with a lead of exactly 2 points</td></tr>
+        </table>
+    </div>
+
+    <!-- 3 -->
+    <div class="wrt-section" id="spiel">
+        <h2>3. Match and sets to win</h2>
+        <p>A match is won by whoever first wins the required number of sets. You set the <strong>sets to win</strong> per stage in
+           the administration:</p>
+        <table>
+            <tr><th>Sets to win</th><th>also called</th><th>possible results</th></tr>
+            <tr><td>2</td><td>best of 3</td><td>2:0, 2:1</td></tr>
+            <tr><td>3</td><td>best of 5 (default)</td><td>3:0, 3:1, 3:2</td></tr>
+            <tr><td>4</td><td>best of 7</td><td>4:0, 4:1, 4:2, 4:3</td></tr>
+        </table>
+        <p>A match cannot end in a draw. When saving, the program checks that every set is valid and that exactly one side has
+           reached the required number of sets.</p>
+    </div>
+
+    <!-- 4 -->
+    <div class="wrt-section" id="kurzschreibweise">
+        <h2>4. Short notation</h2>
+        <p>Because the winner of a set almost always has 11 points, one number per set is enough:
+           the <strong>loser’s points</strong>, <strong>positive</strong> if player A (left) wins the set,
+           <strong>negative</strong> if player B wins. The program adds the winner’s points.</p>
+        <table>
+            <tr><th>Input</th><th>Set</th><th>Explanation</th></tr>
+            <tr><td><code>7</code></td><td>11:7</td><td>A wins, B has 7 points</td></tr>
+            <tr><td><code>-8</code></td><td>8:11</td><td>B wins, A has 8 points</td></tr>
+            <tr><td><code>10</code></td><td>12:10</td><td>from 10 points of the loser: the winner has 2 points more</td></tr>
+            <tr><td><code>-13</code></td><td>13:15</td><td>extended set, B wins</td></tr>
+            <tr><td><code>0</code> or <code>+0</code></td><td>11:0</td><td>A wins to nil</td></tr>
+            <tr><td><code>-0</code></td><td>0:11</td><td>B wins to nil</td></tr>
+        </table>
+        <p>Example of a match with 3 sets to win: <code>5</code>, <code>-9</code>, <code>10</code>, <code>3</code> gives
+           11:5, 9:11, 12:10, 11:3 – 3:1 for player A.</p>
+    </div>
+
+    <!-- 5 -->
+    <div class="wrt-section" id="kampflos">
+        <h2>5. Byes and walkovers</h2>
+        <ul>
+            <li><strong>Bye in a knockout:</strong> A player drawn against a bye wins by walkover and automatically moves on to the
+                next round. The match counts with the full sets to win (e.g. 3:0), without points.</li>
+            <li><strong>Bye in the Swiss system:</strong> With an odd number of participants one player receives a bye each round;
+                it counts as a win (section 7).</li>
+            <li><strong>Missing player in a team tie:</strong> If a position is not filled, the other team wins that match by walkover
+                with the full sets to win. If both players are missing, the match counts for nobody.</li>
+        </ul>
+    </div>
+
+    <!-- 6 -->
+    <div class="wrt-section" id="tabelle">
+        <h2>6. Tables: groups and round robin</h2>
+        <p>In groups, in round robin and in the overall table of a double round robin (first and second leg), the table is calculated
+           from all scored matches. The order is decided by these criteria in turn – the next one only counts when two participants
+           are equal in the previous one:</p>
+        <table>
+            <tr><th>Rank</th><th>Singles and doubles</th><th>Teams</th></tr>
+            <tr><td>1.</td><td>match difference (matches won minus matches lost)</td><td>tie difference (ties won minus ties lost)</td></tr>
+            <tr><td>2.</td><td>set difference</td><td>match difference (singles and doubles of all ties)</td></tr>
+            <tr><td>3.</td><td>point difference</td><td>set difference</td></tr>
+            <tr><td>4.</td><td>–</td><td>point difference</td></tr>
+        </table>
+        <p>Example: Anna and Ben have each won 2 matches and lost 1 (match difference +1). Anna won her sets 7:4 (+3), Ben 6:4 (+2) –
+           Anna ranks ahead of Ben. If the sets were equal too, the point difference would decide.</p>
+        <div class="wrt-note">If two participants are equal in <strong>all</strong> criteria, they share <strong>the same place</strong>
+            (e.g. place 2 twice, then place 4). The head-to-head result is currently not taken into account.
+            You then decide who advances in the draw of the next stage.</div>
+        <p>For teams a drawn tie (e.g. 5:5 in the Braunschweig system) counts neither as won nor as lost; it does not change the tie difference.</p>
+    </div>
+
+    <!-- 7 -->
+    <div class="wrt-section" id="schweizer-system">
+        <h2>7. Swiss system</h2>
+        <p>In the Swiss system not everyone plays everyone; a new draw follows each round. The table is ordered by:</p>
+        <ol>
+            <li><strong>wins</strong> (a bye counts as a win),</li>
+            <li><strong>Buchholz score:</strong> the sum of the wins of all previous opponents (byes do not count as opponents) – with the
+                same number of wins, whoever faced stronger opponents ranks higher,</li>
+            <li><strong>set difference</strong>,</li>
+            <li><strong>TTR rating</strong>.</li>
+        </ol>
+        <p>The draw of the next round follows these rules, in this order: no pairing twice and no second bye for the same player; the bye
+           goes to a player of the lowest score group; players with the same number of wins play each other; club protection; ratings
+           as similar as possible, with the bye going to the weakest player.</p>
+    </div>
+
+    <!-- 8 -->
+    <div class="wrt-section" id="ko">
+        <h2>8. Knockout</h2>
+        <p>In a knockout the winner of each match moves on to the next round and the loser is eliminated (in double elimination the loser
+           moves to the losers’ bracket). The placing follows from the round in which a participant is eliminated; the match for 3rd place
+           decides places 3 and 4.</p>
+        <p>A knockout tie always needs a winner. For teams (section 9): if the score is level after all matches, the decider match or
+           the set and point difference decides.</p>
+    </div>
+
+    <!-- 9 -->
+    <div class="wrt-section" id="begegnung">
+        <h2>9. Teams: the tie</h2>
+        <p>In team competitions the level <strong>tie</strong> is added above the match: two teams play several singles and doubles in
+           a fixed <strong>order of play</strong>; every match won is one point for the team. You choose the team system (section 10)
+           per stage in the administration, together with a mode:</p>
+        <ul>
+            <li><strong>First to n points:</strong> play continues until one team has n points; the remaining matches are dropped
+                (e.g. Bundessystem: ends at 3:0, 3:1 or 3:2).</li>
+            <li><strong>All matches:</strong> all matches in the order of play are played; the team with more points wins
+                (e.g. Bundessystem “All 5 matches”: 4:1 or 5:0 are possible too).</li>
+            <li><strong>Draw:</strong> some systems allow a draw (e.g. 2:2 in the Swaythling Cup, 7:7 with teams of four, 5:5 in the
+                Braunschweig system). In the table it counts neither as a win nor as a loss.</li>
+            <li><strong>Decider:</strong> a decider match (e.g. the deciding doubles in the Swaythling Cup) is only played if the score is
+                level after all other matches and the chosen mode provides for it.</li>
+        </ul>
+        <h3>Draws in knockout rounds</h3>
+        <p>There are no draws in knockout rounds:</p>
+        <ul>
+            <li>If the system has a decider match (Swaythling Cup), it is always played when the score is level.</li>
+            <li>With “first to n points” and a possible draw (teams of four and six, e.g. 7:7), the team with the better
+                <strong>set difference</strong> over all matches of the tie wins; with equal set difference the better
+                <strong>point difference</strong> decides.</li>
+        </ul>
+        <p>Before results are entered, both teams submit their <strong>line-up</strong> (positions A1, A2 … or B1, B2 … and doubles).
+           Once the tie has started, the line-up can no longer be changed.</p>
+    </div>
+
+    <!-- 10 -->
+    <div class="wrt-section" id="spielsysteme">
+        <h2>10. Team systems</h2>
+        <p>In the order of play, A stands for the first team, B for the second and D for a doubles. The default mode is listed first.
+           In the administration of a stage, the info button next to the system selection shows the same details for the chosen system.</p>
+
+        <h3>Teams of two (2 regular players, squad of up to 3)</h3>
+        <table>
+            <tr><th>System</th><th>Order of play</th><th>Modes</th></tr>
+            <tr><td><strong>Bundessystem (Werner Scheffler)</strong> – default, the most widely used system in league play</td>
+                <td>A1–B2, A2–B1, D–D, A1–B1, A2–B2</td>
+                <td>first to 3 points; all 5 matches</td></tr>
+            <tr><td><strong>Swaythling Cup (modified)</strong> – 4 singles, everyone against everyone</td>
+                <td>A1–B1, A2–B2, A1–B2, A2–B1, deciding doubles D–D</td>
+                <td>all 4 singles, draw at 2:2; deciding doubles at 2:2</td></tr>
+            <tr><td><strong>Quick Cup (3-point system)</strong> – short format</td>
+                <td>A1–B1, A2–B2, D–D</td>
+                <td>first to 2 points; all 3 matches</td></tr>
+        </table>
+
+        <h3>Teams of three (3 players)</h3>
+        <table>
+            <tr><th>System</th><th>Order of play</th><th>Modes</th></tr>
+            <tr><td><strong>Corbillon Cup</strong> – default; the singles are played by 2 players, the third can play in the doubles</td>
+                <td>A1–B2, A2–B1, D–D, A1–B1, A2–B2</td>
+                <td>first to 3 points; all 5 matches</td></tr>
+            <tr><td><strong>Eckardt Cup</strong></td>
+                <td>A1–B2, A2–B1, A3–B3, D–D, A1–B1, A3–B2, A2–B3</td>
+                <td>first to 4 points; all 7 matches</td></tr>
+            <tr><td><strong>Braunschweig system (3 players)</strong> – everyone against every player of the other team</td>
+                <td>D–D, A1–B2, A2–B1, A3–B2, A2–B3, A1–B1, A3–B3, A2–B2, A3–B1, A1–B3</td>
+                <td>all 10 matches, draw at 5:5</td></tr>
+        </table>
+
+        <h3>Teams of four (4 players)</h3>
+        <table>
+            <tr><th>System</th><th>Order of play</th><th>Modes</th></tr>
+            <tr><td><strong>Team of four (pair system)</strong> – default, league play</td>
+                <td>D1–D1, D2–D2, A1–B2, A2–B1, A3–B4, A4–B3, A1–B1, A2–B2, A3–B3, A4–B4, A3–B1, A1–B3, A2–B4, A4–B2</td>
+                <td>first to 8 points, draw at 7:7</td></tr>
+            <tr><td><strong>Braunschweig system (4 players)</strong></td>
+                <td>D1–D1, D2–D2, A1–B1, A2–B2, A3–B3, A4–B4, A1–B2, A2–B1, A3–B4, A4–B3</td>
+                <td>all 10 matches, draw at 5:5</td></tr>
+        </table>
+
+        <h3>Teams of six (6 players)</h3>
+        <table>
+            <tr><th>System</th><th>Order of play</th><th>Modes</th></tr>
+            <tr><td><strong>Pair system for six</strong> – 3 opening doubles, 12 singles in the pairs, closing doubles</td>
+                <td>D1–D2, D2–D1, D3–D3, A1–B2, A2–B1, A3–B4, A4–B3, A5–B6, A6–B5, A1–B1, A2–B2, A3–B3, A4–B4, A5–B5, A6–B6, D1–D1</td>
+                <td>first to 9 points, draw at 8:8</td></tr>
+        </table>
+    </div>
+
+    <!-- 11 -->
+    <div class="wrt-section" id="versionen">
+        <h2>11. Scoring system versions</h2>
+        <p>Rules change: new team systems are added, modes are extended. So that a running or finished tournament is not suddenly scored
+           differently, the scoring system is <strong>versioned</strong>:</p>
+        <ul>
+            <li>A published version is never changed again; new rules appear as a new version.</li>
+            <li>A new competition receives the latest version. You see it in the administration of the stage under
+                <strong>“Scoring system”</strong> and can change it there until the first draw.</li>
+            <li>Competitions from older tournaments keep their version, even after a program update. If an installation does not know a
+                version (e.g. a tournament from a newer installation), it calculates with its latest version and shows a notice.</li>
+        </ul>
+        <table>
+            <tr><th>Version</th><th>Content</th></tr>
+            <tr><td>Version 1</td><td>set to 11 with a 2-point lead, 2 to 4 sets to win, table by match, set and point difference;
+                one format for teams of two (2 singles and 1 doubles, first to 2 wins or all 3 matches).
+                Applies to all competitions created before versions were introduced.</td></tr>
+            <tr><td>Version 2</td><td>as version 1, plus the systems for teams of two, three, four and six from section 10,
+                with modes, draws and decider matches.</td></tr>
+        </table>
+    </div>
+</div>
