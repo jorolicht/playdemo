@@ -95,9 +95,10 @@ case class Group(
   /**
    * Berechnet die Platzierungen (Rankings) der Teilnehmer in dieser Gruppe.
    *
-   * Die Platzierung wird lexikografisch anhand der Entscheidungskriterien der Sportart
-   * (`standings.tieBreakers`) ermittelt, bei Tischtennis Spiel-, Satz- und Balldifferenz.
-   * Teilnehmer, die in allen Kriterien gleich sind, erhalten denselben Platz.
+   * Die Platzierung wird nacheinander anhand der Entscheidungskriterien der Sportart
+   * (`standings.tieBreakers`) ermittelt, bei Tischtennis Spiel-, Satz- und Balldifferenz. Ab Version 3 (tt_003)
+   * entscheidet bei gleicher Spieldifferenz zuerst der direkte Vergleich (`headToHead`, Teiltabelle der Spiele
+   * untereinander). Teilnehmer, die in allen Kriterien gleich sind, erhalten denselben Platz.
    *
    * Die errechneten Platzierungen werden direkt in das `place`-Feld jedes
    * Teilnehmers (`Pant`) eingetragen.
@@ -159,26 +160,56 @@ case class Group(
           if v._2 != 0 then v._1.toDouble / v._2
           else if v._1 == 0 then 0.0 else Double.PositiveInfinity
 
-        // Sortierschlüssel je Teilnehmer: ein Wert je Entscheidungskriterium (größer = besser)
-        def key(pos: Int): Seq[Double] = cfg.standings.tieBreakers.flatMap { tb =>
+        // Wert eines Entscheidungskriteriums aus allen Spielen (größer = besser), leer bei unbekanntem Kriterium
+        def crit(pos: Int, tb: String): Seq[Double] =
           tb.split(':') match
-            case Array("points")       => Some(tablePoints(pos).toDouble)
-            case Array("diff",  level) => byLevel(pos, level).map(v => (v._1 - v._2).toDouble)
-            case Array("sum",   level) => byLevel(pos, level).map(_._1.toDouble)
-            case Array("ratio", level) => byLevel(pos, level).map(ratio)
-            case _                     => None   // z. B. headToHead: noch nicht umgesetzt
-        }
+            case Array("points")       => Seq(tablePoints(pos).toDouble)
+            case Array("diff",  level) => byLevel(pos, level).map(v => (v._1 - v._2).toDouble).toSeq
+            case Array("sum",   level) => byLevel(pos, level).map(_._1.toDouble).toSeq
+            case Array("ratio", level) => byLevel(pos, level).map(ratio).toSeq
+            case _                     => Seq()
+
+        // Direkter Vergleich: Differenz eines Werts (Spiele, Sätze oder Bälle) nur aus den gewerteten Spielen gegen die
+        // Teilnehmer in `among` (Doppelte Runde: Rückrunde hängt an der Hinrunde, Gegner = Index mod Größe)
+        def miniDiff(pos: Int, among: Set[Int], f: GroupEntry => (Int, Int)): Seq[Double] =
+          val es = results(pos).indices.collect { case k if k % size != pos && among.contains(k % size) && results(pos)(k).valid => results(pos)(k) }
+          Seq(es.map(f).map(v => v._1 - v._2).sum.toDouble)
+        val miniLevels: List[GroupEntry => (Int, Int)] = List(_.points, _.sets, _.ballDiff)
 
         def better(x: Seq[Double], y: Seq[Double]): Boolean =
           x.zip(y).find(p => p._1 != p._2).exists(p => p._1 > p._2)
 
-        val ranked = (0 until size).map(i => (i, key(i))).sortWith((x, y) => better(x._2, y._2))
+        // Teilt Teilnehmer nach einem Schlüssel in Blöcke gleicher Werte, bester Block zuerst
+        def partition(members: Seq[Int], key: Int => Seq[Double]): Seq[Seq[Int]] =
+          val ks = members.map(p => p -> key(p))
+          ks.map(_._2).distinct.sortWith(better).map(k => ks.collect { case (p, kk) if kk == k => p })
 
-        var cnt = 1
-        pants(ranked(0)._1).place = (cnt, 0)
-        for i <- 1 until size do
-          if ranked(i)._2 != ranked(i - 1)._2 then cnt = cnt + 1
-          pants(ranked(i)._1).place = (cnt, 0)
+        // Reihenfolge nach den Kriterien; Teilnehmer, die in allen gleich sind, bleiben in einem Block
+        def rank(members: Seq[Int], tbs: List[String]): Seq[Seq[Int]] =
+          if members.size <= 1 then Seq(members)
+          else tbs match
+            case Nil                  => Seq(members)
+            case "headToHead" :: rest => headToHead(members, rest)
+            case tb :: rest           => partition(members, crit(_, tb)).flatMap(rank(_, rest))
+
+        // Teiltabelle der Gleichstehenden (ITTF 3.7.5.4, DTTB sinngemäß): Spiel-, dann Satz-, dann Balldifferenz der
+        // Spiele untereinander. Trennt ein Schritt einen Teil ab, beginnt der Vergleich für die übrigen Gleichstehenden
+        // neu (wieder ab der Spieldifferenz, nur noch ihre Spiele untereinander); trennt kein Schritt, gelten die
+        // folgenden Kriterien aus allen Spielen
+        def headToHead(members: Seq[Int], rest: List[String]): Seq[Seq[Int]] =
+          val among = members.toSet
+          def step(levels: List[GroupEntry => (Int, Int)]): Seq[Seq[Int]] = levels match
+            case Nil => rank(members, rest)
+            case f :: more =>
+              val blocks = partition(members, miniDiff(_, among, f))
+              if blocks.size == 1 then step(more)
+              else blocks.flatMap(b => if b.size == 1 then Seq(b) else headToHead(b, rest))
+          step(miniLevels)
+
+        // gleicher Block = gleicher Platz, Plätze fortlaufend (1, 2, 2, 3)
+        rank((0 until size).toSeq, cfg.standings.tieBreakers.toList).zipWithIndex.foreach { case (block, i) =>
+          block.foreach(p => pants(p).place = (i + 1, 0))
+        }
 
       Right(())
     catch

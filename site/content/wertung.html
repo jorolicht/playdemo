@@ -3,7 +3,7 @@
  *
  * Statische Seite /wertung/ (TOURNEY_STATIC_PAGES in wp-plugin/includes/static-pages.php, MainView.StaticSlugs),
  * verlinkt aus der Hilfe (hilfe.html, Abschnitte 6 und 9).
- * Inhalt entspricht dem Wertungssystem Tischtennis Version 2 (shared/sports/tt_002.json) und der Tabellenberechnung
+ * Inhalt entspricht dem Wertungssystem Tischtennis Version 3 (shared/sports/tt_003.json) und der Tabellenberechnung
  * in shared/format (Groups.calc, TeamEncounter, Result/SwissSystem.scala.html).
 -->
 <style>
@@ -33,7 +33,7 @@
         <h2 class="wrt-title"><i class="bi bi-calculator text-primary me-2"></i>Wertungssystem</h2>
         <p class="wrt-subtitle">
             Wie TurnierService Sätze, Spiele und Mannschaftsbegegnungen wertet und Tabellen berechnet –
-            vom einzelnen Ball bis zur Platzierung. Beschrieben ist das Wertungssystem Tischtennis, Version 2.
+            vom einzelnen Ball bis zur Platzierung. Beschrieben ist das Wertungssystem Tischtennis, Version 3.
         </p>
     </div>
 
@@ -145,15 +145,28 @@
         <table>
             <tr><th>Rang</th><th>Einzel und Doppel</th><th>Mannschaften</th></tr>
             <tr><td>1.</td><td>Spieldifferenz (gewonnene minus verlorene Spiele)</td><td>Begegnungsdifferenz (gewonnene minus verlorene Begegnungen)</td></tr>
-            <tr><td>2.</td><td>Satzdifferenz</td><td>Spieldifferenz (Einzel und Doppel aller Begegnungen)</td></tr>
-            <tr><td>3.</td><td>Balldifferenz</td><td>Satzdifferenz</td></tr>
-            <tr><td>4.</td><td>–</td><td>Balldifferenz</td></tr>
+            <tr><td>2.</td><td><strong>Direkter Vergleich</strong> (ab Version 3, siehe unten)</td><td>Spieldifferenz (Einzel und Doppel aller Begegnungen)</td></tr>
+            <tr><td>3.</td><td>Satzdifferenz</td><td>Satzdifferenz</td></tr>
+            <tr><td>4.</td><td>Balldifferenz</td><td>Balldifferenz</td></tr>
         </table>
-        <p>Beispiel: Anna und Ben haben je 2 Spiele gewonnen und 1 verloren (Spieldifferenz +1). Anna hat die Sätze 7:4 gewonnen
-           (+3), Ben 6:4 (+2) – Anna steht vor Ben. Wären auch die Sätze gleich, entschiede die Balldifferenz.</p>
-        <div class="wrt-note">Sind zwei Teilnehmer in <strong>allen</strong> Kriterien gleich, erhalten sie <strong>denselben Platz</strong>
-            (z. B. zweimal Platz 2, danach Platz 4). Der direkte Vergleich der beiden wird derzeit nicht berücksichtigt.
+        <h3 id="direkter-vergleich">Direkter Vergleich (Einzel und Doppel, ab Version 3)</h3>
+        <p>Haben zwei oder mehr Teilnehmer dieselbe Spieldifferenz, zählen zuerst nur ihre Spiele <strong>untereinander</strong>
+           (Teiltabelle, wie in den Regeln von ITTF und DTTB):</p>
+        <ul>
+            <li><strong>Zwei Gleichstehende:</strong> Wer das direkte Spiel gewonnen hat, steht vorn – auch wenn der andere insgesamt die
+                bessere Satz- oder Balldifferenz hat. In der Doppelten Runde zählen beide direkten Spiele.</li>
+            <li><strong>Drei oder mehr Gleichstehende:</strong> Die Teiltabelle aus den Spielen untereinander entscheidet nach Spiel-, dann
+                Satz-, dann Balldifferenz. Wird dabei ein Teil abgetrennt, beginnt der Vergleich für die übrigen Gleichstehenden neu –
+                wieder ab der Spieldifferenz und nur mit ihren Spielen untereinander.</li>
+            <li><strong>Nicht auflösbar</strong> (z. B. alle untereinander gleich): Es entscheiden Satz- und Balldifferenz aus allen Spielen.</li>
+        </ul>
+        <p>Beispiel: Anna und Ben haben je 2 Spiele gewonnen und 1 verloren (Spieldifferenz +1). Anna hat das Spiel gegen Ben
+           gewonnen – Anna steht vor Ben, auch wenn Ben insgesamt die besseren Sätze hat. In Wettbewerben mit Version 1 oder 2
+           entscheidet stattdessen sofort die Satzdifferenz aus allen Spielen.</p>
+        <div class="wrt-note">Sind zwei Teilnehmer in <strong>allen</strong> Kriterien gleich, erhalten sie <strong>denselben Platz</strong>;
+            die Plätze zählen fortlaufend weiter (z. B. zweimal Platz 2, danach Platz 3).
             Wer bei Gleichstand weiterkommt, entscheiden Sie dann in der Auslosung der Folgerunde.</div>
+        <p>Bei Mannschaften gibt es keinen direkten Vergleich; dort entscheiden die Werte aus allen Begegnungen.</p>
         <p>Bei Mannschaften zählt eine unentschiedene Begegnung (z. B. 5:5 im Braunschweiger System) weder als gewonnen noch als
            verloren; sie verändert die Begegnungsdifferenz nicht.</p>
     </div>
@@ -288,6 +301,8 @@
                 Gilt für alle Wettbewerbe, die vor Einführung der Versionen angelegt wurden.</td></tr>
             <tr><td>Version 2</td><td>wie Version 1, dazu die Spielsysteme für 2er-, 3er-, 4er- und 6er-Mannschaften aus Abschnitt 10
                 mit Spielweisen, Unentschieden und Entscheidungsspiel.</td></tr>
+            <tr><td>Version 3</td><td>wie Version 2, dazu bei Einzel und Doppel der <a href="#direkter-vergleich">direkte Vergleich</a>
+                bei gleicher Spieldifferenz (Abschnitt 6).</td></tr>
         </table>
     </div>
 </div>

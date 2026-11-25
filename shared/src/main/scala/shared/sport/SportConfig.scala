@@ -308,8 +308,10 @@ object TablePoints:
 /**
  * Tabelle: Tabellenpunkte und Reihenfolge der Entscheidungskriterien.
  *
- * Kriterien: `points` (Tabellenpunkte), `diff:<level>`, `sum:<level>`, `ratio:<level>`.
- * `headToHead` ist noch nicht umgesetzt und wird ignoriert.
+ * Kriterien: `points` (Tabellenpunkte), `diff:<level>`, `sum:<level>`, `ratio:<level>` (aus allen Spielen) und
+ * `headToHead`: direkter Vergleich der bis dahin Gleichstehenden – Teiltabelle nur aus den Spielen untereinander
+ * (Spiel-, Satz-, Balldifferenz); trennt sie einen Teil ab, wird für die übrigen neu verglichen, sonst gelten die
+ * folgenden Kriterien (siehe `shared.format.Group.calc`).
  *
  * @param points         Tabellenpunkte je Ausgang
  * @param pointsByResult ergebnisabhängige Tabellenpunkte, Schlüssel "a:b" auf der Spielstufe

@@ -3,7 +3,7 @@
  *
  * Static page /en/scoring/ (TOURNEY_STATIC_PAGES in wp-plugin/includes/static-pages.php, MainView.StaticSlugs),
  * linked from the help page (hilfe_en.html, sections 6 and 9). German version: wertung.html.
- * Content follows the table tennis scoring system version 2 (shared/sports/tt_002.json) and the table calculation
+ * Content follows the table tennis scoring system version 3 (shared/sports/tt_003.json) and the table calculation
  * in shared/format (Groups.calc, TeamEncounter, Result/SwissSystem.scala.html).
 -->
 <style>
@@ -33,7 +33,7 @@
         <h2 class="wrt-title"><i class="bi bi-calculator text-primary me-2"></i>Scoring System</h2>
         <p class="wrt-subtitle">
             How TurnierService scores sets, matches and team ties and calculates tables –
-            from a single point to the final placing. Described here is the table tennis scoring system, version 2.
+            from a single point to the final placing. Described here is the table tennis scoring system, version 3.
         </p>
     </div>
 
@@ -143,15 +143,28 @@
         <table>
             <tr><th>Rank</th><th>Singles and doubles</th><th>Teams</th></tr>
             <tr><td>1.</td><td>match difference (matches won minus matches lost)</td><td>tie difference (ties won minus ties lost)</td></tr>
-            <tr><td>2.</td><td>set difference</td><td>match difference (singles and doubles of all ties)</td></tr>
-            <tr><td>3.</td><td>point difference</td><td>set difference</td></tr>
-            <tr><td>4.</td><td>–</td><td>point difference</td></tr>
+            <tr><td>2.</td><td><strong>head-to-head</strong> (from version 3, see below)</td><td>match difference (singles and doubles of all ties)</td></tr>
+            <tr><td>3.</td><td>set difference</td><td>set difference</td></tr>
+            <tr><td>4.</td><td>point difference</td><td>point difference</td></tr>
         </table>
-        <p>Example: Anna and Ben have each won 2 matches and lost 1 (match difference +1). Anna won her sets 7:4 (+3), Ben 6:4 (+2) –
-           Anna ranks ahead of Ben. If the sets were equal too, the point difference would decide.</p>
-        <div class="wrt-note">If two participants are equal in <strong>all</strong> criteria, they share <strong>the same place</strong>
-            (e.g. place 2 twice, then place 4). The head-to-head result is currently not taken into account.
+        <h3 id="direkter-vergleich">Head-to-head (singles and doubles, from version 3)</h3>
+        <p>If two or more participants have the same match difference, only their matches <strong>against each other</strong> count first
+           (mini table, as in the ITTF and DTTB rules):</p>
+        <ul>
+            <li><strong>Two tied:</strong> whoever won the direct match ranks higher – even if the other has the better overall set or point
+                difference. In a double round robin both direct matches count.</li>
+            <li><strong>Three or more tied:</strong> the mini table of their matches against each other decides by match, then set, then point
+                difference. If a step separates some of them, the comparison starts again for the remaining tied participants – again from
+                the match difference and only with their matches against each other.</li>
+            <li><strong>Not resolvable</strong> (e.g. all equal against each other): the set and point difference of all matches decide.</li>
+        </ul>
+        <p>Example: Anna and Ben have each won 2 matches and lost 1 (match difference +1). Anna won the match against Ben – Anna ranks ahead
+           of Ben, even if Ben has the better sets overall. In competitions with version 1 or 2 the set difference of all matches decides
+           straight away instead.</p>
+        <div class="wrt-note">If two participants are equal in <strong>all</strong> criteria, they share <strong>the same place</strong>;
+            places continue consecutively (e.g. place 2 twice, then place 3).
             You then decide who advances in the draw of the next stage.</div>
+        <p>There is no head-to-head for teams; there the values of all ties decide.</p>
         <p>For teams a drawn tie (e.g. 5:5 in the Braunschweig system) counts neither as won nor as lost; it does not change the tie difference.</p>
     </div>
 
@@ -284,6 +297,8 @@
                 Applies to all competitions created before versions were introduced.</td></tr>
             <tr><td>Version 2</td><td>as version 1, plus the systems for teams of two, three, four and six from section 10,
                 with modes, draws and decider matches.</td></tr>
+            <tr><td>Version 3</td><td>as version 2, plus <a href="#direkter-vergleich">head-to-head</a> for singles and doubles
+                when the match difference is equal (section 6).</td></tr>
         </table>
     </div>
 </div>

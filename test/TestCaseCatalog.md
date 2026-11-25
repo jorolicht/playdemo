@@ -489,3 +489,9 @@ Im Dialog „Wettbewerb bearbeiten“ legt der Turnierleiter eine Höchstzahl Te
 - [x] **TC-SPN-01 [👤]:** Die Turnierübersicht zeigt das Format der Wettbewerbe aus dem Wertungssystem („Einzel“/„Doppel“ bzw. „Singles“/„Doubles“).
 - [x] **TC-SPN-02 [👤]:** Der Tabellenkopf einer Jeder-gegen-jeden-Runde nennt die Stufen aus dem Wertungssystem („Spiele“, „Sätze“, „Bälle“ bzw. „Matches“, „Games“, „Points“).
 - [x] **TC-SPN-03 [👤]:** Die Auswahl der Gewinnsätze in der Stage-Administration kommt aus den Varianten („2/3/4 Gewinnsätze“ bzw. „Best of 3/5/7“, Werte 2–4, Standard 3).
+
+## 36. UseCase: Direkter Vergleich bei Punktgleichheit (Wertungssystem `tt_003`, Kriterium `headToHead`; `head_to_head.spec.ts`)
+Tabellenberechnung: Unit-Tests `shared/src/test/scala/shared/format/HeadToHeadSuite.scala` (2 Gleichstehende, Kreis aus 3, Neubeginn nach Abtrennung (ITTF 3.7.5.4), Doppelte Runde, nicht auflösbar, ältere Versionen unverändert, Mannschaften ohne direkten Vergleich).
+### 36.1 Turnierverwalter (👤)
+- [x] **TC-H2H-01 [👤]:** Ein neu angelegter Wettbewerb erhält das Wertungssystem `tt_003` („Version 3“) in der Stage-Administration.
+- [x] **TC-H2H-02 [👤]:** Ein bestehender Wettbewerb (Demo, ohne Eintrag) behält seine Version (`tt_001`).
