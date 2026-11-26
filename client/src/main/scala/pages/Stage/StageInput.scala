@@ -166,17 +166,6 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     else full(sno.singleId).orElse(pants.find(_.id == sno).map(_.name)).getOrElse(sno.toString)
 
   /**
-   * Name eines Teilnehmers für das Matchboard: Einzel nur der Nachname, sonst wie [[formatSnoName]].
-   *
-   * @param sno   Startnummer
-   * @param pants Teilnehmer des Wettbewerbs
-   * @return Name für die Anzeige auf dem Matchboard
-   */
-  private def matchboardSnoName(sno: SNO, pants: Seq[Pant]): String =
-    if (sno.isSingle) pants.find(_.id == sno).map(p => p.name.split(",")(0).trim).getOrElse(sno.toString)
-    else formatSnoName(sno, pants)
-
-  /**
    * Name eines Spielers bzw. Doppels in einem Spiel einer Begegnung (Startnummer aus der Aufstellung).
    *
    * @param sno Startnummer: Einzel, Doppel oder `[0]` für eine nicht besetzte Position
@@ -1199,10 +1188,10 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     val slugParam = s"${slugName.trim}-${t.wpId}"
     
     t.competitions.filter(_ != null).find(_.id == stage.coId).foreach { comp =>
-      // Look up player names
+      // Namen wie in der Ergebniseingabe (Einzel „Nachname, Vorname“, über 20 Zeichen mit gekürztem Vornamen)
       val pants = comp.pants1Stage.toSeq
-      val nameA = matchboardSnoName(m.stNoA, pants)
-      val nameB = matchboardSnoName(m.stNoB, pants)
+      val nameA = formatSnoName(m.stNoA, pants)
+      val nameB = formatSnoName(m.stNoB, pants)
       
       val entry = shared.model.MatchboardEntry(
         id = s"match_${stage.id.value}_${m.gameNo}",

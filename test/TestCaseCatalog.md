@@ -197,7 +197,7 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-SI-10 [👤]:** In `StageResult` ist „Start Nachfolger“ (Jeder-gegen-Jeden, Gruppen, K.-o.-Runde) deaktiviert, solange im Abschnitt kein Ergebnis eingegeben ist (Freilose zählen nicht).
 - [x] **TC-SI-11 [👤]:** Sind nicht alle Ergebnisse eingegeben, zeigt ein Klick auf „Start Nachfolger“ nur einen Hinweisdialog (eingegebene/alle Spiele); es wird kein neuer Abschnitt angelegt.
 - [x] **TC-SI-12 [🌐]:** Im Demo-Turnier zeigt ein laufendes Spiel eine realistische Spielzeit von wenigen Minuten (die Startzeit laufender Spiele wird beim Laden der Demo angepasst).
-- [x] **TC-SI-13 [🌐]:** Reiter „Eingabe“: Einzel als „Nachname, Vorname“ (z. B. „Brandenburg, Mark“); länger als 20 Zeichen mit gekürztem Vornamen („Müller-Lüdenscheidt, L.“); im Spielinfo-Dialog voll ausgeschrieben („Müller-Lüdenscheidt, Luzie“). Matchboard unverändert (Nachname).
+- [x] **TC-SI-13 [🌐]:** Reiter „Eingabe“: Einzel als „Nachname, Vorname“ (z. B. „Brandenburg, Mark“); länger als 20 Zeichen mit gekürztem Vornamen („Müller-Lüdenscheidt, L.“); im Spielinfo-Dialog voll ausgeschrieben („Müller-Lüdenscheidt, Luzie“). Das Matchboard zeigt die Namen wie die Eingabe (TC-MB-02).
 
 ### 9.2 Anonymer Besucher (🌐)
 - [x] **TC-SI-06 [🌐]:** Aufrufen von `StageResult` im öffentlichen Modus. Ergebnisse und Tabellenstände sind sichtbar, die Ergebniseingabefelder sind jedoch deaktiviert.
@@ -509,6 +509,7 @@ Tabellenberechnung: Unit-Tests `shared/src/test/scala/shared/format/HeadToHeadSu
 ## 38. UseCase: Kopfleiste des Matchboards (`server/app/views/MatchboardView.scala.html`; `matchboard_header.spec.ts`)
 ### 38.1 Besucher (🌐)
 - [x] **TC-MB-01 [🌐]:** Der Link „InfoAnzeige“ der Turnierübersicht enthält `?home=`; das Matchboard zeigt oben in der Farbe des Hauptmenüs (#336699) links das Logo (Turnierprogramm, bei hinterlegtem Vereinslogo dieses), mittig den Turniernamen aus WordPress (auch ohne Meldung eines Clients) und rechts eine Uhr (HH:MM); kein Platzhalter „Turnier“.
+- [x] **TC-MB-02 [👤]:** Tischzuweisung in der Ergebniseingabe meldet die Spieler wie in der Eingabe ans Matchboard („Brandenburg, Mark“, über 20 Zeichen „Müller-Lüdenscheidt, L.“); die Anzeigetafel zeigt das Spiel mit diesen Namen (`matchboard_names.spec.ts`).
 
 ## 39. Layout: Scrollbalken und Footer der Website-Variante (`tourney_render_direct_blank_page`; `layout_scroll.spec.ts`)
 - [x] **TC-LAYOUT-01 [🌐]:** Kurze Seite (Startseite): kein Element scrollt selbst, die Seite passt ins Fenster, Footer innerhalb des Fensters.
