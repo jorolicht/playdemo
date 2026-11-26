@@ -126,6 +126,7 @@ if (TOURNEY_FWS) {
 }
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/user.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/webauthn.php';
+require_once TOURNEY_PLUGIN_PATH . 'includes/api/password.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/player.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/waitlist.php';
 require_once TOURNEY_PLUGIN_PATH . 'includes/api/announcement.php';

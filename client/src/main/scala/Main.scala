@@ -139,7 +139,10 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
                              else Global.canEditPage && lastPage != null && Global.isTourneyPage(lastPage) && lastPage != "TourneyWelcome" && lastPage != "CompetitionWelcome" && lastPage != "MyTourney"
         // Statische Seiten haben eine eigene URL; auf der Startseite nicht wiederherstellen
         val lastIsStatic = lastPage == pages.MainView.name.value && pages.MainView.isStaticPage(lastParam)
-        val canRestore = startPage.isEmpty && !lastIsStatic &&
+        // Passwort-Reset (Link bzw. Umleitung in der Adresse, siehe runDefaultRouting) nie durch die letzte Seite ersetzen
+        val query      = new org.scalajs.dom.URLSearchParams(org.scalajs.dom.window.location.search)
+        val pwResetUrl = query.has("tourney_rp") || query.has("tourney_pw")
+        val canRestore = startPage.isEmpty && !lastIsStatic && !pwResetUrl && lastPage != pages.PasswordReset.name.value &&
                          restoreAllowed &&
                          lastWpPageId != null && 
                          lastWpPageId == Global.pageId.toString && 
@@ -203,6 +206,10 @@ object Main extends BaseComp with ComWrapper with JsWrapper with Mgmt:
    * @param isTourneyPost True, wenn die einbettende Seite ein CPT 'tourney' ist
    */
   private def runDefaultRouting(startPage: String, tourneyParam: String, isTourneyPost: Boolean): Unit =
+    // Passwort-Reset (Link aus der Mail bzw. Umleitung von wp-login.php), siehe pages.PasswordReset
+    val query = new org.scalajs.dom.URLSearchParams(org.scalajs.dom.window.location.search)
+    if (query.has("tourney_rp")) { pages.loadPage(pages.PasswordReset.name, "set"); return }
+    if (query.has("tourney_pw")) { pages.loadPage(pages.PasswordReset.name, query.get("tourney_pw")); return }
     startPage match {
       case "login"    => pages.loadPage(pages.UserLogin.name, "")
       case "register" => pages.loadPage(pages.UserRegistration.name, "")

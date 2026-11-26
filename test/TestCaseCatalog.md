@@ -541,3 +541,12 @@ Auf „Platzierungen & Ergebnisse“ (Gesamtansicht, für alle sichtbar): CSV f�
 ### 43.1 Besucher (🌐)
 - [x] **TC-EXPORT-01 [🌐]:** „Excel / CSV“ lädt Platzierungen, Spielergebnisse (alle beendeten Spiele ohne Freilose, mit Runde bzw. Gruppe, Sätzen und Bällen), Medaillenspiegel und Spielerstatistik; Kopfzeilen und Zeilenzahlen stimmen mit der Anzeige bzw. den Demo-Daten überein.
 - [x] **TC-EXPORT-02 [🌐]:** „Drucken / PDF“ öffnet den Druckdialog; im Druck erscheinen Turniername, alle Wettbewerbe aufgeklappt, Medaillenspiegel und Spielerstatistik (mit allen Spalten) untereinander, ohne Reiter, Knöpfe und Navigation; auf dem Bildschirm bleibt die Druck-Überschrift unsichtbar.
+
+## 44. UseCase: Eigener Passwort-Reset (`pages.PasswordReset`, `wp-plugin/includes/api/password.php`; `password_reset.spec.ts`)
+Statt der WordPress-Standardseiten: Antrag und neues Passwort in der App, eigene Mail (de/en) mit Link zurück auf die App-Seite des Antrags; Schlüssel aus dem WordPress-Kern (24 h gültig, einmalig). Schutz: eine Mail je Konto alle 2 Minuten, 5 Anträge je IP in 15 Minuten.
+### 44.1 Besucher (🌐)
+- [x] **TC-PW-01 [🌐]:** „Passwort vergessen?“ auf der Anmeldung öffnet die App-Seite (kein `wp-login.php`); ungültige Adresse wird abgewiesen; unbekannte Adresse erhält dieselbe Antwort, aber keine Mail.
+- [x] **TC-PW-02 [🌐]:** Mail „Passwort zurücksetzen“ mit App-Link (`/login/?tourney_rp=…&key=…`); Formular prüft Mindestlänge 8 und Wiederholung; nach dem Speichern verschwindet der Link aus der Adresszeile, ein zweiter Aufruf ist ungültig; Anmeldung mit neuem Passwort klappt, mit altem nicht.
+- [x] **TC-PW-03 [🌐]:** Server prüft Schlüssel (falsch → 403) und Mindestlänge (→ 400) selbst; relative Rücksprung-Adresse führt auf die Startseite.
+- [x] **TC-PW-04 [🌐]:** Fremde Rücksprung-Adresse wird nicht übernommen; zweiter Antrag innerhalb von 2 Minuten ohne weitere Mail; ab dem 6. Antrag je IP in 15 Minuten 429.
+- [x] **TC-PW-05 [🌐]:** Website: `wp-login.php?action=lostpassword`, `?checkemail=confirm` und `?action=rp` leiten in die App um; die von WordPress selbst verschickte Reset-Mail hat den eigenen Text und den App-Link.

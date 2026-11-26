@@ -49,7 +49,7 @@ object UserLogin extends BasePage with JsWrapper with ComWrapper:
         doPasskeyDelete()
       case `BtnForgot` =>
         event.preventDefault()
-        dom.window.location.href = Global.homeUrl + "/wp-login.php?action=lostpassword"
+        pages.loadPage(PasswordReset.name, "forgot")
       case `BtnStartDemo` =>
         services.DemoManager.promptDemoMode("template-full", () => {
           pages.loadPage(PageNameTyp("TourneyInfo"), "")

@@ -15,7 +15,7 @@ import pages.Stage.*
 val pagesMap = List(Auth, Console, PgError,
                     ChatExample, Goodbye, RegistrationSuccess,
                     ViewOrganizer, MainView, PureView, AppView, TourneyNotice, TourneyNew, CompetitionNew, TourneyInfo, TourneyWelcome, MyTourney, TourneyAdmin, Mockup, CompetitionInfo, CompetitionWelcome,
-                    PlayerRegistration, UserRegistration, UserLogin, VerifyAccount, StageAdmin, StageDraw, StageInput, StageResult, StageScoreSheet, StageCertificate, 
+                    PlayerRegistration, UserRegistration, UserLogin, PasswordReset, VerifyAccount, StageAdmin, StageDraw, StageInput, StageResult, StageScoreSheet, StageCertificate, 
                     PlayerList, TeamList, SystemInfo, ResultList, Certificate, MainSearch, Management)
                     .map(pg => pg.name -> pg).toMap              
 
