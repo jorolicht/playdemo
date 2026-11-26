@@ -387,6 +387,20 @@ results.medalTotal                                  = Gesamt
 results.medalEmpty                                  = Noch keine abgeschlossenen Wettbewerbe.
 results.medalCounted                                = Gewertet: {0} von {1} Wettbewerben (nur abgeschlossene bzw. mit beendetem Urkundenabschnitt).
 results.medalHint                                   = Platz 1 = Gold, Platz 2 = Silber, Platz 3 = Bronze (geteilte Plätze zählen für alle); ein Doppel aus zwei Vereinen zählt für beide Vereine.
+results.tabStats                                    = Spielerstatistik
+results.statEmpty                                   = Noch keine gespielten Einzel oder Doppel.
+results.statLongestAll                              = Längstes Spiel des Turniers
+results.statGames                                   = Spiele
+results.statWinLoss                                 = S:N
+results.statWinLossTitle                            = Siege : Niederlagen
+results.statSets                                    = Sätze
+results.statLongest                                 = Längstes Spiel
+results.statTtr                                     = TTR ±
+results.statTtrTitle                                = Voraussichtliche TTR-Veränderung (nur Einzel)
+results.statBalls                                   = {0} Bälle
+results.statVs                                      = gegen
+results.statHint                                    = Alle Einzel und Doppel aller Abschnitte (ohne Mannschaftswettbewerbe und Freilose). Längstes Spiel: die meisten Bälle, sonst die meisten Sätze.
+results.statTtrHint                                 = TTR ± ist ein Anhaltspunkt: nur Einzel gegen Gegner mit TTR, vereinfacht mit Änderungskonstante 16 ohne Alters- und Neulingszuschläge. Maßgeblich ist die Berechnung des Verbands.
 
 ###
 # UserLogin & UserRegistration

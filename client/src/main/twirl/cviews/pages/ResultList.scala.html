@@ -1,8 +1,8 @@
 @import shared.model.*
-@import pages.ResultList.{ CompResultCard, MedalView }
+@import pages.ResultList.{ CompResultCard, MedalView, StatsView }
 @import base.Messages.gM
 
-@(cards: Seq[CompResultCard], medals: Option[MedalView] = None)
+@(cards: Seq[CompResultCard], medals: Option[MedalView] = None, stats: Option[StatsView] = None)
 
 <div class="container mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -35,6 +35,14 @@
                     <i class="bi bi-trophy me-1"></i>@gM("results.tabMedals")
                 </button>
             </li>
+            @stats.map { _ =>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="results-tab-stats" data-testid="results-tab-stats" data-bs-toggle="tab"
+                            data-bs-target="#results-pane-stats" type="button" role="tab" aria-controls="results-pane-stats" aria-selected="false">
+                        <i class="bi bi-bar-chart me-1"></i>@gM("results.tabStats")
+                    </button>
+                </li>
+            }
         </ul>
     }
     <div class="tab-content">
@@ -190,10 +198,61 @@
             </div>
         </div>
     }
+    @stats.map { st =>
+        <div class="tab-pane fade" id="results-pane-stats" role="tabpanel" aria-labelledby="results-tab-stats">
+            <div class="card shadow-sm border-0 rounded-4 bg-white overflow-hidden" data-testid="stats-table">
+                @if(st.lines.isEmpty) {
+                    <div class="p-5 text-center">
+                        <div class="text-muted display-4 mb-3"><i class="bi bi-bar-chart opacity-50"></i></div>
+                        <h4 class="fw-bold text-dark mb-2" data-testid="stats-empty">@gM("results.statEmpty")</h4>
+                    </div>
+                } else {
+                    @st.longest.map { l =>
+                        <div class="px-4 py-3 border-bottom bg-light small" data-testid="stats-longest">
+                            <i class="bi bi-hourglass-split me-1 text-primary"></i><strong>@gM("results.statLongestAll"):</strong> @l
+                        </div>
+                    }
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">@gM("results.thName")</th>
+                                    <th class="d-none d-md-table-cell">@gM("results.thClub")</th>
+                                    <th class="text-center">@gM("results.statGames")</th>
+                                    <th class="text-center" title="@gM("results.statWinLossTitle")">@gM("results.statWinLoss")</th>
+                                    <th class="text-center">@gM("results.statSets")</th>
+                                    <th class="d-none d-lg-table-cell">@gM("results.statLongest")</th>
+                                    <th class="text-center pe-4" title="@gM("results.statTtrTitle")">@gM("results.statTtr")</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @st.lines.map { l =>
+                                    <tr data-testid="stats-row">
+                                        <td class="ps-4 fw-bold text-primary" data-testid="stats-name">@l.name</td>
+                                        <td class="d-none d-md-table-cell">@l.club</td>
+                                        <td class="text-center" data-testid="stats-games">@l.row.games</td>
+                                        <td class="text-center" data-testid="stats-winloss">@{l.row.wins}:@{l.row.losses}</td>
+                                        <td class="text-center" data-testid="stats-sets">@{l.row.setsWon}:@{l.row.setsLost}</td>
+                                        <td class="d-none d-lg-table-cell text-muted" data-testid="stats-longest-player">@l.longest</td>
+                                        <td class="text-center pe-4 fw-bold @l.ttrClass" data-testid="stats-ttr">@l.ttrText</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                <div class="card-footer bg-white small text-muted px-4 py-2">
+                    <div>@gM("results.statHint")</div>
+                    <div>@gM("results.statTtrHint")</div>
+                </div>
+            </div>
+        </div>
+    }
     </div>
 </div>
 
 <style>
+
     .medal-gold   { color: #d4a017; }
     .medal-silver { color: #a8a9ad; }
     .medal-bronze { color: #b87333; }

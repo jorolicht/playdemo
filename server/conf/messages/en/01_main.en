@@ -387,6 +387,20 @@ results.medalTotal                                  = Total
 results.medalEmpty                                  = No completed competitions yet.
 results.medalCounted                                = Counted: {0} of {1} competitions (only completed ones or those with a finished certificate stage).
 results.medalHint                                   = 1st place = gold, 2nd = silver, 3rd = bronze (shared places count for everyone); a doubles pair from two clubs counts for both clubs.
+results.tabStats                                    = Player statistics
+results.statEmpty                                   = No singles or doubles played yet.
+results.statLongestAll                              = Longest match of the tournament
+results.statGames                                   = Matches
+results.statWinLoss                                 = W:L
+results.statWinLossTitle                            = Wins : Losses
+results.statSets                                    = Sets
+results.statLongest                                 = Longest match
+results.statTtr                                     = TTR ±
+results.statTtrTitle                                = Expected TTR change (singles only)
+results.statBalls                                   = {0} points
+results.statVs                                      = vs.
+results.statHint                                    = All singles and doubles of all stages (without team competitions and byes). Longest match: most points played, otherwise most sets.
+results.statTtrHint                                 = TTR ± is an estimate: singles against opponents with TTR only, simplified with change constant 16 without age or newcomer bonuses. The calculation of the association is authoritative.
 
 ###
 # UserLogin & UserRegistration

@@ -2,6 +2,7 @@ package pages
 
 import org.scalajs.dom
 import base.*
+import base.Messages.gM
 import shared.model.*
 import scala.scalajs.js
 
@@ -27,6 +28,31 @@ object ResultList extends BasePage with JsWrapper:
    * @param total   Anzahl aller Wettbewerbe
    */
   case class MedalView(rows: Seq[shared.utils.MedalTable.Row], counted: Int, total: Int)
+
+  /**
+   * Zeile der Spielerstatistik für die Anzeige.
+   *
+   * @param name    Spielername
+   * @param club    Verein
+   * @param row     berechnete Werte
+   * @param longest längstes Spiel als Text (Gegner, Ergebnis, Bälle, Wettbewerb)
+   */
+  case class StatLine(name: String, club: String, row: shared.utils.PlayerStats.Row, longest: String):
+    /** TTR-Veränderung mit Vorzeichen bzw. „–“ ohne Wert. */
+    def ttrText: String = row.ttrDelta.map(d => if d > 0 then s"+$d" else d.toString).getOrElse("–")
+    /** Farbe der TTR-Veränderung. */
+    def ttrClass: String = row.ttrDelta match
+      case Some(d) if d > 0 => "text-success"
+      case Some(d) if d < 0 => "text-danger"
+      case _                => "text-muted"
+
+  /**
+   * Spielerstatistik für die Anzeige.
+   *
+   * @param lines   Zeilen (nach Siegen, dann Spielen)
+   * @param longest längstes Spiel des Turniers als Text
+   */
+  case class StatsView(lines: Seq[StatLine], longest: Option[String])
 
   /**
    * Toggles collapse state for all competition cards on the page.
@@ -199,6 +225,51 @@ object ResultList extends BasePage with JsWrapper:
     else Seq()
 
   /**
+   * Gewertete Einzel- und Doppelspiele aller Wettbewerbe (Mannschaftswettbewerbe nicht; ohne Freilose).
+   *
+   * @param comps  Wettbewerbe
+   * @param stages Abschnitte
+   * @return Spiele; Kennung = Name des Wettbewerbs
+   */
+  private def statGames(comps: Seq[Competition], stages: Seq[Stage]): Seq[shared.utils.PlayerStats.Game] =
+    def side(sno: SNO): Seq[PlayerId] =
+      if sno.isSingle then Seq(sno.singleId) else if sno.isDouble then { val (a, b) = sno.doubleId; Seq(a, b) } else Seq()
+    for
+      comp <- comps if comp.typ == CompTyp.SINGLE || comp.typ == CompTyp.DOUBLE || comp.typ == CompTyp.MIXED
+      st   <- stages if st.coId == comp.id
+      m    <- st.matches.toSeq if m.countable && !m.stNoA.isBye && !m.stNoB.isBye
+      a     = side(m.stNoA)
+      b     = side(m.stNoB) if a.nonEmpty && b.nonEmpty
+    yield
+      val balls = try m.getBalls.toSeq.filter(x => x._1 >= 0 && x._2 >= 0) catch case _: Throwable => Seq()
+      shared.utils.PlayerStats.Game(comp.name, a, b, m.sets, balls)
+
+  /**
+   * Spielerstatistik über alle Einzel- und Doppelwettbewerbe.
+   *
+   * @param comps  Wettbewerbe
+   * @param stages Abschnitte
+   * @return Anzeige mit Zeilen und längstem Spiel des Turniers
+   */
+  private def statsView(comps: Seq[Competition], stages: Seq[Stage]): StatsView =
+    import shared.utils.PlayerStats
+    val t = services.TourneyDB.tourney
+    def player(id: PlayerId) = t.players.find(pl => pl != null && pl.id == id)
+    def names(ids: Seq[PlayerId]) = ids.map(id => player(id).map(_.displayName).getOrElse(s"#$id")).mkString(" / ")
+    def club(id: PlayerId) = player(id).flatMap(pl => t.clubs.find(c => c != null && c.id.toInt == pl.clubId)).map(_.name).getOrElse("")
+    def ballText(g: PlayerStats.Game) = if g.ballCount > 0 then s", ${gM("results.statBalls", g.ballCount.toString)}" else ""
+    val games = statGames(comps, stages)
+    val lines = PlayerStats.compute(games, id => player(id).flatMap(_.meta.ttr)).map { r =>
+      val longest = r.longest.map { g =>
+        val (opp, sets) = if g.sideA.contains(r.player) then (g.sideB, g.sets) else (g.sideA, g.sets.swap)
+        s"${sets._1}:${sets._2} ${gM("results.statVs")} ${names(opp)}${ballText(g)} (${g.ref})"
+      }.getOrElse("")
+      StatLine(player(r.player).map(_.displayName).getOrElse(s"#${r.player}"), club(r.player), r, longest)
+    }
+    val longest = PlayerStats.longest(games).map(g => s"${names(g.sideA)} – ${names(g.sideB)} ${g.sets._1}:${g.sets._2}${ballText(g)} (${g.ref})")
+    StatsView(lines, longest)
+
+  /**
    * Prüft, ob ein Wettbewerb im Medaillenspiegel zählt: abgeschlossen oder Urkundenabschnitt beendet.
    *
    * @param card Wettbewerb mit Urkundenabschnitt
@@ -273,5 +344,8 @@ object ResultList extends BasePage with JsWrapper:
         shared.utils.MedalTable.compute(counted.flatMap(c => c.pants.map(p => shared.utils.MedalTable.Placing(p.place._1, clubsOf(c.comp, p))))),
         counted.length, allComps.length))
 
-    setMain(cviews.pages.html.ResultList(cards, medals))
+    // Spielerstatistik über alle Einzel- und Doppelwettbewerbe (nur in der Gesamtansicht)
+    val stats = if selectedCompId.isDefined then None else Some(statsView(allComps, allStages))
+
+    setMain(cviews.pages.html.ResultList(cards, medals, stats))
     true
