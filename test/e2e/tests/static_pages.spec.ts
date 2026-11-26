@@ -37,6 +37,15 @@ test.describe('Statische Seiten mit eigener URL', () => {
     expect(new URL(page.url()).pathname).toBe('/preise/');
   });
 
+  test('TC-STATIC-04 [🌐]: „Jugendarbeit unterstützen“ auf „Support & Kosten“ verweist auf die Kontoverbindung des TTC Freising', async ({ page }) => {
+    await page.goto('/preise/');
+    const btn = page.locator('[data-testid="support-youth"]');
+    await expect(btn).toBeVisible({ timeout: 15000 });
+    await expect(btn).toHaveText('Jugendarbeit unterstützen');
+    await expect(btn).toHaveAttribute('href', 'https://www.ttcfreising.org/wp/kontoverbindung/');
+    await expect(btn).toHaveAttribute('target', '_blank');
+  });
+
   test('TC-STATIC-03 [🌐]: Footer- und Navbar-Links haben echte URLs; Klick ändert die Adresszeile, Zurück führt zur Startseite', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('#MainView_BtnDemo')).toBeVisible({ timeout: 15000 });

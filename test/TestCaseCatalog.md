@@ -328,6 +328,7 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-STATIC-01 [🌐]:** `/funktionen/`, `/preise/`, `/excel/`, `/plugin/`, `/historie/`, `/impressum/`, `/datenschutz/`, `/kontakt/` und `/agb/` liefern Status 200, genau einen passenden `<title>`, eine Canonical-URL, eine Meta-Description und den Seiteninhalt (mit `<h1>`) im Server-HTML; alle stehen in `wp-sitemap-tourneystatic-1.xml`. Unbekannte URLs liefern weiterhin 404.
 - [x] **TC-STATIC-02 [🌐]:** Ein direkter Aufruf (z. B. `/preise/`) öffnet die Seite in der App; die Adresse bleibt erhalten.
 - [x] **TC-STATIC-03 [🌐]:** Footer- und Navbar-Links haben echte URLs (`href="/impressum/"`); ein Klick bleibt in der App (kein Neuladen) und setzt die Adresszeile; Zurück führt zur Startseite, Vor wieder zur Seite; der Breadcrumb „Startseite“ setzt die Adresse auf `/`.
+- [x] **TC-STATIC-04 [🌐]:** Der Knopf „Jugendarbeit unterstützen“ auf „Support & Kosten“ (`/preise/`) öffnet die Kontoverbindung des TTC Freising (https://www.ttcfreising.org/wp/kontoverbindung/) in einem neuen Tab.
 
 ---
 
@@ -524,3 +525,8 @@ Die Zustellung über einen echten Push-Dienst ist im Test-Browser nicht möglich
 Gewertet werden abgeschlossene Wettbewerbe bzw. solche mit beendetem Urkundenabschnitt; Platz 1/2/3 = Gold/Silber/Bronze, geteilte Plätze für alle, Doppel aus zwei Vereinen für beide.
 ### 41.1 Turnierverwalter (👤)
 - [x] **TC-MEDAL-01 [👤]:** Reiter „Medaillenspiegel“ in „Platzierungen & Ergebnisse“ (nur Gesamtansicht): ohne endgültige Platzierungen leer („0 von 4“); mit beendetem Urkundenabschnitt zählt der Wettbewerb („1 von 4“), Medaillen je Verein stimmen mit den Plätzen 1–3 überein, Reihenfolge Gold vor Silber vor Bronze.
+
+## 42. UseCase: Spielerstatistik (`pages.ResultList`, `shared.utils.PlayerStats`; `player_stats.spec.ts`, Unit-Test `PlayerStatsSuite`)
+Alle Einzel und Doppel nicht gelöschter Abschnitte (ohne Mannschaftswettbewerbe und Freilose). Längstes Spiel: die meisten Bälle, sonst die meisten Sätze. TTR ± nur Einzel gegen Gegner mit TTR, vereinfacht mit Änderungskonstante 16 (Summe über das Turnier, dann gerundet).
+### 42.1 Turnierverwalter (👤)
+- [x] **TC-STAT-01 [👤]:** Reiter „Spielerstatistik“ in „Platzierungen & Ergebnisse“: Spiele, Siege:Niederlagen, Sätze und TTR ± je Spieler stimmen mit einer unabhängigen Nachrechnung aus den Demo-Daten überein; Sortierung nach Siegen; längstes Spiel je Spieler und des Turniers wird angezeigt.
