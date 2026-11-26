@@ -107,8 +107,14 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
       case _ =>
 
   /**
-   * Formats player/double names. For singles, it outputs only the last name.
-   * For doubles, it displays first names formatted as "Vorname1/Vorname2".
+   * Name eines Teilnehmers in der Ergebniseingabe.
+   *
+   * Einzel: „Nachname, Vorname“; länger als 20 Zeichen mit gekürztem Vornamen („Nachname, V.“, [[shared.utils.PlayerName.short]]).
+   * Doppel: Vornamen „Vorname1/Vorname2“. Mannschaft: Name der Mannschaft.
+   *
+   * @param sno   Startnummer
+   * @param pants Teilnehmer des Wettbewerbs
+   * @return Name für die Anzeige
    */
   def formatSnoName(sno: SNO, pants: Seq[Pant]): String =
     if (sno.isNN) gM("+not_determined")
@@ -128,11 +134,47 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
               case _ =>
                 p.name.replace(" / ", "/")
           } else {
-            val parts = p.name.split(",")
-            if (parts.length > 0) parts(0).trim else p.name
+            services.TourneyDB.tourney.players.find(pl => pl != null && pl.id == sno.singleId) match
+              case Some(pl) => shared.utils.PlayerName.short(pl.lastName, pl.firstName)
+              case None     =>
+                val parts = p.name.split(",", 2).map(_.trim)
+                if (parts.length == 2) shared.utils.PlayerName.short(parts(0), parts(1)) else p.name
           }
         case None =>
           sno.toString
+
+  /**
+   * Voller Name eines Teilnehmers (Spielinfo-Dialog): Einzel „Nachname, Vorname“, Doppel „Nachname, Vorname /
+   * Nachname, Vorname“, Mannschaft mit ihrem Namen.
+   *
+   * @param sno   Startnummer
+   * @param pants Teilnehmer des Wettbewerbs
+   * @return Name für die Anzeige
+   */
+  def fullSnoName(sno: SNO, pants: Seq[Pant]): String =
+    val players = services.TourneyDB.tourney.players
+    def full(id: PlayerId) = players.find(pl => pl != null && pl.id == id).map(pl => shared.utils.PlayerName.full(pl.lastName, pl.firstName))
+    if (sno.isNN) gM("+not_determined")
+    else if (sno.isBye) gM("+bye")
+    else if (sno.isTeam) pants.find(_.id == sno).map(_.name).getOrElse(sno.toString)
+    else if (sno.isDouble) {
+      val (a, b) = sno.doubleId
+      (full(a), full(b)) match
+        case (Some(n1), Some(n2)) => s"$n1 / $n2"
+        case _                    => pants.find(_.id == sno).map(_.name).getOrElse(sno.toString)
+    }
+    else full(sno.singleId).orElse(pants.find(_.id == sno).map(_.name)).getOrElse(sno.toString)
+
+  /**
+   * Name eines Teilnehmers für das Matchboard: Einzel nur der Nachname, sonst wie [[formatSnoName]].
+   *
+   * @param sno   Startnummer
+   * @param pants Teilnehmer des Wettbewerbs
+   * @return Name für die Anzeige auf dem Matchboard
+   */
+  private def matchboardSnoName(sno: SNO, pants: Seq[Pant]): String =
+    if (sno.isSingle) pants.find(_.id == sno).map(p => p.name.split(",")(0).trim).getOrElse(sno.toString)
+    else formatSnoName(sno, pants)
 
   /**
    * Name eines Spielers bzw. Doppels in einem Spiel einer Begegnung (Startnummer aus der Aufstellung).
@@ -1159,8 +1201,8 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
     t.competitions.filter(_ != null).find(_.id == stage.coId).foreach { comp =>
       // Look up player names
       val pants = comp.pants1Stage.toSeq
-      val nameA = formatSnoName(m.stNoA, pants)
-      val nameB = formatSnoName(m.stNoB, pants)
+      val nameA = matchboardSnoName(m.stNoA, pants)
+      val nameB = matchboardSnoName(m.stNoB, pants)
       
       val entry = shared.model.MatchboardEntry(
         id = s"match_${stage.id.value}_${m.gameNo}",
@@ -1195,8 +1237,8 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
       stage.matches.find(_.gameNo == gameNo) match {
         case Some(m) =>
           val pants = comp.pants1Stage.toSeq
-          val nameA = formatSnoName(m.stNoA, pants)
-          val nameB = formatSnoName(m.stNoB, pants)
+          val nameA = fullSnoName(m.stNoA, pants)
+          val nameB = fullSnoName(m.stNoB, pants)
           
           val statusStr = m.status match {
             case MEntry.MS_RESET => "Nicht konfiguriert"
