@@ -4,13 +4,34 @@
 
 @(cards: Seq[CompResultCard], medals: Option[MedalView] = None, stats: Option[StatsView] = None)
 
-<div class="container mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container mt-4 mb-5" id="results-root">
+    <div class="print-only mb-3">
+        <div class="h4 fw-bold mb-0">@services.TourneyDB.tourney.name</div>
+        <div class="text-muted small">@services.TourneyDB.tourney.organizer</div>
+    </div>
+    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-4">
         <h3 class="h4 fw-bold text-dark mb-0 d-flex align-items-center">
             <i class="bi bi-award-fill text-warning me-2 fs-3"></i>@gM("results.title")
         </h3>
         @if(cards.nonEmpty) {
-            <div class="d-flex gap-2">
+            <div class="d-flex flex-wrap gap-2 no-print">
+                @medals.map { _ =>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-3 dropdown-toggle" data-bs-toggle="dropdown"
+                                aria-expanded="false" data-testid="results-export">
+                            <i class="bi bi-file-earmark-spreadsheet me-1"></i>@gM("results.exExcel")
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><button type="button" class="dropdown-item" data-testid="export-places" onclick="resultsExport('places')">@gM("results.tabPlaces")</button></li>
+                            <li><button type="button" class="dropdown-item" data-testid="export-matches" onclick="resultsExport('matches')">@gM("results.exMatches")</button></li>
+                            <li><button type="button" class="dropdown-item" data-testid="export-medals" onclick="resultsExport('medals')">@gM("results.tabMedals")</button></li>
+                            <li><button type="button" class="dropdown-item" data-testid="export-stats" onclick="resultsExport('stats')">@gM("results.tabStats")</button></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" data-testid="results-print" onclick="resultsPrint()">
+                        <i class="bi bi-printer me-1"></i>@gM("results.exPrint")
+                    </button>
+                }
                 <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="toggleAllCards(true)">
                     <i class="bi bi-arrows-expand me-1"></i>@gM("results.expandAll")
                 </button>
@@ -100,7 +121,7 @@
                                             <th class="ps-4 text-center" style="width: 110px;">@gM("results.thPlace")</th>
                                             <th>@gM("results.thName")</th>
                                             <th>@gM("results.thClub")</th>
-                                            <th class="text-end pe-4">@gM("tourneyInfo.actions")</th>
+                                            <th class="text-end pe-4 no-print">@gM("tourneyInfo.actions")</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -136,7 +157,7 @@
                                                         </td>
                                                         <td class="fw-bold text-primary">@p.name</td>
                                                         <td>@p.club</td>
-                                                        <td class="text-end pe-4">
+                                                        <td class="text-end pe-4 no-print">
                                                             <button class="btn btn-outline-warning btn-sm rounded-pill px-3 shadow-sm fw-bold" onclick="appLoadPage('Certificate', '@p.name|@card.comp.name|@placeFirst')">
                                                                 <i class="bi bi-trophy-fill me-1"></i>@gM("results.btnCert")
                                                             </button>
@@ -157,6 +178,7 @@
     </div>
     @medals.map { m =>
         <div class="tab-pane fade" id="results-pane-medals" role="tabpanel" aria-labelledby="results-tab-medals">
+            <h4 class="h5 fw-bold print-only mb-3">@gM("results.tabMedals")</h4>
             <div class="card shadow-sm border-0 rounded-4 bg-white overflow-hidden" data-testid="medal-table">
                 @if(m.rows.isEmpty) {
                     <div class="p-5 text-center">
@@ -200,6 +222,7 @@
     }
     @stats.map { st =>
         <div class="tab-pane fade" id="results-pane-stats" role="tabpanel" aria-labelledby="results-tab-stats">
+            <h4 class="h5 fw-bold print-only mb-3">@gM("results.tabStats")</h4>
             <div class="card shadow-sm border-0 rounded-4 bg-white overflow-hidden" data-testid="stats-table">
                 @if(st.lines.isEmpty) {
                     <div class="p-5 text-center">
@@ -252,7 +275,27 @@
 </div>
 
 <style>
-
+    .print-only { display: none; }
+    @@media print {
+        body.tourney-print-results * { visibility: hidden; }
+        body.tourney-print-results #results-root,
+        body.tourney-print-results #results-root * { visibility: visible; }
+        body.tourney-print-results #results-root { position: absolute; left: 0; top: 0; width: 100%; max-width: none; margin: 0 !important; }
+        body.tourney-print-results #results-root .print-only { display: block; }
+        body.tourney-print-results #results-root .no-print,
+        body.tourney-print-results #results-root .nav-tabs,
+        body.tourney-print-results #results-root td .btn,
+        body.tourney-print-results #results-root .card-header .bi-chevron-down,
+        body.tourney-print-results #results-root .card-header .bi-chevron-up { display: none !important; }
+        body.tourney-print-results #results-root .tab-pane { display: block !important; opacity: 1 !important; }
+        body.tourney-print-results #results-root #results-pane-medals,
+        body.tourney-print-results #results-root #results-pane-stats { break-before: page; }
+        body.tourney-print-results #results-root .comp-card-collapse { display: block !important; height: auto !important; }
+        body.tourney-print-results #results-root th.d-none,
+        body.tourney-print-results #results-root td.d-none { display: table-cell !important; }
+        body.tourney-print-results #results-root .card { box-shadow: none !important; }
+        body.tourney-print-results #results-root tr { break-inside: avoid; }
+    }
     .medal-gold   { color: #d4a017; }
     .medal-silver { color: #a8a9ad; }
     .medal-bronze { color: #b87333; }

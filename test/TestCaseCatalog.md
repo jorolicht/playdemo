@@ -530,3 +530,9 @@ Gewertet werden abgeschlossene Wettbewerbe bzw. solche mit beendetem Urkundenabs
 Alle Einzel und Doppel nicht gelöschter Abschnitte (ohne Mannschaftswettbewerbe und Freilose). Längstes Spiel: die meisten Bälle, sonst die meisten Sätze. TTR ± nur Einzel gegen Gegner mit TTR, vereinfacht mit Änderungskonstante 16 (Summe über das Turnier, dann gerundet).
 ### 42.1 Turnierverwalter (👤)
 - [x] **TC-STAT-01 [👤]:** Reiter „Spielerstatistik“ in „Platzierungen & Ergebnisse“: Spiele, Siege:Niederlagen, Sätze und TTR ± je Spieler stimmen mit einer unabhängigen Nachrechnung aus den Demo-Daten überein; Sortierung nach Siegen; längstes Spiel je Spieler und des Turniers wird angezeigt.
+
+## 43. UseCase: Export und Druckansicht der Ergebnisse (`pages.ResultList`, `shared.utils.Csv`; `results_export.spec.ts`, Unit-Test `CsvSuite`)
+Auf „Platzierungen & Ergebnisse“ (Gesamtansicht, für alle sichtbar): CSV für Excel (Semikolon, UTF-8 mit BOM, CRLF, Schutz vor Formel-Einschleusung) und Druckansicht (über den Druckdialog als PDF speicherbar).
+### 43.1 Besucher (🌐)
+- [x] **TC-EXPORT-01 [🌐]:** „Excel / CSV“ lädt Platzierungen, Spielergebnisse (alle beendeten Spiele ohne Freilose, mit Runde bzw. Gruppe, Sätzen und Bällen), Medaillenspiegel und Spielerstatistik; Kopfzeilen und Zeilenzahlen stimmen mit der Anzeige bzw. den Demo-Daten überein.
+- [x] **TC-EXPORT-02 [🌐]:** „Drucken / PDF“ öffnet den Druckdialog; im Druck erscheinen Turniername, alle Wettbewerbe aufgeklappt, Medaillenspiegel und Spielerstatistik (mit allen Spalten) untereinander, ohne Reiter, Knöpfe und Navigation; auf dem Bildschirm bleibt die Druck-Überschrift unsichtbar.

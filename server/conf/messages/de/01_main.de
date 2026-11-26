@@ -401,6 +401,27 @@ results.statBalls                                   = {0} Bälle
 results.statVs                                      = gegen
 results.statHint                                    = Alle Einzel und Doppel aller Abschnitte (ohne Mannschaftswettbewerbe und Freilose). Längstes Spiel: die meisten Bälle, sonst die meisten Sätze.
 results.statTtrHint                                 = TTR ± ist ein Anhaltspunkt: nur Einzel gegen Gegner mit TTR, vereinfacht mit Änderungskonstante 16 ohne Alters- und Neulingszuschläge. Maßgeblich ist die Berechnung des Verbands.
+results.exExcel                                     = Excel / CSV
+results.exPrint                                     = Drucken / PDF
+results.exMatches                                   = Spielergebnisse
+results.exGroup                                     = Gruppe
+results.exStage                                     = Abschnitt
+results.exRound                                     = Runde
+results.exPantA                                     = Teilnehmer A
+results.exClubA                                     = Verein A
+results.exPantB                                     = Teilnehmer B
+results.exClubB                                     = Verein B
+results.exBalls                                     = Bälle
+results.exWins                                      = Siege
+results.exLosses                                    = Niederlagen
+results.exSetsWon                                   = Sätze gewonnen
+results.exSetsLost                                  = Sätze verloren
+results.exBallsWon                                  = Bälle gewonnen
+results.exBallsLost                                 = Bälle verloren
+results.exFile.places                               = Platzierungen
+results.exFile.matches                              = Spielergebnisse
+results.exFile.medals                               = Medaillenspiegel
+results.exFile.stats                                = Spielerstatistik
 
 ###
 # UserLogin & UserRegistration

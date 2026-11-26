@@ -278,6 +278,106 @@ object ResultList extends BasePage with JsWrapper:
   private def medalsFinal(card: CompResultCard): Boolean =
     card.comp.status == CompStatus.FIN || card.certStage.exists(_.status == StageStatus.FIN)
 
+  // ---------------------------------------------------------------------------------------------------------------
+  // Export (Excel/CSV) und Druckansicht (PDF über den Druckdialog des Browsers)
+  // ---------------------------------------------------------------------------------------------------------------
+
+  /** Zuletzt angezeigte Daten (Gesamtansicht) für den Export. */
+  private var lastCards: Seq[CompResultCard] = Seq()
+  private var lastMedals: Option[MedalView]  = None
+  private var lastStats: Option[StatsView]   = None
+  private var lastMatches: Seq[Seq[String]]  = Seq()
+
+  /**
+   * Bezeichnung der Runde eines Spiels (Gruppe und Runde, K.-o.-Runde bzw. Runde n).
+   *
+   * @param st Abschnitt
+   * @param m  Spiel
+   * @return Text für die Spalte „Runde“
+   */
+  private def roundText(st: Stage, m: MEntry): String = m match
+    case g: MEntryGr =>
+      s"${gM("results.exGroup")} ${('A' + math.max(g.grId, 1) - 1).toChar}, ${gM("StageResult.round_n", g.round.toString)}"
+    case k: MEntryKo if st.stageConfig != StageConfig.DEL =>
+      k.round match
+        case 0 => gM("StageResult.round_3rd")
+        case 1 => gM("StageResult.round_final")
+        case 2 => gM("StageResult.round_semi")
+        case 3 => gM("StageResult.round_quarter")
+        case 4 => gM("StageResult.round_last16")
+        case 5 => gM("StageResult.round_last32")
+        case 6 => gM("StageResult.round_last64")
+        case 7 => gM("StageResult.round_last128")
+        case r => gM("StageResult.round_n", r.toString)
+    case _ => gM("StageResult.round_n", m.round.toString)
+
+  /**
+   * Zeilen aller beendeten Spiele (ohne Freilose) für den Export.
+   *
+   * @param comps  Wettbewerbe
+   * @param stages Abschnitte
+   * @return Wettbewerb, Abschnitt, Runde, Teilnehmer und Verein A/B, Sätze, Bälle
+   */
+  private def matchRows(comps: Seq[Competition], stages: Seq[Stage]): Seq[Seq[String]] =
+    for
+      comp <- comps
+      st   <- stages if st.coId == comp.id
+      m    <- st.matches.toSeq.sortBy(_.gameNo) if m.finished && m.status != MEntry.MS_FIX
+    yield
+      def pant(sno: SNO) = comp.pants1Stage.find(_.id == sno).map(p => (p.name, p.club)).getOrElse((sno.toString, ""))
+      val (nameA, clubA) = pant(m.stNoA)
+      val (nameB, clubB) = pant(m.stNoB)
+      val balls = try m.getBalls.toSeq.filter(b => b._1 >= 0 && b._2 >= 0).map(b => s"${b._1}:${b._2}").mkString(" ")
+                  catch case _: Throwable => m.result
+      Seq(comp.name, st.name, roundText(st, m), nameA, clubA, nameB, clubB, s"${m.sets._1}:${m.sets._2}", balls)
+
+  /**
+   * Lädt eine Auswertung als CSV-Datei für Excel herunter.
+   *
+   * @param kind "places", "matches", "medals" oder "stats"
+   */
+  def exportCsv(kind: String): Unit =
+    import shared.utils.Csv
+    def h(keys: String*): Seq[String] = keys.map(k => gM(k))
+    val content = kind match
+      case "places" =>
+        Csv.document(h("results.thComp", "results.thPlace", "results.thName", "results.thClub"),
+          lastCards.flatMap(c => c.pants.map(p => Seq(c.comp.name, p.place._1.toString, p.name, p.club))))
+      case "matches" =>
+        Csv.document(h("results.thComp", "results.exStage", "results.exRound", "results.exPantA", "results.exClubA",
+                       "results.exPantB", "results.exClubB", "results.statSets", "results.exBalls"), lastMatches)
+      case "medals" =>
+        Csv.document(h("results.medalRank", "results.thClub", "results.medalGold", "results.medalSilver", "results.medalBronze", "results.medalTotal"),
+          lastMedals.toSeq.flatMap(_.rows).map(r => Seq(r.rank.toString, r.club, r.gold.toString, r.silver.toString, r.bronze.toString, r.total.toString)))
+      case _ =>
+        Csv.document(h("results.thName", "results.thClub", "results.statGames", "results.exWins", "results.exLosses",
+                       "results.exSetsWon", "results.exSetsLost", "results.exBallsWon", "results.exBallsLost", "results.statLongest", "results.statTtr"),
+          lastStats.toSeq.flatMap(_.lines).map(l => Seq(l.name, l.club, l.row.games.toString, l.row.wins.toString, l.row.losses.toString,
+            l.row.setsWon.toString, l.row.setsLost.toString, l.row.ballsWon.toString, l.row.ballsLost.toString, l.longest,
+            l.row.ttrDelta.map(_.toString).getOrElse(""))))
+    val base = services.TourneyDB.tourney.name.trim.replaceAll("[^A-Za-z0-9ÄÖÜäöüß]+", "-").stripPrefix("-").stripSuffix("-")
+    val name = s"${if base.isEmpty then "turnier" else base}_${gM(s"results.exFile.$kind")}.csv"
+    val blob = new dom.Blob(js.Array(content), dom.BlobPropertyBag("text/csv;charset=utf-8"))
+    val url  = dom.URL.createObjectURL(blob)
+    val a    = dom.document.createElement("a").asInstanceOf[dom.html.Anchor]
+    a.href = url
+    a.setAttribute("download", name)
+    dom.document.body.appendChild(a)
+    a.click()
+    dom.document.body.removeChild(a)
+    dom.window.setTimeout(() => dom.URL.revokeObjectURL(url), 1000)
+
+  /**
+   * Druckansicht: alle Reiter mit aufgeklappten Wettbewerben untereinander, ohne Navigation; über den Druckdialog
+   * auch als PDF speicherbar.
+   */
+  def printResults(): Unit =
+    val body = dom.document.body
+    body.classList.add("tourney-print-results")
+    dom.window.addEventListener("afterprint", (_: dom.Event) => body.classList.remove("tourney-print-results"),
+                                js.Dynamic.literal(once = true).asInstanceOf[dom.EventListenerOptions])
+    dom.window.print()
+
   def render(param: String = ""): Boolean = 
     val allComps = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
     
@@ -295,6 +395,8 @@ object ResultList extends BasePage with JsWrapper:
     comps.ContextHeader.render()
 
     // Register toggleAllCards on window object so onclick attributes work natively
+    dom.window.asInstanceOf[scala.scalajs.js.Dynamic].resultsExport = (kind: String) => exportCsv(kind)
+    dom.window.asInstanceOf[scala.scalajs.js.Dynamic].resultsPrint = () => printResults()
     dom.window.asInstanceOf[scala.scalajs.js.Dynamic].toggleAllCards = 
       (show: Boolean) => toggleAllCards(show)
 
@@ -346,6 +448,12 @@ object ResultList extends BasePage with JsWrapper:
 
     // Spielerstatistik über alle Einzel- und Doppelwettbewerbe (nur in der Gesamtansicht)
     val stats = if selectedCompId.isDefined then None else Some(statsView(allComps, allStages))
+
+    if selectedCompId.isEmpty then
+      lastCards = cards
+      lastMedals = medals
+      lastStats = stats
+      lastMatches = matchRows(allComps, allStages)
 
     setMain(cviews.pages.html.ResultList(cards, medals, stats))
     true

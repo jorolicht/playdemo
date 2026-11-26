@@ -401,6 +401,27 @@ results.statBalls                                   = {0} points
 results.statVs                                      = vs.
 results.statHint                                    = All singles and doubles of all stages (without team competitions and byes). Longest match: most points played, otherwise most sets.
 results.statTtrHint                                 = TTR ± is an estimate: singles against opponents with TTR only, simplified with change constant 16 without age or newcomer bonuses. The calculation of the association is authoritative.
+results.exExcel                                     = Excel / CSV
+results.exPrint                                     = Print / PDF
+results.exMatches                                   = Match results
+results.exGroup                                     = Group
+results.exStage                                     = Stage
+results.exRound                                     = Round
+results.exPantA                                     = Participant A
+results.exClubA                                     = Club A
+results.exPantB                                     = Participant B
+results.exClubB                                     = Club B
+results.exBalls                                     = Points
+results.exWins                                      = Wins
+results.exLosses                                    = Losses
+results.exSetsWon                                   = Sets won
+results.exSetsLost                                  = Sets lost
+results.exBallsWon                                  = Points won
+results.exBallsLost                                 = Points lost
+results.exFile.places                               = rankings
+results.exFile.matches                              = match-results
+results.exFile.medals                               = medal-table
+results.exFile.stats                                = player-statistics
 
 ###
 # UserLogin & UserRegistration
