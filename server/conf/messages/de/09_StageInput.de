@@ -60,3 +60,5 @@ StageInput.round.112 = Verliererrunde 12
 StageInput.round.150 = Finale
 StageInput.round.151 = Finale, Rückspiel
 StageInput.de_reset_warning = Achtung: Davon abhängige, bereits gespielte Spiele der Verliererrunde werden ebenfalls zurückgesetzt.
+StageInput.remark = Bemerkung zum Spiel
+StageInput.remarkSave = Speichern

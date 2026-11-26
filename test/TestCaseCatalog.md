@@ -198,6 +198,8 @@ Die Testfälle sind nach **UseCases / Seiten** strukturiert und berücksichtigen
 - [x] **TC-SI-11 [👤]:** Sind nicht alle Ergebnisse eingegeben, zeigt ein Klick auf „Start Nachfolger“ nur einen Hinweisdialog (eingegebene/alle Spiele); es wird kein neuer Abschnitt angelegt.
 - [x] **TC-SI-12 [🌐]:** Im Demo-Turnier zeigt ein laufendes Spiel eine realistische Spielzeit von wenigen Minuten (die Startzeit laufender Spiele wird beim Laden der Demo angepasst).
 - [x] **TC-SI-13 [🌐]:** Reiter „Eingabe“: Einzel als „Nachname, Vorname“ (z. B. „Brandenburg, Mark“); länger als 20 Zeichen mit gekürztem Vornamen („Müller-Lüdenscheidt, L.“); im Spielinfo-Dialog voll ausgeschrieben („Müller-Lüdenscheidt, Luzie“). Das Matchboard zeigt die Namen wie die Eingabe (TC-MB-02).
+- [x] **TC-SI-14 [👤]:** Spielinfo-Dialog mit Textfeld „Bemerkung zum Spiel“: ABBRUCH verwirft, „Speichern“ übernimmt; Spiele mit Bemerkung zeigen „!“ zwischen den Spielern (Bemerkung als Tooltip); erneut geöffnet ist sie vorbelegt; leer gespeichert verschwindet die Kennzeichnung (`stage_input_remark.spec.ts`).
+- [x] **TC-SI-15 [👤]:** Cloud-Turnier: Bemerkung wird in WordPress gespeichert (nach dem Abschluss `^_` des Spiels angehängt, „^“ bereinigt) und ist nach dem Neuladen noch da.
 
 ### 9.2 Anonymer Besucher (🌐)
 - [x] **TC-SI-06 [🌐]:** Aufrufen von `StageResult` im öffentlichen Modus. Ergebnisse und Tabellenstände sind sichtbar, die Ergebniseingabefelder sind jedoch deaktiviert.

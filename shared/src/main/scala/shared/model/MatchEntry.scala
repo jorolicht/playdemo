@@ -44,6 +44,9 @@ sealed trait MEntry {
   def startTime_=(value: String): Unit
   def endTime: String
   def endTime_=(value: String): Unit
+  /** Bemerkung zum Spiel (Spielinfo-Dialog der Ergebniseingabe), leer = keine. */
+  def remark: String
+  def remark_=(value: String): Unit
 
   def setPantA(sNoA: SNO):Unit
   def setPantB(sNoB: SNO):Unit
@@ -112,6 +115,7 @@ sealed trait MEntry {
     setResult("")
     startTime = ""
     endTime = ""
+    remark = ""
     this
   } 
 
@@ -160,7 +164,8 @@ case class MEntryBase(coId: CompId,
                       var stNoA: SNO=SNO.nn, 
                       var stNoB: SNO=SNO.nn,
                       var startTime: String = "",
-                      var endTime: String = ""
+                      var endTime: String = "",
+                      var remark: String = ""
                        
 ) extends MEntry { 
     
@@ -204,10 +209,11 @@ case class MEntryKo(
 
   var sets:       (Int,Int),              //(12)(13) sets e.g. (3,1)
   val winSets:    Int,                    //(14) number of sets to win the match or 0 for draw             
-  var result:     String                  //(15) result details, depending on kind of sport
+  var result:     String,                 //(15) result details, depending on kind of sport
+  var remark:     String = ""             // Bemerkung (nach dem Abschluss "_" gespeichert, siehe MEntry.remarkSuffix)
 
 ) extends MEntry {
-  def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, s"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
+  def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, s"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_${MEntry.remarkSuffix(remark)}")
   override def toString(): String = s"""
     |  Ko-Match: SnoA: ${stNoA} - SnoB: ${stNoB} Winner->${winPos} Looser->${looPos}
     |    gameNo: ${gameNo} round: ${round} maNo: ${maNo} info: ${info} winSets: ${winSets}
@@ -309,10 +315,11 @@ case class MEntryGr(
   var status:    Int,                    //(13) see Match Status Values: MS_xxx
   var sets:      (Int,Int),              //(14)(15) sets e.g. (3,1)
   val winSets:   Int,                    //(16) number of sets to win the match or 0 for draw                                         
-  var result:    String                  //(17) result details, depending on kind of sport
+  var result:    String,                 //(17) result details, depending on kind of sport
+  var remark:     String = ""             // Bemerkung (nach dem Abschluss "_" gespeichert, siehe MEntry.remarkSuffix)
 ) extends MEntry {
 
-  def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, s"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${depend}^${trigger}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
+  def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, s"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${depend}^${trigger}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_${MEntry.remarkSuffix(remark)}")
   override def toString(): String = s"""
       |  Group-Match: ${wgw._1}-${wgw._2} SnoA: ${stNoA} - SnoB: ${stNoB} 
       |    gameNo: ${gameNo} round: ${round} grId: ${grId} info: ${info} winSets: ${winSets}
@@ -365,9 +372,10 @@ case class MEntrySw(
 
   var sets:       (Int,Int),              //(10)(11) sets e.g. (3,1)
   val winSets:    Int,                    //(12) number of sets to win the match or 0 for draw             
-  var result:     String                  //(13) result details, depending on kind of sport
+  var result:     String,                 //(13) result details, depending on kind of sport
+  var remark:     String = ""             // Bemerkung (nach dem Abschluss "_" gespeichert, siehe MEntry.remarkSuffix)
 ) extends MEntry {
-  def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, s"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
+  def toTx = MEntryTx(coId, coTyp, stageId, stageFormat, s"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_${MEntry.remarkSuffix(remark)}")
   override def toString(): String = s"""
     |  Sw-Match: SnoA: ${stNoA} - SnoB: ${stNoB}
     |    gameNo: ${gameNo} round: ${round} maNo: ${maNo} info: ${info} winSets: ${winSets}
@@ -426,7 +434,7 @@ object MEntry {
             val sets2 = m(15).toInt
             val winSets = m(16).toInt
             val result = m(17)
-            MEntryGr(tx.coId, tx.coTyp, tx.stageId, tx.stageFormat, gameNo, stNoA, stNoB, round, grId, (wgw1, wgw2), depend, trigger, playfield, info, startTime, endTime, status, (sets1, sets2), winSets, result)
+            MEntryGr(tx.coId, tx.coTyp, tx.stageId, tx.stageFormat, gameNo, stNoA, stNoB, round, grId, (wgw1, wgw2), depend, trigger, playfield, info, startTime, endTime, status, (sets1, sets2), winSets, result, m.lift(19).getOrElse(""))
 
           case StageFormat.KO =>
            val m = tx.content.split("\\^", -1)
@@ -446,7 +454,7 @@ object MEntry {
             val sets2 = m(13).toInt
             val winSets = m(14).toInt
             val result = m(15)
-            MEntryKo(tx.coId, tx.coTyp, tx.stageId, tx.stageFormat, gameNo, stNoA, stNoB, round, maNo, winPos, looPos, playfield, info, startTime, endTime, status, (sets1, sets2), winSets, result) 
+            MEntryKo(tx.coId, tx.coTyp, tx.stageId, tx.stageFormat, gameNo, stNoA, stNoB, round, maNo, winPos, looPos, playfield, info, startTime, endTime, status, (sets1, sets2), winSets, result, m.lift(17).getOrElse(""))
 
           case StageFormat.SW =>
            val m = tx.content.split("\\^", -1)
@@ -464,7 +472,7 @@ object MEntry {
             val sets2 = m(11).toInt
             val winSets = m(12).toInt
             val result = m(13)
-            MEntrySw(tx.coId, tx.coTyp, tx.stageId, tx.stageFormat, gameNo, stNoA, stNoB, round, maNo, playfield, info, startTime, endTime, status, (sets1, sets2), winSets, result) 
+            MEntrySw(tx.coId, tx.coTyp, tx.stageId, tx.stageFormat, gameNo, stNoA, stNoB, round, maNo, playfield, info, startTime, endTime, status, (sets1, sets2), winSets, result, m.lift(15).getOrElse(""))
 
           case _ =>
             MEntryBase(tx.coId, tx.coTyp, tx.stageId, tx.stageFormat)
@@ -493,6 +501,30 @@ object MEntry {
 
   import scala.collection.mutable.HashSet
   import scala.collection.mutable.Map
+
+  /** Höchstlänge einer Bemerkung zu einem Spiel. */
+  val RemarkMaxLen = 200
+
+  /**
+   * Bereinigt eine Bemerkung für die Speicherung: ohne Trennzeichen "^" und Zeilenumbrüche, getrimmt, gekürzt auf
+   * [[RemarkMaxLen]] Zeichen.
+   *
+   * @param text eingegebener Text
+   * @return gespeicherte Bemerkung
+   */
+  def cleanRemark(text: String): String =
+    Option(text).getOrElse("").replace('^', ' ').replaceAll("[\\r\\n\\t]+", " ").trim.take(RemarkMaxLen)
+
+  /**
+   * Anhang der Bemerkung an den gespeicherten Text eines Spiels: leer ohne Bemerkung (Format wie bisher), sonst
+   * "^<Bemerkung>" nach dem Abschluss "_". Ältere Versionen lesen die Felder über feste Positionen und ignorieren ihn.
+   *
+   * @param remark Bemerkung
+   * @return Anhang
+   */
+  def remarkSuffix(remark: String): String =
+    val r = cleanRemark(remark)
+    if r.isEmpty then "" else s"^$r"
 
   // Match Status Values
   val MS_RESET = -3   // match not yet configured

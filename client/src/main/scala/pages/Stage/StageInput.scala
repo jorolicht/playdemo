@@ -1242,7 +1242,6 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
           }
 
           val infoText = m.info.trim
-          val infoDisplay = if (infoText.isEmpty) "-" else infoText
 
           val startTimeDisplay = formatTimestamp(m.startTime)
           val endTimeDisplay = formatTimestamp(m.endTime)
@@ -1258,24 +1257,56 @@ object StageInput extends BasePage with JsWrapper with services.ComWrapper:
                |Status:         $statusStr
                |Startzeit:      $startTimeDisplay
                |Endzeit:        $endTimeDisplay
-               |Sätze:          ${m.sets._1}:${m.sets._2} (Satzstände: $resultDisplay)
-               |Bemerkung:      $infoDisplay""".stripMargin
+               |Sätze:          ${m.sets._1}:${m.sets._2} (Satzstände: $resultDisplay)""".stripMargin +
+            (if (infoText.nonEmpty) s"\nMeldung:        $infoText" else "")
 
           val hasResult = infoText.startsWith("Result")
-          val buttons = if (hasResult) {
-            List(shared.BoxButton.Ok, shared.BoxButton.AcceptResult)
-          } else {
-            List(shared.BoxButton.Ok)
-          }
+          // Bemerkung bearbeiten: Schreibrecht auf das Turnier, Wettbewerb nicht abgeschlossen
+          val canEditRemark = base.Global.hasTourneyAccess(services.TourneyDB.tourney) && comp.status != CompStatus.FIN
+          val title = s"Spiel-Information (Spiel ${m.gameNo})"
+          val accept = if (hasResult) List(shared.BoxButton.AcceptResult) else Nil
 
-          DlgMsgbox.show(body, s"Spiel-Information (Spiel ${m.gameNo})", buttons).map {
-            case shared.BoxButton.AcceptResult =>
-              acceptMatchResult(gameNo, infoText)
-            case _ =>
-              // do nothing
+          if (canEditRemark || m.remark.nonEmpty) {
+            val input   = DlgMsgbox.InputField(gM("StageInput.remark"), m.remark, MEntry.RemarkMaxLen, readOnly = !canEditRemark)
+            val buttons = if (canEditRemark) List(shared.BoxButton.Cancel, shared.BoxButton.Ok) ++ accept else List(shared.BoxButton.Ok) ++ accept
+            val labels  = if (canEditRemark) Map(shared.BoxButton.Ok -> gM("StageInput.remarkSave")) else Map.empty[shared.BoxButton, String]
+            DlgMsgbox.showWithInput(body, title, buttons, input, labels).map {
+              case (shared.BoxButton.Ok, text) if canEditRemark => saveRemark(stage, gameNo, text)
+              case (shared.BoxButton.AcceptResult, text) =>
+                if (canEditRemark) saveRemark(stage, gameNo, text)
+                acceptMatchResult(gameNo, infoText)
+              case _ => ()
+            }
+          } else {
+            DlgMsgbox.show(body, title, List(shared.BoxButton.Ok) ++ accept).map {
+              case shared.BoxButton.AcceptResult => acceptMatchResult(gameNo, infoText)
+              case _                             => ()
+            }
           }
         case None =>
           error(s"StageInput: Match not found for info: $gameNo")
+      }
+    }
+
+  /**
+   * Speichert die Bemerkung zu einem Spiel (bereinigt, siehe [[MEntry.cleanRemark]]) und zeigt die Eingabe neu an
+   * (Markierung „!“ bei Spielen mit Bemerkung).
+   *
+   * @param stage  Spielphase
+   * @param gameNo Spielnummer
+   * @param text   eingegebene Bemerkung (leer = entfernen)
+   */
+  def saveRemark(stage: Stage, gameNo: Int, text: String): Unit =
+    stage.matches.find(_.gameNo == gameNo).foreach { m =>
+      val remark = MEntry.cleanRemark(text)
+      if (remark != m.remark) {
+        m.remark = remark
+        services.TourneyDB.tourney.updateStage(stage) match
+          case Right(updatedStage) =>
+            Global.currentSelection = Global.currentSelection.copy(stage = Some(updatedStage))
+            render()
+          case Left(err) =>
+            error(s"StageInput: Failed to save remark: ${err.msgCode}")
       }
     }
 

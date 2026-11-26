@@ -2,7 +2,7 @@
 @import dialogs.DlgMsgbox.*
 @import shared.BoxButton
 
-@(title: String, body: String, btns: List[BoxButton], details: Option[(String, String)] = None, labels: Map[BoxButton, String] = Map())
+@(title: String, body: String, btns: List[BoxButton], details: Option[(String, String)] = None, labels: Map[BoxButton, String] = Map(), input: Option[dialogs.DlgMsgbox.InputField] = None)
 
 <!-- Modal -->
 <div @id(ModalId)  class="modal fade" tabindex="-1">
@@ -14,6 +14,10 @@
       </div>
       <div class="modal-body">
         <p @id(BodyId) style="white-space: pre-wrap;">@body</p>
+        @for(in <- input) {
+          <label class="form-label fw-semibold small mb-1" for="@InputId.id">@in.label</label>
+          <textarea @id(InputId) class="form-control" rows="3" maxlength="@in.maxLength" data-testid="msgbox-input" @if(in.readOnly){readonly}>@in.value</textarea>
+        }
         @for((code, callStack) <- details) {
           <div @id(DetailsId) class="d-none small font-monospace bg-light border rounded p-2" style="white-space: pre-wrap; word-break: break-all;">@gM("msgbox.code") @code
 @gM("msgbox.callStack") @callStack</div>

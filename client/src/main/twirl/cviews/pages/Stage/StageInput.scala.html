@@ -72,6 +72,9 @@
                                     }
                                 <td class="text-end">
                                     <span id="nameA-@m.gameNo" class="fw-bold player-name-display">@nameA</span>
+                                    @if(m.remark.nonEmpty) {
+                                        <span id="remark-@m.gameNo" class="badge rounded-pill bg-warning text-dark ms-1" title="@m.remark" data-testid="remark-flag">!</span>
+                                    }
                                 </td>
                                 <td class="text-center fw-bold font-monospace" 
                                     id="running-time-@m.gameNo" 

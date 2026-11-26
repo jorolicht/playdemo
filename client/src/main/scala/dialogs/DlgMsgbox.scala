@@ -23,6 +23,20 @@ object DlgMsgbox extends BaseDialog with JsWrapper:
   val CloseId: HtmlId = genId(name)
   val DetailsBtnId: HtmlId = genId(name)
   val DetailsId:    HtmlId = genId(name)
+  val InputId:      HtmlId = genId(name)
+
+  /**
+   * Optionales Textfeld im Dialog (z. B. Bemerkung zu einem Spiel).
+   *
+   * @param label     Beschriftung
+   * @param value     Vorbelegung
+   * @param maxLength Höchstlänge
+   * @param readOnly  nur anzeigen, nicht bearbeiten
+   */
+  case class InputField(label: String, value: String, maxLength: Int, readOnly: Boolean = false)
+
+  /** Inhalt des Textfelds beim Schließen des Dialogs. */
+  private var inputValue: String = ""
 
   var modal: Modal = null
   def render(param: String = ""): Boolean = true
@@ -57,12 +71,33 @@ object DlgMsgbox extends BaseDialog with JsWrapper:
    */
   def show(body: String, title: String, btns: List[BoxButton], details: Option[(String, String)] = None,
            labels: Map[BoxButton, String] = Map()): Future[BoxButton] =
+    open(body, title, btns, details, labels, None)
+
+  /**
+   * Zeigt eine Meldung mit einem Textfeld und Buttons.
+   *
+   * @param body   Text
+   * @param title  Titel
+   * @param btns   Buttons in Anzeigereihenfolge
+   * @param input  Textfeld
+   * @param labels optionale Beschriftungen einzelner Buttons statt des Standardtexts
+   * @return Future mit dem gedrückten Button (Schließen = Cancel) und dem Inhalt des Textfelds
+   */
+  def showWithInput(body: String, title: String, btns: List[BoxButton], input: InputField,
+                    labels: Map[BoxButton, String] = Map()): Future[(BoxButton, String)] =
+    open(body, title, btns, None, labels, Some(input)).map(btn => (btn, inputValue))
+
+  private def open(body: String, title: String, btns: List[BoxButton], details: Option[(String, String)],
+                   labels: Map[BoxButton, String], input: Option[InputField]): Future[BoxButton] =
     val p = Promise[BoxButton]()
     val f = p.future
 
     // init modal dialog, always copy and replace literal \n with real newlines
     val formattedBody = body.replace("\\n", "\n")
-    setHtml(getOrCreateDiv(LoadId), cviews.dialogs.html.DlgMsgbox(title, formattedBody, btns, details, labels))
+    setHtml(getOrCreateDiv(LoadId), cviews.dialogs.html.DlgMsgbox(title, formattedBody, btns, details, labels, input))
+    inputValue = input.map(_.value).getOrElse("")
+    def readInput(): Unit =
+      if input.isDefined then inputValue = gE(InputId).asInstanceOf[org.scalajs.dom.html.TextArea].value
     modal = Modal(gE(ModalId))
     modal.show()
 
@@ -78,6 +113,7 @@ object DlgMsgbox extends BaseDialog with JsWrapper:
 
     for btn <- btns do
       gE(btn.getId).addEventListener("click", (e: MouseEvent) => {
+        readInput()
         if (!p.isCompleted) then p success btn
         modal.hide()      
       })

@@ -60,3 +60,5 @@ StageInput.round.112 = Losers round 12
 StageInput.round.150 = Final
 StageInput.round.151 = Final, second match
 StageInput.de_reset_warning = Note: dependent matches of the losers bracket that were already played are reset as well.
+StageInput.remark = Remark on the match
+StageInput.remarkSave = Save
