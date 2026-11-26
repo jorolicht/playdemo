@@ -519,3 +519,8 @@ Die Zustellung über einen echten Push-Dienst ist im Test-Browser nicht möglich
 - [x] **TC-PUSH-02 [🌐]:** Anmelden/Abmelden eines Geräts; abgelehnt werden unsichere (http), interne (127.0.0.1) Push-Adressen und Nicht-Turniere; erneute Anmeldung aktualisiert.
 - [x] **TC-PUSH-03 [👤]:** Durchsage mit angemeldetem Gerät: gespeichert, Versand versucht; ein Zustellfehler (kein Push-Dienst) bricht nicht ab und löscht die Anmeldung nicht.
 - [x] **TC-PUSH-04 [🌐]:** Direktlink `<turnier>/#mein-turnier` öffnet „Mein Turnier“ mit Durchsagen; bei blockierten Benachrichtigungen Hinweis, sonst Knopf „Durchsagen als Benachrichtigung erhalten“.
+
+## 41. UseCase: Medaillenspiegel (`pages.ResultList`, `shared.utils.MedalTable`; `medal_table.spec.ts`, Unit-Test `MedalTableSuite`)
+Gewertet werden abgeschlossene Wettbewerbe bzw. solche mit beendetem Urkundenabschnitt; Platz 1/2/3 = Gold/Silber/Bronze, geteilte Plätze für alle, Doppel aus zwei Vereinen für beide.
+### 41.1 Turnierverwalter (👤)
+- [x] **TC-MEDAL-01 [👤]:** Reiter „Medaillenspiegel“ in „Platzierungen & Ergebnisse“ (nur Gesamtansicht): ohne endgültige Platzierungen leer („0 von 4“); mit beendetem Urkundenabschnitt zählt der Wettbewerb („1 von 4“), Medaillen je Verein stimmen mit den Plätzen 1–3 überein, Reihenfolge Gold vor Silber vor Bronze.

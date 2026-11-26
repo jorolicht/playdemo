@@ -377,6 +377,16 @@ results.noResults                                   = Noch keine Ergebnisse vorh
 results.btnCert                                     = Urkunde
 results.expandAll                                   = Alle ausklappen
 results.collapseAll                                 = Alle einklappen
+results.tabPlaces                                   = Platzierungen
+results.tabMedals                                   = Medaillenspiegel
+results.medalRank                                   = Rang
+results.medalGold                                   = Gold
+results.medalSilver                                 = Silber
+results.medalBronze                                 = Bronze
+results.medalTotal                                  = Gesamt
+results.medalEmpty                                  = Noch keine abgeschlossenen Wettbewerbe.
+results.medalCounted                                = Gewertet: {0} von {1} Wettbewerben (nur abgeschlossene bzw. mit beendetem Urkundenabschnitt).
+results.medalHint                                   = Platz 1 = Gold, Platz 2 = Silber, Platz 3 = Bronze (geteilte Plätze zählen für alle); ein Doppel aus zwei Vereinen zählt für beide Vereine.
 
 ###
 # UserLogin & UserRegistration

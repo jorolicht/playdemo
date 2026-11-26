@@ -20,6 +20,15 @@ object ResultList extends BasePage with JsWrapper:
   )
 
   /**
+   * Medaillenspiegel für die Anzeige.
+   *
+   * @param rows    Zeilen in Rangfolge
+   * @param counted Anzahl gewerteter (abgeschlossener) Wettbewerbe
+   * @param total   Anzahl aller Wettbewerbe
+   */
+  case class MedalView(rows: Seq[shared.utils.MedalTable.Row], counted: Int, total: Int)
+
+  /**
    * Toggles collapse state for all competition cards on the page.
    *
    * @param show If true, expands all cards; if false, collapses all cards.
@@ -169,6 +178,35 @@ object ResultList extends BasePage with JsWrapper:
       comp.pants1Stage.find(_.id == sno).map(_.copy(place = (place, 0)))
     }.sortBy(_.place._1).toSeq
 
+  /**
+   * Vereine eines Teilnehmers für den Medaillenspiegel: Einzel und Mannschaft je ein Verein, Doppel bis zu zwei.
+   *
+   * @param comp Wettbewerb (für die Mannschaften)
+   * @param p    Teilnehmer
+   * @return Vereine als (ID, Name); ohne Zuordnung der im Teilnehmer gespeicherte Verein
+   */
+  private def clubsOf(comp: Competition, p: Pant): Seq[(Int, String)] =
+    val t = services.TourneyDB.tourney
+    def club(id: Int) = (id, t.clubs.find(c => c != null && c.id.toInt == id).map(_.name).getOrElse(""))
+    def player(id: PlayerId) = t.players.find(pl => pl != null && pl.id == id)
+    val fallback = Seq((p.clubId, p.club))
+    if p.id.isTeam then comp.teams.find(_.id == p.id.teamId).map(tm => Seq(club(tm.clubId))).getOrElse(fallback)
+    else if p.id.isDouble then
+      val (a, b) = p.id.doubleId
+      val cs = Seq(a, b).flatMap(player).map(pl => club(pl.clubId))
+      if cs.nonEmpty then cs else fallback
+    else if p.id.isSingle then player(p.id.singleId).map(pl => Seq(club(pl.clubId))).getOrElse(fallback)
+    else Seq()
+
+  /**
+   * Prüft, ob ein Wettbewerb im Medaillenspiegel zählt: abgeschlossen oder Urkundenabschnitt beendet.
+   *
+   * @param card Wettbewerb mit Urkundenabschnitt
+   * @return true, wenn die Platzierungen endgültig sind
+   */
+  private def medalsFinal(card: CompResultCard): Boolean =
+    card.comp.status == CompStatus.FIN || card.certStage.exists(_.status == StageStatus.FIN)
+
   def render(param: String = ""): Boolean = 
     val allComps = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
     
@@ -212,21 +250,28 @@ object ResultList extends BasePage with JsWrapper:
       }
     })
 
+    val allStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && !s.deleted)
+
+    /** Wettbewerb mit Urkundenabschnitt (bzw. letztem Abschnitt) und Platzierungen. */
+    def card(comp: Competition): CompResultCard =
+      val compStages = allStages.filter(_.coId == comp.id)
+      val certStageOpt = compStages.find(_.certificate).orElse(compStages.lastOption)
+      CompResultCard(comp, certStageOpt, getRankedPantsForStage(comp, certStageOpt))
+
     val targetComps = selectedCompId match {
       case Some(id) => allComps.filter(_.id.value == id)
       case None     => allComps
     }
     
-    val allStages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && !s.deleted)
-
     // Render Cards for ALL target competitions
-    val cards = targetComps.map { comp =>
-      val compStages = allStages.filter(_.coId == comp.id)
-      val certStageOpt = compStages.find(_.certificate).orElse(compStages.lastOption)
-      val rankedPants = getRankedPantsForStage(comp, certStageOpt)
-      
-      CompResultCard(comp, certStageOpt, rankedPants)
-    }
+    val cards = targetComps.map(card)
 
-    setMain(cviews.pages.html.ResultList(cards))
+    // Medaillenspiegel über alle Wettbewerbe (nur in der Gesamtansicht)
+    val medals = if selectedCompId.isDefined then None else
+      val counted = allComps.map(card).filter(medalsFinal)
+      Some(MedalView(
+        shared.utils.MedalTable.compute(counted.flatMap(c => c.pants.map(p => shared.utils.MedalTable.Placing(p.place._1, clubsOf(c.comp, p))))),
+        counted.length, allComps.length))
+
+    setMain(cviews.pages.html.ResultList(cards, medals))
     true

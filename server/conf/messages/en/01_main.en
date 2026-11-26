@@ -377,6 +377,16 @@ results.noResults                                   = No results available yet.
 results.btnCert                                     = Certificate
 results.expandAll                                   = Expand All
 results.collapseAll                                 = Collapse All
+results.tabPlaces                                   = Rankings
+results.tabMedals                                   = Medal table
+results.medalRank                                   = Rank
+results.medalGold                                   = Gold
+results.medalSilver                                 = Silver
+results.medalBronze                                 = Bronze
+results.medalTotal                                  = Total
+results.medalEmpty                                  = No completed competitions yet.
+results.medalCounted                                = Counted: {0} of {1} competitions (only completed ones or those with a finished certificate stage).
+results.medalHint                                   = 1st place = gold, 2nd = silver, 3rd = bronze (shared places count for everyone); a doubles pair from two clubs counts for both clubs.
 
 ###
 # UserLogin & UserRegistration
