@@ -697,6 +697,8 @@ myTourney.koLoserBracket                            = Losers' bracket (after: {0
 myTourney.koSecond                                  = 2nd place
 myTourney.koThird                                   = 3rd place
 myTourney.koWinner                                  = Winner
+myTourney.stats                                     = My statistics
+myTourney.statsHint                                 = All singles and doubles of this tournament. TTR ± is an estimate (singles only, simplified); the calculation of the association is authoritative.
 
 # Copy tournament (template)
 tourneyInfo.copy                                    = Copy

@@ -270,6 +270,17 @@ object ResultList extends BasePage with JsWrapper:
     StatsView(lines, longest)
 
   /**
+   * Statistikzeile eines Spielers (für „Mein Turnier“), berechnet wie im Reiter „Spielerstatistik“.
+   *
+   * @param pid Spieler
+   * @return Zeile, falls der Spieler schon ein gewertetes Einzel oder Doppel gespielt hat
+   */
+  def playerStat(pid: PlayerId): Option[StatLine] =
+    val comps  = services.CompetitionDB.competitions.toSeq.filter(c => c != null && !c.deleted)
+    val stages = services.TourneyDB.tourney.stages.toSeq.filter(s => s != null && !s.deleted)
+    statsView(comps, stages).lines.find(_.row.player == pid)
+
+  /**
    * Prüft, ob ein Wettbewerb im Medaillenspiegel zählt: abgeschlossen oder Urkundenabschnitt beendet.
    *
    * @param card Wettbewerb mit Urkundenabschnitt

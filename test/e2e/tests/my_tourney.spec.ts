@@ -166,4 +166,25 @@ test.describe('UseCase 28: Mein Turnier', () => {
     await expect(page.locator('[data-testid="my-called"]')).toHaveText('Aufgerufen – Tisch 5', { timeout: 40000 });
     await expect(page.locator('[data-testid="my-next"] li').first()).toContainText('gegen Enzien, Ingrid');
   });
+
+  test('TC-MT-06 [🌐]: Eigene Statistik: Spiele, Siege:Niederlagen, Sätze, TTR ±, längstes Spiel', async () => {
+    // Werte wie im Reiter „Spielerstatistik“ (TC-STAT-01 rechnet sie unabhängig aus den Demo-Daten nach)
+    await page.locator('button[id$="BtnChangeId"]').click();
+    await choose('Elb-Rösel, Sam');
+    const stats = page.locator('[data-testid="my-stats"]');
+    await expect(stats).toContainText('Meine Statistik');
+    await expect(stats.locator('[data-testid="my-stats-games"]')).toHaveText('9');
+    await expect(stats.locator('[data-testid="my-stats-winloss"]')).toHaveText('7:2');
+    await expect(stats.locator('[data-testid="my-stats-sets"]')).toHaveText('22:14');
+    await expect(stats.locator('[data-testid="my-stats-ttr"]')).toHaveText('+30');
+    await expect(stats.locator('[data-testid="my-stats-ttr"]')).toHaveClass(/text-success/);
+    await expect(stats.locator('[data-testid="my-stats-longest"]'))
+      .toHaveText('Längstes Spiel: 3:2 gegen Container, Klaas, 96 Bälle (S-Klasse Herren Einzel)');
+
+    // Noch kein beendetes Spiel: keine Statistik
+    await page.locator('button[id$="BtnChangeId"]').click();
+    await choose('Fehr, Luzie');
+    await expect(page.locator('[data-testid="my-results"]')).toBeVisible();
+    await expect(page.locator('[data-testid="my-stats"]')).toHaveCount(0);
+  });
 });

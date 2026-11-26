@@ -417,6 +417,7 @@ Button „Mein Turnier“ auf der Turnierseite (`TourneyWelcome`, bei Einzel-Wet
 - [x] **TC-MT-03 [🌐]:** K.-o.: „Nächste Runde: Halbfinale“ bzw. „Ausgeschieden: Viertelfinale“; ein Freilos erscheint als „Freilos“ ohne Ergebnis.
 - [x] **TC-MT-04 [🌐]:** Die Auswahl bleibt nach erneutem Aufruf erhalten; „Anderer Name“ setzt sie zurück.
 - [x] **TC-MT-05 [🌐]:** Ruft die Turnierleitung ein Spiel auf, erscheint „Aufgerufen – Tisch n“ ohne Neuladen nach spätestens 30 Sekunden.
+- [x] **TC-MT-06 [🌐]:** Eigene Statistik („Meine Statistik“): Spiele, Siege:Niederlagen, Sätze, TTR ± und längstes Spiel wie im Reiter „Spielerstatistik“; ohne beendetes Spiel keine Statistik.
 
 ---
 

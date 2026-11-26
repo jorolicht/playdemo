@@ -697,6 +697,8 @@ myTourney.koLoserBracket                            = Verliererrunde (nach: {0})
 myTourney.koSecond                                  = Platz 2
 myTourney.koThird                                   = Platz 3
 myTourney.koWinner                                  = Sieger
+myTourney.stats                                     = Meine Statistik
+myTourney.statsHint                                 = Alle Einzel und Doppel dieses Turniers. TTR ± ist ein Anhaltspunkt (nur Einzel, vereinfacht); maßgeblich ist die Berechnung des Verbands.
 
 # Turnier kopieren (Turniervorlage)
 tourneyInfo.copy                                    = Kopieren

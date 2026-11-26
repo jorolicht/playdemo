@@ -80,8 +80,10 @@ object MyTourney extends BasePage with JsWrapper:
    * @param comps   seine Wettbewerbe
    * @param next    nächste Spiele (aufgerufene zuerst)
    * @param results Ergebnisse (zuletzt gespielte zuerst)
+   * @param stats   eigene Statistik (Spiele, Siege, Sätze, längstes Spiel, TTR ±), sobald ein Spiel gewertet ist
    */
-  case class View(player: Player, club: String, comps: Seq[CompInfo], next: Seq[NextGame], results: Seq[GameResult])
+  case class View(player: Player, club: String, comps: Seq[CompInfo], next: Seq[NextGame], results: Seq[GameResult],
+                  stats: Option[ResultList.StatLine] = None)
 
   // ---------------------------------------------------------------------------------------------------------------
   // Auswahl im Browser merken
@@ -229,7 +231,7 @@ object MyTourney extends BasePage with JsWrapper:
       }
       .sortBy(r => (-r.stage.id.value, r.m.round, -r.m.gameNo))
 
-    View(player, clubName(player.clubId), infos, next, results)
+    View(player, clubName(player.clubId), infos, next, results, ResultList.playerStat(pid))
 
   /** Startzeit eines Wettbewerbs für die Anzeige, z. B. „21.11. 10:00“. */
   def startDisplay(c: Competition): String =
